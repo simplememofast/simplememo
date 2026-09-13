@@ -84,16 +84,66 @@ def status(runs, enabled=True):
             'business_success': 'not_inferred'}
 
 
+def browser_observation(receipt, now=None):
+    """Scope a human-visible observation; never treat it as an evergreen API list."""
+    now = now or dt.datetime.now(dt.timezone.utc)
+    result = {'state': 'unverified', 'chatgpt_empty': False, 'gcp': {}}
+    if (not isinstance(receipt, dict) or receipt.get('schema_version') != 1 or
+            receipt.get('method') != 'authenticated_visible_browser_ui' or
+            receipt.get('account_scope') != 'SimpleMemo' or receipt.get('identity_verified') is not True):
+        return result
+    try:
+        observed = dt.datetime.fromisoformat(receipt['observed_at'].replace('Z', '+00:00'))
+        age = (now - observed).total_seconds()
+    except (KeyError, ValueError, TypeError, AttributeError):
+        return result
+    result['observed_at'] = receipt['observed_at']
+    if age < 0 or age > 7 * 86400:
+        result['state'] = 'stale_or_future'
+        return result
+    result['state'] = 'observed'
+    tasks = receipt.get('chatgpt_tasks', {})
+    tasks = tasks if isinstance(tasks, dict) else {}
+    filters = tasks.get('filters', {})
+    filters = filters if isinstance(filters, dict) else {}
+    result['chatgpt_empty'] = tasks.get('url') == 'https://chatgpt.com/scheduled' and all(
+        isinstance(filters.get(key), dict) and
+        filters.get(key, {}).get('state') == 'observed' and
+        type(filters.get(key, {}).get('visible_count')) is int and
+        filters[key]['visible_count'] == 0 for key in ['active', 'paused', 'completed'])
+    gcp = receipt.get('gcp', {})
+    if isinstance(gcp, dict) and gcp.get('project') == 'yurika-simplememo':
+        result['gcp'] = gcp
+    return result
+
+
+def documented_owner_matches(job, purpose):
+    # Native IDs are reusable (for example a new one-time login reminder).
+    # ID existence alone must not conceal a missing historical operating owner.
+    schedule = job.get('schedule') or ''
+    return (isinstance(schedule, str) and 'COUNT=1' not in schedule and
+            'FREQ=' in schedule and 'heartbeat' in job.get('trigger', []) and
+            bool(re.search(purpose, job.get('name', ''), re.I)))
+
+
 def build(discovery, root=ROOT):
     jobs, surfaces = [], []
     coverage = read(root / 'data/automation-coverage.json')['tasks']
 
-    def source(name):
+    def source(name, optional=False):
         path = discovery / name
         if not path.exists():
             surfaces.append({'id': name, 'state': 'unavailable', 'reason': 'no_receipt'})
             return {}
-        d = read(path)
+        try:
+            d = read(path)
+            if not isinstance(d, dict):
+                raise ValueError('Receipt must be an object')
+        except (OSError, ValueError):
+            if not optional:
+                raise
+            surfaces.append({'id': name, 'state': 'unavailable', 'reason': 'invalid_or_unreadable_receipt'})
+            return {}
         surfaces.append({'id': name, 'state': 'observed',
                          'observed_at': d.get('observed_at'),
                          'sha256': hashlib.sha256(path.read_bytes()).hexdigest()})
@@ -233,6 +283,7 @@ def build(discovery, root=ROOT):
                     history_scope='Current metadata only. State and last attempt do not establish last successful output.',
                     source_sha=gcp.get('source_sha'), observed_at=gcp_inventory.get('observed_at')))
 
+    browser = browser_observation(source('browser-inventory.json', optional=True))
     jobs.extend([
         record('report:mention-watch', 'Mention & Competitor Watch — SimpleMemo', 'existing Autopilot',
             schedule='weekly within maintenance lane', timezone='Asia/Tokyo', trigger=['existing Autopilot selection'],
@@ -243,8 +294,9 @@ def build(discovery, root=ROOT):
         record('report:chatgpt-reddit', 'Reddit自然コメント', 'ChatGPT Tasks',
             schedule=None, timezone=None, trigger=['historical scheduled task'],
             data_sources=['2026-08-13 task-paused email'], outputs=['candidate and approval request'],
-            execution_state='historically_paused_current_unknown',
-            human_intervention_required='Existing posting approval; current account inventory unavailable'),
+            execution_state='historically_paused_not_in_current_account_views' if browser['chatgpt_empty'] else 'historically_paused_current_unknown',
+            current_inventory_observed_at=browser.get('observed_at'),
+            human_intervention_required='Existing posting approval; historical record retained without reactivation'),
         record('data:gsc-bulk', 'Search Console BigQuery Bulk Export', 'Google managed export',
             schedule='daily provider export', timezone='America/Los_Angeles', trigger=['provider-managed'],
             data_sources=['sc-domain:simplememofast.com'], outputs=['yurika-simplememo.searchconsole'],
@@ -254,9 +306,10 @@ def build(discovery, root=ROOT):
             data_sources=['GA4 property 524656334'], outputs=['yurika-simplememo.analytics_524656334'],
             code_path=['growth/ANALYTICS_API.md']),
         record('data:appsflyer', 'AppsFlyer Partners by Date UA report', 'local existing reader',
-            trigger=['manual'], code_path=['../simplememo-api/scripts/appsflyer_aggregate.py'],
+            trigger=['existing daily owner integration', 'manual'],
+            code_path=['../simplememo-api/scripts/appsflyer_aggregate.py', 'growth/lib/company-data.mjs'],
             data_sources=['existing AppsFlyer aggregate API'], outputs=['private report.csv and result.json'],
-            human_intervention_required='Manual start; recurring integration not yet observed',
+            human_intervention_required='Owner integration installed and bootstrap verified; natural scheduled completion requires follow-up evidence',
             retry_behavior='Existing bounded reader; credentials unchanged'),
     ])
     for job in jobs:
@@ -272,22 +325,30 @@ def build(discovery, root=ROOT):
     for job in jobs:
         if any(k not in job for k in REQUIRED):
             raise ValueError('Incomplete automation record')
-    native_ids = {j['id'] for j in jobs}
-    gaps = [
-        {'id': 'chatgpt-current', 'state': 'unverified', 'reason': 'read authority exists; current authenticated task-list route remains unverified'}]
+    native_jobs = {j['id']: j for j in jobs}
+    gaps = []
+    if not browser['chatgpt_empty']:
+        gaps.append({'id': 'chatgpt-current', 'state': browser['state'],
+                     'reason': 'Need a fresh scoped observation of all three current task views; nonempty views require individual job normalization, not an empty-inventory claim'})
     if gcp_inventory.get('status') != 'complete' or gcp_inventory.get('project') != 'yurika-simplememo':
         gaps.append({'id': 'gcp-schedulers', 'state': gcp_inventory.get('status') or 'unverified',
-                     'reason': 'Verify existing CI credential through encrypted scheduler-inventory report; browser login is not required for this route',
-                     'evidence': {key: value.get('issues', []) for key, value in gcp_inventory.get('services', {}).items()}})
-    for ident, label in [('simplememo-ai', 'weekly AI visibility reservation'), ('simplememo', 'canonical funnel heartbeat')]:
-        if 'codex:' + ident not in native_ids:
-            gaps.append({'id': 'codex-' + ident, 'state': 'unverified', 'reason': 'documented ' + label + ' absent from inspected local scheduler records'})
+                     'reason': 'API inventory remains partial. Authenticated console observations are separate evidence; a disabled Scheduler does not prove no retained definitions and must not be enabled just to clear this gap.',
+                     'evidence': {key: value.get('issues', []) for key, value in gcp_inventory.get('services', {}).items()},
+                     'browser_observation': browser['gcp'], 'browser_observed_at': browser.get('observed_at')})
+    for ident, label, purpose in [('simplememo-ai', 'weekly AI visibility reservation', r'visibility|可視性|露出|probe'),
+                                  ('simplememo', 'canonical funnel heartbeat', r'funnel|ファネル')]:
+        job = native_jobs.get('codex:' + ident)
+        if not job or not documented_owner_matches(job, purpose):
+            gaps.append({'id': 'codex-' + ident, 'state': 'identity_unverified' if job else 'unverified',
+                         'reason': 'documented ' + label + ' not matched by ID, purpose and recurring heartbeat metadata',
+                         'id_present': bool(job)})
     refresh = discovery/'refresh.json'
     if refresh.exists():
         gaps.extend(dict(id='refresh:'+x['source'],state='partial',reason='latest refresh failed; prior evidence is stale') for x in read(refresh).get('failures', []))
     return {'schema_version': SCHEMA, 'generated_at': dt.datetime.now(dt.timezone.utc).isoformat(),
             'privacy': 'private; do not publish this complete machine inventory',
             'discovery_surfaces': surfaces,
+            'browser_coverage': browser,
             'known_gaps': gaps,
             'jobs': jobs, 'legacy_skill_assets': local.get('skill_assets', [])}
 

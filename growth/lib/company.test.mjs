@@ -19,6 +19,49 @@ function directory(t) {
 }
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
+test('browser inventory is scoped and expires; reused native IDs cannot hide missing owners', () => {
+  execFileSync('python3', ['-c', `
+import copy, datetime as dt, importlib.util, json, tempfile
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('inventory','scripts/company-inventory.py')
+m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+now=dt.datetime.now(dt.timezone.utc)
+receipt={'schema_version':1,'method':'authenticated_visible_browser_ui','account_scope':'SimpleMemo','identity_verified':True,
+ 'observed_at':now.isoformat(),'chatgpt_tasks':{'url':'https://chatgpt.com/scheduled','filters':{k:{'state':'observed','visible_count':0} for k in ['active','paused','completed']}},
+ 'gcp':{'project':'yurika-simplememo','cloud_scheduler':{'state':'service_disabled','retained_definitions':'unknown'}}}
+assert m.browser_observation(receipt,now)['chatgpt_empty']
+assert not m.browser_observation(receipt,now+dt.timedelta(days=8))['chatgpt_empty']
+assert not m.browser_observation(receipt,now-dt.timedelta(seconds=1))['chatgpt_empty']
+for field,value in [('account_scope','another account'),('identity_verified',False),('observed_at','invalid'),('method','API')]:
+ bad=copy.deepcopy(receipt);bad[field]=value;assert not m.browser_observation(bad,now)['chatgpt_empty']
+for kind in ['active','paused','completed']:
+ bad=copy.deepcopy(receipt);del bad['chatgpt_tasks']['filters'][kind];assert not m.browser_observation(bad,now)['chatgpt_empty']
+ for count in [1,False,None]:
+  bad=copy.deepcopy(receipt);bad['chatgpt_tasks']['filters'][kind]['visible_count']=count;assert not m.browser_observation(bad,now)['chatgpt_empty']
+bad=copy.deepcopy(receipt);bad['gcp']['project']='another';assert not m.browser_observation(bad,now)['gcp']
+assert m.documented_owner_matches({'name':'SimpleMemo funnel','schedule':'FREQ=DAILY','trigger':['heartbeat']},r'funnel')
+assert not m.documented_owner_matches({'name':'SimpleMemo funnel','schedule':'FREQ=DAILY;COUNT=1','trigger':['heartbeat']},r'funnel')
+with tempfile.TemporaryDirectory() as tmp:
+ p=Path(tmp)
+ (p/'browser-inventory.json').write_text(json.dumps(receipt))
+ (p/'codex.json').write_text(json.dumps({'automations':[{'id':'simplememo','name':'Authentication reminder','kind':'heartbeat','rrule':'FREQ=DAILY;COUNT=1','status':'PAUSED'}]}))
+ (p/'gcp-schedules.json').write_text(json.dumps({'scheduler_inventory':{'project':'yurika-simplememo','status':'partial','services':{'scheduler':{'issues':[{'reason':'SERVICE_DISABLED'}]},'transfers':{'issues':[{'reason':'IAM_PERMISSION_DENIED'}]}}}}))
+ registry=m.build(p);gaps={g['id']:g for g in registry['known_gaps']}
+ assert 'chatgpt-current' not in gaps
+ assert gaps['codex-simplememo']['id_present'] and gaps['codex-simplememo']['state']=='identity_unverified'
+ assert gaps['gcp-schedulers']['evidence']['transfers'][0]['reason']=='IAM_PERMISSION_DENIED'
+ assert gaps['gcp-schedulers']['browser_observation']['cloud_scheduler']['retained_definitions']=='unknown'
+ assert next(j for j in registry['jobs'] if j['id']=='report:chatgpt-reddit')['execution_state']=='historically_paused_not_in_current_account_views'
+ assert next(j for j in registry['jobs'] if j['id']=='codex:simplememo')['execution_state']=='PAUSED'
+ for broken in ['[]','null','{invalid']:
+  (p/'browser-inventory.json').write_text(broken)
+  partial=m.build(p)
+  assert any(g['id']=='chatgpt-current' for g in partial['known_gaps'])
+  assert any(j['id']=='codex:simplememo' for j in partial['jobs'])
+  assert next(s for s in partial['discovery_surfaces'] if s['id']=='browser-inventory.json')['reason']=='invalid_or_unreadable_receipt'
+`], { cwd: path.resolve(import.meta.dirname, '../..'), stdio: 'pipe' });
+});
+
 test('compact GA4 retains scope, missing counts and union semantics and weights rates by sessions',()=>{
   const base={landing_scope:'production',session_channel:'Organic Search',sessions_with_cta_impression:1,sessions_with_own_app_click_24h:1,sessions_with_onelink_click_24h:1,sessions_with_any_app_route_click_24h:1,sessions_with_onelink_qa_click_24h:0};
   const reports=[{file:'ga4-funnel.sql',result:[{...base,observed_started_sessions:1},{...base,observed_started_sessions:'99'},{...base,landing_scope:'missing_landing_page',observed_started_sessions:5,sessions_with_cta_impression:null}]}];

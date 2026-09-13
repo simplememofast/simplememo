@@ -20,6 +20,8 @@ The native Codex automation `obsidian` is the daily master owner at 06:00 Asia/T
 
 Complete private machine registry: `~/.config/simplememo/company-os/automation-registry.json`. Inputs: `discovery/`. Registry schema and builder: `scripts/company-inventory.py`; refresh: `scripts/company-discover.py`. Each source has its own observation time and coverage limits. Archived tasks, enabled definitions, fired sessions, successful processes and successful business outputs are different states.
 
+Authenticated console observations use private `discovery/browser-inventory.json` (schema 1, observation time, method `authenticated_visible_browser_ui`, verified `SimpleMemo` account scope, and explicit service/project/view coverage). For ChatGPT, inspect active, paused and completed views; recommendation templates are not jobs. The normalizer accepts an empty current inventory only when all three counts are explicitly zero, the task URL matches, and the observation is no older than seven days. A nonempty view still requires individual job normalization. Stale or incomplete observations return a coverage gap without triggering task creation. Console evidence never changes the original service-account API receipt. A disabled Scheduler can retain unknown definitions; do not enable it to make discovery pass. Historical native owners require matching ID, operating purpose and recurring trigger because IDs may be reused.
+
 Private runtime files must remain outside every Git checkout, in an owned 0700 directory with 0600 files. Do not commit customer data, ASC revenue, AppsFlyer rows, decrypted BigQuery results, native prompts, shell history, account/task inventory or credentials. Public site assets can expose even robots-disallowed documents.
 
 ## One native run
