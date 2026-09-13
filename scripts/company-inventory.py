@@ -208,6 +208,31 @@ def build(discovery, root=ROOT):
             history_scope='bounded 30-day aggregate; sent may mean deletion or reporting, not growth',
             retry_behavior='Per-job eligibility and existing next Cron tick; outbound actions are not replayed here'))
 
+    gcp = source('gcp-schedules.json')
+    gcp_inventory = gcp.get('scheduler_inventory', {})
+    if gcp_inventory.get('project') == 'yurika-simplememo':
+        for service, details in gcp_inventory.get('services', {}).items():
+            bound_parents = {loc.get('canonical_parent') for loc in details.get('locations', [])
+                             if loc.get('requested_parent') == 'projects/yurika-simplememo/locations/' + str(loc.get('id'))}
+            for item in details.get('jobs', []):
+                name = item.get('name', '')
+                if not name.startswith('projects/yurika-simplememo/locations/') and name.rsplit('/', 2)[0] not in bound_parents:
+                    raise ValueError('Unexpected GCP resource reference')
+                jobs.append(record('gcp:' + name, item.get('display_name') or name.rsplit('/', 1)[-1],
+                    'GCP Cloud Scheduler' if service == 'scheduler' else 'GCP BigQuery Data Transfer',
+                    owner=name, schedule=item.get('schedule'), timezone=item.get('timezone'),
+                    trigger=['existing remote schedule'], inputs=['existing remote job definition'],
+                    data_sources=[item.get('data_source') or item.get('target_kind') or service],
+                    outputs=['existing configured destination'], destination=item.get('destination'),
+                    code_path=['growth/lib/gcp-schedule-inventory.mjs'],
+                    execution_state='disabled' if item.get('disabled') else item.get('state') or 'unknown',
+                    health={'state': item.get('state') or 'unknown', 'last_attempt': item.get('last_attempt'),
+                            'last_status_code': item.get('last_status_code'), 'business_success': 'not_inferred'},
+                    retry_behavior=item.get('retry') or 'provider-managed; current retry policy unobserved',
+                    definition_sha256=item.get('definition_sha256'),
+                    history_scope='Current metadata only. State and last attempt do not establish last successful output.',
+                    source_sha=gcp.get('source_sha'), observed_at=gcp_inventory.get('observed_at')))
+
     jobs.extend([
         record('report:mention-watch', 'Mention & Competitor Watch — SimpleMemo', 'existing Autopilot',
             schedule='weekly within maintenance lane', timezone='Asia/Tokyo', trigger=['existing Autopilot selection'],
@@ -249,8 +274,11 @@ def build(discovery, root=ROOT):
             raise ValueError('Incomplete automation record')
     native_ids = {j['id'] for j in jobs}
     gaps = [
-        {'id': 'chatgpt-current', 'state': 'blocked', 'reason': 'available browser is signed out'},
-        {'id': 'gcp-schedulers', 'state': 'blocked', 'reason': 'no local GCP session; BQ analytics credential is reused in existing CI'}]
+        {'id': 'chatgpt-current', 'state': 'unverified', 'reason': 'read authority exists; current authenticated task-list route remains unverified'}]
+    if gcp_inventory.get('status') != 'complete' or gcp_inventory.get('project') != 'yurika-simplememo':
+        gaps.append({'id': 'gcp-schedulers', 'state': gcp_inventory.get('status') or 'unverified',
+                     'reason': 'Verify existing CI credential through encrypted scheduler-inventory report; browser login is not required for this route',
+                     'evidence': {key: value.get('issues', []) for key, value in gcp_inventory.get('services', {}).items()}})
     for ident, label in [('simplememo-ai', 'weekly AI visibility reservation'), ('simplememo', 'canonical funnel heartbeat')]:
         if 'codex:' + ident not in native_ids:
             gaps.append({'id': 'codex-' + ident, 'state': 'unverified', 'reason': 'documented ' + label + ' absent from inspected local scheduler records'})
