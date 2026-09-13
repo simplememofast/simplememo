@@ -4,7 +4,7 @@ import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { ROOT, digest, formalMetrics, compareMetrics, humanTouchMetrics, autonomyLedger } from './company-metrics.mjs';
-import { latestSnapshot } from './gsc.mjs';
+import { companySearch, searchCandidates } from './company-search.mjs';
 import { isDue, validate as validateExperiments } from './ledger.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { growthFollowups } from './company-growth-followup.mjs';
@@ -120,7 +120,9 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
   const failures = [];
   const registry = attempt('automation_registry', () => read(path.join(stateRoot, 'automation-registry.json')), failures);
   const metrics = attempt('formal_metrics', () => formalMetrics({ now }), failures);
-  const snapshot = attempt('gsc_snapshot', () => latestSnapshot(), failures);
+  const search = attempt('gsc_snapshot', () => companySearch({stateRoot, now}), failures);
+  const snapshot = search?.snapshot;
+  failures.push(...(search?.failures ?? []));
   const experiments = attempt('experiments', () => {
     const d = repoRead('growth/experiments/experiments.json');
     if (validateExperiments(d).length) throw new Error('Experiment validation failed');
@@ -130,8 +132,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
   const actions = attempt('existing_actions', () => repoRead('data/autopilot-actions-report.json'), failures);
   const coverage = attempt('coverage', () => repoRead('data/automation-coverage.json'), failures);
   const touches = attempt('human_touches', () => humanTouchMetrics(repoRead('data/autopilot-runs.json')), failures);
-  const gaps = attempt('content_gaps', () => JSON.parse(execFileSync(process.execPath,
-    ['growth/scripts/analyze.mjs', '--json'], { cwd: ROOT, encoding: 'utf8', timeout: 30000, maxBuffer: 8 * 1024 * 1024 })), failures);
+  const gaps = search?.analysis ?? null;
   const stop = attempt('emergency_stop', () => repoRead('data/emergency-stop.json'), failures);
   const connectionsPath = path.join(stateRoot, 'data/connections.json');
   const connections = attempt('private_growth_connections', () => read(connectionsPath), failures);
@@ -149,14 +150,18 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
     growth: {
       search: snapshot ? { snapshot: snapshot.label, period_start: snapshot.meta.period_start,
         period_end: snapshot.meta.period_end, source: snapshot.meta.source,
+        decision_input: search.evidence,
         observed_days: snapshot.dates?.length ?? null, pages: snapshot.pages.length, queries: snapshot.queries.length,
         clicks: snapshot.dates?.reduce((n, r) => n + r.clicks, 0) ?? null,
         impressions: snapshot.dates?.reduce((n, r) => n + r.impressions, 0) ?? null } : null,
-      connections, experiments, content_gaps: gaps,
+      connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
       aio: probe ? { series: probe.series, observed_at: probe.observed_at, status: probe.status,
         valid_questions: probe.valid_questions, unaided_valid_questions: probe.unaided_valid_questions,
         unaided_mention_rate: probe.unaided_mention_rate, unaided_own_site_citation_rate: probe.unaided_own_site_citation_rate,
+        observations: (probe.observations ?? []).map(q => ({question_id:q.question_id, question:q.question,
+          status:q.status, mention:q.mention ?? null, own_site_citation:q.own_site_citation ?? null,
+          cited_urls:q.cited_urls ?? [], transcript_sha256:q.transcript_sha256 ?? null})),
         warning: 'Small fixed sample; different model series are not comparable and missing mentions do not identify a cause.' } : null,
     },
       existing_actions: actions,
@@ -172,6 +177,7 @@ export function opportunities(observation) {
     safety: 90, ease: 65, reliability: 70, business_impact: 60, growth_impact: 55,
     reuse: 100, affordability: 90, permission_readiness: 90 };
   const candidates = [];
+  candidates.push(...searchCandidates(observation.growth, defaults));
   for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed')) {
     candidates.push({ id: 'diagnose:' + job.id, kind: 'diagnose_automation', title: 'Diagnose ' + job.name,
       permission: 'AUTO', executable: true, owner: job.owner, evidence: [job.id, job.health],
