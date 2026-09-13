@@ -21,8 +21,8 @@ name: Autopilot Health
 # 記事を書かずスキップした日も date_jst は更新される設計なので、
 # 「当日でない」こと自体が異常のシグナルになる（Runbook §5-2）。
 #
-# 【時刻】12:00 / 16:00 / 20:00 JST。主系06:00・副系07:30・日報10:00 のすべてが
-# 終わり、PRのマージとPagesデプロイが落ち着いた後に見る。
+# 【時刻】12:00 / 16:00 / 20:00 JST。主系06:00の運転と
+# PRのマージ・Pagesデプロイが落ち着いた後に見る。補完の有効状態は実予約で確認する。
 #
 # **窓の下限も上限も意味がある。増やすときはこの範囲の中で。**
 #   下限 12:00 … これより早いと当日の運転がまだ途中で、健全なのに stale と出る
@@ -168,8 +168,8 @@ jobs:
               ...(healthy ? [] : [
                 '### 確認する順',
                 '1. `claude/obsidian-auto-<当日JST>` ブランチと open PR の有無',
-                '2. Mac Codex automation `obsidian-autopilot-retry-standby` の06:00 JST主系: 実タスクの起動・停止/予算ゲート・認証・利用枠を確認（予定だけで発火済みとしない）',
-                '3. 同automationの09:20 / 12:20 JST補完: 実タスクの状態と共有占有を確認。旧CCR A/Bは停止維持',
+                '2. Mac Codex automation `obsidian` の06:00 JST主系: 実タスクの起動・停止/予算ゲート・認証・利用枠を確認（予定だけで発火済みとしない）',
+                '3. 補完は別automation `obsidian-2`。保存された有効状態と予定を確認し、停止中ならその意図を保持する。当日のclaim・共有PRに結び付く所有タスクと未終了の予約実行だけを照合し、過去の修理IDを新しい日の占有へ持ち越さない。旧CCR A/Bは停止維持',
                 '4. 上記が動いていて本番だけ古い場合は Cloudflare Pages のデプロイ',
                 '',
                 '運用ルール: `docs/codex-autopilot-execution.md` / `docs/obsidian/AUTOPILOT_RUNBOOK.md` / 履歴: `docs/obsidian/AUTOPILOT_LOG.md`',

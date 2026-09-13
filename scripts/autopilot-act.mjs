@@ -3143,7 +3143,7 @@ async function selftest() {
       t('Act excludes its own snapshot publication from push wakeups', workflow.includes(`!startsWith(github.event.head_commit.message, '${prefix}')`));
     t('auto-merge completion is wired despite suppressed push events', workflow.includes('"Cron Health", "Auto-merge Claude PRs"'));
     t('Act requires the successful intake gate and handles skipped regular events',
-      workflow.includes('needs: routine-intake') && workflow.includes('always() && !cancelled() &&')
+      workflow.includes('needs: [routine-intake, cron-recovery-intake]') && workflow.includes('always() && !cancelled() &&')
       && workflow.includes("(needs.routine-intake.result == 'skipped' || needs.routine-intake.outputs.needed == 'true')"));
     t('emitted report records the snapshot actually consumed', fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
       .includes('routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc)'));
@@ -3152,7 +3152,7 @@ async function selftest() {
     try {
       fs.mkdirSync(path.join(scratch, 'data'));
       fs.symlinkSync(path.join(ROOT, 'scripts'), path.join(scratch, 'scripts'), 'dir');
-      const step = workflow.split('      - name: Check whether routine observation reached intake\n')[1]?.split('\n  act:\n')[0];
+      const step = workflow.split('      - name: Check whether routine observation reached intake\n')[1]?.split(/\n  [a-z][a-z-]*:\n/)[0];
       const shell = step?.split('        run: |\n')[1]?.split('\n').map(line => line.replace(/^          /, '')).join('\n');
       t('actual read-only workflow intake step exists', typeof shell === 'string');
       const output = path.join(scratch, 'output');
