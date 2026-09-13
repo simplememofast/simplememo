@@ -151,15 +151,18 @@ jobs:
           node scripts/recover-ingest.mjs --record "$(tail -c 2000 '${{ runner.temp }}/preflight.log')" \
             | tee -a "$GITHUB_STEP_SUMMARY"
 
-      # 毎日の取り込みは GROWTH_GSC_DIR で捨て場所に書く。
+      # 日次出力は暗号化artifactでも既存Companyへ渡す。追加queryはしない。
       # コミットされるのは下の weekly ステップだけ。
       - name: Ingest today's window (not committed)
+        id: ingest_daily
         env:
           GROWTH_GSC_DIR: ${{ runner.temp }}/gsc
         run: |
+          label="$(date -u +%Y-%m-%d)"
+          echo "label=$label" >> "$GITHUB_OUTPUT"
           node growth/scripts/ingest-bigquery.mjs \
             --days "${{ github.event.inputs.days || '28' }}" \
-            --label "$(date -u +%Y-%m-%d)"
+            --label "$label"
 
       # 【公開表示の突き合わせ】評価・件数・公開バージョンは JSON-LD の
       # aggregateRating としてサイトに出ている。台帳の値は人が App Store Connect を
@@ -234,6 +237,27 @@ jobs:
             node growth/scripts/analyze.mjs --top 10
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Encrypt existing daily snapshot for Company
+        id: seal_daily
+        if: github.ref == 'refs/heads/main' && (github.event.inputs.days || '28') == '28'
+        continue-on-error: true
+        env:
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+        run: |
+          node growth/scripts/seal-daily-gsc.mjs "${{ runner.temp }}/gsc" \
+            "${{ steps.ingest_daily.outputs.label }}" "${{ runner.temp }}/seo-daily-export/seo-daily.enc.json"
+
+      - name: Retain encrypted daily snapshot
+        id: retain_daily
+        if: steps.seal_daily.outcome == 'success'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-daily-encrypted-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/seo-daily-export/seo-daily.enc.json
+          if-no-files-found: error
+          retention-days: 7
 
       # ここから下は週1回（月曜。逃した週は経過日数で拾う）か、手動実行で snapshot=true のとき。
       #
@@ -394,3 +418,10 @@ jobs:
                 'マージには手動の再実行が要る — growth/BIGQUERY_SETUP.md を参照。'
               );
             }
+
+      # Preserve the old report/weekly path, while surfacing a failed new handoff.
+      - name: Check Company handoff health
+        if: always() && (steps.seal_daily.outcome == 'failure' || steps.retain_daily.outcome == 'failure')
+        run: |
+          echo '::error::Encrypted daily handoff failed; existing reports retained. Company must keep its admitted fallback.'
+          exit 1

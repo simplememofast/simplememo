@@ -1,4 +1,6 @@
 import test from 'node:test';
+import './company-search.test.mjs';
+import './daily-gsc-handoff.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
