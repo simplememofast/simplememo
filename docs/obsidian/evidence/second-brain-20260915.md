@@ -11,3 +11,5 @@ Original synthetic-vault GUI verification: Mac Obsidian 1.13.7 on 2026-09-15. Th
 The downloadable three-note starter is authored separately. Its files match the reviewed draft starter byte-for-byte; ZIP integrity passed. Its internal wikilinks resolve. Empty Archive and README are included. Import into readers' vaults remains unverified.
 
 Local SEO: 282 HTML pages, 0 errors / 0 warnings. Responsive Blink inspection at 320/390/768/1440px found no overflow, missing images or JavaScript errors after scrolling each lazy image into view. The initial image check skipped image viewports; its untriggered lazy loads were not a missing-file defect. CSS versions, URL normalization, internal links, CTA metadata, script tags and static overflow passed. Final-head CI results are recorded in PR #1391. Production verification must use actual merged files, not PR preview or completion state alone.
+
+Initial CI34904652393 caught a missing content-graph entry for the new page. Added the actual parent/sibling/next-step entry and retained the failed CI evidence; no gate was relaxed.
