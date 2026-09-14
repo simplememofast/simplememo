@@ -13,7 +13,7 @@ const REPO = 'simplememofast/simplememo';
 export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.json', 'data/eligibility-policy.json', 'data/authority-matrix.json',
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
-  'scripts/lib/decision-origin.mjs', 'scripts/decision-monitor-local.py',
+  'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/decision-monitor-local.py',
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
   'growth/lib/company-measurement.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
@@ -209,6 +209,12 @@ async function selftest() {
     for (const x of legacy.candidates) delete x.calibration;
     save(`data/decision-intents/${c.id}.json`, legacy); g('add', '.'); g('commit', '-m', 'legacy declaration');
     assert.equal((await verifyDecision({ ...options, baseRef: legacyBase, head: g('rev-parse', 'HEAD') })).state, 'declared');
+    g('checkout', '--detach', baseRef);
+    fs.mkdirSync(path.join(dir, 'scripts/lib'), {recursive:true});
+    fs.writeFileSync(path.join(dir, 'scripts/lib/decision-publication-retry.mjs'), '// candidate attempts to replace retry gates\n');
+    g('add', '.'); g('commit', '-m', 'attempt to change publication retry policy');
+    await assert.rejects(verifyDecision({...options,head:g('rev-parse','HEAD')}),
+      /cannot change its gate or policy: scripts\/lib\/decision-publication-retry\.mjs/);
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-ci: real Git declaration-to-run binding and PR-only autonomous merge checks passed');
 }
