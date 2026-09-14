@@ -10,6 +10,7 @@ import {selectComparison} from './comparison.mjs';
 import {inspectSnapshot} from '../../scripts/autopilot-data.mjs';
 import {validateOptions} from '../scripts/export-analytics.mjs';
 import {retainedDaily} from './daily-gsc-handoff.mjs';
+import {experimentScope} from './experiment-overlap.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -123,23 +124,49 @@ export function companySearch({stateRoot, now = new Date(), fallback = latestSna
       note: 'Same canonical CTR/detector functions; no query. Missing joins stay missing. This is decision evidence, not permission or measured treatment impact.'}};
 }
 
+// Reuse the original ledger's explicit, legacy-list and global scope rules.
+// External/unenumerated records remain visible; do not invent a local page.
+function selectionScope(page, pages) {
+  try {
+    if (typeof page !== 'string' && !Array.isArray(page)) throw new Error('Missing experiment page scope');
+    const explicit = pages ?? (Array.isArray(page) ? page : undefined);
+    if (explicit !== undefined && (!Array.isArray(explicit) || explicit.some(p => typeof p !== 'string'))) throw new Error('Invalid experiment pages');
+    const scope = experimentScope({page: typeof page === 'string' ? page : '', pages: explicit});
+    const literals = explicit ?? (Array.isArray(page) ? page : [page]);
+    const own = value => {
+      if (typeof value !== 'string' || !/^(\/|https?:\/\/)/.test(value)) return null;
+      const url = new URL(value, 'https://simplememofast.com');
+      return ['http:', 'https:'].includes(url.protocol) && url.hostname === 'simplememofast.com' ? toPath(value) : null;
+    };
+    const normalized = [...new Set([...scope.pages, ...literals].map(own).filter(Boolean))];
+    return {available: true, global: scope.global, pages: normalized,
+      unenumerated: !scope.global && normalized.length === 0};
+  } catch { return {available: false, global: false, pages: [], unenumerated: true}; }
+}
+
 export function searchCandidates(growth, defaults) {
   const analysis = growth.content_gaps, evidence = growth.search_input;
   if (!analysis || !evidence?.actionable) return [];
+  const experiments = (Array.isArray(growth.experiments) ? growth.experiments : [])
+    .filter(e => e.status === 'RUNNING').map(e => ({id: e.id, scope: selectionScope(e.affected_area, e.affected_pages)}));
+  const reviews = (Array.isArray(growth.followups?.reviews) ? growth.followups.reviews : [])
+    .filter(r => r.status === 'RUNNING').map(r => ({id: r.id, scope: selectionScope(r.parent?.page, r.parent?.pages)}));
+  const scopesReadable = [...experiments, ...reviews].every(e => e.scope.available);
+  const matches = (scope, page) => scope.global || scope.pages.some(p => p === page);
   const result = [], seen = new Set();
   for (const row of analysis.ctr_gap ?? []) {
     if (row.kind !== 'page' || row.impressions * row.expected_ctr < 3 || seen.has(row.key)) continue;
     const page = toPath(row.key); seen.add(page);
-    const ownershipKnown = Array.isArray(growth.experiments) && Array.isArray(growth.followups?.reviews);
-    const overlaps = (growth.experiments ?? []).filter(e => e.status === 'RUNNING' &&
-      (Array.isArray(e.affected_area) ? e.affected_area : [e.affected_area]).some(p => typeof p === 'string' && toPath(p) === page));
-    const followups = (growth.followups?.reviews ?? []).filter(r => r.status === 'RUNNING' &&
-      (Array.isArray(r.parent?.page) ? r.parent.page : [r.parent?.page]).some(p => typeof p === 'string' && toPath(p) === page));
+    const ownershipKnown = Array.isArray(growth.experiments) && Array.isArray(growth.followups?.reviews) && scopesReadable;
+    const overlaps = experiments.filter(e => matches(e.scope, page));
+    const followups = reviews.filter(r => matches(r.scope, page));
     result.push({id: 'search:ctr:' + page, kind: 'review_existing_search_page', title: 'Review the measured CTR gap on ' + page,
       permission: 'AUTO', executable: ownershipKnown && overlaps.length === 0 && followups.length === 0, owner: 'existing Obsidian Autopilot selector',
       lane: 'A', target_page: page, evidence: [evidence, {detector: 'ctr_gap', ...row}],
       blocking_experiments: overlaps.map(e => e.id),
       blocking_followups: followups.map(r => r.id), ownership_state: ownershipKnown ? 'read' : 'unavailable',
+      unenumerated_experiment_scopes: experiments.filter(e => e.scope.unenumerated).map(e => e.id),
+      unenumerated_followup_scopes: reviews.filter(r => r.scope.unenumerated).map(r => r.id),
       action_scope: 'Inspect the existing page and current SERP; declare a prospective metric-specific experiment through existing gates before a single eligible edit. Preserve active experiments, canonical URLs and internal links. An expected CTR gap is not proven cause or uplift.',
       followup: 'Existing experiment ledger and daily follow-up; retain baseline and 28-day maturity, not a short-term WIN.',
       factors: {...defaults, frequency: 50, human_time_saved: 70, manual_touches: 70, business_impact: 70, growth_impact: 80, reliability: 60, ease: 60}});

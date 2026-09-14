@@ -106,7 +106,7 @@ export function experimentView(e, asOf) {
   const status = e.status === 'planned' ? 'PLANNED' : ['running', 'frozen'].includes(e.status) ? 'RUNNING'
     : e.decision === 'revert' ? 'ROLLED_BACK' : 'INCONCLUSIVE';
   return { id: e.id, hypothesis: e.hypothesis ?? null, evidence: e.evidence ?? null,
-    action: e.type, date: e.started_at ?? null, affected_area: e.page,
+    action: e.type, date: e.started_at ?? null, affected_area: e.page, affected_pages: e.pages ?? null,
     baseline: e.baseline ?? null, primary_kpi: e.target_metric ?? null, secondary_kpi: e.secondary_metrics ?? [],
     guardrails: e.stop_loss ?? e.stop_conditions ?? null, expected_impact: e.expected_impact ?? null,
     actual_impact: e.actual_impact ?? null, evaluation_date: e.evaluation_at ?? null,
