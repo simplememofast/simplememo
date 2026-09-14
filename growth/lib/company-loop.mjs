@@ -12,6 +12,7 @@ import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { companyMentions,mentionCandidates } from './company-mentions.mjs';
 import { mentionDecisions } from './company-mention-decisions.mjs';
 import { currentAutomationAssessment } from './company-automation-health.mjs';
+import { companyAio } from './company-aio.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -132,7 +133,8 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
     if (validateExperiments(d).length) throw new Error('Experiment validation failed');
     return d.experiments.map(e => experimentView(e, now.toISOString().slice(0, 10)));
   }, failures);
-  const probe = attempt('ai_visibility', () => repoRead('data/ai-visibility-probe.json'), failures);
+  const aio = companyAio({ now });
+  for (const reason of aio.failures) failures.push({ source: 'ai_visibility', state: 'unavailable', reason });
   const mentions=companyMentions({now});
   if(mentions.status!=='ready')failures.push({source:'mention_watch',state:'unavailable',reason:'existing_watch_not_admitted'});
   const decisions=attempt('mention_decisions',()=>mentionDecisions({stateRoot,mentions,now}),failures);
@@ -172,13 +174,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
         impressions: snapshot.dates?.reduce((n, r) => n + r.impressions, 0) ?? null } : null,
       connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,mentions,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
-      aio: probe ? { series: probe.series, observed_at: probe.observed_at, status: probe.status,
-        valid_questions: probe.valid_questions, unaided_valid_questions: probe.unaided_valid_questions,
-        unaided_mention_rate: probe.unaided_mention_rate, unaided_own_site_citation_rate: probe.unaided_own_site_citation_rate,
-        observations: (probe.observations ?? []).map(q => ({question_id:q.question_id, question:q.question,
-          status:q.status, mention:q.mention ?? null, own_site_citation:q.own_site_citation ?? null,
-          cited_urls:q.cited_urls ?? [], transcript_sha256:q.transcript_sha256 ?? null})),
-        warning: 'Small fixed sample; different model series are not comparable and missing mentions do not identify a cause.' } : null,
+      aio,
     },
       existing_actions: actions,
     execution_boundary: { source: 'data/authority-matrix.json', stopped: stop?.stopped !== false,
@@ -217,7 +213,9 @@ export function opportunities(observation) {
     permission: 'AUTO', executable: true, owner: r.owner, evidence: [r.id, r.parent_sha256, r.post_start, r.post_end],
     action_scope: 'Collect the registered mature GSC window, inspect concurrent changes, then use evaluate-growth-followup with the original metric-specific admission gate. Missing evidence stays pending; keep is not WIN. No automatic source retry, publication or model call.',
     factors: { ...defaults, frequency: 45, business_impact: 80, growth_impact: 80, ease: 55 } });
-  if (observation.growth.aio?.unaided_valid_questions >= 4 && observation.growth.aio.unaided_mention_rate === 0) candidates.push({
+  if (observation.growth.aio?.decision_input?.actionable === true &&
+      observation.growth.aio.status === 'ok' && observation.growth.aio.unaided_valid_questions >= 4 &&
+      observation.growth.aio.unaided_mention_rate === 0) candidates.push({
     id: 'content:ai-visibility-gap', kind: 'existing_content_queue', title: 'Choose an evidenced content gap using the existing coverage queue',
     permission: 'AUTO', executable: true, owner: 'existing Obsidian Autopilot selector', evidence: [observation.growth.aio],
     action_scope: 'Cross-check live sources, existing pages, active experiments and approved value contracts before implementing one eligible page change. Do not rerun the paid probe.',

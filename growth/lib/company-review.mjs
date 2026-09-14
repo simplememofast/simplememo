@@ -62,8 +62,10 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     failures: o.automation.failures.map(j => ({ id: j.id, health: j.health })),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
   // Timestamps do not make unchanged evidence a new notification.
+  const aio = structuredClone(payload.growth.aio);
+  if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
-    next: payload.next?.id, search: payload.growth.search, aio: payload.growth.aio,
+    next: payload.next?.id, search: payload.growth.search, aio,
     mentions:payload.growth.mentions?{status:payload.growth.mentions.status,sha256:payload.growth.mentions.evidence?.sha256,decisions:payload.growth.mentions.decisions}:null,
     experiments: payload.growth.experiments?.map(e => [e.id,e.status,e.decision,e.due]),
     connections: Object.entries(payload.growth.connections).map(([k,v]) => [k,v.status,v.window]) };
