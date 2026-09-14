@@ -16,6 +16,7 @@ import { currentAutomationAssessment } from './company-automation-health.mjs';
 import { companyAio } from './company-aio.mjs';
 import { companyCtaMeasurement } from './company-cta-measurement.mjs';
 import {measurementStatus} from './company-measurement.mjs';
+import { bingView } from './company-bing.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -171,6 +172,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
       note: 'Registry collection and individual source timestamps differ; historical errors do not establish a current incident.' },
     autonomy_ledger: coverage ? autonomyLedger(coverage, registry ?? undefined) : null,
     growth: {
+      bing: attempt('bing_evidence', () => bingView({stateRoot,now}), failures),
       search: snapshot ? { snapshot: snapshot.label, period_start: snapshot.meta.period_start,
         period_end: snapshot.meta.period_end, source: snapshot.meta.source,
         decision_input: search.evidence,
