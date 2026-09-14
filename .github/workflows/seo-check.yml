@@ -1317,6 +1317,8 @@ jobs:
 
       - name: Autonomous Company source boundaries and recovery
         run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs growth/lib/company-goal-followup.test.mjs
+      - name: Bing source boundaries and retry handling
+        run: node --test growth/lib/bing-webmaster.test.mjs growth/lib/company-bing.test.mjs
       - name: Test GA4 funnel SQL with synthetic events
         run: |
           python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"
