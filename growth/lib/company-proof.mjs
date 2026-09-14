@@ -8,6 +8,9 @@ import { ROOT, formalMetrics, compareMetrics } from './company-metrics.mjs';
 import { atomicJson, privateState, acquireLock } from './company-loop.mjs';
 import { verifyAppsFlyer } from './company-data.mjs';
 import { startOperationalFollowup } from './company-followup.mjs';
+import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
+import {observe,opportunities} from './company-loop.mjs';
+import {intentPath} from '../../scripts/value-contracts.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -29,16 +32,34 @@ export function verifyMergedChange(pr, call = run, { requireIntegration = true }
   return { pr, url: pull.url, head_sha: pull.headRefOid, merge_sha: pull.mergeCommit.oid, merged_at: pull.mergedAt, validation_run: verified.databaseId };
 }
 
-export function bindExistingRun({stateRoot,id,autopilotRunId}) {
+export async function bindExistingRun({stateRoot,id,autopilotRunId,call=run,cwd=ROOT,now=new Date(),currentCandidates}) {
   if (!/^[a-f0-9-]{36}$/.test(id) || !/^[A-Za-z0-9._-]{1,160}$/.test(autopilotRunId ?? '')) throw new Error('Invalid run identity');
   const dir=privateState(stateRoot), release=acquireLock(dir);
   if (!release) return {status:'busy'};
   try {
     const file=path.join(dir,'runs',id+'.json'), receipt=read(file);
-    if (!receipt.selected || receipt.status !== 'observed_decision_requires_execution') throw new Error('An uncompleted selected action is required');
+    if (receipt.schema_version!==2 || receipt.status !== 'observed_decision_requires_execution') throw new Error('A new prospective observed action is required');
+    decisionCommitment(receipt);
+    if(receipt.decision.input.run_id!==autopilotRunId)throw new Error('Canonical run differs from the recorded decision');
     if (receipt.bound_autopilot_run_id && receipt.bound_autopilot_run_id !== autopilotRunId) throw new Error('Existing binding is immutable');
-    if (read(path.join(ROOT,'data/autopilot-runs.json')).runs.some(r=>r.run_id===autopilotRunId) || receipt.prior_autopilot_run_ids?.includes(autopilotRunId)) throw new Error('Cannot bind a historical run retrospectively');
-    receipt.bound_autopilot_run_id=autopilotRunId; receipt.bound_at=new Date().toISOString();
+    if(receipt.bound_autopilot_run_id) {
+      if(receipt.bound_decision_sha256!==receipt.decision.sha256)throw new Error('Decision changed after binding');
+      return receipt; // A retry must not move the pre-execution timestamp.
+    }
+    if (read(path.join(cwd,'data/autopilot-runs.json')).runs.some(r=>r.run_id===autopilotRunId) || receipt.prior_autopilot_run_ids?.includes(autopilotRunId)) throw new Error('Cannot bind a historical run retrospectively');
+    const stop=read(path.join(cwd,'data/emergency-stop.json'));
+    if(stop.stopped!==false || stop.agents?.[receipt.route]?.stopped!==false)throw new Error('Current stop blocks binding');
+    const candidates=currentCandidates??opportunities(observe({stateRoot:dir,now}));
+    if(!candidates.some(c=>c.id===receipt.decision.input.candidate_id && candidateDigest(c)===receipt.decision.candidate_sha256))throw new Error('Candidate evidence or eligibility changed before binding');
+    const head=call('git',['rev-parse','HEAD']).trim();
+    const contract=JSON.parse(call('git',['show',head+':'+intentPath(receipt.decision.input.contract_id)]));
+    if(Date.parse(contract.created_at)>now.getTime() || now.getTime()-Date.parse(receipt.observed_at)>6*3600000)throw new Error('Current prospective contract required');
+    const history=await verifyDecisionContract(receipt,contract,call,{head,cwd});
+    const branch=call('git',['branch','--show-current']).trim();
+    if(!branch || call('git',['ls-remote','--heads','origin',branch]).trim().split(/\s+/)[0]!==head)throw new Error('Push the declaration before binding implementation');
+    receipt.bound_autopilot_run_id=autopilotRunId; receipt.bound_at=now.toISOString();
+    receipt.bound_decision_sha256=receipt.decision.sha256;receipt.bound_declaration_sha=history.declaration_sha;
+    receipt.stages.decide='completed';
     atomicJson(file,receipt); atomicJson(path.join(dir,'latest-run.json'),receipt); return receipt;
   } finally {release();}
 }
@@ -91,13 +112,21 @@ export async function verifyActionDelivery(artifact,merge,call=run,fetchImpl=fet
   return artifact===null?verifyOperationalDelivery(merge,call,fetchImpl):verifyPublishedArtifact(artifact,merge.merge_sha,call,fetchImpl);
 }
 
-export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,fetchImpl=fetch,now=new Date()}) {
+export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=ROOT,fetchImpl=fetch,now=new Date()}) {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('Invalid Company run ID');
   const dir=privateState(stateRoot), release=acquireLock(dir);
   if (!release) return {status:'busy'};
   try {
     const file=path.join(dir,'runs',id+'.json'), receipt=read(file), evidence=read(evidenceFile);
-    if (receipt.status==='verified_existing_autopilot') return receipt;
+    if (receipt.status==='verified_existing_autopilot') {
+      if(evidence.run_id!==receipt.bound_autopilot_run_id || evidence.pr!==receipt.evidence_of_completion?.merge?.pr)throw new Error('Completion identity is immutable');
+      if(decisionTrace(receipt).state!=='verified')throw new Error('Retained delivery has no valid prospective decision trace; preserve history, do not upgrade it');
+      return receipt;
+    }
+    if(receipt.schema_version!==2)throw new Error('Legacy observation cannot receive retrospective decision proof');
+    decisionCommitment(receipt);
+    const stops=read(path.join(cwd,'data/emergency-stop.json'));
+    if(receipt.execution_boundary.stopped || receipt.execution_boundary[receipt.route==='actions'?'actions_stopped':'owner_session_stopped'] || stops.stopped!==false || stops.agents?.[receipt.route]?.stopped!==false)throw new Error('Stopped action cannot complete');
     if (evidence.kind!=='autopilot_run' || !receipt.bound_autopilot_run_id || evidence.run_id!==receipt.bound_autopilot_run_id || receipt.prior_autopilot_run_ids?.includes(evidence.run_id)) throw new Error('Actual run must have been bound before execution');
     const merge=verifyMergedChange(evidence.pr,call,{requireIntegration:false});
     if (Date.parse(merge.merged_at)<Date.parse(receipt.started_at)) throw new Error('Historical merge is not a new Company action');
@@ -106,10 +135,14 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,fetc
     if (!row || row.outcome!=='shipped' || row.attempted!==true || row.pr!==evidence.pr || row.route!==receipt.route) throw new Error('Merged canonical run does not match this action');
     const prior=JSON.parse(call('git',['show',merge.merge_sha+'^:data/autopilot-runs.json']));
     if(prior.runs.some(r=>r.run_id===evidence.run_id)) throw new Error('Merge did not introduce this run');
+    const contract=JSON.parse(call('git',['show',merge.merge_sha+':'+intentPath(receipt.decision.input.contract_id)]));
+    call('git',['fetch','origin',`refs/pull/${merge.pr}/head`]);
+    const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd);
     const artifactProof=await verifyActionDelivery(row.artifact,merge,call,fetchImpl);
+    if(row.artifact!==null && !receipt.decision.input.scope.paths.includes(artifactProof.artifact_source))throw new Error('Actually served source was not the declared changed target');
     receipt.status='verified_existing_autopilot'; receipt.finished_at=now.toISOString();
     receipt.stages={detect:'completed',decide:'completed',execute:'completed',verify:'completed',report:'saved',learn:'recorded'};
-    receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,
+    receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,decision_trace:trace,
       limitation:'Exact final SHA CI and canonical run/merge are verified. Domain-specific effect and rollback evidence remain in the existing experiment/PR.'};
     receipt.human_interventions=row.interventions??null;
     receipt.learnings=typeof evidence.learning==='string'&&evidence.learning.length<=2000 ? [evidence.learning] : ['Implementation verified; business impact awaits its existing experiment horizon.'];
@@ -146,6 +179,7 @@ export async function finishIntegration({ stateRoot, id, evidenceFile, call = ru
   try {
     const file = path.join(dir,'runs',id+'.json'), receipt = read(file), evidence = read(evidenceFile);
     if (receipt.status === 'verified_integration') return receipt;
+    if(receipt.schema_version!==1)throw new Error('New Company actions require the prospective autopilot_run decision verifier; pipeline_integration is legacy bootstrap evidence only');
     if (receipt.selected?.id !== 'integrate:appsflyer-consumer' || evidence.kind !== 'pipeline_integration') throw new Error('Proof does not bind the selected integration');
     const route=receipt.route??(receipt.origin==='codex-automation'?'actions':'owner-session');
     if (receipt.execution_boundary.stopped || (route==='actions'?receipt.execution_boundary.actions_stopped:receipt.execution_boundary.owner_session_stopped)) throw new Error('Stopped run cannot complete an action');

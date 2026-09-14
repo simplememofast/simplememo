@@ -13,6 +13,7 @@ import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/c
 import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
 import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagnoses.mjs';
+import {prepareCompanyDecision,decisionTraceStatus} from '../growth/lib/company-decision.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -22,7 +23,11 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='record-automation-diagnosis') {
+if(command==='prepare-decision') {
+  result=prepareCompanyDecision({stateRoot,id:option('run'),evidenceFile:option('evidence')});
+} else if(command==='decision-trace') {
+  result=decisionTraceStatus({stateRoot});
+} else if(command==='record-automation-diagnosis') {
   result=recordAutomationDiagnosis({stateRoot,evidenceFile:option('evidence')});
 } else if(command==='cta-measurement') {
   result=companyCtaMeasurement({stateRoot});
@@ -59,7 +64,7 @@ if(command==='record-automation-diagnosis') {
 } else if (command === 'record-human-touch') {
   result=recordHumanTouch({stateRoot,eventId:option('event'),runId:option('run'),stage:option('stage'),kind:option('kind'),evidenceFile:option('evidence'),occurredAt:option('occurred-at')});
 } else if (command === 'bind') {
-  result = bindExistingRun({stateRoot,id:option('run'),autopilotRunId:option('autopilot-run')});
+  result = await bindExistingRun({stateRoot,id:option('run'),autopilotRunId:option('autopilot-run')});
 } else if (command === 'finish') {
   const evidenceFile=option('evidence');
   const kind=JSON.parse(fs.readFileSync(evidenceFile)).kind;

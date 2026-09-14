@@ -11,6 +11,7 @@ import { growthFollowups } from './company-growth-followup.mjs';
 import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { companyMentions,mentionCandidates } from './company-mentions.mjs';
 import { mentionDecisions } from './company-mention-decisions.mjs';
+import {decisionTraceStatus} from './company-decision.mjs';
 import { currentAutomationAssessment } from './company-automation-health.mjs';
 import { companyAio } from './company-aio.mjs';
 import { companyCtaMeasurement } from './company-cta-measurement.mjs';
@@ -178,7 +179,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
       connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,mentions,
       cta_measurement: ctaMeasurement,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
-      aio,
+      aio, decision_trace: attempt('company_decision_trace',()=>decisionTraceStatus({stateRoot}),failures),
     },
       existing_actions: actions,
     execution_boundary: { source: 'data/authority-matrix.json', stopped: stop?.stopped !== false,
@@ -253,6 +254,7 @@ export function auditObservation(o) {
         ['AppsFlyer daily consumer configuration or original scheduled execution remains unverified']),
       'Historical mention suggestions require current canonical selector execution'],
     handoff_evidence: {appsflyer:o.growth.connections?.appsflyer?.scheduled_consumer_evidence ?? null},
+    decision_trace: o.growth.decision_trace,
     discovery_gaps: o.automation.discovery_gaps,
     source_failures: o.failures,
     opportunities: opportunities(o),
@@ -280,12 +282,12 @@ export function persistRun({ stateRoot = DEFAULT_STATE, cadence = 'daily', origi
     const observation = observe({ stateRoot: dir, now });
     const ranked = opportunities(observation);
     const key = cadenceKey(cadence, now);
-    const receipt = { schema_version: 1, id: randomUUID(), cadence, cadence_key: key,
+    const receipt = { schema_version: 2, id: randomUUID(), cadence, cadence_key: key,
       origin, origin_proof: nativeOrigin(), started_at: now.toISOString(),
       observed_at: observation.observed_at, source_commit: observation.source_commit,
       observation_fingerprint: digest({ sources: observation.formal_metrics?.sources,
         registry: observation.automation.registry_generated_at, growth: observation.growth }),
-      status: 'observed_decision_requires_execution', stages: { detect: 'completed', decide: 'completed',
+      status: 'observed_decision_requires_execution', stages: { detect: 'completed', decide: 'pending',
         execute: 'pending', verify: 'pending', report: 'saved', learn: 'pending' },
       route: origin === 'codex-automation' ? 'actions' : 'owner-session',
       selected: observation.execution_boundary.stopped || (origin === 'codex-automation' ? observation.execution_boundary.actions_stopped : observation.execution_boundary.owner_session_stopped) ? null : ranked.find(c => c.priority !== null) ?? null,

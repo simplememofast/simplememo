@@ -14,6 +14,7 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
   'scripts/lib/decision-origin.mjs', 'scripts/decision-monitor-local.py',
+  'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
@@ -47,14 +48,14 @@ export function verifyPullBinding(pr, run, branch, head) {
   assert.equal(pr?.head?.sha, head, 'run PR does not contain the checked head');
 }
 
-export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT }) {
+export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false }) {
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
   const metrics = JSON.parse(git('show', `${baseRef}:data/value-metrics.json`));
   const files = git('diff', '--name-only', base, head).split('\n').filter(Boolean);
   const forbidden = files.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/'));
   if (forbidden.length) throw new Error(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
-  if (!required(branch, files, metrics)) return { state: 'not_required' };
+  if (!requireContract && !required(branch, files, metrics)) return { state: 'not_required' };
   const intents = files.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
   if (intents.length !== 1) throw new Error('exactly one prospective decision contract is required');
   const c = JSON.parse(git('show', `${head}:${intents[0]}`));
