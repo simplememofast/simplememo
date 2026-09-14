@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {atomicJson,privateState,opportunities,auditObservation} from './company-loop.mjs';
 import {currentAutomationAssessment} from './company-automation-health.mjs';
+import {recordAutomationDiagnosis} from './company-automation-diagnoses.mjs';
 
 const now=new Date('2026-09-14T07:00:00Z');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
@@ -33,6 +34,103 @@ function fixture(t) {
   };
   save();return {stateRoot,row,job,rawFile,metaFile,save,assess:()=>currentAutomationAssessment(job,now,stateRoot)};
 }
+
+function reviewedVfu(t) {
+  const f=fixture(t);f.row.job_name='vfu_regular';f.row.latest_reason='daily_cap_reached';
+  f.job.id='cloudflare:simplememo-api:vfu_regular';f.job.name='vfu_regular';f.save();
+  const file=name=>path.join(f.stateRoot,name),source=file('sanitized-source.json'),investigation=file('investigation.json'),evidence=file('review.json');
+  atomicJson(source,{findings:'Example provider rejects a test domain; no replay performed.'});
+  const p={schema_version:1,job_id:f.job.id,failure_finished_at_ms:f.row.last_failure,checked_at:'2026-09-14T06:57:00Z',
+    findings:['The retained failure has been inspected; no safe replay or repair is justified.'],
+    sources:[{path:'sanitized-source.json',sha256:hash(fs.readFileSync(source))}],no_send_or_cron_trigger:true,disposition:'no_safe_action'};
+  atomicJson(investigation,p);
+  const r={schema_version:1,job_id:f.job.id,failure_finished_at_ms:f.row.last_failure,reviewed_at:'2026-09-14T06:58:00Z',
+    review_after:'2026-09-14T07:30:00Z',decision:'reviewed_no_safe_action',rationale:'The existing owner is retained; no safe immediate repair is justified by these findings.',
+    next_condition:'Inspect a new failure, changed owner result, invalid evidence or expiration of this review.',
+    investigation:{path:'investigation.json',sha256:hash(fs.readFileSync(investigation))}};
+  atomicJson(evidence,r);
+  const history={schema_version:1,reviews:[{id:f.job.id,classification:'existing_residual_outcomes',evidence:['old.json'],observed_result:{errors:6}},
+    {id:'unrelated',classification:'permission_limit'}]};
+  atomicJson(file('failure-classifications.json'),history);atomicJson(file('automation-registry.json'),{jobs:[f.job]});
+  return {...f,r,p,source,investigation,evidence,history,file,
+    record:()=>recordAutomationDiagnosis({stateRoot:f.stateRoot,evidenceFile:evidence,now}),
+    editReview:patch=>{Object.assign(r,patch);atomicJson(evidence,r);}};
+}
+
+test('exact investigated VFU failure no longer monopolizes selection, while history and other opportunities remain intact',t=>{
+  const f=reviewedVfu(t),before=JSON.stringify(f.job);assert(f.assess().needs_diagnosis);
+  const first=f.record();assert.equal(first.status,'recorded');assert.equal(f.record().status,'already_recorded');
+  const assessment=f.assess();assert.equal(assessment.state,'reviewed_no_safe_action');assert.equal(assessment.needs_diagnosis,false);
+  const stored=JSON.parse(fs.readFileSync(f.file('failure-classifications.json')));
+  const {decisions,...kept}=stored.reviews[0];assert.deepEqual(kept,f.history.reviews[0]);assert.deepEqual(stored.reviews[1],f.history.reviews[1]);
+  assert.equal(decisions.length,1);assert.equal(JSON.stringify(f.job),before);
+  const other={...f.job,id:'other-owner'},o={observed_at:now.toISOString(),automation:{failures:[f.job,other],discovery_gaps:[]},growth:{},failures:[]};
+  const original=opportunities(o);f.job.current_assessment=assessment;
+  assert.deepEqual(opportunities(o),original.filter(c=>c.id!=='diagnose:'+f.job.id));
+  assert.equal(auditObservation(o).unreliable_automations.length,2);
+  assert.equal(fs.statSync(f.file('failure-classifications.json')).mode&0o777,0o600);
+});
+
+test('new failures, expiry, failing, active or unknown owner outcomes reopen reviewed VFU diagnosis',t=>{
+  const f=reviewedVfu(t);f.record();const original=structuredClone(f.row);
+  for(const patch of [{last_failure:f.row.last_failure+1},{latest_errors:1},{latest_errors:null},{latest_thrown:1},
+    {latest_eligible:1},{latest_sent:1},{latest_reason:'no_eligible'},{latest_reason:null},{cron_expression:'*/30 * * * *'},
+    {latest_finished:null},{last_no_error:f.row.last_no_error-1}]) {
+    Object.assign(f.row,original,patch);f.save();assert(f.assess().needs_diagnosis,JSON.stringify(patch));
+  }
+  Object.assign(f.row,original);f.save();
+  assert(currentAutomationAssessment(f.job,new Date('2026-09-14T07:30:00Z'),f.stateRoot).needs_diagnosis);
+  assert.equal(currentAutomationAssessment({...f.job,id:'other-owner'},now,f.stateRoot).needs_diagnosis,true);
+});
+
+test('diagnosis cannot be forged by cached flags, altered investigation, nonprivate evidence or stale receipts',t=>{
+  const f=reviewedVfu(t);f.record();
+  fs.appendFileSync(f.source,'\n');assert(f.assess().needs_diagnosis);
+  atomicJson(f.source,{findings:'Example provider rejects a test domain; no replay performed.'});assert.equal(f.assess().needs_diagnosis,false);
+  fs.chmodSync(f.source,0o644);assert(f.assess().needs_diagnosis);fs.chmodSync(f.source,0o600);
+  f.job.health.failures_30d=0;assert(f.assess().needs_diagnosis);f.job.health.failures_30d=1;
+  const file=f.file('failure-classifications.json'),d=JSON.parse(fs.readFileSync(file));
+  d.reviews[0].decisions[0].review.rationale='Forged extension of the old diagnosis to hide a new issue.';atomicJson(file,d);assert(f.assess().needs_diagnosis);
+});
+
+test('writer requires a current investigation, preserves immutable decisions and bounds the review period',t=>{
+  const f=reviewedVfu(t),original=structuredClone(f.r);
+  for(const patch of [{decision:'recovered'},{job_id:'other-owner'},{failure_finished_at_ms:1},{rationale:'ok'},
+    {reviewed_at:'2026-09-14T07:01:00Z'},{reviewed_at:'2026-09-14T06:56:00Z'},
+    {review_after:'2026-09-15T07:00:00Z'},{review_after:'2026-09-14T06:59:00Z'}]) {
+    f.editReview({...original,...patch});assert.throws(f.record,undefined,JSON.stringify(patch));
+  }
+  f.editReview(original);f.record();f.editReview({review_after:'2026-09-14T08:00:00Z'});assert.throws(f.record,/overwritten|extended/);
+  f.editReview(original);atomicJson(f.file('automation-registry.json'),{jobs:[]});assert.throws(f.record,/current job/);
+});
+
+test('a later actual investigation can append a renewal without erasing the expired decision',t=>{
+  const f=reviewedVfu(t);f.record();
+  f.p.checked_at='2026-09-14T07:31:00Z';atomicJson(f.investigation,f.p);
+  f.editReview({reviewed_at:'2026-09-14T07:32:00Z',review_after:'2026-09-14T08:00:00Z',
+    investigation:{path:'investigation.json',sha256:hash(fs.readFileSync(f.investigation))}});
+  // A renewal uses separate evidence files; never overwrite the first proof.
+  atomicJson(f.file('renewal.json'),f.p);
+  f.editReview({investigation:{path:'renewal.json',sha256:hash(fs.readFileSync(f.file('renewal.json')))}});
+  f.p.checked_at='2026-09-14T06:57:00Z';atomicJson(f.investigation,f.p);
+  const later=new Date('2026-09-14T07:33:00Z');
+  assert.equal(recordAutomationDiagnosis({stateRoot:f.stateRoot,evidenceFile:f.evidence,now:later}).status,'recorded');
+  const saved=JSON.parse(fs.readFileSync(f.file('failure-classifications.json')));assert.equal(saved.reviews[0].decisions.length,2);
+  assert.equal(currentAutomationAssessment(f.job,later,f.stateRoot).needs_diagnosis,false);
+});
+
+test('a new hash and review date cannot renew an old investigation in writes or readback',t=>{
+  const f=reviewedVfu(t);f.record();
+  atomicJson(f.file('old-investigation-reformatted.json'),{...f.p,note:'Formatting or supplementary text is not a new investigation.'});
+  f.editReview({reviewed_at:'2026-09-14T07:32:00Z',review_after:'2026-09-14T08:00:00Z',
+    investigation:{path:'old-investigation-reformatted.json',sha256:hash(fs.readFileSync(f.file('old-investigation-reformatted.json')))}});
+  const later=new Date('2026-09-14T07:33:00Z');
+  assert.throws(()=>recordAutomationDiagnosis({stateRoot:f.stateRoot,evidenceFile:f.evidence,now:later}),/new investigation/);
+  const file=f.file('failure-classifications.json'),d=JSON.parse(fs.readFileSync(file));
+  d.reviews[0].decisions.push({schema_version:1,id:hash(JSON.stringify([f.r.job_id,f.r.failure_finished_at_ms,f.r.investigation.sha256])),
+    recorded_at:later.toISOString(),review_sha256:hash(JSON.stringify(f.r)),review:f.r});
+  atomicJson(file,d);assert.equal(currentAutomationAssessment(f.job,later,f.stateRoot).needs_diagnosis,true);
+});
 
 test('fresh original inactive monitor removes repeat diagnosis, retaining historical failures and other priorities',t=>{
   const f=fixture(t),before=JSON.stringify(f.job),assessment=f.assess();

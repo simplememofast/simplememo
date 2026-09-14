@@ -61,12 +61,13 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   const baseline = JSON.parse(fs.readFileSync(path.join(stateRoot, 'metrics-baseline.json')));
   const comparison = compareMetrics(baseline, o.formal_metrics);
   const payload = { growth: compactGrowth(o), comparison, human_touches: o.human_touches,
-    failures: o.automation.failures.map(j => ({ id: j.id, health: j.health })),
+    failures: o.automation.failures.map(j => ({ id: j.id, health: j.health, current_assessment:j.current_assessment })),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
   // Timestamps do not make unchanged evidence a new notification.
   const aio = structuredClone(payload.growth.aio);
   if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
+    diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
     next: payload.next?.id, search: payload.growth.search, aio,
     cta_measurement: payload.growth.cta_measurement,
     mentions:payload.growth.mentions?{status:payload.growth.mentions.status,sha256:payload.growth.mentions.evidence?.sha256,decisions:payload.growth.mentions.decisions}:null,

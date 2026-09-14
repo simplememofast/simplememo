@@ -12,6 +12,7 @@ import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/
 import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/company-goal-followup.mjs';
 import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
+import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagnoses.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -21,7 +22,9 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='cta-measurement') {
+if(command==='record-automation-diagnosis') {
+  result=recordAutomationDiagnosis({stateRoot,evidenceFile:option('evidence')});
+} else if(command==='cta-measurement') {
   result=companyCtaMeasurement({stateRoot});
 } else if(command==='record-cta-diagnosis') {
   result=recordCtaDiagnosis({stateRoot,evidenceFile:option('evidence')});
@@ -72,7 +75,7 @@ if(command==='cta-measurement') {
     const baseline = path.join(stateRoot, 'metrics-baseline.json');
     result = { metrics: o.formal_metrics?.metrics,
       comparison: fs.existsSync(baseline) && o.formal_metrics ? compareMetrics(JSON.parse(fs.readFileSync(baseline)), o.formal_metrics) : null,
-      human_touches: o.human_touches, active_failures: o.automation.failures.map(x => ({ id: x.id, health: x.health })),
+      human_touches: o.human_touches, active_failures: o.automation.failures.map(x => ({ id: x.id, health: x.health, current_assessment:x.current_assessment })),
       stage_observability:observabilityStatus({stateRoot}), source_failures: o.failures };
   } else if (['autonomy-audit', 'growth-audit'].includes(command)) result = auditObservation(o);
   else if (command === 'review') result = saveReview(o, { stateRoot, cadence: option('cadence', 'daily') });
