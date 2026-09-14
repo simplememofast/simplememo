@@ -3,6 +3,7 @@ import './company-search.test.mjs';
 import './daily-gsc-handoff.test.mjs';
 import './company-native-evidence.test.mjs';
 import './company-mentions.test.mjs';
+import './company-automation-health.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

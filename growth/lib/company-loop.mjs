@@ -11,6 +11,7 @@ import { growthFollowups } from './company-growth-followup.mjs';
 import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { companyMentions,mentionCandidates } from './company-mentions.mjs';
 import { mentionDecisions } from './company-mention-decisions.mjs';
+import { currentAutomationAssessment } from './company-automation-health.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -156,7 +157,8 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
     source_commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(),
     formal_metrics: metrics, human_touches: touches,
     automation: { registered: registry?.jobs.length ?? null, active_or_observed: running.length,
-      failures: registry?.jobs.filter(j => ['failure', 'FAILED', 'errors_observed'].includes(j.health?.state)) ?? [],
+      failures: registry?.jobs.filter(j => ['failure', 'FAILED', 'errors_observed'].includes(j.health?.state))
+        .map(j=>({...j,current_assessment:currentAutomationAssessment(j,now,stateRoot)})) ?? [],
       discovery_gaps: registry?.known_gaps ?? [],
       registry_generated_at: registry?.generated_at ?? null,
       note: 'Registry collection and individual source timestamps differ; historical errors do not establish a current incident.' },
@@ -193,7 +195,7 @@ export function opportunities(observation) {
   const candidates = [];
   const mentionInput=mentionCandidates(observation.growth.mentions,searchCandidates(observation.growth,defaults),defaults);
   candidates.push(...mentionInput.search,...mentionInput.candidates);
-  for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed')) {
+  for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed' && j.current_assessment?.needs_diagnosis!==false)) {
     candidates.push({ id: 'diagnose:' + job.id, kind: 'diagnose_automation', title: 'Diagnose ' + job.name,
       permission: 'AUTO', executable: true, owner: job.owner, evidence: [job.id, job.health],
       action_scope: 'Inspect current sanitized error evidence and existing owner; safe code repair only after confirmed cause',
@@ -229,7 +231,8 @@ export function auditObservation(o) {
     coverage_gaps: o.autonomy_ledger?.filter(t => t.automation_status === 'nobody').map(t => ({ id: t.id, task: t.task, next: t.next_improvement })) ?? [],
     manual_handoffs: o.autonomy_ledger?.filter(t => ['H3', 'H4', 'H5'].includes(t.human_touch.level)).map(t => ({ id: t.id, task: t.task, human_touch: t.human_touch })) ?? [],
     stage_measurement_gaps: o.autonomy_ledger?.filter(t => t.human_touch.level === null).length ?? null,
-    unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope })),
+    unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope,
+      current_assessment:j.current_assessment??null })),
     missing_followup: o.growth.experiments?.filter(e => e.status === 'RUNNING' && !e.evaluation_date).map(e => e.id) ?? [],
     due_experiments: o.growth.experiments?.filter(e => e.due).map(e => e.id) ?? [],
     report_only_handoffs: [

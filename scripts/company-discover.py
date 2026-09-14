@@ -119,12 +119,29 @@ process.stdout.write(JSON.stringify(d));"""
     return json.loads(run(['node', '--input-type=module', '-e', script], cwd=ROOT, timeout=90))
 
 
+CLOUDFLARE_HEALTH_SQL = """WITH recent AS (
+SELECT *, ROW_NUMBER() OVER (PARTITION BY job_name,cron_expression ORDER BY started_at DESC,id DESC) AS newest
+FROM cron_run_log WHERE started_at >= (unixepoch()-2592000)*1000
+)
+SELECT job_name,cron_expression,COUNT(*) AS runs,MAX(started_at) AS last_run,
+MAX(CASE WHEN COALESCE(errors,0)=0 AND last_error IS NULL THEN finished_at END) AS last_no_error,
+MAX(CASE WHEN errors>0 OR last_error IS NOT NULL THEN finished_at END) AS last_failure,
+SUM(CASE WHEN errors>0 OR last_error IS NOT NULL THEN 1 ELSE 0 END) AS failures,
+SUM(CASE WHEN sent>0 THEN 1 ELSE 0 END) AS runs_with_output,
+MAX(CASE WHEN newest=1 THEN finished_at END) AS latest_finished,
+MAX(CASE WHEN newest=1 THEN errors END) AS latest_errors,
+MAX(CASE WHEN newest=1 THEN CASE WHEN last_error IS NULL THEN 0 ELSE 1 END END) AS latest_thrown,
+MAX(CASE WHEN newest=1 THEN eligible END) AS latest_eligible,
+MAX(CASE WHEN newest=1 THEN sent END) AS latest_sent,
+MAX(CASE WHEN newest=1 THEN reason END) AS latest_reason
+FROM recent GROUP BY job_name,cron_expression"""
+
+
 def cloudflare_health():
     runbook = Path.home() / '.config/cloudflare/simplememo/RUNBOOK.md'
     if not runbook.is_file():
         raise ValueError('Read the existing Cloudflare runbook before diagnosis')
-    sql = "SELECT job_name,cron_expression,COUNT(*) AS runs,MAX(started_at) AS last_run,MAX(CASE WHEN COALESCE(errors,0)=0 AND last_error IS NULL THEN finished_at END) AS last_no_error,MAX(CASE WHEN errors>0 OR last_error IS NOT NULL THEN finished_at END) AS last_failure,SUM(CASE WHEN errors>0 OR last_error IS NOT NULL THEN 1 ELSE 0 END) AS failures,SUM(CASE WHEN sent>0 THEN 1 ELSE 0 END) AS runs_with_output FROM cron_run_log WHERE started_at >= (unixepoch()-2592000)*1000 GROUP BY job_name,cron_expression"
-    return json.loads(run([str(Path.home()/'.local/bin/simplememo-cf'),'observe','npx','wrangler@4.129.0','d1','execute','simplememo_reminders','--remote','--command',sql,'--json'], cwd=Path.home()/'simplememo-api',timeout=90))
+    return json.loads(run([str(Path.home()/'.local/bin/simplememo-cf'),'observe','npx','wrangler@4.129.0','d1','execute','simplememo_reminders','--remote','--command',CLOUDFLARE_HEALTH_SQL,'--json'], cwd=Path.home()/'simplememo-api',timeout=90))
 
 
 def main():
@@ -155,7 +172,9 @@ def main():
     if args.cloudflare:
         try:
             save(discovery/'cloudflare-cron-health.json', cloudflare_health())
-            save(discovery/'cloudflare-cron-health-meta.json', dict(observed_at=now, profile='observe', method='fixed aggregate SELECT', scope_days=30))
+            save(discovery/'cloudflare-cron-health-meta.json', dict(observed_at=dt.datetime.now(dt.timezone.utc).isoformat(),
+                profile='observe', method='fixed aggregate SELECT', scope_days=30, current_run_evidence_version=1,
+                raw_sha256=hashlib.sha256((discovery/'cloudflare-cron-health.json').read_bytes()).hexdigest()))
         except Exception:
             failures.append(dict(source='cloudflare-cron-health.json',state='refresh_failed',previous_receipt_retained=True))
     save(discovery / 'refresh.json', dict(observed_at=now, failures=failures))
