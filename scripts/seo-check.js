@@ -227,9 +227,15 @@ function checkFile(filePath) {
     warnings.push(`[SCHEMA] No structured data (JSON-LD): ${rel}`);
   }
 
-  // 6. OG tags
-  if (!content.includes('og:title')) {
-    warnings.push(`[OG] Missing og:title: ${rel}`);
+  // 6. Social previews need the full OG core and an explicit X card type.
+  // X title/description/image may legitimately fall back to their OG values.
+  for (const property of ['og:title', 'og:type', 'og:url', 'og:image']) {
+    if (!getMetaContent(content, 'property', property)?.trim()) {
+      errors.push(`[OG] Missing or empty ${property}: ${rel}`);
+    }
+  }
+  if (!getMetaContent(content, 'name', 'twitter:card')?.trim()) {
+    errors.push(`[TWITTER] Missing or empty twitter:card: ${rel}`);
   }
 
   // 7. Viewport
@@ -295,6 +301,16 @@ function checkFile(filePath) {
   // the markup would be one copied template away from spreading to every new
   // video page.
   for (const node of jsonLdNodes(content, rel)) {
+    const types = nodeTypes(node);
+    for (const prop of ['proficiencyLevel', 'dependencies']) {
+      if (node[prop] !== undefined && !types.includes('TechArticle')) {
+        errors.push(`[SCHEMA] ${prop} belongs to TechArticle: ${rel}`);
+      }
+    }
+    // Unrated testimonial summaries stay visible, but cannot be Review rich results.
+    if (types.includes('Review') && node.reviewRating?.ratingValue === undefined) {
+      errors.push(`[SCHEMA] Review missing required reviewRating.ratingValue: ${rel}`);
+    }
     if (!nodeTypes(node).includes('VideoObject')) continue;
     const name = node.name || node['@id'] || '(unnamed)';
     if (node.uploadDate === undefined) {
@@ -680,7 +696,8 @@ function main() {
 function runSelfTest() {
   const os = require('os');
   const failures = [];
-  const t = (name, cond) => { if (!cond) failures.push(name); };
+  let testCount = 0;
+  const t = (name, cond) => { testCount++; if (!cond) failures.push(name); };
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-check-selftest-'));
   /** Run checkFile over one synthetic page and return what it reported. */
@@ -700,6 +717,11 @@ function runSelfTest() {
     `<meta name="description" content="${'d'.repeat(120)}">`,
     '<link rel="canonical" href="https://simplememofast.com/">',
     '<meta name="viewport" content="width=device-width">',
+    '<meta property="og:title" content="Example">',
+    '<meta property="og:type" content="website">',
+    '<meta property="og:url" content="https://simplememofast.com/">',
+    '<meta property="og:image" content="https://simplememofast.com/og.png">',
+    '<meta name="twitter:card" content="summary_large_image">',
   ].join('');
   const page = (over = {}) => {
     const parts = { html: '<html lang="ja">', head, body: '<body></body>', ...over };
@@ -710,6 +732,19 @@ function runSelfTest() {
   // A page with nothing wrong must stay quiet — otherwise every assertion
   // below could be passing on noise rather than on the gate under test.
   t('揃ったページは何も言わない', report(page()).errors.length === 0);
+
+  for (const property of ['og:title', 'og:type', 'og:url', 'og:image']) {
+    const tag = new RegExp(`<meta property="${property}"[^>]*>`);
+    t(`[OG] missing ${property} fails`, has(report(page({ head: head.replace(tag, '') })), '[OG]'));
+    t(`[OG] empty ${property} fails`, has(report(page({ head: head.replace(tag, `<meta property="${property}" content=" ">`) })), '[OG]'));
+  }
+  t('[TWITTER] missing card fails', has(report(page({ head: head.replace(/<meta name="twitter:card"[^>]*>/, '') })), '[TWITTER]'));
+  t('[OG] reversed attributes and single quotes work', !has(report(page({ head: head.replace('<meta property="og:image" content="https://simplememofast.com/og.png">', "<meta content='https://simplememofast.com/og.png' property='og:image'>") })), '[OG]'));
+  const withNode = (node) => page({ head: head + `<script type="application/ld+json">${JSON.stringify(node)}</script>` });
+  t('[SCHEMA] TechArticle properties on BlogPosting fail', has(report(withNode({ '@type': 'BlogPosting', dependencies: 'Xcode' })), '[SCHEMA]'));
+  t('[SCHEMA] co-typed technical blog is valid', report(withNode({ '@type': ['BlogPosting', 'TechArticle'], dependencies: 'Xcode', proficiencyLevel: 'Expert' })).errors.length === 0);
+  t('[SCHEMA] unrated review fails', has(report(withNode({ '@type': 'Review', reviewBody: 'Helpful' })), '[SCHEMA]'));
+  t('[SCHEMA] rated review passes', report(withNode({ '@type': 'Review', reviewRating: { '@type': 'Rating', ratingValue: 5 } })).errors.length === 0);
 
   t('[TITLE] title が無ければ落ちる', has(report(page({ head: head.replace('<title>t</title>', '') })), '[TITLE]'));
   t('[TITLE] title が空でも落ちる', has(report(page({ head: head.replace('<title>t</title>', '<title>  </title>') })), '[TITLE]'));
@@ -775,7 +810,7 @@ function runSelfTest() {
   fs.rmSync(dir, { recursive: true, force: true });
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 26 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト ${testCount} 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
