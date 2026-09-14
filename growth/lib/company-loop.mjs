@@ -8,6 +8,7 @@ import { companySearch, searchCandidates } from './company-search.mjs';
 import { isDue, validate as validateExperiments } from './ledger.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { growthFollowups } from './company-growth-followup.mjs';
+import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -136,6 +137,12 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
   const stop = attempt('emergency_stop', () => repoRead('data/emergency-stop.json'), failures);
   const connectionsPath = path.join(stateRoot, 'data/connections.json');
   const connections = attempt('private_growth_connections', () => read(connectionsPath), failures);
+  const consumer = appsflyerConsumerEvidence({stateRoot,now});
+  if(consumer.failures.length)failures.push({source:'native_consumer_evidence',state:'unavailable',reason:'native_evidence_unverified'});
+  if(connections?.appsflyer) {
+    connections.appsflyer.scheduled_consumer_verified=consumer.state==='verified';
+    connections.appsflyer.scheduled_consumer_evidence=consumer;
+  }
   const running = registry?.jobs.filter(j => ['scheduled', 'ACTIVE', 'enabled', 'loaded', 'observed'].includes(j.execution_state)) ?? [];
   return {
     schema_version: 1, observed_at: now.toISOString(), date_jst: jst(now), failures,
@@ -217,7 +224,12 @@ export function auditObservation(o) {
     unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope })),
     missing_followup: o.growth.experiments?.filter(e => e.status === 'RUNNING' && !e.evaluation_date).map(e => e.id) ?? [],
     due_experiments: o.growth.experiments?.filter(e => e.due).map(e => e.id) ?? [],
-    report_only_handoffs: ['AppsFlyer manual collector until scheduled consumer is verified', 'Historical mention suggestions require current canonical selector execution'],
+    report_only_handoffs: [
+      ...(o.growth.connections?.appsflyer?.consumer_integrated===true &&
+        o.growth.connections.appsflyer.scheduled_consumer_evidence?.state==='verified' ? [] :
+        ['AppsFlyer daily consumer configuration or original scheduled execution remains unverified']),
+      'Historical mention suggestions require current canonical selector execution'],
+    handoff_evidence: {appsflyer:o.growth.connections?.appsflyer?.scheduled_consumer_evidence ?? null},
     discovery_gaps: o.automation.discovery_gaps,
     source_failures: o.failures,
     opportunities: opportunities(o),

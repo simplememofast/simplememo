@@ -1,11 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {execFileSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
 import {privateState,atomicJson,acquireLock} from './company-loop.mjs';
 import {nativeOrigin} from './company-origin.mjs';
 import {evaluateOperationalFollowup} from './company-followup.mjs';
+import {nativeCollections,nativeThread} from './company-native-evidence.mjs';
 
 const CONTRACT='docs/autonomy/RESIDUAL_OPERATIONS_GOAL.md';
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
@@ -39,37 +38,6 @@ export function registerGoalFollowup({stateRoot,experimentId,thread=process.env.
     atomicJson(file,entry);return {status:'registered',target:entry};
   } finally {release();}
 }
-function nativeThread(thread) {
-  return JSON.parse(execFileSync('python3',[fileURLToPath(new URL('../../scripts/codex-routine-observer.py',import.meta.url)),'--thread-state',thread],
-    {encoding:'utf8',timeout:10000,stdio:['ignore','pipe','pipe']}));
-}
-function observations(root,e,now,readThread) {
-  const dir=path.join(root,'data/collection-events');
-  if(!fs.existsSync(dir))return {rows:[],failures:[]};
-  const candidates=fs.readdirSync(dir).filter(f=>f.endsWith('.json')).map(f=>({file:f,event:read(path.join(dir,f))}))
-    .filter(({event:v})=>v?.native_origin?.state==='native_execution_record' && v.native_origin.automation_id==='obsidian' &&
-      !(Number.isFinite(instant(v.observed_at)) && instant(v.observed_at)<instant(e.date)));
-  const rows=[],failures=[],states=new Map();
-  if(new Set(candidates.map(x=>x.event.native_origin.thread_id)).size>64)throw new Error('Native evidence scope exceeds bounded inspection; do not sample the denominator');
-  for(const row of candidates) {
-    const v=row.event,source=v.native_origin,at=instant(v.observed_at);
-    try {
-      if(v.schema_version!==1 || !Number.isFinite(at) || at>now.getTime() || !Array.isArray(v.receipts) ||
-        !UUID.test(source.thread_id??'') || !UUID.test(source.original_turn_id??'') || !/^[a-f0-9]{64}$/.test(source.gate_receipt_sha256??'')) throw new Error('Invalid native claim');
-      if(!states.has(source.thread_id)) {
-        try {states.set(source.thread_id,readThread(source.thread_id));} catch {states.set(source.thread_id,null);}
-      }
-      const state=states.get(source.thread_id),first=state?.original_turn,gate=state?.gate_receipt;
-      const end=first?.finished_at===null && first.state==='in_progress'?now.getTime():instant(first?.finished_at);
-      if(state?.thread_id!==source.thread_id || state.automation_id!=='obsidian' || state.original_turn_id!==source.original_turn_id ||
-        first?.turn_id!==source.original_turn_id || gate?.admitted!==true || gate.thread_id!==source.thread_id ||
-        gate.turn_id!==source.original_turn_id || gate.sha256!==source.gate_receipt_sha256 ||
-        !(instant(first.started_at)<=instant(gate.observed_at) && instant(gate.observed_at)<=at && at<=end && at<=instant(state.observed_at))) throw new Error('Native source mismatch');
-      rows.push({...row,native_transcript_sha256:state.transcript_sha256});
-    } catch {failures.push({file:row.file,reason:'native_origin_unavailable_or_mismatched'});}
-  }
-  return {rows:rows.sort((a,b)=>instant(a.event.observed_at)-instant(b.event.observed_at) || a.file.localeCompare(b.file)),failures};
-}
 // This prepares a tool handoff. It never invokes a model, sends a message or changes Goal status.
 export function goalWake({stateRoot,now=new Date(),reserve=false,origin=nativeOrigin,readThread=nativeThread}={}) {
   const root=privateState(stateRoot),file=path.join(root,'goal-followup-target.json');
@@ -78,7 +46,7 @@ export function goalWake({stateRoot,now=new Date(),reserve=false,origin=nativeOr
   if(!['IN_PROGRESS','BLOCKED'].includes(goal.status))return{status:'goal_not_pending'};
   const target=read(file);
   if(target.schema_version!==1 || target.contract!==CONTRACT || target.target_thread_id!==goal.native_goal_thread || target.expected_owner!=='obsidian') throw new Error('Goal handoff target mismatch');
-  const e=experiment(root,target.experiment_id), {rows,failures}=observations(root,e,now,readThread);
+  const e=experiment(root,target.experiment_id), {rows,failures}=nativeCollections({stateRoot:root,since:e.date,now,readThread});
   // Do not improve a rate by silently dropping unverified claimed native runs.
   if(failures.length)return {status:'native_evidence_unverified',failures,natural_events:rows.length};
   const eligible=rows.map(x=>x.event);
