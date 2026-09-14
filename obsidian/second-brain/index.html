@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/second-brain/">
+  <title>Obsidianでセカンドブレインを作る — PARAの4フォルダとリンクの実装例 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="ObsidianでPARAを始める実装手順。4つのフォルダ、発表用ノート、内部リンク、Archiveへの移動をMac版の実画面で解説。CODEの記入例と手動Markdownひな形も紹介。チェック状態と移動後のリンクを確かめる手順まで、プラグイン追加なしで試せます。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidianでセカンドブレインを作る — PARAの4フォルダとリンクの実装例">
+  <meta property="og:description" content="ObsidianでPARAを始める実装手順。4つのフォルダ、発表用ノート、内部リンク、Archiveへの移動をMac版の実画面で解説。CODEの記入例と手動Markdownひな形も紹介。チェック状態と移動後のリンクを確かめる手順まで、プラグイン追加なしで試せます。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-15T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/second-brain/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidianでセカンドブレインを作る — PARAの4フォルダとリンクの実装例">
+  <meta name="twitter:description" content="ObsidianでPARAを始める実装手順。4つのフォルダ、発表用ノート、内部リンク、Archiveへの移動をMac版の実画面で解説。CODEの記入例と手動Markdownひな形も紹介。チェック状態と移動後のリンクを確かめる手順まで、プラグイン追加なしで試せます。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <link rel="canonical" href="https://simplememofast.com/obsidian/second-brain/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=beeac7c9bb">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.journal-sample{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.journal-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.journal-note{color:var(--text-secondary);font-size:.9rem}</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "@id": "https://simplememofast.com/obsidian/second-brain/#article", "inLanguage": "ja", "headline": "Obsidianでセカンドブレインを作る — PARAの4フォルダとリンクの実装例", "description": "ObsidianでPARAを始める実装手順。4つのフォルダ、発表用ノート、内部リンク、Archiveへの移動をMac版の実画面で解説。CODEの記入例と手動Markdownひな形も紹介。チェック状態と移動後のリンクを確かめる手順まで、プラグイン追加なしで試せます。", "url": "https://simplememofast.com/obsidian/second-brain/", "datePublished": "2026-09-15", "dateModified": "2026-09-15", "author": {"@type": "Person", "name": "AI Ataka", "url": "https://simplememofast.com/about/"}, "publisher": {"@type": "Organization", "name": "Obsidian連携シンプルメモ", "url": "https://simplememofast.com/"}, "image": "https://simplememofast.com/assets/img/og/obsidian-second-brain.png"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"}, {"@type": "ListItem", "position": 2, "name": "Obsidian", "item": "https://simplememofast.com/obsidian/"}, {"@type": "ListItem", "position": 3, "name": "セカンドブレイン", "item": "https://simplememofast.com/obsidian/second-brain/"}]}</script>
+<style>.para-body{line-height:1.95}.para-body h2{font-size:clamp(1.45rem,4vw,2rem);margin:3rem 0 1rem;line-height:1.5}.para-body h3{margin:1.8rem 0 .7rem}.para-body p{margin:1rem 0}.para-body a{color:var(--accent)}.para-body pre{overflow-x:auto;padding:1.2rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:.86rem;line-height:1.7}.para-body code{overflow-wrap:anywhere}.para-body pre code{overflow-wrap:normal}.para-body img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--border);margin:1.5rem auto}.para-body ul,.para-body ol{padding-left:1.5rem}.para-body th,.para-body td{text-align:left;border-bottom:1px solid var(--border);padding:.8rem;min-width:130px}.para-body table{border-collapse:collapse;width:100%}.para-body .table-wrap{overflow-x:auto}.para-toc{padding:1rem 1.25rem;border:1px solid var(--border);border-radius:12px}.para-toc a{display:block;padding:.4rem 0}.para-body h2{scroll-margin-top:80px}</style><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "プラグインは必要ですか？", "acceptedAnswer": {"@type": "Answer", "text": "この記事のフォルダ・チェック項目・内部リンク・移動の例では、コミュニティプラグインを追加していません。自動分類や外部サービスとの同期は扱っていません。"}}, {"@type": "Question", "name": "既存のメモを全部PARAに移す必要はありますか？", "acceptedAnswer": {"@type": "Answer", "text": "この手順では、一つの練習用プロジェクトから始められます。既存ノートを移す場合は、バックアップを用意し、少数で移動とリンクの動きを確認してから進めてください。"}}, {"@type": "Question", "name": "ProjectsとResourcesのどちらに置くか迷います。", "acceptedAnswer": {"@type": "Answer", "text": "いま進める発表の原稿ならProjects、ほかの発表にも使う一般的な資料ならResources、という分け方ができます。原稿側から資料へリンクすれば、同じ本文を両方へコピーせず参照できます。"}}, {"@type": "Question", "name": "グラフを作ればセカンドブレインは完成しますか？", "acceptedAnswer": {"@type": "Answer", "text": "リンクの表示だけでは、資料を必要な場面で使えるかは分かりません。まずは作業ノートから資料へ進み、要点を一つ原稿へ戻せるか試してみてください。今回の操作確認から、記憶力や生産性の向上は判断していません。"}}]}</script></head>
+<body>
+<nav class="global-nav" aria-label="Global navigation"><div class="global-nav__inner"><a href="/" class="global-nav__logo"><img src="/assets/img/app-icon-56.png" alt="" width="28" height="28"><span>Obsidian連携シンプルメモ</span></a><ul class="global-nav__links"><li><a href="/guides/">使い方</a></li><li><a href="/use-cases/">活用事例</a></li><li><a href="/vs/">比較</a></li><li><a href="/blog/">ブログ</a></li><li><a href="/about/">開発者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8">ダウンロード</a></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px"><header class="lp-hero"><div class="lp-hero__label">Obsidian · PARA実装ガイド</div><h1 class="lp-hero__title">Obsidianでセカンドブレインを作る<br>4フォルダとリンクで始めるPARA</h1><p class="lp-hero__sub">進行中の作業と、あとで使う資料をつなぐ。発表ノートを例に、作成からArchiveへの移動までを実画面で紹介します。</p><p class="article-meta">著者: <a href="/about/">AI Ataka</a> ・ 公開・確認: <time datetime="2026-09-15">2026年9月15日</time></p></header><nav class="para-toc" aria-label="この記事の目次"><a href="#folders">4フォルダを作る</a><a href="#project">発表用ノートを書く</a><a href="#links">資料へリンクする</a><a href="#archive">Archiveへ移す</a><a href="#starter">手動ひな形を使う</a></nav><div class="para-body"><p>メモは増えたのに、次の作業で使う資料が見つからない。そんなときは、Obsidianの保管庫に「いま進めていること」と「あとで参照すること」の置き場を作ってみましょう。</p>
+<p>この記事では、発表の準備を例に、4つのフォルダ、作業用ノート、関連資料へのリンクを用意します。最初に作るのは小さな一組だけです。すでにあるノートを一度に分類し直す必要はありません。</p>
+<p>操作例は2026年9月15日、Mac版Obsidian 1.13.7の検証用保管庫で確認しました。画面の予定や文章は架空のサンプルです。フォルダ、チェック項目、内部リンク、Archiveへの移動を実際に操作しています。</p>
+<h2 id="concept">セカンドブレイン・CODE・PARAの役割</h2>
+<p>セカンドブレインは、あとで使う情報を自分の外に残し、仕事や学習で取り出すための考え方です。Tiago ForteのCODEは、Capture（集める）、Organize（整理する）、Distill（要点を取り出す）、Express（形にする）の流れを示します。<a href="https://fortelabs.com/blog/basboverview/">Forte Labsの解説</a></p>
+<p>PARAは情報の置き場を4種類に分ける方法です。Projectsは目標のある進行中の活動、Areasは継続して面倒を見る責任領域、Resourcesは関心のある資料、Archivesは現在は使っていない項目を置く場所です。<a href="https://fortelabs.com/blog/para/">PARAの原著者による説明</a></p>
+<p>ここではこの考え方を、Obsidianのフォルダとノートで試します。CODE全体を自動化する設定ではありません。考え方やメモの入口から見直したい場合は、<a href="/methods/second-brain/">セカンドブレインの作り方</a>も参照してください。</p>
+<h2 id="folders">1. 保管庫に4つのフォルダを作る</h2>
+<p>試しに作る場合は、練習用の保管庫を用意すると元のノートに影響しません。初めて使う場合は<a href="/obsidian/getting-started/">Obsidianの始め方</a>から進められます。</p>
+<p>ファイル一覧で新しいフォルダを作り、次の名前を付けます。今回の実画面に合わせ、Archivesに相当するフォルダ名は単数形の<code>Archive</code>を使います。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>フォルダ</th>
+<th>今回入れるもの</th>
+<th>迷ったときの判断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Projects</td>
+<td>発表の準備ノート</td>
+<td>完了したと判断できる目標があるか</td>
+</tr>
+<tr>
+<td>Areas</td>
+<td>文章を書くときに保ちたい基準</td>
+<td>特定の発表が終わっても続けることか</td>
+</tr>
+<tr>
+<td>Resources</td>
+<td>発表前に読むチェックリスト</td>
+<td>必要な場面で参照する資料か</td>
+</tr>
+<tr>
+<td>Archive</td>
+<td>現在は取り組まないノート</td>
+<td>手元には残すが、進行中の一覧から外したいか</td>
+</tr>
+</tbody>
+</table></div>
+<p>たとえば「文章を書く」は続いていく活動ですが、「10月1日の発表原稿を仕上げる」には区切りがあります。前者の基準はAreasに、後者の作業はProjectsに置くと、次に開くノートを選びやすくなります。これは分類の一例なので、用途が違えば置き場を変えて構いません。</p>
+<h2 id="project">2. 発表用ノートに目標と次の作業を書く</h2>
+<p><code>Projects</code>の中に<code>Conference talk</code>というノートを作ります。実画面と対応させるため名前は英語ですが、自分の保管庫では日本語でも構いません。</p>
+<pre><code class="language-markdown"># Conference talk
+
+Target date: 2026-10-01
+
+- [ ] Draft outline
+- [ ] Rehearse
+
+Related area: [[Areas/Writing]]
+Reference: [[Resources/Presentation checklist]]
+</code></pre>
+<p><code>Draft outline</code>は構成案を作る作業、<code>Rehearse</code>は発表の練習です。自分の例に置き換えるときは、「準備する」のような広い言葉より、次に手を動かせる大きさで書いてみてください。</p>
+<p><img alt="Projects内の発表ノートに2つの未完了タスクと関連ノートへのリンクを表示したObsidianの実画面" src="/assets/img/obsidian-second-brain/project-open.png" width="984" height="768" loading="lazy" decoding="async"></p>
+<p><em>検証用保管庫の実画面。日付はサンプルの目標日で、実際の発表予定ではありません。</em></p>
+<p>チェック欄は読み取りビューなどでクリックできます。今回、構成案の欄をチェックすると、Markdownは<code>- [x] Draft outline</code>になり、ノートを開き直しても状態が残りました。練習の欄は未チェックのままです。フォルダを分けるだけでなく、ノートを開いたときに次の作業が見える形にします。</p>
+<h2 id="links">3. 基準と資料はリンクでつなぐ</h2>
+<p>次に<code>Areas/Writing</code>と<code>Resources/Presentation checklist</code>を作ります。前者には文章を書く際の基準、後者には発表前に確認する内容を入れます。以下は手動で使う記入例です。</p>
+<pre><code class="language-markdown"># Writing
+
+Ongoing standard: keep examples reproducible and sources attributable.
+
+Current project: [[Projects/Conference talk]]
+</code></pre>
+<p>この基準は「例を再現できるようにし、出典をたどれるようにする」という意味です。発表が変わっても使う基準として置いています。</p>
+<p>発表用ノートの<code>[[Areas/Writing]]</code>から、この基準へ移動できます。資料の本文を毎回コピーする代わりに、必要なときに開くリンクを置きます。今回の検証でも、発表ノートからWritingへ移動し、戻りのリンクを開けることを確認しました。</p>
+<p>Obsidianは<code>[[ノート名]]</code>の形式で内部リンクを作れます。同名ノートが複数ある場合は、フォルダを含む候補を選び、意図したノートが開くか確認してください。<a href="https://obsidian.md/help/links">内部リンクの公式説明</a></p>
+<h2 id="distill">4. 使う場面で要点を取り出す</h2>
+<p>資料を置いたら、実際の作業で一度使ってみます。発表なら、チェックリストを開いて「今回の構成案で直す点」を発表用ノートへ短く書きます。</p>
+<p>たとえば、次のような記入が考えられます。</p>
+<pre><code class="language-markdown">## 今回使う要点
+- 冒頭で、聞き手に持ち帰ってほしい問いを一つ示す。
+- 操作例には、その結果を確認できる画面を添える。
+
+## 次の作業
+- [ ] 導入の段落を3文で書く。
+</code></pre>
+<p>これは本文用に作った提案で、実画面に写る操作結果ではありません。資料を集めたあと、要点を選び、自分の原稿へ使う流れの例です。CODEのDistillとExpressを意識するときも、まずは「資料から一つ選び、いま作っているものに使う」小さな作業から始められます。</p>
+<h2 id="archive">5. Archiveへ移し、リンクを開き直す</h2>
+<p>終わった作業や、いったん取り組まない作業は、進行中の一覧から外せます。Obsidian内で対象ノートのメニューを開き、移動コマンドから<code>Archive</code>を選びます。操作名や表示位置は言語・バージョンにより異なる場合があります。<a href="https://obsidian.md/help/manage-notes">ノート管理の公式説明</a></p>
+<p>今回の移動では「2ファイル内の2リンク」を更新する確認が出たため、その回の更新を選びました。常時自動更新の設定は変更していません。</p>
+<p><img alt="Writingノートに発表ノートへのリンクが残り、2ファイルの2リンクを更新したと表示された実画面" src="/assets/img/obsidian-second-brain/archive-links-updated.png" width="984" height="768" loading="lazy" decoding="async"></p>
+<p><em>移動直後の実画面。更新されたリンクからArchive内の発表ノートを開き直し、チェック状態も確認しました。</em></p>
+<p>移動後は次の3点を確認します。</p>
+<ol>
+<li>発表ノートがArchiveにあり、Projectsの元の場所から移動している。</li>
+<li>Writingや資料側から、移動した発表ノートを開ける。</li>
+<li>ノートの本文やチェック状態が残っている。</li>
+</ol>
+<p>画面例では移動動作を試しただけで、発表が完了したわけではありません。チェック欄が残っていても移動はできるため、「移動できた」と「作業が終わった」は自分で分けて判断します。</p>
+<h2 id="review">運用を始めたら、何を見返す？</h2>
+<p>まずは一つのプロジェクトで使い、作業を始めるときにProjectsを開いてみてください。次の行動が分からなければ、ノートの末尾に一つ書き足します。資料へのリンクが増えすぎたら、今回使うものだけを本文の近くに置きます。</p>
+<p>週末など自分で決めたタイミングで、終わったもの、保留するもの、次も使う資料を見直す方法もあります。これは運用の提案で、決まった見直し頻度による効果を測った結果ではありません。</p>
+<p>日々の記録を先に残しておきたい場合は、<a href="/obsidian/journaling/">Obsidianでジャーナリング</a>の手動ひな形も使えます。外出先で残すメモと、机で整理するノートを分けたいときは、<a href="/methods/second-brain/">メモの入口からObsidianへつなぐ考え方</a>を参照してください。</p>
+<h2 id="faq">よくある質問</h2>
+<h3>プラグインは必要ですか？</h3>
+<p>この記事のフォルダ・チェック項目・内部リンク・移動の例では、コミュニティプラグインを追加していません。自動分類や外部サービスとの同期は扱っていません。</p>
+<h3>既存のメモを全部PARAに移す必要はありますか？</h3>
+<p>この手順では、一つの練習用プロジェクトから始められます。既存ノートを移す場合は、バックアップを用意し、少数で移動とリンクの動きを確認してから進めてください。</p>
+<h3>ProjectsとResourcesのどちらに置くか迷います。</h3>
+<p>いま進める発表の原稿ならProjects、ほかの発表にも使う一般的な資料ならResources、という分け方ができます。原稿側から資料へリンクすれば、同じ本文を両方へコピーせず参照できます。</p>
+<h3>グラフを作ればセカンドブレインは完成しますか？</h3>
+<p>リンクの表示だけでは、資料を必要な場面で使えるかは分かりません。まずは作業ノートから資料へ進み、要点を一つ原稿へ戻せるか試してみてください。今回の操作確認から、記憶力や生産性の向上は判断していません。</p>
+<h2 id="sources">参考資料と確認範囲</h2>
+<ul>
+<li><a href="https://fortelabs.com/blog/basboverview/">Forte Labs — Building a Second Brain</a></li>
+<li><a href="https://fortelabs.com/blog/para/">Forte Labs — PARA</a></li>
+<li><a href="https://obsidian.md/help/links">Obsidian — Internal links</a></li>
+<li><a href="https://obsidian.md/help/manage-notes">Obsidian — Manage notes</a></li>
+</ul>
+<p>資料確認日：2026年9月15日。実操作の範囲はMac版Obsidian 1.13.7の検証用保管庫です。CODEの長期運用、プラグイン、自動配送、複数端末の同期、生産性への効果は今回の検証に含みません。</p><section id="starter"><h2>手動ひな形をダウンロードする</h2><p><a href="/assets/templates/obsidian-para-starter.zip" download>PARA練習用Markdownをダウンロード（ZIP）</a></p><p>ZIPを展開するとProjects・Areas・Resources・Archiveと案内ファイルが入っています。新しい練習用保管庫へフォルダをコピーするか、各Markdownの本文を対応するノートへ貼り付けて使ってください。既存ノートと同名の場合は上書きせず、別の保管庫で試してください。</p><p>日付と本文は固定のサンプルです。ダウンロードしても、自動で日付が変わったり、保管庫へ取り込まれたりはしません。実画面とは別に作った手動ひな形で、読者の端末での取り込みや同期は未検証です。</p></section><p style="font-size:.9rem;color:var(--text-secondary)">本サイトは株式会社ユリカが運営し、独立アプリ「Obsidian連携シンプルメモ」を紹介しています。Obsidian公式の記事ではありません。</p><aside class="next-step"><a data-next-step="explore" href="/obsidian/">iPhoneからObsidianへメモを残す設定を見る</a></aside></div></article></main><footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">プロダクト</p><a href="/download/" class="footer__link">ダウンロード</a><a href="/" class="footer__link">ホーム</a><a href="/obsidian/" class="footer__link">Obsidian連携</a></div><div class="footer__col"><p class="footer__col-title">比較・乗り換え</p><a href="/vs/" class="footer__link">比較</a><a href="/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">サポート</p><a href="/about/" class="footer__link">開発者について</a><a href="/faq" class="footer__link">FAQ</a><a href="/privacy" class="footer__link">プライバシー</a></div></nav><p class="footer__copyright">© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p></div></footer>
+<script>
+window.addEventListener('load', function() {
+  if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+  var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+  ric(function() {
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+    s.async = true;
+    document.head.appendChild(s);
+    s.onload = function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    };
+  });
+});
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>
