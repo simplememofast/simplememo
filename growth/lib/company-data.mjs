@@ -9,6 +9,7 @@ import { unseal } from './analytics-envelope.mjs';
 import { ROOT } from './company-metrics.mjs';
 import { privateState, atomicJson, boundedRead, acquireLock } from './company-loop.mjs';
 import { nativeOrigin } from './company-origin.mjs';
+import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { appleAdsConnection } from './company-connection-evidence.mjs';
 import { collectDailyGsc } from './company-daily-gsc.mjs';
 import { retainedDaily } from './daily-gsc-handoff.mjs';
@@ -169,7 +170,7 @@ export function collectAnalytics({ stateRoot, report = 'ga4-funnel', now = new D
   return receipt;
 }
 
-export function connectionView({ stateRoot, now = new Date() } = {}) {
+export function connectionView({ stateRoot, now = new Date(), readThread } = {}) {
   const data = path.join(stateRoot, 'data');
   const values = fs.readdirSync(path.join(data, 'collection-receipts')).filter(n => n.endsWith('.json')).map(n => read(path.join(data, 'collection-receipts', n)));
   const newest = source => values.filter(v => v.source === source).sort((a, b) => b.window.end.localeCompare(a.window.end))[0];
@@ -182,12 +183,8 @@ export function connectionView({ stateRoot, now = new Date() } = {}) {
   const af = connection('appsflyer');
   const integration=path.join(stateRoot,'scheduler-integration.json');
   af.consumer_integrated=fs.existsSync(integration)&&read(integration).integration_present===true;
-  const eventDirectory=path.join(data,'collection-events');
-  af.scheduled_consumer_verified=fs.existsSync(eventDirectory)&&fs.readdirSync(eventDirectory).filter(f=>f.endsWith('.json')).some(f=>{
-    const e=read(path.join(eventDirectory,f));
-    return e.native_origin?.state==='native_execution_record'&&e.native_origin.automation_id==='obsidian'
-      &&e.receipts.some(r=>r.source==='appsflyer'&&r.receipt.status==='verified');
-  });
+  af.scheduled_consumer_evidence=appsflyerConsumerEvidence({stateRoot,now,readThread});
+  af.scheduled_consumer_verified=af.scheduled_consumer_evidence.state==='verified';
   if (af.evidence) {
     try {
       const result = verifyAppsFlyer(af.evidence); af.quality = result.quality; af.population = result.population;
