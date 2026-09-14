@@ -556,10 +556,11 @@
         "scripts/recover-ingest.mjs",
         "data/credential-expiry.json"
       ],
-      "note": "**1行に潰さないために分けた。**旧行は「OAuth切れ・API障害時の自動復旧」で、機械が最後まで出来る側（API障害）と、人にしか出来ない側（再同意）が同じ1行に入っていた。混ぜると、どちらかが出来た時点で行が動いてしまう。機械が取るのは退避と自動起票まで。**ブラウザ同意と鍵の再発行は人の操作**で、そこを「自動復旧しました」と書くと嘘になる。recover-ingest.mjs の check() は `human_action_required` の回が `recovered` になっていたら落とす",
-      "blocker": "human_consent",
-      "unblocked_by": "**解けない。**ブラウザ同意と鍵の再発行に人の操作が要る。機械側は退避と起票まで",
-      "since": "2026-08"
+      "note": "API障害からの自動復旧と、資格情報失効時の再同意・鍵の再発行は別業務として維持する。2026-09-14、所有者の明示承認に基づき、既存のApple Ads組織への再同意とAppsFlyer側の設定保存をAIが実行した。再同意そのものを恒久的な人の操作とは扱わない。一方、その後の実照合でも下流の接続はInvalid credentials、データ受信はNeverのままであり、正常復旧は確認できていない。再同意の実施だけで回復済みとせず、executorと正式スコアは据え置く。recover-ingest.mjsの既存チェックや各利用者本人の同意境界は変更しない。",
+      "blocker": "verification_pending",
+      "unblocked_by": "再同意と設定保存は承認済みで実施済み。既存連携の正常な接続結果と実データ受信を確認し、失効から復旧までの実行証拠を揃える。同じ再同意を反復せず、下流状態の変化または新しい診断根拠に基づいて進める。",
+      "since": "2026-08",
+      "unlock": "credential_recovery_verified"
     },
     {
       "area": "③ 自律型マーケティング",

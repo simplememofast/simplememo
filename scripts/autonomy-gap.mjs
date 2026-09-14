@@ -132,6 +132,11 @@ export function analyse(doc, { target = 0.95 } = {}) {
  *          external_contract … 外部の鍵・契約が要る
  */
 export const UNLOCKS = {
+  credential_recovery_verified: { kind: 'external_contract', label: '承認済み再同意の下流接続が復旧したことを確認する',
+                       needs: '所有者の承認に基づく既存Apple Ads組織への再同意とAppsFlyerの設定保存は実施済み。'
+                            + '下流はInvalid credentials・データ受信Neverのままで、正常復旧の確認が残る。'
+                            + '接続成功と実データ受信を確認するまで加点せず、変化の根拠なく同じ再同意を反復しない。'
+                            + '所有者の委任を各利用者本人のApp Analytics共有同意へ置き換えない。' },
   delegated_device_verification: { kind: 'owner_input', label: '接続した実機の購入・復元の前提を整え、全項目の結果を揃える',
                        needs: 'ユーザーが接続・信頼し利用を指示した端末の実機テストは委任済み。'
                             + '現在の5.8.54(1342)は同じ配布版で5/6確認済みで、購入・復元が未完了。'
