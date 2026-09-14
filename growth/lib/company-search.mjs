@@ -144,20 +144,38 @@ function selectionScope(page, pages) {
   } catch { return {available: false, global: false, pages: [], unenumerated: true}; }
 }
 
-export function searchCandidates(growth, defaults) {
-  const analysis = growth.content_gaps, evidence = growth.search_input;
-  if (!analysis || !evidence?.actionable) return [];
+function selectionOwnership(growth) {
   const experiments = (Array.isArray(growth.experiments) ? growth.experiments : [])
     .filter(e => e.status === 'RUNNING').map(e => ({id: e.id, scope: selectionScope(e.affected_area, e.affected_pages)}));
   const reviews = (Array.isArray(growth.followups?.reviews) ? growth.followups.reviews : [])
     .filter(r => r.status === 'RUNNING').map(r => ({id: r.id, scope: selectionScope(r.parent?.page, r.parent?.pages)}));
   const scopesReadable = [...experiments, ...reviews].every(e => e.scope.available);
+  return {experiments, reviews,
+    known: Array.isArray(growth.experiments) && Array.isArray(growth.followups?.reviews) && scopesReadable};
+}
+
+// A concrete content target has not been selected yet. Global ownership can
+// already rule out publication; individual page checks still happen later.
+export function contentCandidateOwnership(growth) {
+  const {experiments, reviews, known} = selectionOwnership(growth);
+  const blocking_experiments = experiments.filter(e => e.scope.global).map(e => e.id);
+  const blocking_followups = reviews.filter(r => r.scope.global).map(r => r.id);
+  return {executable: known && !blocking_experiments.length && !blocking_followups.length,
+    blocking_experiments, blocking_followups, ownership_state: known ? 'read' : 'unavailable',
+    ownership_scope: 'global_only_until_concrete_page_selected',
+    unenumerated_experiment_scopes: experiments.filter(e => e.scope.unenumerated).map(e => e.id),
+    unenumerated_followup_scopes: reviews.filter(r => r.scope.unenumerated).map(r => r.id)};
+}
+
+export function searchCandidates(growth, defaults) {
+  const analysis = growth.content_gaps, evidence = growth.search_input;
+  if (!analysis || !evidence?.actionable) return [];
+  const {experiments, reviews, known: ownershipKnown} = selectionOwnership(growth);
   const matches = (scope, page) => scope.global || scope.pages.some(p => p === page);
   const result = [], seen = new Set();
   for (const row of analysis.ctr_gap ?? []) {
     if (row.kind !== 'page' || row.impressions * row.expected_ctr < 3 || seen.has(row.key)) continue;
     const page = toPath(row.key); seen.add(page);
-    const ownershipKnown = Array.isArray(growth.experiments) && Array.isArray(growth.followups?.reviews) && scopesReadable;
     const overlaps = experiments.filter(e => matches(e.scope, page));
     const followups = reviews.filter(r => matches(r.scope, page));
     result.push({id: 'search:ctr:' + page, kind: 'review_existing_search_page', title: 'Review the measured CTR gap on ' + page,

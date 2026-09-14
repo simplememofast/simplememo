@@ -9,6 +9,7 @@ import { companyAio } from './company-aio.mjs';
 import { opportunities } from './company-loop.mjs';
 import { ROOT, digest, formalMetrics } from './company-metrics.mjs';
 import { saveReview } from './company-review.mjs';
+import { experimentView } from './company-loop.mjs';
 
 // Reuse the original synthetic Codex events and report builder. Importing the
 // unittest module does not run tests or collect live/model observations.
@@ -34,8 +35,8 @@ function source(t, report = fixtures.good) {
   fs.writeFileSync(file, JSON.stringify(report));
   return { root, file };
 }
-function candidates(aio) {
-  return opportunities({ growth: { aio, experiments: [{ id: 'independent-review', due: true }] }, automation: { failures: [] } });
+function candidates(aio, growth = {}) {
+  return opportunities({ growth: { aio, experiments: [{ id: 'independent-review', due: true }], followups:{reviews:[]}, ...growth }, automation: { failures: [] } });
 }
 function rejected(result) {
   assert.equal(result.status, 'unavailable');
@@ -73,6 +74,40 @@ test('original validated AIO values and independent candidates survive admission
   assert.deepEqual(result.observations.map(q => q.cited_urls), fixtures.good.observations.map(q => q.cited_urls));
   assert.deepEqual(new Set(candidates(result).map(c => c.id)), new Set(['content:ai-visibility-gap', 'evaluate:independent-review']));
   assert.equal(fs.readFileSync(file, 'utf8'), bytes);
+});
+
+test('real global experiment blocks AIO content at selection while evidence and independent work remain', t => {
+  const {root}=source(t),aio=companyAio({root,now});
+  const file=path.join(ROOT,'growth/experiments/experiments.json'),bytes=fs.readFileSync(file);
+  const original=JSON.parse(bytes).experiments.find(e=>e.id==='brand-2026-08-11-entity-merge');
+  const global=experimentView(original,'2026-09-15');
+  for(const item of [global,experimentView({...original,status:'frozen'},'2026-09-15')]) {
+    const rows=candidates(aio,{experiments:[item,{id:'independent-review',due:true}]}),content=rows.find(c=>c.id==='content:ai-visibility-gap');
+    assert.equal(content.executable,false);assert.equal(content.priority,null);
+    assert.deepEqual(content.blocking_experiments,[original.id]);
+    assert.equal(content.ownership_state,'read');assert.deepEqual(content.evidence,[aio]);
+    assert.equal(rows.find(c=>c.priority!==null).id,'evaluate:independent-review');
+  }
+  assert(fs.readFileSync(file).equals(bytes));
+});
+
+test('AIO global follow-up and unreadable ownership cannot select publication; closed scopes release only the early gate', t => {
+  const {root}=source(t),aio=companyAio({root,now});
+  const content=g=>candidates(aio,g).find(c=>c.id==='content:ai-visibility-gap');
+  const followup={id:'global-followup',status:'RUNNING',parent:{page:'(サイト全体)'}};
+  const blocked=content({followups:{reviews:[followup]}});
+  assert.equal(blocked.executable,false);assert.deepEqual(blocked.blocking_followups,[followup.id]);
+  for(const growth of [{experiments:null},{followups:null},{followups:{reviews:[{id:'missing',status:'RUNNING'}]}},
+    {experiments:[{id:'missing',status:'RUNNING'}]},
+    {experiments:[{id:'malformed',status:'RUNNING',affected_area:'/known/',affected_pages:[null]}]}]) {
+    const row=content(growth);assert.equal(row.executable,false);assert.equal(row.ownership_state,'unavailable');assert.equal(row.priority,null);
+  }
+  const rows=[content({followups:{reviews:[{...followup,status:'EVALUATED'}]}}),
+    content({experiments:[{id:'closed',status:'INCONCLUSIVE',affected_area:'(サイト全体)'}]}),
+    content({experiments:[{id:'specific',status:'RUNNING',affected_area:'/existing/'},
+      {id:'external',status:'RUNNING',affected_area:'(PR配信 — 自律運用/RSI)'}]})];
+  for(const row of rows){assert.equal(row.executable,true);assert.equal(row.ownership_scope,'global_only_until_concrete_page_selected');}
+  assert.deepEqual(rows[2].unenumerated_experiment_scopes,['external']);
 });
 
 test('original health gate rejects a valid partial report even with four unaided answers', t => {

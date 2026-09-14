@@ -4,7 +4,7 @@ import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { ROOT, digest, formalMetrics, compareMetrics, humanTouchMetrics, autonomyLedger } from './company-metrics.mjs';
-import { companySearch, searchCandidates } from './company-search.mjs';
+import { companySearch, searchCandidates, contentCandidateOwnership } from './company-search.mjs';
 import { isDue, validate as validateExperiments } from './ledger.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { growthFollowups } from './company-growth-followup.mjs';
@@ -238,8 +238,9 @@ export function opportunities(observation) {
       observation.growth.aio.status === 'ok' && observation.growth.aio.unaided_valid_questions >= 4 &&
       observation.growth.aio.unaided_mention_rate === 0) candidates.push({
     id: 'content:ai-visibility-gap', kind: 'existing_content_queue', title: 'Choose an evidenced content gap using the existing coverage queue',
-    permission: 'AUTO', executable: true, owner: 'existing Obsidian Autopilot selector', evidence: [observation.growth.aio],
-    action_scope: 'Cross-check live sources, existing pages, active experiments and approved value contracts before implementing one eligible page change. Do not rerun the paid probe.',
+    permission: 'AUTO', ...contentCandidateOwnership(observation.growth),
+    owner: 'existing Obsidian Autopilot selector', evidence: [observation.growth.aio],
+    action_scope: 'Cross-check live sources, existing pages, active experiments and approved value contracts before implementing one eligible page change. Global experiment/follow-up ownership is checked before ranking; unknown ownership cannot select publication. A concrete page still needs the original page-specific measurement and publication gates. Do not rerun the paid probe or change experiment scope/dates to create eligibility.',
     factors: { ...defaults, manual_touches: 30, reliability: 55, business_impact: 70, growth_impact: 85, ease: 50 } });
   return prioritize(candidates);
 }
