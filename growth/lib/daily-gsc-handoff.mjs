@@ -13,6 +13,40 @@ export const dailyHash = bytes => crypto.createHash('sha256').update(bytes).dige
 const FILES = ['meta.json', ...BUCKET_KINDS.map(k => k + '.json')];
 const dateOK = s => /^\d{4}-\d{2}-\d{2}$/.test(s ?? '') && new Date(s).toISOString().slice(0, 10) === s;
 
+export const dailyJobsEndpoint = remote => `repos/${DAILY_REPO}/actions/runs/${remote.id}/attempts/${remote.run_attempt}/jobs?per_page=100`;
+const GSC_STEPS = ['Export preflight', "Ingest today's window (not committed)", 'Detectors',
+  'Encrypt existing daily snapshot for Company', 'Retain encrypted daily snapshot'];
+
+// A failed sibling must not invalidate GSC, but the whole workflow stays failed.
+export function verifyDailyJobProof(proof, {remote, now = new Date()}) {
+  assert.equal(remote.status, 'completed'); assert.equal(remote.conclusion, 'failure');
+  assert.equal(proof?.schema_version, 1); assert.equal(proof.endpoint, dailyJobsEndpoint(remote));
+  assert.equal(proof.run_id, remote.id); assert.equal(proof.run_attempt, remote.run_attempt);
+  assert.equal(proof.source_sha, remote.head_sha);
+  assert(Date.parse(proof.observed_at) >= Date.parse(remote.updated_at) && Date.parse(proof.observed_at) <= now.getTime());
+  const inventory = proof.inventory, jobs = inventory?.jobs;
+  assert(Array.isArray(jobs) && jobs.length > 0 && jobs.length < 100);
+  assert.equal(inventory.total_count, jobs.length, 'complete bounded job inventory required');
+  assert.equal(new Set(jobs.map(j => j.id)).size, jobs.length);
+  for (const job of jobs) {
+    assert(Number.isSafeInteger(job.id) && job.id > 0);
+    assert.equal(job.run_id, remote.id); assert.equal(job.run_attempt, remote.run_attempt);
+    assert.equal(job.head_sha, remote.head_sha); assert.equal(job.status, 'completed');
+  }
+  const matches = jobs.filter(j => j.name === 'measure'); assert.equal(matches.length, 1);
+  const job = matches[0]; assert.equal(job.conclusion, 'success');
+  assert(jobs.some(j => j.id !== job.id && j.conclusion === 'failure'), 'failed sibling must remain explicit');
+  assert(Date.parse(job.started_at) >= Date.parse(remote.run_started_at)
+    && Date.parse(job.completed_at) >= Date.parse(job.started_at)
+    && Date.parse(job.completed_at) <= Date.parse(remote.updated_at));
+  assert(Array.isArray(job.steps));
+  for (const name of GSC_STEPS) {
+    const steps = job.steps.filter(s => s.name === name); assert.equal(steps.length, 1);
+    assert.equal(steps[0].status, 'completed'); assert.equal(steps[0].conclusion, 'success');
+  }
+  return job;
+}
+
 export function packDaily({directory, label, env = process.env, now = new Date()}) {
   assert(dateOK(label), 'invalid snapshot label');
   assert.equal(env.GITHUB_REPOSITORY, DAILY_REPO);
@@ -37,7 +71,7 @@ export function packDaily({directory, label, env = process.env, now = new Date()
   return payload;
 }
 
-export function snapshotFromDaily(payload, {now = new Date(), remote = null} = {}) {
+export function snapshotFromDaily(payload, {now = new Date(), remote = null, gscJobProof = null} = {}) {
   assert.equal(payload.schema_version, 1); assert.equal(payload.kind, 'seo_daily_snapshot');
   assert.equal(payload.repository, DAILY_REPO); assert.equal(payload.workflow, DAILY_WORKFLOW);
   assert.match(payload.run_id ?? '', /^[1-9]\d*$/); assert(Number.isSafeInteger(payload.run_attempt) && payload.run_attempt > 0);
@@ -47,7 +81,12 @@ export function snapshotFromDaily(payload, {now = new Date(), remote = null} = {
   assert(Number.isFinite(Date.parse(payload.observed_at)) && Date.parse(payload.observed_at) <= now.getTime());
   if (remote) {
     assert.equal(remote.repository?.full_name, DAILY_REPO); assert.equal(remote.path, DAILY_WORKFLOW);
-    assert.equal(remote.head_branch, 'main'); assert.equal(remote.status, 'completed'); assert.equal(remote.conclusion, 'success');
+    assert.equal(remote.head_branch, 'main'); assert.equal(remote.status, 'completed');
+    if (remote.conclusion !== 'success') {
+      const job = verifyDailyJobProof(gscJobProof, {remote, now});
+      assert(Date.parse(payload.observed_at) >= Date.parse(job.started_at)
+        && Date.parse(payload.observed_at) <= Date.parse(job.completed_at), 'observation outside GSC job');
+    }
     assert.equal(String(remote.id), payload.run_id); assert.equal(remote.run_attempt, payload.run_attempt);
     assert.equal(remote.head_sha, payload.source_sha); assert.equal(remote.event, payload.event);
     assert(Date.parse(payload.observed_at) >= Date.parse(remote.run_started_at)
@@ -105,7 +144,7 @@ export function retainedDaily({stateRoot, now = new Date()}) {
   assert(output.startsWith(root + path.sep));
   assert(fs.statSync(output).size <= DAILY_LIMIT * 2);
   const bytes = fs.readFileSync(output); assert.equal(dailyHash(bytes), receipt.sha256);
-  const payload = JSON.parse(bytes), snapshot = snapshotFromDaily(payload, {now, remote: receipt.remote});
+  const payload = JSON.parse(bytes), snapshot = snapshotFromDaily(payload, {now, remote: receipt.remote, gscJobProof: receipt.gsc_job_proof});
   assert.equal(String(receipt.run_id), payload.run_id); assert.equal(receipt.source_commit, payload.source_sha);
   assert.deepEqual(receipt.window, {start: snapshot.meta.period_start, end: snapshot.meta.period_end});
   return {snapshot, receipt};
