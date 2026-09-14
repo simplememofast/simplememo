@@ -20,7 +20,7 @@ function nativeState(thread) {
     gate_receipt:{admitted:true,thread_id:thread,turn_id:turn(thread),sha256:digest(thread+'gate'),observed_at:`2026-09-${day}T00:00:00Z`},
     transcript_sha256:digest(thread+'transcript')};
 }
-const goalWake=args=>rawGoalWake({readThread:nativeState,...args});
+const goalWake=args=>rawGoalWake({readThread:nativeState,readGrowth:()=>({events:[],failures:[]}),...args});
 function fixture(t) {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),'company-goal-test-'));fs.chmodSync(root,0o700);t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
   atomicJson(path.join(root,'GOAL_STATE.json'),{native_goal_thread:target,status:'IN_PROGRESS',objective:'Complete docs/autonomy/RESIDUAL_OPERATIONS_GOAL.md'});
@@ -62,13 +62,18 @@ test('seven days require seven distinct native threads and maturity, not repeate
   assert.equal(fs.readdirSync(path.join(root,'goal-wake-events')).length,1);
   for(const file of fs.readdirSync(events))fs.unlinkSync(path.join(events,file));
   const ledger=JSON.parse(fs.readFileSync(path.join(root,'operational-experiments.json')));ledger.experiments[0].status='WIN';atomicJson(path.join(root,'operational-experiments.json'),ledger);
-  assert.equal(goalWake({stateRoot:root,now}).status,'waiting_for_native_evidence');
+  assert.equal(goalWake({stateRoot:root,now}).status,'reconcile_delivery','missing source cannot erase an uncertain send');
+  acknowledgeGoalWake({stateRoot:root,eventId:r.event_id,thread:target,now});
+  assert.equal(goalWake({stateRoot:root,now}).status,'waiting_for_native_evidence','stored WIN is not native evidence');
 });
 test('future, missing gate and malformed evidence do not attest a milestone or erase another source',t=>{
   const {root,events}=fixture(t),now=new Date('2026-09-14T01:00:00Z');
   atomicJson(path.join(events,'future.json'),event(20));const invalid=event(14);delete invalid.native_origin.gate_receipt_sha256;
   atomicJson(path.join(events,'invalid.json'),invalid);assert.equal(goalWake({stateRoot:root,now}).status,'native_evidence_unverified');
-  fs.writeFileSync(path.join(events,'corrupt.json'),'{bad');assert.throws(()=>goalWake({stateRoot:root,now}));
+  fs.writeFileSync(path.join(events,'corrupt.json'),'{bad');
+  const failed=goalWake({stateRoot:root,now});assert.equal(failed.status,'native_evidence_unverified');
+  assert.ok(failed.failures.some(f=>f.reason==='native_evidence_read_or_validation_failed'));
+  assert.equal(fs.existsSync(path.join(root,'goal-wake-events')),false);
 });
 test('shaped native claims require matching authoritative owner, original turn, gate and lifecycle',t=>{
   const {root,events}=fixture(t),now=new Date('2026-09-14T02:00:00Z');atomicJson(path.join(events,'native.json'),event(14));
@@ -86,6 +91,44 @@ test('registration cannot retarget another host thread or relax the seven-day ex
   assert.throws(()=>registerGoalFollowup({stateRoot:root,experimentId,thread:sender}),/Only/);
   const doc=JSON.parse(fs.readFileSync(path.join(root,'operational-experiments.json')));doc.experiments[0].minimum_distinct_native_days=1;atomicJson(path.join(root,'operational-experiments.json'),doc);
   assert.throws(()=>goalWake({stateRoot:root}),/seven-day/);
+});
+const growthEvent=(milestone='verified_growth_delivery')=>({milestone,experiment_id:'fixture-growth',identity:digest(milestone),
+  occurred_at:'2026-09-14T00:00:00Z',native_origin:origin(),native_proof:{native_transcript_sha256:digest('transcript')},
+  source_main_sha:'a'.repeat(40),evidence:{receipt_sha256:digest('receipt')}});
+test('received collection does not starve Growth delivery or review and pending transport reconciles first',t=>{
+  const {root,events}=fixture(t),now=new Date('2026-09-14T01:00:00Z');atomicJson(path.join(events,'native.json'),event(14));
+  const first=goalWake({stateRoot:root,now,reserve:true,origin});
+  const legacy=digest(JSON.stringify({thread:target,experiment:experimentId,milestone:'first_native_collection'}));
+  assert.equal(first.event_id,legacy,'existing marker identity must remain unchanged');
+  acknowledgeGoalWake({stateRoot:root,eventId:first.event_id,thread:target,now});
+  const delivery=growthEvent(),review=growthEvent('reviewed_growth_measurement');
+  const readGrowth=({excludeIdentities})=>({events:[delivery,review].filter(e=>!excludeIdentities.includes(e.identity)),failures:[]});
+  const sent=goalWake({stateRoot:root,now,reserve:true,origin,readGrowth});assert.equal(sent.status,'dispatch_once');
+  const record=JSON.parse(fs.readFileSync(path.join(root,'goal-wake-events',sent.event_id+'.json')));
+  assert.equal(record.milestone,delivery.milestone);assert.equal(record.identity,delivery.identity);assert.equal(record.goal_completed,false);
+  const pending=goalWake({stateRoot:root,now,reserve:true,origin,readGrowth:()=>{throw new Error('must reconcile first');}});
+  assert.equal(pending.status,'reconcile_delivery');assert.equal(pending.event_id,sent.event_id);
+  acknowledgeGoalWake({stateRoot:root,eventId:sent.event_id,thread:target,now});
+  const next=goalWake({stateRoot:root,now,reserve:true,origin,readGrowth});assert.equal(next.status,'dispatch_once');
+  assert.notEqual(next.event_id,sent.event_id);assert.equal(JSON.parse(fs.readFileSync(path.join(root,'goal-wake-events',next.event_id+'.json'))).milestone,review.milestone);
+  acknowledgeGoalWake({stateRoot:root,eventId:next.event_id,thread:target,now});
+  assert.equal(goalWake({stateRoot:root,now,reserve:true,origin,readGrowth}).status,'already_received');
+});
+test('independent Growth evidence progresses while a failed collection remains visible without seven-day credit',t=>{
+  const {root,events}=fixture(t),now=new Date('2026-09-20T08:00:00Z');fs.writeFileSync(path.join(events,'bad.json'),'{bad');
+  const readGrowth=()=>({events:[growthEvent()],failures:[{source:'other_growth',reason:'missing_review'}]});
+  const result=goalWake({stateRoot:root,now,reserve:true,origin,readGrowth});assert.equal(result.status,'dispatch_once');
+  const stored=JSON.parse(fs.readFileSync(path.join(root,'goal-wake-events',result.event_id+'.json')));
+  assert.equal(stored.milestone,'verified_growth_delivery');assert.equal(stored.evaluation,null);
+  assert.equal(stored.source_failures.length,2);assert.equal(result.failures.length,2);
+});
+test('retained Growth identity corruption is rejected and terminal Goals remain quiet',t=>{
+  const {root}=fixture(t),now=new Date('2026-09-14T01:00:00Z'),readGrowth=()=>({events:[growthEvent()],failures:[]});
+  const sent=goalWake({stateRoot:root,now,reserve:true,origin,readGrowth}),file=path.join(root,'goal-wake-events',sent.event_id+'.json');
+  const record=JSON.parse(fs.readFileSync(file));record.identity=digest('changed');atomicJson(file,record);
+  assert.throws(()=>goalWake({stateRoot:root,now,readGrowth}),/identity changed/);
+  const state=JSON.parse(fs.readFileSync(path.join(root,'GOAL_STATE.json')));state.status='COMPLETE';atomicJson(path.join(root,'GOAL_STATE.json'),state);
+  assert.equal(goalWake({stateRoot:root,now,readGrowth:()=>{throw new Error('terminal Goal must not inspect');}}).status,'goal_not_pending');
 });
 test('a failed native proof is visible in the CLI without hiding independent follow-up results',t=>{
   const {root,events}=fixture(t);atomicJson(path.join(events,'unverified.json'),event(14));

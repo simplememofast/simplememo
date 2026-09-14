@@ -6,8 +6,8 @@ import os from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {ROOT,digest} from './company-metrics.mjs';
-import {prepareMeasurement,loadMeasurement,verifyMeasurementInput,registerMeasurement,verifyMeasurementDelivery,measurementComparison,evaluateMeasurement,measurementStatus,EXPERIMENTS} from './company-measurement.mjs';
-import {candidateDigest,decisionTrace,prepareCompanyDecision} from './company-decision.mjs';
+import {prepareMeasurement,loadMeasurement,verifyMeasurementInput,registerMeasurement,verifyMeasurementDelivery,measurementComparison,evaluateMeasurement,measurementStatus,measurementHandoffEvidence,EXPERIMENTS} from './company-measurement.mjs';
+import {candidateDigest,decisionTrace,decisionCommitment,prepareCompanyDecision} from './company-decision.mjs';
 import {opportunities,experimentView} from './company-loop.mjs';
 import {measuresPageCtr} from './ledger.mjs';
 import {registerGrowthFollowup} from './company-growth-followup.mjs';
@@ -21,7 +21,7 @@ test('a newly linked revert judgment is not reported as a completed code rollbac
   assert.equal(experimentView(e,'2026-10-20').status,'INCONCLUSIVE');
   assert.equal(experimentView({...e,company_measurement:undefined},'2026-10-20').status,'ROLLED_BACK','retain the explicitly compatible legacy view');
 });
-function fixture(t,{source='ai_citations',threshold=4}={}) {
+function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={}) {
   const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'company-measurement-'));fs.chmodSync(tmp,0o700);t.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
   const root=path.join(tmp,'repo'),stateRoot=path.join(tmp,'state');fs.mkdirSync(root);fs.mkdirSync(stateRoot,{mode:0o700});
   const write=(file,obj)=>{fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});fs.writeFileSync(file,JSON.stringify(obj,null,2)+'\n',{mode:0o600});};
@@ -35,6 +35,7 @@ function fixture(t,{source='ai_citations',threshold=4}={}) {
   };
   const beforeProbe=probe('2026-09-12T12:00:00Z');
   write(path.join(root,EXPERIMENTS),{version:1,experiments:[]});
+  write(path.join(root,'data/autopilot-runs.json'),{runs:[]});
   const page='/obsidian/fixture/',target='obsidian/fixture/index.html';fs.mkdirSync(path.join(root,'obsidian/fixture'),{recursive:true});fs.writeFileSync(path.join(root,target),'before\n');
   git('add','.');git('commit','-qm','fixture base');const sourceCommit=git('rev-parse','HEAD');
   const now=new Date('2026-09-14T01:00:00Z'),id=randomUUID();
@@ -59,10 +60,11 @@ function fixture(t,{source='ai_citations',threshold=4}={}) {
     const prepared=prepare(),decisionInput={schema_version:1,candidate_id:candidate.id,contract_id:'fixture-contract',run_id:'fixture-run',rationale:'The observed fixed cohort supports investigating this concrete page.',
       source_to_action:'The fixture evidence is preserved to test prospective binding only.',alternatives:[{id:'other',reason:'Another candidate has lower estimated business relevance in this fixture.'}],
       measurement:prepared.measurement,scope:{artifact:page,paths:[target]}};
-    const r={schema_version:3,id,source_commit:sourceCommit,observation_fingerprint:'a'.repeat(64),candidates:[candidate,{id:'other'}],observed_at:now.toISOString(),status:'observed_decision_requires_execution',
-      execution_boundary:{stopped:false},route:'owner-session',stages:{}};
+    const r={schema_version:3,id,source_commit:sourceCommit,observation_fingerprint:'a'.repeat(64),candidates:[candidate,{id:'other'}],observed_at:now.toISOString(),started_at:now.toISOString(),status:'observed_decision_requires_execution',
+      execution_boundary:{stopped:false},route,stages:{}};
     write(receiptFile,r);const df=path.join(stateRoot,'decision.json');write(df,decisionInput);
     prepareCompanyDecision({stateRoot,id,evidenceFile:df,now,currentCandidates:r.candidates});
+    write(path.join(root,'data/decision-intents/fixture-contract.json'),{id:'fixture-contract',run_id:'fixture-run',candidates:[{id:'fixture-contract',company_decision:decisionCommitment(read(receiptFile))}]});
     // Declaration transport/selection has independent real-git tests in
     // company-decision.test. This fixture tests the subsequent registry order.
     fs.writeFileSync(path.join(root,'fixture-declaration'),'seal\n');git('add','.');git('commit','-qm','fixture declaration');
@@ -70,7 +72,9 @@ function fixture(t,{source='ai_citations',threshold=4}={}) {
     return saved;
   };
   const register=async()=>{const r=bind();await registerMeasurement({stateRoot,id,root,now});git('add',EXPERIMENTS);git('commit','-qm','fixture registry');return r;};
-  const deliver=async()=>{const r=await register();fs.writeFileSync(path.join(root,target),'after\n');git('add',target);git('commit','-qm','fixture treatment');
+  const deliver=async()=>{const r=await register();fs.writeFileSync(path.join(root,target),'after\n');
+    write(path.join(root,'data/autopilot-runs.json'),{runs:[{run_id:'fixture-run',outcome:'shipped',attempted:true,route,pr:1,artifact:page}]});
+    git('add',target,'data/autopilot-runs.json');git('commit','-qm','fixture treatment');
     const proof=verifyMeasurementDelivery(r,{stateRoot,root,head:git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call});
     Object.assign(r,{status:'verified_existing_autopilot',followup:proof,evidence_of_completion:{decision_trace:{state:'verified',decision_sha256:r.decision.sha256},canonical_run_id:'fixture-run',artifact:page}});write(receiptFile,r);return r;};
   return{root,stateRoot,now,id,input,inputFile,write,read,git,call,prepare,bind,register,deliver,receiptFile,probe,beforeProbe,snapshot,search,page,target};
@@ -162,4 +166,102 @@ test('GSC adapter preserves exact 28-day cohorts, original evidence admission an
   const experiments=f.read(path.join(f.root,EXPERIMENTS)).experiments;assert.equal(measuresPageCtr(experiments[0]),true);
   const followup=registerGrowthFollowup({stateRoot:f.stateRoot,experimentId:f.input.id,evaluationDate:'2026-11-17',postStart:'2026-10-18',postEnd:'2026-11-14',rationale:'Recheck the same registered source after another complete mature observation period.',now,experiments});
   assert(followup.id,'existing GSC follow-up must accept the canonical baseline and evidence hash');
+});
+
+// Synthetic native lifecycle states are deliberately injected. They never
+// create a real scheduler execution, Goal event or production metric credit.
+async function handoffFixture(t) {
+  const f=fixture(t,{route:'actions'}),r=await f.deliver(),deliveryThread=randomUUID(),reviewThread=randomUUID();
+  const proof=thread=>({state:'native_execution_record',automation_id:'obsidian',thread_id:thread,
+    original_turn_id:thread,gate_receipt_sha256:digest(thread+'gate')});
+  const readThread=thread=>({thread_id:thread,automation_id:'obsidian',original_turn_id:thread,
+    original_turn:{turn_id:thread,state:'completed',started_at:thread===deliveryThread?'2026-09-14T00:00:00Z':'2026-10-15T00:00:00Z',
+      finished_at:thread===deliveryThread?'2026-09-15T13:00:00Z':'2026-10-15T13:00:00Z'},
+    gate_receipt:{admitted:true,thread_id:thread,turn_id:thread,sha256:proof(thread).gate_receipt_sha256,
+      observed_at:thread===deliveryThread?'2026-09-14T00:00:00Z':'2026-10-15T00:00:00Z'},
+    transcript_sha256:digest(thread+'transcript'),observed_at:'2026-10-15T13:00:00Z'});
+  Object.assign(r,{route:'actions',origin:'codex-automation',origin_proof:proof(deliveryThread),finished_at:'2026-09-15T12:30:00Z'});
+  r.evidence_of_completion.merge={merge_sha:f.git('rev-parse','HEAD'),head_sha:f.git('rev-parse','HEAD'),pr:1,validation_run:2,merged_at:'2026-09-15T12:00:00Z'};
+  f.write(f.receiptFile,r);
+  const merge=structuredClone(r.evidence_of_completion.merge);
+  const remoteCall=(name,args)=>{
+    if(name!=='gh')return f.call(name,args);
+    if(args[0]==='pr'&&args[1]==='view') {
+      assert.equal(args[2],'1');return JSON.stringify({number:1,state:'MERGED',baseRefName:'main',headRefOid:merge.head_sha,
+        mergedAt:merge.merged_at,mergeCommit:{oid:merge.merge_sha},url:'https://example.invalid/fixture-pr',files:[]});
+    }
+    assert.deepEqual(args,['api','repos/simplememofast/simplememo/actions/runs/2']);return JSON.stringify({id:2,head_sha:merge.head_sha,event:'pull_request',status:'completed',conclusion:'success',name:'SEO Validation',path:'.github/workflows/seo-check.yml'});
+  };
+  const now=new Date('2026-10-15T13:00:00Z');
+  const options={stateRoot:f.stateRoot,root:f.root,now,readThread,call:remoteCall,
+    readCanonical:()=>{f.git('update-ref','refs/remotes/origin/main',f.git('rev-parse','HEAD'));return{sha:f.git('rev-parse','HEAD'),ledger:JSON.parse(f.git('show','HEAD:'+EXPERIMENTS))};}};
+  return {...f,r,deliveryThread,reviewThread,proof,readThread,options};
+}
+test('Growth handoff uses prospective committed delivery and source-bound native review, never an uncommitted evaluation',async t=>{
+  const f=await handoffFixture(t),read=overrides=>measurementHandoffEvidence({...f.options,...overrides});
+  let out=read();assert.equal(out.events.length,1);assert.deepEqual(out.failures,[]);
+  const delivered=out.events[0];assert.equal(delivered.milestone,'verified_growth_delivery');assert.equal(delivered.evidence.page,f.page);
+  assert.equal(delivered.native_proof.native_transcript_sha256,f.readThread(f.deliveryThread).transcript_sha256);
+  f.probe('2026-10-14T12:00:00Z');const review=path.join(f.stateRoot,'native-review.json');
+  f.write(review,{decision:'inconclusive',rationale:'The synthetic fixed cohort has no attributable improvement.',
+    guardrail_findings:['The synthetic delivery preserves the registered guardrail.'],confounders:'Other changes and provider effects prevent a causal conclusion.'});
+  const evaluated=await evaluateMeasurement({stateRoot:f.stateRoot,id:f.input.id,evidenceFile:review,root:f.root,now:new Date('2026-10-15T12:00:00Z'),origin:()=>f.proof(f.reviewThread)});
+  assert.deepEqual(read().events.map(e=>e.milestone),['verified_growth_delivery'],'working-copy result is not committed evidence');
+  f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture admitted review');
+  out=read();assert.deepEqual(out.failures,[]);assert.equal(out.events.length,2);
+  const measured=out.events[1];assert.equal(measured.milestone,'reviewed_growth_measurement');assert.equal(measured.evidence.decision,'inconclusive');
+  assert.equal(measured.evidence.evidence_sha256,evaluated.evidence.sha256);assert.match(measured.evidence.interpretation,/not an automatic WIN/);
+  const received=read({excludeIdentities:[delivered.identity,measured.identity],readThread:()=>{throw new Error('received identities must not reread old native threads');},
+    call:()=>{throw new Error('received identities must not query old remote proof');}});
+  assert.deepEqual(received.events,[]);assert.deepEqual(received.failures,[]);assert.equal(received.skipped.length,2);
+  const artifact=path.join(f.stateRoot,'experiment-evidence',evaluated.evidence.artifact),bundle=f.read(artifact);bundle.evidence.agent_review.decision='keep';f.write(artifact,bundle);
+  out=read();assert.equal(out.events.length,1);assert.equal(out.failures[0].milestone,'reviewed_growth_measurement','private hash mismatch must remain visible');
+});
+test('Growth delivery rejects stale or mismatched native lifecycle and merge proof without relabeling manual work',async t=>{
+  const f=await handoffFixture(t),read=overrides=>measurementHandoffEvidence({...f.options,...overrides});
+  for(const mutate of [s=>({...s,automation_id:'other'}),s=>({...s,transcript_sha256:null}),s=>({...s,original_turn_id:randomUUID()}),
+    s=>({...s,gate_receipt:{...s.gate_receipt,sha256:'a'.repeat(64)}}),s=>({...s,original_turn:{...s.original_turn,finished_at:'2026-09-14T02:00:00Z'}})]) {
+    const out=read({readThread:thread=>mutate(f.readThread(thread))});assert.equal(out.events.length,0);assert.equal(out.failures[0].reason,'native_origin_unavailable_or_mismatched');
+  }
+  assert.equal(read({now:new Date('2026-09-14T02:00:00Z')}).events.length,0,'future delivery cannot be admitted');
+  const original=structuredClone(f.r.evidence_of_completion.merge);
+  for(const change of [{merge_sha:f.r.source_commit},{head_sha:f.r.source_commit},{pr:3},{validation_run:3}]) {
+    f.r.evidence_of_completion.merge={...original,...change};f.write(f.receiptFile,f.r);
+    const rejected=read();assert.equal(rejected.events.length,0,JSON.stringify(change));
+    assert.equal(rejected.failures[0].reason,'original_delivery_reverification_failed');
+  }
+  f.r.evidence_of_completion.merge=original;
+  // Even a shaped remote response cannot make an unrelated in-history commit
+  // introduce this canonical run and its prospective experiment registration.
+  f.r.evidence_of_completion.merge={...original,merge_sha:f.r.source_commit,head_sha:f.r.source_commit};f.write(f.receiptFile,f.r);
+  const unbound=read({call:(name,args)=>{
+    const raw=f.options.call(name,args);if(name!=='gh')return raw;
+    const v=JSON.parse(raw);if(args[0]==='pr'){v.headRefOid=f.r.source_commit;v.mergeCommit.oid=f.r.source_commit;}else v.head_sha=f.r.source_commit;
+    return JSON.stringify(v);
+  }});assert.equal(unbound.events.length,0);assert.equal(unbound.failures[0].reason,'original_delivery_reverification_failed');
+  f.r.evidence_of_completion.merge=original;
+  f.write(f.receiptFile,f.r);
+  const wrongWorkflow=read({call:(name,args)=>{
+    const raw=f.options.call(name,args);if(name!=='gh'||args[0]!=='api')return raw;
+    return JSON.stringify({...JSON.parse(raw),path:'.github/workflows/another.yml'});
+  }});assert.equal(wrongWorkflow.events.length,0,'same workflow name and head cannot replace the original seo-check.yml');
+  assert.equal(wrongWorkflow.failures[0].reason,'original_delivery_reverification_failed');
+  f.r.route='owner-session';f.write(f.receiptFile,f.r);
+  let out=read();assert.deepEqual(out.events,[]);assert.deepEqual(out.failures,[]);assert.equal(out.skipped[0].reason,'not_a_claimed_native_event');
+  const originalMerge=f.r.evidence_of_completion.merge.merge_sha;
+  f.r.route='actions';f.r.evidence_of_completion.merge.merge_sha='a'.repeat(40);f.write(f.receiptFile,f.r);
+  assert.equal(read().events.length,0,'a receipt cannot claim a merge outside canonical main history');
+  f.r.evidence_of_completion.merge.merge_sha=originalMerge;
+  f.r.route='actions';f.r.evidence_of_completion.merge.validation_run=null;f.write(f.receiptFile,f.r);
+  out=read();assert.equal(out.events.length,0);assert.equal(out.failures[0].reason,'prospective_delivery_evidence_unavailable_or_mismatched');
+});
+test('a committed manual evaluation remains available for analysis but does not become a native Goal milestone',async t=>{
+  const f=await handoffFixture(t);f.probe('2026-10-14T12:00:00Z');const file=path.join(f.stateRoot,'manual-review.json');
+  f.write(file,{decision:'inconclusive',rationale:'A manual fixture review preserves the original limited cohort.',
+    guardrail_findings:['The fixture has no observed guardrail regression.'],confounders:'A small nonrandomized cohort cannot establish a causal effect.'});
+  await evaluateMeasurement({stateRoot:f.stateRoot,id:f.input.id,evidenceFile:file,root:f.root,now:new Date('2026-10-15T12:00:00Z'),origin:()=>({state:'not_a_recorded_automation_run'})});
+  f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture manual review');
+  const out=measurementHandoffEvidence(f.options);assert.deepEqual(out.failures,[]);
+  assert.deepEqual(out.events.map(e=>e.milestone),['verified_growth_delivery']);
+  assert.equal(out.skipped[0].milestone,'reviewed_growth_measurement');assert.equal(out.skipped[0].reason,'not_a_claimed_native_event');
 });

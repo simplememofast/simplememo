@@ -18,19 +18,44 @@ const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const run = (name,args,opts={}) => execFileSync(name,args,{ cwd: ROOT, encoding:'utf8', timeout:60000,
   maxBuffer:8*1024*1024, stdio:['pipe','pipe','pipe'], ...opts });
 
-export function verifyMergedChange(pr, call = run, { requireIntegration = true } = {}) {
+export function verifyMergedChange(pr, call = run, { requireIntegration = true, validationRun = null, fetchMain = true } = {}) {
   if (!Number.isInteger(pr) || pr < 1) throw new Error('A real numeric PR is required');
   const repo = 'simplememofast/simplememo';
   const pull = JSON.parse(call('gh',['pr','view',String(pr),'--repo',repo,'--json','number,state,baseRefName,headRefOid,mergedAt,mergeCommit,url,files']));
   if (pull.state !== 'MERGED' || pull.baseRefName !== 'main' || !pull.mergedAt || !pull.mergeCommit?.oid) throw new Error('PR is not merged to main');
-  const checks = JSON.parse(call('gh',['run','list','--repo',repo,'--workflow','seo-check.yml','--commit',pull.headRefOid,
-    '--limit','30','--json','databaseId,headSha,event,status,conclusion']));
+  if(validationRun!==null&&(!Number.isSafeInteger(validationRun)||validationRun<1))throw new Error('Invalid retained validation run');
+  const checks = validationRun===null ? JSON.parse(call('gh',['run','list','--repo',repo,'--workflow','seo-check.yml','--commit',pull.headRefOid,
+    '--limit','30','--json','databaseId,headSha,event,status,conclusion'])) : [JSON.parse(call('gh',['api',`repos/${repo}/actions/runs/${validationRun}`]))]
+      .filter(c=>c.id===validationRun&&c.path==='.github/workflows/seo-check.yml'&&c.name==='SEO Validation')
+      .map(c=>({databaseId:c.id,headSha:c.head_sha,event:c.event,status:c.status,conclusion:c.conclusion}));
   const verified = checks.find(c => c.headSha === pull.headRefOid && c.event === 'pull_request' && c.status === 'completed' && c.conclusion === 'success');
   if (!verified) throw new Error('Exact final PR SHA has no successful SEO Validation');
-  call('git',['fetch','origin','main']);
+  if(fetchMain)call('git',['fetch','origin','main']);
   call('git',['merge-base','--is-ancestor',pull.mergeCommit.oid,'origin/main']);
   if (requireIntegration && !pull.files.some(f => ['scripts/company-os.mjs','growth/lib/company-data.mjs'].includes(f.path))) throw new Error('PR does not contain this integration');
   return { pr, url: pull.url, head_sha: pull.headRefOid, merge_sha: pull.mergeCommit.oid, merged_at: pull.mergedAt, validation_run: verified.databaseId };
+}
+
+// Recheck a previously completed delivery against immutable Git and the exact
+// original remote PR/CI identities before a new Goal handoff. No code deploy,
+// collector or second run is invoked, and no historical receipt is rewritten.
+export function verifyRetainedCompanyDelivery(receipt,{stateRoot,root=ROOT,call=run}) {
+  const saved=receipt.evidence_of_completion?.merge;
+  const merge=verifyMergedChange(saved?.pr,call,{requireIntegration:false,validationRun:saved?.validation_run,fetchMain:false});
+  for(const key of ['pr','head_sha','merge_sha','merged_at','validation_run'])if(merge[key]!==saved[key])throw new Error('Retained delivery identity changed');
+  verifyIntegrationLedger(receipt,merge,call);
+  const row=JSON.parse(call('git',['show',merge.merge_sha+':data/autopilot-runs.json'])).runs.find(r=>r.run_id===receipt.bound_autopilot_run_id);
+  if(row.artifact!==receipt.decision.input.scope.artifact)throw new Error('Retained artifact differs from canonical run');
+  const seal=decisionCommitment(receipt),intent=intentPath(receipt.decision.input.contract_id);
+  for(const sha of [receipt.bound_declaration_sha,merge.head_sha,merge.merge_sha]) {
+    const contract=JSON.parse(call('git',['show',sha+':'+intent]));
+    if(contract.id!==receipt.decision.input.contract_id||contract.run_id!==receipt.bound_autopilot_run_id||
+      !isDeepStrictEqual(contract.candidates?.find(c=>c.id===contract.id)?.company_decision,seal))throw new Error('Git declaration does not bind retained decision');
+  }
+  call('git',['diff','--quiet',merge.head_sha,merge.merge_sha,'--',...receipt.decision.input.scope.paths]);
+  const measurement=verifyMeasurementDelivery(receipt,{stateRoot,root,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
+  if(!isDeepStrictEqual(measurement,receipt.followup))throw new Error('Retained measurement delivery changed');
+  return merge;
 }
 
 export async function bindExistingRun({stateRoot,id,autopilotRunId,call=run,cwd=ROOT,now=new Date(),currentCandidates}) {
