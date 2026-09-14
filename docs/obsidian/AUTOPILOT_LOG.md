@@ -3969,3 +3969,5 @@ Company候補はcontent:ai-visibility-gap（優先度35.7550875）と第三者�
 障害案内はobserve profileで直近48時間・最大49行を1回だけ読み、36行を保存。最新21:00:25 UTCは2時間以内のinactive・eligible=0/errors=0。確認間隔は約24.04時間で48時間超の空白なし。既知の初回失敗1行とnull件数を保持し、新たなactive案内・全端末到達・法的通知完了を推定していない。task134への再加点なし。
 
 監視Issue1379は06:00主系の前、01:46 JSTに作成された当日記録待ちだった。既存health-intake経路で記録し、回復時のcloseは元の監視へ任せる。Codex実費と金銭予測は観測不能でnull、Claude実費台帳へ推計や0ドルを追記していない。
+
+運用記録PR: #1386。事業施策はno_artifactのまま。Local SEOは281 HTML・0 errors/0 warnings、台帳・権限・予算・生成表・静的レイアウト検査は成功。最終HEADのCIと配信結果はPRおよび私的実行証拠へ保存する。
