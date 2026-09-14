@@ -1184,7 +1184,7 @@
       "close_check": {
         "kind": "manual",
         "params": {
-          "observed": "2026-09-13、simplememo-4のACTIVE予約・対象スレッド・時刻・PR⑥の対象と期限を保存後に読み戻し確認。9/17の実測取得・確定評価は未実施。予約保存は自然起動や評価完了の証拠ではない。",
+          "observed": "2026-09-14 19:02:35 JST、simplememo-4のheartbeatが対象タスクへ自然起動し、その実行で検証済みiOS PR515を19:03:06にマージした。一時的な15分間隔での担当予約の起動証拠。通常の日次時刻での起動や9/17のPR⑥実測取得・確定評価は未確認。対象実験はrunning・5項目未取得を維持。",
           "reviewer": "ai"
         }
       },
@@ -1193,7 +1193,7 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-04",
       "closed_jst": null,
-      "evidence": "2026-09-13、simplememo-4のACTIVE予約・対象スレッド・時刻・PR⑥の対象と期限を保存後に読み戻し確認。9/17の実測取得・確定評価は未実施。予約保存は自然起動や評価完了の証拠ではない。（リポジトリからは実測を検査できない。証跡の照合後、AI担当が閉じる）",
+      "evidence": "2026-09-14、simplememo-4の15分間隔でのheartbeat自然起動と、その実行でのiOS PR515マージを確認。予約の存在だけでなく起動経路を確認できたが、PR⑥の取得・評価は9/17まで未実施。通常の日次時刻での起動も未確認。対象の実測・評価の証跡を照合した後、AI担当が閉じる。",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1223,7 +1223,7 @@
         "routine_end_to_end_verified": false,
         "private_metrics_published": false,
         "current_execution": {
-          "updated_jst": "2026-09-13",
+          "updated_jst": "2026-09-14",
           "automation_id": "simplememo-4",
           "target_thread_id": "01a099ad-2092-7d91-a603-f14ded160ef7",
           "schedule_jst": [
@@ -1231,9 +1231,18 @@
             "19:45"
           ],
           "status_observed": "ACTIVE",
-          "evidence": "2026-09-13、simplememo-4のACTIVE予約・対象スレッド・時刻・PR⑥の対象と期限を保存後に読み戻し確認。9/17の実測取得・確定評価は未実施。予約保存は自然起動や評価完了の証拠ではない。",
+          "evidence": "2026-09-14T10:02:35.861Zのsimplememo-4 heartbeatがこの対象タスクへ到着し、その実行で2026-09-14T10:03:06Zにsimplememo-ios PR515を検証済みheadでマージした。自然起動の確認範囲は一時的な15分間隔の設定。通常日次時刻とPR⑥のD+14取得・評価は未確認。",
           "prior_runtime": "旧Coworkとsimplememo-2は停止を維持。ai-90は予約不在を確認。",
-          "natural_execution_verified": false,
+          "natural_execution_verified": true,
+          "natural_execution_scope": "same heartbeat automation at temporary 15-minute interval; not ordinary daily schedule or PR TIMES evaluation",
+          "natural_execution_observed_at": "2026-09-14T10:02:35.861Z",
+          "ordinary_schedule_execution_verified": false,
+          "temporary_schedule_record": {
+            "date_jst": "2026-09-14",
+            "interval_minutes": 15,
+            "owner_requested_until_jst": "2026-09-14T21:04:23+09:00",
+            "restore_instruction_saved": "最初の期限後実行で通常の07:45・19:45 JSTへ戻し、未完了のD+14評価を継続する"
+          },
           "history": {
             "updated_jst": "2026-09-13",
             "automation_id": "ai-90",
