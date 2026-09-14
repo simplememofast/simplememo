@@ -19,10 +19,28 @@ function privateFile(file,root) {
 function validateBody(e,{stateRoot,url,notBefore,now,exactRedirect=false}) {
   const at=Date.parse(e?.fetched_at);
   assert(Number.isFinite(at) && at>=Date.parse(notBefore) && at<=now.getTime(),'invalid source verification time');
-  assert.equal(e.requested_url,url);assert.equal(e.http_status,200);
+  assert.equal(e.requested_url,url);
   const final=new URL(e.final_url),original=new URL(url);
   assert(['http:','https:'].includes(final.protocol) && !final.username && !final.password && final.hostname===original.hostname,'unexpected source redirect');
   if(exactRedirect)assert.equal(final.href,original.href,'owned-page evidence must verify the actual target');
+  if(e.kind==='browser_visible_text') {
+    // Viewed sources are research observations, never HTTP or delivery receipts.
+    assert(!exactRedirect,'browser research cannot verify owned-page resolution');
+    assert.equal(e.http_status,null,'browser observation cannot infer an HTTP status');
+    assert.equal(final.href,original.href,'browser evidence must observe the exact source URL');
+    const bytes=fs.readFileSync(privateFile(e.document_file,stateRoot));
+    assert(bytes.length>0 && bytes.length<=5*1024*1024,'invalid retained browser document');
+    assert.equal(hash(bytes),e.document_sha256,'retained browser document changed');
+    const d=JSON.parse(bytes);
+    assert.equal(d.schema_version,1);assert.equal(d.method,'cua_dom_inner_text');
+    assert.equal(d.url,url);assert.equal(d.observed_at,e.fetched_at);
+    assert(typeof d.title==='string' && d.title.trim().length>0,'browser document title required');
+    assert(typeof d.text==='string' && d.text.trim().length>=20,'visible browser body required');
+    assert.equal(d.observation,'agent_inspected_visible_body','explicit browser observation required');
+    return;
+  }
+  assert(e.kind===undefined || e.kind==='http_html','unknown source evidence kind');
+  assert.equal(e.http_status,200);
   const bytes=fs.readFileSync(privateFile(e.html_file,stateRoot));
   assert(bytes.length>0 && bytes.length<=5*1024*1024,'invalid retained source body');
   assert.equal(hash(bytes),e.html_sha256,'retained source body changed');
@@ -139,7 +157,7 @@ export function recordMentionReview({stateRoot,reviewFile,now=new Date(),mention
       return{status:'already_recorded',id};
     }
     atomicJson(file,{schema_version:1,id,recorded_at:now.toISOString(),review:r,
-      interpretation:'Source-specific agent review, backed by retained body bytes. Semantic conclusions are recorded judgments, not automatic truth checks. No outreach, publication, revenue or native-run credit.'});
+      interpretation:'Source-specific agent review, backed by retained body bytes. Browser-visible text is an agent-observed document, not an HTTP response or publication receipt. Semantic conclusions are recorded judgments, not automatic truth checks. No outreach, publication, revenue or native-run credit.'});
     return{status:'recorded',id,decision:r.decision,formal_gain_claimed:false};
   } finally {release();}
 }
