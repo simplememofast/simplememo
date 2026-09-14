@@ -2,7 +2,7 @@
 
 User-directed follow-up on 2026-09-15: 「作成して」. Complete editorial draft, two inspected original screenshots, and a manual starter. Planned destination: `/obsidian/second-brain/`.
 
-This draft has no live route, sitemap entry, publication date, shipped queue update, native-run credit or experiment change. Keep the PR draft while publication scope and the existing prospective measurement conflict remain unresolved. The earlier native result remains attempted/no_artifact; this user-requested draft does not retrospectively repair it.
+The user explicitly requested publication in a subsequent turn (公開までお願い). PR #1391 now includes the live page implementation, reciprocal links, original images and downloadable starter. The existing autonomous measurement gate and experiment scopes remain unchanged; publication is a user-directed content change without an independently attributable experiment outcome. The earlier native result remains attempted/no_artifact; this user-requested draft does not retrospectively repair it.
 
 ## Files
 
@@ -16,6 +16,6 @@ PARA's four categories and CODE terminology were checked against the original Fo
 
 The original `project-open.png` and `archive-links-updated.png` were visually checked and copied without editing. The entire private evidence directory, owner configuration and personal vault were not copied.
 
-## Before publishing
+## Publication follow-up
 
-Resolve the recorded measurement coexistence policy through the ordinary authorized review. Implement the site page with its Article metadata, matching FAQ markup if used, existing CSS/CTA conventions, OG asset, and reciprocal link from `/methods/second-brain/`. Check overlap with the existing concept article. Run the existing SEO, generated-file and browser checks on the actual page. This editorial PR alone does not satisfy that publication work.
+The explicit user request authorizes publication of the article, not modification of protected measurement policy. The page has Article/FAQ metadata, existing CSS/CTA conventions, an OG asset, and a reciprocal concept-article link. Publication checks and proof are recorded in `docs/obsidian/evidence/second-brain-20260915.md`. The earlier native scheduled attempt remains no_artifact, and its Company run remains unfinished.
