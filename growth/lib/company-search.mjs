@@ -10,7 +10,7 @@ import {selectComparison} from './comparison.mjs';
 import {inspectSnapshot} from '../../scripts/autopilot-data.mjs';
 import {validateOptions} from '../scripts/export-analytics.mjs';
 import {retainedDaily} from './daily-gsc-handoff.mjs';
-import {experimentScope} from './experiment-overlap.mjs';
+import {experimentScope,nonexclusiveObservation} from './experiment-overlap.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -126,12 +126,12 @@ export function companySearch({stateRoot, now = new Date(), fallback = latestSna
 
 // Reuse the original ledger's explicit, legacy-list and global scope rules.
 // External/unenumerated records remain visible; do not invent a local page.
-function selectionScope(page, pages) {
+function selectionScope(page, pages, record=null, {now=new Date(),followup=false}={}) {
   try {
     if (typeof page !== 'string' && !Array.isArray(page)) throw new Error('Missing experiment page scope');
     const explicit = pages ?? (Array.isArray(page) ? page : undefined);
     if (explicit !== undefined && (!Array.isArray(explicit) || explicit.some(p => typeof p !== 'string'))) throw new Error('Invalid experiment pages');
-    const scope = experimentScope({page: typeof page === 'string' ? page : '', pages: explicit});
+    const scope = experimentScope({page: typeof page === 'string' ? page : '', pages: explicit,change_paths:record?.change_paths});
     const literals = explicit ?? (Array.isArray(page) ? page : [page]);
     const own = value => {
       if (typeof value !== 'string' || !/^(\/|https?:\/\/)/.test(value)) return null;
@@ -139,16 +139,17 @@ function selectionScope(page, pages) {
       return ['http:', 'https:'].includes(url.protocol) && url.hostname === 'simplememofast.com' ? toPath(value) : null;
     };
     const normalized = [...new Set([...scope.pages, ...literals].map(own).filter(Boolean))];
-    return {available: true, global: scope.global, pages: normalized,
+    const observational=record?nonexclusiveObservation(record,{now,followup}):false;
+    return {available: true, global: observational?false:scope.global, pages: observational?[]:normalized,
       unenumerated: !scope.global && normalized.length === 0};
   } catch { return {available: false, global: false, pages: [], unenumerated: true}; }
 }
 
 function selectionOwnership(growth) {
   const experiments = (Array.isArray(growth.experiments) ? growth.experiments : [])
-    .filter(e => e.status === 'RUNNING').map(e => ({id: e.id, scope: selectionScope(e.affected_area, e.affected_pages)}));
+    .filter(e => e.status === 'RUNNING').map(e => ({id: e.id, scope: selectionScope(e.affected_area, e.affected_pages, e.ownership_record)}));
   const reviews = (Array.isArray(growth.followups?.reviews) ? growth.followups.reviews : [])
-    .filter(r => r.status === 'RUNNING').map(r => ({id: r.id, scope: selectionScope(r.parent?.page, r.parent?.pages)}));
+    .filter(r => r.status === 'RUNNING').map(r => ({id: r.id, scope: selectionScope(r.parent?.page, r.parent?.pages, r.parent, {followup:true})}));
   const scopesReadable = [...experiments, ...reviews].every(e => e.scope.available);
   return {experiments, reviews,
     known: Array.isArray(growth.experiments) && Array.isArray(growth.followups?.reviews) && scopesReadable};

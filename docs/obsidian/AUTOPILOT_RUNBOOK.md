@@ -40,7 +40,8 @@
    Simulator/実機の証跡なしに新規追加しない。サードパーティアプリは
    このLinux環境で実際に動かせるなら動かして検証する（例: PR #470 の
    Obsidian/Logseqデスクトップ検証）。検証環境は記事末に正直に書く。
-5. **実験に触らない。** `growth/experiments/experiments.json` で running の実験対象
+5. **実験に触らない。** 2026-09-15の明示承認で移行した非排他的な全サイト観測は、`docs/growth/measurement-coexistence-policy.md`と台帳の`coexistence`発効時刻に従って区別する。未移行・frozen・継続評価中の所有は保持し、指標名が違うだけでは重ねない。
+    `growth/experiments/experiments.json` で running の実験対象
    ページのタイトル・ディスクリプション・主要コンテンツは変更しない。
    特に `/obsidian/` ハブ本体は `monitor-2026-08-09-obsidian-ctr`（評価日 2026-09-13）
    が終わるまで作り替え禁止（関連リンクの追記のみ可）。

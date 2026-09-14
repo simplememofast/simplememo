@@ -84,6 +84,7 @@ p();
 p('同じページの複数変更は交絡要因。指標が違っても独立した因果効果とは断定しない。');
 p(`全体に影響する実験: ${overlap.global.join(', ') || 'なし'}。`);
 p(`URLで列挙できない範囲: ${overlap.unenumerated.join(', ') || 'なし'}。`);
+for (const item of overlap.observations || []) p(`非排他的な全サイト観測: ${item.id}（${item.effective_at}以降）。単独因果は判定しない。`);
 for (const item of overlap.overlaps) p(`- \`${item.page}\`: ${item.experiments.join(', ')}`);
 for (const change of ledger.measurement_changes || []) p(`- ${change.date}: ${change.note}`);
 p();

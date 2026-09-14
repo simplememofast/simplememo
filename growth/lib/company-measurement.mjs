@@ -11,7 +11,7 @@ import {companySearch} from './company-search.mjs';
 import {companyAio,validateAioBytes} from './company-aio.mjs';
 import {period,gscBaseline,gscEvidence,reviewEvidence,privateEvidenceReference,fingerprint} from './experiment-evidence.mjs';
 import {validate,isOpen,saveLedger} from './ledger.mjs';
-import {experimentScope} from './experiment-overlap.mjs';
+import {ownershipConflict,changeScope} from './experiment-overlap.mjs';
 import {growthFollowups} from './company-growth-followup.mjs';
 import {decisionTrace,decisionCommitment} from './company-decision.mjs';
 import {nativeOrigin} from './company-origin.mjs';
@@ -33,13 +33,19 @@ function owned(file,dir) {
   assert(real.startsWith(fs.realpathSync(dir)+path.sep)&&st.isFile()&&st.uid===process.getuid()&&!(st.mode&0o077),'owned private measurement input required');
   return real;
 }
-function available(page,experiments,followups=[],except=null) {
-  for(const e of [...experiments.filter(isOpen),...followups.filter(r=>r.status==='RUNNING').map(r=>({...r.parent,id:r.id}))]) {
-    if(e.id===except)continue;
-    const s=experimentScope(e);
-    assert(!s.global&&!s.pages.includes(normalized(page)),'target is owned by an active experiment/follow-up: '+e.id);
+function available(page,experiments,followups=[],except=null,{now=new Date(),paths}={}) {
+  const target=paths?changeScope(page,paths):{pages:[normalized(page)],global:false};
+  for(const entry of [...experiments.filter(isOpen).map(e=>({e,followup:false})),...followups.filter(r=>r.status==='RUNNING').map(r=>({e:{...r.parent,id:r.id,coexistence:undefined},followup:true}))]) {
+    if(entry.e.id===except)continue;
+    assert(!ownershipConflict(entry.e,target,{now,followup:entry.followup}),'target is owned by an active experiment/follow-up: '+entry.e.id);
   }
 }
+export function verifyMeasurementOwnership(plan,{stateRoot,root=ROOT,now=new Date(),experiments=ledger(root).experiments,except=null}={}) {
+  if(plan.schema_version<2)return;
+  validLedger({experiments});
+  available(plan.experiment.page,experiments,growthFollowups({stateRoot,now}).reviews,except,{now,paths:plan.experiment.change_paths});
+}
+
 function stash(dir,value) {
   const bytes=Buffer.isBuffer(value)?value:Buffer.from(JSON.stringify(value,null,2)+'\n');
   const sha256=fingerprint(bytes),file='measurement-source-'+sha256+'.json';
@@ -55,7 +61,7 @@ function sourceBytes(plan,dir) {
 export function loadMeasurement({stateRoot,id,sha256}) {
   assert(idOk(id),'invalid measurement ID');const dir=privateState(stateRoot);
   const p=read(owned(path.join(dir,'measurement-plan-'+id+'.json'),dir));
-  assert.equal(p.schema_version,1);assert.equal(p.id,id);
+  assert([1,2].includes(p.schema_version));assert.equal(p.id,id);
   assert.equal(p.sha256,digest(Object.fromEntries(Object.entries(p).filter(([k])=>k!=='sha256'))),'measurement plan changed');
   if(sha256)assert.equal(p.sha256,sha256,'decision measurement commitment changed');
   sourceBytes(p,dir);validLedger({experiments:[p.experiment]});return p;
@@ -68,7 +74,8 @@ export function prepareMeasurement({stateRoot,evidenceFile,root=ROOT,now=new Dat
     assert(text(input.hypothesis)&&text(input.decision_rule),'prospective hypothesis and interpretation rule required');
     const original=ledger(root);validLedger(original);
     assert(!original.experiments.some(e=>e.id===input.id),'experiment ID already exists; never retrofit a plan');
-    available(input.page,original.experiments,growthFollowups({stateRoot:dir,now}).reviews);
+    changeScope(input.page,input.change_paths);
+    available(input.page,original.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:input.change_paths});
     let snapshot,baseline,contract,source,metric=input.target_metric;
     if(input.source==='gsc') {
       assert(['ctr','position','impressions'].includes(metric),'exact GSC page metric required');
@@ -105,14 +112,14 @@ export function prepareMeasurement({stateRoot,evidenceFile,root=ROOT,now=new Dat
     assert(Date.parse(input.evaluation_at)-Date.parse(input.post_end)>=contract.lag_days*DAY,'evaluation must respect source lag');
     assert(Number.isSafeInteger(input.min_sample?.threshold)&&input.min_sample.threshold>0&&text(input.min_sample.rationale),'explicit positive sample floor and rationale required');
     assert(Array.isArray(input.guardrails)&&input.guardrails.length>0&&input.guardrails.every(text),'concrete guardrails required');
-    const e={id:input.id,page:input.page,type:'company_'+input.source+'_treatment',hypothesis:input.hypothesis,source:{pr:null,commit:null},
+    const e={id:input.id,page:input.page,change_paths:input.change_paths,type:'company_'+input.source+'_treatment',hypothesis:input.hypothesis,source:{pr:null,commit:null},
       started_at:input.started_at,evaluation_at:input.evaluation_at,status:'running',target_metric:metric,baseline:{...baseline,source:source.kind+':'+source.sha256},
       measurement_contract:contract,measurement_scope:input.source==='gsc'?contract.scope:undefined,
       control:input.control,min_sample:input.min_sample,stop_conditions:input.stop_conditions,guardrails:input.guardrails,
       decision_rule:input.decision_rule,post_window:post,decision:null,evaluated_at:null,notes:[]};
     validLedger({experiments:[e]});
     if(input.source==='gsc')gscBaseline(e);
-    const plan={schema_version:1,id:input.id,prepared_at:now.toISOString(),source,experiment:e};plan.sha256=digest(plan);
+    const plan={schema_version:2,id:input.id,prepared_at:now.toISOString(),source,experiment:e};plan.sha256=digest(plan);
     const file=path.join(dir,'measurement-plan-'+input.id+'.json');
     assert(!fs.existsSync(file),'measurement plan is immutable; use a new ID before deciding');atomicJson(file,plan);
     return{status:'prepared',measurement:{id:plan.id,sha256:plan.sha256},baseline:e.baseline,post_window:post,evaluation_at:e.evaluation_at,
@@ -124,6 +131,7 @@ export function verifyMeasurementInput(receipt,{stateRoot,input=receipt.decision
   assert(input.measurement,'prospective Growth measurement plan required for content');
   const p=loadMeasurement({stateRoot,...input.measurement});
   assert.equal(p.experiment.page,input.scope.artifact,'measurement target differs from action');
+  if(p.schema_version>=2)assert.deepEqual([...input.scope.paths].filter(x=>x!==EXPERIMENTS).sort(),[...p.experiment.change_paths].sort(),'measurement change_paths differ from declared action');
   assert(Date.parse(p.prepared_at)<=Date.parse(at),'measurement must precede the decision');return p;
 }
 const rowFor=(p,r)=>({...p.experiment,company_measurement:{schema_version:1,plan_sha256:p.sha256,company_run_id:r.id,decision_sha256:r.decision.sha256}});
@@ -138,10 +146,11 @@ export async function registerMeasurement({stateRoot,id,root=ROOT,now=new Date()
     assert.equal(r.bound_autopilot_run_id,r.decision.input.run_id);assert(r.bound_declaration_sha,'declaration SHA required');
     assert(p.experiment.started_at>=date(now,p.experiment.measurement_contract.time_zone),'prospective launch date has passed');
     const l=ledger(root),e=rowFor(p,r);validLedger(l);
+    verifyMeasurementOwnership(p,{stateRoot:dir,root,now,experiments:l.experiments,except:e.id});
     const old=l.experiments.find(x=>x.id===e.id);if(old){assert.deepEqual(old,e,'registered experiment changed');return{status:'already_registered',id:e.id};}
     assert.equal(git(root,['status','--porcelain']),'','registration must precede implementation from a clean declaration');
     assert.equal(git(root,['rev-parse','HEAD']),r.bound_declaration_sha,'register on the exact bound declaration');
-    available(e.page,l.experiments,growthFollowups({stateRoot:dir,now}).reviews);
+    available(e.page,l.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:e.change_paths});
     l.experiments.push(e);validLedger(l);saveLedger(l,path.join(root,EXPERIMENTS));
     return{status:'registered',id:e.id,path:EXPERIMENTS,next:'Commit only the experiment registry before changing the declared page. Normal original contract/CI/claim gates still apply.'};
   } finally {release();}
@@ -156,7 +165,14 @@ export function verifyMeasurementDelivery(receipt,{stateRoot,root=ROOT,head,merg
   assert.deepEqual(show(registration).find(e=>e.id===p.id),expected,'registration differs from sealed prospective plan');
   assert.deepEqual(show(head).find(e=>e.id===p.id),expected,'measurement contract changed after registration');
   assert.deepEqual(show(mergeSha).find(e=>e.id===p.id),expected,'merged measurement differs from the validated head');
-  const changed=call('git',['diff-tree','--no-commit-id','--name-only','-r',registration]).trim().split('\n');
+  if(p.schema_version>=2) {
+    const at=new Date(mergedAt);
+    for(const sha of [head,mergeSha])verifyMeasurementOwnership(p,{stateRoot,root,now:at,experiments:show(sha),except:p.id});
+    const actual=call('git',['diff','--name-only',registration,head]).trim().split('\n').filter(Boolean);
+    const bookkeeping=new Set(['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md']);
+    assert(actual.every(file=>bookkeeping.has(file)||p.experiment.change_paths.includes(file)),'undeclared measurement change path');
+  }
+  const changed=call('git',['diff-tree' ,'--no-commit-id','--name-only','-r',registration]).trim().split('\n');
   assert.deepEqual(changed,[EXPERIMENTS],'commit the experiment registry alone before implementation');
   call('git',['diff','--quiet',r.bound_declaration_sha,registration,'--',...r.decision.input.scope.paths.filter(p=>p!==EXPERIMENTS)]);
   assert.equal(date(new Date(mergedAt),p.experiment.measurement_contract.time_zone),p.experiment.started_at,'actual launch day differs from prospective treatment date; do not shift the baseline retrospectively');

@@ -39,7 +39,7 @@ function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={})
   const page='/obsidian/fixture/',target='obsidian/fixture/index.html';fs.mkdirSync(path.join(root,'obsidian/fixture'),{recursive:true});fs.writeFileSync(path.join(root,target),'before\n');
   git('add','.');git('commit','-qm','fixture base');const sourceCommit=git('rev-parse','HEAD');
   const now=new Date('2026-09-14T01:00:00Z'),id=randomUUID();
-  const input={id:'fixture-measurement',page,source,target_metric:source==='gsc'?'ctr':'ai_citations',
+  const input={id:'fixture-measurement',page,change_paths:[target],source,target_metric:source==='gsc'?'ctr':'ai_citations',
     started_at:'2026-09-15',post_start:source==='gsc'?'2026-09-16':'2026-10-08',post_end:'2026-10-14',evaluation_at:source==='gsc'?'2026-10-17':'2026-10-15',
     hypothesis:'The specific owned-page answer will improve its measured search or citation visibility.',
     decision_rule:'Use descriptive comparisons and original guardrails; low volume or confounding means inconclusive.',
@@ -63,7 +63,7 @@ function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={})
     const r={schema_version:3,id,source_commit:sourceCommit,observation_fingerprint:'a'.repeat(64),candidates:[candidate,{id:'other'}],observed_at:now.toISOString(),started_at:now.toISOString(),status:'observed_decision_requires_execution',
       execution_boundary:{stopped:false},route,stages:{}};
     write(receiptFile,r);const df=path.join(stateRoot,'decision.json');write(df,decisionInput);
-    prepareCompanyDecision({stateRoot,id,evidenceFile:df,now,currentCandidates:r.candidates});
+    prepareCompanyDecision({stateRoot,id,evidenceFile:df,now,currentCandidates:r.candidates,root});
     write(path.join(root,'data/decision-intents/fixture-contract.json'),{id:'fixture-contract',run_id:'fixture-run',candidates:[{id:'fixture-contract',company_decision:decisionCommitment(read(receiptFile))}]});
     // Declaration transport/selection has independent real-git tests in
     // company-decision.test. This fixture tests the subsequent registry order.
@@ -264,4 +264,23 @@ test('a committed manual evaluation remains available for analysis but does not 
   const out=measurementHandoffEvidence(f.options);assert.deepEqual(out.failures,[]);
   assert.deepEqual(out.events.map(e=>e.milestone),['verified_growth_delivery']);
   assert.equal(out.skipped[0].milestone,'reviewed_growth_measurement');assert.equal(out.skipped[0].reason,'not_a_claimed_native_event');
+});
+
+test('prospective observation coexistence admits a page but retains backlink ownership and later conflicts',async t=>{
+  const {contractHash}=await import('./experiment-coexistence.mjs');
+  const f=fixture(t),plan=f.prepare(),base=loadMeasurement({stateRoot:f.stateRoot,...plan.measurement}).experiment;
+  fs.rmSync(path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'));
+  const global={...base,id:'global-owner',page:'(サイト全体 + サイト外4面)'};delete global.change_paths;
+  global.coexistence={schema_version:1,experiment_id:global.id,from:'exclusive_intervention',to:'nonexclusive_observation',decided_at:'2026-09-13T00:00:00Z',effective_at:'2026-09-13T00:00:00Z',authorized_by:'user',authorization:{request:'反映させてデプロイ',thread_id:'01a0a1b9-4982-70f3-b2d6-eed77be68e26'},original_contract_sha256:contractHash(global),interpretation:'descriptive_only_no_isolated_causal_claim',reason:'Explicit synthetic transition preserves the original experiment contract.'};
+  const owner={...base,id:'hub-owner',page:'/hub/',change_paths:['hub/index.html']};
+  f.write(path.join(f.root,EXPERIMENTS),{experiments:[global,owner]});
+  f.input.change_paths=[f.target,'hub/index.html'];f.write(f.inputFile,f.input);assert.throws(f.prepare,/owned by an active/);
+  f.input.change_paths=[f.target];f.write(f.inputFile,f.input);
+  f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture global observation');
+  const r=f.bind();
+  const l=f.read(path.join(f.root,EXPERIMENTS));l.experiments.push({...base,id:'later-owner'});f.write(path.join(f.root,EXPERIMENTS),l);
+  await assert.rejects(()=>registerMeasurement({stateRoot:f.stateRoot,id:f.id,root:f.root,now:f.now}),/owned by an active/);
+  f.git('checkout','--',EXPERIMENTS);await registerMeasurement({stateRoot:f.stateRoot,id:f.id,root:f.root,now:f.now});f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture registration');
+  fs.writeFileSync(path.join(f.root,f.target),'after');fs.writeFileSync(path.join(f.root,'undeclared.html'),'unreported collateral change');f.git('add','.');f.git('commit','-qm','fixture undeclared change');
+  assert.throws(()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call}),/undeclared measurement change/);
 });
