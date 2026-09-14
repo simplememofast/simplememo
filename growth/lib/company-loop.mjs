@@ -108,7 +108,7 @@ export function prioritize(candidates) {
 export function experimentView(e, asOf) {
   // A legacy 'keep' decision can be administrative or inconclusive; it is not a WIN.
   const status = e.status === 'planned' ? 'PLANNED' : ['running', 'frozen'].includes(e.status) ? 'RUNNING'
-    : e.decision === 'revert' ? 'ROLLED_BACK' : 'INCONCLUSIVE';
+    : e.decision === 'revert' && !e.company_measurement ? 'ROLLED_BACK' : 'INCONCLUSIVE';
   return { id: e.id, hypothesis: e.hypothesis ?? null, evidence: e.evidence ?? null,
     action: e.type, date: e.started_at ?? null, affected_area: e.page, affected_pages: e.pages ?? null,
     baseline: e.baseline ?? null, primary_kpi: e.target_metric ?? null, secondary_kpi: e.secondary_metrics ?? [],

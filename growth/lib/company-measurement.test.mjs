@@ -8,7 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {ROOT,digest} from './company-metrics.mjs';
 import {prepareMeasurement,loadMeasurement,verifyMeasurementInput,registerMeasurement,verifyMeasurementDelivery,measurementComparison,evaluateMeasurement,measurementStatus,EXPERIMENTS} from './company-measurement.mjs';
 import {candidateDigest,decisionTrace,prepareCompanyDecision} from './company-decision.mjs';
-import {opportunities} from './company-loop.mjs';
+import {opportunities,experimentView} from './company-loop.mjs';
 import {measuresPageCtr} from './ledger.mjs';
 import {registerGrowthFollowup} from './company-growth-followup.mjs';
 
@@ -16,6 +16,11 @@ import {registerGrowthFollowup} from './company-growth-followup.mjs';
 const good=JSON.parse(execFileSync('python3',['-B','-c',`import importlib.util,json,sys
 spec=importlib.util.spec_from_file_location('fixtures',sys.argv[1]);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 print(json.dumps(m.CodexProbeTests().report()))`,path.join(ROOT,'scripts/codex-ai-visibility-probe.test.py')],{encoding:'utf8'}));
+test('a newly linked revert judgment is not reported as a completed code rollback',()=>{
+  const e={id:'fixture',page:'/fixture/',status:'evaluated',decision:'revert',company_measurement:{schema_version:1}};
+  assert.equal(experimentView(e,'2026-10-20').status,'INCONCLUSIVE');
+  assert.equal(experimentView({...e,company_measurement:undefined},'2026-10-20').status,'ROLLED_BACK','retain the explicitly compatible legacy view');
+});
 function fixture(t,{source='ai_citations',threshold=4}={}) {
   const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'company-measurement-'));fs.chmodSync(tmp,0o700);t.after(()=>fs.rmSync(tmp,{recursive:true,force:true}));
   const root=path.join(tmp,'repo'),stateRoot=path.join(tmp,'state');fs.mkdirSync(root);fs.mkdirSync(stateRoot,{mode:0o700});
