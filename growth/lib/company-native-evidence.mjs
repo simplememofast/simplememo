@@ -12,6 +12,22 @@ export function nativeThread(thread) {
     {encoding:'utf8',timeout:10000,stdio:['ignore','pipe','pipe']}));
 }
 
+// The same original-turn/gate proof applies to collection, delivered work and
+// reviewed measurements. An origin label or planned time is never sufficient.
+export function nativeEventEvidence(source,occurredAt,{now=new Date(),readThread=nativeThread}={}) {
+  const at=instant(occurredAt);
+  if(source?.state!=='native_execution_record'||source.automation_id!=='obsidian'||!Number.isFinite(at)||at>+now||
+    !UUID.test(source.thread_id??'')||!UUID.test(source.original_turn_id??'')||!/^[a-f0-9]{64}$/.test(source.gate_receipt_sha256??''))throw new Error('Invalid native event claim');
+  const state=readThread(source.thread_id),first=state?.original_turn,gate=state?.gate_receipt;
+  const end=first?.finished_at===null&&first.state==='in_progress'?+now:instant(first?.finished_at);
+  if(state?.thread_id!==source.thread_id||state.automation_id!=='obsidian'||state.original_turn_id!==source.original_turn_id||
+    first?.turn_id!==source.original_turn_id||gate?.admitted!==true||gate.thread_id!==source.thread_id||
+    gate.turn_id!==source.original_turn_id||gate.sha256!==source.gate_receipt_sha256||
+    !/^[a-f0-9]{64}$/.test(state.transcript_sha256??'')||
+    !(instant(first.started_at)<=instant(gate.observed_at)&&instant(gate.observed_at)<=at&&at<=end&&at<=instant(state.observed_at)))throw new Error('Native source mismatch');
+  return{native_transcript_sha256:state.transcript_sha256,thread_id:source.thread_id,original_turn_id:source.original_turn_id};
+}
+
 // Shared with the existing Goal wake verifier. A stored origin label alone
 // cannot prove that collection happened inside an admitted original turn.
 export function nativeCollections({stateRoot,since='1970-01-01T00:00:00Z',now=new Date(),readThread=nativeThread}) {
@@ -30,13 +46,8 @@ export function nativeCollections({stateRoot,since='1970-01-01T00:00:00Z',now=ne
       if(!states.has(source.thread_id)) {
         try {states.set(source.thread_id,readThread(source.thread_id));} catch {states.set(source.thread_id,null);}
       }
-      const state=states.get(source.thread_id),first=state?.original_turn,gate=state?.gate_receipt;
-      const end=first?.finished_at===null && first.state==='in_progress'?now.getTime():instant(first?.finished_at);
-      if(state?.thread_id!==source.thread_id || state.automation_id!=='obsidian' || state.original_turn_id!==source.original_turn_id ||
-        first?.turn_id!==source.original_turn_id || gate?.admitted!==true || gate.thread_id!==source.thread_id ||
-        gate.turn_id!==source.original_turn_id || gate.sha256!==source.gate_receipt_sha256 ||
-        !(instant(first.started_at)<=instant(gate.observed_at) && instant(gate.observed_at)<=at && at<=end && at<=instant(state.observed_at))) throw new Error('Native source mismatch');
-      rows.push({...row,native_transcript_sha256:state.transcript_sha256});
+      const proof=nativeEventEvidence(source,v.observed_at,{now,readThread:t=>states.get(t)});
+      rows.push({...row,native_transcript_sha256:proof.native_transcript_sha256});
     } catch {failures.push({file:row.file,reason:'native_origin_unavailable_or_mismatched'});}
   }
   return {rows:rows.sort((a,b)=>instant(a.event.observed_at)-instant(b.event.observed_at) || a.file.localeCompare(b.file)),failures};

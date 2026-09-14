@@ -14,6 +14,9 @@ import {validate,isOpen,saveLedger} from './ledger.mjs';
 import {experimentScope} from './experiment-overlap.mjs';
 import {growthFollowups} from './company-growth-followup.mjs';
 import {decisionTrace,decisionCommitment} from './company-decision.mjs';
+import {nativeOrigin} from './company-origin.mjs';
+import {nativeEventEvidence,nativeThread} from './company-native-evidence.mjs';
+import {verifyRetainedCompanyDelivery} from './company-proof.mjs';
 
 export const EXPERIMENTS='growth/experiments/experiments.json';
 const DAY=86400000,read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
@@ -178,8 +181,8 @@ function aioCohort({root,contract,start,end,now}) {
   }
   return [...runs.values()];
 }
-function linkedExperiment({stateRoot,id,root}) {
-  const e=ledger(root).experiments.find(e=>e.id===id);assert(e?.company_measurement?.schema_version===1,'not a prospectively linked Company experiment');
+function linkedExperiment({stateRoot,id,root,experiment}) {
+  const e=experiment??ledger(root).experiments.find(e=>e.id===id);assert(e?.company_measurement?.schema_version===1,'not a prospectively linked Company experiment');
   const p=loadMeasurement({stateRoot,id,sha256:e.company_measurement.plan_sha256});
   const r=read(owned(path.join(stateRoot,'runs',e.company_measurement.company_run_id+'.json'),stateRoot));
   decisionCommitment(r);
@@ -250,7 +253,7 @@ export function measurementComparison({stateRoot,id,root=ROOT,now=new Date(),sea
   return{status:'ready_for_decision',experiment_id:id,evidence,sample,sufficient,guardrails:e.guardrails,decision_rule:e.decision_rule,
     next:'Review confounders and guardrails, then evaluate-measurement with a private decision. Original claim/contract gates apply to any resulting code change; keep is not WIN.'};
 }
-export async function evaluateMeasurement({stateRoot,id,evidenceFile,root=ROOT,now=new Date()}) {
+export async function evaluateMeasurement({stateRoot,id,evidenceFile,root=ROOT,now=new Date(),origin=nativeOrigin}) {
   const dir=privateState(stateRoot),release=acquireLock(dir);if(!release)return{status:'busy'};
   try {
     const review=read(owned(evidenceFile,dir));
@@ -259,7 +262,7 @@ export async function evaluateMeasurement({stateRoot,id,evidenceFile,root=ROOT,n
     assert(Array.isArray(review.guardrail_findings)&&review.guardrail_findings.length===e.guardrails.length&&review.guardrail_findings.every(text),'review each registered guardrail');
     assert(text(review.confounders),'review concurrent changes and source limitations');
     const result=measurementComparison({stateRoot:dir,id,root,now,decision:review.decision,rationale:review.rationale});
-    const evidence={...result.evidence,agent_review:{...review,sample:result.sample,reviewed_at:now.toISOString()}};
+    const evidence={...result.evidence,agent_review:{...review,sample:result.sample,reviewed_at:now.toISOString(),native_origin:origin()}};
     const ref=await privateEvidenceReference(evidence,{directory:path.join(dir,'experiment-evidence'),experimentId:id,decision:review.decision,evaluatedAt:date(now)});
     const l=ledger(root),target=l.experiments.find(x=>x.id===id);assert.deepEqual(target,e,'experiment changed during evaluation');
     Object.assign(target,{status:'evaluated',decision:review.decision,evaluated_at:date(now),evidence:ref});
@@ -311,4 +314,61 @@ function evaluatedResult(e,p,{stateRoot,now}) {
   assert.deepEqual(v.scope,e.measurement_contract.scope);assert.equal(v.agent_review?.decision,e.decision);
   const at=Date.parse(v.agent_review.reviewed_at);assert(Number.isFinite(at)&&at<=+now&&date(new Date(at))===e.evaluated_at,'invalid retained evaluation time');
   return{experiment_id:e.id,decision:e.decision,evidence_sha256:ref.sha256,reviewed_at:v.agent_review.reviewed_at,page:e.page};
+}
+
+// A Goal receives already committed evidence from its existing owner. This is
+// neither another experiment evaluator nor a claim of a causal Growth win.
+export function measurementHandoffEvidence({stateRoot,root=ROOT,now=new Date(),readThread=nativeThread,excludeIdentities=[],
+  call=(name,args)=>execFileSync(name,args,{cwd:root,encoding:'utf8',timeout:60000,maxBuffer:8*1024*1024,stdio:['ignore','pipe','pipe']}),
+  readCanonical=()=>({sha:git(root,['rev-parse','origin/main']),ledger:JSON.parse(git(root,['show','origin/main:'+EXPERIMENTS]))})}={}) {
+  const dir=privateState(stateRoot),events=[],failures=[],skipped=[];
+  const canonical=readCanonical();assert.match(canonical.sha,/^[a-f0-9]{40}$/);validLedger(canonical.ledger);
+  const states=new Map();
+  const received=new Set(excludeIdentities);
+  const thread=id=>{if(!states.has(id)){assert(states.size<64,'bounded native verification capacity exceeded');try{states.set(id,readThread(id));}catch{states.set(id,null);}}return states.get(id);};
+  const deliveries=new Set();
+  const admit=(candidate,claimedNative,receipt)=>{
+    if(received.has(candidate.identity)){skipped.push({experiment_id:candidate.experiment_id,milestone:candidate.milestone,reason:'already_received_identity'});return;}
+    if(!claimedNative){skipped.push({experiment_id:candidate.experiment_id,milestone:candidate.milestone,reason:'not_a_claimed_native_event'});return;}
+    try {
+      if(!deliveries.has(receipt.id)){verifyRetainedCompanyDelivery(receipt,{stateRoot:dir,root,call});deliveries.add(receipt.id);}
+    }catch{failures.push({experiment_id:candidate.experiment_id,milestone:candidate.milestone,reason:'original_delivery_reverification_failed'});return;}
+    try {
+      const proof=nativeEventEvidence(candidate.native_origin,candidate.occurred_at,{now,readThread:thread});
+      events.push({...candidate,native_proof:proof,source_main_sha:canonical.sha});
+    }catch{failures.push({experiment_id:candidate.experiment_id,milestone:candidate.milestone,reason:'native_origin_unavailable_or_mismatched'});}
+  };
+  for(const e of canonical.ledger.experiments.filter(e=>e.company_measurement)) {
+    let linked;
+    try {
+      linked=linkedExperiment({stateRoot:dir,root,id:e.id,experiment:e});
+      const {r,p}=linked,merge=r.evidence_of_completion?.merge;
+      assert(r.schema_version>=3&&decisionTrace(r).state==='verified','prospective verified delivery required');
+      assert.match(merge?.merge_sha??'',/^[a-f0-9]{40}$/);assert.match(merge.head_sha??'',/^[a-f0-9]{40}$/);
+      assert(Number.isSafeInteger(merge.pr)&&merge.pr>0&&Number.isSafeInteger(merge.validation_run)&&merge.validation_run>0,'exact verified PR and CI identity required');
+      git(root,['merge-base','--is-ancestor',merge.merge_sha,canonical.sha]);
+      const finished=Date.parse(r.finished_at),merged=Date.parse(merge.merged_at);
+      assert(Number.isFinite(finished)&&finished<=+now&&merged<=finished&&Date.parse(r.decision.recorded_at)<=merged,'delivery chronology required');
+      assert.equal(r.followup.experiment_id,e.id);assert.equal(r.followup.state,'registered_waiting_for_mature_evidence');
+      const receiptBytes=fs.readFileSync(owned(path.join(dir,'runs',r.id+'.json'),dir));
+      admit({milestone:'verified_growth_delivery',experiment_id:e.id,occurred_at:r.finished_at,native_origin:r.origin_proof,
+        identity:digest({experiment:e.id,decision:r.decision.sha256,merge:merge.merge_sha}),
+        evidence:{company_run_id:r.id,receipt_file:'runs/'+r.id+'.json',receipt_sha256:fingerprint(receiptBytes),decision_sha256:r.decision.sha256,
+          plan_sha256:p.sha256,merge_sha:merge.merge_sha,head_sha:merge.head_sha,pr:merge.pr,validation_run:merge.validation_run,page:e.page,source:p.source.kind}},
+        r.route==='actions'&&r.origin==='codex-automation',r);
+    }catch{failures.push({experiment_id:e.id,milestone:'verified_growth_delivery',reason:'prospective_delivery_evidence_unavailable_or_mismatched'});continue;}
+    if(e.status!=='evaluated')continue;
+    try {
+      const result=evaluatedResult(e,linked.p,{stateRoot:dir,now});
+      const bundle=read(owned(path.join(dir,'experiment-evidence',e.evidence.artifact),dir)),review=bundle.evidence.agent_review;
+      assert(Date.parse(linked.r.finished_at)<=Date.parse(result.reviewed_at)&&date(new Date(result.reviewed_at))>=e.evaluation_at,'evaluation must follow delivered treatment and original due date');
+      admit({milestone:'reviewed_growth_measurement',experiment_id:e.id,occurred_at:result.reviewed_at,native_origin:review.native_origin,
+        identity:digest({experiment:e.id,evidence:result.evidence_sha256}),
+        evidence:{...result,plan_sha256:linked.p.sha256,evidence_file:'experiment-evidence/'+e.evidence.artifact,
+          source:linked.p.source.kind,post_window:e.post_window,interpretation:'Admitted source-specific review, not an automatic WIN or completed follow-on action.'}},
+        review.native_origin?.state==='native_execution_record',linked.r);
+    }catch{failures.push({experiment_id:e.id,milestone:'reviewed_growth_measurement',reason:'evaluated_evidence_unavailable_or_mismatched'});}
+  }
+  events.sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at)||a.identity.localeCompare(b.identity));
+  return{events,failures,skipped,scope:'Committed prospective Growth evidence plus original native turn/gate proof; not a formal rate or completion claim.'};
 }
