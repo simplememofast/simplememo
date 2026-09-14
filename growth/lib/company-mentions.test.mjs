@@ -107,6 +107,53 @@ function resolutionFixture(t) {
   const resolutionFile=path.join(f.stateRoot,'resolution.json');atomicJson(resolutionFile,resolution);
   return {...f,now:new Date('2026-09-14T05:03:00Z'),parent,resolution,resolutionFile,body};
 }
+function browserReviewFixture(t) {
+  const f=reviewFixture(t),document_file=path.join(f.stateRoot,'browser-visible.json');
+  const document={schema_version:1,method:'cua_dom_inner_text',url:f.review.url,title:'Source profile',
+    text:'SimpleMemo appears here with a link to the existing product website.',
+    observed_at:f.review.evidence.fetched_at,observation:'agent_inspected_visible_body'};
+  atomicJson(document_file,document);
+  const evidence={kind:'browser_visible_text',requested_url:f.review.url,final_url:f.review.url,http_status:null,
+    fetched_at:document.observed_at,document_file,document_sha256:hash(fs.readFileSync(document_file))};
+  f.review.evidence=evidence;atomicJson(f.reviewFile,f.review);
+  return {...f,document,document_file};
+}
+test('browser source observation reuses the immutable review without claiming HTTP, publication or changing the watch',t=>{
+  const f=browserReviewFixture(t),original=fs.readFileSync(f.file);
+  assert.equal(recordMentionReview(f).status,'recorded');assert.equal(recordMentionReview(f).status,'already_recorded');
+  const d=mentionDecisions(f);assert.equal(d.failures.length,0);assert.equal(d.reviews.length,1);
+  assert.equal(d.reviews[0].evidence.http_status,null);
+  const c=mentionCandidates({...f.mentions,decisions:d.reviews},[],{}).candidates;
+  assert.equal(c[0].evidence[1].rows.length,1);assert.equal(c[1].evidence[1].rows.length,2);
+  assert(c.every(x=>x.can_change_public_content===false));assert.deepEqual(fs.readFileSync(f.file),original);
+  fs.appendFileSync(f.document_file,' ');
+  const invalid=mentionDecisions(f);assert.equal(invalid.reviews.length,0);assert.equal(invalid.failures.length,1);
+});
+test('browser review rejects mismatched source, unretained text, fabricated HTTP status, times and missing observation',t=>{
+  const f=browserReviewFixture(t),e=f.review.evidence;
+  for(const patch of [{http_status:200},{kind:'anything'}, {document_sha256:'a'.repeat(64)},
+    {document_file:path.join(f.stateRoot,'missing')},{final_url:'https://example.org/other'},
+    {fetched_at:'2026-09-15T00:00:00Z'},{fetched_at:'2026-09-12T00:00:00Z'}]) {
+    atomicJson(f.reviewFile,{...f.review,evidence:{...e,...patch}});assert.throws(()=>recordMentionReview(f));
+  }
+  for(const patch of [{url:'https://example.org/other'}, {title:''}, {text:'Error'},
+    {method:'http'}, {observed_at:'2026-09-14T02:00:00Z'}, {observation:undefined}]) {
+    atomicJson(f.document_file,{...f.document,...patch});
+    atomicJson(f.reviewFile,{...f.review,evidence:{...e,document_sha256:hash(fs.readFileSync(f.document_file))}});
+    assert.throws(()=>recordMentionReview(f));
+  }
+  atomicJson(f.document_file,f.document);atomicJson(f.reviewFile,f.review);fs.chmodSync(f.document_file,0o644);
+  assert.throws(()=>recordMentionReview(f),/private/);
+});
+test('browser research cannot replace the original owned-page delivery proof',async t=>{
+  const f=browserReviewFixture(t);f.review.decision='review_owned_page';f.review.target_page='/obsidian/';atomicJson(f.reviewFile,f.review);
+  const parent=recordMentionReview(f),resolutionFile=path.join(f.stateRoot,'browser-resolution.json');
+  atomicJson(resolutionFile,{schema_version:1,decision_id:parent.id,outcome:'no_change',
+    rationale:'Attempt to substitute a visible browser source for the served owned page.',
+    owned_page_evidence:{...f.review.evidence,requested_url:'https://simplememofast.com/obsidian/',final_url:'https://simplememofast.com/obsidian/',fetched_at:now.toISOString()}});
+  await assert.rejects(recordMentionResolution({...f,resolutionFile}),/browser research cannot verify owned-page resolution/);
+  assert.equal(mentionDecisions(f).reviews[0].resolution,null);
+});
 test('owned-page no-change resolution is append-only, suppresses only its source and reopens on corrupt evidence',async t=>{
   const f=resolutionFixture(t),parentFile=path.join(f.stateRoot,'mention-decisions',f.parent.id+'.json'),before=fs.readFileSync(parentFile);
   assert.equal((await recordMentionResolution(f)).status,'recorded');
