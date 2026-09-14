@@ -39,7 +39,9 @@ export function normalizeBing(method, response) {
         if (!['https:', 'http:'].includes(u.protocol) || u.hostname !== 'simplememofast.com' || u.username || u.password) throw fail('wrong_site_page');
       }
       normalized[field] = row.Query;
-      normalized.avg_click_position = position(row.AvgClickPosition);
+      // Live Bing responses use -1 even on rows with clicks. It is not a rank;
+      // preserve the counts and mark only this unavailable position as null.
+      normalized.avg_click_position = row.AvgClickPosition === -1 ? null : position(row.AvgClickPosition);
       normalized.avg_impression_position = position(row.AvgImpressionPosition);
     }
     const identity = JSON.stringify([date, normalized.query ?? normalized.page ?? null]);
@@ -127,7 +129,7 @@ export async function collectBingApi({credentials, fetchImpl=fetch, wait=ms=>new
     return {schema_version:1,kind:'bing_search_api',site:BING_SITE,series:'bing-webmaster-json-v1',
       observed_at:now.toISOString(),status:complete?'collected':'partial',sources,attempts,
       summary:{latest7:summarizeBingDays(daily),previous7:end?summarizeBingDays(daily,{end:offsetDay(end,-7)}):null,last28:summarizeBingDays(daily,{days:28})},
-      limitations:['API statistics keep their provider scope; UI parity is unverified.','Top query/page rows are not a census; provider Date semantics retained.','No AI Performance data in this API series.'],
+      limitations:['API statistics keep their provider scope; UI parity is unverified.','Top query/page rows are not a census; provider Date semantics retained.','Bing AvgClickPosition -1 is unavailable (null); its cause is not inferred from click counts.','No AI Performance data in this API series.'],
       stale,scheduled_execution_verified:false};
   } catch(e) {throw Object.assign(fail(e.code??'reader_failed',e.status??null),{attempts});}
   finally {if(token)token.access_token=null;}

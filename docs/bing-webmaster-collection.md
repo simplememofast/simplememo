@@ -43,6 +43,8 @@ Valid failure outcomes: `auth_required`, `provider_transient`, `export_unavailab
 
 Observations older than eight days, future dates, duplicate dates, wrong properties, null counts and altered aggregates are rejected. A comparison window requires every date. Missing rows never become zero; rounded `K` citation displays never become exact integers. CTR uses summed clicks divided by summed impressions. API/UI parity, search type, country/device scope and query/page date semantics require validation against the provider; retain API labels separately until verified. Query and cited-page lists are samples, not the complete population.
 
+Live API validation on 2026-09-15 found `AvgClickPosition: -1` in both query and page rows, including rows with nonzero clicks. The reader preserves the clicks, impressions and available impression position, and represents only that click position as `null`. It does not infer why the position is unavailable or discard the entire dimension report. Other invalid positions and invalid counts remain errors.
+
 Provider outages, revocation, processing delay and UI changes remain possible. API scheduling removes dependence on browser login and the local Mac for search acquisition; local import and AI browser capture still need the native host. A saved retry policy does not prove recovery, and one successful run does not guarantee later runs.
 
 ## Recovery and rollback
