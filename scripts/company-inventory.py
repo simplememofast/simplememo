@@ -127,7 +127,7 @@ def documented_owner_matches(job, purpose):
 
 
 def build(discovery, root=ROOT):
-    jobs, surfaces = [], []
+    jobs, surfaces, history_gaps = [], [], []
     coverage = read(root / 'data/automation-coverage.json')['tasks']
 
     def source(name, optional=False):
@@ -150,6 +150,10 @@ def build(discovery, root=ROOT):
         return d
 
     for w in source('github.json').get('workflows', []):
+        history_lookup = w.get('history_lookup', {'state': 'legacy_repository_window'})
+        if history_lookup.get('state') in ['request_cap_reached', 'workflow_read_failed']:
+            history_gaps.append({'id': 'github-history:' + w['repo'] + ':' + str(w['id']), 'state': 'partial',
+                'reason': 'Workflow-specific history unavailable (' + history_lookup['state'] + '); bounded repository observations retained. No retry or workflow dispatch performed.'})
         runs = w.get('observed_runs', [])
         success = [r for r in runs if r.get('conclusion') == 'success']
         failures = [r for r in runs if r.get('conclusion') in ['failure', 'timed_out', 'cancelled']]
@@ -168,6 +172,7 @@ def build(discovery, root=ROOT):
             last_failure=max(failures, key=lambda r: r['created_at']) if failures else None,
             health=status(runs, w['state'] == 'active'),
             history_scope=w.get('history_scope', 'latest five observed executions; null does not mean never failed'),
+            history_lookup=history_lookup,
             execution_state='scheduled' if w['cron'] else 'event_or_manual',
             autonomy_contribution=contribution))
 
@@ -347,7 +352,7 @@ def build(discovery, root=ROOT):
         if any(k not in job for k in REQUIRED):
             raise ValueError('Incomplete automation record')
     native_jobs = {j['id']: j for j in jobs}
-    gaps = []
+    gaps = list(history_gaps)
     if not browser['chatgpt_empty']:
         gaps.append({'id': 'chatgpt-current', 'state': browser['state'],
                      'reason': 'Need a fresh scoped observation of all three current task views; nonempty views require individual job normalization, not an empty-inventory claim'})
