@@ -15,6 +15,7 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
   'scripts/lib/decision-origin.mjs', 'scripts/decision-monitor-local.py',
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
+  'growth/lib/company-measurement.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;

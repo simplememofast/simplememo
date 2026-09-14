@@ -6,6 +6,7 @@ import {digest} from './company-metrics.mjs';
 import {privateState,atomicJson,acquireLock,observe,opportunities} from './company-loop.mjs';
 import {safePath,intentPath} from '../../scripts/value-contracts.mjs';
 import {boundRun,verifyDecision} from '../../scripts/decision-ci.mjs';
+import {verifyMeasurementInput,EXPERIMENTS} from './company-measurement.mjs';
 
 const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
 const uuid=s=>/^[a-f0-9-]{36}$/.test(s??'');
@@ -51,7 +52,7 @@ export function prepareCompanyDecision({stateRoot,id,evidenceFile,now=new Date()
   const dir=privateState(stateRoot),release=acquireLock(dir);if(!release)return{status:'busy'};
   try {
     const file=path.join(dir,'runs',id+'.json'),receipt=read(file);
-    assert(receipt.schema_version===2 && receipt.status==='observed_decision_requires_execution','start a new prospective observation; legacy receipts cannot be upgraded');
+    assert([2,3].includes(receipt.schema_version) && receipt.status==='observed_decision_requires_execution','start a new prospective observation; legacy receipts cannot be upgraded');
     const source=fs.realpathSync(evidenceFile),stat=fs.statSync(source);
     assert(source.startsWith(fs.realpathSync(dir)+path.sep) && stat.isFile() && !(stat.mode&0o077) && stat.uid===process.getuid(),'private decision input required');
     const input=read(source);
@@ -61,6 +62,13 @@ export function prepareCompanyDecision({stateRoot,id,evidenceFile,now=new Date()
     assert(candidate?.permission==='AUTO' && candidate.executable===true && Number.isFinite(candidate.priority),'candidate must be observed and eligible for review');
     assert(Array.isArray(input.alternatives) && input.alternatives.length>0 && input.alternatives.length<=10 && input.alternatives.every(a=>a.id!==candidate.id && receipt.candidates.some(c=>c.id===a.id) && text(a.reason)),'compare at least one other observed candidate');
     validateScope(candidate,input.scope);
+    verifyMeasurementInput(receipt,{stateRoot:dir,input,at:now.toISOString()});
+    if(candidate.experiment_id||input.parent_experiment||input.parent_result) {
+      assert(candidate.experiment_id,'only an observed measured-result candidate can bind a parent');
+      assert.equal(input.parent_experiment,candidate.experiment_id,'retain the measured parent behind this next action');
+      assert.deepEqual(input.parent_result,candidate.parent_result,'bind the exact admitted evaluated result');
+      assert(input.scope.artifact===input.parent_result.page&&Date.parse(now)>=Date.parse(input.parent_result.reviewed_at),'next action must follow evaluation on its actual target');
+    }
     if(receipt.decision) {
       assert(isDeepStrictEqual(receipt.decision.input,input),'recorded decision is immutable; retain it and start a new observation if selection changes');
       return{status:'already_recorded',id,commitment:decisionCommitment(receipt)};
@@ -94,6 +102,7 @@ export async function verifyDecisionContract(receipt,contract,call,{head,cwd,del
   // The Company caller requires a contract even on a user-directed branch.
   const history=await verifyDecision({branch:call('git',['branch','--show-current']).trim(),head,baseRef:receipt.source_commit,cwd,requireContract:true});
   assert(d.input.scope.paths.every(p=>contract.touches.includes(p)),'action scope exceeds declared paths');
+  if(receipt.schema_version>=3 && d.input.scope.artifact!==null)assert(contract.touches.includes(EXPERIMENTS),'content contract must include its prospective experiment registration');
   const candidate=receipt.candidates.find(c=>c.id===d.input.candidate_id);
   if(contentKinds.has(candidate.kind))assert(contract.input?.kind==='article' && ['A','B','C','D','E'].includes(contract.input?.lane),'content decision requires the original content lane');
   else {

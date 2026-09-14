@@ -14,6 +14,7 @@ import {recordMentionReview,recordMentionResolution} from '../growth/lib/company
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
 import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagnoses.mjs';
 import {prepareCompanyDecision,decisionTraceStatus} from '../growth/lib/company-decision.mjs';
+import {prepareMeasurement,registerMeasurement,measurementComparison,evaluateMeasurement,measurementStatus} from '../growth/lib/company-measurement.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -23,7 +24,17 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='prepare-decision') {
+if(command==='prepare-measurement') {
+  result=prepareMeasurement({stateRoot,evidenceFile:option('evidence')});
+} else if(command==='register-measurement') {
+  result=await registerMeasurement({stateRoot,id:option('run')});
+} else if(command==='measurement-comparison') {
+  result=measurementComparison({stateRoot,id:option('experiment')});
+} else if(command==='evaluate-measurement') {
+  result=await evaluateMeasurement({stateRoot,id:option('experiment'),evidenceFile:option('evidence')});
+} else if(command==='measurement-status') {
+  result=measurementStatus({stateRoot});
+} else if(command==='prepare-decision') {
   result=prepareCompanyDecision({stateRoot,id:option('run'),evidenceFile:option('evidence')});
 } else if(command==='decision-trace') {
   result=decisionTraceStatus({stateRoot});
@@ -43,6 +54,8 @@ if(command==='prepare-decision') {
   catch { result.operational=null; result.failures.push({source:'operational_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
   try { result.growth=growthFollowups({stateRoot}); }
   catch { result.growth=null; result.failures.push({source:'growth_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
+  try {result.measurements=measurementStatus({stateRoot});}
+  catch {result.measurements=null;result.failures.push({source:'growth_measurements',state:'unavailable',reason:'read_or_validation_failed'});}
   try { result.goal_wake=goalWake({stateRoot});
     if(result.goal_wake.failures?.length)result.failures.push({source:'goal_followup',state:'unavailable',reason:'native_evidence_unverified'});
   }

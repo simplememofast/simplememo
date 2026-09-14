@@ -23,6 +23,19 @@ else:
     print('verified')
 `;
 
+// Historical comparisons validate the original bytes at their observation time;
+// selection still uses companyAio's current eight-day freshness gate below.
+export function validateAioBytes(raw, { at, run = execFileSync } = {}) {
+  const bytes = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(raw);
+  const probe = JSON.parse(bytes);
+  const result = run('python3', ['-B', '-c', BRIDGE, path.join(ROOT, VALIDATOR)], {
+    input: JSON.stringify({ report: bytes, at: new Date(at).toISOString() }), encoding: 'utf8',
+    timeout: 10000, maxBuffer: 65536, stdio: ['pipe', 'pipe', 'pipe'],
+  }).trim();
+  if (result !== 'verified') throw new Error('Original AIO report validation failed');
+  return probe;
+}
+
 export function companyAio({ root = ROOT, now = new Date(), run = execFileSync } = {}) {
   let sha256 = null, checkedAt = null;
   const unavailable = reason => ({

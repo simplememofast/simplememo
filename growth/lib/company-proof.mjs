@@ -9,6 +9,7 @@ import { atomicJson, privateState, acquireLock } from './company-loop.mjs';
 import { verifyAppsFlyer } from './company-data.mjs';
 import { startOperationalFollowup } from './company-followup.mjs';
 import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
+import {verifyMeasurementInput,verifyMeasurementDelivery} from './company-measurement.mjs';
 import {observe,opportunities} from './company-loop.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
 
@@ -38,8 +39,9 @@ export async function bindExistingRun({stateRoot,id,autopilotRunId,call=run,cwd=
   if (!release) return {status:'busy'};
   try {
     const file=path.join(dir,'runs',id+'.json'), receipt=read(file);
-    if (receipt.schema_version!==2 || receipt.status !== 'observed_decision_requires_execution') throw new Error('A new prospective observed action is required');
+    if (![2,3].includes(receipt.schema_version) || receipt.status !== 'observed_decision_requires_execution') throw new Error('A new prospective observed action is required');
     decisionCommitment(receipt);
+    verifyMeasurementInput(receipt,{stateRoot:dir});
     if(receipt.decision.input.run_id!==autopilotRunId)throw new Error('Canonical run differs from the recorded decision');
     if (receipt.bound_autopilot_run_id && receipt.bound_autopilot_run_id !== autopilotRunId) throw new Error('Existing binding is immutable');
     if(receipt.bound_autopilot_run_id) {
@@ -123,7 +125,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
       if(decisionTrace(receipt).state!=='verified')throw new Error('Retained delivery has no valid prospective decision trace; preserve history, do not upgrade it');
       return receipt;
     }
-    if(receipt.schema_version!==2)throw new Error('Legacy observation cannot receive retrospective decision proof');
+    if(![2,3].includes(receipt.schema_version))throw new Error('Legacy observation cannot receive retrospective decision proof');
     decisionCommitment(receipt);
     const stops=read(path.join(cwd,'data/emergency-stop.json'));
     if(receipt.execution_boundary.stopped || receipt.execution_boundary[receipt.route==='actions'?'actions_stopped':'owner_session_stopped'] || stops.stopped!==false || stops.agents?.[receipt.route]?.stopped!==false)throw new Error('Stopped action cannot complete');
@@ -140,13 +142,14 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
     const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd);
     const artifactProof=await verifyActionDelivery(row.artifact,merge,call,fetchImpl);
     if(row.artifact!==null && !receipt.decision.input.scope.paths.includes(artifactProof.artifact_source))throw new Error('Actually served source was not the declared changed target');
+    const measurement=verifyMeasurementDelivery(receipt,{stateRoot:dir,root:cwd,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
     receipt.status='verified_existing_autopilot'; receipt.finished_at=now.toISOString();
     receipt.stages={detect:'completed',decide:'completed',execute:'completed',verify:'completed',report:'saved',learn:'recorded'};
     receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,decision_trace:trace,
       limitation:'Exact final SHA CI and canonical run/merge are verified. Domain-specific effect and rollback evidence remain in the existing experiment/PR.'};
     receipt.human_interventions=row.interventions??null;
     receipt.learnings=typeof evidence.learning==='string'&&evidence.learning.length<=2000 ? [evidence.learning] : ['Implementation verified; business impact awaits its existing experiment horizon.'];
-    receipt.followup={source:'growth/experiments/experiments.json and existing value contracts',status:'preserve original evaluation date and evidence gate'};
+    receipt.followup=measurement??{source:'growth/experiments/experiments.json and existing value contracts',status:'preserve original evaluation date and evidence gate'};
     atomicJson(file,receipt);atomicJson(path.join(dir,'latest-run.json'),receipt);return receipt;
   } finally {release();}
 }
