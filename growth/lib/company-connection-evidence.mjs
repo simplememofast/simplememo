@@ -1,10 +1,14 @@
 // Scoped visible-UI evidence is configuration evidence, never a data receipt.
+const appleAdsObservationURLs = new Set([
+  'https://hq1.appsflyer.com/discovery/overview',
+  'https://hq1.appsflyer.com/marketplace/integrated-partners/id6758438948/iossearchads_int',
+]);
 export function appleAdsConnection(receipt, now = new Date()) {
   const unknown = reason => ({status:'BLOCKED', reason, cost:null, data_verified:false});
   if (receipt?.schema_version !== 1 || receipt.method !== 'authenticated_visible_browser_ui' ||
       receipt.account_scope !== 'SimpleMemo' || receipt.identity_verified !== true ||
       receipt.provider !== 'AppsFlyer' || receipt.app_id !== 'id6758438948' ||
-      receipt.url !== 'https://hq1.appsflyer.com/discovery/overview') {
+      !appleAdsObservationURLs.has(receipt.url)) {
     return unknown('No valid scoped existing Apple Ads configuration observation');
   }
   if (typeof receipt.observed_at !== 'string') return unknown('Apple Ads configuration observation has no valid timestamp');
