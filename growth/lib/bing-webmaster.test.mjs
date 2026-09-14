@@ -29,6 +29,30 @@ test('window comparisons require every date and use summed counts for CTR',()=>{
   const missing=summarizeBingDays(rows.filter(r=>r.date!=='2026-09-09'));assert.equal(missing.clicks,null);assert.deepEqual(missing.missing_dates,['2026-09-09']);
   const zeros=summarizeBingDays(rows.map(r=>({...r,clicks:0,impressions:0})));assert.equal(zeros.clicks,0);assert.equal(zeros.ctr,null);
 });
+test('Bing -1 click positions preserve dimension rows and counts without inventing a rank',()=>{
+  for(const method of ['GetQueryStats','GetPageStats'])for(const Clicks of [0,3]){
+    const row={Date:'2026-09-12',Clicks,Impressions:10,Query:method==='GetPageStats'?BING_SITE+'test':'test query',AvgClickPosition:-1,AvgImpressionPosition:4};
+    const [normalized]=normalizeBing(method,{d:[row]});
+    assert.equal(normalized.avg_click_position,null);assert.equal(normalized.avg_impression_position,4);
+    assert.equal(normalized.clicks,Clicks);assert.equal(normalized.impressions,10);
+    for(const value of [-2,'-1',NaN,Infinity])assert.throws(()=>normalizeBing(method,{d:[{...row,AvgClickPosition:value}]}),/invalid_position/);
+    assert.throws(()=>normalizeBing(method,{d:[{...row,AvgImpressionPosition:-1}]}),/invalid_position/);
+    assert.throws(()=>normalizeBing(method,{d:[{...row,Clicks:-1}]}),/invalid_count/);
+  }
+});
+test('unavailable click positions survive collection and canonical payload validation',async()=>{
+  const missing=method=>reply({d:fixture(method).d.map(row=>({...row,AvgClickPosition:-1}))});
+  const s=service({overrides:{GetQueryStats:()=>missing('GetQueryStats'),GetPageStats:()=>missing('GetPageStats')}});
+  const p=await collectBingApi({credentials:creds,fetchImpl:s.fetchImpl,now});
+  assert.equal(p.status,'collected');
+  for(const method of ['GetQueryStats','GetPageStats']){
+    assert.equal(p.sources[method].rows.length,28);
+    assert(p.sources[method].rows.every(row=>row.avg_click_position===null));
+  }
+  validateBingPayload(p,{now});
+  const tampered=structuredClone(p);tampered.sources.GetQueryStats.rows[0].avg_click_position=-1;
+  assert.throws(()=>validateBingPayload(tampered,{now}),/noncanonical_rows/);
+});
 test('refresh followed by only three read methods, with no credentials in output or URLs',async()=>{
   const s=service();const p=await collectBingApi({credentials:creds,fetchImpl:s.fetchImpl,wait:async()=>{},now});
   assert.equal(p.status,'collected');assert.equal(s.calls.length,4);
