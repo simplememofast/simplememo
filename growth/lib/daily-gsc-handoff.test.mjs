@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {buildMeta, emptyBuckets, writeSnapshot} from './snapshot.mjs';
-import {packDaily, snapshotFromDaily, retainedDaily, dailyHash, DAILY_REPO, DAILY_WORKFLOW} from './daily-gsc-handoff.mjs';
+import {packDaily, snapshotFromDaily, retainedDaily, dailyHash, DAILY_REPO, DAILY_WORKFLOW, dailyJobsEndpoint} from './daily-gsc-handoff.mjs';
 import {seal, unseal} from './analytics-envelope.mjs';
 import {collectDailyGsc} from './company-daily-gsc.mjs';
 import {companySearch} from './company-search.mjs';
@@ -120,5 +120,93 @@ test('no remote artifact remains unavailable; it does not dispatch a duplicate q
   ]});
   assert.equal(receipt.status, 'partial'); assert.equal(independent, true);
   assert.equal(receipt.receipts[0].receipt.failures[0].reason, 'encrypted_artifact_not_available');
+  assert(!fs.existsSync(path.join(root, 'data/seo-daily/latest.json')));
+});
+
+function independentProof() {
+  const failed = {...remote, conclusion: 'failure'};
+  const job = {id: 456, run_id: remote.id, run_attempt: remote.run_attempt, head_sha: remote.head_sha,
+    name: 'measure', status: 'completed', conclusion: 'success',
+    started_at: '2026-09-13T21:01:00Z', completed_at: '2026-09-13T21:09:00Z',
+    steps: ['Export preflight', "Ingest today's window (not committed)", 'Detectors',
+      'Encrypt existing daily snapshot for Company', 'Retain encrypted daily snapshot']
+      .map(name => ({name, status: 'completed', conclusion: 'success'}))};
+  return {failed, proof: {schema_version: 1, endpoint: dailyJobsEndpoint(failed), run_id: remote.id,
+    run_attempt: remote.run_attempt, source_sha: remote.head_sha, observed_at: now.toISOString(),
+    inventory: {total_count: 2, jobs: [job, {...job, id: 457, name: 'Bing search read-only', conclusion: 'failure', steps: []}]}}};
+}
+
+test('failed sibling with successful exact-attempt GSC retains encrypted parity through collection, cache and Company search', t => {
+  const {root, payload} = fixture(t), {failed, proof} = independentProof();
+  const privateKeyFile = path.join(root, 'key.pem'); fs.writeFileSync(privateKeyFile, keys.privateKey, {mode: 0o600});
+  const envelope = seal(payload, keys.publicKey), calls = [];
+  const run = (name, args) => {
+    calls.push(args); assert.equal(name, 'gh');
+    if (args[0] === 'run' && args[1] === 'download') {
+      fs.writeFileSync(path.join(args[args.indexOf('--dir') + 1], 'seo-daily.enc.json'), JSON.stringify(envelope)); return '';
+    }
+    assert.equal(args[0], 'api'); assert(!args.includes('--method'));
+    if (args[1].includes('/jobs?')) {assert.equal(args[1], proof.endpoint); return JSON.stringify(proof.inventory);}
+    if (args[1].endsWith('/artifacts')) return JSON.stringify({artifacts: [{id: 789, name: 'seo-daily-encrypted-123-1', expired: false, size_in_bytes: 10000}]});
+    assert(args[1].includes('status=completed&per_page=3')); return JSON.stringify({workflow_runs: [failed]});
+  };
+  const opts = {stateRoot: root, now, run, privateKeyFile}, receipt = collectDailyGsc(opts);
+  assert.equal(receipt.status, 'verified'); assert.equal(receipt.remote.conclusion, 'failure');
+  assert.deepEqual(receipt.gsc_job_proof, proof); assert.equal(receipt.new_queries, 0);
+  assert.deepEqual(JSON.parse(fs.readFileSync(receipt.output)), payload);
+  const reused = collectDailyGsc(opts); assert.equal(reused.reused, true);
+  assert.equal(calls.filter(a => a[0] === 'run').length, 1);
+  assert.equal(calls.filter(a => a[1].includes('/jobs?')).length, 2, 'cache still requires current exact-attempt evidence');
+  const expected = analyzeSnapshot(snapshotFromDaily(payload, {now, remote}));
+  assert.deepEqual(companySearch({stateRoot: root, now, fallback: null, history: []}).analysis, expected);
+  const health = JSON.parse(fs.readFileSync(path.join(root, 'data/seo-daily/health.json')));
+  assert.equal(health.status, 'verified'); assert.equal(health.workflow_conclusion, 'failure'); assert.equal(health.gsc_job_id, 456);
+  const latest = path.join(root, 'data/seo-daily/latest.json');
+  for (const badProof of [null, {...proof, run_attempt: 2}, {...proof, source_sha: 'b'.repeat(40)}]) {
+    fs.writeFileSync(latest, JSON.stringify({...reused, gsc_job_proof: badProof}));
+    assert.throws(() => retainedDaily({stateRoot: root, now}));
+  }
+  fs.writeFileSync(latest, JSON.stringify(reused));
+  assert.throws(() => retainedDaily({stateRoot: root, now: new Date('2026-09-20')}));
+});
+
+test('partial-workflow admission rejects incomplete, wrong-attempt, skipped-step and failed-GSC proof', t => {
+  const {payload} = fixture(t), {failed, proof} = independentProof();
+  const verify = p => snapshotFromDaily(payload, {now, remote: failed, gscJobProof: p});
+  assert.doesNotThrow(() => verify(proof));
+  for (const mutate of [
+    p => {p.endpoint = p.endpoint.replace('/attempts/1/', '/attempts/2/');},
+    p => {p.run_attempt = 2;}, p => {p.run_id = 124;}, p => {p.source_sha = 'b'.repeat(40);},
+    p => {p.observed_at = '2026-09-13T21:09:00Z';}, p => {p.observed_at = '2026-09-15T00:00:00Z';},
+    p => {p.inventory.total_count = 3;}, p => {p.inventory.jobs[0].name = 'other';},
+    p => {p.inventory.jobs[1] = {...p.inventory.jobs[0], id: 458};},
+    p => {p.inventory.jobs[1].id = p.inventory.jobs[0].id;},
+    p => {p.inventory.jobs[0].run_id = 124;}, p => {p.inventory.jobs[0].run_attempt = 2;},
+    p => {p.inventory.jobs[0].head_sha = 'b'.repeat(40);}, p => {p.inventory.jobs[0].status = 'in_progress';},
+    p => {p.inventory.jobs[0].conclusion = 'failure';}, p => {p.inventory.jobs[1].conclusion = 'success';},
+    p => {p.inventory.jobs[0].completed_at = '2026-09-13T21:04:00Z';},
+    p => {p.inventory.jobs[0].started_at = '2026-09-13T20:59:00Z';},
+    p => {p.inventory.jobs[0].completed_at = '2026-09-13T21:11:00Z';},
+    p => {p.inventory.jobs[0].steps.pop();},
+    p => {p.inventory.jobs[0].steps.push(p.inventory.jobs[0].steps[0]);},
+    p => {p.inventory.jobs[0].steps[3].conclusion = 'skipped';},
+    p => {p.inventory.jobs[0].steps[4].conclusion = 'failure';},
+    p => {p.inventory.jobs[0].steps[1].status = 'in_progress';},
+    p => {p.inventory.jobs = Array.from({length: 100}, (_, i) => ({...p.inventory.jobs[0], id: i + 1})); p.inventory.total_count = 100;},
+  ]) {const changed = structuredClone(proof); mutate(changed); assert.throws(() => verify(changed));}
+  for (const change of [{conclusion: 'cancelled'}, {status: 'in_progress'}, {head_sha: 'b'.repeat(40)}, {run_attempt: 2}])
+    assert.throws(() => snapshotFromDaily(payload, {now, remote: {...failed, ...change}, gscJobProof: proof}));
+});
+
+test('failed GSC cannot download or admit an artifact even if its sibling succeeded', t => {
+  const {root} = fixture(t), {failed, proof} = independentProof();
+  proof.inventory.jobs[0].conclusion = 'failure'; proof.inventory.jobs[1].conclusion = 'success';
+  const run = (name, args) => {
+    assert.equal(name, 'gh'); assert.equal(args[0], 'api');
+    assert(!args[1].endsWith('/artifacts'), 'failed GSC must be rejected before artifact lookup');
+    return JSON.stringify(args[1].includes('/jobs?') ? proof.inventory : {workflow_runs: [failed]});
+  };
+  const result = collectDailyGsc({stateRoot: root, now, run});
+  assert.equal(result.status, 'unavailable'); assert.equal(result.failures.length, 1);
   assert(!fs.existsSync(path.join(root, 'data/seo-daily/latest.json')));
 });
