@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 import {snapshotFromExport, companySearch, searchCandidates} from './company-search.mjs';
 import {buildMeta, emptyBuckets} from './snapshot.mjs';
 import {analyzeSnapshot} from './analysis.mjs';
-import {prioritize} from './company-loop.mjs';
+import {prioritize, experimentView} from './company-loop.mjs';
 
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const now = new Date('2026-09-13T15:00:00Z');
@@ -99,4 +99,65 @@ test('overlapping windows cannot turn the shared detectors into a growth win', (
   const {payload,receipt}=fixture(),s=snapshotFromExport(payload,receipt,{now});
   const previous={...s,label:'previous',meta:{...s.meta,period_start:'2026-08-12',period_end:'2026-09-08'}};
   const a=analyzeSnapshot(s,{previous});assert.equal(a.comparison.comparable,false);assert.equal(a.decay.incomparable.reason,'overlapping_or_reversed_windows');
+});
+
+function scopeCandidates(experiments, reviews = [], pages = ['/apple-watch/', '/unrelated/']) {
+  return searchCandidates({search_input:{actionable:true},
+    content_gaps:{ctr_gap:pages.map(key=>({kind:'page',key,impressions:200,expected_ctr:.04,ctr:.01,position:5,upside_clicks:6}))},
+    experiments:experiments.map(e=>experimentView(e,'2026-09-14')),followups:{reviews}}, {});
+}
+
+test('real AIO explicit scope and legacy video list both protect Apple Watch without editing the source ledger', () => {
+  const file=new URL('../experiments/experiments.json',import.meta.url),before=fs.readFileSync(file,'utf8');
+  const ledger=JSON.parse(before).experiments;
+  const ids=['aio-2026-08-11-answer-blocks','video-2026-08-11-five-clips'];
+  const selected=ledger.filter(e=>ids.includes(e.id));
+  assert.equal(selected.length,2);
+  assert.deepEqual(experimentView(selected[0],'2026-09-14').affected_pages,selected[0].pages);
+  const rows=scopeCandidates(selected);
+  assert.equal(rows[0].executable,false);assert.deepEqual(rows[0].blocking_experiments,ids);
+  assert.equal(rows[1].executable,true);assert.deepEqual(rows[1].blocking_experiments,[]);
+  assert.equal(fs.readFileSync(file,'utf8'),before);
+});
+
+test('global and frozen experiment scopes block refresh while closed and external records keep original meanings', () => {
+  for(const page of ['(サイト全体 + サイト外4面)','(215 pages: 全コンテンツページ)']) {
+    const rows=scopeCandidates([{id:'global',status:'frozen',page}]);
+    assert(rows.every(r=>!r.executable && r.blocking_experiments.includes('global')));
+  }
+  const external={id:'external',status:'running',page:'(PR配信 — 自律運用/RSI)'};
+  const rows=scopeCandidates([external,{id:'closed',status:'evaluated',page:'/apple-watch/',decision:'keep'}]);
+  assert(rows.every(r=>r.executable));
+  assert.deepEqual(rows[0].unenumerated_experiment_scopes,['external']);
+  const offsite=scopeCandidates([{id:'offsite',status:'running',page:'https://example.org/apple-watch/'}]);
+  assert.equal(offsite[0].executable,true);assert.deepEqual(offsite[0].unenumerated_experiment_scopes,['offsite']);
+});
+
+test('retained follow-up parents preserve explicit, legacy and global scope until evaluated', () => {
+  for(const parent of [
+    {page:'/primary/',pages:['/apple-watch/']},
+    {page:'(2 pages: /primary/, /apple-watch/)'},
+    {page:'(サイト全体)'}
+  ]) {
+    const review={id:'retained-parent',status:'RUNNING',parent};
+    const before=JSON.stringify(review),row=scopeCandidates([],[review])[0];
+    assert.equal(row.executable,false);assert.deepEqual(row.blocking_followups,['retained-parent']);
+    assert.equal(JSON.stringify(review),before);
+    assert.equal(scopeCandidates([],[{...review,status:'EVALUATED'}])[0].executable,true);
+  }
+});
+
+test('explicit scope precedence and absolute URL normalization survive; malformed ownership fails closed', () => {
+  const rows=scopeCandidates([{id:'explicit',status:'running',page:'/primary/',pages:['https://simplememofast.com/apple-watch/index.html']}],[],['/apple-watch/','/primary/']);
+  assert.equal(rows[0].executable,false);assert.equal(rows[1].executable,true);
+  for(const e of [
+    {id:'missing',status:'running'},
+    {id:'bad-list',status:'running',page:'/primary/',pages:'not-an-array'},
+    {id:'bad-item',status:'running',page:'/primary/',pages:[null]}
+  ]) {
+    const row=scopeCandidates([e])[0];
+    assert.equal(row.executable,false);assert.equal(row.ownership_state,'unavailable');
+  }
+  const missingParent=scopeCandidates([],[{id:'missing-parent',status:'RUNNING'}])[0];
+  assert.equal(missingParent.executable,false);assert.equal(missingParent.ownership_state,'unavailable');
 });
