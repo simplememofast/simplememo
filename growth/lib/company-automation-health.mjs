@@ -6,6 +6,42 @@ import crypto from 'node:crypto';
 import {isDeepStrictEqual} from 'node:util';
 import {reviewedAutomationAssessment} from './company-automation-diagnoses.mjs';
 
+// Reporting context only. Keep every retained failure and the existing selector
+// and recovery verifiers unchanged; a disabled owner is not a repaired owner.
+export function failureReportingContext(job) {
+  const execution = job.execution_state;
+  const category = execution === 'disabled' ? 'disabled_history'
+    : ['PAUSED','ended'].includes(execution) ? 'paused_or_ended_history'
+    : execution === 'event_or_manual' ? 'event_or_manual_history'
+    : ['scheduled','enabled','ACTIVE','loaded','declared_unobserved'].includes(execution) ? 'registered_owner_needs_verification'
+    : execution !== 'observed' ? 'unverified_execution_state'
+    : job.current_assessment?.needs_diagnosis === false ? 'active_current_disposition'
+    : 'active_diagnosis_required';
+  return { category, execution_state: execution ?? null,
+    existing_selector_diagnosis_candidate: execution === 'observed' && job.current_assessment?.needs_diagnosis !== false,
+    interpretation: {
+      disabled_history: 'Retained failure of a disabled owner. Do not reactivate or retry it from this report.',
+      paused_or_ended_history: 'Retained failure of a paused or ended owner. Do not resume it or call the failure repaired.',
+      event_or_manual_history: 'Retained event/manual failure. Inspect the original owner and permission gate; no automatic redispatch.',
+      registered_owner_needs_verification: 'Owner configuration is recorded; inspect its actual execution and original failure. The existing selector does not automatically admit this runtime state. This is not healthy or resolved.',
+      unverified_execution_state: 'Current execution is unverified. This is not a healthy or resolved classification.',
+      active_current_disposition: 'Existing current-state evidence suppresses repeat diagnosis only; historical failure and limitations remain.',
+      active_diagnosis_required: 'The existing selector admits diagnosis. Diagnosis is not permission to retry side effects or claim recovery.',
+    }[category] };
+}
+
+export function failureReportingSummary(jobs) {
+  const counts = {active_diagnosis_required:0,active_current_disposition:0,disabled_history:0,paused_or_ended_history:0,event_or_manual_history:0,registered_owner_needs_verification:0,unverified_execution_state:0};
+  for (const job of jobs) counts[failureReportingContext(job).category]++;
+  return {version:'company-failure-context-v1',retained_failure_states:jobs.length,counts,
+    scope:'All retained failure-state rows, not all automations or a formal autonomy metric. No failure is removed or declared recovered.'};
+}
+
+export function reportFailure(job) {
+  return {id:job.id,health:job.health,current_assessment:job.current_assessment,
+    reporting_context:failureReportingContext(job)};
+}
+
 // A fresh receipt establishes the current failure identity, not its recovery.
 export function currentCronEvidence(job,now,stateRoot) {
   const e=job.current_observation;

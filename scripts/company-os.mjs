@@ -13,6 +13,7 @@ import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/c
 import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
 import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagnoses.mjs';
+import {reportFailure,failureReportingSummary} from '../growth/lib/company-automation-health.mjs';
 import {prepareCompanyDecision,decisionTraceStatus} from '../growth/lib/company-decision.mjs';
 import {prepareMeasurement,registerMeasurement,measurementComparison,evaluateMeasurement,measurementStatus} from '../growth/lib/company-measurement.mjs';
 
@@ -93,7 +94,9 @@ if(command==='prepare-measurement') {
     const baseline = path.join(stateRoot, 'metrics-baseline.json');
     result = { metrics: o.formal_metrics?.metrics,
       comparison: fs.existsSync(baseline) && o.formal_metrics ? compareMetrics(JSON.parse(fs.readFileSync(baseline)), o.formal_metrics) : null,
-      human_touches: o.human_touches, active_failures: o.automation.failures.map(x => ({ id: x.id, health: x.health, current_assessment:x.current_assessment })),
+      human_touches: o.human_touches, active_failures: o.automation.failures.map(reportFailure),
+      active_failures_scope:'Legacy field retains all observed failure states, including disabled and event/manual history. Use reporting_context and failure_summary for current diagnosis; no rows are hidden.',
+      failure_summary:failureReportingSummary(o.automation.failures),
       stage_observability:observabilityStatus({stateRoot}), source_failures: o.failures };
   } else if (['autonomy-audit', 'growth-audit'].includes(command)) result = auditObservation(o);
   else if (command === 'review') result = saveReview(o, { stateRoot, cadence: option('cadence', 'daily') });
