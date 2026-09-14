@@ -14,6 +14,7 @@ import { appleAdsConnection } from './company-connection-evidence.mjs';
 import { collectDailyGsc } from './company-daily-gsc.mjs';
 import { retainedDaily } from './daily-gsc-handoff.mjs';
 import { retainCtaMeasurement } from './company-cta-measurement.mjs';
+import { collectBingHandoff } from './company-bing.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -229,6 +230,7 @@ export async function collectData({ stateRoot, now = new Date(), analytics = fal
     // Source failures never prevent the other independent readers from running.
     for (const [source, operation] of operations ?? [
       ['gsc_daily_handoff', () => collectDailyGsc({ stateRoot, now })],
+      ['bing_search_api', () => collectBingHandoff({ stateRoot, now })],
       ['appsflyer', () => collectAppsFlyer({ stateRoot, now })],
       ['asc', () => collectAsc({ stateRoot, now })],
       ...(analytics ? [['ga4-funnel', () => collectAnalytics({ stateRoot, now })]] : []),

@@ -55,6 +55,39 @@ env:
   GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
 
 jobs:
+  bing:
+    name: Bing search read-only
+    # Activation follows explicit OAuth read consent and a verified first capture.
+    # Same existing scheduler; independent of a failing GSC preflight.
+    if: github.ref == 'refs/heads/main' && vars.BING_API_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    env:
+      GOOGLE_SERVICE_ACCOUNT_JSON: ''
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Read Bing search and encrypt results
+        env:
+          BING_WEBMASTER_CLIENT_ID: ${{ secrets.BING_WEBMASTER_CLIENT_ID }}
+          BING_WEBMASTER_CLIENT_SECRET: ${{ secrets.BING_WEBMASTER_CLIENT_SECRET }}
+          BING_WEBMASTER_REFRESH_TOKEN: ${{ secrets.BING_WEBMASTER_REFRESH_TOKEN }}
+          ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64: ${{ vars.ANALYTICS_RECIPIENT_PUBLIC_KEY_BASE64 }}
+        run: node growth/scripts/collect-bing.mjs "${{ runner.temp }}/bing/bing-search.enc.json"
+      - name: Retain only encrypted Bing output
+        uses: actions/upload-artifact@v4
+        with:
+          name: bing-search-encrypted-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bing/bing-search.enc.json
+          if-no-files-found: error
+          retention-days: 14
+
   measure:
     runs-on: ubuntu-latest
     timeout-minutes: 15

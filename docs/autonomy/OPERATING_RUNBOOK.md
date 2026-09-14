@@ -10,6 +10,7 @@ The native Codex automation `obsidian` is the daily master owner at 06:00 Asia/T
 | Formal coverage, completion, 100-point instrument | Existing `automation-rate.mjs`, `autonomy-gap.mjs`, `autopilot-runs.mjs`, `autonomy-score.mjs`; exact adapter `growth/lib/company-metrics.mjs` |
 | Routine health and recovery ownership | Existing Routine Observer / `autopilot-act.mjs` / `autopilot-selfheal.mjs`; launchd and GitHub fallback retain their claims |
 | GSC | Existing daily/weekly collector, `growth/lib/gsc.mjs`, BigQuery bulk export; no extra daily GSC query |
+| Bing SEO / AI citations | Same `seo-daily.yml` read job when OAuth is configured; private browser capture through `obsidian`; [collection and limits](../bing-webmaster-collection.md) |
 | GA4 | Existing encrypted `analytics-read.yml`, fixed `ga4-funnel`, same maturity and byte caps |
 | AppsFlyer | Reviewed `simplememo-api/scripts/appsflyer_aggregate.py` from `origin/main`, same local credential and CSV validation |
 | ASC, proceeds, reviews, crash availability | Existing private iOS Actions and committed reports; copy their aggregate outputs privately, do not fetch a duplicate |
@@ -33,6 +34,12 @@ The existing `seo-daily.yml` still runs at its original time and keeps its job s
 `company-os collect` calls the read-only `company-daily-gsc.mjs` adapter before independent sources. It considers at most three successful main runs, pins repository/workflow/run/attempt/SHA/event/timing, decrypts with the existing private key, verifies every allowlisted file hash and canonical totals/CTR derivation, and preserves the original 28-day quality/freshness gate. Private output and receipts live in `data/seo-daily/` under the Company state root. A failed download can retry on the next existing tick; it never dispatches a replacement query. Missing, stale, corrupt and partial outputs remain explicit failures; other sources continue. Public-key encryption alone is not provenance: the successful original GitHub run and artifact supply that evidence.
 
 Company search chooses the freshest admitted daily snapshot or existing fixed export; an equal-window daily snapshot retains its own observed query/page joins. It never mixes rows from different snapshots. Daily outputs stay out of the weekly comparison history, preserving the existing disjoint-window rule. Raw analytics stay outside Git and public assets. Natural Company execution, query cost and treatment impact still require separate evidence. A manual verification run is recorded as manual. Rollback uses a revert PR and removal of the public-only repository variable; existing weekly reports, queries and private keys remain intact. Do not disable any old collector after a merely configured handoff.
+
+## Bing evidence in the existing review
+
+`company-os collect` independently admits the encrypted Bing search artifact from a successful `Bing search read-only` job, even if the GSC job failed. `observe`, `growth-status` and `saveReview` read this API series and the private browser evidence independently. Weekly report regeneration renders the Bing section from these source files; the review JSON `markdown` field remains a file path. No Bing data enters GSC snapshots or the fixed AIO probe series.
+
+The existing native daily owner checks `node scripts/bing-capture.mjs status` each week. Reserve a due browser capture with `begin`; retain its attempt ID, preserve already collected sections and use `complete --attempt ID` only after saving verified current-week observations. A transient failure uses `fail --attempt ID --outcome provider_transient`; retries are limited to three attempts per JST ISO week, at least six hours apart. Authentication failure uses `auth_required` and stays blocked across weeks until a newer verified browser observation establishes recovery. A running reservation requires inspection of its original owner; elapsed time alone never authorizes a duplicate. Full schema, activation and rollback: [Bing collection](../bing-webmaster-collection.md).
 
 ## One native run
 
