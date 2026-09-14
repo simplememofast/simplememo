@@ -6,8 +6,50 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {atomicJson,privateState,opportunities,auditObservation} from './company-loop.mjs';
-import {currentAutomationAssessment} from './company-automation-health.mjs';
+import {currentAutomationAssessment,failureReportingContext,failureReportingSummary,reportFailure} from './company-automation-health.mjs';
 import {recordAutomationDiagnosis} from './company-automation-diagnoses.mjs';
+import {formalMetrics} from './company-metrics.mjs';
+import {saveReview} from './company-review.mjs';
+
+test('failure reporting preserves all history and distinguishes execution without changing selector eligibility',()=>{
+  const states=['observed','observed','disabled','event_or_manual',undefined,'unexpected','PAUSED','ended','scheduled','enabled','ACTIVE','loaded','declared_unobserved'];
+  const jobs=states.map((execution_state,i)=>({id:'job-'+i,name:'Job '+i,execution_state,
+    health:{state:'FAILED'},current_assessment:{needs_diagnosis:i!==1,state:i===1?'reviewed_no_safe_action':'diagnosis_required'}}));
+  const before=structuredClone(jobs),summary=failureReportingSummary(jobs);
+  assert.equal(summary.retained_failure_states,13);
+  assert.deepEqual(summary.counts,{active_diagnosis_required:1,active_current_disposition:1,disabled_history:1,paused_or_ended_history:2,event_or_manual_history:1,registered_owner_needs_verification:5,unverified_execution_state:2});
+  const observation={growth:{},automation:{failures:jobs,discovery_gaps:[]},failures:[]};
+  assert.deepEqual(opportunities(observation).map(c=>c.id),['diagnose:job-0']);
+  const audit=auditObservation(observation);assert.equal(audit.unreliable_automations.length,13);
+  for(const [i,row] of audit.unreliable_automations.entries()){
+    assert.equal(row.state,'FAILED');assert.deepEqual(row.current_assessment,jobs[i].current_assessment);
+    assert.equal(row.reporting_context.existing_selector_diagnosis_candidate,i===0);
+  }
+  assert.match(failureReportingContext(jobs[2]).interpretation,/Do not reactivate/);
+  assert.match(failureReportingContext(jobs[3]).interpretation,/no automatic redispatch/);
+  assert.match(failureReportingContext(jobs[4]).interpretation,/not a healthy or resolved/);
+  assert.match(failureReportingContext(jobs[6]).interpretation,/Do not resume/);
+  assert.match(failureReportingContext(jobs[8]).interpretation,/not healthy or resolved/);
+  assert.deepEqual(jobs.map(reportFailure).map(j=>j.id),jobs.map(j=>j.id));
+  assert.deepEqual(jobs,before);
+});
+
+test('existing reviews retain failures and notify an execution-state change even when health and next action stay the same',t=>{
+  const stateRoot=fs.mkdtempSync(path.join(os.tmpdir(),'company-failure-report-'));fs.chmodSync(stateRoot,0o700);
+  t.after(()=>fs.rmSync(stateRoot,{recursive:true,force:true}));
+  const metrics=formalMetrics({now});atomicJson(path.join(stateRoot,'metrics-baseline.json'),metrics);
+  const jobs=[{id:'active',name:'Active',execution_state:'observed',health:{state:'FAILED'},current_assessment:{needs_diagnosis:true}},
+    {id:'old-event',name:'Old event',execution_state:'event_or_manual',health:{state:'FAILED'},current_assessment:{needs_diagnosis:true}}];
+  const observation={growth:{experiments:[]},formal_metrics:metrics,human_touches:{manual_starts:0},failures:[],automation:{failures:jobs,discovery_gaps:[]}};
+  const review=()=>saveReview(observation,{stateRoot,now});
+  const first=review();assert.equal(first.notification,'material_change');assert.equal(review().notification,'quiet');
+  const saved=()=>JSON.parse(fs.readFileSync(first.markdown.replace(/\.md$/,'.json')));
+  const prior=saved();jobs[1].execution_state='disabled';assert.equal(review().notification,'material_change');
+  const current=saved();assert.equal(current.next.id,prior.next.id);assert.deepEqual(current.failures.map(j=>j.health),prior.failures.map(j=>j.health));
+  assert.equal(current.failures.length,2);assert.equal(current.failure_summary.counts.disabled_history,1);
+  assert.match(fs.readFileSync(first.markdown,'utf8'),/2 retained failure states: 1 active diagnosis candidates/);
+  assert.equal(review().notification,'quiet');assert.deepEqual(current.comparison,prior.comparison);
+});
 
 const now=new Date('2026-09-14T07:00:00Z');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');

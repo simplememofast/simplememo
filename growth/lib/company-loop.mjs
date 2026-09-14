@@ -12,7 +12,7 @@ import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { companyMentions,mentionCandidates } from './company-mentions.mjs';
 import { mentionDecisions } from './company-mention-decisions.mjs';
 import {decisionTraceStatus} from './company-decision.mjs';
-import { currentAutomationAssessment } from './company-automation-health.mjs';
+import { currentAutomationAssessment, failureReportingContext, failureReportingSummary } from './company-automation-health.mjs';
 import { companyAio } from './company-aio.mjs';
 import { companyCtaMeasurement } from './company-cta-measurement.mjs';
 import {measurementStatus} from './company-measurement.mjs';
@@ -254,7 +254,8 @@ export function auditObservation(o) {
       eligible_for_prospective_baseline: o.growth.cta_measurement.eligible_for_prospective_baseline,
       quality: o.growth.cta_measurement.quality ?? null, failures: o.growth.cta_measurement.failures } : null,
     unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope,
-      current_assessment:j.current_assessment??null })),
+      current_assessment:j.current_assessment??null, reporting_context:failureReportingContext(j) })),
+    failure_summary: failureReportingSummary(o.automation.failures),
     missing_followup: o.growth.experiments?.filter(e => e.status === 'RUNNING' && !e.evaluation_date).map(e => e.id) ?? [],
     due_experiments: o.growth.experiments?.filter(e => e.due).map(e => e.id) ?? [],
     report_only_handoffs: [

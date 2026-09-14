@@ -6,6 +6,7 @@ import { privateState, atomicJson, cadenceKey, opportunities } from './company-l
 import {compactMentions} from './company-mentions.mjs';
 import {compactCtaMeasurement} from './company-cta-measurement.mjs';
 import {bingReport} from './company-bing.mjs';
+import {reportFailure,failureReportingSummary} from './company-automation-health.mjs';
 
 const percent = v => Number.isFinite(v) ? (100 * v).toFixed(2) + '%' : 'unknown';
 const value = (m, v) => m.id === 'autonomy_score' && Number.isFinite(v) ? v.toFixed(3) + '/100' : percent(v);
@@ -62,13 +63,14 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   const baseline = JSON.parse(fs.readFileSync(path.join(stateRoot, 'metrics-baseline.json')));
   const comparison = compareMetrics(baseline, o.formal_metrics);
   const payload = { growth: compactGrowth(o), comparison, human_touches: o.human_touches,
-    failures: o.automation.failures.map(j => ({ id: j.id, health: j.health, current_assessment:j.current_assessment })),
+    failures: o.automation.failures.map(reportFailure), failure_summary:failureReportingSummary(o.automation.failures),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
   // Timestamps do not make unchanged evidence a new notification.
   const aio = structuredClone(payload.growth.aio);
   if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
     diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
+    failure_execution_context:payload.failures.map(j=>[j.id,j.reporting_context.execution_state,j.reporting_context.category]),
     next: payload.next?.id, search: payload.growth.search, aio, bing:payload.growth.bing,
     cta_measurement: payload.growth.cta_measurement,
     decision_trace: payload.growth.decision_trace,
@@ -94,7 +96,8 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     `Decision continuity: ${(payload.growth.decision_trace?.runs??[]).filter(r=>r.state==='verified').length} recorded verified traces; ${(payload.growth.decision_trace?.runs??[]).filter(r=>r.state!=='verified').length} deliveries without valid prospective trace. Original shipments and formal metrics are unchanged.`, '',
     ...((payload.growth.experiments ?? []).filter(e => e.due).map(e => `- Due: ${e.id}; existing evidence and maturity gates apply. Missing evidence remains INCONCLUSIVE.`)), '',
     '## Reliability and cost', '',
-    `${payload.failures.length} observed failure states; historical errors need current diagnosis. See audit.json.`,
+    `${payload.failures.length} retained failure states: ${payload.failure_summary.counts.active_diagnosis_required} active diagnosis candidates; ${payload.failure_summary.counts.active_current_disposition} with current dispositions; ${payload.failure_summary.counts.disabled_history} disabled-owner history; ${payload.failure_summary.counts.paused_or_ended_history} paused/ended history; ${payload.failure_summary.counts.event_or_manual_history} event/manual history; ${payload.failure_summary.counts.registered_owner_needs_verification} registered owners needing execution verification; ${payload.failure_summary.counts.unverified_execution_state} with unverified execution state. See audit.json for each original failure and its current evidence.`,
+    'These categories do not erase failures, prove recovery or authorize retries, reactivation or publication. Formal metrics retain their original definitions and records.',
     'API monetary cost and Codex monetary cost remain null unless observed. Analytics receipts retain actual billed bytes and a 2 GiB per-run cap. Model budget, one-action gate and 90-minute limit remain unchanged.', '',
     '## Human blockers', '', ...payload.discovery_gaps.map(b => `- ${b.id}: ${b.reason}`));
   if (cadence === 'monthly') lines.push('', '## 30 / 90 day strategy', '',
