@@ -144,12 +144,14 @@ test('Xvfb exits before readiness with its actual stderr retained', { timeout: 3
   });
 });
 
-test('invalid Xvfb readiness and a hung startup are rejected and reaped', { timeout: 5_000 }, async t => {
+test('invalid Xvfb readiness and a hung startup are rejected and reaped', { timeout: 10_000 }, async t => {
   for (const [response, expected] of [['bad\n', /invalid display/], ['65536\n', /invalid display/],
     ['x'.repeat(40), /too long/], ['', /timed out/]]) {
     const fixture = displayFixture(`require('fs').writeSync(3, ${JSON.stringify(response)}); setInterval(() => {}, 1000);`);
     t.after(() => terminateOwnedProcess(fixture.child));
-    await assert.rejects(ensureDisplay({ ...fixture.options, startupMs: 250 }), expected);
+    // Malformed-data cases must reach the parser even on a cold Node startup.
+    // Keep the hung-process deadline short; no production timeout is changed.
+    await assert.rejects(ensureDisplay({ ...fixture.options, startupMs: response ? 2_000 : 250 }), expected);
     assert(fixture.child.exitCode !== null || fixture.child.signalCode !== null);
   }
 });
