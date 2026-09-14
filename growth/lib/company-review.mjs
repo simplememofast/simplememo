@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { ROOT, digest, compareMetrics } from './company-metrics.mjs';
 import { privateState, atomicJson, cadenceKey, opportunities } from './company-loop.mjs';
 import {compactMentions} from './company-mentions.mjs';
+import {compactCtaMeasurement} from './company-cta-measurement.mjs';
 
 const percent = v => Number.isFinite(v) ? (100 * v).toFixed(2) + '%' : 'unknown';
 const value = (m, v) => m.id === 'autonomy_score' && Number.isFinite(v) ? v.toFixed(3) + '/100' : percent(v);
@@ -45,6 +46,7 @@ export function compactGrowth(o) {
     acquisition: connections.appsflyer ? { population: connections.appsflyer.population,
       metrics: connections.appsflyer.quality?.additive_metrics, caveats: connections.appsflyer.quality?.notes } : null,
     ga4: summarizeGa4(connections.ga4?.reports),
+    cta_measurement: compactCtaMeasurement(o.growth.cta_measurement),
     revenue: asc?.revenue ? Object.fromEntries(Object.entries(asc.revenue.granularities).map(([k,v]) => [k,
       { current: v.current ? { from: v.current.from, to: v.current.to, state: v.current.state, totals: v.current.totals } : null,
         previous: v.previous ? { from: v.previous.from, to: v.previous.to, state: v.previous.state, totals: v.previous.totals } : null }])) : null,
@@ -66,6 +68,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
     next: payload.next?.id, search: payload.growth.search, aio,
+    cta_measurement: payload.growth.cta_measurement,
     mentions:payload.growth.mentions?{status:payload.growth.mentions.status,sha256:payload.growth.mentions.evidence?.sha256,decisions:payload.growth.mentions.decisions}:null,
     experiments: payload.growth.experiments?.map(e => [e.id,e.status,e.decision,e.due]),
     connections: Object.entries(payload.growth.connections).map(([k,v]) => [k,v.status,v.window]) };
@@ -80,6 +83,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     'Recorded manual starts: ' + o.human_touches.manual_starts + '; unobserved historical handoffs remain unknown.', '',
     '## Growth inputs', '', ...Object.entries(payload.growth.connections).map(([k,v]) => `- ${k}: ${v.status}; ${v.window ? v.window.start + '..' + v.window.end : 'see source period'}; ${v.reason ?? v.evidence ?? 'unknown evidence'}`), '',
     '## Decision and follow-up', '',
+    `CTA measurement: ${payload.growth.cta_measurement?.status ?? 'unavailable'}. Retained landing-session observations can prepare a future baseline only after scope/quality review; they cannot repair historical CTA/QR baselines or prove installs.`, '',
     `Mention watch: ${payload.growth.mentions?.status ?? 'unavailable'}; ${payload.growth.mentions?.evidence?.date ?? 'no admitted source'}. Search snippets are not confirmed absence; inspect linked source evidence before selecting an action.`, '',
     payload.next ? `Next candidate: ${payload.next.title}. Growth ${payload.next.growth_opportunity_score.toFixed(1)} / Autonomy opportunity ${payload.next.autonomy_opportunity_score.toFixed(1)}. Native owner must apply existing selection/permission gates and execute the selected safe action in this run.` : 'No currently evidenced executable candidate.',
     'A report is not action completion. Read latest-run.json for EXECUTE / VERIFY and proof.', '',

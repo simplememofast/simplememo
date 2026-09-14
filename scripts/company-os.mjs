@@ -11,6 +11,7 @@ import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from 
 import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/lib/company-observability.mjs';
 import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/company-goal-followup.mjs';
 import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
+import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -20,7 +21,11 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='record-mention-review') {
+if(command==='cta-measurement') {
+  result=companyCtaMeasurement({stateRoot});
+} else if(command==='record-cta-diagnosis') {
+  result=recordCtaDiagnosis({stateRoot,evidenceFile:option('evidence')});
+} else if(command==='record-mention-review') {
   result=recordMentionReview({stateRoot,reviewFile:option('evidence')});
 } else if(command==='resolve-mention-review') {
   result=await recordMentionResolution({stateRoot,resolutionFile:option('evidence')});

@@ -5,6 +5,7 @@ import './company-native-evidence.test.mjs';
 import './company-mentions.test.mjs';
 import './company-automation-health.test.mjs';
 import './company-aio.test.mjs';
+import './company-cta-measurement.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -307,9 +308,10 @@ test('simultaneous stale-lock recovery admits one owner and release is ownership
 test('corrupt aggregate does not erase independent source receipts',async t=>{
   const stateRoot=directory(t);
   const result=await collectData({stateRoot,operations:[['appsflyer',()=>{throw Error('corrupt CSV');}],['asc',()=>({status:'reused_existing_outputs'})]],makeConnections:()=>{throw Error('broken view');}});
-  assert.equal(result.status,'partial');assert.equal(result.receipts[0].source,'asc');assert.equal(result.failures.length,2);
+  assert.equal(result.status,'partial');assert.equal(result.receipts[0].source,'asc');
+  assert.deepEqual(result.failures.map(f=>f.source),['appsflyer','connection_view','cta_measurement']);
   assert.equal(fs.readdirSync(path.join(stateRoot,'data/collection-events')).length,1);
-  assert.equal(JSON.parse(fs.readFileSync(path.join(stateRoot,'data/latest-collection.json'))).failures.length,2);
+  assert.deepEqual(JSON.parse(fs.readFileSync(path.join(stateRoot,'data/latest-collection.json'))).failures,result.failures);
 });
 
 test('AppsFlyer connection corruption is isolated from the ASC view',t=>{

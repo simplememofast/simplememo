@@ -13,6 +13,7 @@ import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { appleAdsConnection } from './company-connection-evidence.mjs';
 import { collectDailyGsc } from './company-daily-gsc.mjs';
 import { retainedDaily } from './daily-gsc-handoff.mjs';
+import { retainCtaMeasurement } from './company-cta-measurement.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -239,7 +240,15 @@ export async function collectData({ stateRoot, now = new Date(), analytics = fal
     try {connections = makeConnections({ stateRoot, now });}
     catch {failures.push({source:'connection_view',reason:'view_unavailable; independent reader receipts retained'});connections={status:'PARTIAL',updated_at:now.toISOString(),view_failure:true};}
     atomicJson(path.join(stateRoot, 'data/connections.json'), connections);
+    let ctaMeasurement = null;
+    {
+      try {
+        ctaMeasurement = retainCtaMeasurement({ stateRoot, now, connection: connections.ga4 ?? null });
+        if (ctaMeasurement.status === 'unavailable') failures.push({ source: 'cta_measurement', reason: ctaMeasurement.failures[0] });
+      } catch { failures.push({ source: 'cta_measurement', reason: 'private_retention_failed' }); }
+    }
     const receipt = { schema_version: 1, observed_at: now.toISOString(), native_origin:nativeOrigin(), receipts, failures,
+      measurements: { cta: ctaMeasurement },
       status: failures.length || receipts.some(r => ['failed', 'stale', 'unavailable', 'dispatched', 'dispatch_uncertain'].includes(r.receipt.status)) ? 'partial' : 'verified',
       query_policy: 'GSC reuses existing daily/weekly collector. GA4 is opt-in for the single native owner, max one fixed query run per mature end-date, no remote retry.' };
     atomicJson(path.join(stateRoot, 'data/latest-collection.json'), receipt);

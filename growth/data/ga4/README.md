@@ -1,7 +1,13 @@
 # growth/data/ga4/ — GA4 手動転記の置き場
 
-GA4 は BigQuery エクスポート未設定（BigQuery にあるのは searchconsole データセットのみ・
-2026-08-20 確認）のため、ここのファイルは GA4 の探索レポートから**人が転記する**。
+ここは既存のGA4探索レポートの手動転記を保持する場所。2026-08-20の確認時点では
+BigQueryエクスポートが未設定だった。その後、既存の `analytics-read.yml` と
+`export-analytics.mjs` による取得が稼働し、Companyの既存日次ownerが出力を再利用する。
+現在の取得・品質検証・非公開保存は [運用手順](../../../docs/autonomy/OPERATING_RUNBOOK.md#prospective-cta-measurement)
+を参照。新しい転記や同じ期間の別取得を自動運転の前提にしない。
+
+以下の古い探索指標は、その期間・定義のまま残す。現在の24時間セッション開始コホートの
+クリック率とは互換ではなく、手動転記のイベント数を新しい施策の基準値へ読み替えない。
 
 ## ai-channel.json — AI経由のセッションと app_store_click（v4 R4 の測定面）
 

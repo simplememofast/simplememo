@@ -13,6 +13,7 @@ import { companyMentions,mentionCandidates } from './company-mentions.mjs';
 import { mentionDecisions } from './company-mention-decisions.mjs';
 import { currentAutomationAssessment } from './company-automation-health.mjs';
 import { companyAio } from './company-aio.mjs';
+import { companyCtaMeasurement } from './company-cta-measurement.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -147,6 +148,8 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
   const stop = attempt('emergency_stop', () => repoRead('data/emergency-stop.json'), failures);
   const connectionsPath = path.join(stateRoot, 'data/connections.json');
   const connections = attempt('private_growth_connections', () => read(connectionsPath), failures);
+  const ctaMeasurement = companyCtaMeasurement({ stateRoot, now, connection: connections?.ga4 });
+  if (ctaMeasurement.status === 'unavailable') failures.push({ source: 'cta_measurement', state: 'unavailable', reason: ctaMeasurement.failures[0] });
   const consumer = appsflyerConsumerEvidence({stateRoot,now});
   if(consumer.failures.length)failures.push({source:'native_consumer_evidence',state:'unavailable',reason:'native_evidence_unverified'});
   if(connections?.appsflyer) {
@@ -173,6 +176,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
         clicks: snapshot.dates?.reduce((n, r) => n + r.clicks, 0) ?? null,
         impressions: snapshot.dates?.reduce((n, r) => n + r.impressions, 0) ?? null } : null,
       connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,mentions,
+      cta_measurement: ctaMeasurement,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
       aio,
     },
@@ -189,6 +193,13 @@ export function opportunities(observation) {
     safety: 90, ease: 65, reliability: 70, business_impact: 60, growth_impact: 55,
     reuse: 100, affordability: 90, permission_readiness: 90 };
   const candidates = [];
+  const cta = observation.growth.cta_measurement;
+  if (cta?.status === 'quality_blocked' && cta.diagnosis?.state !== 'source_limit_recorded') candidates.push({
+    id: 'diagnose:cta-measurement', kind: 'diagnose_measurement', title: 'Diagnose the observed CTA baseline quality gaps',
+    permission: 'AUTO', executable: true, owner: 'existing Company daily owner and GA4 reader',
+    evidence: [{ source: cta.source, period: cta.period, metric: cta.metric, quality: cta.quality }],
+    action_scope: 'Inspect the original retained quality and session rows, then the existing tracking implementation. Missing landing/channel evidence is not zero and no missing session may be dropped to pass readiness. Repair only a reproduced cause through existing gates; otherwise use record-cta-diagnosis to retain a source_limit tied to this exact measurement and investigation evidence. Do not change SQL, reopen old experiments, start a second query or assert installs from clicks.',
+    factors: { ...defaults, frequency: 80, business_impact: 75, growth_impact: 75, reliability: 65, ease: 55 } });
   const mentionInput=mentionCandidates(observation.growth.mentions,searchCandidates(observation.growth,defaults),defaults);
   candidates.push(...mentionInput.search,...mentionInput.candidates);
   for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed' && j.current_assessment?.needs_diagnosis!==false)) {
@@ -229,6 +240,9 @@ export function auditObservation(o) {
     coverage_gaps: o.autonomy_ledger?.filter(t => t.automation_status === 'nobody').map(t => ({ id: t.id, task: t.task, next: t.next_improvement })) ?? [],
     manual_handoffs: o.autonomy_ledger?.filter(t => ['H3', 'H4', 'H5'].includes(t.human_touch.level)).map(t => ({ id: t.id, task: t.task, human_touch: t.human_touch })) ?? [],
     stage_measurement_gaps: o.autonomy_ledger?.filter(t => t.human_touch.level === null).length ?? null,
+    cta_measurement_readiness: o.growth.cta_measurement ? { status: o.growth.cta_measurement.status,
+      eligible_for_prospective_baseline: o.growth.cta_measurement.eligible_for_prospective_baseline,
+      quality: o.growth.cta_measurement.quality ?? null, failures: o.growth.cta_measurement.failures } : null,
     unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope,
       current_assessment:j.current_assessment??null })),
     missing_followup: o.growth.experiments?.filter(e => e.status === 'RUNNING' && !e.evaluation_date).map(e => e.id) ?? [],
