@@ -39,7 +39,7 @@ export function summarizeGa4(reports) {
 export function compactGrowth(o) {
   const connections = o.growth.connections ?? {};
   const asc = connections.app_store_connect;
-  return { search: o.growth.search, aio: o.growth.aio, mentions:compactMentions(o.growth.mentions),
+  return { search: o.growth.search, aio: o.growth.aio, decision_trace:o.growth.decision_trace, mentions:compactMentions(o.growth.mentions),
     connections: Object.fromEntries(Object.entries(connections).filter(([,v]) => v?.status).map(([k,v]) => [k, { status: v.status,
       observed_at: v.observed_at ?? v.collection?.verified_at ?? v.collection?.observed_at ?? null,
       window: v.window ?? null, evidence: v.evidence ?? null, reason: v.reason ?? null }])),
@@ -70,6 +70,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
     next: payload.next?.id, search: payload.growth.search, aio,
     cta_measurement: payload.growth.cta_measurement,
+    decision_trace: payload.growth.decision_trace,
     mentions:payload.growth.mentions?{status:payload.growth.mentions.status,sha256:payload.growth.mentions.evidence?.sha256,decisions:payload.growth.mentions.decisions}:null,
     experiments: payload.growth.experiments?.map(e => [e.id,e.status,e.decision,e.due]),
     connections: Object.entries(payload.growth.connections).map(([k,v]) => [k,v.status,v.window]) };
@@ -87,7 +88,8 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     `CTA measurement: ${payload.growth.cta_measurement?.status ?? 'unavailable'}. Retained landing-session observations can prepare a future baseline only after scope/quality review; they cannot repair historical CTA/QR baselines or prove installs.`, '',
     `Mention watch: ${payload.growth.mentions?.status ?? 'unavailable'}; ${payload.growth.mentions?.evidence?.date ?? 'no admitted source'}. Search snippets are not confirmed absence; inspect linked source evidence before selecting an action.`, '',
     payload.next ? `Next candidate: ${payload.next.title}. Growth ${payload.next.growth_opportunity_score.toFixed(1)} / Autonomy opportunity ${payload.next.autonomy_opportunity_score.toFixed(1)}. Native owner must apply existing selection/permission gates and execute the selected safe action in this run.` : 'No currently evidenced executable candidate.',
-    'A report is not action completion. Read latest-run.json for EXECUTE / VERIFY and proof.', '',
+    'A report is not action completion. Read latest-run.json for EXECUTE / VERIFY and proof.',
+    `Decision continuity: ${(payload.growth.decision_trace?.runs??[]).filter(r=>r.state==='verified').length} recorded verified traces; ${(payload.growth.decision_trace?.runs??[]).filter(r=>r.state!=='verified').length} deliveries without valid prospective trace. Original shipments and formal metrics are unchanged.`, '',
     ...((payload.growth.experiments ?? []).filter(e => e.due).map(e => `- Due: ${e.id}; existing evidence and maturity gates apply. Missing evidence remains INCONCLUSIVE.`)), '',
     '## Reliability and cost', '',
     `${payload.failures.length} observed failure states; historical errors need current diagnosis. See audit.json.`,

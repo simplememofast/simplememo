@@ -6,6 +6,7 @@ import './company-mentions.test.mjs';
 import './company-automation-health.test.mjs';
 import './company-aio.test.mjs';
 import './company-cta-measurement.test.mjs';
+import './company-decision.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
