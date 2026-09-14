@@ -5,15 +5,31 @@ const now=new Date('2026-09-13T12:25:00Z');
 const receipt={schema_version:1,method:'authenticated_visible_browser_ui',account_scope:'SimpleMemo',identity_verified:true,
   provider:'AppsFlyer',app_id:'id6758438948',url:'https://hq1.appsflyer.com/discovery/overview',observed_at:'2026-09-13T12:24:00Z',
   attribution_state:'active',cost_state:'invalid_credentials',cost_last_sync:'Never'};
+const appURL='https://hq1.appsflyer.com/marketplace/integrated-partners/id6758438948/iossearchads_int';
 test('an active attribution integration with invalid cost credentials stays partial with unknown cost',()=>{
   const r=appleAdsConnection(receipt,now);
   assert.equal(r.status,'PARTIAL'); assert.equal(r.cost_integration_state,'invalid_credentials');
   assert.equal(r.cost,null); assert.equal(r.data_verified,false); assert.equal(r.cost_last_sync,'Never');
   assert.equal(appleAdsConnection({...receipt,cost_state:'connected'},now).data_verified,false);
 });
+test('the exact SimpleMemo Apple Ads detail page admits the same partial evidence as the overview',()=>{
+  assert.deepEqual(appleAdsConnection({...receipt,url:appURL},now),appleAdsConnection(receipt,now));
+  const connected=appleAdsConnection({...receipt,url:appURL,cost_state:'connected'},now);
+  assert.equal(connected.status,'PARTIAL'); assert.equal(connected.cost,null); assert.equal(connected.data_verified,false);
+});
+test('lookalike origins, another app or partner, and unrelated settings pages cannot supply this evidence',()=>{
+  for(const url of [appURL.replace('https:','http:'),appURL.replace('hq1.','hq2.'),
+    appURL.replace('appsflyer.com','appsflyer.com.example.com'),
+    appURL.replace('id6758438948','id0000000000'),appURL.replace('iossearchads_int','other_int'),
+    `${appURL}?app_id=id0000000000`,`${appURL}/extra`,
+    'https://hq1.appsflyer.com/cost-settings/overview','https://hq1.appsflyer.com/account-settings/myplan']) {
+    assert.equal(appleAdsConnection({...receipt,url},now).status,'BLOCKED',url);
+  }
+});
 test('other identities, future/stale observations and malformed states cannot establish a connection',()=>{
-  for (const patch of [{app_id:'other'},{account_scope:'other'},{identity_verified:false},{url:'https://example.com'},
+  for (const url of [receipt.url,appURL]) for (const patch of [{app_id:'other'},{account_scope:'other'},
+    {identity_verified:false},{provider:'other'},{method:'unverified'},{url:'https://example.com'},
     {observed_at:'2026-09-14T00:00:00Z'},{observed_at:'2026-09-01T00:00:00Z'},{observed_at:null},{observed_at:{toString:null,valueOf:null}},
-    {attribution_state:'invented'},{cost_state:'success'}]) assert.equal(appleAdsConnection({...receipt,...patch},now).status,'BLOCKED');
+    {attribution_state:'invented'},{cost_state:'success'}]) assert.equal(appleAdsConnection({...receipt,url,...patch},now).status,'BLOCKED');
   for(const r of [null,[],{}])assert.equal(appleAdsConnection(r,now).status,'BLOCKED');
 });
