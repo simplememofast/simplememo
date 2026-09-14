@@ -12,6 +12,7 @@ import { review, advance, recordSelection } from './decision-review.mjs';
 import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
 import { ep as scoreEp, ra as scoreRa } from './autonomy-score.mjs';
 import { automatedDecisionOrigin, runtimeDecisionOrigin, verifyLaunchd, NATIVE_LABEL, NATIVE_SCRIPT } from './lib/decision-origin.mjs';
+import { publicationRetryPlan, retryPendingPublication } from './lib/decision-publication-retry.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -304,7 +305,10 @@ async function main() {
   if (apply) {
     const pending = pendingPublication();
     if (pending.length) {
-      console.log(JSON.stringify({ state: 'waiting_for_publication', ...origin, pending }));
+      const publication_recovery = retryPendingPublication(pending, { request: api, stopped: stop,
+        rerun: id => execFileSync('gh', ['api', '--method', 'POST', `repos/${REPO}/actions/runs/${id}/rerun`],
+          { cwd: ROOT, encoding: 'utf8', timeout: 30000, stdio: ['ignore', 'pipe', 'pipe'] }) });
+      console.log(JSON.stringify({ state: 'waiting_for_publication', ...origin, pending, publication_recovery }));
       return;
     }
   }
@@ -466,6 +470,54 @@ function selftest() {
     { refreshed: { ...publication, head: { ...publication.head, sha: 'b'.repeat(40) } } }, { branch: 'b'.repeat(40) }]) {
     assert.throws(() => pendingPublication(publicationApi(options)), /pending/);
   }
+  // The remote attempt counter bounds retries across the original owners.
+  const ready = {...publication, mergeable: true, mergeable_state: 'clean'};
+  const retryPending = [{pr: ready.number, head: ready.head.sha, draft: false}];
+  const validation = {id: 1234, repository: {full_name: REPO}, path: '.github/workflows/seo-check.yml',
+    name: 'SEO Validation', event: 'pull_request', head_sha: ready.head.sha, head_branch: ready.head.ref,
+    status: 'completed', conclusion: 'success', run_attempt: 1,
+    created_at: '2026-09-14T15:18:03Z', updated_at: '2026-09-14T15:30:24Z'};
+  const retryNow = new Date('2026-09-14T21:00:00Z');
+  const response = rows => ({total_count: rows.length, workflow_runs: rows});
+  const plan = (rows = [validation], pr = ready, now = retryNow) => publicationRetryPlan(retryPending[0], pr, response(rows), now);
+  assert.equal(plan().state, 'retry_ready');
+  for (const pr of [{...ready, draft: true}, {...ready, state: 'closed'}, {...ready, mergeable: null},
+    {...ready, mergeable: false}, {...ready, mergeable_state: 'blocked'},
+    {...ready, head: {...ready.head, sha: 'b'.repeat(40)}},
+    {...ready, head: {...ready.head, ref: 'Codex/unrelated'}},
+    {...ready, base: {...ready.base, ref: 'other'}}]) assert.notEqual(plan([validation], pr).state, 'retry_ready');
+  for (const change of [{status:'in_progress'}, {status:'queued'}, {status:'unknown'}, {conclusion:'failure'},
+    {conclusion:'cancelled'}, {run_attempt:2}, {run_attempt:null}])
+    assert.notEqual(plan([{...validation,...change}]).state,'retry_ready');
+  assert.equal(plan([validation], ready, new Date('2026-09-14T15:59:00Z')).reason,'allow_original_merge_to_finish');
+  for (const change of [{head_sha:'b'.repeat(40)}, {event:'push'}, {repository:{full_name:'other/repo'}},
+    {path:'.github/workflows/other.yml'}, {updated_at:'2026-09-15T00:00:00Z'}])
+    assert.throws(()=>plan([{...validation,...change}]));
+  assert.throws(()=>publicationRetryPlan(retryPending[0],ready,{total_count:31,workflow_runs:[validation]},retryNow));
+  assert.throws(()=>plan([validation,validation]));
+  assert.equal(plan([{...validation,id:1233,run_attempt:2},validation]).reason,'one_retry_limit_or_unknown_attempt');
+  assert.notEqual(plan([validation,{...validation,id:1235,created_at:'2026-09-14T16:00:00Z',updated_at:'2026-09-14T16:01:00Z',conclusion:'failure'}]).state,'retry_ready');
+  const attempt = ({fresh=ready, current=validation, lateRows=[validation], branch=ready.head.sha, stopped=false, postError=false}={}) => {
+    const calls=[], posts=[]; let prReads=0, inventoryReads=0;
+    const result=retryPendingPublication(retryPending,{now:retryNow,stopped:()=>stopped,request:route=>{
+      calls.push(route);
+      if(route===`pulls/${ready.number}`)return ++prReads===1?ready:fresh;
+      if(route.startsWith('actions/workflows/'))return response(++inventoryReads===1?[validation]:lateRows);
+      if(route===`actions/runs/${validation.id}`)return current;
+      if(route.startsWith('git/ref/'))return {object:{sha:branch}};
+      throw new Error('unexpected route');
+    },rerun:id=>{posts.push(id);if(postError)throw new Error('private transport details');}});
+    return {result,calls,posts};
+  };
+  assert.deepEqual(attempt().posts,[validation.id]);
+  assert.equal(attempt().result.state,'validation_retry_requested');
+  for (const options of [{fresh:{...ready,draft:true}}, {fresh:{...ready,state:'closed'}},
+    {current:{...validation,run_attempt:2}}, {branch:'b'.repeat(40)}, {stopped:true},
+    {lateRows:[validation,{...validation,id:1235,status:'queued'}]}]) assert.equal(attempt(options).posts.length,0);
+  const uncertain=attempt({postError:true});assert.equal(uncertain.posts.length,1);
+  assert.equal(uncertain.result.reason,'retry_delivery_unconfirmed');
+  assert(!JSON.stringify(uncertain.result).includes('private transport'));
+  assert.equal(retryPendingPublication([...retryPending,...retryPending],{}).reason,'pending_publication_count');
   const p = { intent: { id: 'x', touches: ['index.html'], eligibility: { reversibility_class: 'R0' } },
     mergeSha: 'a'.repeat(40), headSha: 'b'.repeat(40), checks: { conclusion: 'success' },
     changedAtMerge: ['index.html'], changedSince: [], now: '2026-09-04T01:05:00Z', stopped: false,
