@@ -29,6 +29,10 @@ function directory(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'company-test-')); fs.chmodSync(dir, 0o700);
   t.after(() => fs.rmSync(dir, { recursive: true, force: true })); return dir;
 }
+
+test('scheduled GitHub history survives a busy repository window without unbounded reads or lost partial failures',()=>{
+  execFileSync('python3',['-B','scripts/company-discover.test.py'],{cwd:path.resolve(import.meta.dirname,'../..'),stdio:'pipe'});
+});
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
 test('Growth follow-ups preserve original decisions, remain pending with time, and admit only the registered mature cohort', t => {

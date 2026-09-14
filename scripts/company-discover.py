@@ -80,8 +80,12 @@ def local_jobs():
     return dict(jobs=jobs, cron=cron_state)
 
 
+WORKFLOW_HISTORY_LIMIT = 24
+
+
 def github():
     workflows = []
+    history_reads = 0
     for name in ['simplememo', 'simplememo-api', 'simplememo-ios']:
         repo = ROOT if name == 'simplememo' else Path.home() / name
         run(['git', 'fetch', 'origin', 'main'], cwd=repo)
@@ -99,14 +103,70 @@ def github():
             cron = re.findall(r'^\s*-\s*cron:\s*[\'\"]([^\'\"]+)', body, re.M)
             triggers = re.findall(r'^  (schedule|workflow_dispatch|push|pull_request|workflow_run|repository_dispatch):', body, re.M)
             latest = [r for r in history if r['workflow_id'] == w['id']][:5]
+            history_scope = 'at most five matching runs from latest 100 repository runs; older executions not queried'
+            lookup = {'state': 'repository_window', 'additional_requests': 0}
+            if cron and w['state'] == 'active' and len(latest) < 5:
+                if history_reads >= WORKFLOW_HISTORY_LIMIT:
+                    lookup = {'state': 'request_cap_reached', 'additional_requests': 0}
+                else:
+                    history_reads += 1
+                    try:
+                        direct = json.loads(run(['gh', 'api', f'repos/{remote}/actions/workflows/{w["id"]}/runs?per_page=5']))
+                        rows = direct.get('workflow_runs')
+                        if not isinstance(rows, list) or len(rows) > 5 or any(
+                            not isinstance(r, dict) or r.get('workflow_id') != w['id']
+                            or r.get('repository', {}).get('full_name') != remote
+                            or type(r.get('id')) is not int or r['id'] < 1
+                            for r in rows
+                        ):
+                            raise ValueError('Unexpected workflow history identity or bound')
+                        if len({r['id'] for r in rows}) != len(rows):
+                            raise ValueError('Duplicate workflow run identity')
+                        for row in rows:
+                            created = dt.datetime.fromisoformat(row['created_at'].replace('Z', '+00:00'))
+                            updated = dt.datetime.fromisoformat(row['updated_at'].replace('Z', '+00:00'))
+                            if (created.tzinfo is None or updated.tzinfo is None or updated < created
+                                    or not isinstance(row.get('status'), str) or not row['status']
+                                    or not isinstance(row.get('event'), str) or not row['event']
+                                    or not re.fullmatch(r'[a-f0-9]{40}', row.get('head_sha') or '')
+                                    or (row.get('conclusion') == 'success' and row['status'] != 'completed')):
+                                raise ValueError('Incomplete or inconsistent workflow run metadata')
+                        # An independently read page may be stale. Same-ID
+                        # updates must preserve identity and advance time;
+                        # contradictions retain the entire fallback below.
+                        merged = {r['id']: r for r in latest}
+                        for row in rows:
+                            previous = merged.get(row['id'])
+                            if previous is not None:
+                                identity = ['workflow_id', 'repository', 'created_at', 'head_sha', 'event']
+                                for key in identity:
+                                    old = previous.get(key)
+                                    new = row.get(key)
+                                    if key == 'repository':
+                                        old, new = old.get('full_name'), new.get('full_name')
+                                    if old != new:
+                                        raise ValueError('Conflicting workflow run identity')
+                                old_time = dt.datetime.fromisoformat(previous['updated_at'].replace('Z', '+00:00'))
+                                new_time = dt.datetime.fromisoformat(row['updated_at'].replace('Z', '+00:00'))
+                                if new_time < old_time or (new_time == old_time and any(
+                                    previous.get(key) != row.get(key)
+                                    for key in ['status', 'conclusion', 'run_attempt']
+                                )):
+                                    raise ValueError('Stale or conflicting workflow run observation')
+                            merged[row['id']] = row
+                        latest = sorted(merged.values(), key=lambda r: r.get('created_at') or '', reverse=True)[:5]
+                        history_scope = 'at most five latest observed runs from workflow-specific page plus repository window; older executions not queried'
+                        lookup = {'state': 'workflow_page', 'additional_requests': 1}
+                    except (subprocess.SubprocessError, OSError, ValueError, TypeError, AttributeError, KeyError):
+                        lookup = {'state': 'workflow_read_failed', 'additional_requests': 1}
             fields = ['id', 'created_at', 'updated_at', 'status', 'conclusion', 'event', 'head_sha', 'html_url']
             workflows.append(dict(repo=name, sha=sha, **{k:w[k] for k in ['id', 'name', 'path', 'state']},
                 definition_present=bool(body), cron=cron, trigger_types=triggers,
                 code_paths=sorted(set(re.findall(r'(?:scripts|growth/scripts)/[A-Za-z0-9_./-]+\.(?:mjs|js|py|sh)', body))),
                 source_sha256=hashlib.sha256(body.encode()).hexdigest(),
                 observed_runs=[{k:r.get(k) for k in fields} for r in latest], run_read_complete=False,
-                history_scope='at most five matching runs from latest 100 repository runs; older executions not queried'))
-    return dict(workflows=workflows)
+                history_scope=history_scope, history_lookup=lookup))
+    return dict(workflows=workflows, history_lookup_budget={'limit': WORKFLOW_HISTORY_LIMIT, 'requests': history_reads})
 
 
 def cloud_routines():
