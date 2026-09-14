@@ -9,6 +9,8 @@ import { isDue, validate as validateExperiments } from './ledger.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { growthFollowups } from './company-growth-followup.mjs';
 import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
+import { companyMentions,mentionCandidates } from './company-mentions.mjs';
+import { mentionDecisions } from './company-mention-decisions.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -130,6 +132,11 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
     return d.experiments.map(e => experimentView(e, now.toISOString().slice(0, 10)));
   }, failures);
   const probe = attempt('ai_visibility', () => repoRead('data/ai-visibility-probe.json'), failures);
+  const mentions=companyMentions({now});
+  if(mentions.status!=='ready')failures.push({source:'mention_watch',state:'unavailable',reason:'existing_watch_not_admitted'});
+  const decisions=attempt('mention_decisions',()=>mentionDecisions({stateRoot,mentions,now}),failures);
+  mentions.decisions=decisions?.reviews??[];
+  if(decisions?.failures.length)failures.push({source:'mention_decisions',state:'unavailable',reason:'retained_decision_evidence_invalid'});
   const actions = attempt('existing_actions', () => repoRead('data/autopilot-actions-report.json'), failures);
   const coverage = attempt('coverage', () => repoRead('data/automation-coverage.json'), failures);
   const touches = attempt('human_touches', () => humanTouchMetrics(repoRead('data/autopilot-runs.json')), failures);
@@ -161,7 +168,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
         observed_days: snapshot.dates?.length ?? null, pages: snapshot.pages.length, queries: snapshot.queries.length,
         clicks: snapshot.dates?.reduce((n, r) => n + r.clicks, 0) ?? null,
         impressions: snapshot.dates?.reduce((n, r) => n + r.impressions, 0) ?? null } : null,
-      connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,
+      connections, experiments, content_gaps: gaps, search_input: search?.evidence ?? null,mentions,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
       aio: probe ? { series: probe.series, observed_at: probe.observed_at, status: probe.status,
         valid_questions: probe.valid_questions, unaided_valid_questions: probe.unaided_valid_questions,
@@ -184,7 +191,8 @@ export function opportunities(observation) {
     safety: 90, ease: 65, reliability: 70, business_impact: 60, growth_impact: 55,
     reuse: 100, affordability: 90, permission_readiness: 90 };
   const candidates = [];
-  candidates.push(...searchCandidates(observation.growth, defaults));
+  const mentionInput=mentionCandidates(observation.growth.mentions,searchCandidates(observation.growth,defaults),defaults);
+  candidates.push(...mentionInput.search,...mentionInput.candidates);
   for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed')) {
     candidates.push({ id: 'diagnose:' + job.id, kind: 'diagnose_automation', title: 'Diagnose ' + job.name,
       permission: 'AUTO', executable: true, owner: job.owner, evidence: [job.id, job.health],

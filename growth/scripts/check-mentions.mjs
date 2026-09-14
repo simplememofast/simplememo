@@ -50,6 +50,7 @@ export function queriesFromReadme(text) {
 
 /** クエリの照合は緩める（README は素の語、スナップショットは引用符つきのことがある）。 */
 const norm = (s) => String(s).replace(/["“”\s]/g, '').toLowerCase();
+export { norm as normalizeMentionQuery };
 
 export function validate(snapshots, wantQueries, today = new Date(), acknowledged = []) {
   const problems = [];
@@ -154,7 +155,8 @@ export function validate(snapshots, wantQueries, today = new Date(), acknowledge
 }
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
-if (process.argv.includes('--selftest')) {
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain && process.argv.includes('--selftest')) {
   const WANT = ['シンプルメモ Obsidian', 'simplememofast'];
   const SNAP = (over = {}) => ({
     date: '2026-08-22',
@@ -268,7 +270,6 @@ if (process.argv.includes('--selftest')) {
   process.exit(failed === 0 ? 0 : 1);
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const files = fs.existsSync(DIR)
     ? fs.readdirSync(DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort()
