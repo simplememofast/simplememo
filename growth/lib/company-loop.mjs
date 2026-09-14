@@ -15,6 +15,7 @@ import {decisionTraceStatus} from './company-decision.mjs';
 import { currentAutomationAssessment } from './company-automation-health.mjs';
 import { companyAio } from './company-aio.mjs';
 import { companyCtaMeasurement } from './company-cta-measurement.mjs';
+import {measurementStatus} from './company-measurement.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -180,6 +181,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
       cta_measurement: ctaMeasurement,
       followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
       aio, decision_trace: attempt('company_decision_trace',()=>decisionTraceStatus({stateRoot}),failures),
+      measurements: attempt('growth_measurements',()=>measurementStatus({stateRoot,now}),failures),
     },
       existing_actions: actions,
     execution_boundary: { source: 'data/authority-matrix.json', stopped: stop?.stopped !== false,
@@ -220,6 +222,11 @@ export function opportunities(observation) {
     permission: 'AUTO', executable: true, owner: 'existing growth experiment ledger', evidence: [e.id, e.evaluation_date],
     action_scope: 'Use the existing metric-specific evidence gate. Keep INCONCLUSIVE or measurement_failed when appropriate; no early window or invented data.',
     factors: { ...defaults, frequency: 45, business_impact: 80, growth_impact: 80, ease: 55 } });
+  for(const e of observation.growth.measurements?.experiments??[])if(e.next_action==='review_original_decision_for_action')candidates.push({
+    id:'growth-learning:'+e.id,kind:'review_existing_search_page',experiment_id:e.id,parent_result:e.parent_result,target_page:e.page,
+    title:'Act on the measured '+e.decision+' decision for '+e.page,permission:'AUTO',executable:true,owner:'existing daily owner',evidence:[e],
+    action_scope:'Inspect the admitted comparison, original guardrails and concurrent changes. Execute a justified iteration/revert through the original claim, prospective decision and CI gates. Include parent_experiment; an evaluation is not a delivered change.',
+    factors:{...defaults,frequency:45,business_impact:85,growth_impact:85,ease:55}});
   for (const r of observation.growth.followups?.reviews ?? []) if (r.due) candidates.push({
     id: 'followup:' + r.id, kind: 'evaluate_growth_followup', title: 'Follow up ' + r.parent.id,
     permission: 'AUTO', executable: true, owner: r.owner, evidence: [r.id, r.parent_sha256, r.post_start, r.post_end],
@@ -255,6 +262,7 @@ export function auditObservation(o) {
       'Historical mention suggestions require current canonical selector execution'],
     handoff_evidence: {appsflyer:o.growth.connections?.appsflyer?.scheduled_consumer_evidence ?? null},
     decision_trace: o.growth.decision_trace,
+    measurements: o.growth.measurements,
     discovery_gaps: o.automation.discovery_gaps,
     source_failures: o.failures,
     opportunities: opportunities(o),
@@ -282,7 +290,7 @@ export function persistRun({ stateRoot = DEFAULT_STATE, cadence = 'daily', origi
     const observation = observe({ stateRoot: dir, now });
     const ranked = opportunities(observation);
     const key = cadenceKey(cadence, now);
-    const receipt = { schema_version: 2, id: randomUUID(), cadence, cadence_key: key,
+    const receipt = { schema_version: 3, id: randomUUID(), cadence, cadence_key: key,
       origin, origin_proof: nativeOrigin(), started_at: now.toISOString(),
       observed_at: observation.observed_at, source_commit: observation.source_commit,
       observation_fingerprint: digest({ sources: observation.formal_metrics?.sources,

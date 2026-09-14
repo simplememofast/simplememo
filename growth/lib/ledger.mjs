@@ -118,10 +118,10 @@ export function loadLedger() {
   return JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
 }
 
-export function saveLedger(ledger) {
+export function saveLedger(ledger, file = LEDGER_PATH) {
   ledger.experiments.sort((a, b) =>
     (a.started_at || '').localeCompare(b.started_at || '') || a.id.localeCompare(b.id));
-  fs.writeFileSync(LEDGER_PATH, JSON.stringify(ledger, null, 2) + '\n');
+  fs.writeFileSync(file, JSON.stringify(ledger, null, 2) + '\n');
 }
 
 export function today() {
