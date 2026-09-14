@@ -7,7 +7,7 @@ import { nativeOrigin } from './company-origin.mjs';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const stages = ['detect', 'decide', 'execute', 'verify', 'report', 'learn'];
 const kinds = ['manual_start', 'manual_decision', 'manual_execution', 'manual_verification', 'manual_reporting', 'approval', 'credential'];
-const commands = ['follow-up','register-growth-followup','evaluate-growth-followup','register-goal-followup','goal-wake','acknowledge-goal-wake','bind','finish','collect','run','autonomy-lift','growth-autopilot','autonomy-status','autonomy-audit','growth-audit','review','growth-status','content-gap','aio-audit','observability-status','record-human-touch'];
+const commands = ['follow-up','register-growth-followup','evaluate-growth-followup','register-goal-followup','goal-wake','acknowledge-goal-wake','bind','finish','collect','run','autonomy-lift','growth-autopilot','autonomy-status','autonomy-audit','growth-audit','review','growth-status','content-gap','aio-audit','observability-status','record-human-touch','record-mention-review','resolve-mention-review'];
 const directory = (root, child) => privateState(path.join(privateState(root), child));
 
 // Subprocess measurements are not observations of all parent-session handoffs.
@@ -18,7 +18,7 @@ export function recordCommand({stateRoot, command, startedAt, durationMs, result
     observed_at:now.toISOString(),duration_ms:durationMs,execution_state:failed?'failed':'returned',
     result_status:typeof result?.status==='string'?result.status:null,result_sha256:hash(resultBytes),
     source_failures:result?.failures?.length ?? result?.source_failures?.length ?? null,
-    company_run_id:typeof result?.id==='string'?result.id:null,origin,
+    company_run_id:!['record-mention-review','resolve-mention-review'].includes(command) && typeof result?.id==='string'?result.id:null,origin,
     stages:Object.fromEntries(stages.map(stage=>[stage,{state:result?.stages?.[stage] ?? 'not_observed',human_touches:null}])),
     parent_human_touches:null,parent_zero_touch_completion:null,
     cost:{parent_model_usd:null,parent_model_tokens:null,api_usd:null,bigquery_usd:null,

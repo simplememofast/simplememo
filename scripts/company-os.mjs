@@ -10,6 +10,7 @@ import { followUp } from '../growth/lib/company-followup.mjs';
 import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from '../growth/lib/company-growth-followup.mjs';
 import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/lib/company-observability.mjs';
 import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/company-goal-followup.mjs';
+import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -19,7 +20,11 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if (command === 'follow-up') {
+if(command==='record-mention-review') {
+  result=recordMentionReview({stateRoot,reviewFile:option('evidence')});
+} else if(command==='resolve-mention-review') {
+  result=await recordMentionResolution({stateRoot,resolutionFile:option('evidence')});
+} else if (command === 'follow-up') {
   result={failures:[]};
   try { Object.assign(result, followUp({stateRoot})); }
   catch { result.operational=null; result.failures.push({source:'operational_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
