@@ -234,6 +234,19 @@ def build(discovery, root=ROOT):
     cf = source('cloudflare.json')
     health_path = discovery / 'cloudflare-cron-health.json'
     cf_rows = read(health_path)[0].get('results', []) if health_path.exists() else []
+    meta_path = discovery / 'cloudflare-cron-health-meta.json'
+    current_meta = None
+    try:
+        meta = read(meta_path)
+        raw = read(health_path)
+        if (isinstance(meta, dict) and isinstance(raw, list) and len(raw) == 1 and isinstance(raw[0], dict)
+                and type(meta.get('current_run_evidence_version')) is int and meta['current_run_evidence_version'] == 1 and meta.get('profile') == 'observe'
+                and meta.get('method') == 'fixed aggregate SELECT' and meta.get('scope_days') == 30
+                and meta.get('raw_sha256') == hashlib.sha256(health_path.read_bytes()).hexdigest()
+                and len(raw) == 1 and raw[0].get('success') is True):
+            current_meta = meta
+    except (OSError, ValueError, TypeError, KeyError):
+        pass  # Historical aggregates remain visible without admitted current-run evidence.
     cf_source = discovery / 'sources/simplememo-api/src/index.ts'
     names = set(r['job_name'] for r in cf_rows)
     if cf_source.exists():
@@ -243,8 +256,16 @@ def build(discovery, root=ROOT):
     for name in sorted(names):
         rows = [r for r in cf_rows if r['job_name'] == name]
         values = lambda key: [r[key] for r in rows if r.get(key) is not None]
+        current = dict(schema_version=1, observed_at=current_meta.get('observed_at'),
+                       source='discovery/cloudflare-cron-health.json', raw_sha256=current_meta['raw_sha256'],
+                       latest_failure_ms=max(values('last_failure'), default=None),
+                       latest_no_error_ms=max(values('last_no_error'), default=None),
+                       latest_results=[dict(cron_expression=r.get('cron_expression'), started_at_ms=r.get('last_run'),
+                                            finished_at_ms=r.get('latest_finished'), errors=r.get('latest_errors'),
+                                            thrown=r.get('latest_thrown'), eligible=r.get('latest_eligible'),
+                                            sent=r.get('latest_sent'), reason=r.get('latest_reason')) for r in rows]) if current_meta else None
         jobs.append(record('cloudflare:simplememo-api:' + name, name, 'Cloudflare Worker',
-            owner='simplememo-api/src/index.ts:' + name,
+            owner='simplememo-api/src/index.ts:' + name, current_observation=current,
             schedule=sorted(set(r['cron_expression'] for r in rows)), timezone='UTC', trigger=['Worker Cron'],
             inputs=['existing Worker bindings and per-job gates'], data_sources=['D1 cron_run_log', 'Worker runtime'],
             code_path=['../simplememo-api/src/index.ts', '../simplememo-api/src/cron.ts'],
