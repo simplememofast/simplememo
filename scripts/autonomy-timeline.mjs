@@ -280,7 +280,7 @@ export function toSvg(doc) {
   // 起点はローンチ月（グラフの注記もそこを基準にしている）。
   const { months, ratio } = headlineFacts(doc);
   const headline = ratio
-    ? `運営の自律度は${months}か月で${ratio}倍。コードは最初から高いまま。`
+    ? `運営の自律度は${months}か月で${ratio}倍。コード著者率は別指標です。`
     : '運営の自律度とコード変更のAI比率';
   o.push(`<text x="${M.l}" y="27" fill="${INK}" font-size="17" font-weight="700">${esc(headline)}</text>`);
   o.push(`<text x="${M.l}" y="46" fill="${INK2}" font-size="12">総合自動化率（未着手を含む）／ 2026-08と09途中を観測・以前は証跡の初出月から再構成</text>`);
