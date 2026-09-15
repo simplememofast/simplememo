@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {currentCronDiagnosticInput} from './company-cron-diagnostics.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
@@ -166,7 +167,8 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
     formal_metrics: metrics, human_touches: touches,
     automation: { registered: registry?.jobs.length ?? null, active_or_observed: running.length,
       failures: registry?.jobs.filter(j => ['failure', 'FAILED', 'errors_observed'].includes(j.health?.state))
-        .map(j=>({...j,current_assessment:currentAutomationAssessment(j,now,stateRoot)})) ?? [],
+        .map(j=>({...j,current_assessment:currentAutomationAssessment(j,now,stateRoot),
+          diagnostic_input:currentCronDiagnosticInput(j,now,stateRoot)})) ?? [],
       discovery_gaps: registry?.known_gaps ?? [],
       registry_generated_at: registry?.generated_at ?? null,
       note: 'Registry collection and individual source timestamps differ; historical errors do not establish a current incident.' },
@@ -209,7 +211,8 @@ export function opportunities(observation) {
   candidates.push(...mentionInput.search,...mentionInput.candidates);
   for (const job of observation.automation.failures.filter(j => j.execution_state === 'observed' && j.current_assessment?.needs_diagnosis!==false)) {
     candidates.push({ id: 'diagnose:' + job.id, kind: 'diagnose_automation', title: 'Diagnose ' + job.name,
-      permission: 'AUTO', executable: true, owner: job.owner, evidence: [job.id, job.health],
+      permission: 'AUTO', executable: true, owner: job.owner,
+      evidence: [job.id, job.health,...(job.diagnostic_input?[job.diagnostic_input]:[])],
       action_scope: 'Inspect current sanitized error evidence and existing owner; safe code repair only after confirmed cause',
       factors: { ...defaults, frequency: 95, business_impact: 85, growth_impact: 65, reliability: 80 } });
   }
@@ -255,6 +258,7 @@ export function auditObservation(o) {
       eligible_for_prospective_baseline: o.growth.cta_measurement.eligible_for_prospective_baseline,
       quality: o.growth.cta_measurement.quality ?? null, failures: o.growth.cta_measurement.failures } : null,
     unreliable_automations: o.automation.failures.map(j => ({ id: j.id, state: j.health.state, scope: j.history_scope,
+      ...(j.diagnostic_input?{diagnostic_input:j.diagnostic_input}:{}),
       current_assessment:j.current_assessment??null, reporting_context:failureReportingContext(j) })),
     failure_summary: failureReportingSummary(o.automation.failures),
     missing_followup: o.growth.experiments?.filter(e => e.status === 'RUNNING' && !e.evaluation_date).map(e => e.id) ?? [],

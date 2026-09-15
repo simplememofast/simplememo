@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {cronDiagnosticMaterial} from './company-cron-diagnostics.mjs';
 import {nativeResourceStatus} from './company-resource-usage.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -73,6 +74,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
     native_resource_health:payload.native_resource_usage.status,
     diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
+    diagnostic_causes:payload.failures.map(j=>[j.id,cronDiagnosticMaterial(j.diagnostic_input)]),
     failure_execution_context:payload.failures.map(j=>[j.id,j.reporting_context.execution_state,j.reporting_context.category]),
     next: payload.next?.id, search: payload.growth.search, aio, bing:payload.growth.bing,
     cta_measurement: payload.growth.cta_measurement,
@@ -101,6 +103,7 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     '## Reliability and cost', '',
     `${payload.failures.length} retained failure states: ${payload.failure_summary.counts.active_diagnosis_required} active diagnosis candidates; ${payload.failure_summary.counts.active_current_disposition} with current dispositions; ${payload.failure_summary.counts.disabled_history} disabled-owner history; ${payload.failure_summary.counts.paused_or_ended_history} paused/ended history; ${payload.failure_summary.counts.event_or_manual_history} event/manual history; ${payload.failure_summary.counts.registered_owner_needs_verification} registered owners needing execution verification; ${payload.failure_summary.counts.unverified_execution_state} with unverified execution state. See audit.json for each original failure and its current evidence.`,
     'These categories do not erase failures, prove recovery or authorize retries, reactivation or publication. Formal metrics retain their original definitions and records.',
+    ...payload.failures.filter(j=>j.diagnostic_input).map(j=>`Current diagnostic input — ${j.id}: ${JSON.stringify(cronDiagnosticMaterial(j.diagnostic_input))}. Source receipt and original run identity are retained in the private JSON review.`),
     'API monetary cost and Codex monetary cost remain null unless observed. Analytics receipts retain actual billed bytes and a 2 GiB per-run cap. Model budget, one-action gate and 90-minute limit remain unchanged.', '',
     '## Human blockers', '', ...payload.discovery_gaps.map(b => `- ${b.id}: ${b.reason}`));
   if (cadence === 'monthly') lines.push('', '## 30 / 90 day strategy', '',
