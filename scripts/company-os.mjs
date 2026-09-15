@@ -14,6 +14,7 @@ import {recordMentionReview,recordMentionResolution} from '../growth/lib/company
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
 import {recordAutomationDiagnosis} from '../growth/lib/company-automation-diagnoses.mjs';
 import {reportFailure,failureReportingSummary} from '../growth/lib/company-automation-health.mjs';
+import {recordAppleAdsObservation} from '../growth/lib/company-connection-observations.mjs';
 import {prepareCompanyDecision,decisionTraceStatus} from '../growth/lib/company-decision.mjs';
 import {prepareMeasurement,registerMeasurement,measurementComparison,evaluateMeasurement,measurementStatus} from '../growth/lib/company-measurement.mjs';
 
@@ -25,7 +26,9 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='prepare-measurement') {
+if(command==='record-apple-ads-observation') {
+  result=recordAppleAdsObservation({stateRoot,evidenceFile:option('evidence')});
+} else if(command==='prepare-measurement') {
   result=prepareMeasurement({stateRoot,evidenceFile:option('evidence')});
 } else if(command==='register-measurement') {
   result=await registerMeasurement({stateRoot,id:option('run')});
