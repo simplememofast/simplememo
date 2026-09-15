@@ -159,6 +159,21 @@ For a future eligible CTA change, inspect `cta-measurement` and the retained art
 
 The existing Cloudflare health query retains its original 30-day aggregates and also returns the exact latest result for each job/schedule. Its private metadata binds the raw receipt hash and completion observation time. Company selection keeps historical failure counts visible. For `service_notice_monitor` only, a matching receipt no older than two hours can suppress repeat diagnosis when the original hourly monitor explicitly completed its public response/configuration checks after the last error and returned `service_notice_inactive` with zero errors, exceptions, eligible notices and sends. This is an inactive-monitor observation, not an attributed repair, customer delivery or incident-response success. Raw/metadata/registry mismatches, another schedule, new errors, active notices, missing values, stale results and all other job types keep their diagnosis candidate. A VFU cap stop or generic error-free skip does not establish recovery. The same daily discovery owner refreshes this evidence; no extra query, timer or monitor is added to regular operation.
 
+The existing Company observation also carries the current VFU diagnostic counts
+into its original diagnosis candidate, detailed audit and private reviews. The
+same two-hour, exact-receipt verifier binds the latest completed original hourly
+run. Only the API's fixed dispatch/provider classes with internally consistent
+counts are admitted. Provider counts omitted by an older owner remain unknown;
+malformed or stale evidence never passes through raw error text. Diagnosis
+eligibility, opportunity weights, historical failures, formal metrics and action
+permissions are unchanged. A provider rejection does not authorize correcting a
+recipient, clearing suppression, replacing an original unsubscribe token or
+replaying a message. The native owner uses these actual causes when choosing a
+justified safe repair through the existing gates. Reviews notify a changed cause
+or coverage state; a new run identity, receipt hash or timestamp alone is quiet.
+No new query or scheduler is introduced. Roll back through a normal revert PR;
+retain the original private receipts and failure history.
+
 For an actually investigated `vfu_regular` failure with no justified safe next action, retain the sanitized investigation and use `company-os.mjs record-automation-diagnosis --evidence <private-review.json>`. This appends an immutable decision to that job's **existing** `failure-classifications.json` review. The review needs `schema_version:1`, `job_id`, exact `failure_finished_at_ms`, `decision:"reviewed_no_safe_action"`, `reviewed_at`, `review_after` (at most 24 hours later), concrete `rationale`, `next_condition`, and `investigation:{path,sha256}`. Its separate private investigation JSON needs the same job/failure, actual `checked_at`, nonempty `findings`, retained `sources:[{path,sha256}]`, `disposition:"no_safe_action"` and `no_send_or_cron_trigger:true`. Inspect the current failure before writing it; an older provider error cannot diagnose a newer one. Keep addresses, request bodies and tokens out of these notes.
 
 This is the agent's bounded decision to avoid repeating the same investigation, not independent verification of the cause or recovery. Admission requires the original hourly owner, a fresh matching raw/metadata/registry receipt, the exact reviewed failure, and a later explicit cap stop with zero errors, exceptions, eligible rows and sends. The cap stop alone never clears diagnosis. Changed failure identity, current outcome, invalid evidence or expiration reopens the candidate. All historical failures, source limits, formal metrics and other candidate scores remain intact; status/audit/reviews expose the disposition alongside the failed state. Renewal requires a new actual investigation and new immutable evidence, retaining the old decision. The original daily owner consumes this state without another timer, query, send, token replacement or database cleanup. A diagnosis command is not a completed Autopilot run; real repairs still require the ordinary gates and delivery proof. Rollback is a normal revert PR; retain the private diagnosis history for audit.

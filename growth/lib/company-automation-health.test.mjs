@@ -10,6 +10,7 @@ import {currentAutomationAssessment,failureReportingContext,failureReportingSumm
 import {recordAutomationDiagnosis} from './company-automation-diagnoses.mjs';
 import {formalMetrics} from './company-metrics.mjs';
 import {saveReview} from './company-review.mjs';
+import {currentCronDiagnosticInput,cronDiagnosticMaterial} from './company-cron-diagnostics.mjs';
 
 test('failure reporting preserves all history and distinguishes execution without changing selector eligibility',()=>{
   const states=['observed','observed','disabled','event_or_manual',undefined,'unexpected','PAUSED','ended','scheduled','enabled','ACTIVE','loaded','declared_unobserved'];
@@ -262,4 +263,114 @@ print(json.dumps(next(j for j in r['jobs'] if j['id']=='cloudflare:simplememo-ap
   assert.equal(currentAutomationAssessment(job,now,f.stateRoot).needs_diagnosis,false);
   fs.appendFileSync(f.rawFile,'\n');assert.equal(build().current_observation,null);
   f.save();atomicJson(f.metaFile,[]);assert.equal(build().current_observation,null);
+});
+
+function diagnosticFixture(t) {
+  const f=fixture(t);
+  Object.assign(f.row,{job_name:'vfu_regular',last_failure:f.row.latest_finished,
+    last_no_error:Date.parse('2026-09-14T05:00:03Z'),latest_errors:6,latest_eligible:6,
+    latest_reason:'dispatch_errors:resend_failed=2,suppressed=3,token_lost=1;provider_failures:recipient_invalid=2'});
+  Object.assign(f.job,{id:'cloudflare:simplememo-api:vfu_regular',name:'vfu_regular'});
+  f.save();return {...f,diagnostic:()=>currentCronDiagnosticInput(f.job,now,f.stateRoot)};
+}
+
+test('current original VFU causes reach the existing decision input without changing failure or selection semantics',t=>{
+  const f=diagnosticFixture(t),before=structuredClone(f.job),input=f.diagnostic();
+  assert.equal(input.state,'verified_failure_causes');
+  assert.deepEqual(input.dispatch_counts,{resend_failed:2,suppressed:3,token_lost:1});
+  assert.deepEqual(input.provider_counts,{recipient_invalid:2});
+  assert.equal(input.source.sha256,f.job.current_observation.raw_sha256);
+  assert.equal(input.source.finished_at_ms,f.row.latest_finished);
+  assert.deepEqual(f.job,before);
+  const observation={growth:{},automation:{failures:[f.job],discovery_gaps:[]},failures:[]};
+  const old=opportunities(observation)[0];
+  f.job.diagnostic_input=input;
+  const candidate=opportunities(observation)[0];
+  for(const field of ['id','permission','executable','growth_opportunity_score','autonomy_opportunity_score','priority','scoring_version'])assert.equal(candidate[field],old[field]);
+  assert(Number.isFinite(candidate.priority));assert.deepEqual(candidate.factors,old.factors);
+  assert.deepEqual(candidate.evidence.at(-1),input);
+  assert.deepEqual(candidate.evidence.slice(0,2),old.evidence);
+  assert.deepEqual(reportFailure(f.job).health,before.health);
+  assert.equal(reportFailure(f.job).reporting_context.existing_selector_diagnosis_candidate,true);
+  assert.deepEqual(auditObservation(observation).unreliable_automations[0].diagnostic_input,input);
+});
+
+test('legacy provider omission remains unknown; other dispatch failures do not invent provider counts',t=>{
+  const f=diagnosticFixture(t);
+  f.row.latest_reason='dispatch_errors:resend_failed=2,suppressed=3,token_lost=1';f.save();
+  assert.equal(f.diagnostic().provider_counts,null);assert.equal(f.diagnostic().provider_coverage,'not_reported');
+  f.row.latest_reason='dispatch_errors:suppressed=3,token_lost=3';f.save();
+  assert.deepEqual(f.diagnostic().provider_counts,{});assert.equal(f.diagnostic().provider_coverage,'not_applicable');
+  f.row.latest_reason='dispatch_errors:unknown=6';f.save();
+  assert.deepEqual(f.diagnostic().dispatch_counts,{unknown:6});
+});
+
+test('every current API provider class stays a fixed diagnostic class, including unclassified',t=>{
+  const f=diagnosticFixture(t);
+  for(const name of ['recipient_invalid','authentication','access_restricted','sender_invalid','request_invalid',
+    'quota_exceeded','rate_limited','provider_error','security_restricted','unclassified']) {
+    f.row.latest_reason='dispatch_errors:resend_failed=2,suppressed=3,token_lost=1;provider_failures:'+name+'=2';f.save();
+    assert.deepEqual(f.diagnostic().provider_counts,{[name]:2});
+  }
+});
+
+test('malformed, inconsistent or raw provider text never becomes a diagnostic decision input',t=>{
+  const f=diagnosticFixture(t),prefix='dispatch_errors:resend_failed=2,suppressed=3,token_lost=1';
+  for(const reason of [prefix+';provider_failures:recipient_invalid=1',prefix+';provider_failures:recipient_invalid=3',
+    prefix+';provider_failures:recipient_invalid=2,recipient_invalid=2',prefix+';provider_failures:recipient_invalid=0',
+    prefix+';provider_failures:recipient_invalid=-2',prefix+';provider_failures:recipient_invalid=2.0',
+    prefix+';provider_failures:recipient_invalid=02',prefix+';provider_failures:recipient_invalid=2e0',
+    prefix+';provider_failures:recipient_invalid=2,',prefix+';provider_failures:__proto__=2',
+    prefix+';provider_failures:recipient_invalid=2;extra=1',prefix+';provider_failures:private@example.invalid=2',
+    'dispatch_errors:resend_failed=1,suppressed=3,token_lost=1','dispatch_errors:suppressed=3,suppressed=3',
+    'dispatch_errors:exception=9007199254740992','dispatch_errors:suppressed=3,exception=9007199254740991',
+    'dispatch_errors:suppressed=6;provider_failures:recipient_invalid=2','dispatch_errors:',
+    prefix+';','private@example.invalid '+prefix,'x'.repeat(2049)]) {
+    f.row.latest_reason=reason;f.save();const output=f.diagnostic();
+    assert.equal(output.state,'unavailable',reason);assert(!JSON.stringify(output).includes('private@example'));
+    assert.equal(output.dispatch_counts,undefined);assert.equal(output.provider_counts,undefined);
+  }
+});
+
+test('a changed raw receipt, stale observation, another runtime or inconsistent completed result stays unavailable',t=>{
+  const f=diagnosticFixture(t),original=structuredClone(f.row);
+  for(const patch of [{latest_errors:null},{latest_eligible:5},{latest_sent:1},{latest_thrown:1},
+    {latest_errors:-1},{latest_errors:1.5},{cron_expression:'*/5 * * * *'},
+    {last_failure:f.row.latest_finished-1},{last_no_error:f.row.latest_finished},{latest_finished:null}]) {
+    Object.assign(f.row,original,patch);f.save();assert.equal(f.diagnostic().state,'unavailable',JSON.stringify(patch));
+  }
+  Object.assign(f.row,original);f.save();
+  assert.equal(currentCronDiagnosticInput(f.job,new Date('2026-09-14T10:00:00Z'),f.stateRoot).state,'unavailable');
+  fs.appendFileSync(f.rawFile,'\n');assert.equal(f.diagnostic().state,'unavailable');f.save();
+  f.job.current_observation.latest_results[0].reason='dispatch_errors:unknown=6';assert.equal(f.diagnostic().state,'unavailable');
+  assert.equal(currentCronDiagnosticInput({...f.job,id:'unrelated'},now,f.stateRoot),null);
+});
+
+test('an error-free owner result does not supply a recovery or erase historical failures',t=>{
+  const f=diagnosticFixture(t);
+  Object.assign(f.row,{latest_errors:0,latest_eligible:0,latest_reason:'daily_cap_reached',
+    last_no_error:f.row.latest_finished,last_failure:f.row.last_run-1000});f.save();
+  const input=f.diagnostic();assert.equal(input.state,'no_current_dispatch_failure');
+  assert.equal(input.dispatch_counts,undefined);assert.equal(f.job.health.state,'errors_observed');
+  assert.equal(f.job.health.failures_30d,1);assert.equal(f.assess().needs_diagnosis,true);
+});
+
+test('reviews notify changed failure causes while an equivalent new run remains quiet and failed',t=>{
+  const f=diagnosticFixture(t),metrics=formalMetrics({now});
+  atomicJson(path.join(f.stateRoot,'metrics-baseline.json'),metrics);
+  const observation={growth:{experiments:[]},formal_metrics:metrics,human_touches:{manual_starts:0},failures:[],
+    automation:{failures:[f.job],discovery_gaps:[]}};
+  const review=()=>{f.job.diagnostic_input=f.diagnostic();return saveReview(observation,{stateRoot:f.stateRoot,now});};
+  const first=review();assert.equal(first.notification,'material_change');assert.equal(review().notification,'quiet');
+  const before=f.job.diagnostic_input;
+  f.row.last_run+=1000;f.row.latest_finished+=1000;f.row.last_failure=f.row.latest_finished;f.save();
+  assert.equal(review().notification,'quiet');assert.notEqual(f.job.diagnostic_input.source.sha256,before.source.sha256);
+  assert.deepEqual(cronDiagnosticMaterial(f.job.diagnostic_input),cronDiagnosticMaterial(before));
+  f.row.latest_reason=f.row.latest_reason.replace('recipient_invalid=2','authentication=2');f.save();
+  assert.equal(review().notification,'material_change');assert.equal(review().notification,'quiet');
+  const saved=JSON.parse(fs.readFileSync(first.markdown.replace(/\.md$/,'.json')));
+  assert.equal(saved.failures.length,1);assert.equal(saved.failure_summary.counts.active_diagnosis_required,1);
+  assert.equal(saved.failures[0].health.failures_30d,1);assert.equal(saved.failures[0].diagnostic_input.source.errors,6);
+  assert.deepEqual(saved.next.evidence.at(-1).provider_counts,{authentication:2});
+  assert.match(fs.readFileSync(first.markdown,'utf8'),/authentication/);
 });

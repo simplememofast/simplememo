@@ -39,6 +39,7 @@ export function failureReportingSummary(jobs) {
 
 export function reportFailure(job) {
   return {id:job.id,health:job.health,current_assessment:job.current_assessment,
+    ...(job.diagnostic_input?{diagnostic_input:job.diagnostic_input}:{}),
     reporting_context:failureReportingContext(job)};
 }
 
