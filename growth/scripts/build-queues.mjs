@@ -134,10 +134,19 @@ export function merge(existing, rows, unreachable = new Map()) {
     items.push({ ...leftover, status: leftover.status === 'queued' ? 'stale' : leftover.status });
   }
 
-  // id を振り直す（機械行だけ）。手作り行の id とぶつからないよう接頭辞を分ける。
+  // Preserve every retained ID. Position-based numbering reused IDs when a
+  // new observation preceded a stale/done row. Reserve all existing IDs,
+  // including manual and currently unreachable rows, before assigning new ones.
+  const usedIds = new Set(existing.map(i => i.id).filter(id => id != null));
   let n = 0;
+  const nextId = () => {
+    let id;
+    do { id = `A${++n}`; } while (usedIds.has(id));
+    usedIds.add(id);
+    return id;
+  };
   for (const i of items) {
-    if (i.origin === MACHINE_ORIGIN) { n += 1; i.id = i.id ?? `A${n}`; }
+    if (i.origin === MACHINE_ORIGIN && i.id == null) i.id = nextId();
   }
   return { items: [...manual, ...items], added, kept, blocked, manual, unreachable: skippedUnreachable };
 }
@@ -181,6 +190,29 @@ function selftest() {
 
   const gd = merge([{ origin: MACHINE_ORIGIN, source_key: 'query:z', status: 'done', id: 'A1' }], []);
   t('消えた done は done のまま', gd.items[0].status === 'done');
+
+  t('新規行は後方へ残る stale 行のIDを再使用しない',
+    g.items.find(i => i.source_key === 'query:a').id === 'A2' && z.id === 'A1');
+  const identityRows = [
+    { id: 'A2', page: '/manual', status: 'blocked' },
+    { origin: MACHINE_ORIGIN, source_key: 'query:old', status: 'done', id: 'A1' },
+    { origin: MACHINE_ORIGIN, source_key: 'query:gone', status: 'queued', id: 'A4' },
+  ];
+  const numbered = merge(identityRows, [row('new'), row('second')]);
+  const newIds = numbered.added.map(i => i.id);
+  t('手作り・done・staleのIDを予約して新規IDを一意に採番する',
+    newIds.join(',') === 'A3,A5' && new Set(numbered.items.map(i => i.id)).size === numbered.items.length);
+  const replay = merge(numbered.items, [row('second'), row('new')]);
+  t('再生成で順序が変わっても元の新規IDを維持する',
+    numbered.items.every(i => replay.items.find(r => r.source_key === i.source_key && r.origin === i.origin)?.id === i.id));
+  const removed = merge([{ origin: MACHINE_ORIGIN, source_key: 'query:removed', id: 'A1', status: 'queued' }],
+    [{ ...row('removed'), ranking_pages: [{ page: '/gone' }] }, row('fresh')], new Map([['/gone', 'abandoned-test']]));
+  t('同じ再生成で到達不能になった行のIDも新規へ再使用しない', removed.items[0].id === 'A2');
+  const legacyDuplicates = [{ origin: MACHINE_ORIGIN, source_key: 'query:x', status: 'done', id: 'A1' },
+    { origin: MACHINE_ORIGIN, source_key: 'query:y', status: 'dropped', id: 'A1' }];
+  const legacy = merge(legacyDuplicates, [row('new')]);
+  t('既存の重複IDを勝手に付け替えず新規衝突だけ防ぐ',
+    legacy.added[0].id === 'A2' && legacy.items.filter(i => i.id === 'A1').length === 2);
 
   t('kind が違えば別の行', keyOf(row('a', 'query')) !== keyOf(row('a', 'page')));
 
