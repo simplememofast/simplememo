@@ -117,7 +117,7 @@ def transcript(raw, thread_id, runtime_failure=None):
             'bytes': len(raw), 'turns': turns}
 
 
-def local_transcript(codex_dir, state, thread_id, runtime_failure=None):
+def local_transcript(codex_dir, state, thread_id, runtime_failure=None, resources=None):
     thread = state.execute('SELECT rollout_path FROM threads WHERE id=?', (thread_id,)).fetchone()
     details = {'state': 'unavailable', 'reason': 'thread_missing', 'sha256': None, 'bytes': None, 'turns': []}
     if not thread:
@@ -127,7 +127,20 @@ def local_transcript(codex_dir, state, thread_id, runtime_failure=None):
         details['reason'] = 'path_outside_session_store'
         return details
     try:
-        return transcript(path.read_bytes(), thread_id, runtime_failure)
+        if resources is None:
+            raw = path.read_bytes()
+        else:
+            with path.open('rb') as stream:
+                raw = stream.read(64 * 1024 * 1024 + 1)
+            if len(raw) > 64 * 1024 * 1024:
+                resources.update(state='unknown', reason='transcript_missing_or_too_large',
+                                 counters=None, original_prefix_sha256=None)
+                details['reason'] = 'unreadable_or_incomplete_transcript'
+                return details
+        result = transcript(raw, thread_id, runtime_failure)
+        if resources is not None:
+            resources.update(original_resources(raw, result['turns']))
+        return result
     except (OSError, ValueError, KeyError, TypeError):
         details['reason'] = 'unreadable_or_incomplete_transcript'
         return details
@@ -286,7 +299,7 @@ def validate_runtime_failure(receipt, row):
             'Invalid runtime failure receipt')
 
 
-def observe(codex_dir, previous=None, now=None):
+def observe(codex_dir, previous=None, now=None, resources=None):
     observed_at = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
     origin = native_observer_origin(observed_at)
     prior_runs = {r['thread_id']: r for r in (previous or {}).get('runs', [])}
@@ -301,6 +314,8 @@ def observe(codex_dir, previous=None, now=None):
         runs = [dict(r) for r in scheduler.execute(
             'SELECT thread_id,automation_id,status,created_at,updated_at FROM automation_runs '
             'WHERE automation_id IN (' + placeholders + ') ORDER BY created_at,thread_id', REGISTERED)]
+        if resources is not None:
+            require(len(runs) <= 256, 'Resource inventory exceeds bounded observation; do not sample')
         normalized = []
         for row in runs:
             tid = row['thread_id']
@@ -309,7 +324,11 @@ def observe(codex_dir, previous=None, now=None):
                       'scheduler_status': row['status'], 'created_at': iso(row['created_at']),
                       'updated_at': iso(row['updated_at']), 'business_outcome': 'not_inferred'}
             runtime_failure = {}
-            record['transcript'] = local_transcript(codex_dir, state, tid, runtime_failure)
+            usage = {} if resources is not None else None
+            record['transcript'] = local_transcript(codex_dir, state, tid, runtime_failure, usage)
+            if resources is not None:
+                resources[tid] = usage or {'state': 'unknown', 'reason': 'transcript_unavailable',
+                                         'counters': None, 'original_prefix_sha256': None}
             if runtime_failure and record['transcript']['state'] == 'observed':
                 record['runtime_failure'] = runtime_failure
             receipt = gate_receipt(codex_dir, record)
@@ -480,11 +499,205 @@ def summary(doc):
             'publication_success': 'not_inferred'}
 
 
+RESOURCE_FIELDS = ('input_tokens', 'cached_input_tokens', 'cache_write_input_tokens',
+                   'output_tokens', 'reasoning_output_tokens', 'total_tokens')
+SAFE_INTEGER = 2 ** 53 - 1
+
+
+def resource_counters(value):
+    require(isinstance(value, dict), 'Missing resource counters')
+    result = {k: value.get(k) for k in RESOURCE_FIELDS}
+    require(all(type(v) is int and 0 <= v <= SAFE_INTEGER for v in result.values()), 'Invalid resource counters')
+    require(result['input_tokens'] + result['output_tokens'] == result['total_tokens']
+            and result['cached_input_tokens'] <= result['input_tokens']
+            and result['cache_write_input_tokens'] <= result['input_tokens']
+            and result['reasoning_output_tokens'] <= result['output_tokens'], 'Inconsistent resource counters')
+    return result
+
+
+def original_resources(raw, turns):
+    """Private observed counters only. Never prices, billed cost or all-model coverage.
+
+    The lifecycle parser has already validated these same bytes. Select the
+    original turn and take its last monotonic cumulative counter, not a sum of
+    snapshots. Follow-up turns cannot change its usage or its failure outcome.
+    """
+    unknown = {'state': 'unknown', 'reason': 'usage_not_observed', 'counters': None,
+               'original_prefix_sha256': None}
+    if not turns or len(raw) > 64 * 1024 * 1024:
+        return {**unknown, 'reason': 'transcript_missing_or_too_large'}
+    first = turns[0]
+    last = None
+    samples = 0
+    last_at = None
+    inside = False
+    prefix = hashlib.sha256()
+    events = []
+    try:
+        for line in raw.splitlines(keepends=True):
+            prefix.update(line)
+            event = json.loads(line)
+            if event.get('type') != 'event_msg':
+                continue
+            p = event.get('payload', {})
+            if p.get('type') == 'task_started':
+                if p.get('turn_id') != first['turn_id']:
+                    break
+                inside = True
+            elif inside and p.get('type') in ('task_complete', 'turn_aborted'):
+                break
+            elif inside and p.get('type') == 'token_count' and p.get('info') is not None:
+                events.append((event['timestamp'], p['info']))
+        # Bind even absent/invalid usage to the entire original-turn prefix.
+        # A later correction cannot silently rewrite a failed unknown-cost run.
+        unknown['original_prefix_sha256'] = prefix.hexdigest()
+        for event_at, info in events:
+                total = resource_counters(info.get('total_token_usage'))
+                at = timestamp(event_at)
+                require(timestamp(first['started_at']) <= at and
+                        (first['finished_at'] is None or at <= timestamp(first['finished_at'])) and
+                        (last_at is None or timestamp(last_at) <= at), 'Resource timestamp mismatch')
+                # A first counter with an inherited baseline cannot be assigned
+                # to this run. Repeated unchanged snapshots are not added twice.
+                # Later last_token_usage can be a context-compaction summary
+                # with only total_tokens populated. We do not sum or use that
+                # per-response field. The independently reported cumulative
+                # counters must still be consistent and monotonic throughout.
+                require((last is not None and all(total[k] >= last[k] for k in RESOURCE_FIELDS))
+                        or (last is None and total == resource_counters(info.get('last_token_usage'))),
+                        'Resource baseline missing or reset')
+                samples += 1
+                last, last_at = total, event_at
+        if last is None:
+            return unknown
+        return {'state': 'observed', 'reason': None, 'counters': last, 'samples': samples,
+                'last_sample_at': last_at, 'original_prefix_sha256': prefix.hexdigest(),
+                'coverage': 'host_reported_through_last_sample; not billed usage or proof of complete model accounting'}
+    except (ValueError, TypeError, KeyError, AttributeError):
+        return {**unknown, 'reason': 'usage_invalid_or_unattributable'}
+
+
+def resource_report(codex_dir, now=None):
+    resources = {}
+    observed = observe(codex_dir, now=now, resources=resources)
+    rows = []
+    for r in observed['runs']:
+        turns = r['transcript']['turns']
+        first = turns[0] if turns else None
+        rows.append({'thread_id': r['thread_id'], 'automation_id': r['automation_id'],
+                     'original_turn_id': first['turn_id'] if first else None,
+                     'original_turn_state': first['state'] if first else None,
+                     'started_at': first['started_at'] if first else None,
+                     'finished_at': first['finished_at'] if first else None,
+                     'usage': resources[r['thread_id']]})
+    return {'schema_version': 2, 'observed_at': observed['observed_at'], 'registered': list(REGISTERED),
+            'scope': 'private_original_scheduled_turn_counters', 'runs': rows,
+            'billing_usd': None, 'model_price_estimate_usd': None,
+            'limitations': ['Host counters include cached input; they are not billable uncached tokens.',
+                           'Model-specific prices, invoice matching, child model calls and final accounting coverage are unverified.',
+                           'Failed original runs remain included. Later manual turns are excluded; unknown is not zero.',
+                           'Do not copy this private report into routine-runs.json, public costs or formal autonomy metrics.']}
+
+
 class Tests(unittest.TestCase):
     tid = '00000000-0000-0000-0000-000000000001'
     one = '00000000-0000-0000-0000-000000000002'
     two = '00000000-0000-0000-0000-000000000003'
     now = '2026-09-08T05:00:00.000Z'
+
+    def resource_raw(self, values, followup=None):
+        rows = [json.loads(line) for line in self.raw().splitlines()]
+        def sample(value, minute):
+            return {'type': 'event_msg', 'timestamp': '2026-09-08T0' + minute + ':30.000Z',
+                    'payload': {'type': 'token_count', 'info': value}}
+        first_end = next(i for i, r in enumerate(rows) if r.get('payload', {}).get('type') == 'task_complete')
+        rows[first_end:first_end] = [sample(v, '1:00') for v in values]
+        if followup:
+            rows[-1:-1] = [sample(followup, '2:00')]
+        return b''.join((json.dumps(r) + '\n').encode() for r in rows)
+
+    def usage_sample(self, n=100):
+        c = dict(input_tokens=n, cached_input_tokens=0, cache_write_input_tokens=0,
+                 output_tokens=5, reasoning_output_tokens=2, total_tokens=n + 5)
+        return {'total_token_usage': c, 'last_token_usage': c.copy(), 'private': 'never retain this'}
+
+    def test_private_resources_exclude_followup_and_never_enter_public_metadata(self):
+        raw = self.resource_raw([self.usage_sample()], self.usage_sample(9999))
+        public = transcript(raw, self.tid)
+        usage = original_resources(raw, public['turns'])
+        self.assertEqual(usage['counters']['total_tokens'], 105)
+        self.assertEqual(public['turns'][0]['state'], 'failed')
+        self.assertNotIn('input_tokens', json.dumps(public))
+        self.assertNotIn('never retain', json.dumps(usage))
+        shorter = self.resource_raw([self.usage_sample()])
+        self.assertEqual(usage, original_resources(shorter, transcript(shorter, self.tid)['turns']))
+
+    def test_resource_snapshots_are_not_summed(self):
+        raw = self.resource_raw([self.usage_sample()] * 3)
+        usage = original_resources(raw, transcript(raw, self.tid)['turns'])
+        self.assertEqual(usage['samples'], 3)
+        self.assertEqual(usage['counters']['total_tokens'], 105)
+
+    def test_later_compaction_last_usage_is_not_added_to_authoritative_cumulative_counters(self):
+        compacted = self.usage_sample(150)
+        compacted['last_token_usage'] = {k: 0 for k in RESOURCE_FIELDS}
+        compacted['last_token_usage']['total_tokens'] = 22126
+        raw = self.resource_raw([self.usage_sample(), compacted])
+        usage = original_resources(raw, transcript(raw, self.tid)['turns'])
+        self.assertEqual(usage['counters']['total_tokens'], 155)
+
+    def test_bad_resource_counters_remain_unknown_without_affecting_lifecycle(self):
+        for value in [-1, True, 1.5, float('inf'), SAFE_INTEGER + 1, None]:
+            with self.subTest(value=value):
+                sample = self.usage_sample()
+                sample['total_token_usage']['input_tokens'] = value
+                raw = self.resource_raw([sample])
+                public = transcript(raw, self.tid)
+                self.assertEqual(public['turns'][0]['state'], 'failed')
+                self.assertEqual(original_resources(raw, public['turns'])['state'], 'unknown')
+
+    def test_missing_baseline_or_reset_cannot_be_assigned_to_original_run(self):
+        inherited = self.usage_sample()
+        inherited['last_token_usage'] = self.usage_sample(50)['last_token_usage']
+        for samples in [[inherited], [self.usage_sample(100), self.usage_sample(50)]]:
+            raw = self.resource_raw(samples)
+            self.assertEqual(original_resources(raw, transcript(raw, self.tid)['turns'])['state'], 'unknown')
+
+    def test_followup_usage_cannot_fill_a_missing_original_sample(self):
+        raw = self.resource_raw([], self.usage_sample())
+        usage = original_resources(raw, transcript(raw, self.tid)['turns'])
+        self.assertEqual(usage['state'], 'unknown')
+        self.assertEqual(usage['reason'], 'usage_not_observed')
+        self.assertIsNone(usage['counters'])
+        self.assertRegex(usage['original_prefix_sha256'], '^[a-f0-9]{64}$')
+
+    def test_unknown_resource_source_is_bound_to_the_original_prefix(self):
+        raw = self.resource_raw([])
+        a = original_resources(raw, transcript(raw, self.tid)['turns'])
+        braw = raw.replace(b'private error', b'changed original failure')
+        b = original_resources(braw, transcript(braw, self.tid)['turns'])
+        self.assertNotEqual(a['original_prefix_sha256'], b['original_prefix_sha256'])
+
+    def test_resource_read_limit_applies_before_transcript_parse(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.setup_store(root)
+            state = readonly(root / 'state_5.sqlite')
+            try:
+                with patch.object(Path, 'open') as opened, patch(__name__ + '.transcript') as parse:
+                    opened.return_value.__enter__.return_value.read.return_value = b'x' * (64 * 1024 * 1024 + 1)
+                    usage = {}
+                    result = local_transcript(root, state, self.tid, resources=usage)
+                    opened.return_value.__enter__.return_value.read.assert_called_once_with(64 * 1024 * 1024 + 1)
+                    parse.assert_not_called()
+                    self.assertEqual(result['state'], 'unavailable')
+                    self.assertEqual(usage['reason'], 'transcript_missing_or_too_large')
+            finally:
+                state.close()
+
+    def test_invalid_resource_timestamp_stays_unknown(self):
+        raw = self.resource_raw([self.usage_sample()]).replace(b'01:00:30.000Z', b'03:00:30.000Z')
+        self.assertEqual(original_resources(raw, transcript(raw, self.tid)['turns'])['state'], 'unknown')
 
     def raw(self, failed=True):
         def event(kind, turn, stamp, **extra):
@@ -802,7 +1015,7 @@ class Tests(unittest.TestCase):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
-    for flag in ('apply', 'probe', 'check', 'selftest'):
+    for flag in ('apply', 'probe', 'check', 'selftest', 'resource-report'):
         mode.add_argument('--' + flag, action='store_true')
     mode.add_argument('--thread-state')
     mode.add_argument('--preflight', type=Path)
@@ -815,6 +1028,8 @@ if __name__ == '__main__':
         try:
             if options.thread_state:
                 result = thread_state(options.codex_dir, options.thread_state)
+            elif options.resource_report:
+                result = resource_report(options.codex_dir)
             elif options.preflight:
                 result = record_preflight(options.codex_dir, options.preflight)
             elif options.apply:

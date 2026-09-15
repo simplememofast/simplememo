@@ -3,6 +3,7 @@ import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import { privateState, atomicJson, acquireLock } from './company-loop.mjs';
 import { nativeOrigin } from './company-origin.mjs';
+import { nativeResourceStatus } from './company-resource-usage.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const stages = ['detect', 'decide', 'execute', 'verify', 'report', 'learn'];
@@ -67,5 +68,6 @@ export function observabilityStatus({stateRoot}) {
     reported_human_touches:Object.fromEntries(kinds.map(k=>[k,validTouches.filter(e=>e.touch_kind===k).length])),
     stage_observations:Object.fromEntries(stages.map(s=>[s,{command_evidence:validCommands.filter(e=>e.stages?.[s]?.state!=='not_observed'&&e.stages?.[s]?.state!==undefined).length,reported_human_touches:validTouches.filter(e=>e.stage===s).length}])),
     human_touches_per_successful_output:null,zero_touch_completion_rate:null,cost_per_shipped_improvement_usd:null,
+    native_resource_usage:nativeResourceStatus({stateRoot}),
     unknowns:['Unobserved historical events and parent-stage intervention coverage remain unknown.','No invoice-matched parent model/API cost is available here. Runtime milliseconds are not money.'],failures};
 }

@@ -2,6 +2,7 @@ import test from 'node:test';
 import './company-search.test.mjs';
 import './daily-gsc-handoff.test.mjs';
 import './company-native-evidence.test.mjs';
+import './company-resource-usage.test.mjs';
 import './company-mentions.test.mjs';
 import './company-automation-health.test.mjs';
 import './company-aio.test.mjs';

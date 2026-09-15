@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {nativeResourceStatus} from './company-resource-usage.mjs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, digest, compareMetrics } from './company-metrics.mjs';
@@ -63,12 +64,14 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
   const baseline = JSON.parse(fs.readFileSync(path.join(stateRoot, 'metrics-baseline.json')));
   const comparison = compareMetrics(baseline, o.formal_metrics);
   const payload = { growth: compactGrowth(o), comparison, human_touches: o.human_touches,
+    native_resource_usage:nativeResourceStatus({stateRoot,now}),
     failures: o.automation.failures.map(reportFailure), failure_summary:failureReportingSummary(o.automation.failures),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
   // Timestamps do not make unchanged evidence a new notification.
   const aio = structuredClone(payload.growth.aio);
   if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
+    native_resource_health:payload.native_resource_usage.status,
     diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
     failure_execution_context:payload.failures.map(j=>[j.id,j.reporting_context.execution_state,j.reporting_context.category]),
     next: payload.next?.id, search: payload.growth.search, aio, bing:payload.growth.bing,
