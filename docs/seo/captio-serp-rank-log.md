@@ -4,6 +4,43 @@ Weekly tracking of 15 target keywords (JA 10 / EN 5). 2026-08-11 に「月次・
 
 ---
 
+## 2026-09-15 (weekly)
+
+> **測定不足**: 15語のうち8語は、指定のGoogle検索画面で自然検索結果を30件まで読めず、読めた範囲に対象ドメインが無かったため「未測定」です。「30位圏外」とは判定しません。
+>
+> **方法論メモ**: 2026-09-15 09:05–09:11 JST。Googleの通常検索画面を CUA で読み、JA は `hl=ja&gl=jp&pws=0`、EN は `hl=en&gl=us&pws=0`に固定。JA画面で「検索結果はパーソナライズされていません」「日本」を確認。広告、AIによる概要、関連質問、サイトリンク子項目は順位から除外した。Googleは10件単位で表示し、2–3ページ目のアクセシビリティ取得がタイムアウトしたため、確認できた上位範囲だけを記録した。前回 2026-09-02 は一般 WebSearch の US-based index からの推定値で、地域・言語・取得方法が一致しないため、全15語の前回差は `null`。今回を CUA/Google 新基準とする。
+
+| Keyword | Lang | SimpleMemo pos (page) | attnoel | note2selfmail | emailmeapp | delta vs last | Notes |
+|---|---|---|---|---|---|---|---|
+| captio | JA | 1 (`/blog/captio-discontinued`) | 6 | 未測定（取得9件） | 未測定（取得9件） | null | AI概要あり。引用先に attnoel あり。SMは自然検索 #1。 |
+| captio 代替 | JA | 2 (`/blog/captio-discontinued`); 4 (`/captio-alternative/`) | 1 | 未測定（取得8件） | 未測定（取得8件） | null | AI概要あり。引用先に SM `/captio-alternative/` と attnoel あり。 |
+| captio なくなった | JA | 1 (`/blog/captio-discontinued`) | 未測定（取得6件） | 未測定（取得6件） | 未測定（取得6件） | null | AI概要なし。SM `/captio-alternative/` も #5 で確認。 |
+| captio 後継 | JA | 1 (`/blog/captio-discontinued`) | 4 | 未測定（取得10件） | 未測定（取得10件） | null | AI概要あり。自然検索で SM `/captio-alternative/` #3、`/vs/captioo/` #10 も確認。 |
+| captio 使えない | JA | 1 (`/blog/captio-discontinued`) | 6 | 未測定（取得9件） | 未測定（取得9件） | null | AI概要なし。SM `/captio-alternative/` も #3 で確認。 |
+| Obsidian メモ iPhone | JA | 未測定（取得7件） | n/a | n/a | n/a | null | AI概要あり。Zenn の SM 記事は #1 だが、simplememofast.com の順位には含めない。 |
+| Obsidian 音声入力 | JA | 2 (`/blog/obsidian-voice-input`) | n/a | n/a | n/a | null | AI概要あり。AI概要の引用URLは画面の読取範囲では確定できず。 |
+| メモアプリ 音声 無料 | JA | 未測定（取得0件） | n/a | n/a | n/a | null | 検索画面は開けたが、自然結果リストをアクセシビリティ経由で取得できず。 |
+| 自分宛メール メモ | JA | 未測定（取得0件） | 未測定（取得0件） | 未測定（取得0件） | 未測定（取得0件） | null | 検索画面は開けたが、自然結果リストをアクセシビリティ経由で取得できず。 |
+| Obsidian デイリーノート iPhone | JA | 6 (`/obsidian/`) | n/a | n/a | n/a | null | AI概要あり。サイトリンク子項目を除いた自然検索順。 |
+| obsidian quick capture ios | EN | 未測定（取得3件） | n/a | n/a | n/a | null | US/英語指定。SM不在。 |
+| email to obsidian | EN | 未測定（取得6件） | n/a | n/a | n/a | null | US/英語指定。重複・子項目を除外。email2obsidian.com は対象ドメイン外。 |
+| voice memo obsidian | EN | 未測定（取得0件） | n/a | n/a | n/a | null | US/英語指定。検索画面は開けたが自然結果リストを取得できず。 |
+| captio alternative | EN | 未測定（取得6件） | n/a | 未測定（取得6件） | 未測定（取得6件） | null | US/英語指定。Captions/CapCut 文脈の結果が中心。 |
+| note to self email app | EN | 未測定（取得9件） | n/a | 3 | 9 | null | US/英語指定。App Store、Reddit、サイトリンク子項目を分離。 |
+
+**Take:** CUA/Google の新基準では、Captio の JA 5語すべてで `/blog/captio-discontinued` が上位2件以内（うち4語は #1）に確認でき、`Obsidian 音声入力` も #2、`Obsidian デイリーノート iPhone` も #6 で確認できた。一方、15語中8語は30件未満の取得範囲に対象ドメインが見えず未測定。前回と観測条件が異なるため、改善・後退・横ばいは判定せず、今回を次回比較の基準とする。ライブページの改善は実装していない。
+
+**測定状況:** 対象ドメインの確定順位あり 7語、未測定 8語、30位圏外 0語。未測定は改善・後退・横ばいに算入しない。
+
+**Morning brief JSON:**
+`{"type":"serp-weekly","date":"2026-09-15","regressed":0,"improved":0,"flat":0,"unmeasured":8,"watch":["JA-6","JA-8","JA-9","EN-11","EN-12","EN-13","EN-14","EN-15"],"investigation":false}`
+
+```json
+{"date":"2026-09-15","kw_tracked":15,"top3":6,"top10":7,"improved":0,"declined":0,"out_of_top30":0,"worst":null,"best":null,"investigation":false,"take":"CUA/Google new baseline: 7 keywords have verified SimpleMemo top-10 positions; 8 remain unmeasured because fewer than 30 organic results were readable; all deltas are null against the prior incompatible WebSearch estimate."}
+```
+
+---
+
 ## Methodology
 
 - Search tool: WebSearch (US-based Google index). google.co.jp rankings may differ, especially for the bare "captio" keyword which is dominated by Emburse expense software in US results.
