@@ -55,15 +55,6 @@ WITH extracted AS (
   FROM identified
   WHERE event_name = 'session_start'
   GROUP BY stream_id, user_pseudo_id, session_id
-), page_view_evidence AS (
-  -- Supplemental diagnosis over the same scanned daily tables. Do not use an
-  -- out-of-window page view to fill a landing or change the original cohort.
-  SELECT stream_id, user_pseudo_id, session_id,
-    MIN(event_timestamp) AS first_page_view_at,
-    MAX(event_timestamp) AS last_page_view_at
-  FROM identified
-  WHERE event_name = 'page_view' AND event_timestamp IS NOT NULL
-  GROUP BY stream_id, user_pseudo_id, session_id
 ), windowed AS (
   SELECT e.*, s.started_at
   FROM identified e
@@ -74,7 +65,6 @@ WITH extracted AS (
 ), per_session AS (
   SELECT
     stream_id, user_pseudo_id, session_id,
-    MIN(started_at) AS started_at,
     ARRAY_AGG(IF(event_name = 'page_view', STRUCT(
       production_event AS is_production,
       COALESCE(NULLIF(REGEXP_EXTRACT(page_location, r'^https?://[^/]+([^?#]*)'), ''), '/') AS path,
@@ -105,7 +95,7 @@ WITH extracted AS (
   FROM windowed
   GROUP BY stream_id, user_pseudo_id, session_id
 ), classified AS (
-  SELECT p.*, v.first_page_view_at, v.last_page_view_at,
+  SELECT *,
     CASE WHEN channel_values = 0 THEN '(missing session channel)'
          WHEN channel_values > 1 THEN '(conflicting session channels)'
          ELSE channel_value END AS session_channel,
@@ -125,8 +115,7 @@ WITH extracted AS (
          WHEN landing.is_production IS NULL THEN 'missing_hostname'
          WHEN landing.is_production THEN 'production'
          ELSE 'nonproduction' END AS landing_scope
-  FROM per_session p
-  LEFT JOIN page_view_evidence v USING (stream_id, user_pseudo_id, session_id)
+  FROM per_session
 )
 SELECT
   session_channel,
@@ -140,13 +129,6 @@ SELECT
   landing.device_category AS device_category,
   landing.device_language AS device_language,
   COUNT(*) AS observed_started_sessions,
-  -- Mutually exclusive diagnostic counts, not new grouping dimensions. The
-  -- scan is bounded; absence here does not prove missing client instrumentation.
-  COUNTIF(landing IS NULL AND first_page_view_at IS NULL) AS missing_landing_no_timed_page_view_in_scan,
-  COUNTIF(IFNULL(landing IS NULL AND last_page_view_at < started_at, FALSE)) AS missing_landing_page_view_before_start_only,
-  COUNTIF(IFNULL(landing IS NULL AND first_page_view_at >= started_at + 86400000000, FALSE)) AS missing_landing_page_view_after_window_only,
-  COUNTIF(IFNULL(landing IS NULL AND first_page_view_at < started_at
-    AND last_page_view_at >= started_at + 86400000000, FALSE)) AS missing_landing_page_view_both_sides,
   COUNTIF(saw_cta) AS sessions_with_cta_impression,
   COUNTIF(clicked_own_app) AS sessions_with_own_app_click_24h,
   COUNTIF(clicked_own_app AND NOT saw_cta) AS clicked_without_recorded_impression,

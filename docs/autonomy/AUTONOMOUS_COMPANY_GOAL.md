@@ -70,6 +70,37 @@ Record `verified`, `remaining`, `blocked`, `next` at every checkpoint:
 
 ## Stop and block conditions
 
+### User-resumed residual acceptance — 2026-09-15
+
+The user resumed the existing native Goal to finish the remaining implementation,
+operation, measurement and deployment. Preserve the completed installation and
+the original baseline; a new deployment alone does not complete this residual Goal.
+
+- Resolve SEO/AIO coexistence through a recorded, reviewed policy and migration.
+  Preserve active experiment scopes, dates, baselines, failures and interpretation;
+  a proposed policy document does not itself change admission. Existing owners keep
+  their work until an explicit handoff. Never retrofit a later user-directed
+  publication onto an earlier native no-artifact outcome.
+- Verify the next naturally scheduled GSC and Bing acquisition, original encrypted
+  outputs, independent Company ingestion and report readback. A configured workflow,
+  manual rerun or successful sibling job is not proof of the failed source.
+- Complete the original seven-distinct-native-day acceptance at its existing
+  September 20 evaluation date. Repeated runs in one day and manual maintenance
+  cannot manufacture a native day or a successful parent business run.
+- Let the existing monitor evaluate mature treatments using their original windows,
+  including C16 no earlier than September 16 JST. Retain keep/iterate/rollback or
+  insufficient-evidence decisions and verify the corresponding follow-up action.
+- Reuse the existing iOS task for the remaining five save-path journals, measured
+  completion and physical emergency-stop verification. Do not duplicate its work
+  or infer a release from tests or a merged PR.
+- Diagnose available missing GA4 landing evidence, existing Apple Ads ingestion,
+  comparable ASC crashes and linked AI costs. Retain source-specific unknowns and
+  the minimum actual human requirement where the provider cannot supply data.
+  Supplemental diagnostics never redefine historical metrics or erase missing rows.
+- Deliver authorized fixes through existing CI, merge and Pages gates; verify actual
+  outputs from merged code and re-score with the unchanged formal definitions.
+  Keep private current state, costs, evidence and owner mapping up to date.
+
 COMPLETE requires every applicable acceptance condition above, at least one real PDCA run, at least one real human-work transfer and a verified existing-metric improvement. A report, code, dashboard, test-only run, waiting experiment or saved scheduler alone is insufficient. Connected-source limitations can remain only as explicit source blockers; they cannot hide missing required execution or fabricated measurement.
 
 Native Goal remains active while useful work is possible. Mark blocked only under the native tool's required repeated-blocker conditions, after exhausting independent work. Never mark complete to end a chat, reduce effort or because the budget is nearly exhausted. Natural-time observations remain pending and use existing or explicitly integrated follow-up.
