@@ -5,6 +5,7 @@ Only the warehouse scan is replaced. SQLGlot translates the remaining GoogleSQL;
 the ordered first non-null ARRAY_AGG is adapted for DuckDB's aggregate syntax.
 """
 import datetime
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -286,6 +287,46 @@ class FunnelTests(unittest.TestCase):
         scopes = {r["landing_scope"]: r for r in rows}
         self.assertEqual(set(scopes), {"missing_landing_page", "nonproduction"})
         self.assertEqual(scopes["missing_landing_page"]["landing_referrer_status"], "missing_landing_page")
+
+    def test_diagnostic_partition_preserves_every_prior_metric_and_dimension(self):
+        legacy = Path(__file__).parent / "fixtures/ga4-funnel-v1.sql"
+        self.assertEqual(hashlib.sha256(legacy.read_bytes()).hexdigest(),
+                         "a528c1054d236b9bd4a5fdc2d043ae82e282d9c6323213cbb92eeaff4347b71b")
+        boundary = 86_400_000_000
+        events = [event("absent", "session_start"),
+                  event("before", "session_start"), event("before", "page_view", -1),
+                  event("after", "session_start"), event("after", "page_view", boundary),
+                  event("both", "session_start"), event("both", "page_view", -1),
+                  event("both", "page_view", boundary),
+                  event("at-start", "session_start"), event("at-start", "page_view"),
+                  event("at-start", "page_view", -1), click("at-start"),
+                  event("end-minus-one", "session_start"), event("end-minus-one", "page_view", boundary - 1),
+                  event("unstarted", "page_view"), event(None, "page_view"),
+                  event("null-timestamp", "session_start"), event("null-timestamp", "page_view", event_timestamp=None)]
+        events += visit("preview", page_location="https://preview.example.test/")
+        events += visit("no-host", page_location=None)
+        events += visit("duplicate-start") + [event("duplicate-start", "session_start", 5), click("duplicate-start", 8)]
+        current, prior = run(events), run(events, legacy)
+        old_keys = set(prior[0])
+        normalize = lambda rows: sorted([json.dumps({k: r[k] for k in old_keys}, sort_keys=True) for r in rows])
+        self.assertEqual(normalize(current), normalize(prior))
+        missing = next(r for r in current if r["landing_scope"] == "missing_landing_page")
+        self.assertEqual(missing["observed_started_sessions"], 5)
+        self.assertEqual(missing["missing_landing_no_timed_page_view_in_scan"], 2)
+        for field in ["missing_landing_page_view_before_start_only", "missing_landing_page_view_after_window_only",
+                      "missing_landing_page_view_both_sides"]:
+            self.assertEqual(missing[field], 1)
+        for row in current:
+            total = sum(value for key, value in row.items() if key.startswith("missing_landing_"))
+            self.assertEqual(total, row["observed_started_sessions"] if row["landing_scope"] == "missing_landing_page" else 0)
+
+    def test_diagnostic_join_keeps_session_and_stream_keys_independent(self):
+        events = [event("same-user", "session_start"),
+                  event("same-user", "page_view", -1, session_id=2),
+                  event("same-user", "page_view", -1, stream_id="other-stream")]
+        row = run(events)[0]
+        self.assertEqual(row["missing_landing_no_timed_page_view_in_scan"], 1)
+        self.assertEqual(row["missing_landing_page_view_before_start_only"], 0)
 
     def test_mirrors_competitors_prestart_and_24_hour_boundary_do_not_count(self):
         rows = run(visit("a") + [click("a", -1), click("a", 86_400_000_000),

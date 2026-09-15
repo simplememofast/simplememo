@@ -26,6 +26,8 @@ function fixture(t) {
     sessions_with_own_app_click_24h:numerator,sessions_with_cta_impression:denominator,clicked_without_recorded_impression:0,
     sessions_with_onelink_impression:0,sessions_with_onelink_click_24h:0,onelink_clicked_without_recorded_impression:0,
     sessions_with_onelink_qa_click_24h:0,sessions_with_both_app_routes_24h:0,sessions_with_any_app_route_click_24h:numerator,
+    missing_landing_no_timed_page_view_in_scan:0,missing_landing_page_view_before_start_only:0,
+    missing_landing_page_view_after_window_only:0,missing_landing_page_view_both_sides:0,
     own_app_click_session_rate_24h:numerator/denominator, ...overrides});
   const report = {schema_version:1,report:'ga4-funnel',execution:'export',status:'complete',project:'yurika-simplememo',
     location:'asia-northeast1',start:'2026-09-06',end:'2026-09-09',run_id:'123',source_sha:'a'.repeat(40),
@@ -129,6 +131,53 @@ test('CTA does not infer zero clicks when the requested source has no organic la
   assert.equal(result.total,null);assert.equal(result.eligible_for_prospective_baseline,false);
 });
 
+const diagnosticFields = ['missing_landing_no_timed_page_view_in_scan',
+  'missing_landing_page_view_before_start_only','missing_landing_page_view_after_window_only',
+  'missing_landing_page_view_both_sides'];
+
+test('Landing diagnostics retain every missing session and never admit a blocked cohort',t=>{
+  const f=fixture(t), row=f.report.queries[1].result.rows[0];
+  row.landing_scope='missing_landing_page';row.landing_path=null;
+  diagnosticFields.forEach((k,i)=>{row[k]=[4,3,2,1][i];});f.flush();
+  const result=companyCtaMeasurement(f.options), d=result.landing_diagnostics;
+  assert.equal(result.status,'quality_blocked');assert.equal(result.eligible_for_prospective_baseline,false);
+  assert.equal(result.quality.ambiguous_scope_sessions,10);
+  assert.equal(result.total.denominator,90);assert.equal(d.missing_landing_sessions,10);
+  assert.equal(d.status,'observed');assert.equal(d.scan_end,'2026-09-10');
+  assert.deepEqual(d.counts,Object.fromEntries(diagnosticFields.map((k,i)=>[k,[4,3,2,1][i]])));
+  assert.deepEqual(compactCtaMeasurement(result).landing_diagnostics,d);
+});
+
+for (const [label, mutate] of [
+  ['missing field',r=>{delete r[diagnosticFields[0]];}],
+  ['negative field',r=>{r[diagnosticFields[0]]=-1;}],
+  ['fractional field',r=>{r[diagnosticFields[0]]=0.5;}],
+  ['invented missing session',r=>{r[diagnosticFields[0]]=1;}],
+  ['unaccounted missing sessions',r=>{r.landing_scope='missing_landing_page';}],
+]) test(`Landing diagnosis rejects ${label}`,t=>{
+  const f=fixture(t);mutate(f.report.queries[1].result.rows[0]);f.flush();
+  const result=companyCtaMeasurement(f.options);
+  assert.equal(result.status,'unavailable');assert.equal(result.eligible_for_prospective_baseline,false);
+});
+
+test('Exact legacy SQL retains totals and diagnosis identity, with unavailable supplemental counts',t=>{
+  const f=fixture(t), q=f.report.queries[1];
+  q.sql_sha256=hash(fs.readFileSync(path.join(ROOT,'growth/tests/fixtures/ga4-funnel-v1.sql')));
+  assert.equal(q.sql_sha256,'a528c1054d236b9bd4a5fdc2d043ae82e282d9c6323213cbb92eeaff4347b71b');
+  for(const row of q.result.rows)for(const field of diagnosticFields)delete row[field];
+  q.result.rows[0].landing_scope='missing_landing_page';q.result.rows[0].landing_path=null;f.flush();
+  const result=companyCtaMeasurement(f.options);
+  assert.equal(result.status,'quality_blocked');assert.equal(result.total.denominator,90);
+  assert.equal(result.landing_diagnostics.status,'unavailable');assert.equal(result.landing_diagnostics.counts,null);
+  assert.equal(result.landing_diagnostics.missing_landing_sessions,10);
+  // Original diagnosis identity excludes supplemental fields. Retained reviews
+  // stay valid; changing source bytes still creates a different identity.
+  assert.equal(result.diagnosis.measurement_key,hash(JSON.stringify({source:result.source,period:result.period,
+    metric:result.metric,definition_version:result.definition_version,quality:result.quality})));
+  f.report.queries[0].sql_sha256=q.sql_sha256;f.flush();
+  assert.equal(companyCtaMeasurement(f.options).status,'unavailable');
+});
+
 test('The existing collection retains CTA evidence and isolates invalid measurement from independent source success',async t=>{
   const {collectData}=await import('./company-data.mjs');
   const {opportunities}=await import('./company-loop.mjs');
@@ -139,6 +188,7 @@ test('The existing collection retains CTA evidence and isolates invalid measurem
   const second=await collectData({...f.options,operations,makeConnections});
   assert.equal(second.measurements.cta.reused,true);
   f.report.queries[1].result.rows[0].landing_scope='missing_landing_page';
+  f.report.queries[1].result.rows[0].missing_landing_no_timed_page_view_in_scan=10;
   f.report.queries[1].result.rows[0].landing_path=null;f.flush();
   const diagnosed=companyCtaMeasurement(f.options);
   const candidates=opportunities({growth:{cta_measurement:diagnosed},automation:{failures:[]}});

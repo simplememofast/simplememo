@@ -129,7 +129,25 @@ Failure reporting retains every original failure-state row and its source-specif
 
 ### Prospective CTA measurement
 
-The existing `collect --analytics` owner now retains immutable CTA measurement observations under private `measurement/cta/`. It reuses the original verified `ga4-funnel` receipt, report bytes and unchanged quality/funnel SQL hashes; it does not query again. `cta-measurement`, `growth-status`, audit and the usual reviews expose readiness, exact numerator/denominator, period, quality gaps and source hash. A newer invalid input clears current eligibility while older retained observations remain historical. Repeated collection of the same bytes reuses the identical measurement artifact.
+The fixed funnel query also reports a supplemental `ga4-landing-diagnostics-v1`
+partition for missing landings: no timestamped page view in the existing scan,
+views only before session start, only at/after the 24-hour boundary, or on both
+outside sides. It adds counts to the original grouped rows, without another query,
+scan window, timer, session exclusion or inferred landing page. The consumer checks
+that these nonnegative counts account for every missing-landing session and are zero
+for other rows. The diagnostic covers all channels and hostname scopes and does not
+prove a client tracking defect, recover the missing population or clear quality gates.
+
+The exact pre-diagnostic funnel hash is retained as one explicit compatibility entry,
+with its SQL fixture in `growth/tests/fixtures/ga4-funnel-v1.sql`. Older source receipts
+keep their original metrics and diagnosis identities; supplemental counts are
+unavailable, never inferred zero. The current query requires complete diagnostic
+counts. Other unrecognized SQL hashes remain rejected. Readiness, windows, costs,
+source hashes, original numerators/denominators and prospective experiment rules are
+unchanged. A new diagnostic export is separate evidence and cannot overwrite an old
+daily receipt or be labeled natural scheduled operation.
+
+The existing `collect --analytics` owner now retains immutable CTA measurement observations under private `measurement/cta/`. It reuses the original verified `ga4-funnel` receipt, report bytes and explicitly admitted quality/funnel SQL hashes; it does not query again. `cta-measurement`, `growth-status`, audit and the usual reviews expose readiness, exact numerator/denominator, period, quality gaps and source hash. A newer invalid input clears current eligibility while older retained observations remain historical. Repeated collection of the same bytes reuses the identical measurement artifact.
 
 The supported metric is **observed Organic Search production landing sessions with an own-App-Store click within 24 hours / the same observed started sessions**, grouped by exact landing page and device. Standard non-clicking sessions stay in the denominator. The click may occur on a later page in the same session: this is not click-page, placement, QR scan, install or revenue measurement. Mirrored click events, OneLink pilot and QA clicks are not added to direct Apple clicks. Quality event dates include the following day and are not session-cohort counts.
 

@@ -16,6 +16,12 @@ const COUNTS = ['observed_started_sessions', 'sessions_with_own_app_click_24h', 
   'clicked_without_recorded_impression', 'sessions_with_onelink_impression', 'sessions_with_onelink_click_24h',
   'onelink_clicked_without_recorded_impression', 'sessions_with_onelink_qa_click_24h',
   'sessions_with_both_app_routes_24h', 'sessions_with_any_app_route_click_24h'];
+// Exact pre-diagnostic query, preserved in tests/fixtures/ga4-funnel-v1.sql.
+// This finite compatibility entry does not admit arbitrary historical queries.
+const LEGACY_FUNNEL_SHA256 = 'a528c1054d236b9bd4a5fdc2d043ae82e282d9c6323213cbb92eeaff4347b71b';
+const LANDING_DIAGNOSTICS = ['missing_landing_no_timed_page_view_in_scan',
+  'missing_landing_page_view_before_start_only', 'missing_landing_page_view_after_window_only',
+  'missing_landing_page_view_both_sides'];
 const QUALITY = ['events_without_session_key', 'analytics_storage_denied_events', 'missing_session_channel_events',
   'cta_version_missing_or_other', 'click_target_invalid_or_missing', 'cta_dimensions_incomplete',
   'onelink_version_missing_or_other', 'onelink_target_invalid_or_missing', 'onelink_dimensions_incomplete', 'onelink_qa_scope_mismatch'];
@@ -79,7 +85,8 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
       const matches = report.queries.filter(q => q.file === file);
       requireThat(matches.length === 1, 'query_set_invalid');
       const q = matches[0];
-      requireThat(q.sql_sha256 === hash(fs.readFileSync(path.join(root, 'growth/sql/analytics', file))), 'query_definition_changed');
+      requireThat(q.sql_sha256 === hash(fs.readFileSync(path.join(root, 'growth/sql/analytics', file)))
+        || (file === 'ga4-funnel.sql' && q.sql_sha256 === LEGACY_FUNNEL_SHA256), 'query_definition_changed');
       const params = { start_date: window.start, end_date: window.end,
         ...(file === 'ga4-quality.sql' ? { scan_end_date: endPlusOne } : {}),
         measurement_version: '2026-09-05', bridge_measurement_version: '2026-09-07' };
@@ -90,6 +97,8 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
       return q.result.rows;
     };
     const quality = query('ga4-quality.sql'), funnel = query('ga4-funnel.sql');
+    const funnelSha = report.queries.find(q => q.file === 'ga4-funnel.sql').sql_sha256;
+    const hasLandingDiagnostics = funnelSha !== LEGACY_FUNNEL_SHA256;
     const qualityKeys = new Set(), issues = [];
     for (const row of quality) {
       const day = String(row.event_date).replace(/^(\d{4})(\d{2})(\d{2})$/, '$1-$2-$3');
@@ -125,6 +134,12 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
         && direct - count(row.clicked_without_recorded_impression) <= count(row.sessions_with_cta_impression), 'funnel_relationship_invalid');
       requireThat(n > 0 && Number.isFinite(row.own_app_click_session_rate_24h)
         && Math.abs(row.own_app_click_session_rate_24h - direct / n) < 1e-12, 'funnel_rate_invalid');
+      if (hasLandingDiagnostics) {
+        const partition = LANDING_DIAGNOSTICS.map(k => count(row[k]));
+        requireThat(partition.every(v => v <= n)
+          && partition.reduce((a, b) => a + b, 0) === (row.landing_scope === 'missing_landing_page' ? n : 0),
+        'landing_diagnostic_partition_invalid');
+      }
     }
     const rows = funnel.filter(r => r.landing_scope === 'production' && r.session_channel === 'Organic Search');
     const missingCohort = rows.some(r => !r.landing_path?.startsWith('/') || r.landing_path.startsWith('//')
@@ -154,6 +169,14 @@ export function companyCtaMeasurement({ stateRoot, root = ROOT, now = new Date()
         ambiguous_scope_sessions: sum(ambiguous, 'observed_started_sessions'),
         nonproduction_sessions: sum(funnel.filter(r => r.landing_scope === 'nonproduction'), 'observed_started_sessions') },
       query_sha256: report.queries.map(q => ({ file: q.file, sha256: q.sql_sha256 })),
+      landing_diagnostics: { definition_version: 'ga4-landing-diagnostics-v1',
+        status: hasLandingDiagnostics ? 'observed' : 'unavailable',
+        reason: hasLandingDiagnostics ? null : 'legacy_query_has_no_landing_diagnostics',
+        source_sql_sha256: funnelSha, scan_start: window.start, scan_end: endPlusOne,
+        scope: 'All observed started sessions, all channels and hostname scopes; same original cohort and daily-table scan.',
+        missing_landing_sessions: sum(funnel.filter(r => r.landing_scope === 'missing_landing_page'), 'observed_started_sessions'),
+        counts: hasLandingDiagnostics ? Object.fromEntries(LANDING_DIAGNOSTICS.map(k => [k, sum(funnel, k)])) : null,
+        interpretation: 'Supplemental timestamp evidence only. No out-of-window page is imputed, no session is excluded, and quality blocks remain. Absence within the bounded scan does not establish a client tracking defect or full-history absence.' },
       limitations: LIMITATIONS, failures: [],
     };
     result.diagnosis = ctaDiagnosis({ stateRoot, result, now });
