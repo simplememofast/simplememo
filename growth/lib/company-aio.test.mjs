@@ -76,12 +76,17 @@ test('original validated AIO values and independent candidates survive admission
   assert.equal(fs.readFileSync(file, 'utf8'), bytes);
 });
 
-test('real global experiment blocks AIO content at selection while evidence and independent work remain', t => {
+test('migrated global observation admits AIO selection while legacy and frozen ownership still block', t => {
   const {root}=source(t),aio=companyAio({root,now});
   const file=path.join(ROOT,'growth/experiments/experiments.json'),bytes=fs.readFileSync(file);
   const original=JSON.parse(bytes).experiments.find(e=>e.id==='brand-2026-08-11-entity-merge');
   const global=experimentView(original,'2026-09-15');
-  for(const item of [global,experimentView({...original,status:'frozen'},'2026-09-15')]) {
+  const admitted=candidates(aio,{experiments:[global]}).find(c=>c.id==='content:ai-visibility-gap');
+  assert.equal(admitted.executable,true);
+  assert.equal(admitted.ownership_scope,'global_only_until_concrete_page_selected');
+  assert.deepEqual(admitted.evidence,[aio]);
+  const legacy={...original};delete legacy.coexistence;
+  for(const item of [experimentView(legacy,'2026-09-15'),experimentView({...original,status:'frozen'},'2026-09-15')]) {
     const rows=candidates(aio,{experiments:[item,{id:'independent-review',due:true}]}),content=rows.find(c=>c.id==='content:ai-visibility-gap');
     assert.equal(content.executable,false);assert.equal(content.priority,null);
     assert.deepEqual(content.blocking_experiments,[original.id]);

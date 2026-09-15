@@ -161,3 +161,13 @@ test('explicit scope precedence and absolute URL normalization survive; malforme
   const missingParent=scopeCandidates([],[{id:'missing-parent',status:'RUNNING'}])[0];
   assert.equal(missingParent.executable,false);assert.equal(missingParent.ownership_state,'unavailable');
 });
+
+test('only explicitly migrated running globals release selection; frozen and follow-up remain exclusive',async()=>{
+  const {contractHash}=await import('./experiment-coexistence.mjs');
+  const e={id:'observation',page:'(サイト全体)',status:'running'};
+  e.coexistence={schema_version:1,experiment_id:e.id,from:'exclusive_intervention',to:'nonexclusive_observation',decided_at:'2026-01-01T00:00:00Z',effective_at:'2026-01-01T00:00:00Z',authorized_by:'user',authorization:{request:'反映させてデプロイ',thread_id:'01a0a1b9-4982-70f3-b2d6-eed77be68e26'},original_contract_sha256:contractHash(e),interpretation:'descriptive_only_no_isolated_causal_claim',reason:'Synthetic owner-authorized prospective observation migration.'};
+  assert(scopeCandidates([e]).every(r=>r.executable));
+  assert(scopeCandidates([{...e,status:'frozen'}]).every(r=>!r.executable));
+  assert(scopeCandidates([e],[{id:'followup',status:'RUNNING',parent:e}]).every(r=>!r.executable));
+  assert(scopeCandidates([{...e,coexistence:{...e.coexistence,original_contract_sha256:'bad'}}]).every(r=>!r.executable));
+});

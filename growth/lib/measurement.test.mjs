@@ -79,3 +79,25 @@ test('period comparison rejects partial, overlapping, missing and mixed-surface 
   }), before).comparable, false);
   assert.equal(assessComparison(snapshot('2026-09-07', '2026-10-04', { search_type: 'IMAGE' }), before).comparable, false);
 });
+
+test('authorized global observation preserves history and releases only future running ownership', async () => {
+  const {contractHash,nonexclusiveObservation,changeScope}=await import('./experiment-coexistence.mjs');
+  const {ownershipConflict}=await import('./experiment-overlap.mjs');
+  const e={id:'global-observation',page:'(サイト全体 + サイト外4面)',status:'running',baseline:{value:5},started_at:'2026-01-01',evaluation_at:'2026-12-01',stop_conditions:['Retain original exclusion']};
+  e.coexistence={schema_version:1,experiment_id:e.id,from:'exclusive_intervention',to:'nonexclusive_observation',decided_at:'2026-09-15T00:00:00Z',effective_at:'2026-09-16T00:00:00Z',authorized_by:'user',authorization:{request:'反映させてデプロイ',thread_id:'01a0a1b9-4982-70f3-b2d6-eed77be68e26'},original_contract_sha256:contractHash(e),interpretation:'descriptive_only_no_isolated_causal_claim',reason:'Explicit transition with historical contract preserved.'};
+  const target=changeScope('/new/',['new/index.html','hub/index.html']);
+  assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-15T12:00Z')}),true);
+  assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-17T00:00Z')}),false);
+  assert.equal(nonexclusiveObservation({...e,status:'frozen'},{now:new Date('2026-09-17T00:00Z')}),false);
+  assert.equal(ownershipConflict(e,target,{now:new Date('2026-09-17T00:00Z'),followup:true}),true);
+  assert.throws(()=>nonexclusiveObservation({...e,baseline:{value:0}}),/historical/);
+  assert.throws(()=>nonexclusiveObservation({...e,coexistence:{...e.coexistence,effective_at:'2026-09-14T00:00:00Z'}}),/predate/);
+  assert.equal(ownershipConflict({id:'hub',page:'/hub/',status:'running'},target),true);
+  assert.equal(ownershipConflict({id:'old',page:'/elsewhere/',status:'running'},target),false);
+  assert.equal(ownershipConflict({id:'old',page:'/elsewhere/',status:'running'},changeScope('/new/',['new/index.html','assets/css/style.css'])),true);
+  assert.equal(ownershipConflict({id:'resource',page:'/other/',status:'running',change_paths:['assets/templates/shared.zip']},changeScope('/new/',['assets/templates/shared.zip'])),true);
+  for(const paths of [[],['../escape'],['a/../b'],['a','a']])assert.throws(()=>changeScope('/new/',paths));
+  assert.throws(()=>ownershipConflict({page:null},target),/scope/);
+  const audit=auditOverlaps({experiments:[e]},{now:new Date('2026-09-17T00:00Z')});
+  assert.deepEqual(audit.global,[]);assert.equal(audit.observations[0].scope.global,true);
+});

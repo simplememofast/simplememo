@@ -22,9 +22,11 @@ export function growthFollowups({ stateRoot, now = new Date() }) {
   return { ...doc, reviews: doc.reviews.map(r => {
     if (seen.has(r.id) || !['RUNNING', 'EVALUATED'].includes(r.status) || parentHash(r.parent) !== r.parent_sha256) throw new Error('Growth follow-up identity or parent integrity failed');
     seen.add(r.id);
+    for(const key of ['registered_at','evaluated_at'])if(r[key]!=null&&!Number.isFinite(Date.parse(r[key])))throw new Error('Invalid follow-up lifecycle timestamp');
     date(r.evaluation_date); date(r.post_start); date(r.post_end);
-    return { ...r, due: r.status === 'RUNNING' && r.evaluation_date <= today(now) };
-  }) };
+    const status=r.status==='EVALUATED'&&r.evaluated_at&&Date.parse(r.evaluated_at)>+now?'RUNNING':r.status;
+    return { ...r, status, due: status === 'RUNNING' && r.evaluation_date <= today(now) };
+  }).filter(r=>!r.registered_at||Date.parse(r.registered_at)<=+now) };
 }
 
 export function registerGrowthFollowup({ stateRoot, experimentId, evaluationDate, postStart, postEnd, rationale,
