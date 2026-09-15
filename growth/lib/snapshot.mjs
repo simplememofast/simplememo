@@ -26,6 +26,40 @@ export const BUCKET_KINDS = ['queries', 'pages', 'pages-aio', 'query-pages', 'da
 
 export const emptyBuckets = () => Object.fromEntries(BUCKET_KINDS.map((k) => [k, []]));
 
+// Reuse CSV collision handling. CSV retains its historical two-decimal
+// rounding; BigQuery keeps its unrounded pooled positions. Compound keys keep
+// distinct query/page pairs separate. Call only after existing normalisation.
+export function mergeByKey(rows, key, { positionDigits = 2, rejectMissingKey = false, validateWebRows = false } = {}) {
+  const out = new Map();
+  for (const r of rows) {
+    // Validate each original BigQuery row before pooling. Otherwise an invalid
+    // duplicate can be hidden by another row's valid position or default counts.
+    if (validateWebRows && (!Number.isSafeInteger(r.impressions) || r.impressions < 0
+      || !Number.isSafeInteger(r.clicks) || r.clicks < 0 || r.clicks > r.impressions
+      || (r.impressions > 0 && (!Number.isFinite(r.position) || r.position < 1
+        || !Number.isFinite(r.ctr) || Math.abs(r.ctr - r.clicks / r.impressions) >= 1e-12)))) {
+      throw new Error('Invalid WEB dimension row before canonical merge');
+    }
+    const values = (Array.isArray(key) ? key : [key]).map(k => r[k]);
+    if (values.some(v => v === undefined || v === null)) {
+      if (rejectMissingKey) throw new Error('Missing canonical dimension key');
+      continue;
+    }
+    const k = JSON.stringify(values);
+    const cur = out.get(k);
+    if (!cur) { out.set(k, { ...r }); continue; }
+    const ci = (cur.impressions || 0), ri = (r.impressions || 0);
+    cur.clicks = (cur.clicks || 0) + (r.clicks || 0);
+    cur.impressions = ci + ri;
+    if (cur.position != null && r.position != null && ci + ri > 0) {
+      const pooled = ((cur.position * ci) + (r.position * ri)) / (ci + ri);
+      cur.position = positionDigits === null ? pooled : Number(pooled.toFixed(positionDigits));
+    }
+    cur.ctr = cur.impressions > 0 ? cur.clicks / cur.impressions : 0;
+  }
+  return [...out.values()];
+}
+
 const sum = (rows) => rows.reduce(
   (acc, r) => ({ clicks: acc.clicks + (r.clicks || 0), impressions: acc.impressions + (r.impressions || 0) }),
   { clicks: 0, impressions: 0 }

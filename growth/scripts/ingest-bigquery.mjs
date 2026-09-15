@@ -39,7 +39,7 @@
 
 import path from 'node:path';
 import { ROOT, GSC_DIR, toPath } from '../lib/gsc.mjs';
-import { buildMeta, emptyBuckets, summarise, writeSnapshot } from '../lib/snapshot.mjs';
+import { buildMeta, emptyBuckets, mergeByKey, summarise, writeSnapshot } from '../lib/snapshot.mjs';
 import { connect, query, tableExists, listTables } from '../lib/bigquery.mjs';
 
 const SITE_TABLE = 'searchdata_site_impression';
@@ -312,6 +312,18 @@ for (const [kind, rows] of Object.entries(buckets)) {
     });
 }
 
+
+// Different exported URLs can map to the same canonical page. Keep all clicks
+// and impressions, pooling position by impressions; do not discard a row or
+// weaken the downstream unique-dimension gate. CSV already uses this reducer.
+const canonicalMerges = {};
+for (const [kind, keys] of [['pages', ['page']], ['query-pages', ['query', 'page']]]) {
+  const before = buckets[kind].length;
+  buckets[kind] = mergeByKey(buckets[kind], keys, { positionDigits: null, rejectMissingKey: true, validateWebRows: true });
+  canonicalMerges[kind] = before - buckets[kind].length;
+  if (canonicalMerges[kind]) console.log(`  merged ${canonicalMerges[kind]} canonical ${kind} collision(s); all counts retained`);
+}
+
 const meta = buildMeta({
   label,
   buckets,
@@ -331,6 +343,7 @@ const meta = buildMeta({
       data_available_from: available.min_date,
       data_available_to: available.max_date,
       min_query_page_impressions: minQueryPageImpressions,
+      canonical_page_normalization: { version: 1, merged_rows: canonicalMerges },
       // Impressions counted in the totals but absent from the query table.
       anonymised_query_share: anonymised?.impressions
         ? anonymised.hidden_impressions / anonymised.impressions
