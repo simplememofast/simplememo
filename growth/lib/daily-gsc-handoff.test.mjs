@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import {buildMeta, emptyBuckets, writeSnapshot} from './snapshot.mjs';
+import {buildMeta, emptyBuckets, writeSnapshot, mergeByKey} from './snapshot.mjs';
 import {packDaily, snapshotFromDaily, retainedDaily, dailyHash, DAILY_REPO, DAILY_WORKFLOW, dailyJobsEndpoint} from './daily-gsc-handoff.mjs';
 import {seal, unseal} from './analytics-envelope.mjs';
 import {collectDailyGsc} from './company-daily-gsc.mjs';
@@ -45,6 +45,25 @@ test('same collector bytes survive encryption; canonical totals, curves, query/p
   assert.deepEqual(analyzeSnapshot(before), analyzeSnapshot(after));
   assert.equal(after.queryPages.length, 1); assert.equal(after.meta.totals.clicks, 112);
   assert.equal(after.meta.aio, null); assert.deepEqual(after.pagesAio, []);
+});
+
+test('pooled canonical pages pass unchanged handoff validation; unmerged duplicates still fail', t => {
+  const {dir,env,payload}=fixture(t), buckets=emptyBuckets();
+  for(const kind of Object.keys(buckets))buckets[kind]=payload.files[kind+'.json']?JSON.parse(payload.files[kind+'.json'].body):[];
+  const original=JSON.parse(payload.files['meta.json'].body);
+  buckets.pages=[{page:'/example/',clicks:56,impressions:1400,ctr:.04,position:4},
+    {page:'/example/',clicks:56,impressions:1400,ctr:.04,position:6}];
+  const meta=()=>buildMeta({label,buckets,source:original.source,period:original.period_start+'..'+original.period_end,
+    extra:{bigquery:original.bigquery}});
+  writeSnapshot({label,buckets,meta:meta(),dir});
+  assert.throws(()=>packDaily({directory:dir,label,env,now}),/duplicate dimension row/);
+  buckets.pages=mergeByKey(buckets.pages,['page'],{positionDigits:null,rejectMissingKey:true});
+  writeSnapshot({label,buckets,meta:meta(),dir});
+  const packed=packDaily({directory:dir,label,env,now}), recovered=unseal(seal(packed,keys.publicKey),keys.privateKey);
+  const snapshot=snapshotFromDaily(recovered,{now});
+  assert.deepEqual(snapshot.meta.totals,original.totals);
+  assert.equal(snapshot.pages.length,1);assert.equal(snapshot.pages[0].position,5);
+  assert.deepEqual(analyzeSnapshot(snapshot),analyzeSnapshot(snapshotFromDaily(payload,{now})));
 });
 
 test('wrong workflow, branch, attempt, source, run outcome and timing cannot authenticate an artifact', t => {
