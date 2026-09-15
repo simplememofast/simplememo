@@ -31,6 +31,7 @@
  * 「判定していない」と「異常なし」を同じ語で呼ばないため。
  */
 
+import { run as runScenarios } from './lib/selftest.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -222,13 +223,7 @@ const SCENARIOS = [
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
 
 function selftest() {
-  let failed = 0;
-  for (const [name, fn] of SCENARIOS) {
-    try { fn(); console.log(`  ok   ${name}`); }
-    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
-  }
-  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
-  return failed;
+  return runScenarios(SCENARIOS);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -17,8 +17,16 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
     grep -ohE '(node|python3) (growth/)?scripts/[A-Za-z0-9_./-]+' \
       .github/workflows/seo-check.yml | sort -u
 
-**ローカルで同じものを回すのが `node scripts/preflight.mjs`**（seo-check.yml を
-解析して wired な検査を全部実行する、ゲートのローカルミラー）。
+**ローカル検査は `node scripts/preflight.mjs`**。seo-check.yml から
+Node・Python・複数ファイルの `node --test` 実行行を導出する。
+条件付きステップ・合成コマンド・変数を含む行等は理由つきで実行対象から外すため、
+CI全体の成功を意味しない。対象の一覧は `--list`、
+絞り込みは `--only <文字列>`。不明な書式・不正な引数・0件の選択は失敗する。
+
+生成器の検査は隣接リポジトリを参照できる一時コピーで実行する。
+コピー作成失敗・シンボリックリンク・Gitの作業先を上書きする環境変数がある場合は
+生成器を実行しない。元の作業ツリーへフォールバックしない。
+これらの回帰検査は `node scripts/refactor.test.mjs`（CIでも実行）。
 
 ## 2. 別ワークフローで走る
 
@@ -40,9 +48,10 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
 - `i18n_config.py` … generate_sitemap.py / normalize_i18n_head.py が import
 - `check-asc-landed.mjs` … data/operating-memory.json の script_ok 検証として
   autopilot-act が実行
-- `lib/` … selftest.mjs（32本が import）、read-ledger.mjs（13本）、
+- `lib/` … selftest.mjs（自己テストの実行）、read-ledger.mjs（13本）、
   read-json.mjs、site-files.js、edge-middleware.mjs、blindspot-*（監査手法として
   data/check-blindspots.json / guard-shapes.json が言及）
+  と preflight-runner.mjs（一時コピー作成・検査実行・後片付け）
 
 ## 4. 手動ツールと完了済み一回限り
 

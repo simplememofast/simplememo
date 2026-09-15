@@ -58,6 +58,7 @@
  * ここが持っているのは「その契約を最後に確かめたのはいつか」。
  */
 
+import { run as runScenarios } from './lib/selftest.mjs';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -515,13 +516,7 @@ const SCENARIOS = [
 ];
 
 if (process.argv.includes('--selftest')) {
-  let failed = 0;
-  for (const [name, fn] of SCENARIOS) {
-    try { fn(); console.log(`  ok   ${name}`); }
-    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
-  }
-  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
-  process.exit(failed === 0 ? 0 : 1);
+  process.exit(runScenarios(SCENARIOS) === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
