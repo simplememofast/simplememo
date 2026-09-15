@@ -23,6 +23,7 @@
  * どちらも「やらないと決めた」であって、忘れているのではない。
  */
 
+import { run as runScenarios } from './lib/selftest.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -246,13 +247,7 @@ if (process.argv.includes('--selftest')) {
       if (verify(build()).length) throw new Error('素の1枚で鳴った');
     }],
   ];
-  let failed = 0;
-  for (const [name, fn] of SCENARIOS) {
-    try { fn(); console.log(`  ok   ${name}`); }
-    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
-  }
-  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
-  process.exit(failed === 0 ? 0 : 1);
+  process.exit(runScenarios(SCENARIOS) === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -4,7 +4,7 @@
 //   POST /admin/api/x-delete
 //   Body: { "id": "<tweet_id>" }
 
-import { buildOAuth1Header, json } from './_shared.js';
+import { buildOAuth1Header, json, credKeysFor, firstMissing, USER_AGENT } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -13,10 +13,8 @@ export async function onRequest(context) {
     return json({ error: 'POST only' }, 405);
   }
 
-  const required = ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET'];
-  for (const k of required) {
-    if (!env[k]) return json({ error: k + ' 未設定' }, 400);
-  }
+  const missing = firstMissing(env, credKeysFor('ja'));
+  if (missing) return json({ error: missing + ' 未設定' }, 400);
 
   let body;
   try {
@@ -45,7 +43,7 @@ export async function onRequest(context) {
       method: method,
       headers: {
         'Authorization': authHeader,
-        'User-Agent': 'SimpleMemoAdmin/1.0',
+        'User-Agent': USER_AGENT,
       },
     });
     const respBody = await res.json().catch(function () { return null; });

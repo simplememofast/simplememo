@@ -41,8 +41,8 @@ const n1 = (v) => (v == null ? '—' : Number(v).toFixed(1));
 
 if (asJson) {
   console.log(JSON.stringify(result, null, 2));
-  process.exit(0);
-}
+  // Let stdout drain before exit: build-queues reads this JSON through a pipe.
+} else {
 
 const show = (name) => !only || only === name;
 
@@ -156,3 +156,4 @@ if (show('cannibalisation')) {
 }
 
 console.log(`Snapshots on file: ${listSnapshots().join(', ')}`);
+}

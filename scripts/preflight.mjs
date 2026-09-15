@@ -1,103 +1,14 @@
 #!/usr/bin/env node
 /**
- * **CI が走らせるものを、手元で同じだけ回す。**
+ * Local checks derived from .github/workflows/seo-check.yml.
  *
- *   node scripts/preflight.mjs            # 全部
- *   node scripts/preflight.mjs --list     # 何を回すかだけ出す
- *   node scripts/preflight.mjs --only pub # 名前で絞る
+ *   node scripts/preflight.mjs [--list] [--only <filter>]
+ *   node scripts/preflight.mjs --selftest
  *
- * 【なぜ要るか — 2026-08-28 に実際に踏んだ】
- * 出荷の門（check-release-gate）を作ったとき、**手で9本選んで回して出した。**
- * CI は73本回していて、その中の `check-publication` が落ちた ——
- * 公開リポジトリに新しいデータファイルを足したのに、公開してよいかを
- * 分類していなかった。**データファイルを足したコミットで、データファイルに
- * 効く検査を回していなかった。**
- *
- * 【一覧を手で持たない】
- * **`.github/workflows/seo-check.yml` から導く。**手で持つと、CI に検査を足した
- * 日にここが古くなり、「手元で通ったのにCIで落ちる」が戻ってくる。
- * 導出なので、CI に1本足せばここも1本増える。
- *
- * 【2026-09-01 訂正 — 上の1行は、書かれてから一度も本当ではなかった】
- * 拾えていたのは `run: |` のブロック形式だけで、**1行形式の
- * `run: node scripts/foo.mjs --check` を1本も拾っていなかった。**
- * 実測 CI 108 本のうち **47 本（43%）** がその形。61 本を全部通して
- * 「手元は緑」と出していた。
- *
- * **足りないことは症状に出ない。**落ちる検査が増えるなら気づくが、
- * 検査そのものが減るのは、残りが通ればただの緑になる。
- * このファイルが潰すために作られた「手元で緑・CIで赤」が、
- * このファイル自身の中に残っていた。
- *
- * 見つかり方も同型だった。`check-escalation.mjs --check` が手元で赤いのに
- * preflight は「2 本失敗」と言い、その2本にそれが入っていなかった。
- *
- * 対処は2つ。(1) 1行形式を拾う。(2) **取らなかった行を理由つきで必ず表に出す**
- * （`auditExtraction`）。分類できない実行行が出たら緑にせず exit 2 にする ——
- * 見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。
- * 本数の増減そのものは止められないが、**黙って減ることは止まる。**
- *
- * 【2026-09-03 — 同じ穴が、もう一段あった】
- * 1行形式を拾うようになった後も、導出は **`.mjs` で終わる行しか見ていなかった。**
- * 落ちていたのは 8 本で、そこに **`seo-check.js`（このリポジトリの主検査・12ゲート）**
- * が入っている。CI と手元の差は 125 対 133 だった。
- *
- * 見つけ方は自力ではない。`check-selftests.mjs` のラチェットが**まったく同じ形**で
- * `.js` を1本も見ていないのが先に分かり（act-ci-selftest-ratchet-js-blind）、
- * そちらを直したときに**この鏡も同じ正規表現を持っている**ことに気づいた。
- * **1か所直して終わりにすると、鏡のほうが古い版を映し続ける。**
- *
- * 併せて **`if:` 付きのステップは取らないことにした。**`.mjs` には該当が1本も
- * 無かったので今日までは同じ結果になるが、`.js` を拾うと
- * `node scripts/indexnow-notify.js --since 1`（main への push 限定）が入ってくる ——
- * 手元で回すと検査ではなく **IndexNow への実送信**になる。取らなかったことは
- * 「条件付き」として表に出す（黙って減らさない、は同じ）。
- *
- * 導出そのものは `--selftest` で留めてある。2回続けて**症状に出ない形**で
- * 壊れたので、境界を検体で持つ。
- *
- * 【手元でだけ落ちるものがある — 2026-08-28 の実測】
- * `check-generators --run` は `data/financial-policy.json` と
- * `data/revenue-series.json` が再生成で変わると言う。**これは main でも同じ**
- * （origin/main の当該2ファイルへ戻して確かめた）。CI では通っているので、
- * 生成器の出力がこの環境と CI で違う。**私の変更で増えたものではない。**
- *
- * **↑ ここまでは正しいが、原因を掴んでいなかった。**同じ日の後刻に分かった:
- *
- *   data/revenue-series.json は `../simplememo-ios/data/revenue/series.json`
- *   の**写し**で、隣が進むと古くなる（covered_days 1→2 / last_day 08-23→08-26）。
- *   data/financial-policy.json の `revenue_history_days` はそこから来る。
- *
- * つまり**「環境で出力が違う」のではなく、コミット済みの写しが実際に古い。**
- * CI が緑なのは、**CI が隣リポジトリを checkout しないから** ——
- * 隣が要る生成器はそこで非0を返し、CI はその拒否を確かめている
- * （seo-check.yml に明記。免除ではない）。
- *
- * **したがって写しの古さは、隣が見える場所でしか観測できない。**
- * この preflight が鏡を隣の見える位置に置いているのは、まさにそのため。
- * 見つけたら直す（この2本は 2026-08-28 に再生成して commit した）。
- *
- * **それでも skip の一覧は作らない。**下の理由のとおり。
- *
- * 【上の「数が変われば気づける」は、同じ日に破れた】
- * 元はここに「2本目が増えた日には数が変わって気づける」と書いていた。**破れた。**
- * `data/check-selftests.json` を手で末尾へ追記して（生成器は script 名でソートする）
- * CI が落ちたが、**手元の数は 1 本のまま**だった —— 2本目の失敗が
- * *同じ1本の中* に入ったからで、既知の1本が新しい1本を覆い隠した。
- * 「数を見ていれば気づく」は、**失敗が別の行に出るときにしか効かない。**
- *
- * 【だから鏡を作って、実際に走らせる】
- * `check-generators --run` は作業ツリーがクリーンでないと走らない（人の編集を
- * 潰さないため。正しい）。しかし preflight は**定義上、未コミットの変更がある
- * 状態で走る**ので、この1本は構造的に到達できなかった。
- * いまは追跡ファイルを一時ディレクトリへ写して `git init && commit` し、
- * **こちらの編集を含んだままクリーンな木**を作ってそこで走らせる。
- * 本物の木には触れない。
- *
- * 【落ちたものを隠さない】
- * 手元では通らないもの（外部の資格情報や BigQuery が要るもの）もある。
- * **それを「skip」に分類して黙らせない** —— 落ちたものは落ちたものとして出し、
- * 何が要るかは実行した人が読む。分類を持つと、**本当に落ちたものがそこに紛れる。**
+ * Node, Python and grouped node --test commands retain their interpreter,
+ * arguments and ordering. Conditional steps, shell compositions and variables
+ * are reported rather than executed. Unknown syntax and empty selections fail.
+ * Generators run only in a disposable committed copy beside the repository.
  */
 
 import fs from 'node:fs';
@@ -105,6 +16,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { runChecks } from './lib/preflight-runner.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
@@ -116,7 +28,7 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  * 列挙するようになったので、鏡もここで合わせる。
  * **1か所だけ直すと、鏡が古い版を映し続ける。**
  */
-const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/(?:scripts|queries))\/[A-Za-z0-9_.-]+\.(?:m?js|py))(.*)$/;
+const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/(?:scripts|queries))\/[A-Za-z0-9_.-]+\.(?:m?js|py))(?:\s+(.*))?$/;
 
 // Keep node's test-runner flag and file grouping intact. Only explicit local
 // test files are accepted here; unknown options/paths still fail the audit.
@@ -133,103 +45,50 @@ export function parseCommand(line) {
   }
   const m = line.match(RUN_RE);
   if (!m) return null;
-  const args = m[3].trim();
+  const args = m[3]?.trim() || '';
+  if (!/^[A-Za-z0-9_./:=,+@%\s-]*$/.test(args)) return null;
   return { runner: m[1], script: m[2], args: args === '' ? [] : args.split(/\s+/) };
 }
 
-/**
- * ワークフローから `node <script> <args>` の行を拾う。**純関数。**
- *
- * 行頭の空白と `-` を落としてから見る（YAML のブロック内なので字下げがある）。
- * `&&` や `|` でつながった行は**取らない** —— 手元で意味が変わりうるものを
- * 黙って走らせない。
- *
- * 【2026-09-01 修正】**1行形式の `run: node ...` を落としていた。**
- *
- * 拾えていたのはブロック形式（`run: |` の下に字下げして書く）だけで、
- * `run: node scripts/foo.mjs --check` と1行で書かれたステップは
- * `line.startsWith('node ')` に一度も当たらない。**実測で CI 108 本のうち
- * 47 本（43%）がこの形**で、preflight はそれを1本も回さずに
- * 「61 本中 N 本失敗」と出していた。
- *
- * このファイルの冒頭には「**導出なので、CI に1本足せばここも1本増える**」と
- * 書いてある。1行形式で足された日は増えなかったので、その主張は嘘だった。
- * しかも**足りないことは表に出ない** —— 少ない本数を全部通せば緑になる。
- * 手元で緑を見てから CI で落ちる、というこのファイルが潰すために作られた
- * 事象そのものが、このファイルの中に残っていた。
- *
- * 見つかり方も同じ形だった。`check-escalation.mjs --check` が手元で赤いのに
- * preflight は「2 本失敗」と言い、その2本にそれが入っていなかった。
- */
-export function extractCommands(yamlText) {
-  const out = [];
+/** Shared classification keeps extraction and audit in agreement. */
+function* workflowCommands(yamlText) {
   let stepHasIf = false;
   for (const raw of String(yamlText ?? '').split('\n')) {
     let line = raw.trim();
-    // `- run: node ...` / `run: node ...` / `- node ...` のどれでも同じ扱いにする。
-    // **コマンド本体を取り出してから**既存の除外（合成・変数）に掛けること。
-    // 順序を逆にすると、`run:` の付いた合成行が素通りする。
     if (line.startsWith('- ')) { stepHasIf = false; line = line.slice(2).trim(); }
     if (/^if:\s/.test(line)) { stepHasIf = true; continue; }
     const inline = line.match(/^run:\s+(.+)$/);
     if (inline) line = inline[1].trim();
-    if (!/^(?:node|python3)\s/.test(line)) continue;
-    if (/[|&;><]/.test(line)) continue;          // 合成された行は取らない
-    if (/\$\{\{|\$[A-Z_]/.test(line)) continue;  // 変数を含む行は手元で意味が変わる
-    if (stepHasIf) continue;                     // 条件付きのステップは手元で意味が違う
+    if (!/^(node|python3|npx)(?:\s|$)/.test(line)) continue;
+    if (/[|&;><]/.test(line)) { yield { kind: 'composed', line }; continue; }
+    if (/\$|`/.test(line)) { yield { kind: 'variable', line }; continue; }
+    if (stepHasIf) { yield { kind: 'conditional', line }; continue; }
     const command = parseCommand(line);
-    if (command) out.push(command);
+    if (command) yield { kind: 'taken', line, command };
+    else yield { kind: /^npx\s/.test(line) ? 'out_of_scope' : 'unknown', line };
   }
-  // 同じ script+args は1回だけ
-  const seen = new Set();
-  return out.filter((c) => {
-    const k = `${c.runner} ${c.script} ${c.args.join(' ')}`;
-    if (seen.has(k)) return false;
-    seen.add(k);
-    return true;
-  });
 }
 
-/**
- * **取らなかった行を、理由つきで数える。**
- *
- * 取りこぼしは本数が減るだけなので、**残りが全部通れば緑になる。**
- * 実際 2026-09-01 まで、1行形式の `run: node ...` を47本（CI全体の43%）
- * 落としたまま「61本中N本失敗」と出していた。**足りないことは症状に出ない。**
- *
- * そこで、コマンド行に見えるのに取らなかったものを必ず表に出す。
- * 理由の付くもの（合成・変数・対象外の実行系）は出したうえで通し、
- * **どれにも当てはまらない形が出たら落とす** —— 見たことのない書き方は
- * 「たぶん要らない」ではなく「まだ分かっていない」なので、緑にしない。
- */
+export function extractCommands(yamlText) {
+  const out = [];
+  const seen = new Set();
+  for (const entry of workflowCommands(yamlText)) {
+    if (entry.kind !== 'taken') continue;
+    const key = JSON.stringify(entry.command);
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push(entry.command);
+    }
+  }
+  return out;
+}
+
 export function auditExtraction(yamlText) {
   const dropped = { composed: [], variable: [], conditional: [], out_of_scope: [], unknown: [] };
   let taken = 0;
-  let stepHasIf = false;
-  for (const raw of String(yamlText ?? '').split('\n')) {
-    let line = raw.trim();
-    if (line.startsWith('- ')) { stepHasIf = false; line = line.slice(2).trim(); }
-    if (/^if:\s/.test(line)) { stepHasIf = true; continue; }
-    const inline = line.match(/^run:\s+(.+)$/);
-    if (inline) line = inline[1].trim();
-    // 実行系に見える行だけを対象にする（散文やYAMLの他のキーは無視）
-    if (!/^(node|python3|npx)\s/.test(line)) continue;
-    if (parseCommand(line)
-        && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line) && !stepHasIf) { taken += 1; continue; }
-    if (/[|&;><]/.test(line)) { dropped.composed.push(line); continue; }
-    if (/\$\{\{|\$[A-Z_]/.test(line)) { dropped.variable.push(line); continue; }
-    // **条件付きのステップは、手元では意味が違う。**CI 側の `if:` が
-    // 「main への push のときだけ」と言っているものを手元で回すと、
-    // 検査ではなく副作用（IndexNow への実送信）が起きる。
-    if (stepHasIf) { dropped.conditional.push(line); continue; }
-    // npx remains outside the local script runner.
-    //
-    // **ここを「node/python で始まる行はすべて対象外」にしない。**そう書くと
-    // 見たことのない形（例: `node tools/x.mjs`）まで「既知の除外」に流れ込み、
-    // 下の unknown が構造的に到達不能になる —— 「分類できなかった」を
-    // 「分類済み」と報告する形で、この工程が潰しているものそのもの。
-    if (/^npx\s/.test(line)) { dropped.out_of_scope.push(line); continue; }
-    dropped.unknown.push(line);
+  for (const entry of workflowCommands(yamlText)) {
+    if (entry.kind === 'taken') taken += 1;
+    else dropped[entry.kind].push(entry.line);
   }
   return { taken, dropped };
 }
@@ -356,6 +215,8 @@ function selftest() {
       fs.mkdirSync(path.join(dir, 'scripts'));
       fs.mkdirSync(path.join(dir, '.github/workflows'), { recursive: true });
       fs.copyFileSync(fileURLToPath(import.meta.url), path.join(dir, 'scripts/preflight.mjs'));
+      fs.mkdirSync(path.join(dir, 'scripts/lib'));
+      fs.copyFileSync(path.join(ROOT, 'scripts/lib/preflight-runner.mjs'), path.join(dir, 'scripts/lib/preflight-runner.mjs'));
       fs.writeFileSync(path.join(dir, '.github/workflows/seo-check.yml'),
         'run: node --test scripts/first.test.mjs scripts/second.test.mjs\n');
       const first = path.join(dir, 'scripts/first.test.mjs');
@@ -382,6 +243,8 @@ function selftest() {
       fs.mkdirSync(path.join(dir, 'scripts'));
       fs.mkdirSync(path.join(dir, '.github/workflows'), { recursive: true });
       fs.copyFileSync(fileURLToPath(import.meta.url), path.join(dir, 'scripts/preflight.mjs'));
+      fs.mkdirSync(path.join(dir, 'scripts/lib'));
+      fs.copyFileSync(path.join(ROOT, 'scripts/lib/preflight-runner.mjs'), path.join(dir, 'scripts/lib/preflight-runner.mjs'));
       fs.writeFileSync(path.join(dir, '.github/workflows/seo-check.yml'),
         'run: node scripts/check-generators.mjs --run\nrun: node scripts/seo-check.js\n');
       fs.writeFileSync(path.join(dir, 'scripts/check-generators.mjs'),
@@ -449,14 +312,22 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
 const argv = process.argv.slice(2);
 if (argv.includes('--selftest')) process.exit(selftest());
-const only = (() => {
-  const i = argv.indexOf('--only');
-  return i >= 0 ? argv[i + 1] : null;
-})();
+let only = null;
+for (let i = 0; i < argv.length; i++) {
+  if (argv[i] === '--list') continue;
+  if (argv[i] === '--only' && argv[i + 1] && !argv[i + 1].startsWith('--')) {
+    only = argv[++i];
+    continue;
+  }
+  console.error(`不正な引数: ${argv[i]} — --list / --only <filter> を指定してください`);
+  process.exit(2);
+}
 
+let workflow;
 let cmds;
 try {
-  cmds = extractCommands(fs.readFileSync(WORKFLOW, 'utf8'));
+  workflow = fs.readFileSync(WORKFLOW, 'utf8');
+  cmds = extractCommands(workflow);
 } catch (e) {
   console.error(`ワークフローが読めない: ${WORKFLOW}\n${e.message}`);
   process.exit(2);
@@ -469,7 +340,7 @@ if (cmds.length === 0) {
 // **取らなかった行を先に出す。**本数が減っただけの導出は、残りが全部通れば
 // 緑になる（2026-09-01 まで47本を落としたまま緑を出していた）。
 {
-  const audit = auditExtraction(fs.readFileSync(WORKFLOW, 'utf8'));
+  const audit = auditExtraction(workflow);
   const d = audit.dropped;
   const n = d.composed.length + d.variable.length + d.conditional.length
     + d.out_of_scope.length + d.unknown.length;
@@ -491,7 +362,11 @@ if (cmds.length === 0) {
     process.exit(2);
   }
 }
-if (only) cmds = cmds.filter((c) => `${c.script} ${c.args.join(' ')}`.includes(only));
+if (only !== null) cmds = cmds.filter((c) => `${c.script} ${c.args.join(' ')}`.includes(only));
+if (cmds.length === 0) {
+  console.error(`条件に一致する検査がありません: ${only}`);
+  process.exit(2);
+}
 
 if (argv.includes('--list')) {
   for (const c of cmds) console.log(`${c.runner ?? 'node'} ${c.script} ${c.args.join(' ')}`.trim());
@@ -499,90 +374,8 @@ if (argv.includes('--list')) {
   process.exit(0);
 }
 
-/** クリーンな作業ツリーを要求するもの。**該当は今のところ1本。** */
-function needsCleanTree(c) {
-  return c.script.endsWith('check-generators.mjs') && c.args.includes('--run');
-}
-
-/**
- * 追跡ファイル＋未追跡（無視されていない）ファイルを一時ディレクトリへ写し、
- * `git init && commit` して**クリーンな木**にする。
- *
- * **本物の木には触れない。**生成器は写しの中で書き、写しごと捨てる。
- * 作れなければ null を返す（**黙って本物で走らせない** —— 人の編集を潰す）。
- */
-function makeMirror() {
-  const list = (args) => {
-    const r = spawnSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-    if (r.status !== 0) return null;
-    return r.stdout.split('\0').filter(Boolean);
-  };
-  const tracked = list(['ls-files', '-z']);
-  const untracked = list(['ls-files', '--others', '--exclude-standard', '-z']);
-  if (!tracked || !untracked) {
-    console.log('  （鏡を作れない: git が読めない — この1本は走らせない）');
-    return null;
-  }
-  let dir;
-  try {
-    // **隣（`../simplememo-ios` など）が見える位置に置く。**
-    // `/tmp` に置くと隣が消え、隣を読む生成器（revenue-series / code-authorship /
-    // check-degradation）が「書かずに通る」ようになって**偽の緑**になる。
-    // 2026-08-28、最初 os.tmpdir() に置いて実際にそうなった ——
-    // 本物の木では落ちる2件が、鏡では通っていた。
-    dir = fs.mkdtempSync(path.join(path.dirname(ROOT), '.preflight-mirror-'));
-    for (const rel of [...tracked, ...untracked]) {
-      const src = path.join(ROOT, rel);
-      // 削除済みの追跡ファイルは ls-files に残る。**無いものを写そうとして落ちない。**
-      if (!fs.existsSync(src)) continue;
-      const dst = path.join(dir, rel);
-      fs.mkdirSync(path.dirname(dst), { recursive: true });
-      fs.copyFileSync(src, dst);
-    }
-    const git = (args) => spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
-    git(['-c', 'init.defaultBranch=main', 'init', '-q']);
-    git(['add', '-A']);
-    const commit = git(['-c', 'user.email=preflight@local', '-c', 'user.name=preflight',
-      'commit', '-q', '-m', 'preflight mirror']);
-    if (commit.status !== 0) {
-      console.log('  （鏡をコミットできない — この1本は走らせない）');
-      fs.rmSync(dir, { recursive: true, force: true });
-      return null;
-    }
-    process.on('exit', () => fs.rmSync(dir, { recursive: true, force: true }));
-    return dir;
-  } catch (e) {
-    if (dir) fs.rmSync(dir, { recursive: true, force: true });
-    console.log(`  （鏡を作れない: ${e.message} — この1本は走らせない）`);
-    return null;
-  }
-}
-
-console.log(`CI と同じ ${cmds.length} 本を回す（seo-check.yml から導出）\n`);
-const failed = [];
-let mirror = null;
-for (const c of cmds) {
-  const label = `${c.script} ${c.args.join(' ')}`.trim().replace(/^scripts\//, '');
-  // **クリーンな木を要求するものは、鏡で走らせる。**
-  // 本物の木は preflight を回している時点で汚れているので、そこでは走れない。
-  let cwd = ROOT;
-  if (needsCleanTree(c)) {
-    if (mirror === null) mirror = makeMirror();   // 1回だけ作って使い回す
-    if (!mirror) {
-      failed.push({ label, out: '検証用の鏡を作れないため実行しなかった。本物の作業ツリーでは生成器を実行しない。' });
-      console.log(`  FAIL  ${label}`);
-      continue;
-    }
-    cwd = mirror;
-  }
-  const r = spawnSync(c.runner ?? 'node', [c.script, ...c.args], { cwd, encoding: 'utf8' });
-  if (r.status === 0) {
-    console.log(`  ok    ${label}`);
-  } else {
-    failed.push({ label, out: `${r.stdout ?? ''}${r.stderr ?? ''}`.trim() });
-    console.log(`  FAIL  ${label}`);
-  }
-}
+console.log(`CI から導出した ${cmds.length} 本のローカル検査を回す\n`);
+const failed = runChecks(cmds, { root: ROOT });
 
 console.log(`\n${cmds.length} 本中 ${failed.length} 本失敗`);
 for (const f of failed) {

@@ -99,10 +99,17 @@ export function rateLimitOf(res) {
 // ---- レスポンスヘルパ ----
 
 export async function safeJson(res) {
+  let text;
   try {
-    return await res.json();
+    text = await res.text();
   } catch (e) {
-    return { _raw: await res.text().catch(function () { return '(本文読み取り不能)'; }) };
+    return { _raw: '(本文読み取り不能)' };
+  }
+  // Response bodies can only be consumed once, even when JSON parsing fails.
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return { _raw: text };
   }
 }
 

@@ -30,6 +30,7 @@
  * Exit 0 = clean, 1 = findings.
  */
 
+import { run as runScenarios } from './lib/selftest.mjs';
 import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -286,13 +287,7 @@ if (process.argv.includes("--selftest")) {
       if (!/^404/.test(staticResolve("/そんなページは無い"))) throw new Error("404にならない");
     }],
   ];
-  let failed = 0;
-  for (const [name, fn] of SCENARIOS) {
-    try { fn(); console.log(`  ok   ${name}`); }
-    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
-  }
-  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
-  process.exit(failed === 0 ? 0 : 1);
+  process.exit(runScenarios(SCENARIOS) === 0 ? 0 : 1);
 }
 
 for (const file of files) {
