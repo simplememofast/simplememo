@@ -8,7 +8,7 @@ export {nonexclusiveObservation,changeScope};
 export function experimentScope(exp) {
   assert(typeof exp.page==='string'&&exp.page.trim(),'missing experiment scope');
   const value = exp.page;
-  assert(exp.pages==null||(Array.isArray(exp.pages)&&exp.pages.every(p=>typeof p==='string')),'invalid experiment pages');
+  assert(exp.pages==null||(Array.isArray(exp.pages)&&exp.pages.length>0&&exp.pages.every(p=>typeof p==='string')),'invalid experiment pages');
   let global = /サイト全体|全コンテンツページ/.test(value);
   const pages = exp.pages ? [...exp.pages] : (value.startsWith('/') || /^https?:\/\//.test(value) ? [value]
     : [...value.matchAll(/(?:^|[\s,:：])(\/[\w./-]*)/g)].map(m => m[1]));

@@ -131,7 +131,7 @@ function selectionScope(page, pages, record=null, {now=new Date(),followup=false
     if (typeof page !== 'string' && !Array.isArray(page)) throw new Error('Missing experiment page scope');
     const explicit = pages ?? (Array.isArray(page) ? page : undefined);
     if (explicit !== undefined && (!Array.isArray(explicit) || explicit.some(p => typeof p !== 'string'))) throw new Error('Invalid experiment pages');
-    const scope = experimentScope({page: typeof page === 'string' ? page : '', pages: explicit,change_paths:record?.change_paths});
+    const scope = experimentScope({page: typeof page === 'string' ? page : explicit?.[0] ?? '', pages: explicit,change_paths:record?.change_paths});
     const literals = explicit ?? (Array.isArray(page) ? page : [page]);
     const own = value => {
       if (typeof value !== 'string' || !/^(\/|https?:\/\/)/.test(value)) return null;
