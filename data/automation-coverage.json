@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-09-13",
+  "measured_at": "2026-09-15",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -777,16 +777,19 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "App Store CPP（訴求別ページ）の実験",
-      "executor": "nobody",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/cpp-map.json",
         "../simplememo-ios/scripts/lib/asc_product_pages.rb",
-        "../simplememo-ios/scripts/qa/test_asc_product_page_weeks.rb"
+        "../simplememo-ios/scripts/qa/test_asc_product_page_weeks.rb",
+        "../simplememo-ios/docs/reports/cpp-evaluation-20260915/REPORT.md",
+        "../simplememo-ios/docs/reports/cpp-evaluation-20260915/evidence.json",
+        "../simplememo-ios/docs/reports/cpp-evaluation-20260915/asc-ui-readback.json",
+        "docs/cpp-execution-evidence-20260915.md"
       ],
-      "note": "34本作成済みだが実験として回っていない\n\n[2026-09-07 実測更新] 非公開iOS側PR #401/#402で日次とApple生成の週次Detailedを取得し、日付・ページ・イベント/Download Typeの組み合わせを保持した。mainの取得run 34111401528と34112630725は成功。観測されたCPPのダウンロードセルは更新、DiscoveryセルはImpressionであり、初回DL・ページ閲覧による実験評価には使えなかった。未観測セルは0ではない。実験の完了や効果は加点しない。ページ本数の旧34本は履歴で、2026-09-05の非公開棚卸しは70本（公開済みと下書きが混在）。",
-      "blocker": "external_data",
-      "unblocked_by": "取得経路は本番稼働済み。日次・週次の周辺合計を初回DLやページ閲覧へ読み替えない。次は月次DetailedまたはASCのCPP画面で一次指標の観測可否を確認し、共通の対象期間・比較対象・同時施策を記録する。初回DL・閲覧・比較の根拠が揃うまで実験完了へ移さない。数値は非公開iOS側に保持する。",
-      "unlock": "asc_dimension_read"
+      "note": "34本作成済みだが実験として回っていない\n\n[2026-09-07 実測更新] 非公開iOS側PR #401/#402で日次とApple生成の週次Detailedを取得し、日付・ページ・イベント/Download Typeの組み合わせを保持した。mainの取得run 34111401528と34112630725は成功。観測されたCPPのダウンロードセルは更新、DiscoveryセルはImpressionであり、初回DL・ページ閲覧による実験評価には使えなかった。未観測セルは0ではない。実験の完了や効果は加点しない。ページ本数の旧34本は履歴で、2026-09-05の非公開棚卸しは70本（公開済みと下書きが混在）。\n\n[2026-09-15 実行確認] ASCの認証済みCPP画面で、完結した共通期間2026-09-07〜09-13（UTC）の初回DLとページ閲覧を直接観測し、obsidian-vaultとmail-to-selfの記述的比較を完了した。比較対象、流入元の違い、表示回復・英語/QR導線・本文変更の同時施策を非公開iOS側に保存。元の解除条件は月次DetailedまたはASC CPP画面の一次指標・共通期間・比較対象・同時施策であり、今回の実行が満たした。因果効果・獲得向上は判定できず、欠測は未知のまま。事前の価値契約や効果成功の加点はしない。既存1業務をnobodyからゲート付きAI実行へ移し、業務の追加・分割・除外や算式変更はしない。初回DL等の数値と選択済み画面本文は非公開iOS側に保持する。",
+      "$previous_unblocked_by": "取得経路は本番稼働済み。日次・週次の周辺合計を初回DLやページ閲覧へ読み替えない。次は月次DetailedまたはASCのCPP画面で一次指標の観測可否を確認し、共通の対象期間・比較対象・同時施策を記録する。初回DL・閲覧・比較の根拠が揃うまで実験完了へ移さない。数値は非公開iOS側に保持する。",
+      "since": "2026-09"
     },
     {
       "area": "③ 自律型マーケティング",
