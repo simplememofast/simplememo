@@ -46,6 +46,7 @@ test('Growth follow-ups preserve original decisions, remain pending with time, a
   const registered=registerGrowthFollowup(args);
   assert.equal(registerGrowthFollowup(args).id,registered.id);
   assert.equal(growthFollowups({stateRoot:root,now}).reviews.length,1);
+  assert.equal(growthFollowups({stateRoot:root,now:new Date('2026-09-12T00:00:00Z')}).reviews.length,0);
   assert.equal(growthFollowups({stateRoot:root,now}).reviews[0].due,false);
   assert.throws(()=>registerGrowthFollowup({...args,postEnd:'2026-10-10'}),/window length/);
   assert.throws(()=>registerGrowthFollowup({...args,evaluationDate:'2026-10-15'}),/active review/);
@@ -72,6 +73,7 @@ test('Growth follow-ups preserve original decisions, remain pending with time, a
   write('meta',{period_start:'2026-09-14',period_end:'2026-10-11'});
   const result=evaluateGrowthFollowup(evaluate);
   assert.equal(result.status,'EVALUATED');assert.equal(result.decision,'inconclusive');
+  assert.equal(growthFollowups({stateRoot:root,now}).reviews[0].status,'RUNNING','later evaluation does not erase historical ownership');
   assert.equal(result.evidence.post.clicks,3);assert.equal(result.parent.decision,'inconclusive');
   assert.equal(JSON.stringify(parent),original);
   assert.throws(()=>evaluateGrowthFollowup(evaluate),/due/);

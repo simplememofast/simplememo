@@ -19,6 +19,7 @@
  */
 
 import fs from 'node:fs';
+import {validateCoexistence,changeScope} from './experiment-coexistence.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -175,6 +176,7 @@ export function validate(ledger) {
 
   for (const e of ledger.experiments || []) {
     const at = `experiment ${e.id || '(missing id)'}`;
+    try { validateCoexistence(e); if(e.change_paths)changeScope(e.page,e.change_paths); } catch (error) { problems.push(`${at}: ${error.message}`); }
     if (!e.id) problems.push('an experiment has no id');
     else if (seen.has(e.id)) problems.push(`${at}: duplicate id`);
     else seen.add(e.id);

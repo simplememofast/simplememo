@@ -111,13 +111,13 @@ export function experimentView(e, asOf) {
   const status = e.status === 'planned' ? 'PLANNED' : ['running', 'frozen'].includes(e.status) ? 'RUNNING'
     : e.decision === 'revert' && !e.company_measurement ? 'ROLLED_BACK' : 'INCONCLUSIVE';
   return { id: e.id, hypothesis: e.hypothesis ?? null, evidence: e.evidence ?? null,
-    action: e.type, date: e.started_at ?? null, affected_area: e.page, affected_pages: e.pages ?? null,
+    ownership_record: e, action: e.type, date: e.started_at ?? null, affected_area: e.page, affected_pages: e.pages ?? null,
     baseline: e.baseline ?? null, primary_kpi: e.target_metric ?? null, secondary_kpi: e.secondary_metrics ?? [],
     guardrails: e.stop_loss ?? e.stop_conditions ?? null, expected_impact: e.expected_impact ?? null,
     actual_impact: e.actual_impact ?? null, evaluation_date: e.evaluation_at ?? null,
     status, legacy_status: e.status, decision: e.decision ?? null, learnings: e.learnings ?? e.learning ?? [],
     due: isDue(e, asOf), source: 'growth/experiments/experiments.json',
-    interpretation: 'compatible view; existing dates, statuses, evidence gates and decision semantics are authoritative' };
+    interpretation: e.coexistence ? 'Explicit prospective observation transition; descriptive only, no isolated causal claim. Original evaluation date and historical contract remain authoritative.' : 'compatible view; existing dates, statuses, evidence gates and decision semantics are authoritative' };
 }
 
 function attempt(name, callback, failures) {
