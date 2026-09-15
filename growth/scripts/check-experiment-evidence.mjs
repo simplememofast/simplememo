@@ -151,7 +151,7 @@ test('measurement diagnosis has its own evidence and cannot be submitted as keep
 function withCli(fn) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'simplememo-evaluate-'));
   try {
-    for (const file of ['growth/scripts/experiments.mjs', 'growth/lib/ledger.mjs', 'growth/lib/gsc.mjs', 'growth/lib/experiment-evidence.mjs']) {
+    for (const file of ['growth/scripts/experiments.mjs', 'growth/lib/ledger.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/gsc.mjs', 'growth/lib/experiment-evidence.mjs']) {
       fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
       fs.copyFileSync(path.join(ROOT, file), path.join(dir, file));
     }
