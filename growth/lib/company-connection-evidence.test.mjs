@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {spawnSync} from 'node:child_process';
 import {appleAdsConnection} from './company-connection-evidence.mjs';
 import {recordAppleAdsObservation} from './company-connection-observations.mjs';
 import {atomicJson,acquireLock} from './company-loop.mjs';
@@ -157,4 +158,42 @@ test('an observation can be retained before the first connection view exists',t=
   const r=f.record();assert.equal(r.cached_view_updated,false);
   assert.equal(fs.existsSync(path.join(f.root,'data/connections.json')),false);
   assert.deepEqual(appleAdsConnection(f.get('data/apple-ads-configuration.json'),now),r.connection);
+});
+
+test('the observation CLI records successful, repeated and rejected handoffs without claiming a company run',t=>{
+  const f=fixture(t),fresh={...observed,observed_at:new Date(Date.now()-1000).toISOString()};
+  f.put('observation.json',fresh);
+  const call=()=>spawnSync(process.execPath,['scripts/company-os.mjs','record-apple-ads-observation',
+    '--state-root',f.root,'--evidence','observation.json'],{
+    cwd:path.resolve(import.meta.dirname,'../..'),encoding:'utf8'
+  });
+  const events=()=>fs.readdirSync(path.join(f.root,'command-events')).map(file=>f.get('command-events/'+file));
+  const results=[];
+  for(const status of ['recorded','already_recorded']) {
+    const run=call();assert.equal(run.status,0,run.stderr);
+    assert.equal(run.stderr,'');
+    const result=JSON.parse(run.stdout);results.push(result);
+    assert.equal(result.status,status);assert.equal(result.formal_credit,0);
+    assert.equal(result.connection.status,'PARTIAL');assert.equal(result.connection.cost,null);
+    assert.equal(result.connection.data_verified,false);assert.equal(result.observed_at,fresh.observed_at);
+  }
+  assert.equal(results[0].id,results[1].id);
+  assert.equal(fs.readdirSync(path.join(f.root,'data/connection-observations/apple-search-ads')).length,1);
+  const returned=events();assert.equal(returned.length,2);
+  for(const result of results) {
+    const event=returned.find(e=>e.result_status===result.status);assert(event);
+    assert.equal(event.execution_state,'returned');
+    assert.equal(event.result_sha256,crypto.createHash('sha256').update(JSON.stringify(result)).digest('hex'));
+  }
+  f.put('observation.json',{...fresh,provider:'other'});
+  const failed=call();assert.notEqual(failed.status,0);
+  assert.doesNotMatch(failed.stderr,/Company command observation could not be saved/);
+  const all=events();assert.equal(all.length,3);
+  assert.equal(all.filter(e=>e.execution_state==='failed').length,1);
+  for(const event of all) {
+    assert.equal(event.command,'record-apple-ads-observation');assert.equal(event.company_run_id,null);
+    assert.equal(event.parent_zero_touch_completion,null);assert.equal(event.cost.parent_model_usd,null);
+    assert(Object.values(event.stages).every(stage=>stage.state==='not_observed' && stage.human_touches===null));
+  }
+  assert.deepEqual(f.get('data/apple-ads-configuration.json'),fresh);
 });
