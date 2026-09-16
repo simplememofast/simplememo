@@ -43,8 +43,8 @@ fs.mkdirSync(output, { recursive: true });
           }
         });
         await page.waitForTimeout(500);
-        const broken = await page.locator('img').evaluateAll(images => images.filter(img => img.getBoundingClientRect().width > 0 && !img.naturalWidth).map(img => img.currentSrc || img.src));
-        assert.deepEqual(broken, [], 'All visible lazy images load after scrolling');
+        const broken = await page.locator('img').evaluateAll(images => images.filter(img => new URL(img.currentSrc || img.src).origin === location.origin && img.getBoundingClientRect().width > 0 && !img.naturalWidth).map(img => img.currentSrc || img.src));
+        assert.deepEqual(broken, [], 'All visible same-origin lazy images load after scrolling (external services intentionally blocked)');
         assert.deepEqual(failures, [], 'No JavaScript errors or missing local resources');
         await page.evaluate(() => scrollTo(0, 0));
         if (width === 390 || width === 1440) await page.screenshot({ path: path.join(output, `${locale ? 'en' : 'ja'}-${width}.png`) });

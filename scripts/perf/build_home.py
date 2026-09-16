@@ -158,6 +158,24 @@ def build() -> dict[str, bytes]:
                 new = f'<source data-home-perf="image" type="image/avif" srcset="{srcset}" sizes="{BANNER_SIZES}">\n          '
                 html, count = re.subn(pattern, lambda m: new + m[0], html)
                 assert count == 1, f'Missing banner: {banner}'
+        # Parse the copy before the photograph, matching the mobile visual order.
+        # With early inline CSS, a preloaded photo can otherwise paint before the
+        # following copy is parsed and then jump down by the entire copy height.
+        photo = re.search(r'    <picture class="hero__photograph">.*?</picture>\n    <div class="hero__shade" aria-hidden="true"></div>\n', html, re.S)
+        assert photo, f'{page}: hero picture and shade must remain together'
+        html = html[:photo.start()] + html[photo.end():]
+        marker = '    <div class="hero__footer">'
+        assert html.count(marker) == 1
+        html = html.replace(marker, photo[0] + marker, 1)
+        # Performance-only srcsets must not shift existing analytics identities
+        # across the CTA checker's byte-position thresholds.
+        def stable_placement(match: re.Match) -> str:
+            tag = match[0]
+            position = re.search(r'data-cta-placement="(hero|mid|bottom)"', tag)
+            if position and 'data-cta-position=' not in tag:
+                tag = tag.replace('<a ', f'<a data-cta-position="{position[1]}" ', 1)
+            return tag
+        html = re.sub(r'<a\b[^>]*>', stable_placement, html)
         result[page] = html.encode()
         manifest['pages'][page] = {'font_bytes': font_bytes, 'requested_codepoints': len(needed), 'glyphs_sha256': digest(','.join(map(str, sorted(needed))).encode())}
     manifest['assets'] = {name: {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for name, data in sorted(result.items()) if name.startswith(OUT + '/')}
