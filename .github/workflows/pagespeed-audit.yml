@@ -49,14 +49,15 @@ jobs:
           python scripts/perf/build_home.py --check
           python scripts/perf/verify_home.py --selftest
           python scripts/perf/verify_home.py
+          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs
       - name: Install pinned browser measurement tools
         run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 playwright@1.55.0
       - name: Verify production deployment after a main push
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: python scripts/perf/verify_production.py --require
+        run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs --require
       - name: Observe the production revision for PR or manual audits
         if: github.event_name != 'push'
-        run: python scripts/perf/verify_production.py
+        run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs
       - name: Measure mobile pages and exercise responsive behavior
         shell: bash
         run: |
