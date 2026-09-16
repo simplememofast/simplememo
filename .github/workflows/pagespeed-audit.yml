@@ -1,0 +1,92 @@
+name: PageSpeed Audit
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/**'
+      - 'scripts/perf/**'
+      - '.github/workflows/pagespeed-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/**'
+      - 'scripts/perf/**'
+      - '.github/workflows/pagespeed-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pagespeed-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  mobile-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Initialize audit output directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/perf-results"
+          echo "PERF_RESULTS=$RUNNER_TEMP/perf-results" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Japanese system fallback for realistic browser screenshots
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+      - name: Reproduce generated assets and test integrity guards
+        run: |
+          pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+          python scripts/perf/build_home.py --check
+          python scripts/perf/verify_home.py --selftest
+          python scripts/perf/verify_home.py
+          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs
+      - name: Install pinned browser measurement tools
+        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 playwright@1.55.0
+      - name: Verify production deployment after a main push
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs --require
+      - name: Observe the production revision for PR or manual audits
+        if: github.event_name != 'push'
+        run: NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/verify_production.cjs
+      - name: Measure mobile pages and exercise responsive behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$PERF_RESULTS"
+          python3 scripts/perf/server.py > "$RUNNER_TEMP/perf-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8765/ > /dev/null; then break; fi
+            sleep 1
+          done
+          measure() {
+            "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" "$1" --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$PERF_RESULTS/$2" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
+          }
+          for run in 1 2 3; do
+            measure http://127.0.0.1:8765/ "local-ja-$run"
+            measure https://simplememofast.com/ "production-ja-$run"
+          done
+          measure http://127.0.0.1:8765/en/ local-en
+          measure https://simplememofast.com/en/ production-en
+          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/browser-output.txt"
+      - name: Report all runs and check mobile regression budgets
+        if: always()
+        run: python scripts/perf/summarize.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pagespeed-mobile-reports
+          path: ${{ runner.temp }}/perf-results/
+          retention-days: 14
+          if-no-files-found: error

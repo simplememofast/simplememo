@@ -54,6 +54,7 @@ import { fileURLToPath } from 'node:url';
 import { run } from './lib/selftest.mjs';
 import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
 import { MARKER, measurementGroup } from './lib/viewport-health.mjs';
+import { hasCurrentInlineSharedCss } from './perf/inline_styles.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -232,6 +233,12 @@ export const WEBKIT_SWEEP_WIDTHS = [320];
 export const SHARED_CSS = 'assets/css/style.min.css';
 export const SAFETY_NET_CSS = 'assets/css/safety-net.css';
 
+/** Linked safety CSS or a byte-verified inline copy of the shared layout. */
+export function hasSafetyNet(html) {
+  return linksStylesheet(html, SHARED_CSS) || linksStylesheet(html, SAFETY_NET_CSS)
+    || hasCurrentInlineSharedCss(html, fs.readFileSync(path.join(ROOT, SHARED_CSS), 'utf8'));
+}
+
 /**
  * **`<link>` として読んでいるかを見る。文字列の出現ではない。**
  *
@@ -258,7 +265,7 @@ export function linksStylesheet(html, file) {
 export function pagesWithoutNet(files = STATIC_FILES, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8')) {
   return files.filter((f) => {
     const html = read(f);
-    return !linksStylesheet(html, SHARED_CSS) && !linksStylesheet(html, SAFETY_NET_CSS);
+    return !hasSafetyNet(html);
   });
 }
 
@@ -277,7 +284,7 @@ export function checkStatic(files = STATIC_FILES) {
       problems.push(`${f}:${a.line} 隣り合う nowrap に改行機会が無い — 閉じタグの直後へ \`<wbr>\` を入れること`
         + `\n      …${a.context}…`);
     }
-    if (!linksStylesheet(html, SHARED_CSS) && !linksStylesheet(html, SAFETY_NET_CSS)) {
+    if (!hasSafetyNet(html)) {
       problems.push(`${f}: **共有CSSも網も読んでいない。**`
         + ` \`${SHARED_CSS}\` か \`${SAFETY_NET_CSS}\` のどちらかを読むこと ——`
         + '\n      どちらも無いと、横漏れの修理がこの面へ**一切届かない**'

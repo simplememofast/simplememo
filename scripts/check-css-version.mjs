@@ -23,6 +23,7 @@
 
 import { run as runScenarios } from './lib/selftest.mjs';
 import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -183,6 +184,10 @@ if (stale.size) {
   );
   process.exit(2);
 }
+
+// Inline homepage styles must follow the same source-of-truth and cache checks.
+execFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py'), '--selftest'], { stdio: 'inherit' });
+execFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py')], { stdio: 'inherit' });
 
 console.log('OK: every page requests the current version of '
   + targets.map((t) => `${path.basename(t.asset)}?v=${t.hash}`).join(', '));
