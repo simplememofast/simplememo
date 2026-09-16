@@ -1,0 +1,84 @@
+name: PageSpeed Audit
+
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/**'
+      - 'scripts/perf/**'
+      - '.github/workflows/pagespeed-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pagespeed-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Archive audited public source for reproducible review
+        run: |
+          mkdir -p "$RUNNER_TEMP/perf-source"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/perf-source/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/perf-source/commit.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pagespeed-audited-source
+          path: ${{ runner.temp }}/perf-source/
+          retention-days: 1
+      - name: Install pinned measurement tools
+        run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2
+      - name: Measure mobile homepage and production
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/perf-results"
+          python3 -m http.server 8765 --bind 127.0.0.1 > "$RUNNER_TEMP/perf-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8765/ > /dev/null; then break; fi
+            sleep 1
+          done
+          for run in 1 2 3; do
+            "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" http://127.0.0.1:8765/ --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$RUNNER_TEMP/perf-results/local-$run" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
+          done
+          "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" https://simplememofast.com/ --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$RUNNER_TEMP/perf-results/production" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
+      - name: Summarize measured results
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob, json, os
+          rows = ['| Measurement | Performance | FCP | LCP | TBT | CLS |', '|---|---:|---:|---:|---:|---:|']
+          for path in sorted(glob.glob(os.environ['RUNNER_TEMP'] + '/perf-results/*.report.json')):
+              with open(path) as handle:
+                  report = json.load(handle)
+              audits = report['audits']
+              values = [audits[k].get('displayValue', 'n/a') for k in ['first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift']]
+              score = report['categories']['performance']['score']
+              row = '| ' + ' | '.join([os.path.basename(path), str(round(score * 100)) if score is not None else 'n/a'] + values) + ' |'
+              rows.append(row)
+          summary = '\n'.join(rows) + '\n\nLocal measurements use an uncompressed test server and are not PageSpeed Insights field data. Production includes real third-party scripts.\n'
+          print(summary)
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as handle:
+              handle.write(summary)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pagespeed-mobile-reports
+          path: ${{ runner.temp }}/perf-results/
+          retention-days: 7
+          if-no-files-found: warn
