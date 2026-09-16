@@ -1,0 +1,64 @@
+name: GSC Crawled URL Checks
+
+on:
+  push:
+    branches: [main, claude/gsc-crawled-indexing-20260916]
+    paths:
+      - '_headers'
+      - 'functions/**'
+      - 'robots.txt'
+      - 'sitemap*.xml'
+      - '**/*.html'
+      - 'scripts/gsc-crawled-indexing.mjs'
+      - 'scripts/lib/edge-middleware.mjs'
+      - 'data/publication-policy.json'
+      - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
+      - '.github/workflows/gsc-indexing.yml'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '_headers'
+      - 'functions/**'
+      - 'robots.txt'
+      - 'sitemap*.xml'
+      - '**/*.html'
+      - 'scripts/gsc-crawled-indexing.mjs'
+      - 'scripts/lib/edge-middleware.mjs'
+      - 'data/publication-policy.json'
+      - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
+      - '.github/workflows/gsc-indexing.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gsc-indexing-${{ github.event_name }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.run_id || 'latest' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: All 60 URLs, metadata, crawl permission and inbound links
+        run: node scripts/gsc-crawled-indexing.mjs
+      - name: Record production baseline without claiming candidate deployment
+        if: github.ref != 'refs/heads/main'
+        run: node scripts/gsc-crawled-indexing.mjs --baseline
+      - name: Verify production after deployment propagation
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: node scripts/gsc-crawled-indexing.mjs --live
+      - name: Retain public HTTP evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gsc-indexing-http-${{ github.run_id }}
+          path: gsc-indexing-http-report.json
+          if-no-files-found: warn

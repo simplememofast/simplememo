@@ -119,3 +119,15 @@
 /compose
   X-Robots-Tag: noindex, nofollow
   Cache-Control: public, max-age=3600
+
+# These two public JSON resources appeared in the owner's September GSC
+# sample. Keep their data, URLs and cache policy unchanged for /autopilot/
+# and other consumers; only the raw JSON search listing is excluded.
+# Do not Disallow them in robots.txt: Google must fetch this noindex header.
+# They are static context.next() responses, not generated Function bodies.
+# scripts/gsc-crawled-indexing.mjs --live verifies the actual edge response.
+/data/automation-coverage.json
+  X-Robots-Tag: noindex
+
+/data/autopilot-runs.json
+  X-Robots-Tag: noindex
