@@ -25,12 +25,14 @@ jobs:
   mobile-audit:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    env:
-      PERF_RESULTS: ${{ runner.temp }}/perf-results
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: Initialize audit output directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/perf-results"
+          echo "PERF_RESULTS=$RUNNER_TEMP/perf-results" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
