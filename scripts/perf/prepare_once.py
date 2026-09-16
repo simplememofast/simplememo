@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
-"""One-time branch preparation; removed with the write-enabled draft workflow."""
+"""Temporary, draft-branch-only patcher; removed before merging."""
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
-
-def patch(name, old, new):
-    path = ROOT / name
-    text = path.read_text()
-    if new in text and new:
-        return
-    if not new and old not in text:
-        return
-    assert text.count(old) == 1, f'Unexpected source shape: {name}'
-    path.write_text(text.replace(old, new, 1))
-
-patch('scripts/perf/build_home.py', 'from fontTools import subset\nfrom fontTools.ttLib import TTFont\nfrom PIL import Image\n', '')
-patch('scripts/perf/build_home.py', 'def build() -> dict[str, bytes]:\n', 'def build() -> dict[str, bytes]:\n    from fontTools import subset\n    from fontTools.ttLib import TTFont\n    from PIL import Image\n')
-patch('scripts/perf/build_home.py', "'requested_codepoints': len(needed)", "'requested_codepoints': len(needed), 'glyphs_sha256': digest(','.join(map(str, sorted(needed))).encode())")
-patch('scripts/perf/build_home.py', "                srcset = ', '.join(f'{image(source, w)} {w}w' for w in (600, 900, 1200))", "                with Image.open(ROOT / source) as original:\n                    widths = (600, 900, 1200, original.width)\n                srcset = ', '.join(f'{image(source, w)} {w}w' for w in widths)")
-patch('scripts/check-css-version.mjs', "import crypto from 'node:crypto';", "import crypto from 'node:crypto';\nimport { execFileSync } from 'node:child_process';")
-patch('scripts/check-css-version.mjs', "console.log('OK: every page requests the current version of '", "// Inline homepage styles must follow the same source-of-truth and cache checks.\nexecFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py'), '--selftest'], { stdio: 'inherit' });\nexecFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py')], { stdio: 'inherit' });\n\nconsole.log('OK: every page requests the current version of '")
-p = ROOT / 'CLAUDE.md'
-text = p.read_text()
-if '## Homepage performance assets' not in text:
-    p.write_text(text + '''\n## Homepage performance assets\n\nThe Japanese and English homepages inline the shared styles at their original\ncascade positions and use page-specific Noto subsets and responsive AVIF sources.\nShared source CSS and all original image fallbacks remain authoritative.\nAfter editing either homepage, its source CSS, fonts or banner images, run:\n\n```sh\npython3 -m pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0\npython3 scripts/perf/build_home.py --write\npython3 scripts/perf/build_home.py --check\nnode scripts/check-css-version.mjs\n```\n\nCommit the changed HTML, content-addressed `assets/home-perf/` files and manifest\ntogether. The existing SEO CSS check rejects stale inline CSS, missing/corrupt\nassets and an outdated glyph inventory. Do not remove analytics or gate content\non user-agent strings to improve scores. PageSpeed Audit measures without such\nbypasses; lab scores are not CrUX field data.\n''')
+p = ROOT / 'scripts/perf/build_home.py'
+s = p.read_text()
+old = '        result[page] = html.encode()'
+new = r'''        # Parse the copy before the photograph, matching the mobile visual order.
+        # With early inline CSS, a preloaded photo can otherwise paint before the
+        # following copy is parsed and then jump down by the entire copy height.
+        photo = re.search(r'    <picture class="hero__photograph">.*?</picture>\n    <div class="hero__shade" aria-hidden="true"></div>\n', html, re.S)
+        assert photo, f'{page}: hero picture and shade must remain together'
+        html = html[:photo.start()] + html[photo.end():]
+        marker = '    <div class="hero__footer">'
+        assert html.count(marker) == 1
+        html = html.replace(marker, photo[0] + marker, 1)
+        # Performance-only srcsets must not shift existing analytics identities
+        # across the CTA checker's byte-position thresholds.
+        def stable_placement(match: re.Match) -> str:
+            tag = match[0]
+            position = re.search(r'data-cta-placement="(hero|mid|bottom)"', tag)
+            if position and 'data-cta-position=' not in tag:
+                tag = tag.replace('<a ', f'<a data-cta-position="{position[1]}" ', 1)
+            return tag
+        html = re.sub(r'<a\b[^>]*>', stable_placement, html)
+        result[page] = html.encode()'''
+if 'Parse the copy before the photograph' not in s:
+    assert s.count(old) == 1
+    p.write_text(s.replace(old, new))
+p = ROOT / 'scripts/perf/browser_checks.cjs'
+s = p.read_text().replace('img.getBoundingClientRect().width > 0 && !img.naturalWidth', 'new URL(img.currentSrc || img.src).origin === location.origin && img.getBoundingClientRect().width > 0 && !img.naturalWidth')
+s = s.replace('All visible lazy images load after scrolling', 'All visible same-origin lazy images load after scrolling (external services intentionally blocked)')
+p.write_text(s)

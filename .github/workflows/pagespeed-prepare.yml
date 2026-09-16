@@ -18,6 +18,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          show-progress: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -32,38 +33,22 @@ jobs:
           python scripts/perf/build_home.py --write
           python scripts/perf/build_home.py --check
           node scripts/check-css-version.mjs --check
+          node scripts/tag-cta-placements.js --check
           node scripts/seo-check.js --selftest
           node scripts/seo-check.js
       - name: Commit only reviewed generated and guard files to the draft branch
         run: |
           set -euo pipefail
-          git add -- index.html en/index.html assets/home-perf/ scripts/perf/build_home.py scripts/check-css-version.mjs CLAUDE.md
+          git add -- index.html en/index.html assets/home-perf/ scripts/perf/build_home.py scripts/perf/browser_checks.cjs scripts/check-css-version.mjs CLAUDE.md
           if ! git diff --cached --quiet; then
-            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf: validate generated homepage assets in existing SEO checks'
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'perf: prevent streaming hero layout shifts and preserve CTA identities'
             git push origin HEAD:refs/heads/claude/pagespeed-mobile-20260916
           fi
           git rev-parse HEAD
-      - name: Verify editorial text, metadata, images and analytics unchanged
+      - name: Verify content and analytics are preserved
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          python3 - <<'PY'
-          import os,re,subprocess,sys
-          from pathlib import Path
-          sys.path.insert(0,'scripts/perf')
-          from build_home import Text
-          for name in ['index.html','en/index.html']:
-              before=subprocess.check_output(['git','show',os.environ['BASE_SHA']+':'+name],text=True)
-              after=Path(name).read_text()
-              for pattern in [r'<script\b[^>]*>.*?</script>',r'<meta\b[^>]*>',r'<a\b[^>]*>',r'<img\b[^>]*>',r'<title>.*?</title>',r'<link rel="(?:canonical|alternate)"[^>]*>']:
-                  assert re.findall(pattern,before,re.S)==re.findall(pattern,after,re.S),(name,pattern)
-              def text(html):
-                  parser=Text();parser.feed(html);return re.sub(r'\s+',' ',''.join(parser.parts)).strip()
-              assert text(before)==text(after),name
-              target=Path('.perf-baseline')/name
-              target.parent.mkdir(parents=True,exist_ok=True);target.write_text(before)
-          print('PASS: both homepages preserve text, metadata, scripts, image fallbacks and all links.')
-          PY
+        run: python scripts/perf/verify_preserved.py
       - name: Measure compressed baseline and optimized pages; test browsers
         env:
           PERF_RESULTS: ${{ runner.temp }}/perf-results
@@ -83,7 +68,7 @@ jobs:
             done
           done
           "$RUNNER_TEMP/perf-tools/node_modules/.bin/lighthouse" http://127.0.0.1:8765/en/ --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path="$PERF_RESULTS/optimized-en" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
-          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs
+          NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/browser-output.txt"
       - name: Summarize measured results
         if: always()
         run: |
