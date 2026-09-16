@@ -1,0 +1,55 @@
+name: GSC Redirect Audit
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'functions/_middleware.js'
+      - '_redirects'
+      - 'docs/seo/gsc-redirect-cases-2026-09-16.json'
+      - 'scripts/gsc-redirect-*'
+      - '.github/workflows/gsc-redirect-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'functions/_middleware.js'
+      - '_redirects'
+      - 'docs/seo/gsc-redirect-cases-2026-09-16.json'
+      - 'scripts/gsc-redirect-*'
+      - '.github/workflows/gsc-redirect-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gsc-redirect-audit-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Original URL regression suite and failure-injection tests
+        run: |
+          node scripts/check-url-normalization.mjs
+          node scripts/check-url-normalization.mjs --selftest
+          node --test scripts/gsc-redirect-regressions.test.mjs
+          python3 scripts/gsc-redirect-audit.py --selftest
+      - name: Record current production baseline (not a PR deployment claim)
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/gsc-redirect-audit.py --mode baseline --output /tmp/gsc-redirect-audit.json
+      - name: Verify production behavior and all original HTTP URLs
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/gsc-redirect-audit.py --mode verify --wait-deploy 300 --output /tmp/gsc-redirect-audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gsc-redirect-audit-${{ github.sha }}
+          path: /tmp/gsc-redirect-audit.json
+          if-no-files-found: warn
+          retention-days: 14
