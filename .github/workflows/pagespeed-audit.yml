@@ -33,6 +33,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/perf-results"
           echo "PERF_RESULTS=$RUNNER_TEMP/perf-results" >> "$GITHUB_ENV"
+          echo "PERF_EXPECTED_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -49,7 +50,8 @@ jobs:
           python scripts/perf/build_home.py --check
           python scripts/perf/verify_home.py --selftest
           python scripts/perf/verify_home.py
-          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs
+          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs scripts/perf/browser_checks.test.cjs
+          python scripts/perf/test_summarize.py
       - name: Install pinned browser measurement tools
         run: npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 playwright@1.55.0
       - name: Verify production deployment after a main push
@@ -76,10 +78,13 @@ jobs:
           for run in 1 2 3; do
             measure http://127.0.0.1:8765/ "local-ja-$run"
             measure https://simplememofast.com/ "production-ja-$run"
+            measure http://127.0.0.1:8765/en/ "local-en-$run"
+            measure https://simplememofast.com/en/ "production-en-$run"
           done
-          measure http://127.0.0.1:8765/en/ local-en
-          measure https://simplememofast.com/en/ production-en
           NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/browser-output.txt"
+          if [[ "$GITHUB_EVENT_NAME" == "push" && "$GITHUB_REF" == "refs/heads/main" ]]; then
+            PERF_BASE_URL=https://simplememofast.com PERF_RESULTS="$PERF_RESULTS/production-browser" NODE_PATH="$RUNNER_TEMP/perf-tools/node_modules" node scripts/perf/browser_checks.cjs 2>&1 | tee "$PERF_RESULTS/production-browser-output.txt"
+          fi
       - name: Report all runs and check mobile regression budgets
         if: always()
         run: python scripts/perf/summarize.py
