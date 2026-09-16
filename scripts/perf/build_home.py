@@ -85,7 +85,7 @@ def build() -> dict[str, bytes]:
         images[key] = '/' + name
         return '/' + name
 
-    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 900, 1536))
+    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1536))
     manifest: dict[str, object] = {'version': 1, 'pages': {}, 'inputs': {}}
     for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', HERO):
         manifest['inputs'][source] = digest((ROOT / source).read_bytes())
@@ -152,7 +152,7 @@ def build() -> dict[str, bytes]:
                 source = f'assets/img/{banner}-banner-ja@2x.webp'
                 manifest['inputs'][source] = digest((ROOT / source).read_bytes())
                 with Image.open(ROOT / source) as original:
-                    widths = (600, 900, 1200, original.width)
+                    widths = (600, 750, 900, 1200, original.width)
                 srcset = ', '.join(f'{image(source, w)} {w}w' for w in widths)
                 pattern = rf'(<source type="image/webp" srcset="/assets/img/{banner}-banner-ja\.webp[^>]*>)'
                 new = f'<source data-home-perf="image" type="image/avif" srcset="{srcset}" sizes="{BANNER_SIZES}">\n          '
