@@ -1,6 +1,13 @@
 name: GSC Crawled URL Checks
 
 on:
+  # GITHUB_TOKEN auto-merges do not emit a normal push workflow run.
+  # Observe the existing merger's completion without changing its permissions
+  # or gate. This workflow checks only the default-branch SHA, never executes
+  # an upstream artifact or an untrusted PR head in this event context.
+  workflow_run:
+    workflows: ['Auto-merge Claude PRs']
+    types: [completed]
   push:
     branches: [main, claude/gsc-crawled-indexing-20260916]
     paths:
@@ -38,11 +45,13 @@ concurrency:
 
 jobs:
   verify:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -50,10 +59,10 @@ jobs:
       - name: All 60 URLs, metadata, crawl permission and inbound links
         run: node scripts/gsc-crawled-indexing.mjs
       - name: Record production baseline without claiming candidate deployment
-        if: github.ref != 'refs/heads/main'
+        if: github.event_name != 'workflow_run' && github.ref != 'refs/heads/main'
         run: node scripts/gsc-crawled-indexing.mjs --baseline
       - name: Verify production after deployment propagation
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'workflow_run' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: node scripts/gsc-crawled-indexing.mjs --live
       - name: Retain public HTTP evidence, including failures
         if: always()
