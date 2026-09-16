@@ -14,6 +14,24 @@ function allowedRequest(url, method, base) {
   return parsed.origin === new URL(base).origin && method === 'GET' && !parsed.pathname.startsWith('/cdn-cgi/rum');
 }
 
+// Drive timers from the runner: page timers do not fire when JavaScript is
+// disabled. Bound the scroll using one height snapshot and poll image state
+// from Node rather than waiting on an in-page async loop or animation frame.
+async function loadLazyImages(page) {
+  const height = await page.evaluate(() => document.body.scrollHeight);
+  for (let y = 0; y < height; y += 700) {
+    await page.evaluate(position => scrollTo(0, position), y);
+    await page.waitForTimeout(50);
+  }
+  const deadline = Date.now() + 10000;
+  while (true) {
+    const complete = await page.evaluate(() => [...document.images].filter(img => new URL(img.currentSrc || img.src).origin === location.origin && img.getBoundingClientRect().width > 0).every(img => img.complete && img.naturalWidth > 0));
+    if (complete) return;
+    if (Date.now() >= deadline) throw new Error('Visible same-origin images did not load within 10 seconds');
+    await page.waitForTimeout(100);
+  }
+}
+
 async function main() {
   const { chromium } = require('playwright');
   const base = (process.env.PERF_BASE_URL || 'http://127.0.0.1:8765').replace(/\/$/, '');
@@ -61,13 +79,7 @@ async function main() {
               assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
             }
           }
-          await page.evaluate(async () => {
-            for (let y = 0; y < document.body.scrollHeight; y += 700) {
-              scrollTo(0, y);
-              await new Promise(resolve => setTimeout(resolve, 50));
-            }
-          });
-          await page.waitForFunction(() => [...document.images].filter(img => new URL(img.currentSrc || img.src).origin === location.origin && img.getBoundingClientRect().width > 0).every(img => img.complete && img.naturalWidth > 0), null, { timeout: 10000 });
+          await loadLazyImages(page);
           assert.deepEqual(failures, [], 'No JavaScript errors or missing same-origin resources');
           record.images = await page.locator('picture:has(source[data-home-perf="image"]) img').evaluateAll(images => images.map(img => ({ url: img.currentSrc, cssWidth: img.getBoundingClientRect().width, dpr: devicePixelRatio })));
           for (const image of record.images) {
@@ -98,5 +110,5 @@ async function main() {
   } finally { await browser.close(); }
 }
 
-module.exports = { CASES, allowedRequest };
+module.exports = { CASES, allowedRequest, loadLazyImages };
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });
