@@ -98,3 +98,23 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 - ルートにindex.html（日本語）、en/index.html（英語）
 - robots.txt, sitemap.xml あり
 - JSON-LD構造化データ、FAQ、hreflangタグ実装済み
+
+## Homepage performance assets
+
+The Japanese and English homepages inline the shared styles at their original
+cascade positions and use page-specific Noto subsets and responsive AVIF sources.
+Shared source CSS and all original image fallbacks remain authoritative.
+After editing either homepage, its source CSS, fonts or banner images, run:
+
+```sh
+python3 -m pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+python3 scripts/perf/build_home.py --write
+python3 scripts/perf/build_home.py --check
+node scripts/check-css-version.mjs
+```
+
+Commit the changed HTML, content-addressed `assets/home-perf/` files and manifest
+together. The existing SEO CSS check rejects stale inline CSS, missing/corrupt
+assets and an outdated glyph inventory. Do not remove analytics or gate content
+on user-agent strings to improve scores. PageSpeed Audit measures without such
+bypasses; lab scores are not CrUX field data.

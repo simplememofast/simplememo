@@ -12,9 +12,6 @@ import json
 import re
 from html.parser import HTMLParser
 from pathlib import Path
-from fontTools import subset
-from fontTools.ttLib import TTFont
-from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 PAGES = ('index.html', 'en/index.html')
@@ -60,6 +57,9 @@ def characters(html: str, css: str) -> set[int]:
 
 
 def build() -> dict[str, bytes]:
+    from fontTools import subset
+    from fontTools.ttLib import TTFont
+    from PIL import Image
     result: dict[str, bytes] = {}
     shared = (ROOT / 'assets/css/style.min.css').read_text()
     hero_css = (ROOT / 'assets/css/home-hero.css').read_text()
@@ -151,13 +151,15 @@ def build() -> dict[str, bytes]:
             for banner in BANNERS:
                 source = f'assets/img/{banner}-banner-ja@2x.webp'
                 manifest['inputs'][source] = digest((ROOT / source).read_bytes())
-                srcset = ', '.join(f'{image(source, w)} {w}w' for w in (600, 900, 1200))
+                with Image.open(ROOT / source) as original:
+                    widths = (600, 900, 1200, original.width)
+                srcset = ', '.join(f'{image(source, w)} {w}w' for w in widths)
                 pattern = rf'(<source type="image/webp" srcset="/assets/img/{banner}-banner-ja\.webp[^>]*>)'
                 new = f'<source data-home-perf="image" type="image/avif" srcset="{srcset}" sizes="{BANNER_SIZES}">\n          '
                 html, count = re.subn(pattern, lambda m: new + m[0], html)
                 assert count == 1, f'Missing banner: {banner}'
         result[page] = html.encode()
-        manifest['pages'][page] = {'font_bytes': font_bytes, 'requested_codepoints': len(needed)}
+        manifest['pages'][page] = {'font_bytes': font_bytes, 'requested_codepoints': len(needed), 'glyphs_sha256': digest(','.join(map(str, sorted(needed))).encode())}
     manifest['assets'] = {name: {'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()} for name, data in sorted(result.items()) if name.startswith(OUT + '/')}
     result[f'{OUT}/manifest.json'] = (json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + '\n').encode()
     return result
