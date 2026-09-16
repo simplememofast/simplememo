@@ -182,6 +182,11 @@ const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures"
 // (same reasoning as `?lang=` in step 1).
 const STRIPPED_PARAMS = ["ref", "from", "source", "q"];
 
+// Native Pages directory aliases that must share the query/host redirect.
+// /en?lang=en otherwise becomes /en (301) then /en/ (308). Match only
+// this known directory; do not guess directory shapes for arbitrary paths.
+const DIRECTORY_ALIASES = { "/en": "/en/" };
+
 // Retired paths → their final targets (step 3). Mirrors _redirects, which
 // stays in place as the fallback if a Function deploy ever fails — keep the
 // two in sync.
@@ -194,11 +199,15 @@ const RETIRED = {
   "/en/blog/why-captio-died": "/en/captio-alternative/",
   "/privacy-policy": "/privacy",
   "/privacy-policy/": "/privacy",
+  "/vs/whatsapp": "/vs/",
   "/vs/whatsapp/": "/vs/",
+  "/vs/telegram": "/vs/",
   "/vs/telegram/": "/vs/",
+  "/vs/trello": "/vs/",
   "/vs/trello/": "/vs/",
   "/vs/mem": "/vs/",
   "/vs/mem/": "/vs/",
+  "/vs/slack-self-dm": "/vs/",
   "/vs/slack-self-dm/": "/vs/",
   // A backlink (featureupvote.com, DR72) carries a stray closing paren.
   // `_redirects` has caught the bare form since it was added, but only
@@ -318,6 +327,10 @@ export const onRequest = async (context) => {
   //    — keep the two in sync.
   if (RETIRED[pathname]) {
     pathname = RETIRED[pathname];
+  }
+
+  if (DIRECTORY_ALIASES[pathname]) {
+    pathname = DIRECTORY_ALIASES[pathname];
   }
 
   // 4. Slugs that never existed on this site answer 410 Gone — see the
