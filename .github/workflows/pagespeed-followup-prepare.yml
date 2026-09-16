@@ -1,0 +1,71 @@
+name: Prepare isolated homepage follow-up
+on:
+  push:
+    branches: [claude/pagespeed-followup-20260916]
+    paths: ['.github/workflows/pagespeed-followup-prepare.yml']
+permissions:
+  contents: write
+jobs:
+  prepare:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/claude/pagespeed-followup-20260916'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Apply source-checked, homepage-only changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object scripts/perf/build_home.py)" = 4ae21ce327061ab021dcc249901fdd34034030ed
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/perf/build_home.py')
+          s = p.read_text()
+          for old, new in [('for w in (600, 900, 1536)', 'for w in (600, 750, 900, 1536)'), ('widths = (600, 900, 1200, original.width)', 'widths = (600, 750, 900, 1200, original.width)')]:
+              assert s.count(old) == 1, old
+              s = s.replace(old, new)
+          p.write_text(s)
+          p = Path('en/index.html')
+          s = p.read_text()
+          old = '<img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">'
+          assert s.count(old) == 1
+          assert old + '\n        Simple Memo - for Obsidian\n      </a>' in s
+          s = s.replace(old, old.replace('alt="Simple Memo - for Obsidian"', 'alt=""'), 1)
+          p.write_text(s)
+          PY
+          pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+          python scripts/perf/build_home.py --write
+          python scripts/perf/build_home.py --check
+          python scripts/perf/verify_home.py --selftest
+          python scripts/perf/verify_home.py
+          node scripts/check-css-version.mjs
+          git diff --check
+      - name: Commit only prepared homepage outputs to this isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add scripts/perf/build_home.py index.html en/index.html assets/home-perf/
+          git diff --cached --name-only | while IFS= read -r file; do
+            case "$file" in
+              scripts/perf/build_home.py|index.html|en/index.html|assets/home-perf/*) ;;
+              *) echo "Unexpected staged path: $file"; exit 1 ;;
+            esac
+          done
+          mkdir -p "$RUNNER_TEMP/followup-source"
+          git diff --cached --stat > "$RUNNER_TEMP/followup-source/preparation-stat.txt"
+          git diff --cached -- scripts/perf/build_home.py index.html en/index.html assets/home-perf/manifest.json > "$RUNNER_TEMP/followup-source/preparation.diff"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'perf: add intermediate responsive image sizes and remove redundant logo alternative text'
+          git push origin HEAD:refs/heads/claude/pagespeed-followup-20260916
+          git rev-parse HEAD > "$RUNNER_TEMP/followup-source/commit.txt"
+          git archive --format=tar.gz HEAD > "$RUNNER_TEMP/followup-source/source.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: homepage-followup-source
+          path: ${{ runner.temp }}/followup-source/
+          retention-days: 7
+          if-no-files-found: error
