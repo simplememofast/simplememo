@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Read-only public delivery audit. A passing result is not Google index status."""
 import argparse
-import concurrent.futures
 import datetime as dt
 import json
 import re
@@ -12,6 +11,7 @@ import urllib.request
 import urllib.robotparser
 import xml.etree.ElementTree as ET
 from html.parser import HTMLParser
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,7 +45,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def request(url):
+def raw_request(url):
     safe_url(url)
     opener = urllib.request.build_opener(NoRedirect())
     req = urllib.request.Request(url, headers={'User-Agent': 'SimpleMemo-Redirect-Audit/1.0'})
@@ -60,6 +60,75 @@ def request(url):
             raise ValueError('Response exceeds 4 MB: ' + url)
         return {'status': response.code, 'headers': headers,
                 'body': body.decode('utf-8', errors='replace')}
+
+
+class PoliteClient:
+    """Sequential reads, bounded Retry-After waits, and a stop on persistent 429.
+
+    No rotating identity, cache-busting, allowlisting or bypass of site controls.
+    The failed observations stay in the report even when a later retry succeeds.
+    """
+    def __init__(self, transport=raw_request, clock=time.monotonic, sleep=time.sleep,
+                 wall_clock=time.time):
+        self.transport, self.clock, self.sleep = transport, clock, sleep
+        self.wall_clock = wall_clock
+        self.next_allowed = 0
+        self.started = clock()
+        self.requests = 0
+        self.retry_wait_seconds = 0
+        self.rate_limits = []
+        self.stopped = None
+
+    def once(self, url):
+        if self.stopped:
+            raise RuntimeError(self.stopped + '; no further request sent')
+        if self.clock() - self.started >= 900:
+            self.stopped = 'Audit exceeded its 900-second request budget'
+            raise RuntimeError(self.stopped)
+        self.sleep(max(0, self.next_allowed - self.clock()))
+        self.requests += 1
+        try:
+            return self.transport(url)
+        finally:
+            self.next_allowed = self.clock() + 2.0
+
+    def retry_delay(self, value):
+        try:
+            delay = float(value) if value.isdigit() else (
+                parsedate_to_datetime(value).timestamp() - self.wall_clock())
+            # Be more conservative than a short/missing server delay.
+            return max(60.0, delay)
+        except (ValueError, TypeError, OverflowError, AttributeError):
+            return 60.0
+
+    def fetch(self, url):
+        safe_url(url)
+        result = self.once(url)
+        if result['status'] != 429:
+            return result
+        retry_after = result['headers'].get('retry-after', '')
+        delay = self.retry_delay(retry_after)
+        event = {'url': url, 'status': 429, 'retry_after': retry_after,
+                 'wait_seconds': delay, 'retried': False}
+        self.rate_limits.append(event)
+        if delay > 120 - self.retry_wait_seconds:
+            self.stopped = 'Rate limit requires more than the remaining retry budget'
+            return result
+        self.retry_wait_seconds += delay
+        self.sleep(delay)
+        event['retried'] = True
+        result = self.once(url)
+        event['retry_status'] = result['status']
+        if result['status'] == 429:
+            self.stopped = 'Persistent HTTP 429; audit stopped to respect the rate limit'
+        return result
+
+
+CLIENT = PoliteClient()
+
+
+def request(url):
+    return CLIENT.fetch(url)
 
 
 def trace(url, fetch=request):
@@ -167,6 +236,22 @@ def deployed():
 
 def selftest():
     import unittest
+    from unittest import mock
+    import contextlib
+    import io
+    import tempfile
+
+    class FakeClock:
+        def __init__(self):
+            self.now = 0.0
+            self.waits = []
+
+        def clock(self):
+            return self.now
+
+        def sleep(self, seconds):
+            self.waits.append(seconds)
+            self.now += seconds
 
     def response(status=200, headers=None, body=None):
         return {'status': status, 'headers': headers or {'content-type': 'text/html'},
@@ -229,16 +314,142 @@ def selftest():
                 with self.subTest(url=url), self.assertRaises(ValueError):
                     safe_url(url)
 
+        def client(self, responses):
+            clock = FakeClock()
+            sent = []
+            def transport(url):
+                sent.append((url, clock.now))
+                return responses.pop(0)
+            return PoliteClient(transport, clock.clock, clock.sleep, lambda: 0), clock, sent
+
+        def test_requests_are_spaced_at_least_two_seconds(self):
+            client, clock, sent = self.client([response(), response(), response()])
+            for _ in range(3):
+                client.fetch(ORIGIN + '/')
+            self.assertEqual([t for _, t in sent], [0, 2, 4])
+            self.assertEqual(client.requests, 3)
+
+        def test_429_waits_and_preserves_failed_observation(self):
+            client, clock, sent = self.client([response(429, {'retry-after': '75'}), response()])
+            self.assertEqual(client.fetch(ORIGIN + '/')['status'], 200)
+            self.assertEqual([t for _, t in sent], [0, 75])
+            self.assertEqual(client.rate_limits[0]['status'], 429)
+            self.assertEqual(client.rate_limits[0]['retry_status'], 200)
+
+        def test_retry_after_date_or_invalid_value(self):
+            client, _, _ = self.client([])
+            self.assertEqual(client.retry_delay('Thu, 01 Jan 1970 00:01:30 GMT'), 90)
+            for value in ['', 'invalid', '0', '10']:
+                self.assertEqual(client.retry_delay(value), 60)
+
+        def test_persistent_429_stops_all_further_reads(self):
+            client, clock, sent = self.client([response(429), response(429)])
+            self.assertEqual(client.fetch(ORIGIN + '/')['status'], 429)
+            with self.assertRaisesRegex(RuntimeError, 'no further request'):
+                client.fetch(ORIGIN + '/sitemap-ja.xml')
+            self.assertEqual(len(sent), 2)
+
+        def test_long_retry_after_is_not_ignored_or_clamped(self):
+            client, clock, sent = self.client([response(429, {'retry-after': '3600'})])
+            self.assertEqual(client.fetch(ORIGIN + '/')['status'], 429)
+            with self.assertRaises(RuntimeError):
+                client.fetch(ORIGIN + '/')
+            self.assertEqual(len(sent), 1)
+            self.assertFalse(client.rate_limits[0]['retried'])
+
+        def test_total_retry_wait_budget_is_bounded(self):
+            client, clock, sent = self.client([response(429), response(), response(429),
+                                              response(), response(429)])
+            for _ in range(3):
+                client.fetch(ORIGIN + '/')
+            self.assertEqual(client.retry_wait_seconds, 120)
+            self.assertEqual(len(sent), 5)
+            with self.assertRaises(RuntimeError):
+                client.fetch(ORIGIN + '/')
+
+        def test_time_budget_prevents_further_transport(self):
+            client, clock, sent = self.client([])
+            clock.now = 900
+            with self.assertRaisesRegex(RuntimeError, '900-second'):
+                client.fetch(ORIGIN + '/')
+            self.assertEqual(sent, [])
+
+        def test_non_429_errors_are_not_hidden_by_retries(self):
+            for status in [301, 403, 404, 410, 500, 503]:
+                client, _, sent = self.client([response(status)])
+                self.assertEqual(client.fetch(ORIGIN + '/')['status'], status)
+                self.assertEqual(len(sent), 1)
+
+        def test_main_success_failure_and_baseline_exit_codes(self):
+            # Exercise main itself: an empty discovery-errors list previously
+            # reached int([]), which crashes ONLY on an otherwise successful run.
+            variants = [('verify', True, [], [], 0),
+                        ('verify', False, [], [], 1),
+                        ('verify', True, ['HTTP 429'], [], 1),
+                        ('verify', True, [], ['blocked sitemap'], 1),
+                        ('baseline', True, ['HTTP 429'], ['blocked sitemap'], 0)]
+            for mode, ready, row_errors, discovery_errors, expected in variants:
+                with self.subTest(mode=mode, ready=ready, row_errors=row_errors,
+                                  discovery_errors=discovery_errors), tempfile.TemporaryDirectory() as tmp:
+                    def fake_observe(case):
+                        return dict(case, chain=[{'status': 200}], final_status=200,
+                                    errors=list(row_errors))
+                    outfile = Path(tmp) / 'result.json'
+                    with mock.patch.dict(globals(), {
+                        'observe': fake_observe, 'deployed': lambda: ready,
+                        'discovery_checks': lambda _: {'errors': list(discovery_errors)},
+                    }), contextlib.redirect_stdout(io.StringIO()):
+                        code = main(['--mode', mode, '--wait-deploy', '0', '--output', str(outfile)])
+                    self.assertEqual(code, expected)
+                    report = json.loads(outfile.read_text())
+                    self.assertEqual(len(report['results']), 101)
+                    self.assertEqual(report['mode'], mode)
+                    self.assertEqual(report['deployment_behavior_confirmed'], ready if mode == 'verify' else None)
+                    self.assertEqual(report['discovery']['errors'], discovery_errors)
+
+        def test_complete_verify_pipeline_with_fake_http_and_clock(self):
+            fixture = json.loads((ROOT / 'docs/seo/gsc-redirect-cases-2026-09-16.json').read_text())
+            cases = fixture['cases'] + supplemental()
+            targets = {case['to'] for case in cases}
+            mapping = {case['from']: case['to'] for case in cases}
+            mapping[ORIGIN + '/vs/trello?lang=ja'] = ORIGIN + '/vs/'
+            sitemap = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(
+                '<url><loc>' + url + '</loc></url>' for url in sorted(targets) if '?' not in url) + '</urlset>'
+            def transport(url):
+                if url.endswith('/robots.txt'):
+                    return response(headers={'content-type': 'text/plain'}, body='User-agent: *\nAllow: /\n')
+                if url.endswith(('/sitemap-ja.xml', '/sitemap-en.xml')):
+                    return response(headers={'content-type': 'application/xml'}, body=sitemap)
+                if url in mapping and mapping[url] != url:
+                    return response(301, {'location': mapping[url]})
+                self.assertIn(url, targets)
+                return response(body='<link rel="canonical" href="' + url.split('?')[0] + '">')
+            clock = FakeClock()
+            client = PoliteClient(transport, clock.clock, clock.sleep, lambda: 0)
+            with tempfile.TemporaryDirectory() as tmp:
+                outfile = Path(tmp) / 'result.json'
+                with mock.patch.dict(globals(), {'CLIENT': client}), contextlib.redirect_stdout(io.StringIO()):
+                    code = main(['--mode', 'verify', '--output', str(outfile)])
+                report = json.loads(outfile.read_text())
+            self.assertEqual(code, 0)
+            self.assertIs(report['deployment_behavior_confirmed'], True)
+            self.assertEqual(report['summary']['original_passed'], 87)
+            self.assertEqual(report['summary']['supplemental_rows'], 14)
+            self.assertEqual(report['summary']['failed_rows'], 0)
+            self.assertEqual(report['discovery']['errors'], [])
+            self.assertEqual(client.requests, 208)
+            self.assertEqual(clock.now, 414)
+
     return 0 if unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Checks)).wasSuccessful() else 1
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--selftest', action='store_true')
     parser.add_argument('--mode', choices=('baseline', 'verify'), default='baseline')
     parser.add_argument('--wait-deploy', type=int, default=0)
     parser.add_argument('--output', type=Path, default=Path('/tmp/gsc-redirect-audit.json'))
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     if args.selftest:
         return selftest()
     if not 0 <= args.wait_deploy <= 300:
@@ -255,8 +466,9 @@ def main():
             if ready or time.monotonic() >= deadline:
                 break
             time.sleep(10)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
-        results = list(pool.map(observe, cases + supplemental()))
+    # Intentionally sequential: all HTTP reads, including redirects and discovery,
+    # share CLIENT's two-second spacing rather than flooding the public endpoint.
+    results = [observe(case) for case in cases + supplemental()]
     try:
         discovery = discovery_checks({c['to'] for c in cases})
     except Exception as error:
@@ -272,6 +484,9 @@ def main():
                           'unique_destinations': len({c['to'] for c in cases}),
                           'supplemental_rows': len(results) - 87,
                           'failed_rows': sum(bool(r['errors']) for r in results)},
+              'delivery': {'requests': CLIENT.requests, 'minimum_interval_seconds': 2,
+                           'rate_limit_observations': CLIENT.rate_limits,
+                           'stopped': CLIENT.stopped},
               'discovery': discovery, 'results': results}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
@@ -280,7 +495,8 @@ def main():
         chain = ' -> '.join(str(s['status']) for s in r.get('chain', []))
         print(('FAIL ' if r['errors'] else 'OK ') + r['from'] + ' : ' + chain + ' : ' + '; '.join(r['errors']))
     # Baselines can contain known pre-deploy failures. Never label them verified.
-    return int(args.mode == 'verify' and (not ready or any(r['errors'] for r in results) or discovery['errors']))
+    failed = not ready or any(r['errors'] for r in results) or bool(discovery['errors'])
+    return 1 if args.mode == 'verify' and failed else 0
 
 
 if __name__ == '__main__':
