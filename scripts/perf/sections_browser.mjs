@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
 import {waitForFonts} from './sections_wait.mjs';
+import {assertSectionStates} from './sections_escape.mjs';
 export async function main(){
 const require=createRequire(import.meta.url),pw=require('playwright');
 const [baseline,candidate]=process.argv.slice(2).map(p=>fs.realpathSync(p));
@@ -46,6 +47,11 @@ async function measurePage(url,label,c){
   await page.close();page=await context.newPage();
   stage('screen-navigation');
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
+  const escapeChecks={ordinary:0,fragments:[],focus:0};
+  const sectionStates=p=>p.locator('main > section:not(.hero):not(.press-band)').evaluateAll(nodes=>nodes.map(n=>({visibility:getComputedStyle(n).contentVisibility})));
+  if(label==='candidate'){
+   const states=await sectionStates(page);assertSectionStates(states,'auto','ordinary navigation');escapeChecks.ordinary=states.length;
+  }
   const headings=await page.locator('h1,h2,h3').allTextContents();
   const hero=await page.locator('.hero').boundingBox();
   await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-top.png`)});
@@ -68,6 +74,9 @@ async function measurePage(url,label,c){
    const linked=await context.newPage();
    try{
     await linked.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(600);
+    if(label==='candidate'){
+     const states=await sectionStates(linked);assertSectionStates(states,'visible','fragment '+hash);escapeChecks.fragments.push({hash,sections:states.length});
+    }
     const box=await linked.locator('[id='+JSON.stringify(id)+']').boundingBox();
     anchors.push({hash,y:box?.y,height:box?.height});
    }finally{await linked.close();}
@@ -76,6 +85,10 @@ async function measurePage(url,label,c){
   assert(anchors.length>0,'No real anchor navigation was verified');
   const lastLink=page.locator('main a[href*="apps.apple.com"]').last();await lastLink.focus();await wait(400);
   const focus=await lastLink.boundingBox();assert(focus&&focus.y<823&&focus.y+focus.height>0,'Focused CTA is outside viewport');
+  if(label==='candidate'){
+   const state=await lastLink.evaluate(n=>{const s=n.closest('section');return s?{visibility:getComputedStyle(s).contentVisibility}:null;});
+   assertSectionStates([state],'visible','focused CTA');escapeChecks.focus=1;
+  }
   stage('print-sections');
   await page.emulateMedia({media:'print'});await wait(300);
   const printHeights=[];
@@ -98,7 +111,7 @@ async function measurePage(url,label,c){
   }
   const enDeferred=await page.locator('main > section').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).contentVisibility!=='visible').length);
   // Four existing English sections also use auto; require the exact same count as baseline.
-  return {headings,hero,heights,anchors,printHeights,enHeights,enDeferred};
+  return {headings,hero,heights,anchors,printHeights,enHeights,enDeferred,escapeChecks};
  }finally{await context.close();}
 }
 try{

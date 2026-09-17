@@ -12,7 +12,7 @@ export function removeSectionRule(text){
  }
  if(open<0||end<0)throw Error('Unbalanced section-rendering rule');
  const rule=text.slice(start,end);
- if(!rule.includes('@supports (content-visibility: auto)')||!rule.includes('html[lang="ja"] main > section:not(.hero):not(.press-band)'))throw Error('Unexpected section-rendering rule');
+ if(!rule.includes('@supports (content-visibility: auto)')||!rule.includes('html[lang="ja"] main > section:not(.hero):not(.press-band) {'))throw Error('Unexpected section-rendering rule');
  return text.slice(0,start)+text.slice(end);
 }
 export function main(){
