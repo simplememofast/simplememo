@@ -6,7 +6,12 @@ export const IMMUTABLE = 'public, max-age=31536000, immutable';
 export const REVALIDATE = 'public, no-cache';
 
 export function cachePolicy(request, response) {
-  if (!['GET', 'HEAD'].includes(request.method) || response.status !== 200) return null;
+  if (!['GET', 'HEAD'].includes(request.method)) return null;
+  // Conditional responses carry cache metadata too. Pages can omit Content-Type
+  // on 304; rejecting every 304 left the old/duplicate _headers policy in place.
+  const notModified = response.status === 304
+    && (request.headers.has('if-none-match') || request.headers.has('if-modified-since'));
+  if (response.status !== 200 && !notModified) return null;
   if (request.headers.has('authorization') || request.headers.has('range')) return null;
   if (response.headers.has('set-cookie')
       || /(?:^|,)\s*(?:private|no-store)\b/i.test(response.headers.get('cache-control') || '')
@@ -15,10 +20,14 @@ export function cachePolicy(request, response) {
   if (!pathname.startsWith(PREFIX)) return null;
   const file = pathname.slice(PREFIX.length);
   const type = (response.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
-  if (file === 'manifest.json' && type === 'application/json') return REVALIDATE;
+  // Only a truly omitted type is allowed on conditional 304. A conflicting or
+  // empty Content-Type remains ineligible; 200 must always have the proper type.
+  const compatible = expected => type === expected
+    || (notModified && !response.headers.has('content-type'));
+  if (file === 'manifest.json' && compatible('application/json')) return REVALIDATE;
   // No unhashed filenames, nested paths, percent-encoded aliases or HTML.
-  if (/^[a-z0-9-]+-[0-9a-f]{12}\.woff2$/.test(file) && type === 'font/woff2') return IMMUTABLE;
-  if (/^[a-z0-9-]+-[0-9a-f]{12}\.avif$/.test(file) && type === 'image/avif') return IMMUTABLE;
+  if (/^[a-z0-9-]+-[0-9a-f]{12}\.woff2$/.test(file) && compatible('font/woff2')) return IMMUTABLE;
+  if (/^[a-z0-9-]+-[0-9a-f]{12}\.avif$/.test(file) && compatible('image/avif')) return IMMUTABLE;
   return null;
 }
 
