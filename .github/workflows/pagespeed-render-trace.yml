@@ -9,9 +9,9 @@ concurrency:
   group: pagespeed-render-trace-investigation
   cancel-in-progress: false
 jobs:
-  experiment:
+  confirmation:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,23 +19,41 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install matching measurement tools and Japanese fallback
+      - name: Install matching measurement tools and browser engines
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           npm install --prefix "$RUNNER_TEMP/tools" --no-save lighthouse@12.8.2 playwright@1.55.0
-      - name: Confirm unchanged public source inputs
+          node "$RUNNER_TEMP/tools/node_modules/playwright/cli.js" install --with-deps webkit
+      - name: Confirm unchanged source and select the smaller winning hypothesis
+        env:
+          PERF_RESULTS: ${{ runner.temp }}/layout-confirmation
         run: |
           test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
           test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
-      - name: Compare isolated mobile layout hypotheses without modifying production
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          p=Path('scripts/perf/experiment-layout.cjs'); t=p.read_text()
+          old="process.env.CONFIRM==='1'?{baseline:'',combined:wrap(defer+breaks)}"
+          assert t.count(old)==1
+          p.write_text(t.replace(old,"process.env.CONFIRM==='1'?{baseline:'',deferred:wrap(defer)}"))
+          qa=Path('scripts/perf/experiment-layout-qa.cjs')
+          qa.write_text(qa.read_text().replace("'combined'", "'deferred'"))
+          out=Path(os.environ['PERF_RESULTS']);out.mkdir(parents=True,exist_ok=True)
+          (out/'experiment-layout.cjs').write_text(p.read_text())
+          (out/'experiment-layout-qa.cjs').write_text(qa.read_text())
+          PY
+      - name: Five independent pairs followed by 48 functional scenarios
         env:
-          PERF_RESULTS: ${{ runner.temp }}/layout-experiment
-        run: LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-layout.cjs
+          PERF_RESULTS: ${{ runner.temp }}/layout-confirmation
+          CONFIRM: '1'
+          QA_SCRIPT: scripts/perf/experiment-layout-qa.cjs
+        run: NODE_PATH="$RUNNER_TEMP/tools/node_modules" LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-layout.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pagespeed-layout-experiment
-          path: ${{ runner.temp }}/layout-experiment/
+          name: pagespeed-layout-confirmation
+          path: ${{ runner.temp }}/layout-confirmation/
           retention-days: 7
           if-no-files-found: error
