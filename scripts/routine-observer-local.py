@@ -33,10 +33,44 @@ GH = '/opt/homebrew/bin/gh'
 CACHE = Path.home() / 'Library/Caches/com.simplememo.routine-observer'
 
 
+# The installed launcher is standalone: do not import from a mutable checkout.
+# Only these fixed child codes may reach its local failure log.
+CODEX_DIAGNOSTIC_CODES = frozenset({
+    'scheduler_status_unsupported', 'scheduler_configuration_unsupported',
+    'registered_automation_missing', 'history_run_missing', 'history_identity_changed',
+    'history_transcript_missing', 'history_turn_changed', 'closed_turn_changed',
+    'runtime_failure_changed', 'gate_receipt_changed', 'gate_receipt_invalid',
+    'automatic_detection_invalid', 'metadata_fields_invalid', 'observation_clock_invalid',
+    'observation_scope_changed', 'validation_failed', 'json_invalid', 'sqlite_unavailable',
+    'source_permission_denied', 'source_missing', 'source_io_error',
+    'source_shape_invalid', 'unexpected_failure',
+})
+
+
+def codex_failure_code(text):
+    if type(text) is not str or len(text) > 1024:
+        return None
+    try:
+        doc = json.loads(text)
+    except (ValueError, TypeError):
+        return None
+    if type(doc) is not dict or set(doc) != {'state', 'reason', 'diagnostic_code'}:
+        return None
+    code = doc['diagnostic_code']
+    if (doc['state'] != 'failed' or doc['reason'] != 'Codex run observation unavailable or invalid'
+            or type(code) is not str or code not in CODEX_DIAGNOSTIC_CODES):
+        return None
+    return code
+
+
 def command(argv, cwd=None, env=None):
     result = subprocess.run(argv, cwd=cwd, env=env, text=True, capture_output=True, timeout=180)
     if result.returncode:
         # Do not echo raw API responses, Keychain data, or command output.
+        if argv[:2] == ['/usr/bin/python3', CODEX_OBSERVER]:
+            code = codex_failure_code(result.stdout)
+            if code:
+                raise RuntimeError('Codex observation failed: ' + code)
         if argv[:2] == [NODE, OBSERVER]:
             status = re.search(r'Routine observation HTTP ([0-9]{3})', result.stderr)
             if status:
@@ -335,6 +369,62 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(calls), 2)
 
 
+class DiagnosticTests(unittest.TestCase):
+    def payload(self, code='scheduler_status_unsupported'):
+        return json.dumps({'state': 'failed', 'reason': 'Codex run observation unavailable or invalid',
+                           'diagnostic_code': code})
+
+    def test_fixed_codes_reach_launcher_without_stderr(self):
+        from unittest.mock import patch
+        for code in CODEX_DIAGNOSTIC_CODES:
+            result = subprocess.CompletedProcess([], 1, self.payload(code), 'private stderr token')
+            with patch('subprocess.run', return_value=result):
+                with self.assertRaisesRegex(RuntimeError, '^Codex observation failed: ' + code + '$'):
+                    command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'])
+
+    def test_malformed_private_and_oversized_output_stays_generic(self):
+        from unittest.mock import patch
+        valid = json.loads(self.payload())
+        bad = ['private-secret', '[]', 'null', self.payload('private-secret'),
+               json.dumps({**valid, 'prompt': 'private-secret'}),
+               json.dumps({**valid, 'diagnostic_code': ['private-secret']}),
+               json.dumps({**valid, 'state': 'success'}),
+               json.dumps({**valid, 'reason': 'private-secret'}),
+               json.dumps({'state': 'failed', 'reason': valid['reason']}),
+               ' ' * 1025 + self.payload()]
+        for text in bad:
+            self.assertIsNone(codex_failure_code(text))
+            result = subprocess.CompletedProcess([], 1, text, 'private stderr')
+            with patch('subprocess.run', return_value=result):
+                with self.assertRaisesRegex(RuntimeError, r'^Command failed: python3 \(exit 1\)$'):
+                    command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'])
+
+    def test_other_commands_cannot_impersonate_codex_diagnostics(self):
+        from unittest.mock import patch
+        result = subprocess.CompletedProcess([], 1, self.payload(), 'private stderr')
+        for argv in [['/usr/bin/python3', 'unrelated.py'], ['/bin/python3', CODEX_OBSERVER]]:
+            with patch('subprocess.run', return_value=result):
+                with self.assertRaisesRegex(RuntimeError, r'^Command failed: python3 \(exit 1\)$'):
+                    command(argv)
+
+    def test_success_output_is_unchanged(self):
+        from unittest.mock import patch
+        result = subprocess.CompletedProcess([], 0, '  {"written":true}\n', 'private stderr')
+        with patch('subprocess.run', return_value=result):
+            self.assertEqual(command(['/usr/bin/python3', CODEX_OBSERVER, '--apply']), '{"written":true}')
+
+    def test_child_code_vocabulary_matches_standalone_launcher(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('observer_source_fixture', Path(__file__).with_name('codex-routine-observer.py'))
+        child = importlib.util.module_from_spec(spec); spec.loader.exec_module(child)
+        base_codes = {'validation_failed', 'json_invalid', 'sqlite_unavailable', 'source_permission_denied',
+                      'source_missing', 'source_io_error', 'source_shape_invalid', 'unexpected_failure'}
+        self.assertEqual(CODEX_DIAGNOSTIC_CODES, set(child.DIAGNOSTIC_CHECKS.values()) | base_codes)
+        for message in child.DIAGNOSTIC_CHECKS:
+            self.assertEqual(codex_failure_code(json.dumps(child.failure_payload(ValueError(message)))),
+                             child.DIAGNOSTIC_CHECKS[message])
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
@@ -350,5 +440,6 @@ if __name__ == '__main__':
         except Exception as error:
             # Exception details from Keychain/JSON parsing may contain private data.
             print(json.dumps({'state': 'failed', 'error_type': type(error).__name__,
-                              'reason': str(error) if isinstance(error, RuntimeError) else 'Observation unavailable'}))
+                              'reason': str(error) if isinstance(error, RuntimeError) else 'Observation unavailable',
+                              'observed_at': dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')}))
             raise SystemExit(1)
