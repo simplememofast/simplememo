@@ -1,0 +1,43 @@
+name: Homepage Rendering Study (isolated)
+on:
+  push:
+    branches: [claude/pagespeed-render-study-20260917]
+    paths:
+      - 'scripts/perf/render_study.cjs'
+      - '.github/workflows/render-study.yml'
+permissions:
+  contents: read
+concurrency:
+  group: isolated-render-study
+  cancel-in-progress: false
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare reproducible source and measurement tools
+        run: |
+          mkdir -p "$RUNNER_TEMP/render-results"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/render-results/study-source.tar.gz" HEAD
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save lighthouse@12.8.2 playwright@1.55.0
+      - name: Compare five runs per variant and record three public traces
+        env:
+          PERF_RESULTS: ${{ runner.temp }}/render-results
+          NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
+        run: node scripts/perf/render_study.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: homepage-render-study
+          path: ${{ runner.temp }}/render-results/
+          retention-days: 3
+          if-no-files-found: error
