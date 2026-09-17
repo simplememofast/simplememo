@@ -1,0 +1,67 @@
+name: Homepage Asset Cache Verification
+on:
+  pull_request:
+    paths:
+      - 'functions/assets/home-perf/**'
+      - 'scripts/perf/cache_headers*'
+      - 'assets/home-perf/manifest.json'
+      - '.github/workflows/home-perf-cache.yml'
+  push:
+    branches: [main, claude/pagespeed-asset-cache-20260917]
+    paths:
+      - 'functions/assets/home-perf/**'
+      - 'scripts/perf/cache_headers*'
+      - 'assets/home-perf/manifest.json'
+      - '.github/workflows/home-perf-cache.yml'
+permissions:
+  contents: read
+  checks: read
+concurrency:
+  group: asset-cache-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  cache-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scope privacy response and inventory regressions
+        run: node --test scripts/perf/cache_headers.test.mjs
+      - name: Resolve the exact successful deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = context.payload.pull_request?.head.sha || context.sha;
+            const production = context.eventName === 'push' && context.ref === 'refs/heads/main';
+            for (let i = 0; i < 30; i++) {
+              const {data} = await github.rest.checks.listForRef({...context.repo, ref: sha, per_page: 100, filter: 'all'});
+              const run = data.check_runs.find(r => r.name === 'Cloudflare Pages' && r.head_sha === sha && r.conclusion === 'success');
+              const url = run?.output?.summary?.match(/https:\/\/[a-z0-9-]+\.simplememo-596\.pages\.dev/);
+              if (url) { core.setOutput('origin', production ? 'https://simplememofast.com' : url[0]); return; }
+              await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+            throw new Error('No successful exact-SHA Cloudflare deployment; do not test an old revision.');
+      - name: Install pinned browser client
+        run: |
+          mkdir -p "$RUNNER_TEMP/cache-results"
+          npm install --prefix "$RUNNER_TEMP/perf-tools" --no-save playwright@1.55.0
+      - name: Verify real response bodies and cache policies
+        env:
+          NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
+          PERF_RESULTS: ${{ runner.temp }}/cache-results
+          PERF_ORIGIN: ${{ steps.deployment.outputs.origin }}
+        run: node scripts/perf/cache_headers.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: homepage-asset-cache-proof
+          path: ${{ runner.temp }}/cache-results/
+          retention-days: 14
+          if-no-files-found: warn
