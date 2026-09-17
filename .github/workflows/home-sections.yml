@@ -5,7 +5,7 @@ on:
       - 'index.html'
       - 'en/index.html'
       - 'assets/css/**'
-      - 'scripts/perf/sections_browser.mjs'
+      - 'scripts/perf/section*.mjs'
       - '.github/workflows/home-sections.yml'
   push:
     branches: [main]
@@ -13,7 +13,7 @@ on:
       - 'index.html'
       - 'en/index.html'
       - 'assets/css/**'
-      - 'scripts/perf/sections_browser.mjs'
+      - 'scripts/perf/section*.mjs'
       - '.github/workflows/home-sections.yml'
 permissions:
   contents: read
@@ -33,11 +33,6 @@ jobs:
         with:
           path: candidate
           persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.base.sha || github.event.before }}
-          path: baseline
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -45,12 +40,16 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/tools" --no-save playwright@1.55.0
           "$RUNNER_TEMP/tools/node_modules/.bin/playwright" install --with-deps ${{ matrix.browser }}
+      - name: Prepare identical-content rendering control
+        run: |
+          node --test candidate/scripts/perf/section_control.test.mjs
+          node candidate/scripts/perf/section_control.mjs candidate "$RUNNER_TEMP/section-control"
       - name: Compare native screen, anchor, focus and print behavior
         env:
           QA_BROWSER: ${{ matrix.browser }}
           QA_RESULTS: ${{ runner.temp }}/section-results
           NODE_PATH: ${{ runner.temp }}/tools/node_modules
-        run: node candidate/scripts/perf/sections_browser.mjs baseline candidate
+        run: node candidate/scripts/perf/sections_browser.mjs "$RUNNER_TEMP/section-control" candidate
       - uses: actions/upload-artifact@v4
         if: always()
         with:

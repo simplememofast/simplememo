@@ -20,6 +20,7 @@ async function serve(root){
   if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');
   let data=fs.readFileSync(file);const type=types[path.extname(file)]||'application/octet-stream';
   res.setHeader('Content-Type',type);
+  res.setHeader('Cache-Control',path.extname(file)==='.html'?'no-store':'public, max-age=3600');
   if(/text\/|json|svg/.test(type)&&/gzip/.test(req.headers['accept-encoding']||'')){data=zlib.gzipSync(data);res.setHeader('Content-Encoding','gzip');}
   res.setHeader('Content-Length',data.length);res.end(data);
  }catch{res.writeHead(404);res.end();}});
@@ -57,8 +58,12 @@ async function measurePage(url,label,c){
   for(const hash of hashes){
    const id=decodeURIComponent(hash.slice(1));const target=page.locator('[id='+JSON.stringify(id)+']');
    if(await target.count()!==1)continue;
-   await page.goto(url+'/'+hash,{waitUntil:'load'});await page.reload({waitUntil:'load'});await wait(600);
-   const box=await target.boundingBox();anchors.push({hash,y:box?.y,height:box?.height});
+   const linked=await context.newPage();
+   try{
+    await linked.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(600);
+    const box=await linked.locator('[id='+JSON.stringify(id)+']').boundingBox();
+    anchors.push({hash,y:box?.y,height:box?.height});
+   }finally{await linked.close();}
   }
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(300);
   assert(anchors.length>0,'No real anchor navigation was verified');
