@@ -9,9 +9,9 @@ concurrency:
   group: pagespeed-render-trace-investigation
   cancel-in-progress: false
 jobs:
-  image-visibility:
+  functional-verification:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,8 +25,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           npm install --prefix "$RUNNER_TEMP/tools" --no-save playwright@1.55.0
           node "$RUNNER_TEMP/tools/node_modules/playwright/cli.js" install --with-deps webkit
-      - name: Prepare isolated comparison server; no speed-score retries
+      - name: Retain the same CSS hypothesis and reuse the completed performance experiment
         run: |
+          test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
+          test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
           python3 - <<'PY'
           from pathlib import Path
           p=Path('scripts/perf/experiment-layout.cjs');t=p.read_text()
@@ -35,20 +37,25 @@ jobs:
           t=t.replace(old,"process.env.CONFIRM==='1'?{baseline:'',deferred:wrap(defer)}")
           old='for(let run=1;run<=runs;run++){'
           assert t.count(old)==1
-          t=t.replace(old,"const {run}=require(path.resolve(process.env.QA_SCRIPT));await run({ports:Object.fromEntries(keys.map((v,i)=>[v,18765+i])),output,root});return;\n for(let run=1;run<=runs;run++){")
+          t=t.replace(old,"protocol.phase='Functional verification only; performance proof is artifact10478512577';protocol.runsPerVariant=0;fs.writeFileSync(path.join(output,'protocol.json'),JSON.stringify(protocol,null,2));const {run}=require(path.resolve(process.env.QA_SCRIPT));await run({ports:Object.fromEntries(keys.map((v,i)=>[v,18765+i])),output,root});return;\n for(let run=1;run<=runs;run++){")
           p.write_text(t)
           PY
-      - name: Center every image and record actual visibility and loading states
+          node --check scripts/perf/experiment-layout.cjs
+          node --check scripts/perf/experiment-layout-verified-qa.cjs
+      - name: Compare all 48 browser scenarios including image rectangles, scroll and print
         env:
-          PERF_RESULTS: ${{ runner.temp }}/image-visibility
+          PERF_RESULTS: ${{ runner.temp }}/layout-verified-functional
           CONFIRM: '1'
-          QA_SCRIPT: scripts/perf/experiment-image-visibility.cjs
+          QA_SCRIPT: scripts/perf/experiment-layout-verified-qa.cjs
           LIGHTHOUSE_CLI: unused-functional-only
-        run: NODE_PATH="$RUNNER_TEMP/tools/node_modules" node scripts/perf/experiment-layout.cjs
+        run: |
+          mkdir -p "$PERF_RESULTS"
+          cp scripts/perf/experiment-layout.cjs scripts/perf/experiment-layout-verified-qa.cjs "$PERF_RESULTS/"
+          NODE_PATH="$RUNNER_TEMP/tools/node_modules" node scripts/perf/experiment-layout.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pagespeed-image-visibility
-          path: ${{ runner.temp }}/image-visibility/
+          name: pagespeed-layout-verified-functional
+          path: ${{ runner.temp }}/layout-verified-functional/
           retention-days: 7
           if-no-files-found: error
