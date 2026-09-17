@@ -225,6 +225,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
+          set -euo pipefail
           MODE=--apply
           [ "${{ inputs.dry_run }}" = "true" ] && MODE=""
           node scripts/autopilot-act.mjs $MODE \
