@@ -28,3 +28,15 @@ test('missing, duplicate and incomplete control rules fail closed',()=>{
  assert.throws(()=>removeSectionRule(css.slice(0,end+1)+css.slice(end+2)),/Unbalanced/);
  assert.throws(()=>removeSectionRule(css.replace('html[lang="ja"]','html[lang="en"]')),/Unexpected/);
 });
+
+test('native fragment guard preserves preceding geometry without changing print or no-target policy',()=>{
+ const css=fs.readFileSync(root+'assets/css/home-hero.css','utf8');
+ const selector='html[lang="ja"]:has(:target) main > section:not(.hero):not(.press-band)';
+ assert.equal(css.split(selector).length,2);
+ assert(css.includes('@supports selector(:has(:target))'));
+ assert(!removeSectionRule(css).includes(selector),'The escape must remain inside the existing screen-only rule');
+ assert(css.includes('html[lang="ja"] main > section:not(.hero):not(.press-band):focus-within,'));
+ assert(css.includes('html[lang="ja"] main > section:not(.hero):not(.press-band):target {'));
+ assert(!css.includes('html[lang="ja"] main > section:target {'),'A lower-specificity escape cannot override the deferred selector');
+ for(const file of ['index.html','en/index.html'])assert.equal(fs.readFileSync(root+file,'utf8').split(selector).length,2);
+});

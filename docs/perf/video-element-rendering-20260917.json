@@ -232,5 +232,176 @@
         "sha256": "f83d6ce0b02898e21969e3cf6cae03ccf31fcdc65b20eb6e208e2c9e823f709e"
       }
     ]
+  },
+  "recordedAt": "2026-09-17T11:27:58.916Z",
+  "purpose": "Historical evidence; this JSON is not a deployment flag. The current rollout decision belongs to PR1440.",
+  "preFragmentConfirmation": {
+    "head": "c221e3cd69276b4dbb8b5da6f54de4a4414d84ac",
+    "run": 35214689027,
+    "artifact": 10494059529,
+    "sha256": "b0ae38cbf2eb490381006bd9f3ba685c27bbf03276de34f65c246a27f8fe81e4",
+    "accepted": true,
+    "layoutMedianMs": {
+      "baseline": 482.636,
+      "candidate": 418.26
+    },
+    "lcpMedianMs": {
+      "baseline": 2477.5115,
+      "candidate": 2478.4702
+    },
+    "scope": "Before the fragment-safety correction. This is not final-source or production evidence."
+  },
+  "fragmentSafety": {
+    "finding": "Existing section focus/target escapes had specificity 0,2,3 below deferred selector 0,3,3. They could not override it. Real-fragment navigation also needs preceding section geometry resolved.",
+    "originalFailure": {
+      "run": 35214611661,
+      "artifact": 10493139100,
+      "sha256": "1e76de02bc281d77428cbee2255cf012267d0aa127d8152b257ebcbc762be38f",
+      "webkitWidth": 412,
+      "baselineY": 218,
+      "candidateY": 0
+    },
+    "localObservation": "Before correction, the baseline and candidate both reproduced y=218 at 412px with fonts loaded at 0/400/1000/2000ms after networkidle. This is not proof the new video CSS alone caused the existing instability.",
+    "correction": "Retain the same section filters in focus/target escape selectors. Add a support-gated real-target escape for all matching preceding sections. No fragment means the normal deferred policy is retained; print remains unaffected.",
+    "localWebkit": [
+      {
+        "engine": "webkit",
+        "width": 320,
+        "js": true,
+        "playback": true,
+        "focus": true,
+        "print": true,
+        "anchors": 1,
+        "status": "success"
+      },
+      {
+        "engine": "webkit",
+        "width": 412,
+        "js": true,
+        "playback": true,
+        "focus": true,
+        "print": true,
+        "anchors": 1,
+        "status": "success"
+      },
+      {
+        "engine": "webkit",
+        "width": 768,
+        "js": true,
+        "playback": true,
+        "focus": true,
+        "print": true,
+        "anchors": 1,
+        "status": "success"
+      },
+      {
+        "engine": "webkit",
+        "width": 1440,
+        "js": true,
+        "playback": true,
+        "focus": true,
+        "print": true,
+        "anchors": 1,
+        "status": "success"
+      },
+      {
+        "engine": "webkit",
+        "width": 390,
+        "js": false,
+        "playback": true,
+        "focus": true,
+        "print": true,
+        "anchors": 1,
+        "status": "success"
+      }
+    ],
+    "localLandings": [
+      {
+        "file": "webkit-1440-true-comparison.json",
+        "baseline": [
+          {
+            "hash": "#features",
+            "y": -0.421875,
+            "height": 1128
+          }
+        ],
+        "candidate": [
+          {
+            "hash": "#features",
+            "y": -0.421875,
+            "height": 1128
+          }
+        ]
+      },
+      {
+        "file": "webkit-320-true-comparison.json",
+        "baseline": [
+          {
+            "hash": "#features",
+            "y": 0.0625,
+            "height": 2029
+          }
+        ],
+        "candidate": [
+          {
+            "hash": "#features",
+            "y": 0.0625,
+            "height": 2029
+          }
+        ]
+      },
+      {
+        "file": "webkit-390-false-comparison.json",
+        "baseline": [
+          {
+            "hash": "#features",
+            "y": -0.375,
+            "height": 1929
+          }
+        ],
+        "candidate": [
+          {
+            "hash": "#features",
+            "y": -0.375,
+            "height": 1929
+          }
+        ]
+      },
+      {
+        "file": "webkit-412-true-comparison.json",
+        "baseline": [
+          {
+            "hash": "#features",
+            "y": -0.234375,
+            "height": 1929
+          }
+        ],
+        "candidate": [
+          {
+            "hash": "#features",
+            "y": -0.234375,
+            "height": 1929
+          }
+        ]
+      },
+      {
+        "file": "webkit-768-true-comparison.json",
+        "baseline": [
+          {
+            "hash": "#features",
+            "y": 0.09375,
+            "height": 1179
+          }
+        ],
+        "candidate": [
+          {
+            "hash": "#features",
+            "y": 0.09375,
+            "height": 1179
+          }
+        ]
+      }
+    ],
+    "guards": "Two-pixel native fragment difference remains strict. Added requirement that preceding sections compute visible on a real fragment. Synthetic suite17/17. An initial low-specificity guard failed; it was fixed, not waived. The control parser now matches the exact base-selector opening so a broken base cannot masquerade as an exception prefix."
   }
 }
