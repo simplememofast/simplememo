@@ -6,10 +6,23 @@ const { execFileSync } = require('node:child_process');
 const ROOT = path.resolve(__dirname, '../..');
 const ORIGIN = 'https://simplememofast.com';
 
+function videoBlocks(html) {
+  const starts = html.match(/<video\b[^>]*>/g) || [];
+  const ends = html.match(/<\/video\s*>/g) || [];
+  const blocks = html.match(/<video\b[^>]*>[\s\S]*?<\/video\s*>/g) || [];
+  return starts.length === blocks.length && ends.length === blocks.length ? blocks : null;
+}
+
 function pageMatches(html, expected) {
   const styles = [...expected.matchAll(/<style data-home-perf="(?:base|hero)">([\s\S]*?)<\/style>/g)].map(m => m[1]);
   const sources = expected.match(/<source data-home-perf="image"[^>]*>/g) || [];
-  return styles.length === 2 && sources.length > 0
+  // The stylesheet/asset subset alone cannot distinguish a poster-only release
+  // or rollback. Compare original native markup, including poster and sources.
+  const actualVideo = videoBlocks(html), expectedVideo = videoBlocks(expected);
+  return actualVideo !== null && expectedVideo !== null
+    && actualVideo.length === expectedVideo.length
+    && expectedVideo.every((video, i) => video === actualVideo[i])
+    && styles.length === 2 && sources.length > 0
     && styles.every(style => html.includes(style)) && sources.every(source => html.includes(source))
     && html.indexOf('id="hero-title"') > 0
     && html.indexOf('id="hero-title"') < html.indexOf('<picture class="hero__photograph">');
