@@ -929,6 +929,12 @@ body{overflow-x:clip}
   .hero__footer { padding-inline: 20px; }
 }
 
+/* Skip offscreen section layout on Japanese mobile screens only.
+ * Keep the hero eager; retain remembered sizes; desktop and print are unchanged. */
+@media screen and (max-width:1023px){
+  .home-photo:lang(ja) main>section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 600px}
+}
+
 </style>
 </head>
 <body class="home-photo">
