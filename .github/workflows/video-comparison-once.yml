@@ -1,0 +1,40 @@
+name: Video Rendering Exact-Source Comparison
+on:
+  push:
+    branches: [claude/pagespeed-video-comparison-20260917]
+    paths:
+      - 'scripts/perf/video_compare_once.mjs'
+      - '.github/workflows/video-comparison-once.yml'
+permissions:
+  contents: read
+concurrency:
+  group: video-comparison-20260917
+  cancel-in-progress: false
+jobs:
+  comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 68b1d0ccd1a09ffb9b88b7cc67973ebdfe92b8ed
+          path: site
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: experiment
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install the pinned existing Lighthouse version
+        run: npm install --prefix "$RUNNER_TEMP/compare-tools" --no-save lighthouse@12.8.2
+      - name: Five independent alternating pairs, retaining every sample
+        run: COMPARE_TOOLS="$RUNNER_TEMP/compare-tools" node experiment/scripts/perf/video_compare_once.mjs site "$RUNNER_TEMP/compare-results"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-rendering-final-comparison
+          path: ${{ runner.temp }}/compare-results/
+          retention-days: 14
+          if-no-files-found: error
