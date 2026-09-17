@@ -38,19 +38,16 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (context.eventName === 'push' && context.ref === 'refs/heads/main') {
-              core.setOutput('origin', 'https://simplememofast.com');
-              return;
-            }
             const sha = context.payload.pull_request?.head.sha || context.sha;
+            const production = context.eventName === 'push' && context.ref === 'refs/heads/main';
             for (let i = 0; i < 30; i++) {
               const {data} = await github.rest.checks.listForRef({...context.repo, ref: sha, per_page: 100, filter: 'all'});
               const run = data.check_runs.find(r => r.name === 'Cloudflare Pages' && r.head_sha === sha && r.conclusion === 'success');
               const url = run?.output?.summary?.match(/https:\/\/[a-z0-9-]+\.simplememo-596\.pages\.dev/);
-              if (url) { core.setOutput('origin', url[0]); return; }
+              if (url) { core.setOutput('origin', production ? 'https://simplememofast.com' : url[0]); return; }
               await new Promise(resolve => setTimeout(resolve, 5000));
             }
-            throw new Error('No successful exact-SHA Cloudflare deployment; do not test an old preview.');
+            throw new Error('No successful exact-SHA Cloudflare deployment; do not test an old revision.');
       - name: Install pinned browser client
         run: |
           mkdir -p "$RUNNER_TEMP/cache-results"
@@ -60,7 +57,6 @@ jobs:
           NODE_PATH: ${{ runner.temp }}/perf-tools/node_modules
           PERF_RESULTS: ${{ runner.temp }}/cache-results
           PERF_ORIGIN: ${{ steps.deployment.outputs.origin }}
-          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: node scripts/perf/cache_headers.cjs
       - uses: actions/upload-artifact@v4
         if: always()
