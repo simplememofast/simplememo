@@ -32,10 +32,13 @@ const browser=await pw[engine].launch(options),results=[];
 const cases=[{width:320,js:true},{width:412,js:true},{width:768,js:true},{width:1440,js:true},{width:390,js:false}];
 async function measurePage(url,label,c){
  const context=await browser.newContext({viewport:{width:c.width,height:823},javaScriptEnabled:c.js,reducedMotion:'reduce'});
- const page=await context.newPage();
+ let page=await context.newPage();
  try{
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
-  await page.reload({waitUntil:'networkidle'});await wait(500);
+  for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(150);}
+  await page.evaluate(()=>document.fonts.ready);
+  await page.close();page=await context.newPage();
+  await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
   const headings=await page.locator('h1,h2,h3').allTextContents();
   const hero=await page.locator('.hero').boundingBox();
   await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-top.png`)});
@@ -46,7 +49,10 @@ async function measurePage(url,label,c){
    const box=await section.boundingBox();assert(box&&box.height>0,'Empty section '+i);heights.push(box.height);
    if(i===Math.floor(count/2)||i===count-1)await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-section-${i}.png`)});
   }
-  const hashes=await page.locator('a[href^="#"]').evaluateAll(nodes=>[...new Set(nodes.map(n=>n.getAttribute('href')).filter(v=>v&&v.length>1))]);
+  const linkHashes=await page.locator('a[href^="#"]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('href')).filter(v=>v&&v.length>1));
+  const idHashes=await page.locator('main [id]').evaluateAll(nodes=>nodes.map(n=>'#'+encodeURIComponent(n.id)));
+  const hashes=[...new Set([...linkHashes,...idHashes.slice(0,4),...idHashes.slice(-4)])];
+  assert(hashes.length>0,'No native fragment targets were exercised');
   const anchors=[];
   for(const hash of hashes){
    const id=decodeURIComponent(hash.slice(1));const target=page.locator('[id='+JSON.stringify(id)+']');
@@ -55,19 +61,30 @@ async function measurePage(url,label,c){
    const box=await target.boundingBox();anchors.push({hash,y:box?.y,height:box?.height});
   }
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(300);
+  assert(anchors.length>0,'No real anchor navigation was verified');
   const lastLink=page.locator('main a[href*="apps.apple.com"]').last();await lastLink.focus();await wait(400);
   const focus=await lastLink.boundingBox();assert(focus&&focus.y<823&&focus.y+focus.height>0,'Focused CTA is outside viewport');
   await page.emulateMedia({media:'print'});await wait(300);
-  const printHeights=await page.locator('main > section').evaluateAll(nodes=>nodes.map(n=>({height:n.getBoundingClientRect().height,visibility:getComputedStyle(n).contentVisibility})));
+  const printHeights=[];
+  // Media emulation alone can retain offscreen placeholders; inspect each actually rendered print section.
+  for(const section of await page.locator('main > section').all()){
+   await section.scrollIntoViewIfNeeded();await wait(100);
+   printHeights.push(await section.evaluate(n=>({height:n.getBoundingClientRect().height,visibility:getComputedStyle(n).contentVisibility})));
+  }
   // Existing shared CSS already uses auto on four sections; compare actual print styles and geometry against the baseline below.
   await page.emulateMedia({media:'screen'});
   await page.goto(url+'/en/',{waitUntil:'networkidle'});await wait(300);
-  await page.reload({waitUntil:'networkidle'});await wait(300);
-  for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(80);}
-  const enHeight=await page.locator('main').boundingBox();
+  for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(150);}
+  await page.evaluate(()=>document.fonts.ready);
+  await page.reload({waitUntil:'networkidle'});await wait(500);
+  const enHeights=[];
+  for(const section of await page.locator('main > section').all()){
+   await section.scrollIntoViewIfNeeded();await wait(200);
+   const box=await section.boundingBox();assert(box&&box.height>0,'Empty English section');enHeights.push(box.height);
+  }
   const enDeferred=await page.locator('main > section').evaluateAll(nodes=>nodes.filter(n=>getComputedStyle(n).contentVisibility!=='visible').length);
   // Four existing English sections also use auto; require the exact same count as baseline.
-  return {headings,hero,heights,anchors,printHeights,enHeight,enDeferred};
+  return {headings,hero,heights,anchors,printHeights,enHeights,enDeferred};
  }finally{await context.close();}
 }
 try{
@@ -82,7 +99,8 @@ try{
   assert.equal(b.anchors.length,a.anchors.length,'Anchor count changed');
   a.anchors.forEach((anchor,i)=>{assert.equal(b.anchors[i].hash,anchor.hash);assert(Math.abs(anchor.y-b.anchors[i].y)<2,`Anchor ${anchor.hash} moved: ${anchor.y} vs ${b.anchors[i].y}`);});
   a.printHeights.forEach((n,i)=>{assert.equal(b.printHeights[i].visibility,n.visibility,'Print style changed '+i);assert(Math.abs(n.height-b.printHeights[i].height)<1,'Print geometry changed '+i);});
-  assert.deepEqual(b.enHeight,a.enHeight,'English geometry changed');assert.equal(b.enDeferred,a.enDeferred,'English rendering policy changed');
+  assert.equal(b.enHeights.length,a.enHeights.length,'English section inventory changed');
+  a.enHeights.forEach((h,i)=>assert(Math.abs(h-b.enHeights[i])<1,'English rendered section geometry changed '+i));assert.equal(b.enDeferred,a.enDeferred,'English rendering policy changed');
   const result={browser:engine,width:c.width,javascript:c.js,sections:a.heights.length,anchors:a.anchors.length,status:'success'};
   results.push(result);console.log(JSON.stringify(result));
  }

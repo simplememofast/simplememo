@@ -30,6 +30,7 @@ test('lazy-image scrolling uses runner timers and a bounded height snapshot', as
   const positions = [], waits = [];
   let reads = 0;
   const page = {
+    locator() { return { async count() { return 0; } }; },
     async evaluate(fn, position) {
       assert.equal(fn.constructor.name, 'Function', 'No in-page async function can wait on disabled page timers');
       if (position !== undefined) { positions.push(position); return; }
@@ -42,4 +43,44 @@ test('lazy-image scrolling uses runner timers and a bounded height snapshot', as
   assert.deepEqual(positions, [0, 700, 1400]);
   assert.deepEqual(waits, [50, 50, 50]);
   assert.equal(reads, 2);
+});
+
+test('contained sections are visited before the single height snapshot', async () => {
+  const visited = [], positions = [], waits = [];
+  let reads = 0, inventoryReads = 0;
+  const page = {
+    locator(selector) {
+      assert.equal(selector, 'main > section');
+      return { async count() { inventoryReads++; return 2; },
+        nth(index) { return { async scrollIntoViewIfNeeded(options) {
+          assert.equal(options.timeout, 5000); visited.push(index);
+        } }; } };
+    },
+    async evaluate(fn, position) {
+      assert.equal(fn.constructor.name, 'Function');
+      if (position !== undefined) { positions.push(position); return; }
+      assert.deepEqual(visited, [0, 1], 'Do not measure placeholder height first');
+      reads++; return reads === 1 ? 2800 : reads >= 3;
+    },
+    async waitForTimeout(ms) { waits.push(ms); },
+  };
+  await loadLazyImages(page);
+  assert.equal(inventoryReads, 1, 'DOM inventory must be bounded');
+  assert.deepEqual(positions, [0, 700, 1400, 2100]);
+  assert.deepEqual(waits, [50, 50, 50, 50, 50, 50, 100]);
+  assert.equal(reads, 3, 'An unfinished image must be polled, not accepted');
+});
+
+test('a genuinely broken image still fails after contained-section traversal', async (t) => {
+  let clock = 0, reads = 0;
+  t.mock.method(Date, 'now', () => (clock++ === 0 ? 0 : 11000));
+  const page = {
+    locator() { return { async count() { return 0; } }; },
+    async evaluate(fn, position) {
+      if (position !== undefined) return;
+      reads++; return reads === 1 ? 700 : false;
+    },
+    async waitForTimeout() {},
+  };
+  await assert.rejects(loadLazyImages(page), /Visible same-origin images did not load/);
 });
