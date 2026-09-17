@@ -14,7 +14,7 @@ test('all current generated assets have real content-hash filenames and qualify'
   for (const [file, expected] of Object.entries(manifest.assets)) {
     const hash = createHash('sha256').update(fs.readFileSync(new URL(file, ROOT))).digest('hex');
     assert.equal(hash, expected.sha256); assert.ok(file.includes('-' + hash.slice(0, 12) + '.'));
-    const contentType = file.endsWith('.woff2') ? 'font/woff2' : 'image/avif';
+    const contentType = file.endsWith('.woff2') ? 'font/woff2' : file.endsWith('.webp') ? 'image/webp' : 'image/avif';
     assert.equal(cachePolicy(new Request('https://simplememofast.com/' + file), response({ 'content-type': contentType })), IMMUTABLE);
   }
 });
