@@ -1,4 +1,4 @@
-name: Video Rendering Exact-Source Comparison
+name: Video Element Exact-Source Confirmation
 on:
   push:
     branches: [claude/pagespeed-video-comparison-20260917]
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 68b1d0ccd1a09ffb9b88b7cc67973ebdfe92b8ed
+          ref: c221e3cd69276b4dbb8b5da6f54de4a4414d84ac
           path: site
           persist-credentials: false
       - uses: actions/checkout@v4
@@ -28,7 +28,10 @@ jobs:
         with:
           node-version: '22'
       - name: Install the pinned existing Lighthouse version
-        run: npm install --prefix "$RUNNER_TEMP/compare-tools" --no-save lighthouse@12.8.2
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          npm install --prefix "$RUNNER_TEMP/compare-tools" --no-save lighthouse@12.8.2
       - name: Five independent alternating pairs, retaining every sample
         run: COMPARE_TOOLS="$RUNNER_TEMP/compare-tools" node experiment/scripts/perf/video_compare_once.mjs site "$RUNNER_TEMP/compare-results"
       - uses: actions/upload-artifact@v4
