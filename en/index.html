@@ -910,9 +910,15 @@ body{overflow-x:clip}
       content-visibility: auto;
       contain-intrinsic-block-size: auto 600px;
     }
-    html[lang="ja"] main > section:focus-within,
-    html[lang="ja"] main > section:target {
+    html[lang="ja"] main > section:not(.hero):not(.press-band):focus-within,
+    html[lang="ja"] main > section:not(.hero):not(.press-band):target {
       content-visibility: visible;
+    }
+    /* Resolve preceding section geometry before native fragment navigation. */
+    @supports selector(:has(:target)) {
+      html[lang="ja"]:has(:target) main > section:not(.hero):not(.press-band) {
+        content-visibility: visible;
+      }
     }
   }
 }
