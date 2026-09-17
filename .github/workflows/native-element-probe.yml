@@ -1,0 +1,103 @@
+name: Native Video Element Probe
+on:
+  push:
+    branches: [claude/pagespeed-native-element-probe-20260917]
+    paths: [.github/workflows/native-element-probe.yml]
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: d3df4b387c855aa901ed0f609e3d488413f4e9de
+          persist-credentials: false
+          path: source
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install unchanged measurement tools and Japanese fallback
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          npm install --prefix "$RUNNER_TEMP/tools" --no-save lighthouse@12.8.2
+      - name: Five alternating pairs; do not retry to select scores
+        env:
+          SOURCE: ${{ github.workspace }}/source
+          OUT: ${{ runner.temp }}/probe
+          TOOLS: ${{ runner.temp }}/tools
+        run: |
+          mkdir -p "$OUT"
+          cat > "$RUNNER_TEMP/probe.mjs" <<'JS'
+          import fs from 'node:fs';
+          import http from 'node:http';
+          import path from 'node:path';
+          import zlib from 'node:zlib';
+          import {spawn} from 'node:child_process';
+          import {createHash} from 'node:crypto';
+          const {SOURCE:root,OUT:out,TOOLS:tools}=process.env;
+          const css=`@supports (content-visibility: auto) and selector(:has(:target)) {
+            @media screen {
+              html[lang="ja"] main > figure.lp-video > video {
+                content-visibility: auto;
+                contain-intrinsic-size: 1280px 720px;
+              }
+              html[lang="ja"] main > figure.lp-video:focus-within > video,
+              html[lang="ja"]:has(:target) main > figure.lp-video > video {
+                content-visibility: visible;
+              }
+            }
+          }`;
+          const source=fs.readFileSync(path.join(root,'index.html'),'utf8');
+          const sha=data=>createHash('sha256').update(data).digest('hex');
+          const protocol={source:'d3df4b387c855aa901ed0f609e3d488413f4e9de',sourceHtmlSha256:sha(source),css,cssSha256:sha(css),pairs:5,lighthouse:'12.8.2',order:'baseline/candidate then candidate/baseline alternately',acceptance:{layoutReductionAtLeast:0.10,lcpRegressionMaxMs:100,scoreNotLower:true,clsMax:0.01,otherCategories100:true},scope:'New element-only hypothesis, not a retry of failed figure containment. Same runner, fresh browsers, simulated mobile, no request suppression. Localhost naturally has no production-host GA. Not production, CrUX, or an eliminated-stalls claim.'};
+          fs.writeFileSync(out+'/protocol.json',JSON.stringify(protocol,null,2));
+          const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.woff2':'font/woff2','.webp':'image/webp','.avif':'image/avif','.jpg':'image/jpeg','.png':'image/png','.mp4':'video/mp4'};
+          const servers=[];
+          for(const [index,variant] of ['baseline','candidate'].entries()){
+            const server=http.createServer((req,res)=>{try{
+              let file=path.resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
+              if(!file.startsWith(root+path.sep)&&file!==root)throw Error('outside root');
+              if(fs.statSync(file).isDirectory())file=path.join(file,'index.html');
+              let body=fs.readFileSync(file),type=types[path.extname(file)]||'application/octet-stream';
+              if(variant==='candidate'&&file===path.join(root,'index.html'))body=Buffer.from(source.replace('</head>','<style>'+css+'</style></head>'));
+              res.setHeader('Content-Type',type);res.setHeader('Cache-Control','no-store');
+              if(/text\/|json|svg/.test(type)&&/gzip/.test(req.headers['accept-encoding']||'')){body=zlib.gzipSync(body);res.setHeader('Content-Encoding','gzip');}
+              res.setHeader('Content-Length',body.length);res.end(body);
+            }catch{res.writeHead(404);res.end();}});
+            await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(18765+index,'127.0.0.1',resolve);});servers.push(server);
+          }
+          const rows=[];
+          const median=v=>{v=[...v].sort((a,b)=>a-b);return v[Math.floor(v.length/2)];};
+          try{
+            for(let run=1;run<=5;run++)for(const variant of(run%2?['baseline','candidate']:['candidate','baseline'])){
+              const label=variant+'-'+run,port=variant==='baseline'?18765:18766,log=fs.openSync(out+'/'+label+'.log','w');
+              await new Promise((resolve,reject)=>{
+                const child=spawn(process.execPath,[tools+'/node_modules/lighthouse/cli/index.js','http://127.0.0.1:'+port+'/', '--only-categories=performance,accessibility,best-practices,seo','--output=json','--output-path='+out+'/'+label+'.json','--save-assets','--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage','--quiet'],{stdio:['ignore',log,log],env:{...process.env,CHROME_PATH:'/usr/bin/google-chrome'}});
+                const timer=setTimeout(()=>{child.kill('SIGTERM');reject(Error('measurement timeout'));},90000);
+                child.on('error',reject);child.on('exit',code=>{clearTimeout(timer);fs.closeSync(log);code===0?resolve():reject(Error(label+' exit '+code));});
+              });
+              const raw=fs.readFileSync(out+'/'+label+'.json'),r=JSON.parse(raw),a=r.audits;
+              if(r.runtimeError||r.lighthouseVersion!=='12.8.2'||r.configSettings.blockedUrlPatterns?.length||r.configSettings.formFactor!=='mobile')throw Error('Invalid measurement');
+              const layout=a['mainthread-work-breakdown'].details.items.find(x=>x.group==='styleLayout').duration;
+              const row={variant,run,at:r.fetchTime,score:r.categories.performance.score*100,lcp:a['largest-contentful-paint'].numericValue,tbt:a['total-blocking-time'].numericValue,cls:a['cumulative-layout-shift'].numericValue,layout,bytes:a['total-byte-weight'].numericValue,categories:Object.fromEntries(Object.entries(r.categories).map(([k,v])=>[k,v.score])),sha256:sha(raw)};
+              rows.push(row);fs.writeFileSync(out+'/rows.json',JSON.stringify(rows,null,2));console.log(JSON.stringify(row));
+            }
+            const groups=Object.fromEntries(['baseline','candidate'].map(variant=>[variant,Object.fromEntries(['score','lcp','layout','tbt','cls','bytes'].map(k=>[k,median(rows.filter(r=>r.variant===variant).map(r=>r[k]))]))]));
+            const reduction=1-groups.candidate.layout/groups.baseline.layout;
+            const accepted=reduction>=.10&&groups.candidate.lcp<=groups.baseline.lcp+100&&groups.candidate.score>=groups.baseline.score&&rows.filter(r=>r.variant==='candidate').every(r=>r.cls<=.01&&Object.entries(r.categories).filter(([k])=>k!=='performance').every(([,v])=>v===1));
+            const result={protocol,groups,layoutReduction:reduction,accepted,rows};
+            fs.writeFileSync(out+'/summary.json',JSON.stringify(result,null,2));console.log(JSON.stringify({groups,reduction,accepted}));
+            if(!accepted)process.exitCode=1;
+          }finally{servers.forEach(s=>s.close());}
+          JS
+          node "$RUNNER_TEMP/probe.mjs"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-element-probe
+          path: ${{ runner.temp }}/probe/
+          retention-days: 14
+          if-no-files-found: error
