@@ -80,6 +80,18 @@ async function main() {
             }
           }
           await loadLazyImages(page);
+          // The pricing section was not deferred by the older shared CSS. It
+          // independently checks this rule's locale, viewport and print scope.
+          const pricing = page.locator('main > section.pricing');
+          record.sectionRendering = { screen: await pricing.evaluate(node => getComputedStyle(node).contentVisibility) };
+          assert.equal(record.sectionRendering.screen, !locale && width <= 1023 ? 'auto' : 'visible', 'Only Japanese mobile sections use the new deferral');
+          assert.equal(await page.locator('.hero').evaluate(node => getComputedStyle(node).contentVisibility), 'visible', 'Never defer the above-fold hero');
+          await pricing.scrollIntoViewIfNeeded();
+          assert(await pricing.isVisible(), 'A deep deferred section remains reachable');
+          await page.emulateMedia({ media: 'print' });
+          record.sectionRendering.print = await pricing.evaluate(node => getComputedStyle(node).contentVisibility);
+          assert.equal(record.sectionRendering.print, 'visible', 'New screen-only deferral must not affect print');
+          await page.emulateMedia({ media: 'screen' });
           assert.deepEqual(failures, [], 'No JavaScript errors or missing same-origin resources');
           record.images = await page.locator('picture:has(source[data-home-perf="image"]) img').evaluateAll(images => images.map(img => ({ url: img.currentSrc, cssWidth: img.getBoundingClientRect().width, dpr: devicePixelRatio })));
           for (const image of record.images) {
