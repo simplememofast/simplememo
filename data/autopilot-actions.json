@@ -859,7 +859,7 @@
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-16 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -871,14 +871,14 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-05"
+          "since": "2026-09-16"
         }
       },
-      "state": "done",
+      "state": "open",
       "created_jst": "2026-09-17",
       "last_seen_jst": "2026-09-17",
-      "closed_jst": "2026-09-17",
-      "evidence": "2026-09-05 以降 actions は 6回着手し usage_limit の再発なし",
+      "closed_jst": null,
+      "evidence": "2026-09-16 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
       "reopened_jst": "2026-09-17",
       "owner_needed": true,
       "owner_needed_review": {
@@ -898,7 +898,7 @@
     {
       "id": "act-selfheal-ap-20260831-actions",
       "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-16 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -910,14 +910,14 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-05"
+          "since": "2026-09-16"
         }
       },
-      "state": "done",
+      "state": "open",
       "created_jst": "2026-09-17",
       "last_seen_jst": "2026-09-17",
-      "closed_jst": "2026-09-17",
-      "evidence": "2026-09-05 以降 actions は 6回着手し usage_limit の再発なし",
+      "closed_jst": null,
+      "evidence": "2026-09-16 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
       "reopened_jst": "2026-09-17",
       "owner_needed": true,
       "owner_needed_review": {
@@ -1733,7 +1733,7 @@
     {
       "id": "act-selfheal-ap-20260905-actions",
       "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-16 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -1745,14 +1745,14 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-05"
+          "since": "2026-09-16"
         }
       },
-      "state": "done",
+      "state": "open",
       "created_jst": "2026-09-17",
       "last_seen_jst": "2026-09-17",
-      "closed_jst": "2026-09-17",
-      "evidence": "2026-09-05 以降 actions は 6回着手し usage_limit の再発なし",
+      "closed_jst": null,
+      "evidence": "2026-09-16 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
       "reopened_jst": "2026-09-17",
       "owner_needed": false,
       "owner_needed_review": {
@@ -2778,6 +2778,55 @@
       "last_seen_jst": "2026-09-17",
       "closed_jst": null,
       "evidence": "ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26 は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
+      "id": "act-codex-ledger-sync",
+      "title": "Codex実行の未記帳 1 件・原因分類 0 件を同期する",
+      "detail": "予約と元の終了証跡・判定レシートを照合する。正常終了を出荷とは数えない。",
+      "source": "ledger",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json",
+        "data/autopilot-status.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": "reconcile-codex-runs",
+      "close_check": {
+        "kind": "codex_ledger_covers_runs",
+        "params": {}
+      },
+      "state": "done",
+      "created_jst": "2026-09-17",
+      "last_seen_jst": "2026-09-17",
+      "closed_jst": "2026-09-17",
+      "evidence": "観測有効=true、未記帳のCodex結果 0 件、原因分類 0 件",
+      "last_run_jst": "2026-09-17",
+      "last_run_log": "Codex original outcomes appended: 1; causes classified: 0; shipments not inferred"
+    },
+    {
+      "id": "act-selfheal-ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+      "title": "未修理の故障: ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-09-16 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0a6e0-4347-7fa1-86d8-c2d630e94bf6; receipt SHA256 474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-16 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "auto": null,
+      "close_check": {
+        "kind": "no_failure_since",
+        "params": {
+          "route": "actions",
+          "failure_class": "usage_limit",
+          "since": "2026-09-16"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-17",
+      "last_seen_jst": "2026-09-17",
+      "closed_jst": null,
+      "evidence": "2026-09-16 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
     }
   ],
   "escalation_review_authorization": {
