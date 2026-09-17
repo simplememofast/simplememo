@@ -57,6 +57,9 @@ export async function main(){
       assert(await captionLink.evaluate(n=>n===document.activeElement),'Caption keyboard focus failed');
       const focused=await figure.evaluate(n=>getComputedStyle(n).contentVisibility);assert.equal(focused,'visible','Focused figure must be visible');
       await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-video.png`)});
+      const codecCapability=await video.evaluate(n=>({mp4:n.canPlayType('video/mp4'),h264:n.canPlayType('video/mp4; codecs="avc1.42E01E"'),userAgent:navigator.userAgent}));
+      fs.writeFileSync(path.join(output,`${engine}-${c.width}-${c.js}-${label}-codec.json`),JSON.stringify(codecCapability,null,2));
+      assert(codecCapability.h264,'Test environment cannot decode the unchanged H.264 video');
       progress('native-playback');await video.evaluate(n=>{n.muted=true;n.play().catch(e=>{n.dataset.qaPlayError=e.name+': '+e.message;});});
       const playing=await poll(()=>video.evaluate(n=>({time:n.currentTime,paused:n.paused,error:n.error?.code||n.dataset.qaPlayError||null,width:n.videoWidth,height:n.videoHeight,duration:n.duration})),v=>!v.paused&&v.time>0.15&&v.width>0,'native playback');
       assert.equal(playing.error,null);assert.equal(playing.width,1280);assert.equal(playing.height,720);

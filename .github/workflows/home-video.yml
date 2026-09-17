@@ -24,12 +24,21 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   native-video:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 12
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            os: ubuntu-latest
+            chrome: /usr/bin/google-chrome
+          - browser: firefox
+            os: macos-14
+            chrome: ''
+          - browser: webkit
+            os: macos-14
+            chrome: ''
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,6 +55,7 @@ jobs:
       - name: Verify native playback, focus, fragments and print
         env:
           QA_BROWSER: ${{ matrix.browser }}
+          CHROME_PATH: ${{ matrix.chrome }}
           QA_RESULTS: ${{ runner.temp }}/video-results
           NODE_PATH: ${{ runner.temp }}/video-tools/node_modules
         run: node scripts/perf/video_browser.mjs .
