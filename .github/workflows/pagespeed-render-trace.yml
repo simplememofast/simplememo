@@ -9,13 +9,12 @@ concurrency:
   group: pagespeed-render-trace-investigation
   cancel-in-progress: false
 jobs:
-  trace:
+  experiment:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 4ff1cde9b24776458dab420284a5e090ac38beeb
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -25,36 +24,18 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           npm install --prefix "$RUNNER_TEMP/tools" --no-save lighthouse@12.8.2 playwright@1.55.0
-      - name: Verify public homepage content and asset identity
+      - name: Confirm unchanged public source inputs
+        run: |
+          test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
+          test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
+      - name: Compare isolated hypotheses without modifying production
         env:
-          PERF_RESULTS: ${{ runner.temp }}/render-traces
-        run: NODE_PATH="$RUNNER_TEMP/tools/node_modules" node scripts/perf/verify_production.cjs --require
-      - name: Capture five Japanese and two English cold-browser traces
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/render-traces"
-          for spec in ja-1 en-1 ja-2 ja-3 en-2 ja-4 ja-5; do
-            url=https://simplememofast.com/
-            if [[ "$spec" == en-* ]]; then url=https://simplememofast.com/en/; fi
-            "$RUNNER_TEMP/tools/node_modules/.bin/lighthouse" "$url" --only-categories=performance,accessibility,best-practices,seo --save-assets --output=json --output-path="$RUNNER_TEMP/render-traces/$spec.json" --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --quiet
-          done
-      - name: Print every measurement including adverse samples
-        if: always()
-        run: |
-          python3 - <<'PY'
-          import os, json, glob
-          for file in sorted(glob.glob(os.environ['RUNNER_TEMP']+'/render-traces/*.json')):
-              if '.trace.' in file or '.devtoolslog.' in file: continue
-              r=json.load(open(file))
-              if 'audits' not in r: continue
-              a=r['audits']; m=a['metrics']['details']['items'][0]
-              print(json.dumps({'file':os.path.basename(file),'score':r['categories']['performance']['score'],'lcp':a['largest-contentful-paint']['numericValue'],'observedLcp':m.get('observedLargestContentfulPaint'),'observedFcp':m.get('observedFirstContentfulPaint'),'parts':a.get('lcp-breakdown-insight',{}).get('details',{}).get('items',[]),'runtimeError':r.get('runtimeError')},ensure_ascii=False))
-          PY
+          PERF_RESULTS: ${{ runner.temp }}/render-experiment
+        run: LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-render.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pagespeed-render-traces
-          path: ${{ runner.temp }}/render-traces/
+          name: pagespeed-render-experiment
+          path: ${{ runner.temp }}/render-experiment/
           retention-days: 7
           if-no-files-found: error
