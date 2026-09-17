@@ -39,7 +39,7 @@ async function main() {
             if (row.status !== 200 || row.sha256 !== expected.sha256 || row.bytes !== expected.bytes) failures.push('Asset bytes/status differ: ' + file);
             if (row.cache_control !== immutable) failures.push('Incorrect/duplicate cache policy: ' + file + ' ' + row.cache_control);
             if (row.cors !== '*' || row.nosniff !== 'nosniff' || !row.etag) failures.push('Required original asset headers missing: ' + file);
-            const expectedType = file.endsWith('.woff2') ? 'font/woff2' : 'image/avif';
+            const expectedType = file.endsWith('.woff2') ? 'font/woff2' : file.endsWith('.webp') ? 'image/webp' : 'image/avif';
             if (row.content_type?.split(';')[0].trim() !== expectedType) failures.push('Incorrect asset Content-Type: ' + file);
           } catch (e) { assets[file] = { error: String(e) }; failures.push('Asset read failed: ' + file + ' ' + e); }
         }
@@ -53,7 +53,7 @@ async function main() {
       if (missing.status !== 404 || missing.cache_control?.includes('31536000')) failures.push('Error response was given immutable success policy');
       // Use the exact canonical URLs, not unique query strings which could hide
       // stale CDN metadata. GET and HEAD must both preserve bodyless 304 policy.
-      const samples = [entries.find(([f]) => f.endsWith('.avif'))?.[0], entries.find(([f]) => f.endsWith('.woff2'))?.[0]];
+      const samples = [entries.find(([f]) => f.endsWith('.avif'))?.[0], entries.find(([f]) => f.endsWith('.woff2'))?.[0], entries.find(([f]) => f.endsWith('.webp'))?.[0]];
       if (samples.some(f => !f)) failures.push('Manifest lacks an image or font control');
       const validators = samples.filter(Boolean).map(file => ['/' + file, assets[file]?.etag, immutable]);
       validators.push(['/assets/home-perf/manifest.json', controls['/assets/home-perf/manifest.json'].etag, revalidate]);

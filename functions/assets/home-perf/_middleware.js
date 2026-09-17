@@ -28,6 +28,7 @@ export function cachePolicy(request, response) {
   // No unhashed filenames, nested paths, percent-encoded aliases or HTML.
   if (/^[a-z0-9-]+-[0-9a-f]{12}\.woff2$/.test(file) && compatible('font/woff2')) return IMMUTABLE;
   if (/^[a-z0-9-]+-[0-9a-f]{12}\.avif$/.test(file) && compatible('image/avif')) return IMMUTABLE;
+  if (/^[a-z0-9-]+-[0-9a-f]{12}\.webp$/.test(file) && compatible('image/webp')) return IMMUTABLE;
   return null;
 }
 
