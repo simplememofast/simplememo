@@ -28,14 +28,14 @@ jobs:
         run: |
           test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
           test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
-      - name: Compare isolated hypotheses without modifying production
+      - name: Compare isolated mobile layout hypotheses without modifying production
         env:
-          PERF_RESULTS: ${{ runner.temp }}/render-experiment
-        run: LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-render.cjs
+          PERF_RESULTS: ${{ runner.temp }}/layout-experiment
+        run: LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-layout.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pagespeed-render-experiment
-          path: ${{ runner.temp }}/render-experiment/
+          name: pagespeed-layout-experiment
+          path: ${{ runner.temp }}/layout-experiment/
           retention-days: 7
           if-no-files-found: error
