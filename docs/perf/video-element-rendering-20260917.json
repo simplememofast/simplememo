@@ -1,0 +1,236 @@
+{
+  "status": "screening passed; exact integrated-source confirmation and full functional CI still required",
+  "screeningRun": 35212457702,
+  "screeningArtifact": 10493266291,
+  "screeningArtifactSha256": "162370fdb7ae99066e930f40dac90c9e47aa9821bd768fbdfda9b7b9cbc1ca40",
+  "scope": "Only the native video element is contained. The caption stays in normal layout. Same intrinsic 1280x720 dimensions; same focus/fragment escape and screen-only support gate.",
+  "rejectedFigure": {
+    "head": "68b1d0ccd1a09ffb9b88b7cc67973ebdfe92b8ed",
+    "run": 35209552629,
+    "accepted": false,
+    "layoutMedianBaselineMs": 540.136,
+    "layoutMedianCandidateMs": 590.696,
+    "reason": "Independent comparison increased layout work instead of meeting the 10% reduction contract. Prior Mac evidence is historical and not final-element validation."
+  },
+  "screening": {
+    "protocol": {
+      "source": "d3df4b387c855aa901ed0f609e3d488413f4e9de",
+      "sourceHtmlSha256": "3bf2c92b44753539d46d679002b0a670ef923895608d7bf25ac8cbc1f8e0e96d",
+      "css": "@supports (content-visibility: auto) and selector(:has(:target)) {\n  @media screen {\n    html[lang=\"ja\"] main > figure.lp-video > video {\n      content-visibility: auto;\n      contain-intrinsic-size: 1280px 720px;\n    }\n    html[lang=\"ja\"] main > figure.lp-video:focus-within > video,\n    html[lang=\"ja\"]:has(:target) main > figure.lp-video > video {\n      content-visibility: visible;\n    }\n  }\n}",
+      "cssSha256": "1c6e6d3350e5c23e47db561e6a2c70fa847c1554ed9d6413f176308e0ff470c8",
+      "pairs": 5,
+      "lighthouse": "12.8.2",
+      "order": "baseline/candidate then candidate/baseline alternately",
+      "acceptance": {
+        "layoutReductionAtLeast": 0.1,
+        "lcpRegressionMaxMs": 100,
+        "scoreNotLower": true,
+        "clsMax": 0.01,
+        "otherCategories100": true
+      },
+      "scope": "New element-only hypothesis, not a retry of failed figure containment. Same runner, fresh browsers, simulated mobile, no request suppression. Localhost naturally has no production-host GA. Not production, CrUX, or an eliminated-stalls claim."
+    },
+    "groups": {
+      "baseline": {
+        "score": 96,
+        "lcp": 2552.8911,
+        "layout": 488.75200000000007,
+        "tbt": 0,
+        "cls": 0,
+        "bytes": 355494
+      },
+      "candidate": {
+        "score": 96,
+        "lcp": 2479.6363,
+        "layout": 428.7559999999999,
+        "tbt": 0,
+        "cls": 0,
+        "bytes": 355558
+      }
+    },
+    "layoutReduction": 0.12275346187841718,
+    "accepted": true,
+    "rows": [
+      {
+        "variant": "baseline",
+        "run": 1,
+        "at": "2026-09-17T10:49:57.010Z",
+        "score": 97,
+        "lcp": 2253.2527,
+        "tbt": 2,
+        "cls": 0.0000665563591466865,
+        "layout": 634.2559999999997,
+        "bytes": 355494,
+        "categories": {
+          "performance": 0.97,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "0fbbeecedb72046c4187871c43be5f7acb4b7504bfc918ffa042e4468311792d"
+      },
+      {
+        "variant": "candidate",
+        "run": 1,
+        "at": "2026-09-17T10:50:10.924Z",
+        "score": 96,
+        "lcp": 2478.1447,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 423.032,
+        "bytes": 355558,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "d8a4f95c46568a114174acc8d2cff204588d4e003b7169f4859ca0152f5e8416"
+      },
+      {
+        "variant": "candidate",
+        "run": 2,
+        "at": "2026-09-17T10:50:23.746Z",
+        "score": 96,
+        "lcp": 2481.0558,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 475.23999999999995,
+        "bytes": 355558,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "08bc5cd7fac49072057f5cc7180f8760c99bb774c878eaac586c8edf0cb356be"
+      },
+      {
+        "variant": "baseline",
+        "run": 2,
+        "at": "2026-09-17T10:50:36.610Z",
+        "score": 97,
+        "lcp": 2327.609,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 491.82800000000003,
+        "bytes": 355494,
+        "categories": {
+          "performance": 0.97,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "100953c7860e1f2a645bab3e60e23cb28186bf28c9c9e33896400812a6719795"
+      },
+      {
+        "variant": "baseline",
+        "run": 3,
+        "at": "2026-09-17T10:50:49.559Z",
+        "score": 96,
+        "lcp": 2555.6224,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 480.0600000000002,
+        "bytes": 355494,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "bcfd5eb71fa1165b36120a5801785f91edbf14c677549d48c8cfbd6caf180179"
+      },
+      {
+        "variant": "candidate",
+        "run": 3,
+        "at": "2026-09-17T10:51:02.515Z",
+        "score": 97,
+        "lcp": 2403.2109,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 410.81600000000003,
+        "bytes": 355558,
+        "categories": {
+          "performance": 0.97,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "0b236e5f826e16cb17cff747680635d649743067cea6bf99c2027d96db1f7f11"
+      },
+      {
+        "variant": "candidate",
+        "run": 4,
+        "at": "2026-09-17T10:51:15.376Z",
+        "score": 96,
+        "lcp": 2482.5062,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 455.704,
+        "bytes": 355558,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "dbd8517a85dd9a0b6192dddcca7f77ee60eba9bf8a7362af82daf622d47ec57f"
+      },
+      {
+        "variant": "baseline",
+        "run": 4,
+        "at": "2026-09-17T10:51:28.253Z",
+        "score": 96,
+        "lcp": 2554.2874,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 468.8519999999999,
+        "bytes": 355494,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "49a06cde4da087455be670ec4b9820df3e84ddc89270b086ed4358886867322e"
+      },
+      {
+        "variant": "baseline",
+        "run": 5,
+        "at": "2026-09-17T10:51:41.126Z",
+        "score": 96,
+        "lcp": 2552.8911,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 488.75200000000007,
+        "bytes": 355494,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "eedb798ece5595bb60c9668361d55c7f66f9aa373ff928a66511393c6cde0b1d"
+      },
+      {
+        "variant": "candidate",
+        "run": 5,
+        "at": "2026-09-17T10:51:54.105Z",
+        "score": 96,
+        "lcp": 2479.6363,
+        "tbt": 0,
+        "cls": 0,
+        "layout": 428.7559999999999,
+        "bytes": 355558,
+        "categories": {
+          "performance": 0.96,
+          "accessibility": 1,
+          "best-practices": 1,
+          "seo": 1
+        },
+        "sha256": "f83d6ce0b02898e21969e3cf6cae03ccf31fcdc65b20eb6e208e2c9e823f709e"
+      }
+    ]
+  }
+}

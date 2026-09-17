@@ -45,7 +45,8 @@ export async function main(){
       const headings=await page.locator('h1,h2,h3').allTextContents(),hero=await page.locator('.hero').boundingBox();
       const figure=page.locator('main > figure.lp-video'),video=figure.locator('video');
       assert.equal(await figure.count(),1);assert.equal(await video.count(),1);
-      const initial=await figure.evaluate(n=>({y:n.getBoundingClientRect().y,visibility:getComputedStyle(n).contentVisibility}));
+      assert.equal(await figure.evaluate(n=>getComputedStyle(n).contentVisibility),'visible','Caption container must not be contained');
+      const initial=await video.evaluate(n=>({y:n.getBoundingClientRect().y,visibility:getComputedStyle(n).contentVisibility}));
       await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-top.png`)});
       await figure.scrollIntoViewIfNeeded();await wait(400);await waitForFonts(page);
       const box=await video.boundingBox();assert(box&&box.height>0&&box.y<823&&box.y+box.height>0,'Video is not rendered in viewport');
@@ -55,7 +56,7 @@ export async function main(){
       const caption=await figure.locator('figcaption').innerText();assert(caption.length>0);
       const captionLink=figure.locator('figcaption a');await captionLink.focus();await wait(200);
       assert(await captionLink.evaluate(n=>n===document.activeElement),'Caption keyboard focus failed');
-      const focused=await figure.evaluate(n=>getComputedStyle(n).contentVisibility);assert.equal(focused,'visible','Focused figure must be visible');
+      const focused=await video.evaluate(n=>getComputedStyle(n).contentVisibility);assert.equal(focused,'visible','Focused video must be visible');
       await page.screenshot({path:path.join(output,`${engine}-${c.width}-${c.js}-${label}-video.png`)});
       const codecCapability=await video.evaluate(n=>({mp4:n.canPlayType('video/mp4'),h264:n.canPlayType('video/mp4; codecs="avc1.42E01E"'),userAgent:navigator.userAgent}));
       fs.writeFileSync(path.join(output,`${engine}-${c.width}-${c.js}-${label}-codec.json`),JSON.stringify(codecCapability,null,2));
@@ -69,6 +70,7 @@ export async function main(){
       // persist for a document lifetime and can legitimately differ after deferral.
       const lifecyclePrinted=await figure.evaluate(n=>({width:n.getBoundingClientRect().width,height:n.getBoundingClientRect().height,visibility:getComputedStyle(n).contentVisibility}));
       assert.equal(lifecyclePrinted.visibility,'visible');assert(lifecyclePrinted.height>0);
+      assert.equal(await video.evaluate(n=>getComputedStyle(n).contentVisibility),'visible','Printed video must remain visible');
       await page.emulateMedia({media:'screen'});
       // Compare the exact CSS rule in one document, retaining its actual optional-font choice.
       // Cross-document heights are recorded but are not a font-controlled comparison.
@@ -87,7 +89,7 @@ export async function main(){
       const hashes=await page.locator('main [id]').evaluateAll(nodes=>{const v=document.querySelector('figure.lp-video');return nodes.filter(n=>v.compareDocumentPosition(n)&Node.DOCUMENT_POSITION_FOLLOWING).map(n=>'#'+encodeURIComponent(n.id)).slice(-2);});
       assert(hashes.length>0,'Expected native fragment targets below the video');const anchors=[];
       progress('native-fragments');
-      for(const hash of hashes){const p=await context.newPage();try{await p.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(400);const target=p.locator('[id='+JSON.stringify(decodeURIComponent(hash.slice(1)))+']');const rect=await target.boundingBox();assert(rect&&rect.y<823&&rect.y+rect.height>0,'Fragment target outside viewport');assert.equal(await p.locator('main > figure.lp-video').evaluate(n=>getComputedStyle(n).contentVisibility),'visible','Native fragment must disable preceding video containment');anchors.push({hash,y:rect.y,height:rect.height});}finally{await p.close();}}
+      for(const hash of hashes){const p=await context.newPage();try{await p.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(400);const target=p.locator('[id='+JSON.stringify(decodeURIComponent(hash.slice(1)))+']');const rect=await target.boundingBox();assert(rect&&rect.y<823&&rect.y+rect.height>0,'Fragment target outside viewport');assert.equal(await p.locator('main > figure.lp-video > video').evaluate(n=>getComputedStyle(n).contentVisibility),'visible','Native fragment must disable preceding video containment');anchors.push({hash,y:rect.y,height:rect.height});}finally{await p.close();}}
       return {headings,hero,initial,box,attributes,caption,focused,playing,lifecyclePrinted,printed,anchors};
     }finally{await context.close();}
   }

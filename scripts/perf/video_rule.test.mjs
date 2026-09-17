@@ -29,5 +29,10 @@ test('native video controls, metadata and geometry reservations survive',()=>{
 
 test('fragment-safe containment is gated on selector support and has an eager escape',()=>{
   assert(VIDEO_RULE.includes('and selector(:has(:target))'));
-  assert(VIDEO_RULE.includes('html[lang="ja"]:has(:target) main > figure.lp-video'));
+  assert(VIDEO_RULE.includes('html[lang="ja"]:has(:target) main > figure.lp-video > video'));
+  assert(VIDEO_RULE.includes('contain-intrinsic-size: 1280px 720px'));
+  assert(!VIDEO_RULE.includes('contain-intrinsic-block-size: auto 600px'));
+  const selectors=VIDEO_RULE.split('\n').filter(line=>line.includes('html[lang="ja"]'));
+  assert.equal(selectors.length,3);
+  assert(selectors.every(line=>/ > video\s*[,{]$/.test(line.trim())), 'Caption and figure must remain outside containment');
 });
