@@ -25,21 +25,58 @@ test('the matrix retains all old widths and adds real mobile density cases', () 
   assert.equal(CASES.length, 9);
 });
 
-
-test('lazy-image scrolling uses runner timers and a bounded height snapshot', async () => {
-  const positions = [], waits = [];
-  let reads = 0;
+function fixture(states, { pending = [], ready = true, complete = true } = {}) {
+  let clock = 0, read = 0, checks = 0;
+  const positions = [], revealed = [], waits = [];
   const page = {
-    async evaluate(fn, position) {
-      assert.equal(fn.constructor.name, 'Function', 'No in-page async function can wait on disabled page timers');
-      if (position !== undefined) { positions.push(position); return; }
-      reads++;
-      return reads === 1 ? 2100 : true;
+    async evaluate(fn, arg) {
+      assert.equal(fn.constructor.name, 'Function', 'No page-side asynchronous timer');
+      if (arg !== undefined) { positions.push(arg); return; }
+      if (String(fn).includes('scrollHeight')) return typeof states === 'function' ? states(positions.at(-1)) : states[Math.min(read++, states.length - 1)];
+      return complete;
     },
-    async waitForTimeout(ms) { waits.push(ms); },
+    async waitForTimeout(ms) { clock += ms; waits.push(ms); },
+    locator() {
+      return {
+        async evaluateAll() { return pending; },
+        nth(index) {
+          return {
+            async scrollIntoViewIfNeeded() { revealed.push(index); },
+            async evaluate(fn) { assert.equal(fn.constructor.name, 'Function'); return typeof ready === 'function' ? ready(checks++) : ready; },
+          };
+        },
+      };
+    },
   };
-  await loadLazyImages(page);
-  assert.deepEqual(positions, [0, 700, 1400]);
-  assert.deepEqual(waits, [50, 50, 50]);
-  assert.equal(reads, 2);
+  return { page, positions, revealed, waits, now: () => clock };
+}
+
+test('resamples growing page height and reveals pending lazy images', async () => {
+  const f = fixture([{ top: 0, height: 2100, viewport: 900 }, { top: 700, height: 3500, viewport: 900 }, { top: 1400, height: 3500, viewport: 900 }, { top: 2100, height: 3500, viewport: 900 }, { top: 2600, height: 3500, viewport: 900 }], { pending: [2], ready: i => i > 0 });
+  await loadLazyImages(f.page, { now: f.now });
+  assert.deepEqual(f.positions, [0, 700, 1400, 2100, 2600]);
+  assert.deepEqual(f.revealed, [2]);
+  assert.deepEqual(f.waits, [100, 100, 100, 100, 100]);
+});
+
+test('unbounded page growth is rejected rather than silently passing', async () => {
+  const f = fixture(top => ({ top, height: top + 3000, viewport: 900 }));
+  await assert.rejects(loadLazyImages(f.page, { maxSteps: 3, now: f.now }), /bounded scrolling/);
+  assert.equal(f.positions.length, 4);
+});
+
+test('an onscreen image that never loads still fails', async () => {
+  const f = fixture([{ top: 0, height: 500, viewport: 900 }], { pending: [0], ready: false });
+  await assert.rejects(loadLazyImages(f.page, { now: f.now }), /did not load while onscreen/);
+  assert.equal(f.now(), 10000);
+});
+
+test('bad geometry, final image failure and read errors cannot pass', async () => {
+  for (const state of [null, { top: 0, height: NaN, viewport: 900 }, { top: 0, height: 500, viewport: 0 }]) {
+    const f = fixture([state]);
+    await assert.rejects(loadLazyImages(f.page, { now: f.now }), /Invalid scroll geometry/);
+  }
+  const f = fixture([{ top: 0, height: 500, viewport: 900 }], { complete: false });
+  await assert.rejects(loadLazyImages(f.page, { now: f.now }), /remains incomplete/);
+  await assert.rejects(loadLazyImages({ evaluate: async () => { throw Error('read failed'); } }), /read failed/);
 });

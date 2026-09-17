@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { loadLazyImages } = require('./scroll_images.cjs');
 const CASES = [
   ...[320, 390, 412, 768, 1440].map(width => ({ width, dpr: 1 })),
   { width: 390, dpr: 2 }, { width: 390, dpr: 3 }, { width: 412, dpr: 1.75 },
@@ -12,24 +13,6 @@ const CASES = [
 function allowedRequest(url, method, base) {
   const parsed = new URL(url);
   return parsed.origin === new URL(base).origin && method === 'GET' && !parsed.pathname.startsWith('/cdn-cgi/rum');
-}
-
-// Drive timers from the runner: page timers do not fire when JavaScript is
-// disabled. Bound the scroll using one height snapshot and poll image state
-// from Node rather than waiting on an in-page async loop or animation frame.
-async function loadLazyImages(page) {
-  const height = await page.evaluate(() => document.body.scrollHeight);
-  for (let y = 0; y < height; y += 700) {
-    await page.evaluate(position => scrollTo(0, position), y);
-    await page.waitForTimeout(50);
-  }
-  const deadline = Date.now() + 10000;
-  while (true) {
-    const complete = await page.evaluate(() => [...document.images].filter(img => new URL(img.currentSrc || img.src).origin === location.origin && img.getBoundingClientRect().width > 0).every(img => img.complete && img.naturalWidth > 0));
-    if (complete) return;
-    if (Date.now() >= deadline) throw new Error('Visible same-origin images did not load within 10 seconds');
-    await page.waitForTimeout(100);
-  }
 }
 
 async function main() {
