@@ -1,0 +1,58 @@
+name: Homepage Native Video
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/css/home-hero.css'
+      - 'assets/video/launch-1s*'
+      - 'scripts/perf/video*.mjs'
+      - '.github/workflows/home-video.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/css/home-hero.css'
+      - 'assets/video/launch-1s*'
+      - 'scripts/perf/video*.mjs'
+      - '.github/workflows/home-video.yml'
+permissions:
+  contents: read
+concurrency:
+  group: home-video-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  native-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact control and native markup regressions
+        run: node --test scripts/perf/video*.test.mjs
+      - name: Install pinned browser and media dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/video-tools" --no-save playwright@1.55.0
+          "$RUNNER_TEMP/video-tools/node_modules/.bin/playwright" install --with-deps ${{ matrix.browser }}
+      - name: Verify native playback, focus, fragments and print
+        env:
+          QA_BROWSER: ${{ matrix.browser }}
+          QA_RESULTS: ${{ runner.temp }}/video-results
+          NODE_PATH: ${{ runner.temp }}/video-tools/node_modules
+        run: node scripts/perf/video_browser.mjs .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-video-${{ matrix.browser }}
+          path: ${{ runner.temp }}/video-results/
+          retention-days: 14
+          if-no-files-found: error
