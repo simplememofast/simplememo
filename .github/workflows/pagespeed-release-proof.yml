@@ -1,0 +1,106 @@
+name: PageSpeed PR1431 Public Record Proof
+on:
+  push:
+    branches: ['claude/pagespeed-1431-release-proof']
+    paths: ['.github/workflows/pagespeed-release-proof.yml']
+permissions:
+  contents: read
+concurrency:
+  group: pagespeed-1431-public-record-proof
+  cancel-in-progress: false
+jobs:
+  verify:
+    if: github.repository == 'simplememofast/simplememo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fef330a2d305a704d0c214b43959ee145f488567
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser verification tool
+        run: npm install --prefix "$RUNNER_TEMP/proof-tools" --no-save playwright@1.55.0
+      - name: Verify exact public records and the updated operating-page notice
+        env:
+          PROOF_OUTPUT: ${{ runner.temp }}/release-proof
+        run: |
+          mkdir -p "$PROOF_OUTPUT"
+          NODE_PATH="$RUNNER_TEMP/proof-tools/node_modules" node <<'JS'
+          'use strict';
+          const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+          const {createHash}=require('node:crypto');
+          const {execFileSync}=require('node:child_process');
+          const {chromium}=require('playwright');
+          const origin='https://simplememofast.com',sha='fef330a2d305a704d0c214b43959ee145f488567';
+          assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),sha);
+          const files=['data/autopilot-runs.json','data/autopilot-status.json','sitemap-ja.xml','sitemap.xml'];
+          const hash=data=>createHash('sha256').update(data).digest('hex');
+          const expected=Object.fromEntries(files.map(f=>[f,hash(fs.readFileSync(f))]));
+          const expectedHtml=fs.readFileSync('autopilot/index.html','utf8');
+          const notice='9月16日の記録はオーナー依頼による高速化保守です。定期運転の成功や記事公開を意味せず、同日の未取得タスク結果は不明のままです。';
+          const block=h=>(h.match(/<!-- run-streaks:start -->([\s\S]*?)<!-- run-streaks:end -->/)||[])[1]?.replace(/\s+/g,' ').trim();
+          const score=h=>(h.match(/data-score-total[^>]*>([^<]+)</)||[])[1];
+          assert(expectedHtml.includes(notice));assert(block(expectedHtml));assert(score(expectedHtml));
+          async function main(){
+            const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
+            const deadline=Date.now()+240000;
+            try{
+              while(true){
+                const receipt={source_commit:sha,checked_at:new Date().toISOString(),origin,verified:false,resources:{},scope:'Read-only verification branch, not an additional main deployment. JSON/XML byte equality plus the changed HTML notice/counters; Cloudflare-injected HTML is not claimed byte-identical.'};
+                const context=await browser.newContext();
+                try{
+                  await context.route('**/*',route=>{const r=route.request(),u=new URL(r.url());return u.origin===origin && r.method()==='GET' && !u.pathname.startsWith('/cdn-cgi/rum') ? route.continue() : route.abort();});
+                  const page=await context.newPage();
+                  const response=await page.goto(origin+'/autopilot/',{waitUntil:'domcontentloaded',timeout:30000});
+                  assert.equal(response.status(),200);
+                  const html=await response.text();
+                  receipt.resources['autopilot/index.html']={status:response.status(),sha256:hash(Buffer.from(html)),owner_notice:html.includes(notice),counter_block_matches:block(html)===block(expectedHtml),score_matches:score(html)===score(expectedHtml)};
+                  assert(receipt.resources['autopilot/index.html'].owner_notice);
+                  assert(receipt.resources['autopilot/index.html'].counter_block_matches);
+                  assert(receipt.resources['autopilot/index.html'].score_matches);
+                  const fetched=await page.evaluate(async files=>{
+                    const out={};
+                    for(const f of files){
+                      const r=await fetch('/'+f,{cache:'no-cache',signal:AbortSignal.timeout(20000)});
+                      const bytes=await r.arrayBuffer();
+                      const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');
+                      const record={status:r.status,bytes:bytes.byteLength,sha256};
+                      if(f==='data/autopilot-status.json'){
+                        const j=JSON.parse(new TextDecoder().decode(bytes));
+                        record.published={date_jst:j.date_jst,generated_at:j.generated_at,pr:j.pr,totals:j.runs?.totals,scope:j.observation_scope};
+                      }
+                      if(f==='data/autopilot-runs.json'){
+                        const j=JSON.parse(new TextDecoder().decode(bytes));
+                        record.recovered_rows=j.runs.filter(r=>r.run_id==='ap-20260916-owner-session-pagespeed');
+                      }
+                      out[f]=record;
+                    }
+                    return out;
+                  },files);
+                  for(const f of files){receipt.resources[f]={...fetched[f],expected_sha256:expected[f],matches_checkout:fetched[f].sha256===expected[f]};assert.equal(fetched[f].status,200,f);assert.equal(fetched[f].sha256,expected[f],f);}
+                  const rows=fetched['data/autopilot-runs.json'].recovered_rows;
+                  assert.equal(rows.length,1);assert.equal(rows[0].route,'owner-session');assert.equal(rows[0].interventions[0].kind,'request');
+                  assert.equal(fetched['data/autopilot-status.json'].published.date_jst,'2026-09-16');
+                  receipt.verified=true;
+                }catch(error){receipt.error=String(error);}
+                finally{await context.close();}
+                fs.writeFileSync(path.join(process.env.PROOF_OUTPUT,'public-record-proof.json'),JSON.stringify(receipt,null,2)+'\n');
+                console.log(JSON.stringify(receipt));
+                if(receipt.verified)return;
+                if(Date.now()>=deadline)throw Error('Public record verification did not pass within the bounded window');
+                await new Promise(r=>setTimeout(r,10000));
+              }
+            }finally{await browser.close();}
+          }
+          main().catch(e=>{console.error(e);process.exitCode=1;});
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pagespeed-1431-public-record-proof
+          path: ${{ runner.temp }}/release-proof/
+          if-no-files-found: error
+          retention-days: 14
