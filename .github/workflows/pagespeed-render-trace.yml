@@ -9,9 +9,9 @@ concurrency:
   group: pagespeed-render-trace-investigation
   cancel-in-progress: false
 jobs:
-  confirmation:
+  functional-confirmation:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,41 +19,54 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install matching measurement tools and browser engines
+      - name: Install browser engines and Japanese fallback
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-          npm install --prefix "$RUNNER_TEMP/tools" --no-save lighthouse@12.8.2 playwright@1.55.0
+          npm install --prefix "$RUNNER_TEMP/tools" --no-save playwright@1.55.0
           node "$RUNNER_TEMP/tools/node_modules/playwright/cli.js" install --with-deps webkit
-      - name: Confirm unchanged source and select the smaller winning hypothesis
+      - name: Correct the functional harness without rerunning favorable measurements
         env:
-          PERF_RESULTS: ${{ runner.temp }}/layout-confirmation
+          PERF_RESULTS: ${{ runner.temp }}/layout-functional
         run: |
           test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
           test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
           python3 - <<'PY'
           from pathlib import Path
           import os
-          p=Path('scripts/perf/experiment-layout.cjs'); t=p.read_text()
-          old="process.env.CONFIRM==='1'?{baseline:'',combined:wrap(defer+breaks)}"
-          assert t.count(old)==1
-          p.write_text(t.replace(old,"process.env.CONFIRM==='1'?{baseline:'',deferred:wrap(defer)}"))
-          qa=Path('scripts/perf/experiment-layout-qa.cjs')
-          qa.write_text(qa.read_text().replace("'combined'", "'deferred'"))
+          def replace_once(text,old,new):
+              assert text.count(old)==1,old
+              return text.replace(old,new)
+          p=Path('scripts/perf/experiment-layout.cjs');t=p.read_text()
+          t=replace_once(t,"process.env.CONFIRM==='1'?{baseline:'',combined:wrap(defer+breaks)}","process.env.CONFIRM==='1'?{baseline:'',deferred:wrap(defer)}")
+          t=replace_once(t,'for(let run=1;run<=runs;run++){',"if(process.env.QA_ONLY){protocol.phase='Functional validation only; five-pair measurements retained in artifact10478512577, not rerun';protocol.runsPerVariant=0;fs.writeFileSync(path.join(output,'protocol.json'),JSON.stringify(protocol,null,2));const {run}=require(path.resolve(process.env.QA_SCRIPT));await run({ports:Object.fromEntries(keys.map((v,i)=>[v,18765+i])),output,root});return;}\n for(let run=1;run<=runs;run++){")
+          p.write_text(t)
+          qa=Path('scripts/perf/experiment-layout-qa.cjs');q=qa.read_text().replace("'combined'","'deferred'")
+          q=replace_once(q,'const results=[],baselines={};','const results=[],baselines={},printBaselines={},screenBaselines={};')
+          q=replace_once(q,'record.initialCls=await page.evaluate',"record.screenStyles=await page.locator('main>section').evaluateAll(ns=>ns.map(n=>[getComputedStyle(n).contentVisibility,getComputedStyle(n).containIntrinsicSize]));if(variant==='baseline')screenBaselines[key]=record.screenStyles;\n    record.initialCls=await page.evaluate")
+          q=replace_once(q,'record.images=await page.evaluate',"const pending=await page.locator('img').evaluateAll(ns=>ns.map((n,index)=>({index,needed:n.getBoundingClientRect().width>0&&new URL(n.currentSrc||n.src).origin===location.origin&&(!n.complete||n.naturalWidth===0)})).filter(n=>n.needed).map(n=>n.index));\n    for(const index of pending){const image=page.locator('img').nth(index);await image.scrollIntoViewIfNeeded();for(let i=0;i<100;i++){if(await image.evaluate(n=>n.complete&&n.naturalWidth>0))break;await page.waitForTimeout(100);}}\n    record.images=await page.evaluate")
+          q=replace_once(q,"assert(await page.locator('main>section').evaluateAll(ns=>ns.every(n=>getComputedStyle(n).contentVisibility==='visible')),'Print unexpectedly defers a section');","record.print={styles:await page.locator('main>section').evaluateAll(ns=>ns.map(n=>[getComputedStyle(n).contentVisibility,getComputedStyle(n).containIntrinsicSize])),text:await page.locator('body').innerText()};if(variant==='baseline')printBaselines[key]=record.print;else assert.deepEqual(record.print,printBaselines[key],'Candidate changed print visibility or printable text');")
+          q=replace_once(q,"if(locale==='en'||width>=1024)assert(await page.locator('main>section').evaluateAll(ns=>ns.every(n=>getComputedStyle(n).contentVisibility==='visible')),'Non-target page changed');","if(locale==='en'||width>=1024)assert.deepEqual(record.screenStyles,screenBaselines[key],'Non-target rendering rules changed');")
+          q=q.replace("'Print does not defer content'","'Print retains baseline visibility rules and text (four sections already use auto)' ")
+          qa.write_text(q)
           out=Path(os.environ['PERF_RESULTS']);out.mkdir(parents=True,exist_ok=True)
-          (out/'experiment-layout.cjs').write_text(p.read_text())
-          (out/'experiment-layout-qa.cjs').write_text(qa.read_text())
+          (out/'experiment-layout.cjs').write_text(t);(out/'experiment-layout-qa.cjs').write_text(q)
+          (out/'harness-correction.txt').write_text('Initial 48-case comparison failed: it incorrectly required content-visibility:visible for every print section although four baseline classes already use auto in shared CSS. This run compares baseline print styles AND printable text, and verifies unchanged English/desktop styles. WebKit may defer image loading while an image is offscreen; pending images are brought onscreen with a bounded10s wait rather than forced eager or ignored. The candidate CSS, performance samples and thresholds are unchanged. Original failures retained in artifact10478512577.\n')
           PY
-      - name: Five independent pairs followed by 48 functional scenarios
+          node --check scripts/perf/experiment-layout.cjs
+          node --check scripts/perf/experiment-layout-qa.cjs
+      - name: Verify all 48 functional scenarios with the corrected baseline contract
         env:
-          PERF_RESULTS: ${{ runner.temp }}/layout-confirmation
+          PERF_RESULTS: ${{ runner.temp }}/layout-functional
           CONFIRM: '1'
+          QA_ONLY: '1'
           QA_SCRIPT: scripts/perf/experiment-layout-qa.cjs
-        run: NODE_PATH="$RUNNER_TEMP/tools/node_modules" LIGHTHOUSE_CLI="$RUNNER_TEMP/tools/node_modules/lighthouse/cli/index.js" node scripts/perf/experiment-layout.cjs
+          LIGHTHOUSE_CLI: unused-functional-only
+        run: NODE_PATH="$RUNNER_TEMP/tools/node_modules" node scripts/perf/experiment-layout.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pagespeed-layout-confirmation
-          path: ${{ runner.temp }}/layout-confirmation/
+          name: pagespeed-layout-functional
+          path: ${{ runner.temp }}/layout-functional/
           retention-days: 7
           if-no-files-found: error
