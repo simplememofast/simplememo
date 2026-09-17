@@ -18,6 +18,15 @@ function allowedRequest(url, method, base) {
 // disabled. Bound the scroll using one height snapshot and poll image state
 // from Node rather than waiting on an in-page async loop or animation frame.
 async function loadLazyImages(page) {
+  // Offscreen containment can change the document height as sections render.
+  // Visit a fixed DOM inventory first; keep the bounded scroll and strict image
+  // assertions below. Runner timers also work with page JavaScript disabled.
+  const sections = page.locator('main > section');
+  const count = await sections.count();
+  for (let index = 0; index < count; index++) {
+    await sections.nth(index).scrollIntoViewIfNeeded({ timeout: 5000 });
+    await page.waitForTimeout(50);
+  }
   const height = await page.evaluate(() => document.body.scrollHeight);
   for (let y = 0; y < height; y += 700) {
     await page.evaluate(position => scrollTo(0, position), y);

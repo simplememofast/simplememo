@@ -929,6 +929,20 @@ body{overflow-x:clip}
   .hero__footer { padding-inline: 20px; }
 }
 
+/* Progressive enhancement only: native search, focus and print keep full content. */
+@supports (content-visibility: auto) and (contain-intrinsic-block-size: auto 600px) {
+  @media screen {
+    html[lang="ja"] main > section:not(.hero):not(.press-band) {
+      content-visibility: auto;
+      contain-intrinsic-block-size: auto 600px;
+    }
+    html[lang="ja"] main > section:focus-within,
+    html[lang="ja"] main > section:target {
+      content-visibility: visible;
+    }
+  }
+}
+
 </style>
 </head>
 <body class="home-photo">
