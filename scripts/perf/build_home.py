@@ -87,10 +87,6 @@ def build() -> dict[str, bytes]:
 
     hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1536))
     manifest: dict[str, object] = {'version': 1, 'pages': {}, 'inputs': {}}
-    from poster import SOURCE as POSTER_SOURCE, encode as encode_poster, patch as patch_poster
-    poster_name, poster_data, _ = encode_poster((ROOT / POSTER_SOURCE).read_bytes())
-    result[poster_name] = poster_data
-    manifest['inputs'][POSTER_SOURCE] = digest((ROOT / POSTER_SOURCE).read_bytes())
     for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', HERO):
         manifest['inputs'][source] = digest((ROOT / source).read_bytes())
 
@@ -152,7 +148,6 @@ def build() -> dict[str, bytes]:
         html, count = re.subn(r'(<picture class="hero__photograph">)', lambda m: m[0] + f'\n      <source data-home-perf="image" type="image/avif" srcset="{hero_srcset}" sizes="{HERO_SIZES}">', html)
         assert count == 1
         if lang == 'ja':
-            html = patch_poster(html, poster_name)
             for banner in BANNERS:
                 source = f'assets/img/{banner}-banner-ja@2x.webp'
                 manifest['inputs'][source] = digest((ROOT / source).read_bytes())
