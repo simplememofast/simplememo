@@ -1,0 +1,85 @@
+name: PageSpeed Record Recovery (temporary)
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths: ['.github/workflows/pagespeed-record-recovery.yml']
+permissions:
+  contents: write
+  actions: read
+  pull-requests: read
+concurrency:
+  group: pagespeed-owner-record-recovery
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.repository == 'simplememofast/simplememo' && github.event.pull_request.number == 1431 && github.event.pull_request.head.ref == 'claude/pagespeed-variance-20260917' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Obtain immutable shipment evidence from GitHub
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const repo = context.repo;
+            const {data:p} = await github.rest.pulls.get({...repo,pull_number:1426});
+            const {data:a} = await github.rest.actions.getWorkflowRun({...repo,run_id:35097287925});
+            const {data:s} = await github.rest.actions.getWorkflowRun({...repo,run_id:35097287853});
+            const {data:f} = await github.rest.actions.getArtifact({...repo,artifact_id:10446718605});
+            const pick=(o,keys)=>Object.fromEntries(keys.map(k=>[k,o[k]]));
+            fs.writeFileSync('owner-performance-evidence.json',JSON.stringify({pr:pick(p,['number','merged','merged_at','merge_commit_sha','html_url']),audit:pick(a,['id','conclusion','head_sha','html_url']),seo:pick(s,['id','conclusion','head_sha','html_url']),artifact:pick(f,['id','digest','archive_download_url'])},null,2));
+      - name: Verify deployment artifact and recover only the proven owner cycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/simplememofast/simplememo/actions/artifacts/10446718605/zip > "$RUNNER_TEMP/shipped-evidence.zip"
+          python3 - <<'PY'
+          import os, hashlib, zipfile
+          from pathlib import Path
+          file=Path(os.environ['RUNNER_TEMP'])/'shipped-evidence.zip'
+          if hashlib.sha256(file.read_bytes()).hexdigest() != '0f0487511f0ddcc4bf563119bb4e91d84b7fafbc998497a7b6408b99e36e8ff0':
+              raise SystemExit('Artifact digest mismatch')
+          with zipfile.ZipFile(file) as z:
+              Path('owner-performance-receipt.json').write_bytes(z.read('production-deployment.json'))
+          PY
+          node scripts/recover_owner_performance.mjs
+          python3 scripts/generate_sitemap.py
+          node scripts/autopilot-runs.mjs --selftest
+          node scripts/autopilot-runs.mjs --check
+          node scripts/check-autopilot-page.mjs --check
+      - name: Commit the bounded recovery to the same unmerged draft branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const {execFileSync} = require('node:child_process');
+            const assert = require('node:assert/strict');
+            const branch='claude/pagespeed-variance-20260917';
+            const expected=context.payload.pull_request.head.sha;
+            const files=['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','sitemap-ja.xml','sitemap.xml','docs/perf/owner-session-recovery-20260917.json'];
+            const changed=execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\n').filter(Boolean);
+            assert(changed.every(f=>files.includes(f)),'Unexpected tracked-file change');
+            const {data:p}=await github.rest.pulls.get({...context.repo,pull_number:1431});
+            assert(p.state==='open' && p.draft && p.head.sha===expected,'PR changed during recovery');
+            const {data:base}=await github.rest.git.getCommit({...context.repo,commit_sha:expected});
+            const tree=[];
+            for (const file of files) {
+              const {data:b}=await github.rest.git.createBlob({...context.repo,content:fs.readFileSync(file,'utf8'),encoding:'utf-8'});
+              tree.push({path:file,mode:'100644',type:'blob',sha:b.sha});
+            }
+            const {data:t}=await github.rest.git.createTree({...context.repo,base_tree:base.tree.sha,tree});
+            const {data:c}=await github.rest.git.createCommit({...context.repo,message:'fix(ops): recover the verified owner-requested PageSpeed cycle without inferring scheduled outcomes',tree:t.sha,parents:[expected]});
+            const {data:ref}=await github.rest.git.getRef({...context.repo,ref:'heads/'+branch});
+            assert.equal(ref.object.sha,expected,'Branch moved; refusing to overwrite');
+            await github.rest.git.updateRef({...context.repo,ref:'heads/'+branch,sha:c.sha,force:false});
+            await core.summary.addHeading('Recovered proven owner-requested maintenance').addRaw(`Branch commit: ${c.sha}\n\nExactly one shipped cycle from PR1425/1426, with the owner request counted as an intervention. Local scheduler outcomes remain unknown. Temporary workflow and helper must be removed before merge. Full final-head SEO and PageSpeed checks remain required.\n`).write();
+            console.log('Recovery commit: '+c.sha);
