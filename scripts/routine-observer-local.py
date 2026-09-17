@@ -27,6 +27,9 @@ BRANCH = 'Codex/routine-observations'
 LEDGER = 'data/routine-runs.json'
 OBSERVER = 'scripts/routine-observer.mjs'
 CODEX_OBSERVER = 'scripts/codex-routine-observer.py'
+# Existing reader runtime verified with read-only WAL fixtures on this Mac.
+# Keep the launchd parent on system Python; never fall back to writable/immutable.
+CODEX_PYTHON = '/opt/homebrew/opt/python@3.13/bin/python3.13'
 LABEL = 'com.simplememo.routine-observer'
 NODE = '/opt/homebrew/bin/node'
 GH = '/opt/homebrew/bin/gh'
@@ -67,7 +70,7 @@ def command(argv, cwd=None, env=None):
     result = subprocess.run(argv, cwd=cwd, env=env, text=True, capture_output=True, timeout=180)
     if result.returncode:
         # Do not echo raw API responses, Keychain data, or command output.
-        if argv[:2] == ['/usr/bin/python3', CODEX_OBSERVER]:
+        if argv[:2] == [CODEX_PYTHON, CODEX_OBSERVER]:
             code = codex_failure_code(result.stdout)
             if code:
                 raise RuntimeError('Codex observation failed: ' + code)
@@ -239,14 +242,14 @@ def run_once(probe=False):
                 git(['-c', 'user.name=SimpleMemo Routine Observer', '-c', 'user.email=observer@simplememofast.com',
                      'merge', '--no-edit', 'origin/main'], work)
                 before = json.loads((work / LEDGER).read_text())
-                codex_summary = json.loads(command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'], cwd=work))
+                codex_summary = json.loads(command([CODEX_PYTHON, CODEX_OBSERVER, '--apply'], cwd=work))
                 summary = json.loads(observe(work))
                 summary['codex'] = codex_summary
                 summary['temporary_ledger_written'] = summary.pop('written')
                 after = json.loads((work / LEDGER).read_text())
                 check_paths(git(['diff', '--name-only'], work).splitlines())
                 command([NODE, 'scripts/check-routine-runs.mjs', '--check'], cwd=work)
-                command(['/usr/bin/python3', CODEX_OBSERVER, '--check'], cwd=work)
+                command([CODEX_PYTHON, CODEX_OBSERVER, '--check'], cwd=work)
                 changed = should_publish(before, after)
                 if probe or not changed:
                     return {'state': 'probe' if probe else 'unchanged', 'published_to_git': False, 'publish_needed': changed, **summary}
@@ -380,7 +383,7 @@ class DiagnosticTests(unittest.TestCase):
             result = subprocess.CompletedProcess([], 1, self.payload(code), 'private stderr token')
             with patch('subprocess.run', return_value=result):
                 with self.assertRaisesRegex(RuntimeError, '^Codex observation failed: ' + code + '$'):
-                    command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'])
+                    command([CODEX_PYTHON, CODEX_OBSERVER, '--apply'])
 
     def test_malformed_private_and_oversized_output_stays_generic(self):
         from unittest.mock import patch
@@ -396,8 +399,8 @@ class DiagnosticTests(unittest.TestCase):
             self.assertIsNone(codex_failure_code(text))
             result = subprocess.CompletedProcess([], 1, text, 'private stderr')
             with patch('subprocess.run', return_value=result):
-                with self.assertRaisesRegex(RuntimeError, r'^Command failed: python3 \(exit 1\)$'):
-                    command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'])
+                with self.assertRaisesRegex(RuntimeError, '^Command failed: ' + re.escape(Path(CODEX_PYTHON).name) + r' \(exit 1\)$'):
+                    command([CODEX_PYTHON, CODEX_OBSERVER, '--apply'])
 
     def test_other_commands_cannot_impersonate_codex_diagnostics(self):
         from unittest.mock import patch
@@ -411,7 +414,7 @@ class DiagnosticTests(unittest.TestCase):
         from unittest.mock import patch
         result = subprocess.CompletedProcess([], 0, '  {"written":true}\n', 'private stderr')
         with patch('subprocess.run', return_value=result):
-            self.assertEqual(command(['/usr/bin/python3', CODEX_OBSERVER, '--apply']), '{"written":true}')
+            self.assertEqual(command([CODEX_PYTHON, CODEX_OBSERVER, '--apply']), '{"written":true}')
 
     def test_child_code_vocabulary_matches_standalone_launcher(self):
         import importlib.util
@@ -423,6 +426,66 @@ class DiagnosticTests(unittest.TestCase):
         for message in child.DIAGNOSTIC_CHECKS:
             self.assertEqual(codex_failure_code(json.dumps(child.failure_payload(ValueError(message)))),
                              child.DIAGNOSTIC_CHECKS[message])
+
+
+class ReaderRuntimeTests(unittest.TestCase):
+    reader = '/opt/homebrew/opt/python@3.13/bin/python3.13'
+
+    def test_collection_and_check_use_the_selected_reader(self):
+        from unittest.mock import patch
+        calls = []
+        with tempfile.TemporaryDirectory(prefix='observer-runtime-test-') as tmp:
+            cache = Path(tmp) / 'cache'; (cache / 'repository').mkdir(parents=True)
+            ledger = {'observed_at': '2026-09-17T00:00:00Z', 'routines': [],
+                      'open_findings': [], 'intentional_stops': []}
+            def fake_git(args, cwd):
+                if args[:3] == ['remote', 'get-url', 'origin']:
+                    return REMOTE
+                if args[:2] == ['worktree', 'add']:
+                    work = Path(args[-2]); (work / LEDGER).parent.mkdir(parents=True)
+                    (work / LEDGER).write_text(json.dumps(ledger))
+                return ''
+            def fake_command(args, **kwargs):
+                calls.append(args)
+                if args[:3] == [GH, 'pr', 'list']:
+                    return '[]'
+                return '{}'
+            with patch.dict(globals(), {'CACHE': cache, 'git': fake_git, 'command': fake_command,
+                                         'observe': lambda work: '{"written":false}'}):
+                result = run_once(probe=True)
+            self.assertEqual(result['state'], 'probe')
+            self.assertFalse(result['published_to_git'])
+            self.assertEqual([args for args in calls if len(args) > 1 and args[1] == CODEX_OBSERVER],
+                             [[self.reader, CODEX_OBSERVER, '--apply'],
+                              [self.reader, CODEX_OBSERVER, '--check']])
+
+    def test_old_interpreter_cannot_supply_reader_diagnostics(self):
+        from unittest.mock import patch
+        result = subprocess.CompletedProcess([], 1, DiagnosticTests().payload(), 'private stderr')
+        with patch('subprocess.run', return_value=result):
+            with self.assertRaisesRegex(RuntimeError, r'^Command failed: python3 \(exit 1\)$'):
+                command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'])
+
+    def test_missing_reader_has_no_runtime_or_mode_fallback(self):
+        from unittest.mock import patch
+        with patch('subprocess.run', side_effect=FileNotFoundError('synthetic missing reader')) as invoke:
+            with self.assertRaises(FileNotFoundError):
+                command([self.reader, CODEX_OBSERVER, '--apply'])
+            invoke.assert_called_once()
+
+    def test_parent_launchd_runtime_and_schedule_are_unchanged(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory(prefix='observer-install-test-') as tmp:
+            home = Path(tmp)
+            with patch.object(Path, 'home', return_value=home), patch.dict(globals(), {'CACHE': home / 'cache'}):
+                result = install()
+            with Path(result['plist']).open('rb') as stream:
+                config = plistlib.load(stream)
+            self.assertEqual(config['ProgramArguments'], ['/usr/bin/python3',
+                             str(home / '.local/libexec/simplememo-routine-observer.py'), '--once'])
+            self.assertEqual(config['StartInterval'], 3600)
+            self.assertIs(config['RunAtLoad'], True)
+            self.assertEqual(config['Label'], LABEL)
 
 
 if __name__ == '__main__':
