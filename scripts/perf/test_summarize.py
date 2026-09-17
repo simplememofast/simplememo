@@ -155,5 +155,66 @@ class SummaryTests(unittest.TestCase):
         self.assertEqual(result.stdout, '')
 
 
+    def test_variability_retains_outliers_without_relaxing_median_gates(self):
+        for run, score, lcp in [(1, .77, 7000), (2, .93, 2500), (3, .95, 2000)]:
+            r = report('production-ja')
+            r['categories']['performance']['score'] = score
+            r['audits'][audit.METRICS[1]]['numericValue'] = lcp
+            self.write(f'production-ja-{run}.report.json', r)
+        result = audit.summarize(self.root, require_production=True)
+        spread = result['variability']['production-ja']
+        self.assertEqual(result['status'], 'success')
+        self.assertEqual(spread['performance'], {'count': 3, 'min': 77, 'median': 93, 'max': 95, 'range': 18, 'mad': 2})
+        self.assertEqual(spread['runs_below_score_budget'], 1)
+        self.assertEqual(spread['runs_above_lcp_budget'], 1)
+        self.assertIn('77 / 93 / 95', audit.render(result))
+
+    def test_distribution_rejects_invalid_samples(self):
+        from variability import distribution
+        for values in ([], [True], [None], ['90'], [-1], [float('nan')], [float('inf')]):
+            with self.subTest(values=values), self.assertRaises(ValueError):
+                distribution(values)
+        self.assertEqual(distribution([5])['mad'], 0)
+        self.assertEqual(distribution([1, 2, 3, 4])['median'], 2.5)
+
+    def test_missing_trace_diagnostics_are_unknown_not_zero(self):
+        result = audit.summarize(self.root)
+        for row in result['runs']:
+            trace = row['trace_diagnostics']
+            self.assertIsNone(trace['observed_lcp_ms'])
+            self.assertTrue(all(v is None for v in trace['lcp_parts_ms'].values()))
+            self.assertTrue(trace['unavailable'])
+
+    def test_observed_trace_is_separate_from_simulated_mobile(self):
+        r = report('local-ja')
+        r['audits']['metrics'] = {'details': {'items': [{'observedLargestContentfulPaint': 400, 'observedFirstContentfulPaint': 300}]}}
+        parts = [{'subpart': k, 'duration': v} for k, v in zip(('timeToFirstByte', 'resourceLoadDelay', 'resourceLoadDuration', 'elementRenderDelay'), (100, 20, 30, 250))]
+        r['audits']['lcp-breakdown-insight'] = {'details': {'items': [{'items': parts}]}}
+        self.write('local-ja-1.report.json', r)
+        row = audit.read_run(self.root / 'local-ja-1.report.json')
+        self.assertEqual(row['trace_diagnostics']['observed_lcp_ms'], 400)
+        self.assertEqual(row['trace_diagnostics']['lcp_parts_ms']['elementRenderDelay'], 250)
+        self.assertEqual(row['metrics']['largest-contentful-paint'], 2400)
+        self.assertEqual(row['trace_diagnostics']['unavailable'], [])
+
+    def test_malformed_optional_trace_never_becomes_false_precision(self):
+        from variability import diagnostics
+        for parts in (None, {}, [None], [{'subpart': 'timeToFirstByte', 'duration': float('nan')}], [{'subpart': 'timeToFirstByte', 'duration': 1}] * 2):
+            with self.subTest(parts=parts):
+                r = report('local-ja')
+                r['audits']['metrics'] = {'details': {'items': [None]}}
+                r['audits']['lcp-breakdown-insight'] = {'details': {'items': [{'items': parts}]}}
+                trace = diagnostics(r)
+                self.assertIsNone(trace['observed_lcp_ms'])
+                self.assertIsNone(trace['lcp_parts_ms']['timeToFirstByte'])
+                json.dumps(trace, allow_nan=False)
+
+    def test_unverified_baseline_variability_is_still_reported(self):
+        self.write('production-deployment.json', {'verified': False})
+        result = audit.summarize(self.root)
+        self.assertEqual(set(result['variability']), set(audit.GROUPS))
+        self.assertEqual(result['enforced_groups'], ['local-ja', 'local-en'])
+
+
 if __name__ == '__main__':
     unittest.main()

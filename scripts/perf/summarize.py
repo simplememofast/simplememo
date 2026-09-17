@@ -6,6 +6,7 @@ import math
 import os
 from pathlib import Path
 import statistics
+from variability import diagnostics, group_variability, render_variability
 
 METRICS = ('first-contentful-paint', 'largest-contentful-paint', 'total-blocking-time', 'cumulative-layout-shift')
 CATEGORIES = ('performance', 'accessibility', 'best-practices', 'seo')
@@ -52,7 +53,7 @@ def read_run(path):
     categories = {key: number(report['categories'][key]['score'], f'{path.name}: {key}', 1) for key in CATEGORIES}
     metrics = {key: number(report['audits'][key]['numericValue'], f'{path.name}: {key}') for key in METRICS}
     return {'file': path.name, 'group': group, 'performance': categories['performance'] * 100,
-            'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', [])}
+            'categories': categories, 'metrics': metrics, 'warnings': report.get('runWarnings', []), 'trace_diagnostics': diagnostics(report)}
 
 
 def summarize(root: Path, *, require_production=False, expected_commit=None):
@@ -99,6 +100,7 @@ def summarize(root: Path, *, require_production=False, expected_commit=None):
             if any(r['categories'][category] != 1 for r in selected):
                 failures.append(f'{group}: {category} fell below 100')
     return {'measurement': MEASUREMENT, 'runs': rows, 'medians': medians,
+            'variability': group_variability(rows, BUDGETS, METRICS),
             'production_verified': verified, 'enforced_groups': enforced,
             'status': 'failure' if failures else 'success', 'failures': failures}
 
@@ -108,6 +110,7 @@ def render(summary):
     for row in summary.get('runs', []):
         a = row['metrics']
         lines.append(f"| {row['file']} | {row['performance']:.0f} | {a[METRICS[0]]/1000:.2f} | {a[METRICS[1]]/1000:.2f} | {a[METRICS[2]]:.0f} | {a[METRICS[3]]:.4f} |")
+    lines += render_variability(summary.get('variability', {}))
     lines += ['', MEASUREMENT, '', 'Enforced groups: ' + ', '.join(summary.get('enforced_groups', []))]
     if summary.get('production_verified') is False:
         lines.append('Production is an unverified baseline observation, not evidence that this checkout is deployed.')
