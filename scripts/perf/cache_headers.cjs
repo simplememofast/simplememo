@@ -1,6 +1,7 @@
 'use strict';
 // Bounded, read-only public response verification; no analytics submissions.
 const fs=require('node:fs'),path=require('node:path');
+const {execFileSync}=require('node:child_process');
 const {chromium}=require('playwright');
 const ROOT=path.resolve(__dirname,'../..');
 const origin=new URL(process.env.PERF_ORIGIN || 'https://simplememofast.com');
@@ -11,7 +12,7 @@ const manifest=JSON.parse(fs.readFileSync(path.join(ROOT,'assets/home-perf/manif
 async function main(){
  fs.mkdirSync(output,{recursive:true});
  const browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox']});
- const receipt={checked_at:new Date().toISOString(),origin:origin.origin,expected_commit:process.env.GITHUB_SHA,verified:false};
+ const receipt={checked_at:new Date().toISOString(),origin:origin.origin,expected_commit:execFileSync('git',['rev-parse','HEAD'],{cwd:ROOT,encoding:'utf8'}).trim(),verified:false};
  try{
   const ctx=await browser.newContext();
   await ctx.route('**/*',r=>new URL(r.request().url()).origin===origin.origin&&r.request().method()==='GET'?r.continue():r.abort());
