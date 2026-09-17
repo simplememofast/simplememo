@@ -21,11 +21,11 @@ async function snapshot(browser,engine,lang,width,js,variant){
   await p.evaluate(()=>scrollTo({top:0,behavior:'instant'}));await delay(200);
   const rects=await p.evaluate(()=>[...document.querySelectorAll('main>section,main>figure')].map(e=>{const r=e.getBoundingClientRect();return{id:e.id,cls:e.className,x:r.x,y:r.y+scrollY,w:r.width,h:r.height};}));
   const overflow=await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1);
-  const text=await p.locator('main').inner_text();
+  const text=await p.locator('main').innerText();
   const imgs=await p.locator('main img').evaluateAll(xs=>xs.map(e=>({src:e.currentSrc,complete:e.complete,width:e.naturalWidth})));
   const anchors=await p.locator('a[href^="#"]').evaluateAll(xs=>[...new Set(xs.map(e=>e.getAttribute('href')))].filter(x=>x.length>1));
   const targetResults=[];
-  for(const a of anchors){await p.goto(url+a,{waitUntil:'load',timeout:30000});await delay(400);targetResults.push(await p.evaluate(id=>{const e=document.getElementById(id);const r=e?.getBoundingClientRect();return{id,exists:!!e,y:r?.y,h:r?.height,visible:!!r&&r.height>0&&r.y<innerHeight&&r.bottom>0};},a.slice(1)));}
+  for(const a of anchors){await p.goto('about:blank');await p.goto(url+a,{waitUntil:'load',timeout:30000});await delay(400);targetResults.push(await p.evaluate(id=>{const e=document.getElementById(id);const r=e?.getBoundingClientRect();return{id,exists:!!e,y:r?.y,h:r?.height,visible:!!r&&r.height>0&&r.y<innerHeight&&r.bottom>0};},a.slice(1)));}
   await p.emulateMedia({media:'print'});await delay(200);
   const print=await p.evaluate(()=>[...document.querySelectorAll('main>section')].map(e=>({id:e.id,h:e.getBoundingClientRect().height,cv:getComputedStyle(e).contentVisibility})));
   return{engine,lang,width,js,variant,errors,rects,overflow,text,imgs,anchors:targetResults,print};
