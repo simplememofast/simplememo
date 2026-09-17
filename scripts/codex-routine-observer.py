@@ -28,6 +28,48 @@ OUTPUTS = {'function_call_output', 'custom_tool_call_output'}
 RUNTIME_FAILURES = {'usage_limit_exceeded': 'usage_limit'}
 
 
+# Fixed diagnostic vocabulary, separate from the public observation schema.
+# Never return source values, arbitrary exception strings, paths or identities.
+DIAGNOSTIC_CHECKS = {
+    'Unknown scheduler UI status': 'scheduler_status_unsupported',
+    'Unknown scheduler configuration': 'scheduler_configuration_unsupported',
+    'Registered automation is missing': 'registered_automation_missing',
+    'Previously observed scheduled run disappeared': 'history_run_missing',
+    'Scheduled run identity changed': 'history_identity_changed',
+    'Previously observed transcript disappeared': 'history_transcript_missing',
+    'Previously observed turn identity changed': 'history_turn_changed',
+    'Closed turn changed; do not replace the initial failure': 'closed_turn_changed',
+    'Original runtime failure classification changed': 'runtime_failure_changed',
+    'Closed gate receipt changed': 'gate_receipt_changed',
+    'Invalid gate receipt': 'gate_receipt_invalid',
+    'Invalid automatic detection receipt': 'automatic_detection_invalid',
+    'Unexpected metadata fields': 'metadata_fields_invalid',
+    'Codex observation is stale or future': 'observation_clock_invalid',
+    'Observation scope changed': 'observation_scope_changed',
+}
+
+
+def failure_payload(error):
+    code = 'unexpected_failure'
+    if isinstance(error, json.JSONDecodeError):
+        code = 'json_invalid'
+    elif type(error) is ValueError:
+        message = error.args[0] if len(error.args) == 1 and type(error.args[0]) is str else None
+        code = DIAGNOSTIC_CHECKS.get(message, 'validation_failed')
+    elif isinstance(error, sqlite3.Error):
+        code = 'sqlite_unavailable'
+    elif isinstance(error, PermissionError):
+        code = 'source_permission_denied'
+    elif isinstance(error, FileNotFoundError):
+        code = 'source_missing'
+    elif isinstance(error, OSError):
+        code = 'source_io_error'
+    elif isinstance(error, (KeyError, IndexError, TypeError, AttributeError)):
+        code = 'source_shape_invalid'
+    return {'state': 'failed', 'reason': 'Codex run observation unavailable or invalid',
+            'diagnostic_code': code}
+
+
 def require(condition, message):
     if not condition:
         raise ValueError(message)
@@ -440,7 +482,8 @@ def validate(doc, now=None):
         require(isinstance(tid, str) and UUID.fullmatch(tid) and tid not in seen, 'Duplicate or invalid scheduled run')
         seen.add(tid)
         require(run['automation_id'] in REGISTERED, 'Unregistered automation data')
-        require(run['scheduler_status'] in ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'NEEDS_REVIEW',
+        # UI review state is not an original turn outcome or publication proof.
+        require(run['scheduler_status'] in ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'NEEDS_REVIEW', 'PENDING_REVIEW',
                                             'ACCEPTED', 'ARCHIVED', 'FAILED', 'ERROR'),
                 'Unknown scheduler UI status')
         require(run['business_outcome'] == 'not_inferred', 'Scheduler status is not publication success')
@@ -1012,6 +1055,81 @@ class Tests(unittest.TestCase):
             self.assertEqual(ledger.read_bytes(), before)
 
 
+class DiagnosticTests(unittest.TestCase):
+    # Temporary synthetic stores only; never the user's scheduler or sessions.
+    def test_pending_review_preserves_original_lifecycle(self):
+        for failed in (True, False):
+            with self.subTest(failed=failed), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp); fixture = Tests(); log = fixture.setup_store(root)
+                log.write_bytes(fixture.raw(failed=failed))
+                prior = observe(root, now=fixture.now)
+                with sqlite3.connect(root / 'sqlite/codex-dev.db') as c:
+                    c.execute("UPDATE automation_runs SET status='PENDING_REVIEW' WHERE automation_id='obsidian-2'")
+                result = observe(root, prior, now=fixture.now)
+                self.assertEqual(result['runs'][0]['scheduler_status'], 'PENDING_REVIEW')
+                self.assertEqual(result['runs'][0]['transcript'], prior['runs'][0]['transcript'])
+                self.assertEqual(summary(result)['initial_failed'], int(failed))
+                self.assertEqual(summary(result)['publication_success'], 'not_inferred')
+
+    def test_pending_review_without_turns_is_not_completion(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); fixture = Tests(); log = fixture.setup_store(root)
+            log.write_bytes((json.dumps({'type': 'session_meta', 'payload': {'id': fixture.tid}}) + '\n').encode())
+            with sqlite3.connect(root / 'sqlite/codex-dev.db') as c:
+                c.execute("UPDATE automation_runs SET status='PENDING_REVIEW' WHERE automation_id='obsidian-2'")
+            result = observe(root, now=fixture.now)
+            self.assertEqual(result['runs'][0]['transcript']['turns'], [])
+            self.assertEqual(summary(result)['publication_success'], 'not_inferred')
+
+    def test_unknown_scheduler_status_is_still_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); fixture = Tests(); fixture.setup_store(root)
+            with sqlite3.connect(root / 'sqlite/codex-dev.db') as c:
+                c.execute("UPDATE automation_runs SET status='private-unknown-status' WHERE automation_id='obsidian-2'")
+            with self.assertRaisesRegex(ValueError, '^Unknown scheduler UI status$'):
+                observe(root, now=fixture.now)
+
+    def test_diagnostic_codes_are_fixed_and_no_raw_error_is_returned(self):
+        for message, code in DIAGNOSTIC_CHECKS.items():
+            self.assertEqual(failure_payload(ValueError(message)), {
+                'state': 'failed', 'reason': 'Codex run observation unavailable or invalid', 'diagnostic_code': code})
+        for error, expected in [
+            (ValueError('private arbitrary message'), 'validation_failed'),
+            (ValueError({'secret': 'private'}), 'validation_failed'),
+            (KeyError('private-key'), 'source_shape_invalid'),
+            (IndexError('private-index'), 'source_shape_invalid'),
+            (sqlite3.OperationalError('private-sql'), 'sqlite_unavailable'),
+            (FileNotFoundError('private-path'), 'source_missing'),
+            (PermissionError('private-path'), 'source_permission_denied'),
+            (OSError('private-path'), 'source_io_error'),
+            (json.JSONDecodeError('private', 'private', 0), 'json_invalid'),
+            (RuntimeError('private-token'), 'unexpected_failure'),
+        ]:
+            out = failure_payload(error)
+            self.assertEqual(out['diagnostic_code'], expected)
+            self.assertNotIn('private', json.dumps(out))
+
+    def test_diagnostics_never_call_exception_stringification(self):
+        class SensitiveError(Exception):
+            def __str__(self):
+                raise AssertionError('Do not stringify source exceptions')
+        self.assertEqual(failure_payload(SensitiveError())['diagnostic_code'], 'unexpected_failure')
+
+    def test_cli_failure_is_nonzero_and_leaves_ledger_untouched(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ledger = root / 'private-ledger.json'
+            ledger.write_text('{"existing": "private-preserved"}\n')
+            before = ledger.read_bytes()
+            run = subprocess.run([sys.executable, __file__, '--apply', '--ledger', str(ledger),
+                                  '--codex-dir', str(root / 'missing-store')], capture_output=True, text=True, timeout=10)
+            self.assertEqual(run.returncode, 1)
+            self.assertEqual(json.loads(run.stdout)['diagnostic_code'], 'sqlite_unavailable')
+            self.assertNotIn('private', run.stdout + run.stderr)
+            self.assertNotIn(str(root), run.stdout + run.stderr)
+            self.assertEqual(ledger.read_bytes(), before)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -1041,7 +1159,7 @@ if __name__ == '__main__':
                 doc = json.loads(options.ledger.read_text())[KEY]
                 result = summary(validate(doc))
             print(json.dumps(result))
-        except Exception:
+        except Exception as error:
             # Database paths, exception messages and transcript text stay local.
-            print(json.dumps({'state': 'failed', 'reason': 'Codex run observation unavailable or invalid'}))
+            print(json.dumps(failure_payload(error)))
             sys.exit(1)
