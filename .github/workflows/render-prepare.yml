@@ -1,0 +1,61 @@
+name: Prepare Rendering Candidate (temporary)
+on:
+  push:
+    branches: [claude/pagespeed-section-render-20260917]
+    paths: ['.github/workflows/render-prepare.yml']
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply the exact measured CSS only when source preconditions match
+        run: |
+          test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
+          cat >> assets/css/home-hero.css <<'CSS'
+          
+          /* Render below-fold sections only when needed. Keep the hero immediate.
+             Intrinsic height is replaced by the browser's remembered real height.
+             Screen-only: printed pages retain their existing complete layout. */
+          @media screen{
+            .home-photo main>section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 1000px}
+            .home-photo main>section:target{content-visibility:visible}
+          }
+          CSS
+          pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+          python scripts/perf/build_home.py --write
+          python scripts/perf/build_home.py --check
+          python scripts/perf/verify_home.py --selftest
+          node scripts/check-css-version.mjs
+          node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs scripts/perf/browser_checks.test.cjs
+          python scripts/perf/test_summarize.py
+      - name: Commit only the four verified text outputs to this isolated branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const {execFileSync} = require('node:child_process');
+            const branch = 'claude/pagespeed-section-render-20260917';
+            if (context.ref !== `refs/heads/${branch}`) throw new Error('Unexpected branch');
+            const expected = ['assets/css/home-hero.css','assets/home-perf/manifest.json','en/index.html','index.html'].sort();
+            const changed = execFileSync('git',['diff','--name-only'],{encoding:'utf8'}).trim().split('\n').sort();
+            if (JSON.stringify(changed)!==JSON.stringify(expected)) throw new Error('Unexpected generated change, including any font/image bytes: '+JSON.stringify(changed));
+            const ref = await github.rest.git.getRef({...context.repo,ref:`heads/${branch}`});
+            if (ref.data.object.sha !== context.sha) throw new Error('Branch moved; do not overwrite');
+            const parent = await github.rest.git.getCommit({...context.repo,commit_sha:context.sha});
+            const entries=[];
+            for(const name of expected){const blob=await github.rest.git.createBlob({...context.repo,content:fs.readFileSync(name,'utf8'),encoding:'utf-8'});entries.push({path:name,mode:'100644',type:'blob',sha:blob.data.sha});}
+            const tree=await github.rest.git.createTree({...context.repo,base_tree:parent.data.tree.sha,tree:entries});
+            const commit=await github.rest.git.createCommit({...context.repo,message:'perf: defer below-fold homepage rendering with print and target safeguards',tree:tree.data.sha,parents:[context.sha]});
+            await github.rest.git.updateRef({...context.repo,ref:`heads/${branch}`,sha:commit.data.sha,force:false});
+            core.notice('Isolated candidate committed: '+commit.data.sha+'. Not approved for deployment.');
