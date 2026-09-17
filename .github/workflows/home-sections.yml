@@ -1,0 +1,60 @@
+name: Homepage Section Rendering
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/css/**'
+      - 'scripts/perf/sections_browser.mjs'
+      - '.github/workflows/home-sections.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'en/index.html'
+      - 'assets/css/**'
+      - 'scripts/perf/sections_browser.mjs'
+      - '.github/workflows/home-sections.yml'
+permissions:
+  contents: read
+concurrency:
+  group: home-sections-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+jobs:
+  section-rendering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha || github.event.before }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned functional browser tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/tools" --no-save playwright@1.55.0
+          "$RUNNER_TEMP/tools/node_modules/.bin/playwright" install --with-deps ${{ matrix.browser }}
+      - name: Compare native screen, anchor, focus and print behavior
+        env:
+          QA_BROWSER: ${{ matrix.browser }}
+          QA_RESULTS: ${{ runner.temp }}/section-results
+          NODE_PATH: ${{ runner.temp }}/tools/node_modules
+        run: node candidate/scripts/perf/sections_browser.mjs baseline candidate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: section-rendering-${{ matrix.browser }}
+          path: ${{ runner.temp }}/section-results/
+          retention-days: 14
+          if-no-files-found: error
