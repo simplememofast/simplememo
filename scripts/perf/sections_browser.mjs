@@ -5,6 +5,7 @@ import zlib from 'node:zlib';
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
+import {waitForFonts} from './sections_wait.mjs';
 export async function main(){
 const require=createRequire(import.meta.url),pw=require('playwright');
 const [baseline,candidate]=process.argv.slice(2).map(p=>fs.realpathSync(p));
@@ -33,12 +34,17 @@ const browser=await pw[engine].launch(options),results=[];
 const cases=[{width:320,js:true},{width:412,js:true},{width:768,js:true},{width:1440,js:true},{width:390,js:false}];
 async function measurePage(url,label,c){
  const context=await browser.newContext({viewport:{width:c.width,height:823},javaScriptEnabled:c.js,reducedMotion:'reduce'});
+ context.setDefaultTimeout(15000);context.setDefaultNavigationTimeout(30000);
+ const stage=phase=>{const value={browser:engine,width:c.width,javascript:c.js,label,phase,at:new Date().toISOString()};fs.writeFileSync(path.join(output,engine+'-progress.json'),JSON.stringify(value,null,2));console.log(JSON.stringify(value));};
  let page=await context.newPage();
  try{
+  stage('warmup-navigation');
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
+  stage('warmup-sections');
   for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(150);}
-  await page.evaluate(()=>document.fonts.ready);
+  stage('warmup-fonts');await waitForFonts(page);
   await page.close();page=await context.newPage();
+  stage('screen-navigation');
   await page.goto(url+'/',{waitUntil:'networkidle'});await wait(500);
   const headings=await page.locator('h1,h2,h3').allTextContents();
   const hero=await page.locator('.hero').boundingBox();
@@ -55,6 +61,7 @@ async function measurePage(url,label,c){
   const hashes=[...new Set([...linkHashes,...idHashes.slice(0,4),...idHashes.slice(-4)])];
   assert(hashes.length>0,'No native fragment targets were exercised');
   const anchors=[];
+  stage('fresh-fragment-navigation');
   for(const hash of hashes){
    const id=decodeURIComponent(hash.slice(1));const target=page.locator('[id='+JSON.stringify(id)+']');
    if(await target.count()!==1)continue;
@@ -69,6 +76,7 @@ async function measurePage(url,label,c){
   assert(anchors.length>0,'No real anchor navigation was verified');
   const lastLink=page.locator('main a[href*="apps.apple.com"]').last();await lastLink.focus();await wait(400);
   const focus=await lastLink.boundingBox();assert(focus&&focus.y<823&&focus.y+focus.height>0,'Focused CTA is outside viewport');
+  stage('print-sections');
   await page.emulateMedia({media:'print'});await wait(300);
   const printHeights=[];
   // Media emulation alone can retain offscreen placeholders; inspect each actually rendered print section.
@@ -78,9 +86,10 @@ async function measurePage(url,label,c){
   }
   // Existing shared CSS already uses auto on four sections; compare actual print styles and geometry against the baseline below.
   await page.emulateMedia({media:'screen'});
+  stage('english-navigation');
   await page.goto(url+'/en/',{waitUntil:'networkidle'});await wait(300);
   for(const section of await page.locator('main > section').all()){await section.scrollIntoViewIfNeeded();await wait(150);}
-  await page.evaluate(()=>document.fonts.ready);
+  stage('english-fonts');await waitForFonts(page);
   await page.reload({waitUntil:'networkidle'});await wait(500);
   const enHeights=[];
   for(const section of await page.locator('main > section').all()){

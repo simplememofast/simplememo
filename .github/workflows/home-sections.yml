@@ -42,7 +42,7 @@ jobs:
           "$RUNNER_TEMP/tools/node_modules/.bin/playwright" install --with-deps ${{ matrix.browser }}
       - name: Prepare identical-content rendering control
         run: |
-          node --test candidate/scripts/perf/section_control.test.mjs
+          node --test candidate/scripts/perf/section*.test.mjs
           node candidate/scripts/perf/section_control.mjs candidate "$RUNNER_TEMP/section-control"
       - name: Compare native screen, anchor, focus and print behavior
         env:
