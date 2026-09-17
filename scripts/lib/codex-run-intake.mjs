@@ -42,9 +42,23 @@ export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automati
     || now - observed > 3 * 86400000 || !Array.isArray(doc.runs)) return empty;
   empty.valid = true;
   const known = new Map();
+  const knownIds = new Set();
   for (const row of runsDoc?.runs ?? []) {
     if (!String(row.external_ref).startsWith('codex:')) continue;
-    if (known.has(row.external_ref)) throw new Error('duplicate Codex ledger reference');
+    if (knownIds.has(row.run_id)) throw new Error('duplicate Codex ledger task id');
+    knownIds.add(row.run_id);
+    const previous = known.get(row.external_ref);
+    if (previous) {
+      // A manual session can deliver distinct owner-directed tasks. Its thread
+      // is provenance, not a scheduled-run identity. Keep every ledger row and
+      // retain the ref as known so it cannot be imported again as automation.
+      const ownerTask = r => r.route === 'owner-session' && r.source === 'session'
+        && r.needs_triage !== true;
+      if (!ownerTask(previous) || !ownerTask(row) || previous.run_id === row.run_id) {
+        throw new Error('duplicate Codex ledger reference');
+      }
+      continue;
+    }
     known.set(row.external_ref, row);
   }
   const taken = new Set((runsDoc?.runs ?? []).map(r => r.run_id));
