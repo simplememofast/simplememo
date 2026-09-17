@@ -1,0 +1,72 @@
+name: Prepare Mobile Rendering Candidate (temporary)
+on:
+  push:
+    branches: [claude/pagespeed-mobile-rendering-20260917]
+    paths: [.github/workflows/pagespeed-layout-prepare.yml]
+permissions:
+  contents: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply only the measured mobile Japanese rule and reproduce homepage outputs
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = f9b41530a4e3f188b44072e86261dd11cf7bd0a4
+          test "$(git hash-object assets/css/home-hero.css)" = c70924f4140092371f18071a92144837e41b891b
+          pip install fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          manifest=Path('assets/home-perf/manifest.json')
+          old=json.loads(manifest.read_text())
+          css=Path('assets/css/home-hero.css')
+          css.write_text(css.read_text()+'\n/* Skip offscreen section layout on Japanese mobile screens only.\n * Keep the hero eager; retain remembered sizes; desktop and print are unchanged. */\n@media screen and (max-width:1023px){\n  .home-photo:lang(ja) main>section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 600px}\n}\n')
+          subprocess.run(['python3','scripts/perf/build_home.py','--write'],check=True)
+          new=json.loads(manifest.read_text())
+          assert old['assets']==new['assets'], 'Image or font contents unexpectedly changed'
+          assert old['pages']==new['pages'], 'Glyph inventory unexpectedly changed'
+          allowed={'assets/css/home-hero.css','index.html','en/index.html','assets/home-perf/manifest.json'}
+          changed=set(subprocess.check_output(['git','diff','--name-only'],text=True).splitlines())
+          assert changed==allowed, repr(changed)
+          PY
+          python3 scripts/perf/build_home.py --check
+          python3 scripts/perf/verify_home.py --selftest
+          python3 scripts/perf/verify_home.py
+          node scripts/check-css-version.mjs
+      - name: Commit only the four verified candidate files to the same branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs=require('fs');
+            const branch='claude/pagespeed-mobile-rendering-20260917';
+            if(context.ref!==`refs/heads/${branch}`)throw Error('Unexpected branch');
+            const {owner,repo}=context.repo;
+            const current=await github.rest.git.getRef({owner,repo,ref:`heads/${branch}`});
+            if(current.data.object.sha!==context.sha)throw Error('Branch moved; refuse to overwrite');
+            const commit=await github.rest.git.getCommit({owner,repo,commit_sha:context.sha});
+            const paths=['assets/css/home-hero.css','index.html','en/index.html','assets/home-perf/manifest.json'];
+            const tree=await github.rest.git.createTree({owner,repo,base_tree:commit.data.tree.sha,tree:paths.map(path=>({path,mode:'100644',type:'blob',content:fs.readFileSync(path,'utf8')}))});
+            const created=await github.rest.git.createCommit({owner,repo,message:'perf: defer offscreen Japanese mobile sections without changing content or media',tree:tree.data.sha,parents:[context.sha]});
+            await github.rest.git.updateRef({owner,repo,ref:`heads/${branch}`,sha:created.data.sha,force:false});
+            core.info(`Prepared candidate ${created.data.sha}; no main merge or production claim.`);
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mobile-rendering-candidate-text
+          path: |
+            assets/css/home-hero.css
+            index.html
+            en/index.html
+            assets/home-perf/manifest.json
+          retention-days: 7
