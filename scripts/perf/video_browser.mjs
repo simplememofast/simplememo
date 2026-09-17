@@ -87,7 +87,7 @@ export async function main(){
       const hashes=await page.locator('main [id]').evaluateAll(nodes=>{const v=document.querySelector('figure.lp-video');return nodes.filter(n=>v.compareDocumentPosition(n)&Node.DOCUMENT_POSITION_FOLLOWING).map(n=>'#'+encodeURIComponent(n.id)).slice(-2);});
       assert(hashes.length>0,'Expected native fragment targets below the video');const anchors=[];
       progress('native-fragments');
-      for(const hash of hashes){const p=await context.newPage();try{await p.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(400);const target=p.locator('[id='+JSON.stringify(decodeURIComponent(hash.slice(1)))+']');const rect=await target.boundingBox();assert(rect&&rect.y<823&&rect.y+rect.height>0,'Fragment target outside viewport');anchors.push({hash,y:rect.y,height:rect.height});}finally{await p.close();}}
+      for(const hash of hashes){const p=await context.newPage();try{await p.goto(url+'/'+hash,{waitUntil:'networkidle'});await wait(400);const target=p.locator('[id='+JSON.stringify(decodeURIComponent(hash.slice(1)))+']');const rect=await target.boundingBox();assert(rect&&rect.y<823&&rect.y+rect.height>0,'Fragment target outside viewport');assert.equal(await p.locator('main > figure.lp-video').evaluate(n=>getComputedStyle(n).contentVisibility),'visible','Native fragment must disable preceding video containment');anchors.push({hash,y:rect.y,height:rect.height});}finally{await p.close();}}
       return {headings,hero,initial,box,attributes,caption,focused,playing,lifecyclePrinted,printed,anchors};
     }finally{await context.close();}
   }

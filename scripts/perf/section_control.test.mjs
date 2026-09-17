@@ -22,6 +22,9 @@ test('missing, duplicate and incomplete control rules fail closed',()=>{
  const css=fs.readFileSync(root+'assets/css/home-hero.css','utf8');
  assert.throws(()=>removeSectionRule('unrelated css'),/exactly one/);
  assert.throws(()=>removeSectionRule(css+css),/exactly one/);
- assert.throws(()=>removeSectionRule(css.trim().slice(0,-1)),/Unbalanced/);
+ const start=css.indexOf('/* Progressive enhancement only:');
+ const end=css.indexOf('\n}',start);
+ assert(start>=0&&end>start,'Expected the actual section-rule boundary');
+ assert.throws(()=>removeSectionRule(css.slice(0,end+1)+css.slice(end+2)),/Unbalanced/);
  assert.throws(()=>removeSectionRule(css.replace('html[lang="ja"]','html[lang="en"]')),/Unexpected/);
 });

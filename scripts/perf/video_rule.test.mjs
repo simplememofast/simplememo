@@ -26,3 +26,8 @@ test('native video controls, metadata and geometry reservations survive',()=>{
   assert(html.includes('"@type":"VideoObject"'));
   assert(!fs.readFileSync(new URL('en/index.html',root),'utf8').includes('<video'));
 });
+
+test('fragment-safe containment is gated on selector support and has an eager escape',()=>{
+  assert(VIDEO_RULE.includes('and selector(:has(:target))'));
+  assert(VIDEO_RULE.includes('html[lang="ja"]:has(:target) main > figure.lp-video'));
+});
