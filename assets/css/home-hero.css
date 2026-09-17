@@ -230,3 +230,11 @@
   .home-photo .hero--photo .hero-cta-row { gap: 16px; }
   .hero__footer { padding-inline: 20px; }
 }
+
+/* Render below-fold sections only when needed. Keep the hero immediate.
+   Intrinsic height is replaced by the browser's remembered real height.
+   Screen-only: printed pages retain their existing complete layout. */
+@media screen{
+  .home-photo main>section:not(.hero){content-visibility:auto;contain-intrinsic-size:auto 1000px}
+  .home-photo main>section:target{content-visibility:visible}
+}
