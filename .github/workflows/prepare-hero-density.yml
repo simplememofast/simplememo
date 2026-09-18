@@ -27,7 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD^)" = a33f6b7230dc46628f4e5f34c25e5524e60073cd
+          test "$(git rev-parse HEAD^)" = 43f395ddf784ea6ebbcb8118f3f867b181321af5
           python - <<'PY'
           import subprocess
           files=set(subprocess.check_output(['git','diff','--name-only','2c25e4b5fc4f3395cdc7c16e27a23868510b59e3','HEAD'],text=True).splitlines())
