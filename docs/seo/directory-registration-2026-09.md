@@ -36,7 +36,7 @@
 | P0-6 | フリーソフト100（JA-091） | SUBMISSION | SUBMITTED | 2026-09-19 | no | pending | https://freesoft-100.com/about/form_software.html | 掲載まで1〜2か月・不採用時は連絡なし | 11月頃に `freesoft-100.com` 内検索で掲載有無を確認 |
 | 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要 | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新 |
 | 既存 | Product Hunt | — | ALREADY_EXISTS | — | yes | **ugc**（`rel="noreferrer noopener ugc"`）・当該ページは `noindex, nofollow` | https://www.producthunt.com/products/simple-memo-captio-style | — | 重複ローンチを作らない。下書き1件は未投稿のまま |
-| 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり → `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。awesome 系ミラー（awesome.ecosyste.ms 等）への波及を後日確認 |
+| 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | BLOCKED | — | — | — | https://www.indiehackers.com/products/new | アカウント `memolife23` が **"Your account cannot create or edit products"** | IH サポートに制限解除を問い合わせる（人の操作1回） |
 | 追加 | Launching Next | SELF_REGISTER | BLOCKED | — | — | — | https://www.launchingnext.com/submit/ | ボット確認「What is 2+3?」 | **開いたタブでクイズに `5` と入力して Submit を押すだけ**（他項目は入力済み） |
@@ -45,6 +45,19 @@
 | 追加 | Uneed | SELF_REGISTER | BLOCKED | — | — | — | https://www.uneed.best/submit-a-tool | 最終保存にアカウント作成が必要 | 人がアカウントを作れば数分で完了 |
 | 追加 | Slant | SELF_REGISTER | BLOCKED | — | — | — | https://www.slant.co/ | サイトが HTTP 526 を返し到達不能 | 復旧後に再訪 |
 | 追加 | アプリソムリエ | — | NOT_ELIGIBLE | — | — | — | appsomm.jp | ドメインが消滅（DNS NXDOMAIN） | 候補から削除 |
+
+### リンク属性の確認結果（2026-09-19 実測）
+
+| 掲載先 | ページ | 出リンクの rel | ページの robots |
+| --- | --- | --- | --- |
+| SaaSHub | `/simplememo-fast-alternatives` | **なし＝dofollow** | 指定なし |
+| SaaSHub | `/simplememo-fast` | `nofollow` | `noindex, follow` |
+| AlternativeTo | `/software/simple-memo--captio-style/about/` | `nofollow noopener` | `index, follow` |
+| Product Hunt | `/products/simple-memo-captio-style` と各ローンチ | `noreferrer noopener ugc` | `noindex, nofollow`（ログイン状態で観測） |
+| awesome-obsidian（GitHub） | リポジトリのREADME | `nofollow`（GitHubの仕様） | — |
+
+**現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
+ただし AlternativeTo と Product Hunt は実ユーザーのいる媒体なので、nofollow でも掲載価値は残す。
 
 ### 集計
 
