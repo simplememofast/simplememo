@@ -6,14 +6,14 @@ const file='autopilot/index.html';
 let html=fs.readFileSync(file,'utf8');
 const current=score(loadContext());
 assert(Number.isFinite(current.total));
-function update(pattern, transform){
-  const flags=pattern.flags.includes('g')?pattern.flags:pattern.flags+'g';
-  const matches=Array.from(html.matchAll(new RegExp(pattern.source,flags)));
-  assert.equal(matches.length,1,'Expected unique public counter '+pattern.source);
+function update(pattern, transform, expectedCount=1){
+  const matches=Array.from(html.matchAll(new RegExp(pattern.source,pattern.flags.includes('g')?pattern.flags:pattern.flags+'g')));
+  assert.equal(matches.length,expectedCount,'Unexpected public counter inventory '+pattern.source);
   html=html.replace(pattern,transform);
 }
 update(/(<span data-score-total>)[\d.]+(<\/span>)/,(_,a,b)=>a+current.total.toFixed(1)+b);
-update(/(<span data-decision-date>)[\d-]+(<\/span>)/,(_,a,b)=>a+current.generated_jst+b);
+// Both existing date spans explicitly describe this same live autonomy score.
+update(/(<span data-decision-date>)[\d-]+(<\/span>)/g,(_,a,b)=>a+current.generated_jst+b,2);
 for(const [id,c] of Object.entries(current.components)){
   assert(Number.isFinite(c.points));
   update(new RegExp('(<tr data-score="'+id+'"><td>[^<]+<\\/td><td class="num"><b>)[\\d.]+(<\\/b>)'),(_,a,b)=>a+c.points.toFixed(1)+b);
