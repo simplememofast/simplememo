@@ -158,3 +158,15 @@ runs first and `--strict` makes staleness an incident rather than a data point.
   weekly report currently stops at clicks.
 - **Activation correlation.** Which in-app event predicts payment is an open
   question; answering it needs product analytics this repo does not have.
+
+## Next initiative: Japanese editorial links (2026-09-18)
+
+The [100-candidate implementation plan](../docs/seo/ja-editorial-links-plan-2026-09-18.md)
+and [machine-readable backlog](plans/ja-editorial-links-2026-09-18.json) preserve
+prior-outreach exclusions, incomplete-history warnings and the first eight
+verification candidates. This is **planned, not activated**: no email, paid
+commitment, scheduler change, new public page or running experiment is authorized
+by registering the plan. Recheck current authority, stop conditions, claims and
+the full contact history before selecting one next action.
+
+Track the next verification action in [issue #1454](https://github.com/simplememofast/simplememo/issues/1454).
