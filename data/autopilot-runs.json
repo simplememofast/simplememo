@@ -1414,6 +1414,26 @@
       "failure_class": "no_artifact"
     },
     {
+      "run_id": "ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+      "date_jst": "2026-09-16",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "Structured Codex runtime code usage_limit_exceeded; original turn 01a0a6e0-4347-7fa1-86d8-c2d630e94bf6; receipt SHA256 474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed",
+      "external_ref": "codex:01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+      "interventions": [],
+      "source": "act-reconcile",
+      "failure_class": "usage_limit",
+      "failed_at": "2026-09-15T21:01:56.057Z",
+      "detected_at": "2026-09-17T14:34:10.102Z",
+      "detected_note": "Codex original turn 01a0a6e0-4347-7fa1-86d8-c2d630e94bf6; transcript SHA256 9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0; observed 2026-09-17T14:34:10.102Z; automatic detection receipt SHA256 e8bbf11e3eb77ffd28baf58ac3259e0c81f1d8b6c33173a529cd18a748eac1aa",
+      "failure_stage": "cost"
+    },
+    {
       "run_id": "ap-20260916-owner-session-pagespeed",
       "date_jst": "2026-09-16",
       "route": "owner-session",
@@ -1434,6 +1454,53 @@
       "source": "session",
       "note": "PR1425と追加PR1426を同じPageSpeed改善サイクルとして1行で回収。2026-09-16に両方公開済み。監査PR1431や未採用実験は出荷数に含めない。ローカルCodex定期タスクの未取得記録・成否は依然不明。",
       "evidence": "docs/perf/owner-session-recovery-20260917.json"
+    },
+    {
+      "date_jst": "2026-09-17",
+      "route": "owner-session",
+      "attempted": true,
+      "lane": "F",
+      "action": "repair",
+      "artifact": null,
+      "source": "session",
+      "evidence": "docs/perf/pagespeed-reconciliation-20260918.json",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "run_id": "ap-20260917-owner-session-pagespeed-navigation",
+      "outcome": "shipped",
+      "pr": 1441,
+      "failure_reason": null,
+      "external_ref": "github-pr:1441",
+      "note": "検証済みのページ内移動修正1441を1サイクルとして回収。不採用動画案1440は出荷に数えない。"
+    },
+    {
+      "date_jst": "2026-09-17",
+      "route": "owner-session",
+      "attempted": true,
+      "lane": "F",
+      "action": "repair",
+      "artifact": null,
+      "source": "session",
+      "evidence": "docs/perf/pagespeed-reconciliation-20260918.json",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "run_id": "ap-20260917-owner-session-pagespeed-poster",
+      "outcome": "failed",
+      "pr": 1443,
+      "external_ref": "github-pr:1443+1445",
+      "failure_reason": "Poster1443 and rollback1445 both failed their original post-merge Japanese performance budget. Original content was restored; speed recovery and causality are unproven.",
+      "failure_stage": "execution",
+      "needs_triage": true,
+      "note": "ポスター試行とロールバックを1つの失敗サイクルとして保持。成功出荷や今回の1200px候補として計上しない。",
+      "failure_class": "post-merge-performance-budget"
     }
   ],
   "retracted_observations": [

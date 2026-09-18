@@ -204,6 +204,15 @@
       "within_hours": 24,
       "stop_automation": false,
       "note": "モデルは動いたが、今回の実行に結びつく成果物がない。まず実行ログ・実行ID・ブランチ先頭・PRと結果台帳を照合し、原因を特定して既存の修理範囲で対応する。run 33959414641は旧検査が開始前の宣言ブランチの存在だけで成功した例。成果物照合は既存PR943で修正済みだが、主系の正常完走を確認するまでは復旧と記録しない。単発では全経路を止めず、日報に残す。同じ種別の修理後も再発する場合は既存self_repair.stop_after_failed_repairsとrepair_limitによる経路停止・人への移管を適用する。今回の規則追加はオーナーの運用改善依頼によるもの。self_repair.may_modifyや権限、予算、停止解除条件は変更しない。"
+    },
+    {
+      "trigger": "post-merge-performance-budget",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "公開後の速度監査で既存の性能基準を満たさなかったという観測の分類であり、原因の断定ではない。まずAIが同一コミットの公開確認・全測定結果・表示と画像取得を調査し、既存の権限内で修復する。24時間以内の日報で報告し、単発では自動運用全体を停止しない。既存self_repair.stop_after_failed_repairsに達した場合はrepair_limitによる停止・オーナー移管を適用し、停止解除は人間のみ。性能基準やCIを緩めず、失敗記録を成功へ書き換えず、原因未確定のneeds_triageを根拠なく消さない。【2026-09-18 オーナー承認】この種別に限る上記の通知・停止ルール追加の明示確認に、オーナーが「はい」と回答。PR #1449の承認記録: https://github.com/simplememofast/simplememo/pull/1449#issuecomment-5726292280 。今回限りの承認であり、このファイルをself_repair.may_modifyへ追加せず、他の規則・権限・予算・修理上限・再開条件は変更しない。"
     }
   ]
 }

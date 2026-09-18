@@ -22,7 +22,8 @@ test('the matrix retains all old widths and adds real mobile density cases', () 
   assert(CASES.some(c => c.width === 390 && c.dpr === 2));
   assert(CASES.some(c => c.width === 390 && c.dpr === 3));
   assert.equal(CASES.filter(c => c.javascript === false).length, 1);
-  assert.equal(CASES.length, 9);
+  assert(CASES.some(c => c.width === 412 && c.dpr === 3));
+  assert.equal(CASES.length, 10);
 });
 
 
@@ -83,4 +84,20 @@ test('a genuinely broken image still fails after contained-section traversal', a
     async waitForTimeout() {},
   };
   await assert.rejects(loadLazyImages(page), /Visible same-origin images did not load/);
+});
+
+
+test('responsive hero hints share five widths and retain original fallback and decoding', () => {
+  const fs = require('node:fs'), path = require('node:path');
+  for (const name of ['index.html', 'en/index.html']) {
+    const html = fs.readFileSync(path.join(__dirname, '../..', name), 'utf8');
+    const preload = html.match(/<link rel="preload" as="image"[^>]*imagesrcset="([^"]+)"[^>]*imagesizes="([^"]+)"/);
+    const picture = html.match(/<picture class="hero__photograph">([\s\S]*?)<\/picture>/);
+    assert(preload && picture, 'Both native image hints must remain');
+    const source = picture[1].match(/<source data-home-perf="image"[^>]*srcset="([^"]+)"[^>]*sizes="([^"]+)"/);
+    assert(source); assert.equal(source[1], preload[1]); assert.equal(source[2], preload[2]);
+    assert.deepEqual([...source[1].matchAll(/ (\d+)w/g)].map(m => Number(m[1])), [600, 750, 900, 1200, 1536]);
+    assert(picture[1].includes('decoding="async"'), 'Rejected decoding change must not ship');
+    assert(picture[1].includes('.webp'), 'Original native fallback must survive');
+  }
 });

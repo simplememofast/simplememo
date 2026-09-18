@@ -6,6 +6,7 @@ const path = require('node:path');
 const CASES = [
   ...[320, 390, 412, 768, 1440].map(width => ({ width, dpr: 1 })),
   { width: 390, dpr: 2 }, { width: 390, dpr: 3 }, { width: 412, dpr: 1.75 },
+  { width: 412, dpr: 3 },
   { width: 390, dpr: 1, javascript: false },
 ];
 
@@ -101,6 +102,21 @@ async function main() {
           }
           const heroRequests = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => entry.name));
           assert.equal(heroRequests.length, 1, 'Responsive preload and picture must reuse one hero request');
+          const hero = record.images.find(image => /voice-airpods-pro-bright-/.test(image.url));
+          assert(hero, 'The displayed hero must be in the checked inventory');
+          if ((width === 390 && dpr === 3) || (width === 1440 && dpr === 1)) {
+            assert(/-1200-[a-f0-9]{12}\.avif$/.test(hero.url), 'Use the correctly sized 1200px hero');
+          }
+          if (width === 412 && dpr === 3) {
+            assert(/-1536-[a-f0-9]{12}\.avif$/.test(hero.url), 'Wider triple-density displays retain full detail');
+          }
+          record.heroResources = await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => /\/voice-airpods-pro-bright-/.test(entry.name)).map(entry => ({url: entry.name, encodedBodySize: entry.encodedBodySize, transferSize: entry.transferSize, initiatorType: entry.initiatorType})));
+          assert.equal(record.heroResources.length, 1, 'Responsive preload and picture must reuse one request');
+          assert.equal(record.heroResources[0].url, hero.url, 'Measured request must be the displayed hero');
+          const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '../../assets/home-perf/manifest.json'), 'utf8'));
+          const expected = manifest.assets[new URL(hero.url).pathname.slice(1)];
+          assert(expected, 'Displayed hero must be in the verified manifest');
+          assert.equal(record.heroResources[0].encodedBodySize, expected.bytes, 'Encoded response bytes must match the immutable asset');
           await page.evaluate(() => scrollTo(0, 0));
           if (width === 390 || width === 1440 || dpr === 1.75) await page.screenshot({ path: path.join(output, label + '.png') });
           record.pass = true;
