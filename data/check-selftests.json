@@ -694,6 +694,12 @@
       "broke": "独立した一時コピーで2変異を実測。未達 blocked_on による wait 強制を外すと fresh act assessments cannot override unmet inventory prerequisites が失敗。無効な証拠参照を例外で拒まず通すと evidence must reference a real repository file が失敗。いずれも node --test --test-reporter=tap が exit 1。一時コピーを除去した本体は7件成功。"
     },
     {
+      "script": "scripts/export-benchmark-csv.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-18",
+      "broke": "公開CSVへ余分な改行を1つ加えて source-of-truth と不一致にした検体で `node scripts/export-benchmark-csv.mjs --check` が `data/benchmark-2026.csv is stale` を出して exit 1 になることを実測。元ファイルへ復元後は同じコマンドが exit 0。CSV生成物が `data/benchmark.json` からドリフトしたとき、CIが実際に赤くなることを確認した。"
+    },
+    {
       "script": "scripts/feature-score.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
