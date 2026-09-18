@@ -10,9 +10,21 @@ const check = process.argv.includes('--check');
 const data = JSON.parse(fs.readFileSync(src, 'utf8'));
 
 const quote = (value) => {
-  const s = value == null ? '' : String(value);
+  const s = String(value);
   return /[",\n]/.test(s) ? `"${s.replaceAll('"', '""')}"` : s;
 };
+
+const requireOwn = (object, key, label) => {
+  if (!Object.hasOwn(object, key)) {
+    throw new Error(`benchmark source is missing ${label}.${key}`);
+  }
+};
+
+for (const key of ['date', 'device', 'os', 'ourAppVersion']) {
+  requireOwn(data.measuredOn, key, 'measuredOn');
+}
+requireOwn(data, 'methodologyPage', 'benchmark');
+requireOwn(data.columns, 'ready', 'columns');
 
 const header = [
   'app', 'ready_seconds', 'focus_seconds', 'ready_min_seconds',
@@ -21,6 +33,10 @@ const header = [
 ];
 const rows = [header];
 for (const [app, v] of Object.entries(data.apps)) {
+  for (const key of ['ready', 'focus', 'n']) requireOwn(v, key, app);
+  if (!Array.isArray(v.ready_range) || v.ready_range.length !== 2) {
+    throw new Error(`benchmark source has invalid ${app}.ready_range`);
+  }
   rows.push([
     app,
     v.ready,
