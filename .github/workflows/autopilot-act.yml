@@ -181,6 +181,7 @@ jobs:
       # Derive from the pending ledger itself. Computing against main and applying
       # a stash onto a pending PR conflicts when two observers record the same run.
       - name: Prepare ledger branch before observation
+        id: ledger_branch
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         run: |
@@ -202,6 +203,7 @@ jobs:
           else
             git checkout -B "$DAY"
           fi
+          echo "branch=$DAY" >> "$GITHUB_OUTPUT"
 
       # 判定ロジックそのものの自己検査。台帳を読まないので、台帳が壊れていても
       # ここは通る（＝壊れているのが判定側か台帳側かを切り分けられる）。
@@ -275,12 +277,25 @@ jobs:
         if: inputs.dry_run != true
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          PREPARED_BRANCH: ${{ steps.ledger_branch.outputs.branch }}
         run: |
+          # Keep the branch selected before observation, even across midnight.
+          # Only the branch identity is pinned; ledger/score dates stay real time.
+          set -euo pipefail
+          if [[ ! "$PREPARED_BRANCH" =~ ^claude/autopilot-act-[0-9]{8}$ ]]; then
+            echo "Missing or unexpected prepared ledger branch" >&2
+            exit 1
+          fi
+          CURRENT_BRANCH="$(git symbolic-ref --quiet --short HEAD)"
+          if [[ "$CURRENT_BRANCH" != "$PREPARED_BRANCH" ]]; then
+            echo "Prepared ledger branch does not match the checkout" >&2
+            exit 1
+          fi
+          DAY="$PREPARED_BRANCH"
           if [ -z "$(git status --porcelain)" ]; then
             echo "変更なし（同期も封じ込めも不要な日）。PRは作らない。"
             exit 0
           fi
-          DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-status.json data/autopilot-cost.json data/emergency-stop.json \
                   data/eligibility-log.json data/autonomy-score-history.json data/routine-runs.json autopilot/index.html \
@@ -302,7 +317,9 @@ jobs:
           # 再実行は「何かがおかしかった日」にこそ起きるので、この壊れ方は
           # **必要なときに限って届かない。**緑のまま何も出ないという、この運用が
           # 繰り返し踏んできた形そのもの。
-          if [ -z "$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')" ]; then
+          # A failed lookup is unknown, not proof that no PR exists.
+          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          if [ -z "$OPEN" ]; then
             gh pr create --base main --head "$DAY" \
               --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \
               --body "$(cat /tmp/act.txt)"
