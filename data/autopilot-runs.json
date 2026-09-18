@@ -1434,6 +1434,53 @@
       "source": "session",
       "note": "PR1425と追加PR1426を同じPageSpeed改善サイクルとして1行で回収。2026-09-16に両方公開済み。監査PR1431や未採用実験は出荷数に含めない。ローカルCodex定期タスクの未取得記録・成否は依然不明。",
       "evidence": "docs/perf/owner-session-recovery-20260917.json"
+    },
+    {
+      "date_jst": "2026-09-17",
+      "route": "owner-session",
+      "attempted": true,
+      "lane": "F",
+      "action": "repair",
+      "artifact": null,
+      "source": "session",
+      "evidence": "docs/perf/pagespeed-reconciliation-20260918.json",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "run_id": "ap-20260917-owner-session-pagespeed-navigation",
+      "outcome": "shipped",
+      "pr": 1441,
+      "failure_reason": null,
+      "external_ref": "github-pr:1441",
+      "note": "検証済みのページ内移動修正1441を1サイクルとして回収。不採用動画案1440は出荷に数えない。"
+    },
+    {
+      "date_jst": "2026-09-17",
+      "route": "owner-session",
+      "attempted": true,
+      "lane": "F",
+      "action": "repair",
+      "artifact": null,
+      "source": "session",
+      "evidence": "docs/perf/pagespeed-reconciliation-20260918.json",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "run_id": "ap-20260917-owner-session-pagespeed-poster",
+      "outcome": "failed",
+      "pr": 1443,
+      "external_ref": "github-pr:1443+1445",
+      "failure_reason": "Poster1443 and rollback1445 both failed their original post-merge Japanese performance budget. Original content was restored; speed recovery and causality are unproven.",
+      "failure_stage": "execution",
+      "needs_triage": true,
+      "note": "ポスター試行とロールバックを1つの失敗サイクルとして保持。成功出荷や今回の1200px候補として計上しない。",
+      "failure_class": "post-merge-performance-budget"
     }
   ],
   "retracted_observations": [
