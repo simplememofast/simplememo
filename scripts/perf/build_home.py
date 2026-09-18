@@ -85,7 +85,7 @@ def build() -> dict[str, bytes]:
         images[key] = '/' + name
         return '/' + name
 
-    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1536))
+    hero_srcset = ', '.join(f'{image(HERO, w)} {w}w' for w in (600, 750, 900, 1200, 1536))
     manifest: dict[str, object] = {'version': 1, 'pages': {}, 'inputs': {}}
     for source in ('assets/css/style.min.css', 'assets/css/home-hero.css', HERO):
         manifest['inputs'][source] = digest((ROOT / source).read_bytes())
