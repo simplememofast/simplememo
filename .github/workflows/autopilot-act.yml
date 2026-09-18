@@ -292,14 +292,16 @@ jobs:
             exit 1
           fi
           DAY="$PREPARED_BRANCH"
-          if [ -z "$(git status --porcelain)" ]; then
+          # Read failures are unknown, not a clean tree; retain the Git exit code.
+          CHANGES="$(git status --porcelain)"
+          if [ -z "$CHANGES" ]; then
             echo "変更なし（同期も封じ込めも不要な日）。PRは作らない。"
             exit 0
           fi
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-status.json data/autopilot-cost.json data/emergency-stop.json \
                   data/eligibility-log.json data/autonomy-score-history.json data/routine-runs.json autopilot/index.html \
-                  sitemap.xml sitemap-ja.xml sitemap-en.xml sitemap-locales.xml 2>/dev/null || true
+                  sitemap.xml sitemap-ja.xml sitemap-en.xml sitemap-locales.xml
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。
