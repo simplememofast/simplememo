@@ -7,7 +7,9 @@ let html=fs.readFileSync(file,'utf8');
 const current=score(loadContext());
 assert(Number.isFinite(current.total));
 function update(pattern, transform){
-  assert.equal([...html.matchAll(new RegExp(pattern.source, pattern.flags.includes('g')?pattern.flags:pattern.flags+'g')))].length,1,'Expected unique public counter '+pattern.source);
+  const flags=pattern.flags.includes('g')?pattern.flags:pattern.flags+'g';
+  const matches=Array.from(html.matchAll(new RegExp(pattern.source,flags)));
+  assert.equal(matches.length,1,'Expected unique public counter '+pattern.source);
   html=html.replace(pattern,transform);
 }
 update(/(<span data-score-total>)[\d.]+(<\/span>)/,(_,a,b)=>a+current.total.toFixed(1)+b);
@@ -25,7 +27,6 @@ for(const stage of ['eligibility','execution','cost','absent']){
   assert(Number.isInteger(stages[stage]));
   update(new RegExp('(<tr data-stage="'+stage+'"><td>[^<]+<\\/td><td class="num"><b>)\\d+(<\\/b>)'),(_,a,b)=>a+stages[stage]+b);
 }
-// The unchanged component explanations must still agree with their source.
 assert.equal(current.components.vdc.n,24);assert.equal(current.components.vdc.hit,6);
 assert.equal(current.components.ra.n,13);assert.equal(current.components.ra.detect.hit,0);assert.equal(current.components.ra.recover.hit,6);
 assert.equal(current.components.ep.precision.judged,23);assert.equal(current.components.ep.precision.delegated_ai,18);
