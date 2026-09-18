@@ -27,11 +27,11 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git rev-parse HEAD~2)" = 2c25e4b5fc4f3395cdc7c16e27a23868510b59e3
+          test "$(git rev-parse HEAD^)" = a33f6b7230dc46628f4e5f34c25e5524e60073cd
           python - <<'PY'
           import subprocess
           files=set(subprocess.check_output(['git','diff','--name-only','2c25e4b5fc4f3395cdc7c16e27a23868510b59e3','HEAD'],text=True).splitlines())
-          assert files=={'.github/workflows/prepare-hero-density.yml','scripts/perf/prepare_density_once.py'},files
+          assert files=={'.github/workflows/prepare-hero-density.yml','scripts/perf/prepare_density_once.py','scripts/perf/reconcile_density_counters.mjs'},files
           PY
       - name: Reproduce assets and reconcile only known historical outcomes
         env:
@@ -39,7 +39,16 @@ jobs:
         run: |
           set -euo pipefail
           pip install --disable-pip-version-check fonttools==4.63.0 brotli==1.2.0 Pillow==12.3.0
-          python scripts/perf/prepare_density_once.py
+          node --check scripts/perf/reconcile_density_counters.mjs
+          python - <<'PY'
+          import os,pathlib
+          text=pathlib.Path('scripts/perf/prepare_density_once.py').read_text()
+          target="run('node','scripts/check-autopilot-page.mjs','--check')"
+          assert text.count(target)==1
+          text=text.replace(target,"run('node','scripts/perf/reconcile_density_counters.mjs')\n"+target)
+          (pathlib.Path(os.environ['RUNNER_TEMP'])/'prepare_density_once.py').write_text(text)
+          PY
+          python "$RUNNER_TEMP/prepare_density_once.py"
           python scripts/perf/verify_home.py --selftest
           python scripts/perf/verify_home.py
           node --test scripts/perf/inline_styles.test.mjs scripts/perf/verify_production.test.cjs scripts/perf/browser_checks.test.cjs scripts/perf/cache_headers*.test.mjs scripts/perf/section*.test.mjs
@@ -58,7 +67,7 @@ jobs:
           assert changed|untracked==allowed,(changed,untracked,allowed)
           subprocess.run(['git','diff','--check'],check=True)
           subprocess.run(['git','add','--',*sorted(allowed)],check=True)
-          subprocess.run(['git','rm','scripts/perf/prepare_density_once.py'],check=True)
+          subprocess.run(['git','rm','scripts/perf/prepare_density_once.py','scripts/perf/reconcile_density_counters.mjs'],check=True)
           output=pathlib.Path(os.environ['RUNNER_TEMP'])/'density-prepared'
           (output/'allowed-files.txt').write_text('\n'.join(sorted(allowed))+'\n')
           with tarfile.open(output/'prepared-files.tar.gz','w:gz') as archive:
