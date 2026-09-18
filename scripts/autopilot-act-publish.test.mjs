@@ -40,12 +40,13 @@ git() {
   record git "$@"
   case "$1" in
     symbolic-ref) if [ "$DETACHED" = 1 ]; then return 1; fi; printf '%s\n' "$CHECKED_OUT_BRANCH"; return "$SYMBOLIC_EXIT" ;;
-    status) if [ "$HAS_CHANGES" = 1 ]; then printf ' M data/autopilot-status.json\n'; fi ;;
+    status) if [ "$HAS_CHANGES" = 1 ]; then printf ' M data/autopilot-status.json\n'; fi; return "$STATUS_EXIT" ;;
     commit) return "$COMMIT_EXIT" ;;
     push) return "$PUSH_EXIT" ;;
     diff) if [ -n "$PENDING_PATH" ]; then printf '%s\n' "$PENDING_PATH"; fi ;;
     checkout) return "$CHECKOUT_EXIT" ;;
-    config|fetch|merge|add) return 0 ;;
+    add) if [ "$ADD_EXIT" != 0 ]; then printf 'synthetic staging failure\n' >&2; fi; return "$ADD_EXIT" ;;
+    config|fetch|merge) return 0 ;;
     *) printf 'unexpected git command: %s\n' "$1" >&2; return 90 ;;
   esac
 }
@@ -92,7 +93,7 @@ function run(script, overrides = {}) {
         CALL_LOG: log, GITHUB_OUTPUT: output,
         PREPARED_BRANCH: branch, CHECKED_OUT_BRANCH: branch,
         CLOCK_DAY: '20260918', CLOCK_DATE: '2026-09-18', HAS_CHANGES: '1', OPEN_PR: '',
-        LIST_EXIT: '0', COMMIT_EXIT: '0', PUSH_EXIT: '0',
+        LIST_EXIT: '0', COMMIT_EXIT: '0', PUSH_EXIT: '0', STATUS_EXIT: '0', ADD_EXIT: '0',
         CHECKOUT_EXIT: '0', SYMBOLIC_EXIT: '0', DETACHED: '0', PENDING_PATH: '',
         ...overrides,
       },
@@ -174,6 +175,41 @@ test('a clean working tree remains a no-op', () => {
   assert.equal(result.status, 0, result.stderr);
   noWrites(result);
   assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+});
+
+for (const hasChanges of ['0', '1']) {
+  test(`a failed status read with changes=${hasChanges} stops before writes`, () => {
+    const result = run(publish, { STATUS_EXIT: '24', HAS_CHANGES: hasChanges });
+    assert.equal(result.status, 24);
+    assert.equal(callsOf(result, 'git', 'status').length, 1);
+    assert.ok(!result.stdout.includes('変更なし'), 'unknown status is not a clean tree');
+    noWrites(result);
+    assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+  });
+}
+
+test('a staging failure stays visible and prevents commit, push and PR lookup', () => {
+  const result = run(publish, { ADD_EXIT: '25' });
+  assert.equal(result.status, 25);
+  assert.match(result.stderr, /synthetic staging failure/);
+  assert.equal(callsOf(result, 'git', 'add').length, 1);
+  assert.equal(callsOf(result, 'git', 'commit').length, 0);
+  assert.equal(callsOf(result, 'git', 'push').length, 0);
+  assert.equal(callsOf(result, 'gh', 'pr').length, 0);
+});
+
+test('successful staging keeps the exact existing publication path allowlist', () => {
+  const result = run(publish);
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(callsOf(result, 'git', 'add'), [[
+    'git', 'add', 'data/autopilot-actions.json', 'data/autopilot-actions-report.json',
+    'data/autopilot-runs.json', 'data/autopilot-status.json', 'data/autopilot-cost.json',
+    'data/emergency-stop.json', 'data/eligibility-log.json', 'data/autonomy-score-history.json',
+    'data/routine-runs.json', 'autopilot/index.html',
+    'sitemap.xml', 'sitemap-ja.xml', 'sitemap-en.xml', 'sitemap-locales.xml',
+  ]]);
+  assert.equal(callsOf(result, 'git', 'commit').length, 1);
+  assert.equal(callsOf(result, 'git', 'push').length, 1);
 });
 
 test('an existing open PR is not duplicated after midnight', () => {
