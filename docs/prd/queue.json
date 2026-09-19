@@ -880,7 +880,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "既存Siri/Shortcutsを保持。製品外SDK契約検査に加え、未登録のprimary-reminders adapterを実装・native検証。共通Capture、保存/読戻し、暗号化受付/receipt、本文を返さないID解決、未対応入力拒否を含む。Notesの保存方式、perform/schema宣言、索引opt-in/消去、primary-reminders計測、実機実行は未完了。",
+      "note": "Remindersの実perform/EntityQuery、本文を含まない任意タイトル索引と解除/消去を実装しnative検証。検証用Debugのみ登録し、標準版は未登録・Draft/OFFを維持。Notes保存先、primary-reminders outcome計測、実機Siri/EventKit/Spotlight受入は未完了。",
       "blocked_by_scope": "product release acceptance; independent contract implementation is not blocked",
       "contract_validation": {
         "sdk": "Xcode 27.0 (27A266a), iPhone Simulator 27.0",
@@ -895,7 +895,7 @@
         "built_app_actions": 5,
         "built_widget_actions": 1,
         "built_app_unshipped_schemas_registered": false,
-        "product_metadata_tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4"
+        "product_metadata_tested_head": "6a304f1743843e2e702738958dbabb52a27db86a"
       },
       "contract_prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
@@ -914,6 +914,50 @@
         "registered_entity_query": false,
         "spotlight_index_donation": false,
         "nsm_arrival_evidence": false
+      },
+      "product_connection_validation": {
+        "tested_head": "6a304f1743843e2e702738958dbabb52a27db86a",
+        "state": "implemented_build_gated",
+        "native_total": 389,
+        "native_passed": 387,
+        "native_failures": 0,
+        "native_skipped": 2,
+        "native_skip_reasons": [
+          "iOS 27 schema execution unavailable on local iOS 26.5",
+          "physical-device transfer protection metadata"
+        ],
+        "standard_native_passed": 39,
+        "standard_native_failures": 0,
+        "standard_native_skipped": 0,
+        "source_hash_count": 275,
+        "source_hashes_unchanged": true,
+        "enabled_variant_actions": 6,
+        "enabled_variant_entities": 5,
+        "enabled_variant_queries": 5,
+        "standard_app_actions": 5,
+        "standard_widget_actions": 1,
+        "standard_notes_reminders_registered": false,
+        "real_css_searchable_item_projection_verified": true,
+        "spotlight_os_donation_verified": false,
+        "physical_siri_verified": false,
+        "physical_eventkit_save_verified": false,
+        "nsm_outcome_supported": false,
+        "remote_ci": "all_5_passed",
+        "testflight_distributed": false,
+        "formal_score_credit": 0,
+        "cloud_validation": {
+          "build_number": 1744,
+          "source_sha": "6a304f1743843e2e702738958dbabb52a27db86a",
+          "result_pages": 9,
+          "unique_tests": 1718,
+          "models": 4,
+          "executions": 6872,
+          "passed": 6868,
+          "failed": 0,
+          "skipped": 4,
+          "skip_reason": "physical-device transfer protection metadata",
+          "configuration": "standard; reminder schema compile gate remains off"
+        }
       }
     },
     {
