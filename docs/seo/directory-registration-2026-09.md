@@ -14,6 +14,8 @@
 - **新規アカウント作成・パスワード入力を行わない**（セッションのポリシー）。
   既存ログインが残っているサービス（Product Hunt / GitHub / Indie Hackers）は利用した。
 - **CAPTCHA・人間確認の回答を行わない**（同）。算数クイズ形式も対象。
+  Launching Next はこの形で止まったが、**人がクイズだけ answer して送信ボタンを押し、
+  それ以外の入力はセッション側が用意する**という分担で通った。以後この型を使う。
 - **有料掲載・広告・相互リンクの購入を行わない**（依頼者の指示）。
 - **メール送信を伴う編集部への売り込みを行わない**。本リポジトリの
   `growth/plans/ja-editorial-links-2026-09-18.json` が「営業送信は別途承認」と定めているため、
@@ -39,7 +41,7 @@
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | BLOCKED | — | — | — | https://www.indiehackers.com/products/new | アカウント `memolife23` が **"Your account cannot create or edit products"** | IH サポートに制限解除を問い合わせる（人の操作1回） |
-| 追加 | Launching Next | SELF_REGISTER | BLOCKED | — | — | — | https://www.launchingnext.com/submit/ | ボット確認「What is 2+3?」 | **開いたタブでクイズに `5` と入力して Submit を押すだけ**（他項目は入力済み） |
+| 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
 | 追加 | kmaasrud/awesome-obsidian | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/en/obsidian/`） | https://github.com/kmaasrud/awesome-obsidian/pull/135 | 未処理PRが46件あり滞留気味 | 反応がなければ Memo Inbox（MIT）への差し替えを提案済み |
@@ -69,10 +71,10 @@
 
 - 新規公開：**0 件**（今回の送信分から公開確認できたものはまだ無い）
 - 既に公開されていた新規参照ドメインの発見：**1 件**（github.com / awesome-obsidian、2026-09-08 マージ）
-- 申請完了：**9 件**（フリーソフト100 / SaaSHub「Memo Inbox」新規 / NoteApps.info 情報更新 / awesome系6リストへのPR）
+- 申請完了：**10 件**（フリーソフト100 / SaaSHub「Memo Inbox」新規 / NoteApps.info 情報更新 / Launching Next / awesome系6リストへのPR）
 - 既存掲載の改善申請：**1 件**（SaaSHub「Simple Memo」の全項目訂正）
 - 既存掲載の点検のみ：**2 件**（AlternativeTo / Product Hunt）
-- BLOCKED：**7 件**
+- BLOCKED：**6 件**
 - 対象外：**3 件**
 
 うち awesome系6件は 2026-09-19 に `simplememofast` アカウントでPRを出した。
@@ -80,6 +82,19 @@
 いずれも GitHub の README リンクなので `rel="nofollow"` が付く。**期待しているのは
 リンク評価ではなく、awesome系リストが多数のミラー（awesome.ecosyste.ms、LibHunt 等）へ
 転載されることによる参照ドメインの広がりと、実ユーザーの流入である。**
+
+### 実装上のつまずき（次回同じ穴に落ちないための記録）
+
+Launching Next の初回送信は `Write a brief sentence about the startup` で弾かれた。
+原因は**このセッション側のバグ**で、`document.getElementsByName('description')` が
+`<meta name="description">` と入力欄の**2つ**を返し、先頭の meta を掴んでいた。
+meta 要素に `.value` を代入しても expando プロパティが生えるだけなので、
+読み返しても値が入って見え、入力欄は空のまま送信されていた。
+
+**フォームに値を入れるときは `input[name=...]` / `textarea[name=...]` / `select[name=...]`
+で要素型を明示して取得する。** `getElementsByName` は使わない。
+また送信が失敗して再描画されると、ラジオ選択とチェックボックスは既定値に戻る
+（ニュースレター購読が勝手に入り直す）ので、再送信前に必ず全項目を読み直す。
 
 ## 2. 既存掲載の点検結果
 
@@ -184,7 +199,7 @@
 
 1. **G2** — 人がビジネスメールで myG2 に登録すれば無料プロフィール申請が通る。DR最大。
 2. **Indie Hackers Products DB** — アカウント制限の解除だけ。既にログイン済み。
-3. **Launching Next** — 入力済みのタブでボット確認に答えるだけ。
+3. ~~Launching Next~~ — **2026-09-19 送信済**（受付番号 152234、無料枠は待ち約4か月）。
 4. **Uneed / MicroLaunch / Fazier / Peerlist / DevHunt / BetaList** — 無料枠あり。各アカウント作成が必要。
 5. ~~tehtbl/awesome-note-taking~~ — **2026-09-19 にPR提出済**（#144）。以下も同日提出：
    awesome-knowledge-management #83 / awesome-obsidian(kmaasrud) #135 /
