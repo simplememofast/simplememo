@@ -1,12 +1,12 @@
 # 機能PRDと実装状態
-更新: 2026-09-19。作成・管理: SimpleMemo Developer。
+更新: 2026-09-20。作成・管理: SimpleMemo Developer。
 
 [queue.json](prd/queue.json) は実装の順序・証拠・残条件を管理する。**現在は手動で引き継ぐ台帳で、自動実装ジョブは稼働していない。**
 iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.yml` は提案であり、最新mainの `.github/workflows/` に実行定義はない。この台帳の追加でジョブ・配布・提出を開始しない。
 
 ## 状態の意味
 
-- `in_progress`: 一部コードがあるが、PRD全体の受入条件は未完了。ブランチの存在とPRの存在を分ける。
+- `in_progress`: コードまたは独立した契約検証が進んでいるが、PRD全体の受入条件は未完了。製品コード・検証用定義・PRの存在を分ける。
 - `blocked`: 前提となるPRDの統合・検証が未完了。
 - `held`: 提供条件または実アカウント確認が未成立。
 - `done`: PRマージだけでなく、PRDに記載した必要な確認の証拠が揃った状態。
@@ -20,13 +20,15 @@ iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.
 |---|---|---|
 | 共通Capture | [iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存MemoCapture / MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。関連テスト成功 | 必要なCIと同一版の実配送を確認 |
 | サイドボタン | PR594（Draft）で統合。既存下書きを保護し、実際のCapture結果へ返答を対応づける。既定OFF | 実機の適格性・entitlement、音声/割込/背景動作、同じ版での確認 |
-| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化journal、Capture別receiptによるObsidian注記を実装。既定OFF | 実FileProvider・実保存/権限、JA/EN精度と同一版QA |
-| App Intentsスキーマ | 通常のSiri/Shortcutsは実装済み。現行SDKで対象スキーマのiOS 27要件とAPIを照合 | 共通Capture/Routingの受入、本文非公開の実装、登録メタデータと実行試験 |
+| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化journal、Capture別receiptによるObsidian注記を実装。JA50/EN50入力ケースと時刻の回帰を含む29 native tests成功。既定OFF | Correctionのsource/device・保存/移行、実FileProvider・実保存/権限、端末内モデル精度と同一版QA |
+| App Intentsスキーマ | 既存Siri/Shortcutsを保持。Xcode 27の製品外検証用定義でコンパイル・メタデータ生成成功。不正な型/必須項目欠落の2比較を検出 | 保存処理・Entityの解決・本文非公開・登録抑止の実装と実行試験。製品公開は共通Capture/Routingの受入後 |
 | Notion提供 | iOS/APIに実装済み。9/4のサーバーOAuth・実保存・本文読取・同一ID再送は確認済み | 現在の提供状態・同意範囲・同じ配布版の実機配送を確認 |
 
 初回はiOS main `17dcad9`、API main `c6ed249` と照合。9/19の追記ではiOS PR594の統合基底 `f6906b4`（PR590/591を含む）とDraft差分を確認した。PR594はマージ・有効化・配布ではない。Notion手順は[API PR358](https://github.com/simplememofast/simplememo-api/pull/358)で訂正済みだが、提供受入条件の完了には数えない。
 
-PR594の最新照合headは `90f230210849f300940435ef8e1cd76102520de9`。main `e3431b2` の対話メモと待機ゲートを取り込み、対話への切替中とScene経由のモーダル保護を確認した。新しい専用iOS 26.5 Simulatorの14 suite・307テストは `9beff2cf9f55470db05b7f8a1c4f00b81a952549` で成功した。後続差分は再送検証用fixtureの対応のみで、アプリとテストのソースは同一。前処理全体も9種の保存/回復probeを含めてローカルで成功した。過去の307件という同じ件数の結果とは別の実行である。
+PR594の最新照合headは `bb527d5998400c1a2fd98fddb9f647ab3b61fde0`。日本語50入力・英語50入力を追加し、6文の不一致を修正した。開始時刻の順序と夜中をまたぐ表現も補強し、同headのDestinationRouterTests 29件がiOS 26.5 Simulatorで成功。修正前の失敗結果は非公開で保持している。
+
+過去の証拠は区別する。main `e3431b2` の対話メモと待機ゲートを取り込んだ `9beff2c` は関連14 suite・307テスト成功。`90f2302` まではアプリ/テストが同一で、前処理9種のprobeと全CIも成功し、Cloudは1,472 tests×4 Simulatorで全成功した。現在headでは日時判定のソースが変わっているため、この旧結果を現在headの全検証成功へ転用しない。
 
 CIはPR本文と現在のチェック欄を正本にする。再利用Simulatorでの署名不足・設定/キュー残留を伴う失敗と中断は別記録として保持し、旧データを削除して合格扱いにはしていない。実機確認・配布・フラグ有効化・正式加点は未成立。旧prototypeブランチは保全したままで、`exact_branch_prs_found: 0`は当初その名前で検索した結果を保持する。
 
