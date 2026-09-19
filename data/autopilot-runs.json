@@ -1523,6 +1523,31 @@
       "failure_stage": "cost"
     },
     {
+      "run_id": "ap-20260918-owner-session-pagespeed-density",
+      "date_jst": "2026-09-18",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "repair",
+      "pr": 1449,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "github-pr:1449",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "source": "session",
+      "repair_of": [
+        "ap-20260917-owner-session-pagespeed-poster"
+      ],
+      "repair_note": "PR #1449 の main 同一SHAで公開後PageSpeed Audit 35318018414が既存性能予算を通過。production-jaは3回 90/91/91、中央値91、LCP中央値3.09秒、score未達0/LCP超過0。9/17のPR1443/1445は中央値89で失敗していたため性能予算の回復は確認できる。旧失敗の根本原因や断続的描画遅延の因果は未確定のまま保持する。",
+      "evidence": "docs/perf/pagespeed-recovery-20260919.json"
+    },
+    {
       "run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
       "date_jst": "2026-09-19",
       "route": "actions",
