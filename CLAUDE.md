@@ -92,6 +92,70 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
 使われるため、auto-merge.yml 自体を変更した場合、その変更はmainに
 マージされて初めて有効になる。
 
+
+## /autopilot/ の自律スコアは日付で動く（2026-09-19）
+
+**公開ページを1日更新しないと、main も全PRも同じ6件で落ちる。**
+PR側の変更が無関係でも落ちるので、原因がPRに出ない。
+
+`/autopilot/` §5 のスコアは `scripts/autonomy-score.mjs` が `todayJst()` 基準で計算する。
+**同じデータのまま日付だけ変えると値が動く**（実測）:
+
+    09-16 47.65   09-17 48.23   09-18 48.48   09-19 48.09   09-20 47.60
+
+`scripts/check-autopilot-page.mjs` は `autonomyScore(loadScoreContext())`＝**今日**の値と
+ページの数字を突き合わせる。**ページの `data-decision-date` は見ていない。**
+だから JST の日付が変わった瞬間にページは「古い」判定になる。
+
+2026-09-18T15:00Z（JST 09-19 00:00）以降、main（`3bd3c5b`）と open PR 5本が全滅した。
+PR #1459 のCI失敗もこれで、**中身は無関係**（main と #1459 のマージツリーで検査の出力が
+バイト単位で一致することを確認した）。
+
+### 直すはずの自動機構が、PRを1本開いたままにしていたせいで止まっていた
+
+`scripts/decision-monitor.mjs` の `--apply` は冒頭でこれを通る:
+
+    const pending = pendingPublication();
+    if (pending.length) { …'waiting_for_publication'… ; return; }
+
+head が `Codex/decision-observe-*` の open PR が**1本でもある**と、`publishReport()` に
+到達しない。PR #1430 が 2026-09-16 から開きっぱなしで、15分毎の run が **4.7秒で return**
+し続けていた（run 35406523045）。**その #1430 自身は当日の別検査（`台帳が 2 日書かれていない`）
+で落ちてマージできず**、自分で自分を塞いでいた。
+
+**open PR が全部同じ6件で落ちていたら、まず main を疑う。**
+`node scripts/check-autopilot-page.mjs --check` を main で走らせれば1分で分かる。
+
+### 直し方
+
+**手で数字を置き換えない。**`node scripts/decision-monitor.mjs --publish-report` が正。
+成分の本文（出荷◯件・故障◯件・週◯回）も同じ生成器が一緒に書き換えるので、
+**点数だけ直すと本文が取り残される。**ページを変えたら
+`python3 scripts/generate_sitemap.py` も同じコミットに入れる。
+
+**`Codex/decision-observe-*` を merge で更新しない。**main を merge すると、マージコミットが
+first-parent 比較で `/en/`・`/en/blog/`・`/blog/fastest-memo-app-benchmark` など
+**無関係ページの `lastmod` まで動かす**（実測: `sitemap-en.xml` が3行）。
+`pendingPublication()` の `reportSitemapChange` スコープを外れるので、その形でマージすると
+Monitor は15分毎に `unverified scope` で**落ちる** —— 詰まりが「止まる」から「失敗する」に
+変わるだけで良くならない。**rebase で載せ替える。**
+
+**生成器のテンプレートに無い文言を、ページへ手で足さない。**2026-09-19、PR #1461 が ep の本文に
+分母を足した（「エスカレーション**26件のうち**必要性を判定済みなのは23件」）。
+`renderReport()` の `notes.ep` にその分母は無いので、**Monitor が復帰した最初の run で消える。**
+残したいなら `scripts/decision-monitor.mjs` 側に入れること（`c.ep.precision.n` に 26 が入っている）。
+
+### 確定していないこと
+
+**この赤窓が毎晩起きていたかは未確認。**過去の main push は JST 日中に偏っていて、
+窓（15:00Z〜日次同期）の中の run がほとんど無い。窓内で観測できた main run は
+#1460（09-18 19:33Z）の1件だけで、それは落ちている。
+**反証条件: 窓内の run が緑で終わる実例が1件でも出れば、この読みは外れている。**
+
+今回の赤は 2026-09-19T00:5xZ に PR #1461 が同じ同期を運んだことで解消した。
+**「詰まりを直したから解けた」ではない** —— Monitor は止まったままで、別のPRが
+たまたま同じファイルを現在値へ書き換えた。構造は残っている。
+
 ## Site Structure
 
 - 静的HTMLサイト（日本語/英語の2言語対応）
