@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/" name="apple-itunes-app"/>
+<!-- Google tag (gtag.js) -->
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+<title>Dev Log | Simple Memo - for Obsidian</title>
+<meta content="Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern…" name="description"/>
+<meta content="#070b14" name="theme-color"/>
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+<!-- OGP -->
+<meta content="Dev Log | Simple Memo - for Obsidian" property="og:title"/>
+<meta content="Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern…" property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://simplememofast.com/en/devlog/" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="Dev Log | Simple Memo - for Obsidian" name="twitter:title"/>
+<meta content="Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern…" name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog.png" name="twitter:image"/>
+
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon"/>
+<link href="/assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/assets/favicon/site.webmanifest" rel="manifest"/>
+<!-- JSON-LD: CollectionPage + BreadcrumbList (moved to top of head for consistency) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CollectionPage","@id":"https://simplememofast.com/en/devlog/#webpage","inLanguage":"en","name":"開発日誌 - Obsidian連携シンプルメモ","description":"Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern, privacy-first design.","url":"https://simplememofast.com/en/devlog/","hasPart":[{"@type":"Article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Dev Log | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/devlog/day1"},{"@type":"Article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Dev Log | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/devlog/uikit-vs-swiftui"},{"@type":"Article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Dev Log | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/devlog/outbox-architecture"},{"@type":"Article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Dev Log | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/devlog/relay-api-design"},{"@type":"Article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Dev Log | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/devlog/privacy-first-design"}],"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+<link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    .devlog-intro { text-align: center; margin-bottom: 40px; }
+    .devlog-intro p { color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem; }
+    .article-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
+    .article-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; text-decoration: none; color: inherit; display: block; box-shadow: var(--shadow-card); }
+    .article-card:hover { border-color: var(--border-highlight); box-shadow: var(--shadow-lift); transform: translateY(-2px); }
+    .article-card__date { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700; }
+    .article-card__title { font-size: 1.15rem; font-weight: 800; color: var(--text); margin-bottom: 10px; line-height: 1.5; letter-spacing: -0.01em; }
+    .article-card__excerpt { font-size: 0.92rem; color: var(--text-secondary); line-height: 1.75; }
+    .article-card__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .article-card__tag { font-size: 0.72rem; background: rgba(82, 160, 255, 0.10); border: 1px solid rgba(82, 160, 255, 0.25); border-radius: 12px; padding: 3px 10px; color: var(--accent); font-weight: 700; }
+    .topic-section { margin-bottom: 50px; }
+    .topic-section h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 18px; color: var(--text); letter-spacing: -0.01em; }
+    .topic-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 600px) { .topic-grid { grid-template-columns: 1fr 1fr; } }
+    .topic-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; text-decoration: none; color: inherit; transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s; display: block; }
+    .topic-card:hover { border-color: var(--border-highlight); box-shadow: var(--shadow-soft); transform: translateY(-1px); background: var(--surface-elevated); }
+    .topic-card__title { font-size: 0.98rem; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.005em; }
+    .topic-card__desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/devlog/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/devlog/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/devlog/" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+<!-- Meta Templates for JS -->
+
+<main class="page-content">
+<div class="container">
+<h1 class="page-content__title">
+
+<span lang="en">Dev Log</span>
+</h1>
+<div class="devlog-intro">
+
+<div lang="en">
+<p>We loved Captio so much, we wanted to recreate that experience.<br/>This dev log documents the technical decisions behind building Simple Memo - for Obsidian.</p>
+<p>What comes next is laid out in <a href="/en/roadmap/">what we build next</a> — including the survey that decides the order.</p>
+</div>
+</div>
+<!-- Article List -->
+
+<div lang="en">
+<div class="article-list">
+<a class="article-card" href="/en/devlog/day1">
+<div class="article-card__date">February 13, 2026</div>
+<div class="article-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+<div class="article-card__excerpt">Launch in ~1s, send with one tap, zero message loss. Dissecting the Captio experience and documenting every technical decision: UIKit, Outbox architecture, Relay API, and privacy-first design.</div>
+<div class="article-card__tags">
+<span class="article-card__tag">UIKit</span>
+<span class="article-card__tag">Outbox</span>
+<span class="article-card__tag">Cloudflare Workers</span>
+<span class="article-card__tag">Privacy</span>
+<span class="article-card__tag">Swift</span>
+</div>
+</a>
+</div>
+</div>
+<!-- Topic Deep Dives -->
+<div class="topic-section">
+<h2>
+
+<span lang="en">Technical Deep Dives</span>
+</h2>
+
+<div lang="en">
+<div class="topic-grid">
+<a class="topic-card" href="/en/devlog/uikit-vs-swiftui">
+<div class="topic-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
+<div class="topic-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
+</a>
+<a class="topic-card" href="/en/devlog/outbox-architecture">
+<div class="topic-card__title">Outbox Architecture: Zero Message Loss</div>
+<div class="topic-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+</a>
+<a class="topic-card" href="/en/devlog/relay-api-design">
+<div class="topic-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
+<div class="topic-card__desc">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</div>
+</a>
+<a class="topic-card" href="/en/devlog/privacy-first-design">
+<div class="topic-card__title">Privacy-First Design: Obsessive Attention to Detail</div>
+<div class="topic-card__desc">On-device encryption, session storage, logs, and analytics, including the current limits of app-switcher privacy.</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Give your notes somewhere to accumulate</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+</span>
+</a>
+</aside>
+</main>
+<footer class="footer">
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
+<a class="footer__link" href="/en/how-to/"> <span lang="en">How to Use</span></a>
+<a class="footer__link" href="/en/templates/"> <span lang="en">Templates</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/captio/"> <span lang="en">Captio Method</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/en/devlog/"> <span lang="en">Dev Log</span></a>
+<a class="footer__link" href="/en/autopilot/"> <span lang="en">How this app is run</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/terms"> <span lang="en">Terms</span></a>
+<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
+<a class="footer__link" href="/en/contact"> <span lang="en">Contact</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p>
+</div>
+</footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+</body>
+</html>

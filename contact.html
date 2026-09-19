@@ -40,16 +40,19 @@
   <meta property="og:site_name" content="Obsidian連携シンプルメモ">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:locale:alternate" content="en_US">
-  
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="お問い合わせ | Obsidian連携シンプルメモ">
   <meta name="twitter:description" content="Obsidian連携シンプルメモへのお問い合わせ。不具合報告、機能リクエスト、一般的なご質問など、メールフォームからお気軽にご連絡ください。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/contact.png">
-  
+
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/contact">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/contact">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/contact">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/contact">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -112,7 +115,6 @@
     ]
   }
   </script>
-
 
   <script type="application/ld+json">
   {
@@ -179,7 +181,7 @@
         transition: none;
       }
     }
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -305,7 +307,6 @@
       }
     }
 
-
     /* お問い合わせフォーム。既存トークン（--accent / --border / --text-muted）を使う。 */
     .inquiry-form {
       max-width: 640px;
@@ -390,141 +391,128 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/contact" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/contact" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">お問い合わせ | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">お問い合わせ | Obsidian連携シンプルメモ</span>
-      <span class="meta-description">Obsidian連携シンプルメモへのお問い合わせ。不具合報告、機能リクエスト、一般的なご質問など、メールフォームからお気軽にご連絡ください。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Contact Us | Simple Memo - for Obsidian</span>
-      <span class="meta-og-title">Contact Us | Simple Memo - for Obsidian</span>
-      <span class="meta-description">Contact Simple Memo - for Obsidian. Report bugs, request features, or ask questions via our email form. We typically respond within 48 hours.</span>
-    </div>
-  </div>
 
   <!-- Header -->
 <!-- Content -->
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja" data-lang="ja">お問い合わせ</span>
-        <span lang="en" data-lang="en">Contact Us</span>
+        <span lang="ja">お問い合わせ</span>
+
       </h1>
-      
+
       <form id="inquiry-form" class="inquiry-form" novalidate>
         <p class="inquiry-form__lead">
-          <span lang="ja" data-lang="ja">不具合のご報告、使い方のご質問、ご要望をお送りください。</span>
-          <span lang="en" data-lang="en">Send us a bug report, a question about how to use the app, or a request.</span>
+          <span lang="ja">不具合のご報告、使い方のご質問、ご要望をお送りください。</span>
+
         </p>
 
         <label class="inquiry-form__label" for="inquiry-body">
-          <span lang="ja" data-lang="ja">お問い合わせ内容</span>
-          <span lang="en" data-lang="en">Your message</span>
+          <span lang="ja">お問い合わせ内容</span>
+
         </label>
         <textarea id="inquiry-body" class="inquiry-form__textarea" rows="8" maxlength="4000" required></textarea>
         <p id="inquiry-counter" class="inquiry-form__counter">0 / 4000</p>
 
         <label class="inquiry-form__label" for="inquiry-email">
-          <span lang="ja" data-lang="ja">返信先メールアドレス（任意）</span>
-          <span lang="en" data-lang="en">Email for our reply (optional)</span>
+          <span lang="ja">返信先メールアドレス（任意）</span>
+
         </label>
         <input id="inquiry-email" class="inquiry-form__input" type="email" autocomplete="email" inputmode="email">
         <p class="inquiry-form__hint">
-          <span lang="ja" data-lang="ja">未記入でも送信できます。その場合、こちらから返信はできません。</span>
-          <span lang="en" data-lang="en">You can send without it — but then we have no way to reply.</span>
+          <span lang="ja">未記入でも送信できます。その場合、こちらから返信はできません。</span>
+
         </p>
 
         <label class="inquiry-form__label" for="inquiry-device">
-          <span lang="ja" data-lang="ja">お使いの端末（任意・不具合のご報告のときだけ）</span>
-          <span lang="en" data-lang="en">Your device (optional — only for bug reports)</span>
+          <span lang="ja">お使いの端末（任意・不具合のご報告のときだけ）</span>
+
         </label>
         <input id="inquiry-device" class="inquiry-form__input" type="text" maxlength="64"
                autocomplete="off" placeholder="iPhone 15 Pro / Apple Watch Series 9">
 
         <label class="inquiry-form__label" for="inquiry-os">
-          <span lang="ja" data-lang="ja">OSのバージョン（任意）</span>
-          <span lang="en" data-lang="en">OS version (optional)</span>
+          <span lang="ja">OSのバージョン（任意）</span>
+
         </label>
         <input id="inquiry-os" class="inquiry-form__input" type="text" maxlength="64"
                autocomplete="off" placeholder="iOS 26.0">
         <label class="inquiry-form__label" for="inquiry-version">
-          <span lang="ja" data-lang="ja">シンプルメモのバージョン（任意）</span>
-          <span lang="en" data-lang="en">Simple Memo version (optional)</span>
+          <span lang="ja">シンプルメモのバージョン（任意）</span>
+
         </label>
         <input id="inquiry-version" class="inquiry-form__input" type="text" maxlength="64"
                autocomplete="off" placeholder="5.8.20">
         <p class="inquiry-form__hint">
-          <span lang="ja" data-lang="ja">同じ操作でも端末とOSで挙動が変わることがあります。分かる範囲で構いません。<strong>ブラウザから自動では取得しません</strong>（この画面を開いた端末と、不具合が起きている端末は別のことがあるため）。</span>
-          <span lang="en" data-lang="en">The same steps can behave differently per device and OS. Rough is fine. <strong>We don't read this from your browser</strong> — the device you're typing on isn't always the one with the problem.</span>
+          <span lang="ja">同じ操作でも端末とOSで挙動が変わることがあります。分かる範囲で構いません。<strong>ブラウザから自動では取得しません</strong>（この画面を開いた端末と、不具合が起きている端末は別のことがあるため）。</span>
+
         </p>
 
         <details class="inquiry-form__reproduction">
           <summary>
-            <span lang="ja" data-lang="ja">不具合の詳しい状況を追加する（任意）</span>
-            <span lang="en" data-lang="en">Add details about a bug (optional)</span>
+            <span lang="ja">不具合の詳しい状況を追加する（任意）</span>
+
           </summary>
           <p class="inquiry-form__hint">
-            <span lang="ja" data-lang="ja">分かる項目だけで構いません。メモの本文やパスワードなどは書かず、操作の流れを教えてください。お問い合わせ内容と合わせて4,000文字まで送れます。</span>
-            <span lang="en" data-lang="en">Fill in what you know. Describe your actions without including private memo text or passwords. Your message and these details can contain up to 4,000 characters in total.</span>
+            <span lang="ja">分かる項目だけで構いません。メモの本文やパスワードなどは書かず、操作の流れを教えてください。お問い合わせ内容と合わせて4,000文字まで送れます。</span>
+
           </p>
           <label class="inquiry-form__label" for="inquiry-steps">
-            <span lang="ja" data-lang="ja">問題が起きるまでに行った操作</span>
-            <span lang="en" data-lang="en">What did you do before the problem occurred?</span>
+            <span lang="ja">問題が起きるまでに行った操作</span>
+
           </label>
           <textarea id="inquiry-steps" class="inquiry-form__textarea" rows="3" maxlength="2000"></textarea>
           <label class="inquiry-form__label" for="inquiry-expected">
-            <span lang="ja" data-lang="ja">本来どうなると思っていましたか？</span>
-            <span lang="en" data-lang="en">What did you expect to happen?</span>
+            <span lang="ja">本来どうなると思っていましたか？</span>
+
           </label>
           <textarea id="inquiry-expected" class="inquiry-form__textarea" rows="3" maxlength="1000"></textarea>
           <label class="inquiry-form__label" for="inquiry-actual">
-            <span lang="ja" data-lang="ja">実際にはどうなりましたか？</span>
-            <span lang="en" data-lang="en">What actually happened?</span>
+            <span lang="ja">実際にはどうなりましたか？</span>
+
           </label>
           <textarea id="inquiry-actual" class="inquiry-form__textarea" rows="3" maxlength="1000"></textarea>
         </details>
 
         <button id="inquiry-submit" class="inquiry-form__submit" type="submit">
-          <span lang="ja" data-lang="ja">送信する</span>
-          <span lang="en" data-lang="en">Send</span>
+          <span lang="ja">送信する</span>
+
         </button>
         <p id="inquiry-status" class="inquiry-form__status" role="status" aria-live="polite"></p>
 
         <p class="inquiry-form__privacy">
-          <span lang="ja" data-lang="ja">お問い合わせ内容は最大180日間保存し、その後削除します。メールアドレスは<strong>ハッシュ化して保存</strong>し、そのままの形では残しません。用件によっては自動で定型のご案内をお送りします（返金・退会・個人情報に関するご連絡は、必ず人が確認します）。</span>
-          <span lang="en" data-lang="en">Messages are kept for up to 180 days, then deleted. Your email address is <strong>stored as a hash</strong>, never in plain form. Some messages get an automatic templated reply — anything about refunds, account deletion, or privacy is always read by a person.</span>
+          <span lang="ja">お問い合わせ内容は最大180日間保存し、その後削除します。メールアドレスは<strong>ハッシュ化して保存</strong>し、そのままの形では残しません。用件によっては自動で定型のご案内をお送りします（返金・退会・個人情報に関するご連絡は、必ず人が確認します）。</span>
+
         </p>
       </form>
 
       <div class="contact-info">
         <p class="contact-info__label">
-          <span lang="ja" data-lang="ja">メールでのご連絡</span>
-          <span lang="en" data-lang="en">Or email us</span>
+          <span lang="ja">メールでのご連絡</span>
+
         </p>
         <!--email_off--><a href="mailto:support&#64;simplememofast.com" class="contact-info__email">support&#64;simplememofast.com</a><!--/email_off-->
       </div>
@@ -537,27 +525,27 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span lang="ja">Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">よくあるご質問</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/legal" class="footer__link footer__link--legal"><span lang="ja" data-lang="ja">特定商取引法に基づく表記</span> <span lang="en" data-lang="en">Legal</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
+        <a href="/faq" class="footer__link"><span lang="ja">よくあるご質問</span> </a>
+        <a href="/legal" class="footer__link footer__link--legal"><span lang="ja">特定商取引法に基づく表記</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -565,8 +553,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

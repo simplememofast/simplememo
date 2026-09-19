@@ -251,6 +251,10 @@ if (SELFTEST) {
   // **12件中0件失敗**（＝緑のまま）だった。どれも実害が外に出る門である。
   // 判定を scanHtml / scanLlms へ切り出し、ここから面ごと通す。
   const drift = (html, rel = 'fixture/x.html') => scanHtml(html, rel).findings;
+  const englishCopyright = `<p>${C.copyrightLineEn}</p>`;
+  t('英語ページの著作権表記を日本語へ戻さない', drift(englishCopyright, 'en/fixture.html').length === 0);
+  t('英語ページの古い著作権表記も同期する',
+    scanHtml('<p>© 2026 Old Name</p>', 'en/fixture.html', { write: true }).out === englishCopyright);
 
   // 何も食い違っていない面が黙ることを先に固定する。これが無いと、
   // 以下の「落ちた」が雑音の上で成立している可能性を排除できない。
@@ -348,7 +352,8 @@ function scanHtml(src, rel, { write = false } = {}) {
       const m = args2[0];
       const index = args2[args2.length - 2];
       if (scope === 'pricing' && !inPriceZone(index)) return m;
-      const canonical = build(...args2);
+      const canonical = desc === '© line' && rel.startsWith('en/')
+        ? C.copyrightLineEn : build(...args2);
       if (m === canonical) return m;
       findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
       return write ? canonical : m;

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design" name="apple-itunes-app"/>
+<!-- Google tag (gtag.js) -->
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+<title>Privacy-First Design: Obsessive Attention to Detail in a Memo App</title>
+<meta content="Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits." name="description"/>
+<meta content="#070b14" name="theme-color"/>
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+<!-- OGP -->
+<meta content="Privacy-First Design: Obsessive Attention to Detail in a Memo App" property="og:title"/>
+<meta content="Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="2026-02-13T00:00:00+09:00" property="article:published_time"/>
+<meta content="https://simplememofast.com/en/devlog/privacy-first-design" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="Privacy-First Design: Obsessive Attention to Detail in a Memo App" name="twitter:title"/>
+<meta content="Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits." name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png" name="twitter:image"/>
+
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon"/>
+<link href="/assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/assets/favicon/site.webmanifest" rel="manifest"/>
+<!-- JSON-LD: BlogPosting -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/privacy-first-design#article","headline":"Privacy-First Design: Obsessive Attention to Detail in a Memo App | Simple Memo Dev Log","description":"Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits.","url":"https://simplememofast.com/en/devlog/privacy-first-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/privacy-first-design#webpage"}}</script>
+<!-- JSON-LD: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Privacy-First Design: Obsessive Attention to Detail in a Memo App","item":"https://simplememofast.com/en/devlog/privacy-first-design"}]}</script>
+<!-- JSON-LD: Speakable (AIO / Voice Search) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/devlog/privacy-first-design#webpage","inLanguage":"en","name":"Privacy-First Design: Obsessive Attention to Detail in a Memo App | Simple Memo Dev Log","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title"]},"url":"https://simplememofast.com/en/devlog/privacy-first-design"}</script>
+<link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/devlog/privacy-first-design" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/devlog/privacy-first-design" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+<!-- Meta Templates for JS -->
+
+<main class="page-content">
+<div class="container">
+<h1 class="page-content__title">
+
+<span lang="en">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
+</h1>
+<div class="article-meta">
+
+<span lang="en">Published February 13, 2026 ・ Protection and analytics explanation updated September 6, 2026</span>
+</div>
+<!-- Japanese Content -->
+
+<!-- English Content -->
+<div class="" lang="en">
+<div class="article-body">
+<h2>1. Why Privacy Matters for a Memo App</h2>
+<p>Work ideas, personal drafts, and daily notes often contain information that is not ready to share. Fast capture should come with a clear explanation of where that information is stored and sent.</p>
+<p>This article separates on-device encryption, session storage, screen visibility, diagnostic logs, and usage analytics. Protection in one area does not guarantee protection in another.</p>
+<div class="philosophy-highlight">
+<strong>Updated September 6, 2026:</strong> We checked the source for version 5.8.17, matching the public app’s version, and corrected the explanations of screen protection, logs, and analytics. The descriptions include their limits.
+          </div>
+<h2>2. Automatic Hiding in the App Switcher Is Not Enabled</h2>
+<p>iOS takes a snapshot after an app moves to the background. Apple advises removing sensitive information from the interface during that transition.</p>
+<p>In the checked source for version 5.8.17, <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code> save the draft without calling the privacy overlay. The old overlay functions remain in the source, but are not an active protection path.</p>
+<p><strong>Visible memo text may remain in the app-switcher snapshot.</strong> Encrypting the Outbox does not hide a screen image. This corrects the earlier article’s claim that the overlay always hides memo content.</p>
+<h2>3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
+<p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
+<p>Communication cache persisting on the device means traces of which URLs were accessed and when exist on disk. Cookies being stored means session information remains on the device.</p>
+<p>This app uses <code>URLSessionConfiguration.ephemeral</code>.</p>
+<pre><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+<ul>
+<li><strong>No disk cache:</strong> This URLSession does not persist its cache to disk</li>
+<li><strong>Cookie use disabled:</strong> This URLSession does not accept cookies or set them on requests</li>
+<li><strong>URL cache disabled:</strong> The cache storage itself is set to <code>nil</code></li>
+<li><strong>No persistent session storage:</strong> URLSession session data is not stored on disk</li>
+</ul>
+<p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
+<h2>4. The Scope of Performance Logging</h2>
+<p>Logging in <code>PerformanceLogger</code> is guarded by <code>#if DEBUG</code>. Builds without DEBUG defined do not include this logger’s logging operations.</p>
+<p>Its <code>logError</code> records the error type, such as <code>URLError</code>, instead of the detailed <code>localizedDescription</code>, which may contain a file path or user input.</p>
+<p>This does not automatically sanitize every event name or additional string passed to <code>logEvent</code>. Callers must avoid passing email addresses, memo text, and authentication information.</p>
+<p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> First-party usage events and AppsFlyer remain separate, enabled systems. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
+<h2>5. What the AES-GCM Encrypted Outbox Protects</h2>
+<p>Pending memos are managed in an on-device queue called the Outbox. The app uses Apple’s CryptoKit to encrypt saved data with AES-GCM. Newly generated encryption keys are 256 bits.</p>
+<p>Keys are stored in Keychain with <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. This allows access after the first unlock following a restart, until the next restart, and prevents migration through a backup restored to another device. The app reads the key for encryption and decryption.</p>
+<p>This protects stored data. It does not hide the visible screen or guarantee safety against every form of device compromise. Before changing devices, confirm that important memos have reached their destination.</p>
+<p>When email sending is used, memo bodies are processed by our Relay API and delivery infrastructure, and remain as email in the recipient’s mailbox. <strong>On-device encryption does not mean email delivery is end-to-end encrypted (E2EE).</strong> See our <a href="/en/privacy#technical">Privacy Policy</a> and <a href="/en/privacy-architecture/">data route explanation</a>.</p>
+<p>For the pending-send queue, see the <a href="/en/devlog/outbox-architecture">Outbox architecture article</a>.</p>
+<h2>6. Memo Protection and External SDKs</h2>
+<p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
+<p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill from a Google account. Firebase App Check initializes at launch to protect backend access. AppsFlyer supports acquisition and usage analytics, with the same installation identifier used for first-party analytics.</p>
+<p>Keeping memo text out of event fields does not remove links through identifiers and delivery records. Analytics, including SDK behavior, needs to be considered separately from memo encryption. Our <a href="/en/privacy#technical">Privacy Policy</a> describes the fields and purposes.</p>
+<h2>7. Explain the Scope of Each Protection</h2>
+<p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not mean the app collects no usage events.</p>
+<p>Fast capture should come with an understandable explanation of collected data. We describe analytics destinations, identifiers, and how records can be linked, and review these explanations as the app changes.</p>
+<!-- FAQ Section -->
+<div class="faq-section">
+<h2>Frequently Asked Questions</h2>
+<div class="faq-item">
+<div class="faq-item__question">Q. Is memo content stored on servers?</div>
+<div class="faq-item__answer">When you send email, the body passes through our Relay API and delivery infrastructure. Our Relay API does not permanently store memo bodies except where required by law or for legitimate operational needs such as incident response. This is separate from storage in the recipient’s mailbox. See the <a href="/en/privacy-architecture/">privacy architecture</a> for the destination-specific explanation.</div>
+</div>
+<div class="faq-item">
+<div class="faq-item__question">Q. Is communication encrypted?</div>
+<div class="faq-item__answer">Yes. API communication uses HTTPS. An ephemeral URLSession avoids persisting that session’s caches, cookies, and credentials to disk. It does not remove separate analytics or server-side records.</div>
+</div>
+<div class="faq-item">
+<div class="faq-item__question">Q. Are memos safe if I lose my device?</div>
+<div class="faq-item__answer">The Outbox is encrypted at rest with AES-GCM, and newly generated keys are 256 bits. Keys use a Keychain protection class that prevents migration to another device. This does not protect the visible screen or email already delivered to a mailbox, and on-device encryption does not guarantee that all information is safe after a device is lost.</div>
+</div>
+<div class="faq-item">
+<div class="faq-item__question">Q. Is there analytics or tracking?</div>
+<div class="faq-item__answer">Yes. We use first-party usage analytics and the AppsFlyer SDK. First-party events include a random installation identifier, session identifier, event type and time, app version, and outcomes such as send results. The app sends AppsFlyer events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases; purchase events may include price, currency, and subscription period. The same installation identifier is set as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes, but first-party send IDs can link to recipient email hashes. These records are not fully anonymous. See the <a href="/en/privacy#technical">technical measures in our Privacy Policy</a>.</div>
+</div>
+<div class="faq-item">
+<div class="faq-item__question">Q. How do you use Apple frameworks and external SDKs?</div>
+<div class="faq-item__answer">Within the iOS app, memo encryption and key storage use CryptoKit and Keychain, and memo transmission uses URLSession. External SDKs support Google sign-in, Firebase backend protection, and AppsFlyer acquisition and usage analytics. Memo-body protection and analytics involving identifiers are separate parts of the design.</div>
+</div>
+</div>
+<!-- Related Articles -->
+<div class="related-section">
+<h2 class="related-section__title">Related Articles</h2>
+<div class="related-grid">
+<a class="related-card" href="/en/devlog/day1">
+<div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+<div class="related-card__desc">The initial development decisions behind recreating the Captio experience.</div>
+</a>
+<a class="related-card" href="/en/devlog/">
+<div class="related-card__title">Dev Log Index</div>
+<div class="related-card__desc">Technical decision records for Simple Memo - for Obsidian.</div>
+</a>
+<a class="related-card" href="/en/devlog/outbox-architecture">
+<div class="related-card__title">Outbox Architecture: Zero Message Loss</div>
+<div class="related-card__desc">How the Outbox queues pending memos and encrypts stored data with AES-GCM.</div>
+</a>
+<a class="related-card" href="/en/devlog/relay-api-design">
+<div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
+<div class="related-card__desc">The email infrastructure built on Cloudflare Workers and its relay design.</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+
+<span lang="en">References</span>
+</h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://developer.apple.com/documentation/cryptokit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — CryptoKit Documentation</a> — <span lang="en">Used for implementing AES-GCM encryption to protect Outbox data at rest</span></li>
+<li><a href="https://developer.apple.com/documentation/foundation/urlsession" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — URLSession Documentation</a> — <span lang="en">Ephemeral session configuration for privacy-preserving network communication</span></li>
+<li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Preventing Insecure Network Connections (App Transport Security)</a> — <span lang="en">Enforcing TLS for secure data transmission</span></li>
+<li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Generating Log Messages from Your Code</a> — <span lang="en">Log storage and handling sensitive information</span></li>
+<li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="en">App-switcher snapshots and visible information</span></li>
+<li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="en">Key access conditions and migration restrictions</span></li>
+</ul>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Give your notes somewhere to accumulate</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Learn how to enable the Obsidian integration and configure its destination.</span>
+</span>
+</a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+
+<span lang="en">Related Content</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/en/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Captio Alternatives</span></a></li>
+<li><a href="/en/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">All Blog Posts</span></a></li>
+<li><a href="/en/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Compare Memo Apps</span></a></li>
+</ul>
+</section>
+</main>
+<footer class="footer">
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
+<a class="footer__link" href="/en/how-to/"> <span lang="en">How to Use</span></a>
+<a class="footer__link" href="/en/templates/"> <span lang="en">Templates</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/captio/"> <span lang="en">Captio Method</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/en/devlog/"> <span lang="en">Dev Log</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/terms"> <span lang="en">Terms</span></a>
+<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
+<a class="footer__link" href="/en/contact"> <span lang="en">Contact</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p>
+</div>
+</footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+</body>
+</html>

@@ -47,6 +47,12 @@ SHARED_JA_EN = {
     "メニュー": "Menu",
     "ホーム": "Home",
     "ブログ": "Blog",
+    "プロダクト": "Product",
+    "比較・乗り換え": "Compare & Switch",
+    "読みもの": "Learn",
+    "サポート": "Support",
+    "© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ":
+        "© 2026 Simple Memo - for Obsidian / Yurika Inc.",
 }
 
 
@@ -68,6 +74,59 @@ def en_url_for(root_path: str) -> str | None:
     return None
 
 
+def english_only_text(el) -> str:
+    """Return the EN-visible text of a bilingual element."""
+    if el is None:
+        return ""
+    clone = BeautifulSoup(str(el), "html.parser")
+    for node in clone.find_all(attrs={"data-lang": "ja"}):
+        node.decompose()
+    for node in clone.find_all(attrs={"data-lang": "en"}):
+        node.attrs.pop("data-lang", None)
+    return clone.get_text(" ", strip=True)
+
+
+def legacy_en_metadata(soup: BeautifulSoup) -> tuple[str, str]:
+    """Derive EN title/description for older dual-DOM pages without meta-template.
+
+    We only call this for pages that already contain substantive EN DOM. Nothing is
+    translated or invented: title/description are selected from the EN text already
+    shipped in the page.
+    """
+    title = english_only_text(soup.find("h1"))
+    if not title:
+        # Some legacy pages put the EN heading on a child rather than the h1 itself.
+        for node in soup.find_all(attrs={"data-lang": "en"}):
+            text = node.get_text(" ", strip=True)
+            if 12 <= len(text) <= 140 and node.find_parent("h1"):
+                title = text
+                break
+    desc = ""
+    preferred = [
+        ".lp-hero__lead", ".hero__lead", ".hero-subtitle", ".hero__subtitle",
+        ".lead", ".intro-text", "main p", "article p",
+    ]
+    for selector in preferred:
+        for node in soup.select(selector):
+            text = english_only_text(node)
+            if 70 <= len(text) <= 320 and not text.startswith("This article is currently only available"):
+                desc = text
+                break
+        if desc:
+            break
+    if not desc:
+        candidates = []
+        for node in soup.find_all(attrs={"data-lang": "en"}):
+            text = node.get_text(" ", strip=True)
+            if 70 <= len(text) <= 320 and not text.startswith("This article is currently only available"):
+                candidates.append(text)
+        if candidates:
+            desc = max(candidates, key=len)
+    if title and not title.endswith(("Simple Memo", "Obsidian")):
+        title = f"{title} | Simple Memo"
+    return title[:180], desc[:320]
+
+
 def main(ja_rel: str, en_rel: str) -> None:
     ja_path = REPO / ja_rel
     en_path = REPO / en_rel
@@ -86,6 +145,13 @@ def main(ja_rel: str, en_rel: str) -> None:
     en_title = tmpl("meta-title")
     en_ogtitle = tmpl("meta-og-title", en_title)
     en_desc = tmpl("meta-description")
+    if not en_title or not en_desc:
+        legacy_title, legacy_desc = legacy_en_metadata(soup)
+        en_title = en_title or legacy_title
+        en_desc = en_desc or legacy_desc
+        en_ogtitle = en_ogtitle or en_title
+    if not en_title or not en_desc:
+        raise ValueError(f"Cannot derive substantive EN metadata from {ja_rel}")
 
     # --- <html lang> ---
     soup.html["lang"] = "en"
@@ -145,10 +211,14 @@ def main(ja_rel: str, en_rel: str) -> None:
                         obj[k] = EN_BRAND
                     elif v in SHARED_JA_EN:
                         obj[k] = SHARED_JA_EN[v]
-                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting", "ListItem") and JA_TITLE_RE.search(v):
+                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting", "ContactPage") and JA_TITLE_RE.search(v):
+                        obj[k] = en_title
+                    elif obj.get("@type") == "ListItem" and str(obj.get("item", "")).rstrip("/") == ja_abs.rstrip("/"):
                         obj[k] = en_title
                 elif isinstance(v, str) and ja_abs in v:
-                    obj[k] = v.replace(ja_abs, abs_en)
+                    # Replace the slash-terminated source first. Otherwise an
+                    # original .../page/#article plus abs_en ending in / becomes //.
+                    obj[k] = v.replace(ja_abs + "/", abs_en).replace(ja_abs, abs_en.rstrip("/"))
                 else:
                     localize(v)
             # breadcrumb item URLs: /blog/ -> /en/blog/
@@ -201,6 +271,11 @@ def main(ja_rel: str, en_rel: str) -> None:
     # --- residual JA-only shared strings (bio, headings, aria-labels) ---
     for ja, en in SHARED_JA_EN.items():
         html_out = html_out.replace(ja, en)
+
+    from finalize_split_pages import finish_markup, finish_faq, finish_breadcrumbs
+    html_out = finish_markup(html_out, REPO, english=True)
+    html_out = finish_faq(html_out, abs_en)
+    html_out = finish_breadcrumbs(html_out, REPO).replace("AI Ataka", "AI ATAKA")
 
     en_path.parent.mkdir(parents=True, exist_ok=True)
     en_path.write_text(html_out, encoding="utf-8")

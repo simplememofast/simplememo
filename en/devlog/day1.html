@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1" name="apple-itunes-app"/>
+<!-- Google tag (gtag.js) -->
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+<title>[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That…</title>
+<meta content="Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design." name="description"/>
+<meta content="#070b14" name="theme-color"/>
+<meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
+<meta content="Obsidian連携シンプルメモ開発チーム" name="author"/>
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+<!-- OGP -->
+<meta content="[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That…" property="og:title"/>
+<meta content="Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="https://simplememofast.com/en/devlog/day1" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-day1.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<meta content="2026-02-13T00:00:00+09:00" property="article:published_time"/>
+<meta content="Obsidian連携シンプルメモ開発チーム" property="article:author"/>
+<meta content="Development" property="article:section"/>
+<meta content="Captio" property="article:tag"/>
+<meta content="UIKit" property="article:tag"/>
+<meta content="Outbox Architecture" property="article:tag"/>
+<meta content="Privacy" property="article:tag"/>
+<meta content="Swift" property="article:tag"/>
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That…" name="twitter:title"/>
+<meta content="Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design." name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-day1.png" name="twitter:image"/>
+
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon"/>
+<link href="/assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/assets/favicon/site.webmanifest" rel="manifest"/>
+<!-- JSON-LD: BlogPosting -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/day1#article","headline":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","description":"Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, zero message loss.","url":"https://simplememofast.com/en/devlog/day1","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage"}}</script>
+<!-- JSON-LD: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience","item":"https://simplememofast.com/en/devlog/day1"}]}</script>
+<!-- JSON-LD: Speakable (AIO / Voice Search) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage","inLanguage":"en","name":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body h2"]},"url":"https://simplememofast.com/en/devlog/day1"}</script>
+<link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/en/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/en/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/devlog/day1" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/devlog/day1" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+<!-- Meta Templates for JS -->
+
+<main class="page-content">
+<div class="container">
+<!-- ======================== -->
+<!-- JAPANESE VERSION         -->
+<!-- ======================== -->
+
+<!-- ======================== -->
+<!-- ENGLISH VERSION          -->
+<!-- ======================== -->
+<div lang="en">
+<h1 class="page-content__title">[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience</h1>
+<div class="article-meta">February 13, 2026</div>
+<!-- Table of Contents -->
+<nav class="article-toc">
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#en-intro">Introduction: The App Called Captio</a></li>
+<li><a href="#en-section1">What Made Captio So Good -- Deconstructing the Experience</a></li>
+<li><a href="#en-section2">Architecture: Why UIKit Instead of SwiftUI</a></li>
+<li><a href="#en-section3">Achieving "Send and Clear" in a Single Tap</a></li>
+<li><a href="#en-section4">Zero Message Loss: The Outbox Architecture</a></li>
+<li><a href="#en-section5">Relay API: Breaking Free from External Email API Dependency</a></li>
+<li><a href="#en-section6">Today's Work: Eliminating Small Annoyances One by One</a></li>
+<li><a href="#en-section7">Fixing History Status Display Inconsistencies</a></li>
+<li><a href="#en-section8">An Obsessive Commitment to Privacy</a></li>
+<li><a href="#en-section9">10 Languages: Reaching Captio Users Worldwide</a></li>
+<li><a href="#en-section10">Today's Lesson: Product Design Is About Trust</a></li>
+<li><a href="#en-section11">Day 2 Preview</a></li>
+</ol>
+</nav>
+<div class="page-content__body">
+<!-- Introduction -->
+<section id="en-intro">
+<p>Have you ever heard of an app called Captio?</p>
+<p>You write a memo, tap the send button. That's it -- your memo arrives in your email inbox. The keyboard appeared the instant you launched it. You wrote, you sent, it cleared. No extra features whatsoever. That was all the app did.</p>
+<p>But that "all it did" was extraordinarily comfortable.</p>
+<p>An idea on the commuter train, a task that popped into your head during a meeting, a thought before falling asleep -- Captio delivered all of them to your inbox within a second. No opening a notes app, choosing a folder, typing a title... none of that friction. Once you experienced that "zero friction" workflow, you couldn't let it go.</p>
+<p>Then Captio shut down.</p>
+<p>I tried several alternatives, but none came close to that experience. Slow launch times, unnecessary UI elements, memos lingering after send -- these might seem like minor differences, but the essence of what Captio had built was precisely the accumulation of these "minor things."</p>
+<p>So I decided to build it myself. The Captio experience, once more.</p>
+<p>This is Day 1 of the "Simple Memo (Captio-style)" development diary. In this article, I'll deconstruct the Captio experience and document every technical decision made to recreate it with a modern tech stack.</p>
+</section>
+<!-- Section 1 -->
+<section id="en-section1">
+<h2>1. What Made Captio So Good -- Deconstructing the Experience</h2>
+<p>To articulate the Captio experience, I broke it down into three elements.</p>
+<h3>Element 1: Instant Launch-to-Input</h3>
+<p>When you launched Captio, the keyboard appeared instantly and text input was ready. There was no splash screen followed by a home screen where you then tap a "compose" button. Launch equals input. We call the time from launch to text input readiness <strong>Time-to-Text</strong>. Captio's felt like under 0.5 seconds.</p>
+<h3>Element 2: Instant Clear After Send</h3>
+<p>When you tapped send, the screen cleared immediately. No staring at a "Sending..." progress bar. The moment your memo disappeared, you felt the reassurance of "it's sent" and moved on. We call the time from tapping send to UI clearing <strong>Send-to-Reset</strong>. Our target is under one-tap.</p>
+<h3>Element 3: Nothing Unnecessary</h3>
+<p>Folders, tags, rich text, markdown support -- Captio had none of these. Just a text field and a send button. This decisiveness brought cognitive load close to zero. An app where you never have to think about "what should I do." That was Captio.</p>
+<p>Recreating these three elements with modern iOS development. That's the mission of "Simple Memo (Captio-style)."</p>
+</section>
+<!-- Section 2 -->
+<section id="en-section2">
+<h2>2. Architecture: Why UIKit Instead of SwiftUI</h2>
+<p>Choosing UIKit over SwiftUI in 2026 iOS development might seem unorthodox. But our top priority was clear -- <strong>Time-to-Text under 500ms</strong>.</p>
+<p>SwiftUI's `body` re-evaluation, `StateObject` initialization, `@Environment` resolution -- these overheads are negligible in typical app development, but not when you need "instant launch-to-input." We wanted to focus the text field even 1ms faster.</p>
+<p>So we adopted <strong>direct UIKit construction without Storyboard</strong>.</p>
+<p>We create the window in SceneDelegate and set ComposeViewController directly as the rootViewController. We even skip Storyboard parsing.</p>
+<pre><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+<p>Then in ComposeViewController's `viewDidAppear`, we immediately focus the text view.</p>
+<pre><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+<p>These two pieces of code alone create the shortest path from launch to keyboard display.</p>
+<p>Real device measurements: <strong>200-300ms</strong>. Well below our 500ms target. Trying to achieve the same with SwiftUI, we found that `@FocusState` delays and body re-evaluation timing made it difficult to consistently stay under 500ms.</p>
+<p>UIKit may be "old." But it's "fast." On this single point, UIKit remains the best choice.</p>
+</section>
+<!-- Section 3 -->
+<section id="en-section3">
+<h2>3. Achieving "Send and Clear" in a Single Tap</h2>
+<p>To recreate Captio's "send and it's gone" experience, the most critical design decision was to <strong>completely decouple the send animation and UI clear from the network response</strong>.</p>
+<p>A typical app's send flow looks like this:</p>
+<ol>
+<li>Tap the send button</li>
+<li>Show a loading indicator</li>
+<li>Wait for the server response</li>
+<li>Clear UI on success, show error on failure</li>
+</ol>
+<p>In this flow, network latency directly becomes UI latency. Our flow works differently:</p>
+<ol>
+<li>Tap the send button</li>
+<li><strong>Immediately</strong> clear the UI (animation: 0.25s)</li>
+<li>Send via network in the background</li>
+<li>Success: silently remove from Outbox / Failure: retry in background</li>
+</ol>
+<pre><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+<p>For the user, the moment they tap send, the memo "vanishes" and they're ready to write the next one. Network success or failure is handled invisibly in the background.</p>
+<p>"But what if the send fails?" -- that question is answered by the Outbox architecture in the next section.</p>
+</section>
+<!-- Section 4 -->
+<section id="en-section4">
+<h2>4. Zero Message Loss: The Outbox Architecture</h2>
+<p>Decoupling the send UI from the network response means that "the UI cleared but the email actually failed to send" could happen. This is absolutely unacceptable. A user thinking they sent a memo that was never actually delivered -- this is a fatal loss of trust for a memo app.</p>
+<p>That's why we adopted the <strong>Outbox pattern</strong>.</p>
+<p>The message send flow works as follows:</p>
+<ol>
+<li><strong>Tap send</strong>: Save the message to the Outbox (local storage) with AES-GCM encryption</li>
+<li><strong>UI clear</strong>: performSendAnimation immediately clears the screen</li>
+<li><strong>Background send</strong>: Retrieve the message from the Outbox and send to the Relay API</li>
+<li><strong>Success</strong>: Delete the message from the Outbox</li>
+<li><strong>Failure</strong>: Retry with exponential backoff (1s, 2s, 4s, 8s...)</li>
+<li><strong>Offline</strong>: Monitor connectivity with NWPathMonitor, auto-resend when restored</li>
+</ol>
+<p>The critical point is that <strong>the message is saved to the Outbox before the network send</strong>. This means even if the app crashes suddenly or the device loses power, the message is never lost.</p>
+<p>Messages stored in the Outbox are protected with AES-GCM encryption using CryptoKit. Encryption keys are stored in the Keychain, inaccessible from outside the app's sandbox.</p>
+<pre><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+<p>Furthermore, everything is implemented in-house, resulting in <strong>zero external library dependencies</strong>. CryptoKit, NWPathMonitor, URLSession -- all Apple-native frameworks. Being free from third-party library version management and security audits is a significant advantage for a small team.</p>
+</section>
+<!-- Section 5 -->
+<section id="en-section5">
+<h2>5. Relay API: Breaking Free from External Email API Dependency</h2>
+<p>Captio's sending mechanism was never officially documented, but it is believed to have relied on sending mail through an external provider from the device. In general, when an external email API's OAuth requirements change and access restrictions pile up, this kind of approach tends to become unsustainable.</p>
+<p>We chose a <strong>Cloudflare Workers + Resend API</strong> architecture.</p>
+<p>Cloudflare Workers is an edge computing platform where code runs at the data center closest to each user. Requests from Japan are processed at Japan's edge, requests from the US at the US edge. This virtually eliminates the cold start problem compared to traditional serverless platforms (AWS Lambda, etc.).</p>
+<p>For email delivery, we use the Resend API. Resend is a developer-friendly email API offering high deliverability and reliability.</p>
+<h3>Email Verification Flow</h3>
+<p>When users set their destination email address, a 6-digit verification code is sent for email verification. This prevents unauthorized sending to third-party email addresses.</p>
+<h3>Multi-Layer Rate Limiting</h3>
+<p>To prevent abuse, we implement multi-layer rate limiting.</p>
+<pre><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 30 per minute per device
+  devicePerDay: 200,      // 200 per day per device
+  ipPerHour: 120,         // 120 per hour per IP
+  globalPerDay: 300       // 300 per day globally (adjustable)
+};</code></pre>
+<p>By applying rate limits at three layers -- device, IP, and global -- we can block both single device runaway and botnet attacks.</p>
+<h3>Idempotency Guarantee</h3>
+<p>To prevent duplicate sends due to network instability, each message is assigned a UUID, and the Relay API performs duplicate checking. If the same UUID is resent, subsequent attempts return a success response without actually sending the email. Combined with the Outbox pattern's retry mechanism, this ensures users never receive the same memo twice.</p>
+</section>
+<!-- Section 6 -->
+<section id="en-section6">
+<h2>6. Today's Work: Eliminating Small Annoyances One by One</h2>
+<p>Much of Day 1's implementation work was spent redesigning the star rating dialog. App Store ratings are an app's lifeline, but you shouldn't ask for ratings in a way that damages the user experience.</p>
+<h3>Redesigned Display Conditions</h3>
+<p>The star rating dialog display conditions were set as follows:</p>
+<ul>
+<li><strong>Shows every 100 sends</strong>: Only displayed to users who have used the app extensively</li>
+<li><strong>Minimum 14-day interval</strong>: At least 14 days must have passed since the last display</li>
+<li><strong>30 days after dismiss</strong>: If the user dismisses it, it won't reappear for 30 days</li>
+</ul>
+<h3>Star Icon Tap Area Fix</h3>
+<p>Apple's Human Interface Guidelines recommend a minimum touch target size of 44x44pt. The star icon tap areas didn't meet this standard, so we fixed it.</p>
+<pre><code>// StarRatingView.swift
+private func createStarButton() -&gt; UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+<h3>Star Icon Distortion Fix</h3>
+<p>Star icons were being distorted due to UIStackView's `.fillEqually` distribution. Fixed by setting `contentMode` to `.scaleAspectFit` and changing the StackView distribution to `.equalSpacing`.</p>
+<h3>Post-Rating Flow</h3>
+<ul>
+<li><strong>5 stars</strong>: Navigate to the App Store review screen (`SKStoreReviewController`)</li>
+<li><strong>4 stars and below</strong>: Quietly display a "Thank you" toast and close. Don't funnel negative reviews to the App Store.</li>
+</ul>
+</section>
+<!-- Section 7 -->
+<section id="en-section7">
+<h2>7. Fixing History Status Display Inconsistencies</h2>
+<p>In the send history screen (History), I noticed a bug. Some messages showed "sending" status indefinitely even though delivery had already completed.</p>
+<p>After investigating, I found the issue in the status update logic. The previous implementation used the message's text content as the key for status updates. However, when the same memo content is sent multiple times, text-based lookup can't identify the correct message.</p>
+<p>The fix was straightforward. We changed from text-based lookup to <strong>ID-based status updates</strong>. Since each message is assigned a UUID when saved to the Outbox, we use this ID to update History status.</p>
+<pre><code>// HistoryManager.swift
+// Before: Text-based lookup (cause of the bug)
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: ID-based status update
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+<p>With this fix, even when sending the same memo content multiple times, each message's status is displayed correctly.</p>
+</section>
+<!-- Section 8 -->
+<section id="en-section8">
+<h2>8. An Obsessive Commitment to Privacy</h2>
+<p>Private information gets written into memo apps. Passwords, personal concerns, business ideas -- we can't predict what users will write. That's exactly why privacy protection should be not just "adequate" but "excessive" -- that level is just right.</p>
+<h3>Privacy Overlay in App Switcher</h3>
+<p>iOS's app switcher shows app screens as thumbnails. To eliminate the risk of third parties seeing memo content, we display a privacy overlay when the app transitions to the background.</p>
+<h3>Ephemeral URLSession</h3>
+<p>A standard URLSession saves cache, cookies, and authentication data to disk. We use `URLSessionConfiguration.ephemeral` to ensure none of this information persists on disk. This eliminates any risk of memo content remaining as cached data in storage.</p>
+<h3>Sanitized Logging</h3>
+<p>Debug logs during development require careful attention. A seemingly harmless practice like "logging the content of sent memos" can become a security hole. Our policy is clear:</p>
+<ul>
+<li>Memo content is <strong>never logged, even in DEBUG builds</strong></li>
+<li>Error logs use <strong>only `type(of: error)`</strong>, never `localizedDescription`</li>
+<li>Reason: `localizedDescription` may contain user input</li>
+</ul>
+<pre><code>// NetworkManager.swift
+// BAD: Logging error details
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: Logging only the error type
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+<p>It might seem paranoid. But to earn users' trust in a memo app, we believe this level of paranoia is necessary.</p>
+</section>
+<!-- Section 9 -->
+<section id="en-section9">
+<h2>9. 10 Languages: Reaching Captio Users Worldwide</h2>
+<p>Captio had users worldwide, centered around English-speaking countries. To reach those former users with "Simple Memo (Captio-style)," we supported 10 languages from the initial release.</p>
+<p>Supported languages: Japanese, English, Spanish, French, German, Italian, Portuguese, Korean, Chinese (Simplified), and Arabic.</p>
+<p>The technical challenge of <strong>Arabic RTL (Right-to-Left) support</strong> was particularly notable. Not just text direction, but the entire UI layout needs to be mirrored. By consistently using `leading`/`trailing` constraints in Auto Layout, we achieve a natural layout in RTL environments.</p>
+<h3>In-App Language Switching</h3>
+<p>In addition to iOS 16+'s built-in per-app language settings, we implemented our own language switching mechanism. When the language changes, the ViewController is replaced with a `cross-dissolve` transition for a smooth switching experience.</p>
+<pre><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+</section>
+<!-- Section 10 -->
+<section id="en-section10">
+<h2>10. Today's Lesson: Product Design Is About Trust</h2>
+<p>Finishing Day 1, what strikes me is that the essence of this product is designing for trust.</p>
+<p>Let me summarize the technical metrics:</p>
+<ul>
+<li><strong>Time-to-Text</strong>: Under 500ms (measured 200-300ms)</li>
+<li><strong>Send-to-Reset</strong>: Under one-tap</li>
+<li><strong>Message loss</strong>: Zero (Outbox pattern)</li>
+<li><strong>Encryption</strong>: AES-GCM (CryptoKit)</li>
+<li><strong>External library dependencies</strong>: Zero</li>
+</ul>
+<p>But all these metrics converge on a single goal: trust.</p>
+<p>Fast launch: the trust that "I can always write immediately."<br/>
+            Send and clear: the trust that "it's been processed."<br/>
+            Zero message loss: the trust that "it will absolutely be delivered."<br/>
+            Encryption: the trust that "nobody can see it."</p>
+<p>Captio wasn't loved because its features were superior. It was loved because it had meticulously polished an experience you could use with complete trust. That's what we want to carry forward.</p>
+</section>
+<!-- Section 11 -->
+<section id="en-section11">
+<h2>11. Day 2 Preview</h2>
+<p>In Day 2, we plan to tackle the following themes:</p>
+<ul>
+<li><strong>Send animation refinement</strong>: Moving beyond the current 0.25s fade-out to a more pleasant animation</li>
+<li><strong>History status update timing optimization</strong>: Comparing real-time updates vs. batch updates</li>
+<li><strong>Is the success toast even needed?</strong>: Considering the option of "not showing" any send success feedback</li>
+</ul>
+<p>Aiming for Captio's "nothing there" decisiveness. On to Day 2.</p>
+</section>
+</div>
+</div>
+<!-- ======================== -->
+<!-- RELATED TOPICS (shared)  -->
+<!-- ======================== -->
+<div class="related-topics">
+<h2>
+
+<span lang="en">Related Deep Dives</span>
+</h2>
+<div class="related-grid">
+<a class="related-card" href="/en/devlog/uikit-vs-swiftui">
+<div class="related-card__title">
+
+<span lang="en">UIKit vs SwiftUI: Choosing for Launch Speed</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</span>
+</div>
+</a>
+<a class="related-card" href="/en/devlog/outbox-architecture">
+<div class="related-card__title">
+
+<span lang="en">Outbox Architecture: Zero Message Loss</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</span>
+</div>
+</a>
+<a class="related-card" href="/en/devlog/relay-api-design">
+<div class="related-card__title">
+
+<span lang="en">Relay API: Email Infrastructure on Cloudflare Workers</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</span>
+</div>
+</a>
+<a class="related-card" href="/en/devlog/privacy-first-design">
+<div class="related-card__title">
+
+<span lang="en">Privacy-First Design: Obsessive Attention to Detail</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</span>
+</div>
+</a>
+<a class="related-card" href="/en/captio-alternative/">
+<div class="related-card__title">
+
+<span lang="en">Captio Alternative Comparison &amp; Migration Guide</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">Migration steps, feature comparison table, and FAQ for switching from Captio.</span>
+</div>
+</a>
+<a class="related-card" href="/en/note-to-email/">
+<div class="related-card__title">
+
+<span lang="en">How to Email Notes to Yourself</span>
+</div>
+<div class="related-card__desc">
+
+<span lang="en">The fastest way to capture ideas via email. A note-to-email usage guide.</span>
+</div>
+</a>
+</div>
+</div>
+</div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+
+<span lang="en">References</span>
+</h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://developer.apple.com/documentation/uikit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — UIKit Documentation</a> — <span lang="en">Official UIKit framework reference used for building Simple Memo - for Obsidian's UI</span></li>
+<li><a href="https://developer.apple.com/documentation/cryptokit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — CryptoKit Documentation</a> — <span lang="en">Used for implementing AES-GCM encryption to protect Outbox data</span></li>
+<li><a href="https://developers.cloudflare.com/workers/" rel="noopener" style="color:var(--accent);" target="_blank">Cloudflare Workers Documentation</a> — <span lang="en">Adopted as the serverless platform for the email relay API</span></li>
+<li>Wikipedia — Transactional Outbox Pattern — <span lang="en">Design pattern for offline-first message sending architecture</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5321" rel="noopener" style="color:var(--accent);" target="_blank">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="en">Standard specification for email transmission protocol</span></li>
+</ul>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Give your notes somewhere to accumulate</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+</span>
+</a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+
+<span lang="en">Related Content</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/en/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Captio Alternatives</span></a></li>
+<li><a href="/en/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">All Blog Posts</span></a></li>
+<li><a href="/en/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Compare Memo Apps</span></a></li>
+</ul>
+</section>
+</main>
+<footer class="footer">
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
+<a class="footer__link" href="/en/how-to/"> <span lang="en">How to Use</span></a>
+<a class="footer__link" href="/en/templates/"> <span lang="en">Templates</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/captio/"> <span lang="en">Captio Method</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/en/devlog/"> <span lang="en">Dev Log</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/terms"> <span lang="en">Terms</span></a>
+<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
+<a class="footer__link" href="/en/contact"> <span lang="en">Contact</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p>
+</div>
+</footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+</body>
+</html>

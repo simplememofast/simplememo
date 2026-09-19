@@ -52,6 +52,9 @@
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/devlog/relay-api-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/relay-api-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -60,7 +63,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/relay-api-design#article","headline":"Relay API設計：Cloudflare Workersでメール送信基盤を構築","description":"外部メールAPIへの依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。","url":"https://simplememofast.com/devlog/relay-api-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/relay-api-design#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/relay-api-design#article","headline":"Relay API設計：Cloudflare Workersでメール送信基盤を構築","description":"外部メールAPIへの依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。","url":"https://simplememofast.com/devlog/relay-api-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/relay-api-design#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"Relay API設計","item":"https://simplememofast.com/devlog/relay-api-design"}]}</script>
@@ -371,7 +374,7 @@
       background: rgba(82, 160, 255, 0.25);
       box-shadow: 0 0 16px rgba(82, 160, 255, 0.15);
     }
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -506,54 +509,41 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/devlog/relay-api-design" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/devlog/relay-api-design" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Obsidian連携シンプルメモ 開発日誌</span>
-      <span class="meta-og-title">Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Obsidian連携シンプルメモ 開発日誌</span>
-      <span class="meta-description">外部メールAPIへの依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log</span>
-      <span class="meta-og-title">Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log</span>
-      <span class="meta-description">Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.</span>
-    </div>
-  </div>
 
   <!-- Header -->
 <!-- Content -->
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja" data-lang="ja">Relay API設計：Cloudflare Workersでメール送信基盤を構築</span>
-        <span lang="en" data-lang="en">Relay API Design: Building Email Infrastructure on Cloudflare Workers</span>
+        <span lang="ja">Relay API設計：Cloudflare Workersでメール送信基盤を構築</span>
+
       </h1>
 
       <!-- Japanese Content -->
-      <div lang="ja" class="lang-content" data-lang="ja">
+      <div lang="ja" class="">
         <p class="article-meta">2026年2月13日 公開</p>
         <div class="page-content__body">
 
@@ -658,126 +648,16 @@
 
           <div class="cta-box">
             <p>この技術基盤の上に構築された「Obsidian連携シンプルメモ」を、ぜひお試しください。</p>
-            <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="hero" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__hero&amp;mt=8" target="_blank" rel="noopener noreferrer">App Storeでダウンロード</a>
+            <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" target="_blank" rel="noopener noreferrer">App Storeでダウンロード</a>
           </div>
 
         </div>
       </div>
 
       <!-- English Content -->
-      <div lang="en" class="lang-content" data-lang="en">
-        <p class="article-meta">Published February 13, 2026</p>
-        <div class="page-content__body">
-
-          <h2>1. Why We Didn't Use a Major Provider's Email API</h2>
-          <p>When building an app that sends memos via email, a major mail provider's sending API is the first thing that comes to mind. However, for indie developers, the Google OAuth verification process presents a formidable barrier.</p>
-          <p>Apps that haven't passed Google OAuth verification display a warning screen: "This app isn't verified by Google." For a memo app, this warning is devastating. Users send their personal thoughts and private information as memos. If "unverified" appears during their very first experience, who would trust this app?</p>
-          <p>The Google OAuth verification process is a steep climb for solo developers. Preparing a privacy policy, justifying scope requirements, undergoing security assessments -- for a team at a large company, this is routine. But for a solo-developed app, the cost of going through all this just for a single email-sending feature is disproportionately high.</p>
-          <p>What we needed was a solution that could send emails without compromising user trust and without the complexity of OAuth verification. The answer was building our own Relay API.</p>
-
-          <h2>2. Cloudflare Workers + Resend API Architecture</h2>
-          <p>The Relay API architecture is simple yet robust. It receives requests from the iOS app and relays them to an email delivery service -- a design focused on doing exactly one thing well.</p>
-
-          <div class="arch-diagram">
-            <span class="node">iOS App</span>
-            <span class="arrow"> &rarr; </span>
-            <span class="node">Relay API (Cloudflare Workers)</span>
-            <span class="arrow"> &rarr; </span>
-            <span class="node">Resend API</span>
-            <span class="arrow"> &rarr; </span>
-            <span class="node">Email Delivery</span>
-          </div>
-
-          <p><strong>Cloudflare Workers</strong> is a serverless platform that executes TypeScript code at edge locations around the world. Unlike traditional serverless platforms that suffer from cold starts, Workers starts processing requests almost instantly with near-zero cold start time.</p>
-          <p><strong>Resend API</strong> is a modern email delivery service. It makes SPF/DKIM/DMARC configuration straightforward and achieves high delivery rates. Its developer-friendly API can be called simply from TypeScript.</p>
-          <p>The cost advantage is significant. For a memo app's traffic volume, Cloudflare Workers' free tier (100,000 requests per day) is more than sufficient. Resend API is also free for up to 100 emails per month. For an indie-developed memo app, this means near-zero operational cost.</p>
-
-          <h2>3. Email Address Verification (6-Digit Code)</h2>
-          <p>The Relay API only sends memos to verified email addresses. This is the most fundamental layer of abuse prevention.</p>
-          <p>Before any memos can be sent, the destination email address must go through a verification flow:</p>
-          <ul>
-            <li>User enters their email address in the app</li>
-            <li>Relay API sends a 6-digit verification code to that address</li>
-            <li>User enters the received 6-digit code back into the app</li>
-            <li>Verification complete. Memo sending to that email address is now permitted</li>
-          </ul>
-          <p>This mechanism prevents unauthorized sending to other people's email addresses. Since only the email address owner can receive the verification code, impersonation is impossible.</p>
-          <p>Verification is a one-time process per email address. Once verified, users can continue sending memos without re-entering any code.</p>
-
-          <h2>4. Multi-Layer Rate Limiting</h2>
-          <p>To prevent abuse of the email sending API, we implement rate limiting across multiple layers.</p>
-
-<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
-  <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
-  <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
-  <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
-  <span class="code-string">globalPerDay</span>: <span class="code-number">300</span>,
-};</code></pre>
-
-          <div class="info-card">
-            <div class="info-card__label">Device Level</div>
-            <div class="info-card__title">Per-Device Limiting</div>
-            <div class="info-card__desc">Prevents excessive sending from a single device. Limits set at 30 per minute and 200 per day. These thresholds are unreachable during normal memo usage but reliably block automated mass sending.</div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__label">IP Level</div>
-            <div class="info-card__title">Per-IP Address Limiting</div>
-            <div class="info-card__desc">Limits mass requests from the same network. 120 per hour. Protects infrastructure even against attacks using multiple devices on the same network.</div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__label">Global</div>
-            <div class="info-card__title">Global Limit</div>
-            <div class="info-card__desc">Protects the entire infrastructure. A global cap of 300 per day serves as the final line of defense against any attack pattern.</div>
-          </div>
-
-          <p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This minimizes latency for legitimate requests while reliably blocking unauthorized access.</p>
-
-          <h2>5. Idempotency: Ensuring Memos Never Arrive Twice</h2>
-          <p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
-          <p>Idempotency guarantees solve this problem:</p>
-          <ul>
-            <li>Each memo is assigned a unique UUID (message ID)</li>
-            <li>The Relay API records every received message ID</li>
-            <li>If a request with the same message ID arrives again, the email is not sent a second time</li>
-            <li>A success response is returned to the client (notifying that it was already sent)</li>
-          </ul>
-          <p>With this design, even if retries occur due to network instability, the same memo will never be delivered twice. This is a critical design decision for maintaining user trust.</p>
-
-          <h2>6. The Edge Computing Advantage</h2>
-          <p>The primary reason for choosing Cloudflare Workers as our email infrastructure is the fundamental advantages of edge computing.</p>
-
-          <div class="info-card">
-            <div class="info-card__label">Latency</div>
-            <div class="info-card__title">Global Edge Locations = Low Latency</div>
-            <div class="info-card__desc">Cloudflare operates edge servers in over 300 cities worldwide. Requests are processed at the location closest to the user, delivering API responses in tens of milliseconds from any country.</div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__label">Cold Start</div>
-            <div class="info-card__title">Near-Zero Cold Start</div>
-            <div class="info-card__desc">Traditional serverless platforms (like AWS Lambda) can take hundreds of milliseconds to several seconds for cold starts. Cloudflare Workers essentially eliminates this problem. Processing begins the instant the send button is tapped.</div>
-          </div>
-
-          <div class="info-card">
-            <div class="info-card__label">Operations</div>
-            <div class="info-card__title">Auto-Scaling with No Infrastructure Management</div>
-            <div class="info-card__desc">Server management, capacity planning, scaling configuration -- none of these are needed. The system scales automatically as requests increase, and incurs no cost when idle.</div>
-          </div>
-
-          <p>For a memo app, this combination is ideal. Fast, reliable, cheap. No matter where in the world the user is, processing completes the moment they send a memo. That's the strength of a Relay API built on edge computing.</p>
-
-          <div class="cta-box">
-            <p>Try Simple Memo - for Obsidian, built on this technical foundation.</p>
-            <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" target="_blank" rel="noopener noreferrer">Download on the App Store</a>
-          </div>
-
-        </div>
-      </div>
 
       <!-- FAQ Section (visible, mirrors JSON-LD) -->
-      <div lang="ja" data-lang="ja">
+      <div lang="ja">
         <div class="page-content__body cross-links">
           <h2>よくある質問</h2>
 
@@ -795,26 +675,8 @@
         </div>
       </div>
 
-      <div lang="en" data-lang="en">
-        <div class="page-content__body cross-links">
-          <h2>Frequently Asked Questions</h2>
-
-          <h3>Q. Why Cloudflare Workers?</h3>
-          <p>Near-zero cold start, global edge delivery, and nearly free monthly cost. It's a platform that achieves both the speed and reliability a memo app demands.</p>
-
-          <h3>Q. What's the email delivery rate?</h3>
-          <p>Resend API achieves high delivery rates. SPF/DKIM/DMARC are pre-configured to minimize spam classification.</p>
-
-          <h3>Q. Is memo content stored on the server?</h3>
-          <p>The Relay API is pass-through. Memo content is not persistently stored. It is handled temporarily only as needed for the send operation.</p>
-
-          <h3>Q. What happens when rate limited?</h3>
-          <p>The app queues memos in the Outbox and automatically retries after the rate limit resets. No memos are lost.</p>
-        </div>
-      </div>
-
       <!-- Cross Links -->
-      <div lang="ja" data-lang="ja">
+      <div lang="ja">
         <div class="cross-links">
           <h2>関連記事</h2>
           <div class="cross-links__grid">
@@ -842,47 +704,19 @@
         </div>
       </div>
 
-      <div lang="en" data-lang="en">
-        <div class="cross-links">
-          <h2>Related Articles</h2>
-          <div class="cross-links__grid">
-            <a href="/devlog/day1" class="cross-links__item">
-              <div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-              <div class="cross-links__item-desc">Launch in ~1s, send with one tap, zero message loss — the full first dev log entry.</div>
-            </a>
-            <a href="/devlog/" class="cross-links__item">
-              <div class="cross-links__item-title">Dev Log Index</div>
-              <div class="cross-links__item-desc">All dev log entries and technical deep dives in one place.</div>
-            </a>
-            <a href="/devlog/outbox-architecture" class="cross-links__item">
-              <div class="cross-links__item-title">Outbox Architecture: Zero Message Loss</div>
-              <div class="cross-links__item-desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
-            </a>
-            <a href="/devlog/uikit-vs-swiftui" class="cross-links__item">
-              <div class="cross-links__item-title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
-              <div class="cross-links__item-desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
-            </a>
-            <a href="/devlog/privacy-first-design" class="cross-links__item">
-              <div class="cross-links__item-title">Privacy-First Design: Obsessive Attention to Detail</div>
-              <div class="cross-links__item-desc">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</div>
-            </a>
-          </div>
-        </div>
-      </div>
-
     </div>
-  
+
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">参考文献</span>
-    <span lang="en" data-lang="en">References</span>
+    <span lang="ja">参考文献</span>
+
   </h2>
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span lang="ja" data-lang="ja">リレーAPIのサーバーレス実行基盤。エッジでのリクエスト処理に使用</span><span lang="en" data-lang="en">Serverless execution platform for the relay API, processing requests at the edge</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="ja" data-lang="ja">メール送信の基本プロトコル仕様。リレーAPIが準拠するSMTP標準</span><span lang="en" data-lang="en">Core email transmission protocol specification that the relay API adheres to</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener" style="color:var(--accent);">RFC 6376 — DomainKeys Identified Mail (DKIM)</a> — <span lang="ja" data-lang="ja">送信メールの改ざん防止と送信元認証に使用する電子署名仕様</span><span lang="en" data-lang="en">Digital signature specification for preventing email tampering and authenticating senders</span></li>
-    <li><a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener" style="color:var(--accent);">RFC 7208 — Sender Policy Framework (SPF)</a> — <span lang="ja" data-lang="ja">送信ドメイン認証。許可されたIPアドレスからのメール送信を検証</span><span lang="en" data-lang="en">Sender domain authentication verifying email is sent from authorized IP addresses</span></li>
-    <li><a href="https://resend.com/docs/introduction" target="_blank" rel="noopener" style="color:var(--accent);">Resend API Documentation</a> — <span lang="ja" data-lang="ja">メール送信APIプロバイダー。Cloudflare Workersから呼び出すメール配信サービス</span><span lang="en" data-lang="en">Email sending API provider called from Cloudflare Workers for mail delivery</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span lang="ja">リレーAPIのサーバーレス実行基盤。エッジでのリクエスト処理に使用</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="ja">メール送信の基本プロトコル仕様。リレーAPIが準拠するSMTP標準</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener" style="color:var(--accent);">RFC 6376 — DomainKeys Identified Mail (DKIM)</a> — <span lang="ja">送信メールの改ざん防止と送信元認証に使用する電子署名仕様</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener" style="color:var(--accent);">RFC 7208 — Sender Policy Framework (SPF)</a> — <span lang="ja">送信ドメイン認証。許可されたIPアドレスからのメール送信を検証</span></li>
+    <li><a href="https://resend.com/docs/introduction" target="_blank" rel="noopener" style="color:var(--accent);">Resend API Documentation</a> — <span lang="ja">メール送信APIプロバイダー。Cloudflare Workersから呼び出すメール配信サービス</span></li>
   </ul>
 </section>
 
@@ -893,26 +727,26 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+        <span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
   </ul>
 </section>
 </main>
@@ -923,26 +757,26 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span lang="ja">Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -950,8 +784,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

@@ -127,6 +127,9 @@ def process(path, ja_url, en_url):
 
     # 3. drop data-lang="ja" attributes
     src, n_ja = re.subn(r'\s+data-lang="ja"', "", src)
+    from pathlib import Path
+    from finalize_split_pages import finish_markup
+    src = finish_markup(src, Path(__file__).resolve().parent.parent, english=False)
 
     # 4. switcher buttons -> links
     btn_pat = re.compile(
@@ -140,6 +143,17 @@ def process(path, ja_url, en_url):
         f'aria-label="Switch to English" style="text-decoration:none">EN</a>'
     )
     src, n_btn = btn_pat.subn(link_html, src)
+    if n_btn == 0 and 'data-lang-btn=' in src:
+        # Older templates have whitespace/classes that differ from the paired regex.
+        ja_btn = re.compile(r'<button\b[^>]*data-lang-btn="ja"[^>]*>\s*JA\s*</button>')
+        en_btn = re.compile(r'<button\b[^>]*data-lang-btn="en"[^>]*>\s*EN\s*</button>')
+        src, n_ja_btn = ja_btn.subn(
+            f'<a class="lang-switcher__btn active" href="{ja_url}" aria-current="page" '
+            f'hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a>', src)
+        src, n_en_btn = en_btn.subn(
+            f'<a class="lang-switcher__btn" href="{en_url}" hreflang="en" '
+            f'aria-label="Switch to English" style="text-decoration:none">EN</a>', src)
+        n_btn = min(n_ja_btn, n_en_btn)
 
     # 5a. lang.js include
     src, n_js = re.subn(r'\s*<script src="/js/lang\.js[^"]*" defer></script>', "", src)
@@ -153,6 +167,7 @@ def process(path, ja_url, en_url):
     src, n_css2 = re.subn(r'\s*a\.app-store-badge\[data-lang\]\.active\{display:inline-flex\}', "", src)
 
     # tidy: collapse runs of 3+ blank lines left by removals
+    src = re.sub(r"[ \t]+(?=\n)", "", src)
     src = re.sub(r"\n[ \t]*\n[ \t]*\n+", "\n\n", src)
 
     open(path, "w", encoding="utf-8").write(src)

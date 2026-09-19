@@ -49,13 +49,15 @@
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/devlog/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
-
 
   <!-- JSON-LD: CollectionPage + BreadcrumbList (moved to top of head for consistency) -->
   <script type="application/ld+json">
@@ -96,7 +98,7 @@
     .topic-card:hover { border-color: var(--border-highlight); box-shadow: var(--shadow-soft); transform: translateY(-1px); background: var(--surface-elevated); }
     .topic-card__title { font-size: 0.98rem; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.005em; }
     .topic-card__desc { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; }
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -231,62 +233,47 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/devlog/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/devlog/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">開発日誌 | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">開発日誌 | Obsidian連携シンプルメモ</span>
-      <span class="meta-description">Obsidian連携シンプルメモの開発日誌。Captioの体験を再現するために、UIKit・Outboxアーキテクチャ・プライバシー設計など、技術的な意思決定の記録。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Dev Log | Simple Memo - for Obsidian</span>
-      <span class="meta-og-title">Dev Log | Simple Memo - for Obsidian</span>
-      <span class="meta-description">Development diary of Simple Memo - for Obsidian. Technical decisions behind recreating the Captio experience: UIKit architecture, Outbox pattern, privacy-first design.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja" data-lang="ja">開発日誌</span>
-        <span lang="en" data-lang="en">Dev Log</span>
+        <span lang="ja">開発日誌</span>
+
       </h1>
 
       <div class="devlog-intro">
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <p>Captioというアプリが好きすぎて、もう一度あの体験を作りたくなった。<br>「Obsidian連携シンプルメモ」の開発過程を、技術的な意思決定とともに記録しています。</p>
           <p>これから何を作るかは<a href="/roadmap/">次に作るもの</a>にまとめてあります。優先順位を決めるアンケートもそこに置いています。</p>
         </div>
-        <div lang="en" data-lang="en">
-          <p>We loved Captio so much, we wanted to recreate that experience.<br>This dev log documents the technical decisions behind building Simple Memo - for Obsidian.</p>
-          <p>What comes next is laid out in <a href="/en/roadmap/">what we build next</a> — including the survey that decides the order.</p>
-        </div>
+
       </div>
 
       <!-- Article List -->
-      <div lang="ja" data-lang="ja">
+      <div lang="ja">
         <div class="article-list">
           <a href="/devlog/day1" class="article-card">
             <div class="article-card__date">2026年2月13日</div>
@@ -302,30 +289,14 @@
           </a>
         </div>
       </div>
-      <div lang="en" data-lang="en">
-        <div class="article-list">
-          <a href="/devlog/day1" class="article-card">
-            <div class="article-card__date">February 13, 2026</div>
-            <div class="article-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-            <div class="article-card__excerpt">Launch in ~1s, send with one tap, zero message loss. Dissecting the Captio experience and documenting every technical decision: UIKit, Outbox architecture, Relay API, and privacy-first design.</div>
-            <div class="article-card__tags">
-              <span class="article-card__tag">UIKit</span>
-              <span class="article-card__tag">Outbox</span>
-              <span class="article-card__tag">Cloudflare Workers</span>
-              <span class="article-card__tag">Privacy</span>
-              <span class="article-card__tag">Swift</span>
-            </div>
-          </a>
-        </div>
-      </div>
 
       <!-- Topic Deep Dives -->
       <div class="topic-section">
         <h2>
-          <span lang="ja" data-lang="ja">技術トピック深掘り</span>
-          <span lang="en" data-lang="en">Technical Deep Dives</span>
+          <span lang="ja">技術トピック深掘り</span>
+
         </h2>
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="topic-grid">
             <a href="/devlog/uikit-vs-swiftui" class="topic-card">
               <div class="topic-card__title">UIKit vs SwiftUI：起動速度のための選択</div>
@@ -345,26 +316,7 @@
             </a>
           </div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="topic-grid">
-            <a href="/devlog/uikit-vs-swiftui" class="topic-card">
-              <div class="topic-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
-              <div class="topic-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
-            </a>
-            <a href="/devlog/outbox-architecture" class="topic-card">
-              <div class="topic-card__title">Outbox Architecture: Zero Message Loss</div>
-              <div class="topic-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
-            </a>
-            <a href="/devlog/relay-api-design" class="topic-card">
-              <div class="topic-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-              <div class="topic-card__desc">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</div>
-            </a>
-            <a href="/devlog/privacy-first-design" class="topic-card">
-              <div class="topic-card__title">Privacy-First Design: Obsessive Attention to Detail</div>
-              <div class="topic-card__desc">On-device encryption, session storage, logs, and analytics, including the current limits of app-switcher privacy.</div>
-            </a>
-          </div>
-        </div>
+
       </div>
     </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
@@ -373,13 +325,13 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+        <span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
@@ -391,27 +343,27 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span lang="ja">Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
-        <a href="/autopilot/" class="footer__link"><span lang="ja" data-lang="ja">自律型アプリ運営</span> <span lang="en" data-lang="en">How this app is run</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
+        <a href="/autopilot/" class="footer__link"><span lang="ja">自律型アプリ運営</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -419,8 +371,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
