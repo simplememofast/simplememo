@@ -38,11 +38,11 @@
       }
     }
   },
-  "open_total": 15,
+  "open_total": 13,
   "deferred": [],
   "pending_pr": [],
   "oldest_open_days": 2,
-  "acknowledged": 7,
+  "acknowledged": 8,
   "closed_today": [
     {
       "id": "act-orphaned-branch-Codex-trend-radar-observations",
@@ -58,18 +58,14 @@
       "id": "act-codex-ledger-sync",
       "title": "Codex実行の未記帳 1 件・原因分類 0 件を同期する",
       "evidence": "観測有効=true、未記帳のCodex結果 0 件、原因分類 0 件"
+    },
+    {
+      "id": "act-health-1463",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "evidence": "GitHub issue #1463 を 2026-09-19 に closed/completed。元 scheduled run 35300478440 の失敗は保持し、failed jobs の run attempt 2 が completed/success、台帳検査を含む全コアstep成功・PR #1466生成まで確認。"
     }
   ],
   "human": [
-    {
-      "id": "act-orphaned-branch-claude-autopilot-act-20260917",
-      "title": "ブランチ claude/autopilot-act-20260917 に 1 コミットが取り残されている（PR #1439 ほか1件 のマージ後）",
-      "detail": "ブランチ claude/autopilot-act-20260917 が、最後のマージ（PR #1439 / head 7aa4757）より1 件先にあり、**それらは main にも無い**: cbd59a9。（別の7件は main 側のコミットなので除外した）\n\nこのブランチは #1433 #1439 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: autopilot/index.html / data/autonomy-score-history.json / data/autopilot-actions-report.json / data/autopilot-actions.json / data/autopilot-runs.json / data/autopilot-status.json / data/eligibility-log.json\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
-      "age_days": 1,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "claude/autopilot-act-20260917 はまだ 1 件先にある",
-      "not_before_jst": null
-    },
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
@@ -113,14 +109,6 @@
       "age_days": 1,
       "why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
       "evidence": "2026-09-19 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "not_before_jst": null
-    },
-    {
-      "id": "act-health-1463",
-      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "age_days": 0,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "#1463 がまだ open",
       "not_before_jst": null
     },
     {

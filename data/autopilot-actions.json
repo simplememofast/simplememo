@@ -2844,11 +2844,28 @@
           "branch": "claude/autopilot-act-20260917"
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-09-18",
       "last_seen_jst": "2026-09-19",
       "closed_jst": null,
-      "evidence": "claude/autopilot-act-20260917 はまだ 1 件先にある"
+      "evidence": "2026-09-19 に取り残し cbd59a9 を再照合。PR #1447 は 2026-09-18 の closeout で、7変更ファイルの固有履歴が後続 #1448/#1456 等の main に吸収済み、残差は後続観測・台帳・日付窓で更新済みの派生値または古い再生成物であり、旧7ファイルをマージすると 9/18 以降の失敗・最新集計・最新ページを巻き戻すため「superseded として close」と一次証拠付きで確定している。現在のブランチ head も同じ cbd59a9。したがって再投入するものは無く、SHAだけが残る既知の取り残しとして受容する。元失敗や後続の利用枠回復とは別件。",
+      "reviewed_orphans": [
+        "cbd59a9"
+      ],
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-19",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "PR #1447 の既存closeout一次証拠と current main を照合して、再投入が巻き戻しになる技術的判断まで確定済み。ブランチ削除は行わず、既知SHAの受容だけを記帳する。",
+        "evidence_sha": "cbd59a9aab690ce54acf86cde4c5e6782108c56a",
+        "evidence_fields": [
+          "detail",
+          "evidence",
+          "close_check",
+          "reviewed_orphans"
+        ]
+      }
     },
     {
       "id": "act-selfheal-ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
@@ -2913,11 +2930,11 @@
           "issue": 1463
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-19",
       "last_seen_jst": "2026-09-19",
-      "closed_jst": null,
-      "evidence": "#1463 がまだ open"
+      "closed_jst": "2026-09-19",
+      "evidence": "GitHub issue #1463 を 2026-09-19 に closed/completed。根拠となった元 scheduled run 35300478440 は失敗履歴を保持したまま、failed jobs の run attempt 2 を再実行し act job が completed/success、台帳検査を含む全コアstep成功・日次同期PR #1466生成まで一次証拠で確認した。"
     },
     {
       "id": "act-selfheal-ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
