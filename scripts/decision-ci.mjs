@@ -65,6 +65,7 @@ function verifySupportRegistration(e,base,head,files,git) {
   assert(registration,'support registration commit missing');
   assert.deepEqual(git('diff-tree','--no-commit-id','--name-only','-r',registration).split('\n'),[registry],'support registry must be committed alone before implementation');
   const declared=JSON.parse(git('show',registration+'^:'+intents[0]));
+  assert(typeof declared.id==='string' && /^[a-z0-9][a-z0-9-]{2,99}$/.test(declared.id),'support declaration requires a valid selected candidate ID');
   assert(declared.candidates?.some(c=>c.id===declared.id&&c.company_decision?.schema_version===1
     &&c.company_decision.company_run_id===m.company_run_id&&c.company_decision.sha256===m.decision_sha256),'support registration differs from prior Company declaration');
   assert.equal(git('show',registration+'^:'+intents[0]),git('show',head+':'+intents[0]),'support declaration changed after registration');

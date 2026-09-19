@@ -304,7 +304,19 @@ test('prospective page support reaches registration, real-Git CI and delivery wi
   assert.equal((await verifyDecision(options())).state,'not_required','measurement gates still run before optional value-contract routing');
   const delivery=()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call});
   assert.equal(delivery().state,'registered_waiting_for_mature_evidence');
-  const goodHead=f.git('rev-parse','HEAD'),missing=f.read(path.join(f.root,EXPERIMENTS));delete missing.experiments.find(e=>e.id===f.input.id).company_measurement;
+  const goodHead=f.git('rev-parse','HEAD');
+  // Rewrite only this disposable fixture's prospective declaration, preserving
+  // the valid registration/treatment commits, to exercise the actual CI entry.
+  for(const absentId of [undefined,'']) {
+    f.git('checkout','--detach',goodHead+'^^');
+    const declarationPath='data/decision-intents/fixture-contract.json',declaration=f.read(path.join(f.root,declarationPath));
+    declaration.id=absentId;declaration.candidates[0].id=absentId;
+    f.write(path.join(f.root,declarationPath),declaration);f.git('add',declarationPath);f.git('commit','--amend','--no-edit');
+    f.git('cherry-pick',goodHead+'^',goodHead);
+    await assert.rejects(()=>verifyDecision(options()),/requires a valid selected candidate ID/);
+  }
+  f.git('checkout','--detach',goodHead);
+  const missing=f.read(path.join(f.root,EXPERIMENTS));delete missing.experiments.find(e=>e.id===f.input.id).company_measurement;
   f.write(path.join(f.root,EXPERIMENTS),missing);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture unregistered support owner');
   await assert.rejects(()=>verifyDecision(options()),/requires prospective Company measurement registration/);
   f.git('checkout',goodHead,'--',EXPERIMENTS);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture restore measurement binding');
