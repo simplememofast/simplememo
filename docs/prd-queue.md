@@ -20,15 +20,15 @@ iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.
 |---|---|---|
 | 共通Capture | [iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存MemoCapture / MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。関連テスト成功 | 必要なCIと同一版の実配送を確認 |
 | サイドボタン | PR594（Draft）で統合。既存下書きを保護し、実際のCapture結果へ返答を対応づける。既定OFF | 実機の適格性・entitlement、音声/割込/背景動作、同じ版での確認 |
-| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化journal、Capture別receiptによるObsidian注記を実装。JA50/EN50入力ケースと時刻の回帰を含む29 native tests成功。既定OFF | Correctionのsource/device・保存/移行、実FileProvider・実保存/権限、端末内モデル精度と同一版QA |
-| App Intentsスキーマ | 既存Siri/Shortcutsを保持。Xcode 27の製品外検証用定義でコンパイル・メタデータ生成成功。不正な型/必須項目欠落の2比較を検出 | 保存処理・Entityの解決・本文非公開・登録抑止の実装と実行試験。製品公開は共通Capture/Routingの受入後 |
+| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化journal、Capture別receiptによるObsidian注記を実装。鍵付き入力の選択記録、候補補正、消去世代と移行APIを実装。既定OFF | 実端末情報の取得、移行UI/鍵受渡し、実FileProvider・実保存/権限、端末内モデル精度と同一版QA |
+| App Intentsスキーマ | 既存Siri/Shortcutsを保持。Xcode 27の製品外検証用定義でコンパイル・メタデータ生成成功。不正な型/必須項目欠落の2比較を検出。実appとwidgetに未出荷スキーマがないことも確認 | 保存処理・Entityの解決・本文非公開・登録制御の実装と実行試験。製品公開は共通Capture/Routingの受入後 |
 | Notion提供 | iOS/APIに実装済み。9/4のサーバーOAuth・実保存・本文読取・同一ID再送は確認済み | 現在の提供状態・同意範囲・同じ配布版の実機配送を確認 |
 
 初回はiOS main `17dcad9`、API main `c6ed249` と照合。9/19の追記ではiOS PR594の統合基底 `f6906b4`（PR590/591を含む）とDraft差分を確認した。PR594はマージ・有効化・配布ではない。Notion手順は[API PR358](https://github.com/simplememofast/simplememo-api/pull/358)で訂正済みだが、提供受入条件の完了には数えない。
 
-PR594の最新照合headは `bb527d5998400c1a2fd98fddb9f647ab3b61fde0`。日本語50入力・英語50入力を追加し、6文の不一致を修正した。開始時刻の順序と夜中をまたぐ表現も補強し、同headのDestinationRouterTests 29件がiOS 26.5 Simulatorで成功。修正前の失敗結果は非公開で保持している。
+PR594の最新照合headは `b4afd1e65451a1bc91a4f957ab40beeeb95eab76`。main `50b0585` の受付境界・Watch再送修正まで取り込み、元の計測境界と宛先を保持した。明示選択の保存・候補参照、受付世代の引継ぎ、取消した予約の下書き復元、遅延した音声/画面応答の分離を追加した。最終native結果は `queue.json` の同headの証拠を参照する。
 
-過去の証拠は区別する。main `e3431b2` の対話メモと待機ゲートを取り込んだ `9beff2c` は関連14 suite・307テスト成功。`90f2302` まではアプリ/テストが同一で、前処理9種のprobeと全CIも成功し、Cloudは1,472 tests×4 Simulatorで全成功した。現在headでは日時判定のソースが変わっているため、この旧結果を現在headの全検証成功へ転用しない。
+過去の証拠は区別する。`bb527d5` は全5 CIが成功し、Cloudで1,485 tests×4 Simulator、計5,940実行が成功、失敗/skipは0だった。日時判定の29 native testsは日本語66・英語81の異なる非空例文を含み、修正前の6文の不一致も非公開で保持した。`9beff2c` の関連14 suite・307件、`90f2302` のCloud1,472 tests×4も旧結果として保持する。ソースが変わった現在headの全CI成功へ転用しない。
 
 CIはPR本文と現在のチェック欄を正本にする。再利用Simulatorでの署名不足・設定/キュー残留を伴う失敗と中断は別記録として保持し、旧データを削除して合格扱いにはしていない。実機確認・配布・フラグ有効化・正式加点は未成立。旧prototypeブランチは保全したままで、`exact_branch_prs_found: 0`は当初その名前で検索した結果を保持する。
 
