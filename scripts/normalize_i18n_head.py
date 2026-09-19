@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 from typing import Iterable
 
@@ -225,23 +226,84 @@ def is_owned_comment(line: str) -> bool:
     return _matches_any(line, COMMENT_LINE_PATTERNS)
 
 
+class HeadInventory(HTMLParser):
+    """Locate real head markup without treating script strings or comments as tags."""
+    def __init__(self, text: str):
+        super().__init__(convert_charrefs=False)
+        self.text = text
+        self.line_offsets = [0]
+        for match in re.finditer(r"\n", text):
+            self.line_offsets.append(match.end())
+        self.in_head = False
+        self.head_end = None
+        self.html_range = None
+        self.tags = []
+        self.comments = []
+        self.feed(text)
+
+    def absolute_offset(self):
+        line, column = self.getpos()
+        return self.line_offsets[line - 1] + column
+
+    def region(self, length):
+        start = self.absolute_offset()
+        end = start + length
+        line_start = self.text.rfind("\n", 0, start) + 1
+        line_end = self.text.find("\n", end)
+        line_end = len(self.text) if line_end < 0 else line_end
+        if not self.text[line_start:start].strip() and not self.text[end:line_end].strip():
+            return line_start, min(line_end + 1, len(self.text))
+        return start, end
+
+    def handle_starttag(self, tag, attrs):
+        raw = self.get_starttag_text()
+        if tag == "html" and self.html_range is None:
+            self.html_range = (self.absolute_offset(), self.absolute_offset() + len(raw))
+        if tag == "head":
+            self.in_head = True
+        if not self.in_head:
+            return
+        a = dict(attrs)
+        rel = (a.get("rel") or "").lower().split()
+        owned = (tag == "link" and ("canonical" in rel or ("alternate" in rel and "hreflang" in a)))
+        owned |= tag == "meta" and (a.get("http-equiv") or "").lower() == "content-language"
+        if owned:
+            self.tags.append(self.region(len(raw)))
+
+    def handle_endtag(self, tag):
+        if tag == "head" and self.in_head:
+            self.head_end = self.absolute_offset()
+            self.in_head = False
+
+    def handle_comment(self, data):
+        raw = "<!--" + data + "-->"
+        if self.in_head and is_owned_comment(raw):
+            self.comments.append(self.region(len(raw)))
+
+
 def set_html_lang(text: str, locale: str) -> str:
     lang_attr = LOCALE_LANG[locale]
     is_rtl = locale in RTL_LOCALES
 
-    def repl(m: re.Match) -> str:
-        attrs = m.group(0)
-        new = re.sub(r'\blang="[^"]*"', f'lang="{lang_attr}"', attrs)
+    def repl(attrs: str) -> str:
+        new = re.sub(r'''\blang\s*=\s*(["']).*?\1''', f'lang="{lang_attr}"', attrs, flags=re.I)
         if 'lang=' not in new:
-            new = new.replace('<html', f'<html lang="{lang_attr}"', 1)
-        has_dir = 'dir=' in new
-        if is_rtl and not has_dir:
-            new = new.replace('<html', '<html dir="rtl"', 1)
-        elif not is_rtl and has_dir:
-            new = re.sub(r'\sdir="[^"]*"', '', new)
+            new = re.sub(r'<html\b', f'<html lang="{lang_attr}"', new, count=1, flags=re.I)
+        direction = r'''\sdir\s*=\s*(["']).*?\1'''
+        if is_rtl:
+            if re.search(direction, new, re.I):
+                new = re.sub(direction, ' dir="rtl"', new, flags=re.I)
+            else:
+                new = re.sub(r'<html\b', '<html dir="rtl"', new, count=1, flags=re.I)
+        else:
+            new = re.sub(direction, '', new, flags=re.I)
         return new
 
-    return re.sub(r'<html\b[^>]*>', repl, text, count=1)
+    span = HeadInventory(text).html_range
+    if span is None:
+        return text
+    start, end = span
+    return text[:start] + repl(text[start:end]) + text[end:]
 
 
 def build_block(
@@ -267,38 +329,18 @@ def build_block(
 
 
 def replace_i18n_lines(text: str, block_lines: list[str]) -> str:
-    """Strip all owned tag/comment lines and insert block_lines at the
-    position the first owned line used to occupy. If no owned line exists,
-    insert just before </head>."""
-    lines = text.splitlines(keepends=True)
-
-    # Find index of first owned (tag) line
-    first_owned_idx: int | None = None
-    for i, line in enumerate(lines):
-        if is_owned_line(line):
-            first_owned_idx = i
-            break
-
-    if first_owned_idx is not None:
-        # Insertion index in the *filtered* list = first_owned_idx minus the
-        # number of comment-only owned lines stripped before that point.
-        comments_before = sum(
-            1 for line in lines[:first_owned_idx] if is_owned_comment(line)
-        )
-        insertion_idx = first_owned_idx - comments_before
-        filtered = [
-            line for line in lines if not (is_owned_line(line) or is_owned_comment(line))
-        ]
-        return "".join(
-            filtered[:insertion_idx] + block_lines + filtered[insertion_idx:]
-        )
-
-    # No owned tags exist; place the block right before </head>.
-    filtered = [line for line in lines if not is_owned_comment(line)]
-    for i, line in enumerate(filtered):
-        if "</head>" in line:
-            return "".join(filtered[:i] + block_lines + filtered[i:])
-    return text  # malformed (no </head>); leave alone
+    """Replace actual owned head tags; keep examples, RSS, banners and body intact."""
+    inventory = HeadInventory(text)
+    if inventory.head_end is None:
+        return text
+    insertion = inventory.tags[0][0] if inventory.tags else inventory.head_end
+    regions = sorted(inventory.tags + inventory.comments)
+    adjusted = insertion - sum(end - start for start, end in regions if end <= insertion)
+    cleaned = text
+    for start, end in reversed(regions):
+        cleaned = cleaned[:start] + cleaned[end:]
+    prefix = "" if adjusted == 0 or cleaned[adjusted - 1] == "\n" else "\n"
+    return cleaned[:adjusted] + prefix + "".join(block_lines) + cleaned[adjusted:]
 
 
 def normalize_file(

@@ -272,10 +272,13 @@ def main(ja_rel: str, en_rel: str) -> None:
     for ja, en in SHARED_JA_EN.items():
         html_out = html_out.replace(ja, en)
 
-    from finalize_split_pages import finish_markup, finish_faq, finish_breadcrumbs
+    from finalize_split_pages import finish_markup, finish_text_labels, finish_faq, finish_breadcrumbs, finish_schema_names, finish_product_schema
     html_out = finish_markup(html_out, REPO, english=True)
+    html_out = finish_text_labels(html_out)
     html_out = finish_faq(html_out, abs_en)
     html_out = finish_breadcrumbs(html_out, REPO).replace("AI Ataka", "AI ATAKA")
+    html_out = finish_schema_names(html_out, REPO)
+    html_out = finish_product_schema(html_out, en_rel)
 
     en_path.parent.mkdir(parents=True, exist_ok=True)
     en_path.write_text(html_out, encoding="utf-8")
