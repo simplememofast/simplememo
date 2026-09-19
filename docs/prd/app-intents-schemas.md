@@ -17,6 +17,19 @@ iOS main `17dcad9` の `SimpleMemo/SimpleMemoAppIntents.swift` にはStartVoiceM
 提案のNotes/RemindersスキーマとIndexedEntityはmain検索では未確認。
 9/5のSDK名・API綴り・対応時期の予測を現在の仕様としてコピーせず、実装時にApple公式資料と利用SDKで照合する。
 
+### 2026-09-19のSDK照合
+
+Appleの現行資料とXcode 27 SDKでは、対象のNotes/RemindersスキーマはiOS 27以降。
+マクロは `@AppIntent(schema:)` / `@AppEntity(schema:)`。旧案の綴りをそのまま実装へ移さない。
+[createNote](https://developer.apple.com/documentation/appintents/appschema/notesintent/createnote) は名前だけでなく本文・添付・ピン・フォルダの項目を持つ。
+[note](https://developer.apple.com/documentation/appintents/appschema/notesentity/note) にも本文などの任意項目があるため、タイトルとタグだけというプライバシー要件は、単にEntity名を採用するだけでは成立しない。
+本文をEntityの返却値・検索用属性・索引へ渡さないことを、それぞれ検証する。
+
+[createReminder](https://developer.apple.com/documentation/appintents/appschema/remindersintent/createreminder) は期限・繰り返し・場所・添付なども受け取る。
+既存EventKit経路が扱わない入力は、黙って捨てて成功を返さない。
+Routing未出荷の版ではIntentを公開しないという条件は維持し、実行時フラグだけで登録を抑止できると仮定しない。
+SDKの確認は、スキーマ実装・登録メタデータ・iOS 27の実行試験・Siriでの解決の完了ではない。
+
 ## 2. VISION §13 のチェック
 
 1. **Capture Coverage / Zero-decision 率を上げるか**: 既存の標準入口から保存への到達を支える。効果は未検証。

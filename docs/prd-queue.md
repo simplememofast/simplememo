@@ -18,15 +18,17 @@ iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.
 
 | 項目 | 現在地 | 次の成立条件 |
 |---|---|---|
-| 共通Capture | [iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存MemoCapture / MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持 | 必要なCI・最終テストと同一版の実配送を確認 |
+| 共通Capture | [iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存MemoCapture / MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。関連テスト成功 | 必要なCIと同一版の実配送を確認 |
 | サイドボタン | PR594（Draft）で統合。既存下書きを保護し、実際のCapture結果へ返答を対応づける。既定OFF | 実機の適格性・entitlement、音声/割込/背景動作、同じ版での確認 |
-| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化候補と書込journalを統合。既定OFF | Obsidian本文内注記、実保存/権限、JA/EN精度と同一版QA |
-| App Intentsスキーマ | 通常のSiri/Shortcutsは実装済み。提案のNotes/Remindersスキーマ・索引はmainで未確認 | 共通CaptureとRoutingの統合後、現行SDKで対象スキーマを確認 |
+| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化journal、Capture別receiptによるObsidian注記を実装。既定OFF | 実FileProvider・実保存/権限、JA/EN精度と同一版QA |
+| App Intentsスキーマ | 通常のSiri/Shortcutsは実装済み。現行SDKで対象スキーマのiOS 27要件とAPIを照合 | 共通Capture/Routingの受入、本文非公開の実装、登録メタデータと実行試験 |
 | Notion提供 | iOS/APIに実装済み。9/4のサーバーOAuth・実保存・本文読取・同一ID再送は確認済み | 現在の提供状態・同意範囲・同じ配布版の実機配送を確認 |
 
 初回はiOS main `17dcad9`、API main `c6ed249` と照合。9/19の追記ではiOS PR594の統合基底 `f6906b4`（PR590/591を含む）とDraft差分を確認した。PR594はマージ・有効化・配布ではない。Notion手順は[API PR358](https://github.com/simplememofast/simplememo-api/pull/358)で訂正済みだが、提供受入条件の完了には数えない。
 
-PR594のCI・試験結果はPR本文と現在のチェック欄を正本にする。以前の差分の307テスト成功を最終SHAの合格へ転用しない。旧prototypeブランチは保全したままで、`exact_branch_prs_found: 0`は当初その名前で検索した結果を保持する。
+PR594の最新照合headは `90f230210849f300940435ef8e1cd76102520de9`。main `e3431b2` の対話メモと待機ゲートを取り込み、対話への切替中とScene経由のモーダル保護を確認した。新しい専用iOS 26.5 Simulatorの14 suite・307テストは `9beff2cf9f55470db05b7f8a1c4f00b81a952549` で成功した。後続差分は再送検証用fixtureの対応のみで、アプリとテストのソースは同一。前処理全体も9種の保存/回復probeを含めてローカルで成功した。過去の307件という同じ件数の結果とは別の実行である。
+
+CIはPR本文と現在のチェック欄を正本にする。再利用Simulatorでの署名不足・設定/キュー残留を伴う失敗と中断は別記録として保持し、旧データを削除して合格扱いにはしていない。実機確認・配布・フラグ有効化・正式加点は未成立。旧prototypeブランチは保全したままで、`exact_branch_prs_found: 0`は当初その名前で検索した結果を保持する。
 
 ## 現行仕様の優先順位
 
