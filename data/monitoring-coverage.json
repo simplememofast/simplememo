@@ -23,7 +23,7 @@
       "watches": "status JSON が当日分に更新されたか（上流と本番の両方）",
       "detection": "automatic",
       "detector": ".github/workflows/autopilot-health.yml",
-      "cadence": "毎日 12:00 JST",
+      "cadence": "毎日 09:45 JST（close-only）＋ 12:00 / 16:00 / 20:00 JST",
       "on_detect": "Issue（label ops/autopilot-stale）に集約、回復でクローズ",
       "covers_failure_class": [
         "route-absent",
@@ -85,6 +85,23 @@
       "note": "台帳に記録が入って初めて動く。**記録が入らない失敗は見えない**"
     },
     {
+      "id": "autopilot_failure_intake",
+      "domain": "オートパイロット実行結果",
+      "watches": "GitHub Actions / Mac Codex の失敗runを共有運転台帳へ同期し、観測済みfailure_classを保持する",
+      "detection": "automatic",
+      "detector": "scripts/autopilot-act.mjs",
+      "cadence": "09:00 JST＋関連workflow完了時のコールバック",
+      "on_detect": "Actions API / Routine Observer の一次証拠をreconcileし、既知原因はfailure_classへ分類してselfheal/owner routingへ渡す",
+      "covers_failure_class": [
+        "auth_or_credential",
+        "claim_without_completion",
+        "usage_limit",
+        "no_artifact",
+        "post-merge-performance-budget"
+      ],
+      "note": "2026-09-19時点。Actionsの失敗stepとCodexのstructured runtime_failureを台帳へ同期する。usage_limitは資格情報失効と混同せず、過去失敗を成功へ書き換えない。台帳へ入った後はautopilot-selfhealの閉じ条件・repair_of・owner routingが担当する"
+    },
+    {
       "id": "credential_expiry",
       "domain": "資格情報",
       "watches": "証明書・Profile・ドメインの期限",
@@ -112,7 +129,7 @@
       "watches": "起動完走率（launch_incomplete）の**前段ステージ**と、比率の前週比",
       "detection": "automatic",
       "detector": "../simplememo-api/src/launch-health-monitor.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）＋段階公開中はガードが別途見る",
+      "cadence": "毎日 07:00 JST（autopilot_report の日報に同梱）＋段階公開中はガードが別途見る",
       "on_detect": "日報に1行。前段ステージが**1件でも出たら分母を問わず劣化**として出す",
       "covers_failure_class": [],
       "note": "2026-08-22。**指標も読み方の文書も既にあり、無かったのは毎日それを見る仕組み**だった（POSTを叩いた日にしか読まれていなかった）。段階公開中だけガードが見る状態から、常時監視にした。**比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常に使った後でOSがkillしただけでも launch_incomplete が出る（scene_did_become_active は恒常的に最多バケットで、実害の証拠にならない）。判定は docs/launch_health.md の読み方をそのまま機械にした: **前段ステージ（launch_begin / did_finish_launching_enter / scene_will_connect）が1件でも出たら実クラッシュを疑う**。比率は水準ではなく前週比の跳ねだけに使う。残る弱さ: **クラッシュそのものは見ていない**（launch_incomplete は起動が完走しなかったことの記録で、Xcode Organizer のクラッシュログとは別物）",
@@ -135,10 +152,10 @@
       "watches": "install単位の同期失敗率（毎時）／ watch_sync_push_failed・push_recovered・stuck・manual_repair の直近24h件数（日報）",
       "detection": "automatic",
       "detector": "../simplememo-api/src/analytics.ts / ../simplememo-api/src/watch-health.ts",
-      "cadence": "毎時 cron（ops_alerts）＋ 毎日 10:00 JST（日報に同梱）",
+      "cadence": "毎時 cron（ops_alerts）＋ 毎日 07:00 JST（日報に同梱）",
       "on_detect": "毎時: 失敗した install の割合が閾値超でアラート。日報: 1行。手動修復が1件でもあれば「劣化」。分母不足のときは**判定不能**と書く",
       "covers_failure_class": [],
-      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。\n\n**検知器は2つある。**片方だけでは足りないことが分かったため。\n\n- **毎時（ops_alerts）は install 単位で見る。** 件数で見ると3秒間隔でリトライする1台が群全体を動かす —— 2026-08-15..19 の実測で **7 install が 712 件**を出していた。つまり件数ベースの閾値は、1台の不調を全体の障害に見せる\n- **日報は24h窓の件数と手動修復を見る。**母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。ただし「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている\n\n残る弱さ: **Watchアプリの起動失敗・クラッシュ・UI・課金表示は見ていない**（見ているのは同期だけ）",
+      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。\n\n**検知器は2つある。**片方だけでは足りないことが分かったため。\n\n- **毎時（ops_alerts）は install 単位で見る。** 件数で見ると3秒間隔でリトライする1台が群全体を動かす —— 2026-08-15..19 の実測で **7 install が 712 件**を出していた。つまり件数ベースの閾値は、1台の不調を全体の障害に見せる\n- **日報は共通の内部/TestFlight install除外後に、24h窓の件数と手動修復を見る。**母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。ただし外部installで「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている\n\n残る弱さ: **Watchアプリの起動失敗・クラッシュ・UI・課金表示は見ていない**（見ているのは同期だけ）",
       "coverage_kind": "direct"
     },
     {
@@ -155,13 +172,13 @@
     {
       "id": "support",
       "domain": "問い合わせ",
-      "watches": "未応答の問い合わせの件数・人の対応が要る件数・分類できなかった件数・最古の滞留時間",
+      "watches": "未応答の問い合わせ件数・受信時human履歴・現在の本文再点検候補・分類できなかった件数・最古の滞留時間",
       "detection": "automatic",
       "detector": "../simplememo-api/src/inquiry.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
-      "on_detect": "日報に1行。**人の対応が要る件数は強調**。返信そのものは人（返信の自動化は未実装）",
+      "cadence": "毎日 07:00 JST（autopilot_report の日報に同梱）",
+      "on_detect": "日報に1行。保存済みneeds_humanは受信時の履歴値として明示し、現在の対応要否と混同しない。現在の本文再点検候補（support/business/notification/unknown）は別集計。返信は既存の承認済みテンプレート/アウトボックス境界に従う",
       "covers_failure_class": [],
-      "note": "2026-08-22。受け口（/v1/inquiry）と分類は実装済みだったが、**来たことに気づく経路が無かった** — 受け口があることと、来たと知ることは別。日報に滞留を1行載せる形で埋めた。**本文は載せない**（日報はメールで、メールは残る）。DBが読めなかった場合は 0件 ではなく「集計できず」と書く — ここを混ぜると監視の穴が「異常なし」に見える。残る弱さ: **返信が自動化されていないので CSAT は発火しない**。INQUIRY_ENABLED が false の間は受け口ごと 503 を返す",
+      "note": "2026-08-22。受け口（/v1/inquiry）と分類は実装済みだったが、**来たことに気づく経路が無かった** — 受け口があることと、来たと知ることは別。日報に滞留を1行載せる形で埋めた。**本文は載せない**（日報はメールで、メールは残る）。DBが読めなかった場合は 0件 ではなく「集計できず」と書く — ここを混ぜると監視の穴が「異常なし」に見える。残る弱さ: **承認済みテンプレートに当たらない返信は人の判断境界に残る**。INQUIRY_ENABLED が false の間は受け口ごと 503 を返す",
       "coverage_kind": "direct"
     },
     {
@@ -170,7 +187,7 @@
       "watches": "—",
       "detection": "derived",
       "detector": ".github/workflows/autopilot-health.yml",
-      "cadence": "毎日 12:00 JST（間接）",
+      "cadence": "毎日 09:45 JST（close-only）＋ 12:00 / 16:00 / 20:00 JST（間接）",
       "on_detect": "「出荷が無い」として Issue。原因の特定は人",
       "covers_failure_class": [
         "actor-rejected"
@@ -184,7 +201,7 @@
       "watches": "/admin/* の認証失敗の件数と経路（直近24h）",
       "detection": "automatic",
       "detector": "../simplememo-api/src/access-log.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "cadence": "毎日 07:00 JST（autopilot_report の日報に同梱）",
       "on_detect": "日報に1行。拒否0のときもそう書く（無音と区別する）",
       "covers_failure_class": [],
       "coverage_kind": "direct",
@@ -196,7 +213,7 @@
       "watches": "直近24hに落ちた送信の件数・種別・再送可否",
       "detection": "automatic",
       "detector": "../simplememo-api/src/dlq.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "cadence": "毎日 07:00 JST（autopilot_report の日報に同梱）",
       "on_detect": "日報に1行。**再送が手動であることも毎回書く**（記録があることと戻せることは別）",
       "covers_failure_class": [],
       "coverage_kind": "direct",
