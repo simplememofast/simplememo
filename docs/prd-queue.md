@@ -18,13 +18,15 @@ iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.
 
 | 項目 | 現在地 | 次の成立条件 |
 |---|---|---|
-| 共通Capture | mainにMemoCapture / MemoDelivery / CaptureInstructionがある。古いRouting試作には別のCapture型が残る | 既存の受付ID・保存指示・旧Outbox互換性を保ち、試作を共通経路へ統合 |
-| サイドボタン | 9/5のローカル試作あり。同名ブランチのPRは0件 | 共通Capture統合、最新SDK/要件照合、同じ版での実機確認 |
-| Reminders / Calendar | ローカル試作あり。同名ブランチのPRは0件 | Level 1→2、端末内推論、両宛先を同じ版で検証 |
+| 共通Capture | [iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存MemoCapture / MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持 | 必要なCI・最終テストと同一版の実配送を確認 |
+| サイドボタン | PR594（Draft）で統合。既存下書きを保護し、実際のCapture結果へ返答を対応づける。既定OFF | 実機の適格性・entitlement、音声/割込/背景動作、同じ版での確認 |
+| Reminders / Calendar | PR594（Draft）で明示的な追加保存、端末内判定、暗号化候補と書込journalを統合。既定OFF | Obsidian本文内注記、実保存/権限、JA/EN精度と同一版QA |
 | App Intentsスキーマ | 通常のSiri/Shortcutsは実装済み。提案のNotes/Remindersスキーマ・索引はmainで未確認 | 共通CaptureとRoutingの統合後、現行SDKで対象スキーマを確認 |
 | Notion提供 | iOS/APIに実装済み。9/4のサーバーOAuth・実保存・本文読取・同一ID再送は確認済み | 現在の提供状態・同意範囲・同じ配布版の実機配送を確認 |
 
-iOS main `17dcad9`、API main `c6ed249` と照合した時点の記録。iOS PR #590は別担当の計測整備で、このキューの機能完成や新しい配布証拠に数えない。
+初回はiOS main `17dcad9`、API main `c6ed249` と照合。9/19の追記ではiOS PR594の統合基底 `f6906b4`（PR590/591を含む）とDraft差分を確認した。PR594はマージ・有効化・配布ではない。Notion手順は[API PR358](https://github.com/simplememofast/simplememo-api/pull/358)で訂正済みだが、提供受入条件の完了には数えない。
+
+PR594のCI・試験結果はPR本文と現在のチェック欄を正本にする。以前の差分の307テスト成功を最終SHAの合格へ転用しない。旧prototypeブランチは保全したままで、`exact_branch_prs_found: 0`は当初その名前で検索した結果を保持する。
 
 ## 現行仕様の優先順位
 
