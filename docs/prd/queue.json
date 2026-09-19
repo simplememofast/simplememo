@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T10:47:36.371685+00:00",
+  "updated_at": "2026-09-19T12:35:51.286142+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -11,10 +11,11 @@
     "note": "提案ファイルはローカル試作ブランチ内。mainの実行ワークフローではない。台帳の追加はジョブや配布を起動しない。"
   },
   "evidence_scope": {
-    "ios_main": "17dcad9",
-    "api_main": "c6ed249",
     "pr_lookup": "GitHub PRをstate=all、head=各ローカル試作ブランチ名で照合。別名PRを含む全履歴の網羅ではない。",
-    "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。"
+    "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。",
+    "initial_ios_main": "17dcad9",
+    "initial_api_main": "c6ed249",
+    "ios_integration_base": "f6906b47438d0ffef0a1817db1a8ffa942f2ed48"
   },
   "target_release": {
     "version": "6.0 (proposal)",
@@ -38,13 +39,23 @@
       "repo": "simplememo-ios",
       "status": "in_progress",
       "blocked_by": [],
-      "prs": [],
-      "note": "mainのMemoCapture / MemoDelivery / CaptureInstructionへローカルRouting試作を統合する。共通配送は既存であり新規に重複作成しない。",
+      "prs": [
+        "https://github.com/simplememofast/simplememo-ios/pull/594"
+      ],
+      "note": "PR594（Draft）で既存MemoCapture/MemoDeliveryへ試作を統合。受付ID・時刻・元の保存先を保持。必要なCI、最終テスト、同一配布版の確認が未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
         "merged": false,
         "exact_branch_prs_found": 0
+      },
+      "integration": {
+        "state": "draft",
+        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "flags_enabled": false,
+        "device_qa": "pending",
+        "testflight_distributed": false,
+        "formal_score_credit": 0
       }
     },
     {
@@ -55,13 +66,23 @@
       "blocked_by": [
         "capture-object"
       ],
-      "prs": [],
-      "note": "ローカル試作を保持。共通Capture統合・現行SDKとApple要件の確認・同一版の実機QA待ち。",
+      "prs": [
+        "https://github.com/simplememofast/simplememo-ios/pull/594"
+      ],
+      "note": "PR594（Draft）で共通Captureへ統合。sideButtonCaptureは既定OFF。実機の適格性・entitlement・音声/割込/背景動作と同一版QA待ち。",
       "local_prototype": {
         "branch": "claude/prd-side-button-voice-capture",
         "sha": "adc5b20a8f9ef853157a7f857c3fda9ceb257cb2",
         "merged": false,
         "exact_branch_prs_found": 0
+      },
+      "integration": {
+        "state": "draft",
+        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "flags_enabled": false,
+        "device_qa": "pending",
+        "testflight_distributed": false,
+        "formal_score_credit": 0
       }
     },
     {
@@ -72,13 +93,23 @@
       "blocked_by": [
         "capture-object"
       ],
-      "prs": [],
-      "note": "ローカルEventKit試作を保持。端末内推論、Level 1→2、両宛先同梱、既存受付計測と保存先保持の検証待ち。",
+      "prs": [
+        "https://github.com/simplememofast/simplememo-ios/pull/594"
+      ],
+      "note": "PR594（Draft）で明示操作後のEventKit追加と暗号化候補/選択ログ・書込journalを統合。routingSuggest/routingUseModelは既定OFF。Obsidian本文内注記と実保存・権限・日時精度・同一版QAは残る。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
         "merged": false,
         "exact_branch_prs_found": 0
+      },
+      "integration": {
+        "state": "draft",
+        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "flags_enabled": false,
+        "device_qa": "pending",
+        "testflight_distributed": false,
+        "formal_score_credit": 0
       }
     },
     {
@@ -101,7 +132,10 @@
       "blocked_by": [],
       "prs": [],
       "note": "iOS/APIの実装はmainに存在。9/4の実OAuth・実保存・本文読取・同一ID再送のサーバー証拠は確認済み。現在のavailableはHTTP403で不明。同意範囲・現行提供条件・同じ配布版の実機配送待ち。",
-      "implementation": "present_on_main; release acceptance incomplete"
+      "implementation": "present_on_main; release acceptance incomplete",
+      "documentation_prs": [
+        "https://github.com/simplememofast/simplememo-api/pull/358"
+      ]
     }
   ]
 }
