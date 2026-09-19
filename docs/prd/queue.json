@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-09-19T10:47:36.371685+00:00",
+  "maintainer": "SimpleMemo Developer",
+  "execution": {
+    "mode": "tracked_handoff",
+    "enabled": false,
+    "workflow_state": "proposal_only",
+    "proposal_repo": "simplememo-ios",
+    "proposal_path": "docs/proposals/feature-autopilot.yml",
+    "note": "提案ファイルはローカル試作ブランチ内。mainの実行ワークフローではない。台帳の追加はジョブや配布を起動しない。"
+  },
+  "evidence_scope": {
+    "ios_main": "17dcad9",
+    "api_main": "c6ed249",
+    "pr_lookup": "GitHub PRをstate=all、head=各ローカル試作ブランチ名で照合。別名PRを含む全履歴の網羅ではない。",
+    "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。"
+  },
+  "target_release": {
+    "version": "6.0 (proposal)",
+    "app_review_submit": null,
+    "press_release": null,
+    "notion_enable_date": null,
+    "historical_dates": {
+      "app_review_submit": "2026-10-01",
+      "press_release": "2026-10-13",
+      "notion_enable_window": [
+        "2026-11-10",
+        "2026-11-12"
+      ]
+    },
+    "note": "旧日付は履歴のみ。版指定の承認と実機・審査・公開ゲートが必要。"
+  },
+  "items": [
+    {
+      "id": "capture-object",
+      "prd": "docs/prd/capture-object.md",
+      "repo": "simplememo-ios",
+      "status": "in_progress",
+      "blocked_by": [],
+      "prs": [],
+      "note": "mainのMemoCapture / MemoDelivery / CaptureInstructionへローカルRouting試作を統合する。共通配送は既存であり新規に重複作成しない。",
+      "local_prototype": {
+        "branch": "claude/prd-routing-level1-2",
+        "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
+        "merged": false,
+        "exact_branch_prs_found": 0
+      }
+    },
+    {
+      "id": "side-button-voice-capture",
+      "prd": "docs/prd/side-button-voice-capture.md",
+      "repo": "simplememo-ios",
+      "status": "in_progress",
+      "blocked_by": [
+        "capture-object"
+      ],
+      "prs": [],
+      "note": "ローカル試作を保持。共通Capture統合・現行SDKとApple要件の確認・同一版の実機QA待ち。",
+      "local_prototype": {
+        "branch": "claude/prd-side-button-voice-capture",
+        "sha": "adc5b20a8f9ef853157a7f857c3fda9ceb257cb2",
+        "merged": false,
+        "exact_branch_prs_found": 0
+      }
+    },
+    {
+      "id": "routing-level1-2-reminders-calendar",
+      "prd": "docs/prd/routing-level1-2-reminders-calendar.md",
+      "repo": "simplememo-ios",
+      "status": "in_progress",
+      "blocked_by": [
+        "capture-object"
+      ],
+      "prs": [],
+      "note": "ローカルEventKit試作を保持。端末内推論、Level 1→2、両宛先同梱、既存受付計測と保存先保持の検証待ち。",
+      "local_prototype": {
+        "branch": "claude/prd-routing-level1-2",
+        "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
+        "merged": false,
+        "exact_branch_prs_found": 0
+      }
+    },
+    {
+      "id": "app-intents-schemas",
+      "prd": "docs/prd/app-intents-schemas.md",
+      "repo": "simplememo-ios",
+      "status": "blocked",
+      "blocked_by": [
+        "capture-object",
+        "routing-level1-2-reminders-calendar"
+      ],
+      "prs": [],
+      "note": "通常のSiri/Shortcutsは既存。追加スキーマと索引は依存PRD完了・現行SDK照合後に着手。"
+    },
+    {
+      "id": "notion-enable",
+      "prd": "docs/prd/notion-enable.md",
+      "repo": "simplememo-api",
+      "status": "held",
+      "blocked_by": [],
+      "prs": [],
+      "note": "iOS/APIの実装はmainに存在。現在のavailableはこの環境のHTTP403で不明。実OAuth・実保存・同意と現行提供条件の照合待ち。",
+      "implementation": "present_on_main; release acceptance incomplete"
+    }
+  ]
+}
