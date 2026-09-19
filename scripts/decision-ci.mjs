@@ -2,6 +2,7 @@
 // CI uses base-branch policy, never policy supplied by an autonomous PR.
 import fs from 'node:fs';
 import {ownershipConflict,changeScope} from '../growth/lib/experiment-overlap.mjs';
+import {verifySupportingGitDiff} from '../growth/lib/measurement-support.mjs';
 import {isOpen,validate as validateExperiments} from '../growth/lib/ledger.mjs';
 import path from 'node:path';
 import os from 'node:os';
@@ -17,7 +18,7 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
   'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/decision-monitor-local.py',
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
-  'growth/lib/company-measurement.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
+  'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
 export function required(branch, paths, metrics) {
@@ -52,6 +53,26 @@ export function verifyPullBinding(pr, run, branch, head) {
   assert.equal(pr?.head?.sha, head, 'run PR does not contain the checked head');
 }
 
+function verifySupportRegistration(e,base,head,files,git) {
+  const m=e.company_measurement;
+  assert(m?.schema_version===1&&/^[a-f0-9]{64}$/.test(m.plan_sha256??'')
+    &&/^[a-f0-9]{64}$/.test(m.decision_sha256??'')&&/^[a-f0-9-]{36}$/.test(m.company_run_id??''),'support requires prospective Company measurement registration');
+  const intents=files.filter(p=>/^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
+  assert.equal(intents.length,1,'support requires one prospective decision declaration');
+  const commits=git('rev-list','--reverse','--first-parent',base+'..'+head).split('\n').filter(Boolean);
+  const registry='growth/experiments/experiments.json';
+  const registration=commits.find(sha=>JSON.parse(git('show',sha+':'+registry)).experiments.some(row=>row.id===e.id));
+  assert(registration,'support registration commit missing');
+  assert.deepEqual(git('diff-tree','--no-commit-id','--name-only','-r',registration).split('\n'),[registry],'support registry must be committed alone before implementation');
+  const declared=JSON.parse(git('show',registration+'^:'+intents[0]));
+  assert(typeof declared.id==='string' && /^[a-z0-9][a-z0-9-]{2,99}$/.test(declared.id),'support declaration requires a valid selected candidate ID');
+  assert(declared.candidates?.some(c=>c.id===declared.id&&c.company_decision?.schema_version===1
+    &&c.company_decision.company_run_id===m.company_run_id&&c.company_decision.sha256===m.decision_sha256),'support registration differs from prior Company declaration');
+  assert.equal(git('show',registration+'^:'+intents[0]),git('show',head+':'+intents[0]),'support declaration changed after registration');
+  assert.deepEqual(JSON.parse(git('show',registration+':'+registry)).experiments.find(row=>row.id===e.id),e,'support registration changed after implementation');
+  git('diff','--quiet',base,registration,'--',...e.change_paths);
+}
+
 export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = ROOT, requireContract = false }) {
   const git = gitAt(cwd);
   const base = git('merge-base', baseRef, head);
@@ -63,11 +84,14 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
     const before=JSON.parse(git('show',baseRef+':growth/experiments/experiments.json')).experiments;
     const after=JSON.parse(git('show',head+':growth/experiments/experiments.json')).experiments;
     assert.deepEqual(validateExperiments({experiments:after}),[],'invalid head experiment ledger');
-    for(const e of after.filter(e=>e.company_measurement&&!before.some(old=>old.id===e.id))) {
-      const scope=changeScope(e.page,e.change_paths);
+    for(const old of before)assert.deepEqual(after.find(e=>e.id===old.id)?.supporting_changes,old.supporting_changes,'autonomous decision cannot reinterpret existing support ownership');
+    for(const e of after.filter(e=>(e.company_measurement||e.supporting_changes!==undefined)&&!before.some(old=>old.id===e.id))) {
+      if(e.supporting_changes!==undefined)verifySupportRegistration(e,base,head,files,git);
+      const scope=changeScope(e.page,e.change_paths,e.supporting_changes);
       for(const owner of after.filter(o=>o.id!==e.id&&isOpen(o)))assert(!ownershipConflict(owner,scope),'active experiment conflicts at final head: '+owner.id);
       const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/');
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
+      verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
   }
   const forbidden = files.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/'));

@@ -1,3 +1,4 @@
+import {supportFixture} from './measurement-support.test.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -59,7 +60,7 @@ function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={})
   const bind=()=>{
     const prepared=prepare(),decisionInput={schema_version:1,candidate_id:candidate.id,contract_id:'fixture-contract',run_id:'fixture-run',rationale:'The observed fixed cohort supports investigating this concrete page.',
       source_to_action:'The fixture evidence is preserved to test prospective binding only.',alternatives:[{id:'other',reason:'Another candidate has lower estimated business relevance in this fixture.'}],
-      measurement:prepared.measurement,scope:{artifact:page,paths:[target]}};
+      measurement:prepared.measurement,scope:{artifact:page,paths:[...input.change_paths]}};
     const r={schema_version:3,id,source_commit:sourceCommit,observation_fingerprint:'a'.repeat(64),candidates:[candidate,{id:'other'}],observed_at:now.toISOString(),started_at:now.toISOString(),status:'observed_decision_requires_execution',
       execution_boundary:{stopped:false},route,stages:{}};
     write(receiptFile,r);const df=path.join(stateRoot,'decision.json');write(df,decisionInput);
@@ -67,7 +68,7 @@ function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={})
     write(path.join(root,'data/decision-intents/fixture-contract.json'),{id:'fixture-contract',run_id:'fixture-run',candidates:[{id:'fixture-contract',company_decision:decisionCommitment(read(receiptFile))}]});
     // Declaration transport/selection has independent real-git tests in
     // company-decision.test. This fixture tests the subsequent registry order.
-    fs.writeFileSync(path.join(root,'fixture-declaration'),'seal\n');git('add','.');git('commit','-qm','fixture declaration');
+    git('add','.');git('commit','-qm','fixture declaration');
     const saved=read(receiptFile);Object.assign(saved,{bound_decision_sha256:saved.decision.sha256,bound_declaration_sha:git('rev-parse','HEAD'),bound_autopilot_run_id:'fixture-run'});write(receiptFile,saved);
     return saved;
   };
@@ -283,4 +284,45 @@ test('prospective observation coexistence admits a page but retains backlink own
   f.git('checkout','--',EXPERIMENTS);await registerMeasurement({stateRoot:f.stateRoot,id:f.id,root:f.root,now:f.now});f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture registration');
   fs.writeFileSync(path.join(f.root,f.target),'after');fs.writeFileSync(path.join(f.root,'undeclared.html'),'unreported collateral change');f.git('add','.');f.git('commit','-qm','fixture undeclared change');
   assert.throws(()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call}),/undeclared measurement change/);
+});
+
+
+test('prospective page support reaches registration, real-Git CI and delivery without releasing another page',async t=>{
+  const {verifyDecision}=await import('../../scripts/decision-ci.mjs');
+  const f=fixture(t,{source:'gsc'}),q='data/distribution-queue.json';
+  f.input.change_paths.push(q);f.input.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-fixture'}];f.write(f.inputFile,f.input);
+  f.write(path.join(f.root,q),{items:[{id:'20260901-existing',url:'https://simplememofast.com/protected'}]});
+  f.write(path.join(f.root,'data/value-metrics.json'),{metrics:[]});
+  const first=f.prepare(),base=loadMeasurement({stateRoot:f.stateRoot,...first.measurement}).experiment;
+  fs.rmSync(path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'));
+  const owner={...base,id:'protected-owner',page:'/protected',change_paths:['protected/index.html']};delete owner.supporting_changes;
+  f.write(path.join(f.root,EXPERIMENTS),{experiments:[owner]});f.git('add','.');f.git('commit','-qm','fixture existing shared support and protected owner');
+  const baseRef=f.git('rev-parse','HEAD'),r=await f.register(),item={...supportFixture().item,id:'20260915-fixture',date_jst:'2026-09-15',url:'https://simplememofast.com'+f.page};
+  const original=f.read(path.join(f.root,q));f.write(path.join(f.root,q),{...original,items:[item,...original.items]});fs.writeFileSync(path.join(f.root,f.target),'after\n');
+  f.git('add','.');f.git('commit','-qm','fixture bounded article support');
+  const options=()=>({branch:'Codex/fixture',head:f.git('rev-parse','HEAD'),baseRef,cwd:f.root});
+  assert.equal((await verifyDecision(options())).state,'not_required','measurement gates still run before optional value-contract routing');
+  const delivery=()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call});
+  assert.equal(delivery().state,'registered_waiting_for_mature_evidence');
+  const goodHead=f.git('rev-parse','HEAD');
+  // Rewrite only this disposable fixture's prospective declaration, preserving
+  // the valid registration/treatment commits, to exercise the actual CI entry.
+  for(const absentId of [undefined,'']) {
+    f.git('checkout','--detach',goodHead+'^^');
+    const declarationPath='data/decision-intents/fixture-contract.json',declaration=f.read(path.join(f.root,declarationPath));
+    declaration.id=absentId;declaration.candidates[0].id=absentId;
+    f.write(path.join(f.root,declarationPath),declaration);f.git('add',declarationPath);f.git('commit','--amend','--no-edit');
+    f.git('cherry-pick',goodHead+'^',goodHead);
+    await assert.rejects(()=>verifyDecision(options()),/requires a valid selected candidate ID/);
+  }
+  f.git('checkout','--detach',goodHead);
+  const missing=f.read(path.join(f.root,EXPERIMENTS));delete missing.experiments.find(e=>e.id===f.input.id).company_measurement;
+  f.write(path.join(f.root,EXPERIMENTS),missing);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture unregistered support owner');
+  await assert.rejects(()=>verifyDecision(options()),/requires prospective Company measurement registration/);
+  f.git('checkout',goodHead,'--',EXPERIMENTS);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture restore measurement binding');
+  const mutated=f.read(path.join(f.root,q));mutated.items[1].url='https://simplememofast.com/changed';f.write(path.join(f.root,q),mutated);f.git('add',q);f.git('commit','-qm','fixture unrelated queue corruption');
+  await assert.rejects(()=>verifyDecision(options()),/only one new seed/);assert.throws(delivery,/only one new seed/);
+  f.git('checkout',goodHead,'--',q);f.git('add',q);f.git('commit','-qm','fixture restore exact queue');
+  const l=f.read(path.join(f.root,EXPERIMENTS)),old=l.experiments.find(e=>e.id==='protected-owner');old.change_paths.push(q);old.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-protected'}];f.write(path.join(f.root,EXPERIMENTS),l);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture reinterpret previous owner');
+  await assert.rejects(()=>verifyDecision(options()),/cannot reinterpret existing support ownership/);
 });

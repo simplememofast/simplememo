@@ -64,6 +64,18 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/decision-ci.mjs",
+      "expr": "declared.id",
+      "disposition": "別に検出",
+      "note": "2026-09-20: assert 内で事前宣言の選択候補 ID と候補の ID の一致を要求する成功条件。両方欠落した undefined 同士の一致を防ぐため、直前で選択 ID の文字列型と既存の契約 ID 形式を必須にした。両 ID 欠落・両 ID 空文字の事前宣言を実 Git 履歴に置く回帰検査で拒否を確認する。"
+    },
+    {
+      "file": "scripts/decision-ci.mjs",
+      "expr": "m.company_run_id",
+      "disposition": "別に検出",
+      "note": "2026-09-20: assert 内で事前宣言と計測登録の Company run ID および決定ハッシュの一致を要求する成功条件。run ID の欠落・不正形式は先行する schema_version/UUID/ハッシュ検査で拒否し、一致しない場合もこの assert が拒否する。照合元の欠落で規則が消える向きではない。"
+    },
+    {
       "file": "scripts/autopilot-act.mjs",
       "expr": "observed?.task_kind_unavailable",
       "disposition": "前提",
