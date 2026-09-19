@@ -49,6 +49,10 @@
 | 追加 | jyguyomarch/awesome-productivity | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/jyguyomarch/awesome-productivity/pull/386 | レビュー待ち | Note Management 節の末尾に追加 |
 | 追加 | doanhthong/awesome-pkm | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/doanhthong/awesome-pkm/pull/23 | 未処理PRが9件あり滞留気味 | — |
 | 追加 | Obsidian公式フォーラム | SUBMISSION | BLOCKED | — | — | — | https://forum.obsidian.md/c/share-showcase/9 | アカウント `SimpleMemoFast` でトピックを作成できない（`/new-topic` が `/categories` へ転送される）。投稿0件のため信頼レベル不足と見られる | 既存スレッドへ返信して信頼レベルを上げるか、モデレーターに相談。なお同フォーラムの外部リンクは `rel="noopener nofollow ugc"` |
+| 追加 | Obsidian Hub（publish.obsidian.md/hub） | SUBMISSION | NOT_ELIGIBLE | — | — | — | https://github.com/community-archive/obsidian-hub | リポジトリが **2026-08-01 にアーカイブされ read-only**。`obsidian-community` から `community-archive` へ移管済みでPRを受け付けない | 対象外。`02.04 Auxiliary Tools` に Drafts が載っており枠としては適合していたが、もう更新されない |
+| 追加 | Obsidian公式フォーラム（プロフィール） | SELF_REGISTER | **PUBLISHED** | 2026-09-19 | **2026-09-19** | あり（`rel="noopener nofollow ugc"`） | https://forum.obsidian.md/u/SimpleMemoFast/summary | — | 新しい参照ドメイン。トピック作成は別途 BLOCKED のまま |
+| 追加 | GitHub（プロフィール） | SELF_REGISTER | ALREADY_EXISTS ＋ 修正 | 2026-09-19 | yes | あり | https://github.com/simplememofast | — | 表示名の誤字と旧ブランド「Simple Memo Faset - Captio-style」を「Simple Memo - for Obsidian」へ修正。bio と所在地を追加。awesome系6PRの表示名がこれで揃った |
+| 追加 | note（プロフィール） | — | ALREADY_EXISTS | — | yes | あり（`rel="noopener nofollow"`） | https://note.com/simplememo | — | 既にリンク済み。追加作業なし |
 | 追加 | Softpedia | — | NOT_ELIGIBLE | — | — | — | https://www.softpedia.com/user/submit.shtml | Windows / Mac / Linux のダウンロード配布ソフトのみ | 対象外 |
 | 追加 | Uneed | SELF_REGISTER | BLOCKED | — | — | — | https://www.uneed.best/submit-a-tool | 最終保存にアカウント作成が必要 | 人がアカウントを作れば数分で完了 |
 | 追加 | Slant | SELF_REGISTER | BLOCKED | — | — | — | https://www.slant.co/ | サイトが HTTP 526 を返し到達不能 | 復旧後に再訪 |
@@ -62,20 +66,25 @@
 | SaaSHub | `/simplememo-fast` | `nofollow` | `noindex, follow` |
 | AlternativeTo | `/software/simple-memo--captio-style/about/` | `nofollow noopener` | `index, follow` |
 | Product Hunt | `/products/simple-memo-captio-style` と各ローンチ | `noreferrer noopener ugc` | `noindex, nofollow`（ログイン状態で観測） |
+| Product Hunt | `/@simple_memo_captio_style`（プロフィール） | `noreferrer` のみ＝**nofollowは付かない** | ただしページが `noindex, nofollow`（同上） |
+| Obsidian フォーラム | `/u/SimpleMemoFast/summary` | `noopener nofollow ugc` | 指定なし |
+| note | `/simplememo` | `noopener nofollow` | 指定なし |
 | awesome-obsidian（GitHub） | リポジトリのREADME | `nofollow`（GitHubの仕様） | — |
 
 **現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
+Product Hunt のプロフィールは `rel` に nofollow が無いが、ページ自体が `noindex, nofollow` を
+返すため評価は期待しない（**ログイン状態での観測**であり、クローラ向けの応答は未確認）。
 ただし AlternativeTo と Product Hunt は実ユーザーのいる媒体なので、nofollow でも掲載価値は残す。
 
 ### 集計
 
-- 新規公開：**0 件**（今回の送信分から公開確認できたものはまだ無い）
+- 新規公開：**1 件**（forum.obsidian.md のプロフィールに実リンクが載った。nofollow）
 - 既に公開されていた新規参照ドメインの発見：**1 件**（github.com / awesome-obsidian、2026-09-08 マージ）
 - 申請完了：**10 件**（フリーソフト100 / SaaSHub「Memo Inbox」新規 / NoteApps.info 情報更新 / Launching Next / awesome系6リストへのPR）
 - 既存掲載の改善申請：**1 件**（SaaSHub「Simple Memo」の全項目訂正）
 - 既存掲載の点検のみ：**2 件**（AlternativeTo / Product Hunt）
 - BLOCKED：**6 件**
-- 対象外：**3 件**
+- 対象外：**4 件**
 
 うち awesome系6件は 2026-09-19 に `simplememofast` アカウントでPRを出した。
 すべて1行追加のみ、各リストの CONTRIBUTING に沿った書式で、**本文に「開発者本人である」と明記**している。
@@ -242,6 +251,29 @@ GitHub の awesome 系リストは、登録フォームこそ無いが**PRとい
   条件にしており、`simplememofast.com` のトップページには Google Analytics（`G-EPZVZKCVQG`）が入っている。
   `/memo-inbox/` 配下だけは第三者スクリプトが1本も無いことを確認したが、サイト全体としては条件を
   満たさないため、条件を満たすふりをして出すことはしない。
+
+## 6.6 既存アカウントのプロフィール整備（2026-09-19）
+
+新規アカウントが作れない制約の下でも、**既にログインが残っているサービスのプロフィールを
+埋めることで参照ドメインは増やせる。**今回それで1件増えた。
+
+| サービス | 状態 | 結果 |
+| --- | --- | --- |
+| Obsidian公式フォーラム | Web Site 欄が空だった | `https://simplememofast.com/` と所在地を登録。**公開プロフィールに実リンクが出たことを確認**（`rel="noopener nofollow ugc"`） |
+| GitHub | リンクは既にあった | 表示名が `Simple Memo Faset - Captio-style`（**誤字＋旧ブランド**）だったので `Simple Memo - for Obsidian` に修正。bio と所在地も追加 |
+| Product Hunt | 既にリンク済み | Website / App Store / LinkedIn / Twitter が揃っている。追加不要 |
+| note | 既にリンク済み | 追加不要 |
+| Indie Hackers | 到達不能 | `/settings` が Not found、`/<user>` はリダイレクトループ。products 作成不可と同じ制限と見られる |
+
+GitHub の表示名修正は副次的だが効く —— **本日出した awesome系6件のPRすべてに、
+この名前が投稿者名として並ぶ。**誤字のまま6リストのメンテナに見せずに済んだ。
+
+### 出さなかった候補
+
+- **fhoehl/awesome-zettelkasten** — `Apps` 節に Napkin のようなキャプチャ系も並んでおり枠としては
+  入りうるが、Simple Memo はノートを保存も連結もしない。**適合が弱いので出さない。**
+  小さなキュレーションリストに筋の悪いPRを出すのは、件数より損になる。
+- **awesome-privacy** — §6.5 に記載の理由（サイト全体に Google Analytics）。
 
 ## 7. 未解決の課題
 
