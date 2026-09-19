@@ -61,6 +61,11 @@ def build() -> dict[str, bytes]:
     from fontTools.ttLib import TTFont
     from PIL import Image
     result: dict[str, bytes] = {}
+    previous_manifest_path = ROOT / OUT / 'manifest.json'
+    try:
+        previous_manifest = json.loads(previous_manifest_path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        previous_manifest = None
     shared = (ROOT / 'assets/css/style.min.css').read_text()
     hero_css = (ROOT / 'assets/css/home-hero.css').read_text()
     # Remove only remote Noto faces; preserve the original local fallback metrics.
@@ -72,6 +77,29 @@ def build() -> dict[str, bytes]:
         key = (source, width)
         if key in images:
             return images[key]
+
+        # AVIF encoders are not byte-stable across Pillow/libavif versions.
+        # If the source image itself is unchanged, preserve the already
+        # content-addressed, manifest-verified bytes rather than churning every
+        # homepage image during an unrelated CSS/font rebuild.
+        if previous_manifest:
+            source_digest = digest((ROOT / source).read_bytes())
+            if previous_manifest.get('inputs', {}).get(source) == source_digest:
+                stem = Path(source).stem.replace('@2x', '')
+                prefix = f'{OUT}/{stem}-{width}-'
+                candidates = [
+                    name for name in previous_manifest.get('assets', {})
+                    if name.startswith(prefix) and name.endswith('.avif')
+                ]
+                for name in candidates:
+                    path = ROOT / name
+                    expected = previous_manifest['assets'][name].get('sha256')
+                    if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == expected:
+                        data = path.read_bytes()
+                        result[name] = data
+                        images[key] = '/' + name
+                        return '/' + name
+
         with Image.open(ROOT / source) as original:
             rgb = original.convert('RGB')
             assert width <= rgb.width, 'Never upscale source images'
