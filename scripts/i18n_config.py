@@ -223,6 +223,7 @@ JA_EN_PAIRS = [
     ("/vs/ticktick/", "/en/vs/ticktick/"),
     ("/vs/todoist/", "/en/vs/todoist/"),
     ("/vs/upnote/", "/en/vs/upnote/"),
+    ("/contact", "/en/contact"),
 ]
 # x-default for ja-en pairs points to the JA url (current site convention).
 JA_EN_XDEFAULT = "ja"  # "ja" or "en"

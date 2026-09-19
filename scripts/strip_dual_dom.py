@@ -167,6 +167,7 @@ def process(path, ja_url, en_url):
     src, n_css2 = re.subn(r'\s*a\.app-store-badge\[data-lang\]\.active\{display:inline-flex\}', "", src)
 
     # tidy: collapse runs of 3+ blank lines left by removals
+    src = re.sub(r"[ \t]+(?=\n)", "", src)
     src = re.sub(r"\n[ \t]*\n[ \t]*\n+", "\n\n", src)
 
     open(path, "w", encoding="utf-8").write(src)

@@ -4,7 +4,8 @@
 A page qualifies only when:
 - root <html lang="ja">
 - it contains data-lang="en"
-- EN-visible text is >= MIN_EN_CHARS
+- EN-visible text is >= MIN_EN_CHARS, or an indexable short page has an
+  explicitly translated H1 (for example the contact form).
 
 This deliberately excludes pages whose only English is navigation or a
 "This article is currently only available in Japanese" fallback.
@@ -53,7 +54,13 @@ def discover() -> list[tuple[str, int]]:
         if not soup.html or soup.html.get("lang") != "ja":
             continue
         en_text = " ".join(n.get_text(" ", strip=True) for n in soup.find_all(attrs={"data-lang": "en"}))
-        if len(en_text) >= MIN_EN_CHARS:
+        heading = soup.find("h1")
+        english_heading = bool(heading and (
+            heading.get("data-lang") == "en" or heading.find(attrs={"data-lang": "en"})
+        ))
+        robots = soup.find("meta", attrs={"name": "robots"})
+        noindex = bool(robots and "noindex" in robots.get("content", "").lower())
+        if len(en_text) >= MIN_EN_CHARS or (english_heading and not noindex):
             out.append((rel, len(en_text)))
     return sorted(out)
 

@@ -211,7 +211,7 @@ def main(ja_rel: str, en_rel: str) -> None:
                         obj[k] = EN_BRAND
                     elif v in SHARED_JA_EN:
                         obj[k] = SHARED_JA_EN[v]
-                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting") and JA_TITLE_RE.search(v):
+                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting", "ContactPage") and JA_TITLE_RE.search(v):
                         obj[k] = en_title
                     elif obj.get("@type") == "ListItem" and str(obj.get("item", "")).rstrip("/") == ja_abs.rstrip("/"):
                         obj[k] = en_title
