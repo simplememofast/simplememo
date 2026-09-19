@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T12:35:51.286142+00:00",
+  "updated_at": "2026-09-19T14:06:17.737441+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -15,7 +15,7 @@
     "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。",
     "initial_ios_main": "17dcad9",
     "initial_api_main": "c6ed249",
-    "ios_integration_base": "f6906b47438d0ffef0a1817db1a8ffa942f2ed48"
+    "ios_integration_base": "e3431b254dad975faf3551fa427aec328d66cc21"
   },
   "target_release": {
     "version": "6.0 (proposal)",
@@ -42,7 +42,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で既存MemoCapture/MemoDeliveryへ試作を統合。受付ID・時刻・元の保存先を保持。必要なCI、最終テスト、同一配布版の確認が未完了。",
+      "note": "PR594（Draft）で既存MemoCapture/MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。同一アプリ/テストソースで関連307テスト成功。CIはPRの現在のチェックを参照し、同一配布版の確認は未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -51,11 +51,21 @@
       },
       "integration": {
         "state": "draft",
-        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "head": "90f230210849f300940435ef8e1cd76102520de9",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
-        "formal_score_credit": 0
+        "formal_score_credit": 0,
+        "local_validation": {
+          "native_tests": 307,
+          "native_failures": 0,
+          "suites": 14,
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
+          "app_and_test_sources_unchanged": true,
+          "post_clone_gate": "passed; all nine storage/recovery probes"
+        }
       }
     },
     {
@@ -69,7 +79,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で共通Captureへ統合。sideButtonCaptureは既定OFF。実機の適格性・entitlement・音声/割込/背景動作と同一版QA待ち。",
+      "note": "PR594（Draft）で共通Captureへ統合。対話メモへの遷移とScene経由のモーダル保護を検証。sideButtonCaptureは既定OFF。実機の適格性・entitlement・音声/割込/背景動作と同一版QA待ち。",
       "local_prototype": {
         "branch": "claude/prd-side-button-voice-capture",
         "sha": "adc5b20a8f9ef853157a7f857c3fda9ceb257cb2",
@@ -78,11 +88,21 @@
       },
       "integration": {
         "state": "draft",
-        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "head": "90f230210849f300940435ef8e1cd76102520de9",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
-        "formal_score_credit": 0
+        "formal_score_credit": 0,
+        "local_validation": {
+          "native_tests": 307,
+          "native_failures": 0,
+          "suites": 14,
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
+          "app_and_test_sources_unchanged": true,
+          "post_clone_gate": "passed; all nine storage/recovery probes"
+        }
       }
     },
     {
@@ -96,7 +116,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で明示操作後のEventKit追加と暗号化候補/選択ログ・書込journalを統合。routingSuggest/routingUseModelは既定OFF。Obsidian本文内注記と実保存・権限・日時精度・同一版QAは残る。",
+      "note": "PR594（Draft）で明示操作後のEventKit追加と暗号化候補/選択ログ・書込journal、Capture別receiptに基づくObsidian本文内注記を実装。未ack追記中は注記を延期する。routingSuggest/routingUseModelは既定OFF。実FileProvider・実保存・権限・日時精度・同一版QAは残る。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -105,11 +125,21 @@
       },
       "integration": {
         "state": "draft",
-        "head": "002c1cbf16208673a7538fdaab3e2ce27ff963b5",
+        "head": "90f230210849f300940435ef8e1cd76102520de9",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
-        "formal_score_credit": 0
+        "formal_score_credit": 0,
+        "local_validation": {
+          "native_tests": 307,
+          "native_failures": 0,
+          "suites": 14,
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
+          "app_and_test_sources_unchanged": true,
+          "post_clone_gate": "passed; all nine storage/recovery probes"
+        }
       }
     },
     {
@@ -122,7 +152,7 @@
         "routing-level1-2-reminders-calendar"
       ],
       "prs": [],
-      "note": "通常のSiri/Shortcutsは既存。追加スキーマと索引は依存PRD完了・現行SDK照合後に着手。"
+      "note": "通常のSiri/Shortcutsは既存。現行Xcode 27 SDKとApple資料で対象スキーマのiOS 27要件・マクロ・パラメータを照合。追加スキーマと既定OFF索引は依存PRD完了待ち。本文非公開、未対応入力の扱い、未出荷版での登録抑止、実行試験は未完了。"
     },
     {
       "id": "notion-enable",
