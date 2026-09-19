@@ -1317,26 +1317,6 @@
       "reason": "engine=codex; automation_id=obsidian-2; scheduled_slot=2026-09-12T12:20:00+09:00; preflight rejected unknown execution state of repair task 01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a; primary and earlier retry completed. No implementation or publication. Recovered to the shared ledger on 2026-09-13 from the completed scheduled task and its saved local ledger. Original gate outcome retained; no execution or publication success inferred."
     },
     {
-      "run_id": "ap-20260913-owner-session-company-os",
-      "date_jst": "2026-09-13",
-      "route": "owner-session",
-      "attempted": true,
-      "outcome": "shipped",
-      "lane": "F",
-      "action": "wiring",
-      "pr": 1306,
-      "artifact": null,
-      "failure_reason": null,
-      "external_ref": "01a09937-5f64-7032-9084-650e5bdd6c28",
-      "interventions": [
-        {
-          "kind": "request",
-          "note": "オーナーのAutonomous Company OS構築指示を受けたGoal実行。自然定期起動・ゼロタッチ起票としては数えない。"
-        }
-      ],
-      "source": "session"
-    },
-    {
       "run_id": "ap-20260913-owner-session-billing-readiness",
       "date_jst": "2026-09-13",
       "route": "owner-session",
@@ -1356,6 +1336,26 @@
       ],
       "source": "session",
       "note": "課金回復の一業務施策。API PR318とiOS PR503の検証・本番監視を経て運用準備を受け入れた。実際の決済回復と案内の寄与は未観測。"
+    },
+    {
+      "run_id": "ap-20260913-owner-session-company-os",
+      "date_jst": "2026-09-13",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "wiring",
+      "pr": 1306,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "01a09937-5f64-7032-9084-650e5bdd6c28",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナーのAutonomous Company OS構築指示を受けたGoal実行。自然定期起動・ゼロタッチ起票としては数えない。"
+        }
+      ],
+      "source": "session"
     },
     {
       "run_id": "ap-20260913-owner-session-service-notice-readiness",
@@ -1412,6 +1412,30 @@
       "gate_code": "measurement_experiment_overlap",
       "stage_note": "engine=Codex; automation=obsidian; scheduled slot=2026-09-15 06:00 JST; started=2026-09-15 06:01:09.852 JST; initial gate receipt e853083a6b24030a2557cb2eae0144bbcc7c7af0cd8f96bd1c9b08f92c976989. Protected measurement gate and active experiment scopes unchanged.",
       "failure_class": "no_artifact"
+    },
+    {
+      "run_id": "ap-20260915-owner-session-measurement-coexistence",
+      "date_jst": "2026-09-15",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "repair",
+      "pr": 1398,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "github-pr:1398",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼の計測共存修理。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "source": "session",
+      "repair_of": [
+        "ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26"
+      ],
+      "repair_note": "PR #1398 で site-wide observation と page measurement の共存を実装し、元の measurement_experiment_overlap を品質ゲートを弱めず解消。元の no_artifact は履歴として保持し、SEO Validation と同一mergeのCloudflare Pages成功まで確認。自然定期運転の成功は別証拠。"
     },
     {
       "run_id": "ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
@@ -1521,6 +1545,31 @@
       "detected_at": "2026-09-17T21:35:41.289Z",
       "detected_note": "Codex original turn 01a0b12d-3693-7930-80d4-e5dba3e33048; transcript SHA256 c66f86a34f21e40bb749f82a6b537a29b609cfddcb821f24d4154631db6a0f9e; observed 2026-09-17T21:35:41.289Z; automatic detection receipt SHA256 f1645dcab873c2b55d6cd0053b9067d016fa21cee6d219b8cdd0d3d55ba82054",
       "failure_stage": "cost"
+    },
+    {
+      "run_id": "ap-20260918-owner-session-pagespeed-density-recovery",
+      "date_jst": "2026-09-18",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "repair",
+      "pr": 1449,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "github-pr:1449+run:35318018414",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "オーナー依頼のPageSpeed継続作業。自然定期運転・無介入出荷として数えない。"
+        }
+      ],
+      "source": "session",
+      "evidence": "docs/perf/hero-density-20260918.json",
+      "repair_of": [
+        "ap-20260917-owner-session-pagespeed-poster"
+      ],
+      "repair_note": "PR #1449 merge 19b8ed37 の本番PageSpeed run 35318018414で、元の失敗と同じ production-ja median performance >= 90 の予算を再度通過（90/91/91、median 91）。旧1443/1445の失敗は書き換えず、原因もPR #1449だったとは断定しない。現在の本番予算回復だけを証明する。"
     },
     {
       "run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",

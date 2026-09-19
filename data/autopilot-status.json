@@ -1,13 +1,13 @@
 {
-  "date_jst": "2026-09-17",
-  "generated_at": "2026-09-18T01:45:03.137157+00:00",
+  "date_jst": "2026-09-18",
+  "generated_at": "2026-09-19T02:21:10.160657+00:00",
   "action": "repair",
   "article": null,
-  "pr": 1445,
+  "pr": 1449,
   "streak": {
-    "consecutive_no_article_days": 3,
+    "consecutive_no_article_days": 4,
     "last_article_date_jst": "2026-09-14",
-    "last_production_change_date_jst": "2026-09-17",
+    "last_production_change_date_jst": "2026-09-18",
     "days_since_production_change": 0
   },
   "data_freshness": {
@@ -265,15 +265,15 @@
       ]
     }
   },
-  "reason": "9月17日のページ内移動修正1441を成功1サイクル、ポスター試行1443とロールバック1445を速度基準未達の失敗1サイクルとして一次証拠から回収。定期運転・無介入出荷・記事公開ではない。",
-  "verified": "同一SHAのPR1441公開後PageSpeed/SEO成功と本番照合artifact、およびPR1443/1445公開後PageSpeed失敗を確認。証拠: docs/perf/pagespeed-reconciliation-20260918.json。未取得の定期タスク結果は不明。",
+  "reason": "9月17日のPageSpeed予算失敗を履歴のまま保持し、9月18日のPR #1449後の本番PageSpeed run 35318018414で同じproduction-ja median performance >= 90予算が回復したことをrepair_ofで記録。定期運転・無介入出荷・記事公開ではない。",
+  "verified": "PR #1449 merge 19b8ed370434402bc06e4c07f19396d0a3e34262 と本番PageSpeed run 35318018414を照合。production-jaは90/91/91、median 91で同じ予算を通過。旧PR #1443/#1445の失敗は書き換えず、原因もPR #1449だったとは断定しない。",
   "checks": {
-    "seo_check": "Historical PR1441 post-merge SEO35219409557 succeeded; this field describes recovered September17 outcomes, not current release acceptance.",
-    "mobile_qa": "Historical PR1441 audit35219409503 succeeded; PR1443/1445 audits35231730962/35235783346 failed. Those failures remain unresolved.",
-    "scheduled_run_recovery": "Not verified. No new success/failure/no_run outcome is inferred for local Codex schedules."
+    "seo_check": "PR #1449のSEO/Cloudflare Pagesチェックは成功。これは9/18の修理確認で、9/19定期運転の成功を意味しない。",
+    "mobile_qa": "PageSpeed run 35318018414 は production-ja 90/91/91（median 91）で既存予算を通過。旧1443/1445の失敗は履歴として保持。",
+    "scheduled_run_recovery": "9/19 06:01 JSTのMac Codex主系はstructured usage_limit_exceededで失敗。provider回復時刻17:09を一次証拠で確認し、既存ACTIVE主系17:20・補完19:00へ再試行予約済み。成功はまだ加点しない。"
   },
   "owner_requests": [],
-  "next": "断続的な描画遅延と既存の失敗は未解決。回収対象以外の出荷はこの記録に含めない。未取得定期運転とprevious_scheduled_observationの保留事項を維持。",
+  "next": "9/19 17:20 JSTの主系と、必要なら19:00 JSTの補完を一次証拠で確認し、成功または新しい失敗を記帳する。usage_limitの古い失敗は再試行成功後に閉じる。",
   "previous_scheduled_observation": {
     "date_jst": "2026-09-15",
     "source": "https://github.com/simplememofast/simplememo/blob/993828cae21d5a63a2efd1e6e6b325fde3e46e13/data/autopilot-status.json",
@@ -291,5 +291,5 @@
     },
     "next": "全サイト実験とページ別事前計測の共存方針を、権限を持つ通常のレビューで確認する必要がある。C15はpending維持。同じ全体スコープに阻まれる候補の登録を繰り返さない。既存主系で安全な日次収集と成熟待ち評価を継続。追加予約・認証拡大・利用枠リセットなし。"
   },
-  "observation_scope": "Two historical September17 owner cycles, including one failure; not scheduled execution or a current density-release verdict."
+  "observation_scope": "2026-09-18のevidence-backed owner-session repair reconciliation。2026-09-19のscheduled usage_limit failureは別台帳行で保持し、回復再試行の結果待ち。"
 }

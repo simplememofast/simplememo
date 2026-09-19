@@ -558,7 +558,7 @@ export function scheduledSafeRecovery(target, ctx) {
   const now = typeof ctx.now === 'number' ? ctx.now : Date.now();
   const observedAt = Date.parse(observation.observed_at ?? '');
   if (!Number.isFinite(observedAt) || Math.abs(now - observedAt) > 6 * 3600_000) return null;
-  const recoveryEvidence = observation.usage_limit_recovery;
+  const recoveryEvidence = ctx.routineDoc?.safe_recovery_observation;
   const recoveryMs = Date.parse(recoveryEvidence?.provider_recovery_at ?? '');
   if (!Number.isFinite(recoveryMs) || !recoveryEvidence?.source) return null;
   const automation = (observation.automations ?? []).find((a) => a.id === automationId);
@@ -1310,6 +1310,9 @@ export function merge(ledger, derived, today) {
           cur.force_owner = d.force_owner;
           cur.force_owner_why = d.force_owner_why ?? null;
         }
+        // 明示委任も導出事実。これを台帳へ写さないと force_owner=ai だけが残り、
+        // classify は「AI分類だけでは委任にならない」と安全側で human に戻す。
+        cur.execution_authorization = d.execution_authorization ?? null;
       }
       continue;
     }
@@ -1317,6 +1320,7 @@ export function merge(ledger, derived, today) {
       id: d.id, title: d.title, detail: d.detail, source: d.source,
       domain: d.domain ?? null, touches: d.touches ?? [],
       force_owner: d.force_owner ?? null, force_owner_why: d.force_owner_why ?? null,
+      execution_authorization: d.execution_authorization ?? null,
       auto: d.auto ?? null, close_check: d.close_check,
       state: 'open', created_jst: today, last_seen_jst: today,
       closed_jst: null, evidence: null,
@@ -4323,20 +4327,29 @@ async function selftest() {
     safe_recovery: { mode: 'wait_then_retry', owner_authorized_at: '2026-09-19' } } });
   const safeCtx = { today: '2026-09-19', now: Date.parse('2026-09-19T01:20:00Z'), runsDoc: { runs: shRuns },
     statusDoc: null, costDoc: null, selfheal: { targets: [safeTarget] },
-    routineDoc: { codex_observation: { scheduler_query_complete: true, observed_at: '2026-09-19T01:19:00Z',
-      usage_limit_recovery: { provider_recovery_at: '2026-09-19T08:09:00Z',
+    routineDoc: { safe_recovery_observation: { provider_recovery_at: '2026-09-19T08:09:00Z',
         source: 'structured task_complete 01a0b653-5a26-7eb3-b906-f316e4d8c8dd' },
+      codex_observation: { scheduler_query_complete: true, observed_at: '2026-09-19T01:19:00Z',
       automations: [{ id: 'obsidian', status: 'ACTIVE', next_run_at: '2026-09-19T08:20:00Z' }] } } };
   const safeRow = derive(safeCtx).find((d) => d.id === 'act-selfheal-r-0830');
   t('usage_limit の待機再試行は委任済みかつ ACTIVE・将来予約を観測した時だけAIへ戻す',
     safeRow?.force_owner === 'ai' && safeRow?.execution_authorization?.scope === 'usage_limit:wait_then_retry'
     && (safeRow?.title ?? '').includes('自動回復待ち'));
+  const safeLedger = { actions: [{ id: safeRow.id, title: 'old', detail: 'old', source: 'selfheal',
+    domain: null, touches: [], force_owner: 'human', force_owner_why: 'old', auto: null,
+    close_check: safeRow.close_check, state: 'open', created_jst: '2026-09-18', last_seen_jst: '2026-09-18',
+    closed_jst: null, evidence: null }] };
+  merge(safeLedger, [safeRow], '2026-09-19');
+  t('既存のusage_limit行にも明示委任を同期し、AI分類まで届かせる',
+    safeLedger.actions[0].execution_authorization?.scope === 'usage_limit:wait_then_retry'
+    && classify(safeLedger.actions[0], matrix).owner === 'ai');
+
   const tooEarlySafe = structuredClone(safeCtx);
   tooEarlySafe.routineDoc.codex_observation.automations[0].next_run_at = '2026-09-19T08:00:00Z';
   t('provider 回復時刻より前の予約は自動回復扱いにしない',
     derive(tooEarlySafe).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
   const noProviderEvidence = structuredClone(safeCtx);
-  delete noProviderEvidence.routineDoc.codex_observation.usage_limit_recovery;
+  delete noProviderEvidence.routineDoc.safe_recovery_observation;
   t('provider 回復時刻の一次証拠が無い予約は自動回復扱いにしない',
     derive(noProviderEvidence).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
 
