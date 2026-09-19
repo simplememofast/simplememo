@@ -82,11 +82,16 @@ def to_unicode_range(codes):
 
 
 def update_css_and_preloads(delta, extended):
+    # Fonts are served with Cache-Control: immutable for one year. Every
+    # referenced font therefore needs a content-derived query, not just delta;
+    # otherwise replacing a broken subset/ext binary leaves returning visitors
+    # on the old outlines for up to a year.
     versions = {}
     for weight in ("Regular", "Bold"):
-        name = f"NotoSansJP-{weight}-delta.woff2"
-        with open(os.path.join(FONTS, name), "rb") as font:
-            versions[name] = hashlib.sha256(font.read()).hexdigest()[:10]
+        for kind in ("subset", "delta", "ext"):
+            name = f"NotoSansJP-{weight}-{kind}.woff2"
+            with open(os.path.join(FONTS, name), "rb") as font:
+                versions[name] = hashlib.sha256(font.read()).hexdigest()[:10]
 
     for relative in ("assets/css/style.css", "assets/css/style.min.css"):
         path = os.path.join(ROOT, relative)
@@ -121,6 +126,17 @@ def update_css_and_preloads(delta, extended):
 
 
 def main():
+    # CSS declares Regular as 400 and Bold as 500–800. Verify the binaries
+    # match those declarations before deriving any child font. A 2026-09-19
+    # audit found the files named "Regular" were actually 100/Thin outlines,
+    # which made Japanese body text visibly wrong while all CSS looked valid.
+    expected_weights = {"Regular": 400, "Bold": 700}
+    for weight, expected in expected_weights.items():
+        for kind in ("subset", "ext"):
+            path = os.path.join(FONTS, f"NotoSansJP-{weight}-{kind}.woff2")
+            actual = TTFont(path)["OS/2"].usWeightClass
+            assert actual == expected, f"{os.path.basename(path)}: expected OS/2 weight {expected}, got {actual}"
+
     subset_cps = codepoints(os.path.join(FONTS, "NotoSansJP-Regular-subset.woff2"))
     ext_cps = codepoints(os.path.join(FONTS, "NotoSansJP-Regular-ext.woff2"))
 
