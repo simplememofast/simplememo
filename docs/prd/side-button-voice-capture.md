@@ -17,6 +17,8 @@
 `claude/prd-routing-level1-2`（`6ddc66a`）に試作がある。同名ブランチのGitHub PRは9/19照合時0件。
 iOS main `17dcad9` には通常のStartVoiceMemoIntentがあり、提案のside-button機能は未統合。
 
+最新の統合先は[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）、head `33e78f257db3cd5e803666e5588e553b36f4f533`。既定OFFを維持し、今回の選択履歴移行のnative検証（92成功/0失敗/実機専用1skip）、同headのCloud検証（6,420成功/0失敗/実機専用4skip）、旧headの証拠を台帳で分けている。今回の試験だけで全入口・音声・保存先の同一配布版QAを完了扱いにしない。
+
 ## 2. VISION §13 のチェック
 
 1. **Capture Coverage / Zero-decision 率を上げるか**: 音声入力への到達を短くする。効果は実機と利用後に測る。
@@ -57,7 +59,7 @@ iOS main `17dcad9` には通常のStartVoiceMemoIntentがあり、提案のside-
 
 Appleが用途を受け入れるかは審査結果で確認する。決めるのは: Apple。
 次の提出版・日付は既存の実機・審査・公開ゲートで判断する。旧10/1提出の記録を自動実行しない。
-現在の5.8.67の端末担当と操作を重複させない。
+現在の実機QA担当と操作を重複させず、旧版の証拠を新しい配布版へ転用しない。
 
 ## 7. 測り方
 

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T17:52:35.522786+00:00",
+  "updated_at": "2026-09-19T19:30:13.661044+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -42,7 +42,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で既存Captureと受付計測を維持し、消去世代を主保存・再送・認証待ち予約・取消復元した下書きへ引き継ぐ。同headの関連native成功と、旧headの全CI成功を区別。同一配布版QAは未完了。",
+      "note": "PR594（Draft）で既存Captureと受付計測を維持し、消去世代を主保存・再送・認証待ち予約・取消復元した下書きへ引き継ぐ。現headのnative/Cloudの検証範囲と実機専用skip、旧headの証拠を分ける。同一配布版QAは未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -51,28 +51,31 @@
       },
       "integration": {
         "state": "draft",
-        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
+        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 135,
+          "native_tests": 93,
+          "native_passed": 92,
           "native_failures": 0,
-          "native_skipped": 0,
+          "native_skipped": 1,
+          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
           "suites": 4,
           "suite_names": [
+            "RoutingChoiceTransferTests",
             "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "PendingVerifySendQueueTests",
-            "WatchCaptureActionTests"
+            "RoutingDeliveryJournalTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
           "ci_authority": "current PR checks",
-          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
           "source_hashes_unchanged": true,
-          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+          "source_files_verified": 30,
+          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -103,19 +106,19 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
-          "unique_tests": 1587,
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "unique_tests": 1592,
           "simulator_models": 4,
-          "successful_executions": 6348,
+          "successful_executions": 6368,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1735,
+          "cloud_build": 1736,
           "result_pages": 8,
           "cloud_build_and_test": "succeeded",
           "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks",
+        "current_head_ci": "succeeded; physical file protection test skipped on each Simulator, not accepted",
         "prior_admission_validation": {
           "native_tests": 431,
           "native_failures": 0,
@@ -140,6 +143,19 @@
           "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
         },
         "historical_ci_validation": [
+          {
+            "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+            "unique_tests": 1587,
+            "simulator_models": 4,
+            "successful_executions": 6348,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1735,
+            "result_pages": 8,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
           {
             "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
             "checks_succeeded": 5,
@@ -195,6 +211,42 @@
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
           "physical_validation": "pending"
+        },
+        "prior_origin_validation": {
+          "native_tests": 135,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 4,
+          "suite_names": [
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "PendingVerifySendQueueTests",
+            "WatchCaptureActionTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "ci_authority": "current PR checks",
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+        },
+        "ci_validation": {
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+          "unique_tests": 1606,
+          "successful_unique_tests": 1605,
+          "skipped_unique_tests": 1,
+          "simulator_models": 4,
+          "total_executions": 6424,
+          "successful_executions": 6420,
+          "failed": 0,
+          "skipped": 4,
+          "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+          "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+          "runtime": "iOS 27.0 Simulator",
+          "cloud_build": 1738,
+          "result_pages": 9,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         }
       }
     },
@@ -218,28 +270,31 @@
       },
       "integration": {
         "state": "draft",
-        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
+        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 135,
+          "native_tests": 93,
+          "native_passed": 92,
           "native_failures": 0,
-          "native_skipped": 0,
+          "native_skipped": 1,
+          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
           "suites": 4,
           "suite_names": [
+            "RoutingChoiceTransferTests",
             "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "PendingVerifySendQueueTests",
-            "WatchCaptureActionTests"
+            "RoutingDeliveryJournalTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
           "ci_authority": "current PR checks",
-          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
           "source_hashes_unchanged": true,
-          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+          "source_files_verified": 30,
+          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -270,19 +325,19 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
-          "unique_tests": 1587,
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "unique_tests": 1592,
           "simulator_models": 4,
-          "successful_executions": 6348,
+          "successful_executions": 6368,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1735,
+          "cloud_build": 1736,
           "result_pages": 8,
           "cloud_build_and_test": "succeeded",
           "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks",
+        "current_head_ci": "succeeded; physical file protection test skipped on each Simulator, not accepted",
         "prior_admission_validation": {
           "native_tests": 431,
           "native_failures": 0,
@@ -307,6 +362,19 @@
           "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
         },
         "historical_ci_validation": [
+          {
+            "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+            "unique_tests": 1587,
+            "simulator_models": 4,
+            "successful_executions": 6348,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1735,
+            "result_pages": 8,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
           {
             "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
             "checks_succeeded": 5,
@@ -362,6 +430,42 @@
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
           "physical_validation": "pending"
+        },
+        "prior_origin_validation": {
+          "native_tests": 135,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 4,
+          "suite_names": [
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "PendingVerifySendQueueTests",
+            "WatchCaptureActionTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "ci_authority": "current PR checks",
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+        },
+        "ci_validation": {
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+          "unique_tests": 1606,
+          "successful_unique_tests": 1605,
+          "skipped_unique_tests": 1,
+          "simulator_models": 4,
+          "total_executions": 6424,
+          "successful_executions": 6420,
+          "failed": 0,
+          "skipped": 4,
+          "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+          "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+          "runtime": "iOS 27.0 Simulator",
+          "cloud_build": 1738,
+          "result_pages": 9,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         }
       }
     },
@@ -376,7 +480,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で明示操作後のEventKit追加、暗号化journalとCapture別Obsidian注記を実装。鍵付き入力のCorrection保存・移行API・有効候補の補正を追加し、消去前callbackの再流入を拒否。3フラグ既定OFF。実端末情報、移行UI/鍵受渡し、実保存/権限/モデル精度/同一版QAは未完了。",
+      "note": "PR594（Draft）で明示操作後のEventKit追加、暗号化journalとCapture別Obsidian注記を実装。選択履歴の明示移行UIは暗号化ファイルと元端末QRを分離し、取消・期限・消去・遅延callbackを検査。3フラグ既定OFF。音声機器の観測、実機移行と保存保護、実保存/権限/モデル精度/同一版QAは未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -385,28 +489,31 @@
       },
       "integration": {
         "state": "draft",
-        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
+        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 135,
+          "native_tests": 93,
+          "native_passed": 92,
           "native_failures": 0,
-          "native_skipped": 0,
+          "native_skipped": 1,
+          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
           "suites": 4,
           "suite_names": [
+            "RoutingChoiceTransferTests",
             "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "PendingVerifySendQueueTests",
-            "WatchCaptureActionTests"
+            "RoutingDeliveryJournalTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
           "ci_authority": "current PR checks",
-          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
           "source_hashes_unchanged": true,
-          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+          "source_files_verified": 30,
+          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -437,19 +544,19 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
-          "unique_tests": 1587,
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "unique_tests": 1592,
           "simulator_models": 4,
-          "successful_executions": 6348,
+          "successful_executions": 6368,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1735,
+          "cloud_build": 1736,
           "result_pages": 8,
           "cloud_build_and_test": "succeeded",
           "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks",
+        "current_head_ci": "succeeded; physical file protection test skipped on each Simulator, not accepted",
         "prior_admission_validation": {
           "native_tests": 431,
           "native_failures": 0,
@@ -474,6 +581,19 @@
           "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
         },
         "historical_ci_validation": [
+          {
+            "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+            "unique_tests": 1587,
+            "simulator_models": 4,
+            "successful_executions": 6348,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1735,
+            "result_pages": 8,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
           {
             "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
             "checks_succeeded": 5,
@@ -529,6 +649,55 @@
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
           "physical_validation": "pending"
+        },
+        "prior_origin_validation": {
+          "native_tests": 135,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 4,
+          "suite_names": [
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "PendingVerifySendQueueTests",
+            "WatchCaptureActionTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
+          "ci_authority": "current PR checks",
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
+        },
+        "choice_transfer": {
+          "state": "implemented_default_off",
+          "request_lifetime_seconds": 600,
+          "key_bits": 256,
+          "key_handoff": "source-device QR scanned in person; never in share sheet or file",
+          "archive": "AES-GCM and exact-file SHA-256 binding",
+          "retention_days": 30,
+          "choice_limit": 200,
+          "localized_languages": 10,
+          "physical_migration_verified": false,
+          "physical_file_protection_verified": false,
+          "camera_share_sheet_provider_accessibility_verified": false
+        },
+        "ci_validation": {
+          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+          "unique_tests": 1606,
+          "successful_unique_tests": 1605,
+          "skipped_unique_tests": 1,
+          "simulator_models": 4,
+          "total_executions": 6424,
+          "successful_executions": 6420,
+          "failed": 0,
+          "skipped": 4,
+          "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+          "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+          "runtime": "iOS 27.0 Simulator",
+          "cloud_build": 1738,
+          "result_pages": 9,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         }
       },
       "local_choice_storage": {
@@ -537,7 +706,7 @@
         "fingerprint": "HMAC-SHA256 with encrypted random key",
         "device_provenance": "unknown unless independently observed",
         "candidate_adjustment": "valid candidate only; explicit rules first; at least 3 choices and 0.7 share; affirmative write required",
-        "transfer": "authenticated internal API with recipient generation; UI and key exchange incomplete"
+        "transfer": "implemented default-off UI: encrypted request-bound archive and separate in-person random-key QR; native tested, physical acceptance pending"
       }
     },
     {
@@ -567,7 +736,7 @@
         "built_app_actions": 5,
         "built_widget_actions": 1,
         "built_app_unshipped_schemas_registered": false,
-        "product_metadata_tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b"
+        "product_metadata_tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533"
       },
       "contract_prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"

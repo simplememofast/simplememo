@@ -19,6 +19,8 @@ iOS main `17dcad9` の `SimpleMemo/NotionManager.swift` にMemoCaptureとCapture
 ローカルRouting試作 `6ddc66a` の `Capture.swift` は判定入出力用で、既存配送の載せ替えは未完了と明記されている。
 共通処理の不在を前提に作り直さず、既存実装と差分を統合する。
 
+最新の統合先は[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）、head `33e78f257db3cd5e803666e5588e553b36f4f533`。既定OFFを維持し、今回の選択履歴移行のnative検証（92成功/0失敗/実機専用1skip）、同headのCloud検証（6,420成功/0失敗/実機専用4skip）、旧headの証拠を台帳で分けている。今回の試験だけで全入口・音声・保存先の同一配布版QAを完了扱いにしない。
+
 ## 2. VISION §13 のチェック
 
 1. **Capture Coverage / Zero-decision 率を上げるか**: 入口追加と保存先一致を支える基盤。実測の改善は未確認。
