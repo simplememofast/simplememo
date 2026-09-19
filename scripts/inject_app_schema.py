@@ -48,10 +48,17 @@ TARGETS = [
     ("hands-free/index.html", "ja"),
     ("en/obsidian/index.html", "en"),
     ("en/siri/index.html", "en"),
+    ("en/voice-input/index.html", "en"),
+    ("en/fastest-voice-memo/index.html", "en"),
+    ("en/note-to-email/index.html", "en"),
+    ("en/hands-free/index.html", "en"),
 ]
 
 
 def build_node(lang: str) -> str:
+    currency = "JPY" if lang == "ja" else "USD"
+    monthly = C["priceMonthlyJpy"] if lang == "ja" else C["priceMonthlyUsd"]
+    yearly = C["priceYearlyJpy"] if lang == "ja" else C["priceYearlyUsd"]
     payload = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
@@ -68,13 +75,13 @@ def build_node(lang: str) -> str:
         "softwareVersion": C["appVersion"],
         "isAccessibleForFree": True,
         "inLanguage": lang,
-        "downloadUrl": f"https://apps.apple.com/jp/app/id{C['appStoreId']}",
+        "downloadUrl": f"https://apps.apple.com/{'jp' if lang == 'ja' else 'us'}/app/id{C['appStoreId']}",
         "offers": [
             {
                 "@type": "Offer",
                 "name": "Free",
                 "price": "0",
-                "priceCurrency": "JPY",
+                "priceCurrency": currency,
                 "description": (f"1日{C['freeSendsPerDay']}通まで（ずっと無料）" if lang == "ja"
                                 else f"Up to {C['freeSendsPerDay']} sends a day, free forever"),
                 "availability": "https://schema.org/InStock",
@@ -82,26 +89,26 @@ def build_node(lang: str) -> str:
             {
                 "@type": "Offer",
                 "name": "Premium Monthly",
-                "price": C["priceMonthlyJpy"],
-                "priceCurrency": "JPY",
+                "price": monthly,
+                "priceCurrency": currency,
                 "description": (f"月額{C['priceMonthlyJpy']}円・送信無制限" if lang == "ja"
-                                else f"{C['priceMonthlyJpy']} JPY a month, unlimited sends"),
+                                else f"${monthly} a month, unlimited sends"),
                 "availability": "https://schema.org/InStock",
             },
             {
                 "@type": "Offer",
                 "name": "Premium Yearly",
-                "price": C["priceYearlyJpy"].replace(",", ""),
-                "priceCurrency": "JPY",
+                "price": yearly.replace(",", ""),
+                "priceCurrency": currency,
                 "description": (f"年額{C['priceYearlyJpy']}円・送信無制限" if lang == "ja"
-                                else f"{C['priceYearlyJpy']} JPY a year, unlimited sends"),
+                                else f"${yearly} a year, unlimited sends"),
                 "availability": "https://schema.org/InStock",
             },
         ],
         "author": {
             "@type": "Person",
             "@id": f"{SITE_URL}/about/#person",
-            "name": "AI Ataka",
+            "name": "AI ATAKA",
             "url": f"{SITE_URL}/about/",
         },
         "aggregateRating": {
@@ -122,11 +129,15 @@ def replace_or_insert(html_text: str, block: str) -> str:
         + r"\s*<script\s+type=\"application/ld\+json\">.*?</script>[ \t]*\n?",
         re.DOTALL,
     )
-    html_text = pat.sub("", html_text)
-    head_close = re.search(r"</head>", html_text)
-    if not head_close:
+    current = pat.search(html_text)
+    if current:
+        # Keep its position when other generators also own head blocks.
+        return html_text[:current.start()] + block + html_text[current.end():]
+    from normalize_i18n_head import HeadInventory
+    head_close = HeadInventory(html_text).head_end
+    if head_close is None:
         return html_text
-    return html_text[: head_close.start()] + block + html_text[head_close.start():]
+    return html_text[:head_close] + block + html_text[head_close:]
 
 
 def main() -> int:
