@@ -15,8 +15,9 @@
 `docs/VISION.md` §4.2、§5.1、§6と `docs/adr/ADR-001-text-inference-placement.md` に対応する。
 ローカルRoutingブランチ `6ddc66a` にDestinationRouter / EventKitWriter / RoutingCoordinator / Correction記録の試作がある。
 元の試作ブランチは保全し、[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存Captureへ統合中。
-最新照合headは `b4afd1e65451a1bc91a4f957ab40beeeb95eab76`。機能フラグは既定OFF、mainへの統合と出荷は未完了。
+最新照合headは `44f2d783a6063c1cce43ca43b6a6854a974dca9b`。機能フラグは既定OFF、mainへの統合と出荷は未完了。
 既存MemoCapture・CaptureInstructionを置き換えて計測を失う統合はしない。
+期限付きReminderの必須開始日とGregorian暦、元の絶対通知時刻を保持する修正も含む。新しい未登録primary-reminders adapterは補助配送journalと別管理で、そのreceiptをNSM到達へ加算しない。
 
 ## 2. VISION §13 のチェック
 

@@ -44,6 +44,16 @@ Query識別子の一意性と文字列解決もメタデータ検査で確認し
 
 再利用するSDK契約検査と、JSON構造・破損・未対応形式・拡張内の登録漏れを検出する6回帰をPR594へ追加した。実際にビルドしたappの5 actionsとwidgetの1 actionを読み取り、未出荷のNotes/Remindersスキーマが登録されていないことを確認した。これは現在の登録内容の検査であり、将来の登録を自動制御する機能ではない。
 
+### 未登録primary-reminders adapterの実装
+
+PR594 head `44f2d783a6063c1cce43ca43b6a6854a974dca9b` で、明示Reminders宛てのMemoCaptureを実EventKit writerへ渡す接続処理を追加した。通常メールを先に送らず、未対応のリスト/セクション、画像、フラグ、タグ、URL、繰り返し、場所指定は副作用の前に拒否する。
+
+受付・試行・確認receiptを端末鍵で暗号化し、再試行は同じ受付と保存先を維持する。保存後の読戻しが不確かな場合は成功や再作成へ進まない。ID解決は確認済みの実項目だけを対象とし、返却データに本文を含めない。取消・消去中のcallbackを拒否し、消去は外部Remindersの項目を削除しない。
+
+関連10 suite・494 native testsが成功（失敗/skip0）。このうちadapterは22件で、実EKReminderオブジェクトの必須開始日/Gregorian/TZ/通知設定と、模擬保存先による保存失敗・二重作成防止・消去・再起動を確認した。実機での権限、EventKit保存/同期、Siriの成功ではない。ビルド済みapp5 actionsとwidget1 actionにNotes/Remindersスキーマが未登録であることも読戻した。
+
+このadapterに製品callerはなく、AppIntentのperform/schema宣言・EntityQuery・索引設定/寄贈/消去は未接続。primary-remindersの計測契約も未接続で、補助Routing journalからNSMを作らない。Notesは別の残件で、廃止済みのObsidian「1メモ=1ファイル」を日次/Inbox追記の代わりに無断で復活させない。
+
 ## 2. VISION §13 のチェック
 
 1. **Capture Coverage / Zero-decision 率を上げるか**: 既存の標準入口から保存への到達を支える。効果は未検証。
@@ -80,6 +90,7 @@ Query識別子の一意性と文字列解決もメタデータ検査で確認し
 
 ## 6. 決めていないこと
 
+createNoteの実保存先・新規Entityの意味は未決定。既存日次/Inbox追記を新規Noteと同一視せず、初期対応範囲を確認中。
 updateNoteは採用未決定。決めるのは: 既存の送信後の編集契約とVISIONを確認した担当。
 Siriの将来対応を前提とした告知・公開日は確定していない。
 
