@@ -15,7 +15,7 @@
 `docs/VISION.md` §4.2、§5.1、§6と `docs/adr/ADR-001-text-inference-placement.md` に対応する。
 ローカルRoutingブランチ `6ddc66a` にDestinationRouter / EventKitWriter / RoutingCoordinator / Correction記録の試作がある。
 元の試作ブランチは保全し、[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存Captureへ統合中。
-最新照合headは `44f2d783a6063c1cce43ca43b6a6854a974dca9b`。機能フラグは既定OFF、mainへの統合と出荷は未完了。
+最新照合headは `013858dedabeef2ff85d73201148fd617055a9cf`。機能フラグは既定OFF、mainへの統合と出荷は未完了。
 既存MemoCapture・CaptureInstructionを置き換えて計測を失う統合はしない。
 期限付きReminderの必須開始日とGregorian暦、元の絶対通知時刻を保持する修正も含む。新しい未登録primary-reminders adapterは補助配送journalと別管理で、そのreceiptをNSM到達へ加算しない。
 
@@ -38,7 +38,7 @@
 - [ ] RemindersとCalendarを同じ版に含め、作成・権限拒否・重複・取消・オフラインを検証する。
 - [ ] 保存先への書込が確認できた場合だけ成功を表示し、失敗時に本文と元宛先を保全する。
 - [x] Correction保存と移行APIを定めて実装する。鍵付き入力ハッシュ、予測先・選択先・確信度・既知source・観測済みdevice・時刻を端末内で保護し、本文・タイトル・Contextは選択記録や移行データへ含めない。未知deviceはunknownとして保持する。
-- [ ] 実入力端末の観測、承認された移行UI・鍵の受渡しと同一配布版の実機移行を確認する。内部APIの成功だけで完了にしない。
+- [ ] 音声機器の観測、各入口の実機確認、承認された移行UI・鍵の受渡しと同一配布版の実機移行を確認する。本体文字入力とWatch受付はsource/deviceを元ticketへ固定済みで、再送時に上書きしない。内部APIの成功だけで完了にしない。
 - [x] 日本語・英語の日時解釈を各50文以上で検証し、誤りも保持する。旧head `bb527d5` のDestinationRouterTests 29件がiOS 26.5 Simulatorで成功。専用corpusは各50入力（49例文と空入力1件）。既存・追加回帰を含む同suite全体では空入力を除く日本語66・英語81の異なる例文を検証した。修正前の100入力では6文の不一致を再現し、失敗結果を非公開で保全した。夜中をまたぐ時刻、開始・終了時刻の順序、不正入力の追加回帰も成功。端末内モデルの精度や実配送の合格ではない。
 - [ ] 同じ配布版でWatchを含む現行入口を確認する。片方未完了なら同梱版を出さない。
 
@@ -57,12 +57,12 @@
 
 ## 6. 決めていないこと
 
-実端末情報の取得方法と移行UI・鍵受渡しは未決定。決めるのは: 実装担当が現行の同意・消去契約と承認範囲を照合して具体化し、必要な本人操作を分けて提示する。
+音声機器の観測方法と移行UI・鍵受渡しは未決定。決めるのは: 実装担当が現行の同意・消去契約と承認範囲を照合して具体化し、必要な本人操作を分けて提示する。
 
 端末内CorrectionはAES-GCMで保護し、入力の照合には独立した秘密鍵によるHMACを使う。候補7日/32件、明示選択30日/200件、重複防止30日/2,000件を適用する。古い選択へ本文ハッシュや端末情報を推測補完しない。
 同じ入力・source・deviceの明示選択が3件以上、選択割合0.7以上ある場合だけ、既存の有効候補へ反映する。明示ルールを優先し、日付や確信度を履歴から作らず、追加保存には利用者の操作が必要。
 消去は永続世代を更新し、配送・モデル・権限確認中の古いcallbackを拒否する。受付時の世代をHistory/Outbox/認証待ち予約/取消後の下書きへ保持し、再送で再発行しない。時計が戻っても消去済み記録が復活しないようにする。
-移行APIは受信先世代を含む認証暗号データを使い、期限・改ざん・別鍵・消去を検査する。実端末情報の取得、共有UI、鍵の受渡しは未実装。端末内保存と内部APIの検証を、移行体験や精度改善の実績へ置き換えない。
+移行APIは受信先世代を含む認証暗号データを使い、期限・改ざん・別鍵・消去を検査する。本体文字入力はUI idiom、WatchConnectivityの2受付はApple Watchを元ticketへ固定する。Siri・voice・side_buttonはunknownを保ち、旧ticketはsourceもunknownとして学習照合から除外する。関連4 suite・135 native testsが成功、失敗/skip0。音声機器の観測、共有UI、鍵の受渡しと実機での確認は未完了。端末内保存と内部APIの検証を、移行体験や精度改善の実績へ置き換えない。
 実装方針はiOSの `docs/adr/ADR-004-routing-correction-storage.md` と `docs/implementation/routing-personalization.md` を正本とする。
 当面無料という9/5の案は料金変更の実行指示ではない。課金の変更は既存の判断・公開手順で別途扱う。
 
