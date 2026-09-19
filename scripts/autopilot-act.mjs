@@ -173,26 +173,46 @@ export const CLOSE_CHECKS = {
       : { closed: true, evidence: `${run_id} は selfheal の未修理リストから消えた` };
   },
 
-  /** 指定経路が、指定日以降に同じ failure_class で落ちていなければ閉じる。 */
-  no_failure_since({ route, failure_class, since }, ctx) {
-    // `since` は起票の根拠になった最後の失敗日。**その日自身は含めない** —
-    // 含めると起票の原因が毎回ヒットして、この条件は永久に閉じない。
-    const runs = (ctx.runsDoc?.runs ?? []).filter((r) =>
-      r.route === route && r.date_jst > since && FAILED_OUTCOMES.has(r.outcome));
-    const same = runs.filter((r) => (r.failure_class ?? 'unknown') === failure_class);
+  /** 指定経路が、最後の同種失敗より後に実着手し、同じ failure_class が再発していなければ閉じる。 */
+  no_failure_since({ route, failure_class, since, after_run_id }, ctx) {
+    const rows = ctx.runsDoc?.runs;
+    if (!Array.isArray(rows)) {
+      return { closed: false, evidence: '運転台帳を読めず判定不能（回復したという意味ではない）' };
+    }
+
+    // 日付だけでは同日中の回復を表現できない。2026-09-19 は 06:01 の usage_limit 後、
+    // 同じ actions 経路が11時台に出荷まで完走したが、date_jst > since では後者を見られず
+    // 「一度も着手していない」と誤報した。run_id を台帳上の順序マーカーにし、同日でも
+    // **原因runそのものより後**を回復窓として扱う。古い行は since へフォールバックする。
+    let later;
+    let label;
+    if (after_run_id) {
+      const marker = rows.findIndex((r) => r.run_id === after_run_id);
+      if (marker < 0) {
+        return { closed: false, evidence: `回復判定の起点 ${after_run_id} が運転台帳に無く判定不能` };
+      }
+      later = rows.slice(marker + 1).filter((r) => r.route === route);
+      label = `${after_run_id} より後`;
+    } else {
+      later = rows.filter((r) => r.route === route && r.date_jst > since);
+      label = `${since} 以降`;
+    }
+
+    const same = later.filter((r) => FAILED_OUTCOMES.has(r.outcome)
+      && (r.failure_class ?? 'unknown') === failure_class);
     if (same.length > 0) {
       const last = same[same.length - 1];
-      return { closed: false, evidence: `${since} 以降も ${failure_class} で失敗（最新 ${last.run_id}）` };
+      return { closed: false, evidence: `${label}も ${failure_class} で失敗（最新 ${last.run_id}）` };
     }
+
     // 落ちていないだけでは足りない。**走ってすらいない可能性を潰す。**
     // 「失敗が無い」は「動いた」ではない——秘密鍵未設定で毎日 success を
     // 返していた前例（Runbook §0-2）がここに効く。
-    const attempted = (ctx.runsDoc?.runs ?? []).filter((r) =>
-      r.route === route && r.date_jst > since && r.attempted);
+    const attempted = later.filter((r) => r.attempted);
     if (attempted.length === 0) {
-      return { closed: false, evidence: `${since} 以降 ${route} は一度も着手していない（失敗が無いことは回復の証拠にならない）` };
+      return { closed: false, evidence: `${label}に ${route} は一度も着手していない（失敗が無いことは回復の証拠にならない）` };
     }
-    return { closed: true, evidence: `${since} 以降 ${route} は ${attempted.length}回着手し ${failure_class} の再発なし` };
+    return { closed: true, evidence: `${label}に ${route} は ${attempted.length}回着手し ${failure_class} の再発なし` };
   },
 
   /**
@@ -593,14 +613,17 @@ export function derive(ctx) {
       // つまり **規則が満たすことを禁じている閉じ条件**で、構造的に永久に開く。
       //
       // 代わりに「その経路で、その種別が再発しなくなったか」で見る（D5 と同じ形）。
-      // `since` は**同じ経路・同じ種別の最後の失敗日**にする。行は run 単位だが、
-      // 上限は経路単位で解けるので、同じ上限に当たった回は同時に閉じる。
+      // 閉じ条件は**同じ経路・同じ種別の最後の失敗 run**を起点にする。日付だけを
+      // 起点にすると、同日の朝に失敗し昼に回復した実績を翌日まで認識できない。
       // `no_failure_since` は「失敗が無い」だけでは閉じない（走ってすらいない
       // 可能性を潰す）ので、沈黙している経路の行は開いたまま残る。
       const sameClass = runs.filter((r) => r.route === t.route
         && (r.failure_class ?? 'unknown') === t.failure_class
         && FAILED_OUTCOMES.has(r.outcome));
-      const latest = sameClass.reduce((a, r) => (a && a > r.date_jst ? a : r.date_jst), t.date_jst);
+      // runs は追記順の運転台帳。日付だけでは同日内の「失敗→回復」を表せないので、
+      // 最後の同種失敗 run 自体を閉じ条件の起点にする。
+      const latestFailure = sameClass.at(-1) ?? t;
+      const latest = latestFailure.date_jst;
       const esc = t.escalation ?? {};
       out.push({
         id: `act-selfheal-${t.run_id}`,
@@ -610,9 +633,9 @@ export function derive(ctx) {
           + `レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、`
           + `3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n`
           + `渡し先 ${esc.channel ?? '不明'} / ${esc.within_hours ?? '?'}時間以内。\n\n`
-          + `**閉じ条件は経路と種別で見る** — ${latest} 以降に ${t.route} が実際に着手し、`
-          + `${t.failure_class} が再発しなければ閉じる。着手が1回も無い間は閉じない`
-          + `（失敗が無いことは回復の証拠にならない）。`,
+          + `**閉じ条件は経路と種別で見る** — ${latestFailure.run_id}（${latest}）より後に `
+          + `${t.route} が実際に着手し、${t.failure_class} が再発しなければ閉じる。`
+          + `着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。`,
         source: 'selfheal',
         domain: null,
         // **人の判断が要るのは「待つ」以外の2つ** —— 枠を上げる / 1回あたりの入力量を減らす。
@@ -624,7 +647,7 @@ export function derive(ctx) {
         auto: null,
         close_check: {
           kind: 'no_failure_since',
-          params: { route: t.route, failure_class: t.failure_class, since: latest },
+          params: { route: t.route, failure_class: t.failure_class, since: latest, after_run_id: latestFailure.run_id },
         },
       });
     } else {
@@ -3902,6 +3925,25 @@ async function selftest() {
       { route: 'actions', date_jst: '2026-08-26', attempted: true, outcome: 'shipped' }] } });
   t('起票日の失敗は再発に数えない', sameDay.closed === true);
 
+  // 同日中に失敗→回復した実形。日付だけの判定では翌日まで永久に「着手ゼロ」になる。
+  const sameDayRecovery = CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'usage_limit', since: '2026-09-19', after_run_id: 'fail-am' },
+    { runsDoc: { runs: [
+      { run_id: 'fail-am', route: 'actions', date_jst: '2026-09-19', attempted: true, outcome: 'failed', failure_class: 'usage_limit' },
+      { run_id: 'ship-noon', route: 'actions', date_jst: '2026-09-19', attempted: true, outcome: 'shipped' }] } });
+  t('**同日でも最後の失敗runより後に着手して再発が無ければ閉じる**', sameDayRecovery.closed === true);
+  const sameDayRelapse = CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'usage_limit', since: '2026-09-19', after_run_id: 'fail-am' },
+    { runsDoc: { runs: [
+      { run_id: 'fail-am', route: 'actions', date_jst: '2026-09-19', attempted: true, outcome: 'failed', failure_class: 'usage_limit' },
+      { run_id: 'ship-noon', route: 'actions', date_jst: '2026-09-19', attempted: true, outcome: 'shipped' },
+      { run_id: 'fail-pm', route: 'actions', date_jst: '2026-09-19', attempted: true, outcome: 'failed', failure_class: 'usage_limit' }] } });
+  t('同日回復後に同じ故障が再発したら閉じない', sameDayRelapse.closed === false
+    && sameDayRelapse.evidence.includes('fail-pm'));
+  t('回復起点runが台帳に無ければ閉じない', CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'usage_limit', since: '2026-09-19', after_run_id: 'missing' },
+    { runsDoc: { runs: [] } }).closed === false);
+
   // 閉じ条件: 実費は「上限内か」ではなく「載っているか」で判定する
   t('実費未記録なら閉じない', CLOSE_CHECKS.cost_covers_runs({}, {
     costDoc: { runs: [] },
@@ -4284,6 +4326,8 @@ async function selftest() {
     && ownerRow?.close_check?.params?.failure_class === 'usage_limit');
   t('**since は同じ経路・同じ種別の最後の失敗日**（古い回の行が先に閉じない）',
     ownerRow?.close_check?.params?.since === '2026-08-31');
+  t('**同日回復も見られるよう最後の失敗runを起点に持つ**',
+    ownerRow?.close_check?.params?.after_run_id === 'r-0831');
   t('自動実行は付けない（人の行に handler を付けない）', ownerRow?.auto == null);
   t('行IDは今までどおり run 単位（既存の行へ流れて増えない）',
     ownerRow?.id === 'act-selfheal-r-0830');
