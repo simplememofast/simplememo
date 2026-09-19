@@ -1,14 +1,14 @@
 {
   "as_of_jst": "2026-09-19",
-  "routine_snapshot_sha256": "8a201d8126e37b352932af517247ef7ae9a1561ae3397c91e2960fdaaf9deffd",
+  "routine_snapshot_sha256": "ca17d17c13b83d1a8933777b920185963838a836e2eb31bad31a1bdd52f22f5f",
   "viewport_measurement": {
-    "main_sha": "5b801a60dbbcc3d89528ae55f04d4d1aae1a1ac3",
-    "head_sha": "41a81b364af480cacdcbd0038dc8a46a064a4aa1",
-    "run_id": 35419451548,
+    "main_sha": "42a489948554f1f90de8caa291fe6fab5bc30bbd",
+    "head_sha": "937b06b8e6836909cf48196b4c95aa1b3649311a",
+    "run_id": 35423446106,
     "attempt": 1,
-    "started_at": "2026-09-19T03:45:25Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/35419451548/attempts/1",
-    "job_id": 105834227887,
+    "started_at": "2026-09-19T05:15:02Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/35423446106/attempts/1",
+    "job_id": 105845178555,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -38,10 +38,10 @@
       }
     }
   },
-  "open_total": 1,
+  "open_total": 0,
   "deferred": [],
   "pending_pr": [],
-  "oldest_open_days": 2,
+  "oldest_open_days": 0,
   "acknowledged": 7,
   "closed_today": [
     {
@@ -63,6 +63,11 @@
       "id": "act-status-stale",
       "title": "data/autopilot-status.json が 2日前（2026-09-17）のまま",
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 0"
+    },
+    {
+      "id": "act-pr6-d14-evaluate",
+      "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
+      "evidence": "2026-09-19、既存の明示承認済み読み取り専用PR TIMES経路で release_id=9 / 2026-09-03〜2026-09-17 を照合。D+14実測: 1,574PV、転載23、スマートフォン25.33%、参照元は全2件 t.co/ 45・news.google.com/ 18、Google系比率18/63=28.57%。growth/experiments/experiments.json は boarded=false / decision=iterate / status=evaluated / evaluated_at=2026-09-19、growth/data/annotations.json は同D+14値へ更新。day1_senders_vs_prev3avg は取得不能のためnullを保持し、0扱いしていない。d_score_preは再採点していない。過去のD+1観測・旧owner_needed_reviewは履歴として保持し、今回の確定評価で現在のowner_neededのみfalseへ解消。"
     },
     {
       "id": "act-selfheal-ap-20260905-actions",
@@ -141,15 +146,6 @@
     }
   ],
   "human": [],
-  "ai": [
-    {
-      "id": "act-pr6-d14-evaluate",
-      "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
-      "detail": "2026-09-17（D+14）に、9/3配信のPR⑥を評価する。対象は growth/experiments/experiments.json の pr-2026-rsi-autopilot（status: running、evaluation_at: 2026-09-17）。\n\n2026-09-04、対象リリースの非公開分析を読み取り専用で開くことへのオーナーの明示承認「ok」を受け、Codexのアプリ内ブラウザーで取得経路を確認した。「分析データ」→「レポート」→対象行の「詳細」。公開URL・公開日時・期間指定を照合し、ページビュー、デバイス別アクセス、参照元サイト一覧、掲載メディア一覧を実際に読めた。閲覧承認待ちは解消済み。今回の非公開取得値は公開台帳へ転記していない。\n\n手順の正典は docs/prtimes-d14-capture.md。参照元は割合表示ではなく訪問者数の表なので、全ページの行を読み、Google系の合計を全参照元合計で割る。スマートフォン比率は対象リリースの期間合計の%を100で割る。送信者比率はPR TIMESにはなく、アプリ側の実測が別途必要。\n\n2026-09-07の所有者判断「2 任せる」により、停止した旧Cowork Routineの取得・取りこぼし監視はCodexの運用タスク simplememo-2（毎日10:30 JST）へ統合済み。docs/monitor-delegation-20260907.md に従い、既存の取得担当・実行中PRを照合し、不在なら取得から評価・PR反映まで引き受ける。停止済みCoworkの完走は現在の前提条件にしない。残る実測は、現行の担当による認可された取得・保存・PR反映と、9/17の評価値。予約保存や対話中の読み取り成功を無人完走とは扱わない。毎回最新の実験台帳で期限と未取得項目を確認する。\n\n期限後、対象と期間と公開範囲を確認した値だけを確定転記し、docs/prtimes-d14-capture.md に従って評価と3台帳の整合を検証する。この取得タスクでは d_score_pre を再採点せず、既存の点数と履歴を保持し「再採点は未実施」と報告する。annotations.jsonとbacktestは照合するが、既存D+1観測のあるPR⑥でbacktest件数の増加を合格条件にしない。読めた値が一部だけの場合は非公開の作業記録に保持し、最終転記先へ部分的に入れない（2026-09-07以降は部分転記も期限判定へ残る。既存値は証拠・期間・最新mainとの照合後、不足分だけを補う）。判定不能を完了とはせず、この対象実験の評価完了を確認して閉じる。\n\n2026-09-13更新: 旧simplememo-2はPAUSEDのまま、移管先ai-90の予約が現在存在しないことを確認した。所有者の残件完了委任に基づき、この会話に付くsimplememo-4（毎日07:45・19:45 JST）へ残件とD+14評価を引き継ぎ、保存後の予約を読み戻した。現在の実行担当はexecution_authorization.current_executionを正本とし、過去の移管記述を現在の稼働証拠にしない。",
-      "age_days": 2,
-      "auto": null,
-      "evidence": "2026-09-14 19:02:35 JST、simplememo-4のheartbeatが対象タスクへ自然起動し、その実行で検証済みiOS PR515を19:03:06にマージした。一時的な15分間隔での担当予約の起動証拠。通常の日次時刻での起動や9/17のPR⑥実測取得・確定評価は未確認。対象実験はrunning・5項目未取得を維持。（リポジトリからは検査できない。証跡の照合後、AI担当が閉じる）"
-    }
-  ],
+  "ai": [],
   "executed": []
 }
