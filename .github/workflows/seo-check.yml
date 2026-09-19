@@ -57,6 +57,11 @@ jobs:
       - name: Language switcher insertion and regeneration regressions
         run: python3 scripts/inject_lang_switcher_test.py
 
+      - name: Split pages preserve visible content and English navigation
+        run: |
+          python3 scripts/finalize_split_pages_test.py
+          python3 scripts/finalize_split_pages.py --check
+
       - name: Every public page declares the correct Smart App Banner
         run: |
           python3 scripts/smart-app-banner.py --selftest

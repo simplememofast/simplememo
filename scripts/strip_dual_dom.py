@@ -127,6 +127,9 @@ def process(path, ja_url, en_url):
 
     # 3. drop data-lang="ja" attributes
     src, n_ja = re.subn(r'\s+data-lang="ja"', "", src)
+    from pathlib import Path
+    from finalize_split_pages import finish_markup
+    src = finish_markup(src, Path(__file__).resolve().parent.parent, english=False)
 
     # 4. switcher buttons -> links
     btn_pat = re.compile(

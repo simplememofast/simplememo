@@ -100,6 +100,9 @@ def main() -> int:
         strip_ja(rel, ja_url, en_url)
         pairs.append((ja_url, en_url))
     register_pairs(pairs)
+    # Resolve links only after all targets have been created, regardless of order.
+    from finalize_split_pages import finalize
+    finalize(ROOT, apply=True)
     print(f"created_en={created} reused_en={reused} stripped_ja={len(rows)} registered_pairs={len(pairs)}")
     return 0
 

@@ -132,7 +132,7 @@ function testPendingBranch(act) {
   const shell = block.split('        run: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'act-branch-'));
   const cwd = path.join(root, 'work');
-  const env = { ...process.env, RUNNER_TEMP: root, PATH: `${root}:${process.env.PATH}`,
+  const env = { ...process.env, RUNNER_TEMP: root, GITHUB_OUTPUT: path.join(root, 'step-output'), PATH: `${root}:${process.env.PATH}`,
     GIT_AUTHOR_NAME: 'test', GIT_COMMITTER_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.test', GIT_COMMITTER_EMAIL: 'test@example.test' };
   const git = (...args) => execFileSync('git', args, { cwd, env, stdio: 'pipe' });
   try {

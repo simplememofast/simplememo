@@ -211,7 +211,9 @@ def main(ja_rel: str, en_rel: str) -> None:
                         obj[k] = EN_BRAND
                     elif v in SHARED_JA_EN:
                         obj[k] = SHARED_JA_EN[v]
-                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting", "ListItem") and JA_TITLE_RE.search(v):
+                    elif obj.get("@type") in ("WebPage", "WebSite", "Article", "BlogPosting") and JA_TITLE_RE.search(v):
+                        obj[k] = en_title
+                    elif obj.get("@type") == "ListItem" and str(obj.get("item", "")).rstrip("/") == ja_abs.rstrip("/"):
                         obj[k] = en_title
                 elif isinstance(v, str) and ja_abs in v:
                     # Replace the slash-terminated source first. Otherwise an
@@ -269,6 +271,11 @@ def main(ja_rel: str, en_rel: str) -> None:
     # --- residual JA-only shared strings (bio, headings, aria-labels) ---
     for ja, en in SHARED_JA_EN.items():
         html_out = html_out.replace(ja, en)
+
+    from finalize_split_pages import finish_markup, finish_faq, finish_breadcrumbs
+    html_out = finish_markup(html_out, REPO, english=True)
+    html_out = finish_faq(html_out, abs_en)
+    html_out = finish_breadcrumbs(html_out, REPO).replace("AI Ataka", "AI ATAKA")
 
     en_path.parent.mkdir(parents=True, exist_ok=True)
     en_path.write_text(html_out, encoding="utf-8")
