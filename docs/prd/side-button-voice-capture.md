@@ -17,7 +17,7 @@
 `claude/prd-routing-level1-2`（`6ddc66a`）に試作がある。同名ブランチのGitHub PRは9/19照合時0件。
 iOS main `17dcad9` には通常のStartVoiceMemoIntentがあり、提案のside-button機能は未統合。
 
-最新の統合先は[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）、head `33e78f257db3cd5e803666e5588e553b36f4f533`。既定OFFを維持し、今回の選択履歴移行のnative検証（92成功/0失敗/実機専用1skip）、同headのCloud検証（6,420成功/0失敗/実機専用4skip）、旧headの証拠を台帳で分けている。今回の試験だけで全入口・音声・保存先の同一配布版QAを完了扱いにしない。
+最新の統合先は[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）、head `c52db6925a8c2b2081c1c638b0209d7b65d8bcd4`。main #604を統合し、通常音声の入力元観測と最終文字起こしの引継ぎを追加した。関連12 suite・292 native testsが成功（失敗/skip0）、277ソースの実行前後・コミット一致を確認。同headの必須CI5項目が成功。Cloud1740の全9ページで1,624試験×4モデル＝6,496実行を確認し、6,492成功・失敗0・実機専用の保護属性試験4skipである。skipは実機保護の合格に含めない。旧head `33e78f2` の移行検証はnative92成功/実機専用1skip、Cloud6,420成功/実機専用4skipとして分離する。既定OFF、追加配布なしを維持し、全入口・音声・保存先の同一配布版QAは未完了。
 
 ## 2. VISION §13 のチェック
 
