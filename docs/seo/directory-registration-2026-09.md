@@ -40,7 +40,13 @@
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | BLOCKED | — | — | — | https://www.indiehackers.com/products/new | アカウント `memolife23` が **"Your account cannot create or edit products"** | IH サポートに制限解除を問い合わせる（人の操作1回） |
 | 追加 | Launching Next | SELF_REGISTER | BLOCKED | — | — | — | https://www.launchingnext.com/submit/ | ボット確認「What is 2+3?」 | **開いたタブでクイズに `5` と入力して Submit を押すだけ**（他項目は入力済み） |
-| 追加 | tehtbl/awesome-note-taking | SUBMISSION | BLOCKED | — | — | — | https://github.com/tehtbl/awesome-note-taking | 当セッションは公開PRを作成できない | フォーク済（`simplememofast/awesome-note-taking`）。下の§6の1行を `README.md` の Proprietary 節（Save と Simplenote の間）に入れてPRを出す |
+| 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
+| 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
+| 追加 | kmaasrud/awesome-obsidian | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/en/obsidian/`） | https://github.com/kmaasrud/awesome-obsidian/pull/135 | 未処理PRが46件あり滞留気味 | 反応がなければ Memo Inbox（MIT）への差し替えを提案済み |
+| 追加 | pjpoulose/awesome-second-brain | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/pjpoulose/awesome-second-brain/pull/1 | レビュー待ち | 同リポジトリで最初のPR。CONTRIBUTING準拠で提出 |
+| 追加 | jyguyomarch/awesome-productivity | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/jyguyomarch/awesome-productivity/pull/386 | レビュー待ち | Note Management 節の末尾に追加 |
+| 追加 | doanhthong/awesome-pkm | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/doanhthong/awesome-pkm/pull/23 | 未処理PRが9件あり滞留気味 | — |
+| 追加 | Obsidian公式フォーラム | SUBMISSION | BLOCKED | — | — | — | https://forum.obsidian.md/c/share-showcase/9 | アカウント `SimpleMemoFast` でトピックを作成できない（`/new-topic` が `/categories` へ転送される）。投稿0件のため信頼レベル不足と見られる | 既存スレッドへ返信して信頼レベルを上げるか、モデレーターに相談。なお同フォーラムの外部リンクは `rel="noopener nofollow ugc"` |
 | 追加 | Softpedia | — | NOT_ELIGIBLE | — | — | — | https://www.softpedia.com/user/submit.shtml | Windows / Mac / Linux のダウンロード配布ソフトのみ | 対象外 |
 | 追加 | Uneed | SELF_REGISTER | BLOCKED | — | — | — | https://www.uneed.best/submit-a-tool | 最終保存にアカウント作成が必要 | 人がアカウントを作れば数分で完了 |
 | 追加 | Slant | SELF_REGISTER | BLOCKED | — | — | — | https://www.slant.co/ | サイトが HTTP 526 を返し到達不能 | 復旧後に再訪 |
@@ -63,11 +69,17 @@
 
 - 新規公開：**0 件**（今回の送信分から公開確認できたものはまだ無い）
 - 既に公開されていた新規参照ドメインの発見：**1 件**（github.com / awesome-obsidian、2026-09-08 マージ）
-- 申請完了：**3 件**（フリーソフト100 / SaaSHub「Memo Inbox」新規 / NoteApps.info 情報更新）
+- 申請完了：**9 件**（フリーソフト100 / SaaSHub「Memo Inbox」新規 / NoteApps.info 情報更新 / awesome系6リストへのPR）
 - 既存掲載の改善申請：**1 件**（SaaSHub「Simple Memo」の全項目訂正）
 - 既存掲載の点検のみ：**2 件**（AlternativeTo / Product Hunt）
 - BLOCKED：**7 件**
 - 対象外：**3 件**
+
+うち awesome系6件は 2026-09-19 に `simplememofast` アカウントでPRを出した。
+すべて1行追加のみ、各リストの CONTRIBUTING に沿った書式で、**本文に「開発者本人である」と明記**している。
+いずれも GitHub の README リンクなので `rel="nofollow"` が付く。**期待しているのは
+リンク評価ではなく、awesome系リストが多数のミラー（awesome.ecosyste.ms、LibHunt 等）へ
+転載されることによる参照ドメインの広がりと、実ユーザーの流入である。**
 
 ## 2. 既存掲載の点検結果
 
@@ -174,13 +186,10 @@
 2. **Indie Hackers Products DB** — アカウント制限の解除だけ。既にログイン済み。
 3. **Launching Next** — 入力済みのタブでボット確認に答えるだけ。
 4. **Uneed / MicroLaunch / Fazier / Peerlist / DevHunt / BetaList** — 無料枠あり。各アカウント作成が必要。
-5. **tehtbl/awesome-note-taking** — フォーク済（`simplememofast/awesome-note-taking`）。
-   `README.md` の `## Proprietary` 節、`Save` と `Simplenote` の**間**に次の1行を入れてPRを出すだけ
-   （アイコンは 📖=プレーンテキスト保存、🍎=iOSアプリ。同リストの contributing.md の書式に合わせてある）。
-
-   ```markdown
-   - 📖🍎 [Simple Memo](https://simplememofast.com/) - iPhone quick-capture app that emails a short note to your own inbox and appends it to an Obsidian vault as Markdown, with Apple Watch, Siri and on-device voice capture. Works offline through an encrypted on-device outbox.
-   ```
+5. ~~tehtbl/awesome-note-taking~~ — **2026-09-19 にPR提出済**（#144）。以下も同日提出：
+   awesome-knowledge-management #83 / awesome-obsidian(kmaasrud) #135 /
+   awesome-second-brain #1 / awesome-productivity #386 / awesome-pkm #23。
+   次にやることは**レビュー対応だけ**で、こちらから追加で送るものは無い。
 
 6. **kmaasrud/awesome-obsidian**（External Tools › Other）— GitHubリポジトリ形式の表なので、
    iOSアプリ本体ではなく MIT ライセンスの `simplememofast/memo-inbox` を出す方が体裁に合う。
@@ -192,6 +201,32 @@
 **除外した候補と理由：** Tool Finder（$29の有料掲載のみ）／Capterra・GetApp・Software Advice
 （個人向け生産性アプリを掲載基準で除外）／Softpedia（Windows/Mac/Linux配布ソフトのみ）／
 StartupRanking（相互リンクのバッジ設置が実質必須）／PreApps（$3,000〜の有料）。
+
+## 6.5 awesome系リストへの提出（2026-09-19 追加分）
+
+GitHub の awesome 系リストは、登録フォームこそ無いが**PRという定型の掲載申請窓口**を持ち、
+自薦を明示的に受け付けている。今回はこれを「簡単な掲載申請」として処理した。
+
+| リスト | スター | 提出先の節 | PR | 備考 |
+| --- | ---: | --- | --- | --- |
+| tehtbl/awesome-note-taking | — | Proprietary | [#144](https://github.com/tehtbl/awesome-note-taking/pull/144) | 100+アプリの現行リスト。`Save` と `Simplenote` の間 |
+| brettkromkamp/awesome-knowledge-management | 845 | Platforms, Applications and Tools | [#83](https://github.com/brettkromkamp/awesome-knowledge-management/pull/83) | 追加頻度が高い。ガイドライン通り節の末尾へ |
+| kmaasrud/awesome-obsidian | 9.3k | External Tools › Other | [#135](https://github.com/kmaasrud/awesome-obsidian/pull/135) | 未処理PR46件。表の他行は全てGitHubリポジトリなので体裁が浮く旨をPRで自己申告 |
+| pjpoulose/awesome-second-brain | — | Note-Taking & PKM Apps | [#1](https://github.com/pjpoulose/awesome-second-brain/pull/1) | 同リポジトリ初のPR。1文・130字以内・タグ指定を遵守 |
+| jyguyomarch/awesome-productivity | — | Tools and Apps › Note Management | [#386](https://github.com/jyguyomarch/awesome-productivity/pull/386) | 節の末尾へ |
+| doanhthong/awesome-pkm | 108 | Note-taking Tools › SaaS with free plan | [#23](https://github.com/doanhthong/awesome-pkm/pull/23) | 未処理PR9件 |
+
+守ったこと：
+
+- **1リスト1行、1PR。**差分は必ず `1 file changed / 1 insertion` に収めた。
+- 各リストの CONTRIBUTING を読み、配置（末尾か辞書順か）・書式・タグ・アイコンを合わせた。
+- **本文で「開発者本人である」と明記**し、方針に合わなければ閉じてよいと書いた。
+- 誇張しない。kmaasrud では `rel` ではなくアイコンの話として、**E2EEではない**ことを理由に
+  🔒 を付けない判断を明示した。awesome-note-taking では同様に 🔁（同期）も付けていない。
+- awesome-privacy への提出は**見送った**。同リストは「プロジェクトのWebサイトにユーザー追跡が無いこと」を
+  条件にしており、`simplememofast.com` のトップページには Google Analytics（`G-EPZVZKCVQG`）が入っている。
+  `/memo-inbox/` 配下だけは第三者スクリプトが1本も無いことを確認したが、サイト全体としては条件を
+  満たさないため、条件を満たすふりをして出すことはしない。
 
 ## 7. 未解決の課題
 
