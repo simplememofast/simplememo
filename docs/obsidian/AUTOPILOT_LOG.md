@@ -4069,3 +4069,15 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 `check-viewport-overflow --check`（動的）は回していない。WebKitGTK でも測っていない。
 
 `ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`
+
+
+## 2026-09-20 - Native daily observations; complete measurement scope rejected
+
+- Engine Codex, automation obsidian, scheduled06:00JST verified from scheduler and saved RRULE; task01a0bb78-4965-7242-bedf-29a93d1b0bf9. Initial preflight admitted and rechecked before atomic daily claim.
+- Candidate1: align email-yourself-memo title with its existing Gmail/Outlook how-to body. Original GSC2026-08-20..09-16:9clicks/603impressions. HTML-only measurement preparation was incomplete and unused. Complete mandatory sitemap/distribution scope rejected by aio-2026-08-11-answer-blocks ownership. No declaration, bind, experiment registration or article implementation. Other content targets share the same required-generated-scope obstacle; changing candidate names cannot bypass it.
+- Candidate2: VFU diagnosis. Exact latest failed row retained:2invalid recipients,3hard suppressions,1unavailable token. Latest hourly result errors/eligible/sent each0 does not prove repair. No safe code cause demonstrated; no message replay, recipient edits or token replacement. Current reason is null, so the specialized cap-stop suppression gate remains unsatisfied.
+- GSC original encrypted handoff and AppsFlyer original reader verified; ASC outputs reused. GA4 request468e5600-69fa-4e32-ab55-598cdd9cf0b8 resumed under the same UUID, run35469267276 verified. Bing W38 browser evidence reused; API partial is a separate source. No new source/scheduler or fabricated missing zero.
+- Existing weekly AI slot2026-09-16T06:47JST collected by this original daily owner:run c043bb65-92ee-4dc3-b031-9ba006bb2396,5valid questions, unaided mentions0/4. Private originals retained. Observation publication is not a treatment, Growth win or business shipment.
+- One observe-profile service-notice query covered last48h/max49rows, all49inactive; latest errors0/eligible0. More than48h since prior saved observation: the earlier uncovered interval remains unknown. No active notice in retained rows and no task134 score credit.
+- Daily, existing Weekly appendix and follow-up refreshed; existing Monthly retained. AppsFlyer7-day evaluation is not yet due at this06:00slot. Existing human requests not repeated.
+- Canonical run attempted:true/no_artifact; this PR only publishes observations and bookkeeping. Company business execution remains unfinished. Codex billedUSD null; Claude actual-cost ledger unchanged. Full-scope policy blocker retained privately without changing permissions, scores or experiment ownership.
