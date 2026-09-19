@@ -3,9 +3,9 @@
 ## この文書の位置づけ
 
 `docs/seo/directory-registration-2026-09.md` §5.6 で**公開窓口の実在を確認できた媒体**について、
-**そのまま送れる状態の本文**を媒体ごとに個別に書いたもの。
+**内容・重複・名義の再確認が必要な本文案**を媒体ごとに個別に書いたもの。
 
-**まだ1通も送っていない。** 送信には人の承認が要る（→「送信前の確認事項」）。
+この文書の5案の送信記録は未確認。関連台帳には別候補への送信試行もあるため、全施策の未送信証明には使わない。送信の可否は候補ごとの最新権限・全履歴の重複照合・公開版の資料確認で判定する。下書き保存は送信承認ではない。
 
 守っている条件：
 
@@ -20,7 +20,7 @@
 
 ## 送信前の確認事項
 
-1. 送信者名は「安宅 基（株式会社ユリカ）」、返信先は `support@simplememofast.com` を使う。
+1. 送信者名・署名は `SimpleMemo Developer`。個人名が必須の欄だけ `AI ATAKA` を使う。返信先は `support@simplememofast.com`。送信直前に実際の送信者欄、署名・引用を含む全文、添付名・著者情報を読み戻し、私有の identity policy とローカルチェッカーで照合する。画像も別途確認し、未確認なら送らない。
 2. 送る直前に App Store のアプリ名・価格・対応OSを `data/site-constants.json` と突き合わせる。
 　 価格は機械検証できていない項目なので、古くなっていないか目視で確認する。
 3. 1媒体ずつ送る。同日中に5通まとめて送らない。
@@ -81,7 +81,7 @@ iTunes Lookup API（`id=6758438948`, `country=jp`）で以下を確認した。
 ```
 AAPL Ch. 編集部様
 
-株式会社ユリカの安宅と申します。自社で開発したiOSアプリの情報提供です。
+株式会社ユリカのSimpleMemo Developerと申します。自社で開発したiOSアプリの情報提供です。
 
 シンプルメモ - Obsidian連携・高速音声入力
 https://apps.apple.com/jp/app/id6758438948
@@ -102,7 +102,7 @@ https://simplememofast.com/blog/benchmark-methodology
 取り上げるかどうかは編集部のご判断にお任せします。原稿の事前確認をお願いすることはありません。
 追加の資料や検証用のプロモコードが必要でしたらお送りします。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -122,7 +122,7 @@ https://simplememofast.com/
 ```
 Macお宝鑑定団 編集部様
 
-株式会社ユリカの安宅と申します。返信は不要です。自社開発のiOSアプリの情報提供のみお送りします。
+株式会社ユリカのSimpleMemo Developerと申します。返信は不要です。自社開発のiOSアプリの情報提供のみお送りします。
 
 シンプルメモ - Obsidian連携・高速音声入力
 https://apps.apple.com/jp/app/id6758438948
@@ -137,7 +137,7 @@ https://simplememofast.com/blog/benchmark-methodology
 
 端末内の保存はAES-GCM-256ですが、送信はSMTPのためE2EEではありません。
 
-安宅 基
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 ```
@@ -153,7 +153,7 @@ support@simplememofast.com
 **本文**
 
 ```
-はじめまして。株式会社ユリカの安宅と申します。ニュースのタレコミとしてお送りします。
+はじめまして。株式会社ユリカのSimpleMemo Developerと申します。ニュースのタレコミとしてお送りします。
 広告のご相談ではありません。
 
 Obsidian連携の日本製メモアプリ「シンプルメモ」は、Apple Watchからの音声入力に対応しています。
@@ -174,7 +174,7 @@ https://simplememofast.com/blog/benchmark-methodology
 
 記事にするかどうかはお任せします。原稿の事前確認はお願いしません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -201,7 +201,7 @@ https://simplememofast.com/
 ```
 ガジェットショット 編集部様
 
-株式会社ユリカの安宅と申します。レビューのご相談です。
+株式会社ユリカのSimpleMemo Developerと申します。レビューのご相談です。
 はじめに、掲載条件について先に書きます。
 
 ・レビューは無償提供を条件とのことですので、その条件は満たせます。
@@ -231,7 +231,7 @@ iOS / iPadOS 16.0 以降、9言語、2026年2月12日公開
 第三者検証は受けていません。実機で再測定して数字が食い違えば、その結果をそのままお書きください。
 評価の内容・掲載可否はすべて編集部にお任せします。原稿の事前確認はお願いしません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -251,7 +251,7 @@ https://simplememofast.com/
 ```
 gihyo.jp 編集部様
 
-株式会社ユリカの安宅と申します。記事寄稿のご相談です。
+株式会社ユリカのSimpleMemo Developerと申します。記事寄稿のご相談です。
 
 ■ 提案する題材
 「メモを1行追記するだけの処理が、なぜ失敗するのか ― iOSからMarkdownファイルへ安全に追記する」
@@ -284,7 +284,7 @@ gihyo.jp 編集部様
 構成案・分量・締切のご希望があればそれに合わせます。企画としてお受けいただけない場合も、
 その旨だけご返信いただければ追いません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -292,10 +292,11 @@ https://simplememofast.com/
 
 ---
 
-## 送らないと決めた媒体
+## 送付保留の媒体と再開条件
 
 | 媒体 | 理由 |
 | --- | --- |
-| コリス（coliss.com） | 「営業メールはお断りいたします」と窓口に明記。資産は揃っているが送らない |
-| すまほん!!（smhn.info） | 窓口は適切（「レビューの依頼」区分あり）だが、reCAPTCHA v3 が spam 判定。本文は §5.6 の通り用意済みで、人が手で送れば通る可能性が高い |
-| CodeZine / Publickey | 公開窓口の所在を確認できていない（403 / 404）。窓口が分かるまで送らない |
+| コリス（coliss.com） | 営業メールは禁止。趣旨に合うWebサービス・スクリプト等の紹介候補は受付対象だが、適格性・素材検証・全履歴照合が未完。資料URLの存在だけで完成や送付可としない |
+| すまほん!!（smhn.info） | 既存記録はreCAPTCHA v3によるspam判定。送信試行と相手側受領は別で、受領未確認。ボット判定を回避せず、同一送信を繰り返さない。人の操作なら通るという根拠もない |
+| CodeZine | 追加調査で[公式の寄稿・取材企画窓口](https://codezine.jp/offering)を確認。製品宣伝・採用目的は対象外。技術寄稿の全履歴照合と内容・最終条件を確認するまで保留 |
+| Publickey | この文書の範囲では公開窓口未確認。CodeZineの取得成功を流用せず、正規窓口を確認するまで保留 |
