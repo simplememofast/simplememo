@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T19:30:13.661044+00:00",
+  "updated_at": "2026-09-19T20:51:07.039402+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -15,7 +15,7 @@
     "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。",
     "initial_ios_main": "17dcad9",
     "initial_api_main": "c6ed249",
-    "ios_integration_base": "57fcafe73b711d6ec3bb5d17ad0ea843cc402510"
+    "ios_integration_base": "29929a6a2989daeb97891b8d2b63e3fd4596f37b"
   },
   "target_release": {
     "version": "6.0 (proposal)",
@@ -42,7 +42,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で既存Captureと受付計測を維持し、消去世代を主保存・再送・認証待ち予約・取消復元した下書きへ引き継ぐ。現headのnative/Cloudの検証範囲と実機専用skip、旧headの証拠を分ける。同一配布版QAは未完了。",
+      "note": "PR594（Draft）で既存Captureと受付計測を維持し、消去世代を主保存・再送・認証待ち予約・取消復元した下書きへ引き継ぐ。現headのnative292成功とCloud6,492成功/実機専用4skipを、旧headの実機専用skipを含む証拠と分ける。同一配布版QAは未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -51,31 +51,39 @@
       },
       "integration": {
         "state": "draft",
-        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+        "head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 93,
-          "native_passed": 92,
+          "native_tests": 292,
+          "native_passed": 292,
           "native_failures": 0,
-          "native_skipped": 1,
-          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
-          "suites": 4,
+          "native_skipped": 0,
+          "suites": 12,
           "suite_names": [
-            "RoutingChoiceTransferTests",
+            "VoiceRoutingOriginTests",
+            "VoiceAutoStartLifecycleTests",
             "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "RoutingDeliveryJournalTests"
+            "RoutingDeliveryJournalTests",
+            "CaptureEnrollmentReceiptTests",
+            "CaptureEnrollmentControlTests",
+            "CaptureAdmissionJournalTests",
+            "ObsidianManagerTests",
+            "ObsidianPendingDurabilityTests",
+            "ObsidianEmailRescueTests",
+            "DialogueMemoTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
           "ci_authority": "current PR checks",
-          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
+          "source_scope": "coarse microphone origin, route invalidation, session-bound callbacks and finalized Dialogue seed; merged main consent and Obsidian regressions",
           "source_hashes_unchanged": true,
-          "source_files_verified": 30,
-          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
+          "source_files_verified": 277,
+          "independent_review": "Dialogue inherited origin and final-result handoff P2 corrected; limited re-review no remaining P1/P2",
+          "runtime_warning": "QoS waits in existing Obsidian test fixture; no latency qualification"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -144,6 +152,24 @@
         },
         "historical_ci_validation": [
           {
+            "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+            "unique_tests": 1606,
+            "successful_unique_tests": 1605,
+            "skipped_unique_tests": 1,
+            "simulator_models": 4,
+            "total_executions": 6424,
+            "successful_executions": 6420,
+            "failed": 0,
+            "skipped": 4,
+            "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+            "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1738,
+            "result_pages": 9,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
+          {
             "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
             "unique_tests": 1587,
             "simulator_models": 4,
@@ -210,7 +236,12 @@
           "voice_accessory_observed": false,
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
-          "physical_validation": "pending"
+          "physical_validation": "pending",
+          "voice_builtin_host": "iPhone/iPad/Mac only after positive audio from a single built-in microphone; invalidated by recording route change or interruption",
+          "voice_external_input": "unknown; no accessory-model inference",
+          "simulator_voice_host": "unknown",
+          "dialogue_voice_origin": "unknown; separate audio surface",
+          "finalized_transcript_handoff": "join buffered result consumer and queued UI delivery before origin invalidation"
         },
         "prior_origin_validation": {
           "native_tests": 135,
@@ -230,20 +261,42 @@
           "source_hashes_unchanged": true,
           "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
         },
-        "ci_validation": {
+        "prior_transfer_validation": {
+          "native_tests": 93,
+          "native_passed": 92,
+          "native_failures": 0,
+          "native_skipped": 1,
+          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
+          "suites": 4,
+          "suite_names": [
+            "RoutingChoiceTransferTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "RoutingDeliveryJournalTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
           "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
-          "unique_tests": 1606,
-          "successful_unique_tests": 1605,
+          "ci_authority": "current PR checks",
+          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
+          "source_hashes_unchanged": true,
+          "source_files_verified": 30,
+          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
+        },
+        "ci_validation": {
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
+          "unique_tests": 1624,
+          "successful_unique_tests": 1623,
           "skipped_unique_tests": 1,
           "simulator_models": 4,
-          "total_executions": 6424,
-          "successful_executions": 6420,
+          "total_executions": 6496,
+          "successful_executions": 6492,
           "failed": 0,
           "skipped": 4,
           "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
           "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1738,
+          "cloud_build": 1740,
+          "cloud_build_id": "b83a97f9-07d4-495b-8006-69ff0ed170d5",
           "result_pages": 9,
           "cloud_build_and_test": "succeeded",
           "checks_succeeded": 5
@@ -270,31 +323,39 @@
       },
       "integration": {
         "state": "draft",
-        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+        "head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 93,
-          "native_passed": 92,
+          "native_tests": 292,
+          "native_passed": 292,
           "native_failures": 0,
-          "native_skipped": 1,
-          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
-          "suites": 4,
+          "native_skipped": 0,
+          "suites": 12,
           "suite_names": [
-            "RoutingChoiceTransferTests",
+            "VoiceRoutingOriginTests",
+            "VoiceAutoStartLifecycleTests",
             "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "RoutingDeliveryJournalTests"
+            "RoutingDeliveryJournalTests",
+            "CaptureEnrollmentReceiptTests",
+            "CaptureEnrollmentControlTests",
+            "CaptureAdmissionJournalTests",
+            "ObsidianManagerTests",
+            "ObsidianPendingDurabilityTests",
+            "ObsidianEmailRescueTests",
+            "DialogueMemoTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
           "ci_authority": "current PR checks",
-          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
+          "source_scope": "coarse microphone origin, route invalidation, session-bound callbacks and finalized Dialogue seed; merged main consent and Obsidian regressions",
           "source_hashes_unchanged": true,
-          "source_files_verified": 30,
-          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
+          "source_files_verified": 277,
+          "independent_review": "Dialogue inherited origin and final-result handoff P2 corrected; limited re-review no remaining P1/P2",
+          "runtime_warning": "QoS waits in existing Obsidian test fixture; no latency qualification"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -363,6 +424,24 @@
         },
         "historical_ci_validation": [
           {
+            "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+            "unique_tests": 1606,
+            "successful_unique_tests": 1605,
+            "skipped_unique_tests": 1,
+            "simulator_models": 4,
+            "total_executions": 6424,
+            "successful_executions": 6420,
+            "failed": 0,
+            "skipped": 4,
+            "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+            "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1738,
+            "result_pages": 9,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
+          {
             "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
             "unique_tests": 1587,
             "simulator_models": 4,
@@ -429,7 +508,12 @@
           "voice_accessory_observed": false,
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
-          "physical_validation": "pending"
+          "physical_validation": "pending",
+          "voice_builtin_host": "iPhone/iPad/Mac only after positive audio from a single built-in microphone; invalidated by recording route change or interruption",
+          "voice_external_input": "unknown; no accessory-model inference",
+          "simulator_voice_host": "unknown",
+          "dialogue_voice_origin": "unknown; separate audio surface",
+          "finalized_transcript_handoff": "join buffered result consumer and queued UI delivery before origin invalidation"
         },
         "prior_origin_validation": {
           "native_tests": 135,
@@ -449,52 +533,7 @@
           "source_hashes_unchanged": true,
           "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
         },
-        "ci_validation": {
-          "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
-          "unique_tests": 1606,
-          "successful_unique_tests": 1605,
-          "skipped_unique_tests": 1,
-          "simulator_models": 4,
-          "total_executions": 6424,
-          "successful_executions": 6420,
-          "failed": 0,
-          "skipped": 4,
-          "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
-          "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
-          "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1738,
-          "result_pages": 9,
-          "cloud_build_and_test": "succeeded",
-          "checks_succeeded": 5
-        }
-      }
-    },
-    {
-      "id": "routing-level1-2-reminders-calendar",
-      "prd": "docs/prd/routing-level1-2-reminders-calendar.md",
-      "repo": "simplememo-ios",
-      "status": "in_progress",
-      "blocked_by": [
-        "capture-object"
-      ],
-      "prs": [
-        "https://github.com/simplememofast/simplememo-ios/pull/594"
-      ],
-      "note": "PR594（Draft）で明示操作後のEventKit追加、暗号化journalとCapture別Obsidian注記を実装。選択履歴の明示移行UIは暗号化ファイルと元端末QRを分離し、取消・期限・消去・遅延callbackを検査。3フラグ既定OFF。音声機器の観測、実機移行と保存保護、実保存/権限/モデル精度/同一版QAは未完了。",
-      "local_prototype": {
-        "branch": "claude/prd-routing-level1-2",
-        "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
-        "merged": false,
-        "exact_branch_prs_found": 0
-      },
-      "integration": {
-        "state": "draft",
-        "head": "33e78f257db3cd5e803666e5588e553b36f4f533",
-        "flags_enabled": false,
-        "device_qa": "pending",
-        "testflight_distributed": false,
-        "formal_score_credit": 0,
-        "local_validation": {
+        "prior_transfer_validation": {
           "native_tests": 93,
           "native_passed": 92,
           "native_failures": 0,
@@ -514,6 +553,81 @@
           "source_hashes_unchanged": true,
           "source_files_verified": 30,
           "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
+        },
+        "ci_validation": {
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
+          "unique_tests": 1624,
+          "successful_unique_tests": 1623,
+          "skipped_unique_tests": 1,
+          "simulator_models": 4,
+          "total_executions": 6496,
+          "successful_executions": 6492,
+          "failed": 0,
+          "skipped": 4,
+          "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+          "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+          "runtime": "iOS 27.0 Simulator",
+          "cloud_build": 1740,
+          "cloud_build_id": "b83a97f9-07d4-495b-8006-69ff0ed170d5",
+          "result_pages": 9,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
+        }
+      }
+    },
+    {
+      "id": "routing-level1-2-reminders-calendar",
+      "prd": "docs/prd/routing-level1-2-reminders-calendar.md",
+      "repo": "simplememo-ios",
+      "status": "in_progress",
+      "blocked_by": [
+        "capture-object"
+      ],
+      "prs": [
+        "https://github.com/simplememofast/simplememo-ios/pull/594"
+      ],
+      "note": "PR594（Draft）で明示操作後のEventKit追加、暗号化journalとCapture別Obsidian注記を実装。選択履歴の明示移行UIは暗号化ファイルと元端末QRを分離し、取消・期限・消去・遅延callbackを検査。3フラグ既定OFF。通常音声の入力元観測をnative検証済み。音声の実機確認、実機移行と保存保護、実保存/権限/モデル精度/同一版QAは未完了。",
+      "local_prototype": {
+        "branch": "claude/prd-routing-level1-2",
+        "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
+        "merged": false,
+        "exact_branch_prs_found": 0
+      },
+      "integration": {
+        "state": "draft",
+        "head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
+        "flags_enabled": false,
+        "device_qa": "pending",
+        "testflight_distributed": false,
+        "formal_score_credit": 0,
+        "local_validation": {
+          "native_tests": 292,
+          "native_passed": 292,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 12,
+          "suite_names": [
+            "VoiceRoutingOriginTests",
+            "VoiceAutoStartLifecycleTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "RoutingDeliveryJournalTests",
+            "CaptureEnrollmentReceiptTests",
+            "CaptureEnrollmentControlTests",
+            "CaptureAdmissionJournalTests",
+            "ObsidianManagerTests",
+            "ObsidianPendingDurabilityTests",
+            "ObsidianEmailRescueTests",
+            "DialogueMemoTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
+          "ci_authority": "current PR checks",
+          "source_scope": "coarse microphone origin, route invalidation, session-bound callbacks and finalized Dialogue seed; merged main consent and Obsidian regressions",
+          "source_hashes_unchanged": true,
+          "source_files_verified": 277,
+          "independent_review": "Dialogue inherited origin and final-result handoff P2 corrected; limited re-review no remaining P1/P2",
+          "runtime_warning": "QoS waits in existing Obsidian test fixture; no latency qualification"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -582,6 +696,24 @@
         },
         "historical_ci_validation": [
           {
+            "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
+            "unique_tests": 1606,
+            "successful_unique_tests": 1605,
+            "skipped_unique_tests": 1,
+            "simulator_models": 4,
+            "total_executions": 6424,
+            "successful_executions": 6420,
+            "failed": 0,
+            "skipped": 4,
+            "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
+            "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1738,
+            "result_pages": 9,
+            "cloud_build_and_test": "succeeded",
+            "checks_succeeded": 5
+          },
+          {
             "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
             "unique_tests": 1587,
             "simulator_models": 4,
@@ -648,7 +780,12 @@
           "voice_accessory_observed": false,
           "legacy_ticket_source": "unknown; excluded from learned matching",
           "retry_relabels_origin": false,
-          "physical_validation": "pending"
+          "physical_validation": "pending",
+          "voice_builtin_host": "iPhone/iPad/Mac only after positive audio from a single built-in microphone; invalidated by recording route change or interruption",
+          "voice_external_input": "unknown; no accessory-model inference",
+          "simulator_voice_host": "unknown",
+          "dialogue_voice_origin": "unknown; separate audio surface",
+          "finalized_transcript_handoff": "join buffered result consumer and queued UI delivery before origin invalidation"
         },
         "prior_origin_validation": {
           "native_tests": 135,
@@ -681,20 +818,42 @@
           "physical_file_protection_verified": false,
           "camera_share_sheet_provider_accessibility_verified": false
         },
-        "ci_validation": {
+        "prior_transfer_validation": {
+          "native_tests": 93,
+          "native_passed": 92,
+          "native_failures": 0,
+          "native_skipped": 1,
+          "skipped_scope": "physical-device complete file protection metadata; unavailable on Simulator",
+          "suites": 4,
+          "suite_names": [
+            "RoutingChoiceTransferTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "RoutingDeliveryJournalTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
           "tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533",
-          "unique_tests": 1606,
-          "successful_unique_tests": 1605,
+          "ci_authority": "current PR checks",
+          "source_scope": "explicit two-device choice-history transfer, recipient/erasure/cancellation/expiry fences, altered files and keys, bounded file reads; physical acceptance not established",
+          "source_hashes_unchanged": true,
+          "source_files_verified": 30,
+          "independent_review": "scanner completion and picker identity P2 corrected; limited re-review has no remaining P1/P2"
+        },
+        "ci_validation": {
+          "tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4",
+          "unique_tests": 1624,
+          "successful_unique_tests": 1623,
           "skipped_unique_tests": 1,
           "simulator_models": 4,
-          "total_executions": 6424,
-          "successful_executions": 6420,
+          "total_executions": 6496,
+          "successful_executions": 6492,
           "failed": 0,
           "skipped": 4,
           "skipped_test": "testTemporaryExportProtectionMetadataOnPhysicalDevice()",
           "skipped_scope": "physical-device complete file protection metadata; no physical protection acceptance",
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1738,
+          "cloud_build": 1740,
+          "cloud_build_id": "b83a97f9-07d4-495b-8006-69ff0ed170d5",
           "result_pages": 9,
           "cloud_build_and_test": "succeeded",
           "checks_succeeded": 5
@@ -736,7 +895,7 @@
         "built_app_actions": 5,
         "built_widget_actions": 1,
         "built_app_unshipped_schemas_registered": false,
-        "product_metadata_tested_head": "33e78f257db3cd5e803666e5588e553b36f4f533"
+        "product_metadata_tested_head": "c52db6925a8c2b2081c1c638b0209d7b65d8bcd4"
       },
       "contract_prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
@@ -764,11 +923,24 @@
       "status": "held",
       "blocked_by": [],
       "prs": [],
-      "note": "iOS/APIの実装はmainに存在。9/4の実OAuth・実保存・本文読取・同一ID再送のサーバー証拠は確認済み。現在のavailableはHTTP403で不明。同意範囲・現行提供条件・同じ配布版の実機配送待ち。",
+      "note": "iOS/APIの実装はmainに存在。9/4の実OAuth・実保存・本文読取・同一ID再送のサーバー証拠は確認済み。2026-09-19 20:18:39Zの通常GETはHTTP200/available=true、Notion行のフラグfalseを確認。旧403は解消したが、認証・保存操作はしていない。同意範囲・現行提供条件・同じ配布版の実機配送待ち。",
       "implementation": "present_on_main; release acceptance incomplete",
       "documentation_prs": [
-        "https://github.com/simplememofast/simplememo-api/pull/358"
-      ]
+        "https://github.com/simplememofast/simplememo-api/pull/358",
+        "https://github.com/simplememofast/simplememo-api/pull/361",
+        "https://github.com/simplememofast/simplememo/pull/1502"
+      ],
+      "current_availability_observation": {
+        "observed_at": "2026-09-19T20:18:39Z",
+        "config_http_status": 200,
+        "available": true,
+        "notion_destination_row": false,
+        "oauth_or_save_performed": false,
+        "current_build_physical_acceptance": false,
+        "production_rechecked_at": "2026-09-19T20:35:40Z",
+        "api_documentation_merge": "ebfe970c95de2758d4a92976eed8e64b4c8fd3fa",
+        "web_documentation_merge": "d777c433b2d0721052d2f360dc34815d767ebe2e"
+      }
     }
   ]
 }

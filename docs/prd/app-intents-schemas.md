@@ -42,7 +42,7 @@ Query識別子の一意性と文字列解決もメタデータ検査で確認し
 この検証ではQueryは空配列を返し、performは常にエラーを返す。宛先へアクセスせず、アプリ登録・Siri実行・保存成功・プライバシー契約の完成を証明しない。
 既存Obsidianの日次ファイル追記を「新しいNoteの作成」と同一視せず、保存済みEntityのID・再解決・削除・未対応入力・登録抑止を具体化する。これらのコード作業は実機待ちで一括停止する項目ではない。
 
-再利用するSDK契約検査と、JSON構造・破損・未対応形式・拡張内の登録漏れを検出する6回帰をPR594へ追加した。実際にビルドしたappの5 actionsとwidgetの1 actionを読み取り、未出荷のNotes/Remindersスキーマが登録されていないことを確認した。最新head `33e78f257db3cd5e803666e5588e553b36f4f533` のビルド済みappも5 actions、widgetも1 actionで、Notes/Remindersスキーマが未登録であることを再確認した。これは現在の登録内容の検査であり、将来の登録を自動制御する機能ではない。
+再利用するSDK契約検査と、JSON構造・破損・未対応形式・拡張内の登録漏れを検出する6回帰をPR594へ追加した。実際にビルドしたappの5 actionsとwidgetの1 actionを読み取り、未出荷のNotes/Remindersスキーマが登録されていないことを確認した。最新head `c52db6925a8c2b2081c1c638b0209d7b65d8bcd4` のビルド済みappも5 actions、widgetも1 actionで、Notes/Remindersスキーマが未登録であることを再確認した。これは現在の登録内容の検査であり、将来の登録を自動制御する機能ではない。
 
 ### 未登録primary-reminders adapterの実装
 
