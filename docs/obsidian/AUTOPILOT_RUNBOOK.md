@@ -695,6 +695,29 @@ node scripts/autopilot-selfheal.mjs
   `who` を `owner` にして修理から逃げる経路が無い（自己テストがこれを固定している）。
   規則が読めなかった回は全件が修理対象に戻る
 
+**2026-09-19 追加委任 — `usage_limit` の「待つ」は自動回復に含める。**
+
+料金プラン変更・追加クレジット購入・権限拡大・資格情報交換は引き続きオーナー判断。
+一方で provider が回復時刻を返し、対象の Codex automation が **すでに ACTIVE** なら、
+次の可逆な経路は再承認なしでAIが完了してよい。
+
+1. structured transcript / runtime log から回復時刻を一次証拠で読む
+2. 同じ ACTIVE automation の**次の1回だけ**を回復時刻後へ置く
+3. 同じ route が実際に着手したことを観測し、`usage_limit` が再発したか判定する
+4. 再発しなければ `no_failure_since` で古い同一経路の上限行を閉じる
+5. 再発したら新しい回復時刻へ同じ手順を繰り返す。回復時刻が無い・automation が
+   PAUSED・料金/権限変更が必要、のどれかならオーナーへ戻す
+
+**PAUSED を自動で ACTIVE にする権限ではない。** また「再試行予約済み」は成功ではない。
+完走・出荷・公開は、それぞれ既存の一次証拠が出るまで加点しない。
+`data/escalation-rules.json` の `safe_recovery.mode=wait_then_retry` はこの委任だけを表し、
+`who: owner` 自体は料金・契約判断の境界として保持する。
+
+**日報を終端にしない。** `data/autopilot-actions-report.json` に AI 行が残った運転では、
+次の記事候補へ進む前にその行を優先して、修理→再検証→台帳更新→Act再照合まで行う。
+CLOSED PR、mainへ既に着地した取り残し、後続 `repair_of` で復旧済みの故障を
+翌日へ持ち越さない。取得不能は0件・解決済みとして扱わない。
+
 **レーンFで1日使い切ってよい。** その日の記事はゼロでよく、
 `action: "maintenance"`・`reason` に修理内容を書く。**壊れた基盤の上で記事を出しても、
 翌日また止まる。**

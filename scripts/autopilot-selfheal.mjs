@@ -135,7 +135,7 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
       escalate: tried >= limit,
       // **修理主体が人しかいない種別は、そもそも修理対象ではない。**
       owner_routed: rule?.who === 'owner',
-      escalation: rule ? { who: rule.who, channel: rule.channel, within_hours: rule.within_hours } : null,
+      escalation: rule ? { who: rule.who, channel: rule.channel, within_hours: rule.within_hours, safe_recovery: rule.safe_recovery ?? null } : null,
     };
   });
 

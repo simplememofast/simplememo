@@ -547,6 +547,28 @@ export function classify(action, matrix) {
 // 台帳の同じ行が育つ。**日付入りにすると毎日新しい行が生えて、
 // 「12件のうち6件が解消済み」と同じ状態に戻る。
 
+export function scheduledSafeRecovery(target, ctx) {
+  const safe = target?.escalation?.safe_recovery;
+  if (safe?.mode !== 'wait_then_retry' || !safe.owner_authorized_at) return null;
+  const automationId = target.route === 'actions' ? 'obsidian'
+    : target.route === 'ccr-0920' ? 'obsidian-2' : null;
+  if (!automationId) return null;
+  const observation = ctx.routineDoc?.codex_observation;
+  if (!observation?.scheduler_query_complete) return null;
+  const now = typeof ctx.now === 'number' ? ctx.now : Date.now();
+  const observedAt = Date.parse(observation.observed_at ?? '');
+  if (!Number.isFinite(observedAt) || Math.abs(now - observedAt) > 6 * 3600_000) return null;
+  const recoveryEvidence = observation.usage_limit_recovery;
+  const recoveryMs = Date.parse(recoveryEvidence?.provider_recovery_at ?? '');
+  if (!Number.isFinite(recoveryMs) || !recoveryEvidence?.source) return null;
+  const automation = (observation.automations ?? []).find((a) => a.id === automationId);
+  const nextMs = Date.parse(automation?.next_run_at ?? '');
+  if (automation?.status !== 'ACTIVE' || !Number.isFinite(nextMs) || nextMs <= now || nextMs <= recoveryMs) return null;
+  return { automation_id: automationId, next_run_at: automation.next_run_at,
+    provider_recovery_at: recoveryEvidence.provider_recovery_at, recovery_source: recoveryEvidence.source,
+    owner_authorized_at: safe.owner_authorized_at };
+}
+
 export function derive(ctx) {
   const out = [];
   out.push(...deriveViewportActions(ctx));
@@ -602,9 +624,11 @@ export function derive(ctx) {
         && FAILED_OUTCOMES.has(r.outcome));
       const latest = sameClass.reduce((a, r) => (a && a > r.date_jst ? a : r.date_jst), t.date_jst);
       const esc = t.escalation ?? {};
+      const recovery = scheduledSafeRecovery(t, ctx);
       out.push({
         id: `act-selfheal-${t.run_id}`,
-        title: `未修理の故障: ${t.run_id}（${t.failure_class}）— セッション側に打つ手が無い種別`,
+        title: recovery ? `自動回復待ち: ${t.run_id}（${t.failure_class}）`
+          : `未修理の故障: ${t.run_id}（${t.failure_class}）— セッション側に打つ手が無い種別`,
         detail: `${t.date_jst} / ${t.route} / outcome=${t.outcome}。${t.failure_reason ?? '理由未記入'}\n\n`
           + `**この種別は data/escalation-rules.json が who: owner と宣言している。**`
           + `レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、`
@@ -612,14 +636,20 @@ export function derive(ctx) {
           + `渡し先 ${esc.channel ?? '不明'} / ${esc.within_hours ?? '?'}時間以内。\n\n`
           + `**閉じ条件は経路と種別で見る** — ${latest} 以降に ${t.route} が実際に着手し、`
           + `${t.failure_class} が再発しなければ閉じる。着手が1回も無い間は閉じない`
-          + `（失敗が無いことは回復の証拠にならない）。`,
+          + `（失敗が無いことは回復の証拠にならない）。`
+          + (recovery ? `\n\n**自動回復を予約済み** — ${recovery.automation_id} / ${recovery.next_run_at}。`
+            + `料金・プラン・権限は変えず、同じ経路を実再試行して閉じ条件を検証する。` : ''),
         source: 'selfheal',
         domain: null,
         // **人の判断が要るのは「待つ」以外の2つ** —— 枠を上げる / 1回あたりの入力量を減らす。
-        force_owner: 'human',
-        force_owner_why: `data/escalation-rules.json が ${t.failure_class} を who: owner と宣言している`
-          + `（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。`
-          + `**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い`,
+        force_owner: recovery ? 'ai' : 'human',
+        force_owner_why: recovery
+          ? `オーナーが wait_then_retry を委任済み。ACTIVE な ${recovery.automation_id} を ${recovery.next_run_at} に再試行し、料金・権限は変更しない`
+          : `data/escalation-rules.json が ${t.failure_class} を who: owner と宣言している`
+            + `（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。`
+            + `**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い`,
+        execution_authorization: recovery ? { by: 'owner', granted_at: recovery.owner_authorized_at,
+          scope: 'usage_limit:wait_then_retry' } : undefined,
         touches: [],
         auto: null,
         close_check: {
@@ -4288,6 +4318,36 @@ async function selftest() {
   t('行IDは今までどおり run 単位（既存の行へ流れて増えない）',
     ownerRow?.id === 'act-selfheal-r-0830');
   t('題に「打つ手が無い種別」と出す', (ownerRow?.title ?? '').includes('打つ手が無い'));
+
+  const safeTarget = shTarget({ escalation: { who: 'owner', channel: 'daily_report', within_hours: 24,
+    safe_recovery: { mode: 'wait_then_retry', owner_authorized_at: '2026-09-19' } } });
+  const safeCtx = { today: '2026-09-19', now: Date.parse('2026-09-19T01:20:00Z'), runsDoc: { runs: shRuns },
+    statusDoc: null, costDoc: null, selfheal: { targets: [safeTarget] },
+    routineDoc: { codex_observation: { scheduler_query_complete: true, observed_at: '2026-09-19T01:19:00Z',
+      usage_limit_recovery: { provider_recovery_at: '2026-09-19T08:09:00Z',
+        source: 'structured task_complete 01a0b653-5a26-7eb3-b906-f316e4d8c8dd' },
+      automations: [{ id: 'obsidian', status: 'ACTIVE', next_run_at: '2026-09-19T08:20:00Z' }] } } };
+  const safeRow = derive(safeCtx).find((d) => d.id === 'act-selfheal-r-0830');
+  t('usage_limit の待機再試行は委任済みかつ ACTIVE・将来予約を観測した時だけAIへ戻す',
+    safeRow?.force_owner === 'ai' && safeRow?.execution_authorization?.scope === 'usage_limit:wait_then_retry'
+    && (safeRow?.title ?? '').includes('自動回復待ち'));
+  const tooEarlySafe = structuredClone(safeCtx);
+  tooEarlySafe.routineDoc.codex_observation.automations[0].next_run_at = '2026-09-19T08:00:00Z';
+  t('provider 回復時刻より前の予約は自動回復扱いにしない',
+    derive(tooEarlySafe).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
+  const noProviderEvidence = structuredClone(safeCtx);
+  delete noProviderEvidence.routineDoc.codex_observation.usage_limit_recovery;
+  t('provider 回復時刻の一次証拠が無い予約は自動回復扱いにしない',
+    derive(noProviderEvidence).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
+
+  const pausedSafe = structuredClone(safeCtx);
+  pausedSafe.routineDoc.codex_observation.automations[0].status = 'PAUSED';
+  t('PAUSED automation は自動回復の委任に含めない',
+    derive(pausedSafe).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
+  const staleSafe = structuredClone(safeCtx);
+  staleSafe.routineDoc.codex_observation.observed_at = '2026-09-18T12:00:00Z';
+  t('古い scheduler 観測だけでは自動回復扱いにしない',
+    derive(staleSafe).find((d) => d.id === 'act-selfheal-r-0830')?.force_owner === 'human');
 
   // **自分だけ見て since を決めない**（他の回が無ければ自分の日付）
   t('同じ種別の失敗が自分しか無ければ since は自分の日付',
