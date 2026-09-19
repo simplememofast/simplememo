@@ -21,11 +21,12 @@ name: Autopilot Health
 # 記事を書かずスキップした日も date_jst は更新される設計なので、
 # 「当日でない」こと自体が異常のシグナルになる（Runbook §5-2）。
 #
-# 【時刻】12:00 / 16:00 / 20:00 JST。主系06:00の運転と
-# PRのマージ・Pagesデプロイが落ち着いた後に見る。補完の有効状態は実予約で確認する。
+# 【時刻】09:45（close-only）/ 12:00 / 16:00 / 20:00 JST。主系06:00→独立フォールバック07:30→
+# Act 09:00 の後、10:00の日報メール前に**回復の追認だけ**1回行う。補完の有効状態は実予約で確認する。
 #
-# **窓の下限も上限も意味がある。増やすときはこの範囲の中で。**
-#   下限 12:00 … これより早いと当日の運転がまだ途中で、健全なのに stale と出る
+# **新規Issueを開く窓の下限も上限も意味がある。09:45はこの窓の外でclose-only。**
+#   09:45      … 10:00日報前の回復追認。healthyなら閉じるが、staleでも新規Issueは開かない
+#   開く下限 12:00 … これより早いと当日の運転がまだ途中の可能性があるため、従来の検知境界を維持
 #   上限 20:00 … 判定は `date_jst == 今日(JST)` なので、**0:00〜6:00 に走らせると
 #                 新しい日の当日分がまだ無いのは当たり前で、毎晩必ず誤検知する**
 #
@@ -54,7 +55,7 @@ name: Autopilot Health
 # **`data/autopilot-status.json` が main に着くことが回復イベントそのもの。**
 # 窓を待つ理由が無いので push で拾う。8時間に縮めるのではなく、遅延を消す。
 #
-# **ただし push では「閉じる」しかしない。**判定は `date_jst == 今日(JST)` なので、
+# **ただし push と09:45では「閉じる」しかしない。**判定は `date_jst == 今日(JST)` なので、
 # 0:00〜6:00 JST に別のPRがマージされた回に開く方向へ働かせると、
 # 新しい日の当日分がまだ無いのは当たり前なので**毎晩必ず誤検知する**
 # （窓の上限が 20:00 なのと同じ理由）。
@@ -63,6 +64,7 @@ name: Autopilot Health
 # ここでは「閉じるのは即時・開くのは窓の中だけ」として置く。
 on:
   schedule:
+    - cron: '45 0 * * *'     # 09:45 JST — 10:00日報前の回復追認（close-only）
     - cron: '0 3,7,11 * * *' # 12:00 / 16:00 / 20:00 JST（窓の理由は上のコメント）
   workflow_dispatch:
   push:
@@ -183,12 +185,15 @@ jobs:
             });
             const existing = openIssues[0];
 
-            // **push で起動した回は閉じることしかしない。**（冒頭の追記を参照）
-            // 窓の外で開く方向へ働かせると、深夜のマージが毎晩 stale を立てる。
-            const mayOpen = context.eventName !== 'push';
+            // **push と09:45の事前確認は閉じることしかしない。**（冒頭の追記を参照）
+            // 09:45で新規Issueを開くと「12:00より前は運転途中かもしれない」という既存境界を壊す。
+            // schedule文字列はこのworkflow自身が固定した値だけを比較し、時刻の遅延から推測しない。
+            const preReportCloseOnly = context.eventName === 'schedule'
+              && context.payload.schedule === '45 0 * * *';
+            const mayOpen = context.eventName !== 'push' && !preReportCloseOnly;
 
             if (!healthy && !mayOpen) {
-              core.notice(`stale だが push 起動なので開かない（判定は窓の中の schedule が持つ）`);
+              core.notice(`stale だが close-only 起動なので開かない（新規検知は12:00以降の schedule が持つ）`);
             } else if (!healthy) {
               try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
               catch { await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'B60205', description: 'autopilot の status JSON が当日分に更新されていない' }); }
