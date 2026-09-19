@@ -22,7 +22,7 @@
     "**ここを読むときに「止まった」と読まないこと。**halted フィールドが実際の停止を持つ。"
   ],
   "enforcement": "record_plus_r2_block",
-  "last_judged_jst": "2026-09-18",
+  "last_judged_jst": "2026-09-19",
   "judgements": [
     {
       "candidate_id": "act-asc-cpp-slot-cleanup",
@@ -10204,6 +10204,1023 @@
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
+    },
+    {
+      "candidate_id": "act-ccr-bigquery-connector",
+      "title": "副系CCRは BigQuery MCP 接続子を持たずに起動する",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 25,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**28 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 28
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "repeat_guard: **28 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-ccr-command-classifier",
+      "title": "副系CCRで一部コマンドが auto mode クラシファイアに断続的にブロックされる",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 25,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**28 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 28
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "repeat_guard: **28 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-codex-ledger-sync",
+      "title": "Codex実行の未記帳 1 件・原因分類 0 件を同期する",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "2 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_auto_handler / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_auto_handler"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-health-1423",
+      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R1",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R1",
+          "class": "R1",
+          "class_source": "domain:サイトコンテンツの新設・更新"
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "2 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 2
+        }
+      },
+      "reasons": [
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-health-1463",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-autopilot-act-20260917",
+      "title": "ブランチ claude/autopilot-act-20260917 に 1 コミットが取り残されている（PR #1439 ほか1件 のマージ後）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-obsidian-auto-20260902",
+      "title": "ブランチ claude/obsidian-auto-20260902 に 1 コミットが取り残されている（PR #774 のマージ後）",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**17 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 17
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "repeat_guard: **17 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-obsidian-auto-20260903",
+      "title": "ブランチ claude/obsidian-auto-20260903 に 1 コミットが取り残されている（PR #793 のマージ後）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "3 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_auto_handler / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_auto_handler"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "16 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 16
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-orphaned-branch-Codex-trend-radar-observations",
+      "title": "PR #1432 の反映待ち: Codex/trend-radar-observations",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "2 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 2
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-pr-660",
+      "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**23 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 23
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "repeat_guard: **23 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-pr6-d14-evaluate",
+      "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 15,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "16 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 16
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）"
+      ]
+    },
+    {
+      "candidate_id": "act-route-silent-actions",
+      "title": "actions が 4日ぶん出荷していない（2026-09-15〜2026-09-19・最後の出荷 2026-09-14）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 1
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-routine-run-trig_01N1SWZdPwKTot2SbT71UV2U",
+      "title": "定期タスクの実行結果を確認: 伏字が実際の日次取り込みで効いたか確認 (completion_unverified)",
+      "judged_jst": "2026-09-19",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**14 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 14
+        }
+      },
+      "reasons": [
+        "repeat_guard: **14 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260830-actions",
+      "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260831-actions",
+      "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260831-ccr0920",
+      "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "18 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 18
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260905-actions",
+      "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26",
+      "title": "未修理の故障: ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26（no_artifact）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "2 パス・selfheal の範囲内",
+          "scope": "selfheal",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "2 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 2
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+      "title": "未修理の故障: ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260917-owner-session-pagespeed-poster",
+      "title": "未修理の故障: ap-20260917-owner-session-pagespeed-poster（post-merge-performance-budget）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "2 パス・selfheal の範囲内",
+          "scope": "selfheal",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 1
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1",
+      "title": "未修理の故障: ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
+      "title": "未修理の故障: ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-shipping-outage",
+      "title": "どの経路も 2日連続で出荷していない（2026-09-18〜2026-09-19）",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-status-stale",
+      "title": "data/autopilot-status.json が 2日前（2026-09-17）のまま",
+      "judged_jst": "2026-09-19",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_median / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": []
     }
   ]
 }
