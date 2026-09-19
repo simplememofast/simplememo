@@ -50,6 +50,9 @@
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -257,7 +260,7 @@
       color: var(--text-primary);
       margin-bottom: 16px;
     }
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -392,56 +395,44 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/devlog/privacy-first-design" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/devlog/privacy-first-design" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Obsidian連携シンプルメモ 開発日誌</span>
-      <span class="meta-og-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
-      <span class="meta-description">iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App | Simple Memo Dev Log</span>
-      <span class="meta-og-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
-      <span class="meta-description">Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja" data-lang="ja">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
-        <span lang="en" data-lang="en">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
+        <span lang="ja">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
+
       </h1>
 
       <div class="article-meta">
-        <span lang="ja" data-lang="ja">2026年2月13日公開 ・ 保護・利用解析の説明更新：2026年9月6日</span>
-        <span lang="en" data-lang="en">Published February 13, 2026 ・ Protection and analytics explanation updated September 6, 2026</span>
+        <span lang="ja">2026年2月13日公開 ・ 保護・利用解析の説明更新：2026年9月6日</span>
+
       </div>
 
       <!-- Japanese Content -->
-      <div lang="ja" class="lang-content" data-lang="ja">
+      <div lang="ja" class="lang-content">
         <div class="article-body">
 
           <h2>1. なぜメモアプリにプライバシーが重要なのか</h2>
@@ -553,130 +544,21 @@
       </div>
 
       <!-- English Content -->
-      <div lang="en" class="lang-content" data-lang="en">
-        <div class="article-body">
 
-          <h2>1. Why Privacy Matters for a Memo App</h2>
-          <p>Work ideas, personal drafts, and daily notes often contain information that is not ready to share. Fast capture should come with a clear explanation of where that information is stored and sent.</p>
-          <p>This article separates on-device encryption, session storage, screen visibility, diagnostic logs, and usage analytics. Protection in one area does not guarantee protection in another.</p>
-          <div class="philosophy-highlight">
-            <strong>Updated September 6, 2026:</strong> We checked the source for version 5.8.17, matching the public app’s version, and corrected the explanations of screen protection, logs, and analytics. The descriptions include their limits.
-          </div>
-
-          <h2>2. Automatic Hiding in the App Switcher Is Not Enabled</h2>
-          <p>iOS takes a snapshot after an app moves to the background. Apple advises removing sensitive information from the interface during that transition.</p>
-          <p>In the checked source for version 5.8.17, <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code> save the draft without calling the privacy overlay. The old overlay functions remain in the source, but are not an active protection path.</p>
-          <p><strong>Visible memo text may remain in the app-switcher snapshot.</strong> Encrypting the Outbox does not hide a screen image. This corrects the earlier article’s claim that the overlay always hides memo content.</p>
-
-          <h2>3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
-          <p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
-          <p>Communication cache persisting on the device means traces of which URLs were accessed and when exist on disk. Cookies being stored means session information remains on the device.</p>
-          <p>This app uses <code>URLSessionConfiguration.ephemeral</code>.</p>
-          <pre><code>private let session: URLSession = {
-    let config = URLSessionConfiguration.ephemeral
-    config.httpCookieAcceptPolicy = .never
-    config.httpShouldSetCookies = false
-    config.urlCache = nil
-    return URLSession(configuration: config)
-}()</code></pre>
-          <ul>
-            <li><strong>No disk cache:</strong> This URLSession does not persist its cache to disk</li>
-            <li><strong>Cookie use disabled:</strong> This URLSession does not accept cookies or set them on requests</li>
-            <li><strong>URL cache disabled:</strong> The cache storage itself is set to <code>nil</code></li>
-            <li><strong>No persistent session storage:</strong> URLSession session data is not stored on disk</li>
-          </ul>
-          <p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
-
-          <h2>4. The Scope of Performance Logging</h2>
-          <p>Logging in <code>PerformanceLogger</code> is guarded by <code>#if DEBUG</code>. Builds without DEBUG defined do not include this logger’s logging operations.</p>
-          <p>Its <code>logError</code> records the error type, such as <code>URLError</code>, instead of the detailed <code>localizedDescription</code>, which may contain a file path or user input.</p>
-          <p>This does not automatically sanitize every event name or additional string passed to <code>logEvent</code>. Callers must avoid passing email addresses, memo text, and authentication information.</p>
-          <p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> First-party usage events and AppsFlyer remain separate, enabled systems. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
-
-          <h2>5. What the AES-GCM Encrypted Outbox Protects</h2>
-          <p>Pending memos are managed in an on-device queue called the Outbox. The app uses Apple’s CryptoKit to encrypt saved data with AES-GCM. Newly generated encryption keys are 256 bits.</p>
-          <p>Keys are stored in Keychain with <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. This allows access after the first unlock following a restart, until the next restart, and prevents migration through a backup restored to another device. The app reads the key for encryption and decryption.</p>
-          <p>This protects stored data. It does not hide the visible screen or guarantee safety against every form of device compromise. Before changing devices, confirm that important memos have reached their destination.</p>
-          <p>When email sending is used, memo bodies are processed by our Relay API and delivery infrastructure, and remain as email in the recipient’s mailbox. <strong>On-device encryption does not mean email delivery is end-to-end encrypted (E2EE).</strong> See our <a href="/en/privacy#technical">Privacy Policy</a> and <a href="/en/privacy-architecture/">data route explanation</a>.</p>
-          <p>For the pending-send queue, see the <a href="/devlog/outbox-architecture">Outbox architecture article</a>.</p>
-
-          <h2>6. Memo Protection and External SDKs</h2>
-          <p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
-          <p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill from a Google account. Firebase App Check initializes at launch to protect backend access. AppsFlyer supports acquisition and usage analytics, with the same installation identifier used for first-party analytics.</p>
-          <p>Keeping memo text out of event fields does not remove links through identifiers and delivery records. Analytics, including SDK behavior, needs to be considered separately from memo encryption. Our <a href="/en/privacy#technical">Privacy Policy</a> describes the fields and purposes.</p>
-
-          <h2>7. Explain the Scope of Each Protection</h2>
-          <p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not mean the app collects no usage events.</p>
-          <p>Fast capture should come with an understandable explanation of collected data. We describe analytics destinations, identifiers, and how records can be linked, and review these explanations as the app changes.</p>
-
-          <!-- FAQ Section -->
-          <div class="faq-section">
-            <h2>Frequently Asked Questions</h2>
-
-            <div class="faq-item">
-              <div class="faq-item__question">Q. Is memo content stored on servers?</div>
-              <div class="faq-item__answer">When you send email, the body passes through our Relay API and delivery infrastructure. Our Relay API does not permanently store memo bodies except where required by law or for legitimate operational needs such as incident response. This is separate from storage in the recipient’s mailbox. See the <a href="/en/privacy-architecture/">privacy architecture</a> for the destination-specific explanation.</div>
-            </div>
-
-            <div class="faq-item">
-              <div class="faq-item__question">Q. Is communication encrypted?</div>
-              <div class="faq-item__answer">Yes. API communication uses HTTPS. An ephemeral URLSession avoids persisting that session’s caches, cookies, and credentials to disk. It does not remove separate analytics or server-side records.</div>
-            </div>
-
-            <div class="faq-item">
-              <div class="faq-item__question">Q. Are memos safe if I lose my device?</div>
-              <div class="faq-item__answer">The Outbox is encrypted at rest with AES-GCM, and newly generated keys are 256 bits. Keys use a Keychain protection class that prevents migration to another device. This does not protect the visible screen or email already delivered to a mailbox, and on-device encryption does not guarantee that all information is safe after a device is lost.</div>
-            </div>
-
-            <div class="faq-item">
-              <div class="faq-item__question">Q. Is there analytics or tracking?</div>
-              <div class="faq-item__answer">Yes. We use first-party usage analytics and the AppsFlyer SDK. First-party events include a random installation identifier, session identifier, event type and time, app version, and outcomes such as send results. The app sends AppsFlyer events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases; purchase events may include price, currency, and subscription period. The same installation identifier is set as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes, but first-party send IDs can link to recipient email hashes. These records are not fully anonymous. See the <a href="/en/privacy#technical">technical measures in our Privacy Policy</a>.</div>
-            </div>
-
-            <div class="faq-item">
-              <div class="faq-item__question">Q. How do you use Apple frameworks and external SDKs?</div>
-              <div class="faq-item__answer">Within the iOS app, memo encryption and key storage use CryptoKit and Keychain, and memo transmission uses URLSession. External SDKs support Google sign-in, Firebase backend protection, and AppsFlyer acquisition and usage analytics. Memo-body protection and analytics involving identifiers are separate parts of the design.</div>
-            </div>
-          </div>
-
-          <!-- Related Articles -->
-          <div class="related-section">
-            <h2 class="related-section__title">Related Articles</h2>
-            <div class="related-grid">
-              <a href="/devlog/day1" class="related-card">
-                <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-                <div class="related-card__desc">The initial development decisions behind recreating the Captio experience.</div>
-              </a>
-              <a href="/devlog/" class="related-card">
-                <div class="related-card__title">Dev Log Index</div>
-                <div class="related-card__desc">Technical decision records for Simple Memo - for Obsidian.</div>
-              </a>
-              <a href="/devlog/outbox-architecture" class="related-card">
-                <div class="related-card__title">Outbox Architecture: Zero Message Loss</div>
-                <div class="related-card__desc">How the Outbox queues pending memos and encrypts stored data with AES-GCM.</div>
-              </a>
-              <a href="/devlog/relay-api-design" class="related-card">
-                <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-                <div class="related-card__desc">The email infrastructure built on Cloudflare Workers and its relay design.</div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-  
+
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">参考文献</span>
-    <span lang="en" data-lang="en">References</span>
+    <span lang="ja">参考文献</span>
+
   </h2>
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja" data-lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span><span lang="en" data-lang="en">Used for implementing AES-GCM encryption to protect Outbox data at rest</span></li>
-    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span lang="ja" data-lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span><span lang="en" data-lang="en">Ephemeral session configuration for privacy-preserving network communication</span></li>
-    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preventing Insecure Network Connections (App Transport Security)</a> — <span lang="ja" data-lang="ja">TLS通信の強制によるデータ転送時のセキュリティ確保</span><span lang="en" data-lang="en">Enforcing TLS for secure data transmission</span></li>
-    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Generating Log Messages from Your Code</a> — <span lang="ja" data-lang="ja">ログの保存範囲と機密情報の扱い</span><span lang="en" data-lang="en">Log storage and handling sensitive information</span></li>
-    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="ja" data-lang="ja">アプリスイッチャー用スナップショットと画面上の情報</span><span lang="en" data-lang="en">App-switcher snapshots and visible information</span></li>
-    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="ja" data-lang="ja">鍵のアクセス条件と他端末への移行制限</span><span lang="en" data-lang="en">Key access conditions and migration restrictions</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preventing Insecure Network Connections (App Transport Security)</a> — <span lang="ja">TLS通信の強制によるデータ転送時のセキュリティ確保</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Generating Log Messages from Your Code</a> — <span lang="ja">ログの保存範囲と機密情報の扱い</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="ja">アプリスイッチャー用スナップショットと画面上の情報</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="ja">鍵のアクセス条件と他端末への移行制限</span></li>
   </ul>
 </section>
 
@@ -687,26 +569,26 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">Obsidian連携を有効にし、保存先を設定する手順を確認できます。</span><span lang="en" data-lang="en">Learn how to enable the Obsidian integration and configure its destination.</span>
+        <span lang="ja">Obsidian連携を有効にし、保存先を設定する手順を確認できます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
   </ul>
 </section>
 </main>
@@ -716,26 +598,26 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span lang="ja">Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -743,8 +625,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

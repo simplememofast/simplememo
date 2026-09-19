@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/blog/engineer-code-snippets" name="apple-itunes-app"/>
+<meta content="index, follow, max-snippet:-1, max-image-preview:large" name="robots"/>
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script><title>Code Snippet Memo Management for Engineers | Simple Memo</title>
+<meta content="Note-taking techniques that double development efficiency. Guides Use Cases Compare Methods Blog Glossary FAQ About" name="description"/>
+<meta content="Code Snippet Management" property="og:title"/>
+<meta content="Note-taking techniques that double development efficiency. Guides Use Cases Compare Methods Blog Glossary FAQ About" property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="2026-03-04T00:00:00+09:00" property="article:published_time"/>
+<meta content="https://simplememofast.com/en/blog/engineer-code-snippets" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="Code Snippet Management" name="twitter:title"/>
+<meta content="Note-taking techniques that double development efficiency. Guides Use Cases Compare Methods Blog Glossary FAQ About" name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png" name="twitter:image"/>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/blog/engineer-code-snippets#article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/blog-engineer-code-snippets.png","headline":"Code Snippet Memo Management for Engineers | Simple Memo","description":"Note-taking techniques that double development efficiency.","url":"https://simplememofast.com/en/blog/engineer-code-snippets","datePublished":"2026-03-04","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/blog/engineer-code-snippets"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://simplememofast.com/en/blog/"},{"@type":"ListItem","position":3,"name":"Code Snippet Memo Management for Engineers | Simple Memo","item":"https://simplememofast.com/en/blog/engineer-code-snippets"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/engineer-code-snippets#webpage","inLanguage":"en","name":"Code Snippet Memo Management for Engineers | Simple Memo","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".tldr"]},"url":"https://simplememofast.com/en/blog/engineer-code-snippets"}</script> <link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}a.app-store-badge[data-lang].active{display:inline-flex}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+
+<!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/blog/engineer-code-snippets#faq","inLanguage":"en","mainEntity":[]}</script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/engineer-code-snippets">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/engineer-code-snippets">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/blog/engineer-code-snippets" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/blog/engineer-code-snippets" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container">
+<div class="lp-hero"><div class="lp-hero__label"><span lang="en">For Engineers</span></div><h1 class="lp-hero__title"><span lang="en">Code Snippet<br/>Memo Management</span></h1><p class="lp-hero__sub"><span lang="en">Code snippet memo management for engineers is a systematic approach to instantly capturing useful code fragments, solutions, and design patterns via memo apps, accumulating them in a searchable format. While re-searching Stack Overflow takes 15 minutes on average, saved notes take 5 seconds. This article covers 4 management techniques that double development efficiency.</span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
+
+<span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 6, 2026</span>
+</p></div>
+<!-- TL;DR Summary for AI Citation -->
+<div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+<div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+
+<p lang="en" style="color:var(--text-secondary);margin:0;">A comprehensive guide to code snippet memo management for engineers. Covers four key techniques -- instant capture, tag-based classification, search optimization, and team sharing -- to dramatically improve development efficiency and build a personal knowledge base.</p>
+</div>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Method 1: Instant Capture</span></h2>
+
+<div lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>Capture Insights During Code Reviews</span><span class="tip-card__rank">Capture</span></div><div class="tip-card__desc"><p>Engineers discover useful patterns at unexpected moments:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Code reviews:</strong> Senior's elegant coding pattern</li><li><strong>Debugging:</strong> Solution after 3 hours of struggle</li><li><strong>Reading docs:</strong> Hidden useful API parameter</li><li><strong>Conferences:</strong> Speaker's useful code example</li></ul><p style="margin-top:.75rem">90% of "I'll note it later" moments never get recorded. Simple Memo lets you capture in 3 seconds from your phone, even during commute.</p></div><div class="tip-card__example"><strong>Example:</strong> "[Python][pandas] df.query() for SQL-style filtering. More readable than df[df['age'] &gt; 30]. Docs: link"</div></div></div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Method 2: Tag-Based Classification</span></h2>
+
+<div lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>Language x Category Tag System</span><span class="tip-card__rank">Classification</span></div><div class="tip-card__desc"><p>Classify snippets on two axes -- language and category:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Language tags:</strong> [Python] [JavaScript] [TypeScript] [SQL] [Shell] [Go]</li><li><strong>Category tags:</strong> [API] [DB] [UI] [Auth] [Deploy] [Test] [Performance]</li><li><strong>Status:</strong> [Verified] [Unverified] [Deprecated]</li></ul><p style="margin-top:.75rem">Prefix every note with tags. Searching Gmail for "[Python][API]" instantly lists all Python API code snippets.</p></div><div class="tip-card__example"><strong>Naming:</strong> "[JS][API][Verified] fetch with retry - 3x retry with exponential backoff fetch wrapper"</div></div></div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Method 3: Search-Optimized Notes</span></h2>
+
+<div lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>Write With Future Search Terms</span><span class="tip-card__rank">Searchability</span></div><div class="tip-card__desc"><p>Note value appears not when written but when searched. Maximize search hits with these rules:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Include the problem:</strong> "How to fix CORS errors"</li><li><strong>Exact error message:</strong> "Access-Control-Allow-Origin missing"</li><li><strong>Solution summary:</strong> "Add headers server-side"</li><li><strong>Code fragment:</strong> Paste working code</li><li><strong>Reference URLs:</strong> Official docs or Stack Overflow links</li></ul><p style="margin-top:.75rem">The trick: imagine what keywords your future self would search when hitting the same problem 3 months later.</p></div></div></div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Method 4: Team Knowledge Base</span></h2>
+
+<div lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">4</span>From Personal Notes to Team Assets</span><span class="tip-card__rank">Sharing</span></div><div class="tip-card__desc"><p>Personal snippet notes become seeds for team knowledge bases:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Weekly share:</strong> Post the week's most useful snippet to Slack</li><li><strong>GitHub Gist:</strong> Convert verified snippets to Gists, add to README</li><li><strong>Notion/Wiki:</strong> Promote project-specific insights to official docs</li><li><strong>Onboarding:</strong> Organize "common problems &amp; solutions" for new members</li></ul><p style="margin-top:.75rem">One person's notes save development time for 10. Simple Memo capture, Gmail accumulation, GitHub Gist sharing -- this 3-step pipeline is unbeatable.</p></div></div></div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">FAQ</span></h2>
+
+<div lang="en">
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Best tool for code snippet management?</summary><div class="faq-answer"><p>Simple Memo for instant capture, GitHub Gist/Notion/Obsidian for organization, VS Code snippets for daily use.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">How to classify snippets?</summary><div class="faq-answer"><p>Use language x category tags. Unified prefixes like [Python][API] dramatically improve searchability.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Worth saving Stack Overflow answers?</summary><div class="faq-answer"><p>Re-searching takes 15 minutes; saved notes take 5 seconds. Save adapted versions for your project.</p></div></details></div>
+</div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Language-Specific Snippet Memo Best Practices</span></h2>
+
+<div lang="en">
+<div class="tip-card">
+<div class="tip-card__header"><span class="tip-card__name">Python / Data Processing</span><span class="tip-card__rank">Python</span></div>
+<div class="tip-card__desc">
+<p>Python snippet searchability is maximized by noting "library name + operation." Python's rich ecosystem makes distinguishing standard library from third-party packages especially useful.</p>
+<ul style="margin-top:.5rem;padding-left:1.2rem">
+<li><strong>Naming rule:</strong> [Python][pandas] Read CSV and handle missing values -- always include library name in tags</li>
+<li><strong>Version info:</strong> New syntax available in Python 3.11+ (match-case, etc.) should note the version. Add tags like "[Python3.11+]"</li>
+<li><strong>Virtual env commands:</strong> venv, conda, poetry setup commands are used frequently but easily forgotten. Memo as "[Python][env] poetry add --dev pytest"</li>
+<li><strong>One-liners:</strong> List comprehensions, lambda expressions -- powerful Python one-liners are needed just when you've forgotten them. Save with concrete examples</li>
+</ul>
+</div>
+<div class="tip-card__example"><strong>Example:</strong> "[Python][pandas][Verified] Chunked CSV reading - pd.read_csv('file.csv', chunksize=10000) saves memory. Tested with 1M rows."</div>
+</div>
+<div class="tip-card">
+<div class="tip-card__header"><span class="tip-card__name">JavaScript / TypeScript / Frontend</span><span class="tip-card__rank">JS/TS</span></div>
+<div class="tip-card__desc">
+<p>JS/TS frameworks evolve rapidly, making "framework name + version" especially important.</p>
+<ul style="margin-top:.5rem;padding-left:1.2rem">
+<li><strong>React/Next.js:</strong> "[React18][Hooks]" "[Next14][App Router]" -- note major versions and paradigms. Server Components differ entirely between Pages Router and App Router</li>
+<li><strong>TypeScript types:</strong> Complex generics and utility types (Partial, Pick, Omit) are easy to forget. Save with concrete use cases</li>
+<li><strong>npm/yarn commands:</strong> Install, uninstall, and version-specific commands vary subtly. Memo as "[npm] npm install --save-exact package@1.2.3"</li>
+<li><strong>Browser APIs:</strong> Intersection Observer, Web Workers, Service Worker -- low frequency but hard to recall when needed. Save as snippets</li>
+</ul>
+</div>
+</div>
+<div class="tip-card">
+<div class="tip-card__header"><span class="tip-card__name">SQL / Shell / Infrastructure</span><span class="tip-card__rank">SQL/Shell</span></div>
+<div class="tip-card__desc">
+<p>For SQL, shell, and infrastructure commands, noting the "execution environment" and "danger level" is critical.</p>
+<ul style="margin-top:.5rem;padding-left:1.2rem">
+<li><strong>SQL:</strong> "[SQL][PostgreSQL] Window function ranking" "[SQL][MySQL] JSON column query" -- specify the RDBMS. Syntax often differs between MySQL, PostgreSQL, and SQLite</li>
+<li><strong>Shell scripts:</strong> "[Shell][Destructive] Safe rm -rf alternative: trash-cli" -- tag dangerous-in-production commands with [Destructive]</li>
+<li><strong>Docker/K8s:</strong> "[Docker] Multi-stage build to reduce image size" "[K8s] Update ConfigMap without Pod restart" -- include operational context in titles</li>
+<li><strong>Git:</strong> "[Git] Apply specific commit to another branch: cherry-pick" -- writing the purpose in natural language improves search hit rate</li>
+</ul>
+</div>
+<div class="tip-card__example"><strong>Important:</strong> Always note the execution environment (macOS/Linux/WSL) for shell commands. Command options differ across OSes, and this is the #1 cause of errors when running memorized commands.</div>
+</div>
+</div>
+</section>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Benefits of Managing Code Snippets via Email</span></h2>
+
+<div lang="en">
+<div class="tip-card">
+<div class="tip-card__header"><span class="tip-card__name">Why Email Over GitHub Gist or Notion</span><span class="tip-card__rank">Benefits</span></div>
+<div class="tip-card__desc">
+<p>Many code snippet management tools exist, but email-based management offers unique advantages in combining "instant capture" with "search convenience."</p>
+<p style="margin-top:.75rem"><strong>Benefit 1: Zero Capture Friction</strong></p>
+<p style="margin-top:.5rem">Opening GitHub Gist, entering a title, pasting code -- this flow is unusable during commute or meetings. With Simple Memo, 3 seconds on your phone captures the snippet and its context. It is more reliable to throw it into email first than to plan "I'll organize it in Gist later" and forget.</p>
+<p style="margin-top:.75rem"><strong>Benefit 2: Gmail's Search Power</strong></p>
+<p style="margin-top:.5rem">Gmail search is exceptionally powerful. Searching "from:noreply@simplememofast.com python api retry" pinpoints just your snippet memos. Full-text search is a given, plus you can filter by attachment names and date ranges.</p>
+<p style="margin-top:.75rem"><strong>Benefit 3: No Tool Lock-in</strong></p>
+<p style="margin-top:.5rem">Migrating between snippet management tools is painful -- export/import compatibility issues, lost tags and metadata. But email is infrastructure guaranteed to exist in 10 years. Even if Gist or Notion changes or shuts down, your email-saved snippets remain unaffected.</p>
+<p style="margin-top:.75rem"><strong>Benefit 4: Automatic Chronological Records</strong></p>
+<p style="margin-top:.5rem">Email automatically records send timestamps, so you know exactly when you saved a snippet or solved a bug. This serves as a "chronological knowledge log" invaluable for project retrospectives and technical blog writing.</p>
+<p style="margin-top:.75rem"><strong>Benefit 5: Effortless Team Sharing</strong></p>
+<p style="margin-top:.5rem">Want to share a saved snippet with a colleague? With email, just forward it. No format conversion, no account invitations needed. "I'll email you that CORS fix" and sharing is done.</p>
+</div>
+<div class="tip-card__example"><strong>Recommended flow:</strong> Instant capture (Simple Memo to email) then weekend organization (promote important ones to GitHub Gist) then team sharing (post Gist URL in Slack). Email is the "messy capture bin," Gist is the "curated showcase" -- separating these roles is the most practical approach.</div>
+</div>
+</div>
+</section>
+<section class="lp-section">
+<h2 class="lp-section__title">
+
+<span lang="en">Related Articles</span>
+</h2>
+<div class="internal-links">
+<a href="/en/blog/chatgpt-memo-workflow">
+
+<span lang="en">Is Memo-Taking Still Meaningful in the ChatGPT Era?</span>
+</a>
+<a href="/en/blog/ai-information-workflow">
+
+<span lang="en">AI-Era Information Workflow Memo to Email to GPT</span>
+</a>
+<a href="/blog/meeting-memo-template">
+
+<span lang="en">5 Meeting Note Templates That Transform Your Minutes</span>
+</a>
+</div>
+</section>
+<div class="cta-box"><div class="cta-box__title"><span lang="en">Capture code insights instantly</span></div><div class="cta-box__desc"><span lang="en">Save discoveries during code reviews in 0.4s. Build your snippet library via self-email.</span></div><a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" lang="en"><img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="120"/></a></div>
+<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Related Pages</span></h2><div class="internal-links"><a href="/blog/memo-taking-tips"><span lang="en">10 Note-Taking Tips</span></a><a href="/en/blog/chatgpt-memo-workflow"><span lang="en">ChatGPT Era Memos</span></a><a href="/en/blog/ai-information-workflow"><span lang="en">AI Info Workflow</span></a><a href="/blog/idea-memo-organization"><span lang="en">Idea Memo Organization</span></a><a href="/blog/productivity-methods-comparison"><span lang="en">Productivity Methods</span></a><a href="/en/blog/"><span lang="en">All Articles</span></a></div></section>
+</div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Give your notes somewhere to accumulate</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+</span>
+</a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+
+<span lang="en">Related Content</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/en/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Captio Alternatives</span></a></li>
+<li><a href="/en/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">How to Email Yourself</span></a></li>
+<li><a href="/en/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Compare Memo Apps</span></a></li>
+<li><a href="/en/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Setup Guides</span></a></li>
+</ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - for Obsidian" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span lang="en">Developer of Simple Memo, an iPhone app for capturing text into a configured email inbox or connected note destination.</span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/en/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">Profile</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X / Twitter</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside>
+</main>
+
+<section class="references" lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
+<ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+<li>Storey, M.-A. et al. (2020). How Developers and Managers Define and Trade Productivity and Quality. IEEE Software.</li>
+<li><a href="https://queue.acm.org/detail.cfm?id=3595878" rel="noopener" target="_blank">Forsgren, N. et al. (2023). DevEx: What Actually Drives Productivity. ACM Queue.</a></li>
+</ul>
+</section>
+<footer class="footer"><div class="container"><nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"><span lang="en">Home</span></a>
+<a class="footer__link" href="/en/use-cases/"><span lang="en">Use Cases</span></a>
+<a class="footer__link" href="/en/guides/"><span lang="en">Guides</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/en/captio-alternative/"><span lang="en">Captio Alternative</span></a>
+<a class="footer__link" href="/en/note-to-email/"><span lang="en">Note to Email</span></a>
+<a class="footer__link" href="/en/vs/"><span lang="en">Comparisons</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/en/blog/"><span lang="en">Blog</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/devlog/"><span lang="en">Dev log</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/faq"><span lang="en">FAQ</span></a>
+<a class="footer__link" href="/en/privacy"><span lang="en">Privacy</span></a>
+<a class="footer__link" href="/contact"><span lang="en">Contact</span></a>
+</div>
+</nav><p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p></div></footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+</body></html>

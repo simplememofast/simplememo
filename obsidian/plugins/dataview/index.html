@@ -48,6 +48,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/dataview/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/dataview/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -89,8 +92,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -287,22 +288,22 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/obsidian/plugins/dataview/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/obsidian/plugins/dataview/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
@@ -315,127 +316,124 @@
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">Obsidianプラグイン解説 — Dataview</span><span lang="en" data-lang="en">Obsidian plugin guide — Dataview</span>
+          <span lang="ja">Obsidianプラグイン解説 — Dataview</span>
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">Dataviewの使い方 — 保管庫をデータベースのように検索する</span><span lang="en" data-lang="en">Dataview: query your vault like a database</span>
+          <span lang="ja">Dataviewの使い方 — 保管庫をデータベースのように検索する</span>
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">Dataviewはダウンロード数<a href="/obsidian/plugins/">実測3位</a>の定番プラグインです。このページでは<strong>公式GitHubリポジトリのREADMEとマニフェスト、公式ダウンロード数データを直接取得</strong>し、何ができるか・どれくらい使われているか・4つのクエリの書き方を、検証できた範囲だけでまとめました。</span><span lang="en" data-lang="en">Dataview is the plugin <a href="/obsidian/plugins/">ranked #3 by measured downloads</a>. For this page we pulled the official GitHub repository&#39;s README and manifest, plus the official download-count data, directly — and cover what it does, how much it is used, and its four query modes, limited to what we could actually verify.</span>
+          <span lang="ja">Dataviewはダウンロード数<a href="/obsidian/plugins/">実測3位</a>の定番プラグインです。このページでは<strong>公式GitHubリポジトリのREADMEとマニフェスト、公式ダウンロード数データを直接取得</strong>し、何ができるか・どれくらい使われているか・4つのクエリの書き方を、検証できた範囲だけでまとめました。</span>
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-22">2026年8月22日</time>・ 検証日: 2026年8月22日（公式GitHubリポジトリ・公式レジストリ実取得）</span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-22">August 22, 2026</time> · Verified August 22, 2026 (fetched directly from the official GitHub repo and registry)</span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-22">2026年8月22日</time>・ 検証日: 2026年8月22日（公式GitHubリポジトリ・公式レジストリ実取得）</span>
         </p>
       </div>
 
       <!-- Answer block (AIO) -->
       <section class="lp-section" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;">
-        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">Dataviewは何をするプラグインですか？</span><span lang="en" data-lang="en">What does the Dataview plugin do?</span></h2>
-        <div lang="ja" data-lang="ja">
+        <h2 class="lp-section__title"><span lang="ja">Dataviewは何をするプラグインですか？</span></h2>
+        <div lang="ja">
           <p><strong>保管庫（Vault）をデータベースのように検索できるようにするプラグインです。</strong>ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASK・DataviewJSという4つのクエリモードで一覧化・集計できます。公式ダウンロード数データ（2026年8月22日取得）では480万5,635件で3位でした（レジストリの登録総数は6,840個ですが、順位はこれとは別ファイルのダウンロード数データの中での順位です）。</p>
           <p>ただし目立った機能追加は2025年4月を最後に止まって見えます（下の実測データで詳述）。壊れているわけではありませんが、「今も活発に開発が進んでいる」という前提では見ない方が正確です。</p>
         </div>
-        <div lang="en" data-lang="en">
-          <p><strong>Dataview turns your vault into something you can query like a database.</strong> Metadata you write in a note&#39;s frontmatter or as inline fields becomes queryable through four modes: TABLE, LIST, TASK and DataviewJS. Per the official download-count data (fetched August 22, 2026), it has 4,805,635 downloads and ranks #3 within that data (the registry itself lists 6,840 plugins, but that is a separate file from the one the ranking is computed over).</p>
-          <p>That said, visible feature work appears to have stopped after April 2025 (details below). It is not broken, but it is more accurate to think of it as stable rather than actively evolving.</p>
-        </div>
+
       </section>
 
       <!-- Measured: downloads, rank, release status -->
       <section class="lp-section" id="measured">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">実測 — ダウンロード数とリリース状況</span><span lang="en" data-lang="en">Measured: downloads and release status</span>
+          <span lang="ja">実測 — ダウンロード数とリリース状況</span>
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">Obsidian公式の配布元（GitHub: <code>obsidianmd/obsidian-releases</code>）が公開する <code>community-plugin-stats.json</code> と、Dataview自身のリポジトリ（GitHub: <code>blacksmithgu/obsidian-dataview</code>）の <code>manifest.json</code> を、<code>raw.githubusercontent.com</code> 経由でこの環境に直接取得しました。</span><span lang="en" data-lang="en">We fetched <code>community-plugin-stats.json</code> from Obsidian&#39;s official distribution (GitHub: <code>obsidianmd/obsidian-releases</code>) and <code>manifest.json</code> from Dataview&#39;s own repository (GitHub: <code>blacksmithgu/obsidian-dataview</code>) directly into this environment via <code>raw.githubusercontent.com</code>.</span>
+          <span lang="ja">Obsidian公式の配布元（GitHub: <code>obsidianmd/obsidian-releases</code>）が公開する <code>community-plugin-stats.json</code> と、Dataview自身のリポジトリ（GitHub: <code>blacksmithgu/obsidian-dataview</code>）の <code>manifest.json</code> を、<code>raw.githubusercontent.com</code> 経由でこの環境に直接取得しました。</span>
         </p>
         <div style="overflow-x:auto">
           <table class="rt-table">
           <thead>
             <tr>
-              <th scope="col"><span lang="ja" data-lang="ja">項目</span><span lang="en" data-lang="en">Item</span></th>
-              <th scope="col"><span lang="ja" data-lang="ja">実測値</span><span lang="en" data-lang="en">Measured value</span></th>
-              <th scope="col"><span lang="ja" data-lang="ja">出典</span><span lang="en" data-lang="en">Source</span></th>
+              <th scope="col"><span lang="ja">項目</span></th>
+              <th scope="col"><span lang="ja">実測値</span></th>
+              <th scope="col"><span lang="ja">出典</span></th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">ダウンロード数・順位</span><span lang="en" data-lang="en">Downloads &amp; rank</span></th>
-              <td data-label="Value">4,805,635<span lang="ja" data-lang="ja">（ダウンロード数データの中で<strong>3位</strong>。1位Excalidraw・2位Templater）</span><span lang="en" data-lang="en"> (<strong>#3</strong> within the download-count data; Excalidraw #1, Templater #2)</span></td>
+              <th scope="row"><span lang="ja">ダウンロード数・順位</span></th>
+              <td data-label="Value">4,805,635<span lang="ja">（ダウンロード数データの中で<strong>3位</strong>。1位Excalidraw・2位Templater）</span></td>
               <td data-label="Source"><code>community-plugin-stats.json</code></td>
             </tr>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">レジストリの登録プラグイン総数</span><span lang="en" data-lang="en">Plugins in the registry</span></th>
-              <td data-label="Value"><span lang="ja" data-lang="ja">6,840件。<strong>順位の母数とは別のファイル</strong>で、ダウンロード数データに載る件数はこれよりわずかに少ない（統計に現れないプラグインがあるため）。</span><span lang="en" data-lang="en">6,840. This is a <strong>different file from the one the ranking is computed over</strong> — slightly fewer plugins appear in the download-count data, since not every registered plugin shows up there.</span></td>
+              <th scope="row"><span lang="ja">レジストリの登録プラグイン総数</span></th>
+              <td data-label="Value"><span lang="ja">6,840件。<strong>順位の母数とは別のファイル</strong>で、ダウンロード数データに載る件数はこれよりわずかに少ない（統計に現れないプラグインがあるため）。</span></td>
               <td data-label="Source"><code>community-plugins.json</code></td>
             </tr>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">前回計測（2026-08-21）との差</span><span lang="en" data-lang="en">Change vs. 2026-08-21</span></th>
-              <td data-label="Value"><span lang="ja" data-lang="ja">±0件。ただしこれは「24時間で1件も増えなかった」という意味では<strong>ありません</strong>。配信されているJSON自体が2回の取得の間に再生成されておらず、<a href="/obsidian/plugins/">前回ページ</a>と同じスナップショットを読んだ、というのが正確な読み方です。</span><span lang="en" data-lang="en">±0 — but this does <strong>not</strong> mean downloads stood still for 24 hours. The published JSON itself had not been regenerated between the two fetches, so this read hit the same snapshot as <a href="/obsidian/plugins/">yesterday&#39;s page</a>.</span></td>
+              <th scope="row"><span lang="ja">前回計測（2026-08-21）との差</span></th>
+              <td data-label="Value"><span lang="ja">±0件。ただしこれは「24時間で1件も増えなかった」という意味では<strong>ありません</strong>。配信されているJSON自体が2回の取得の間に再生成されておらず、<a href="/obsidian/plugins/">前回ページ</a>と同じスナップショットを読んだ、というのが正確な読み方です。</span></td>
               <td data-label="Source"><code>community-plugin-stats.json</code></td>
             </tr>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">ダウンロード数データの更新日時</span><span lang="en" data-lang="en">Stats <code>updated</code> timestamp</span></th>
-              <td data-label="Value">2025-04-07 19:17 UTC<span lang="ja" data-lang="ja">（計測時点で約16ヶ月前）</span><span lang="en" data-lang="en"> (about 16 months before this measurement)</span></td>
-              <td data-label="Source"><code>community-plugin-stats.json</code> <span lang="ja" data-lang="ja">の</span><code>updated</code><span lang="ja" data-lang="ja">フィールド</span></td>
+              <th scope="row"><span lang="ja">ダウンロード数データの更新日時</span></th>
+              <td data-label="Value">2025-04-07 19:17 UTC<span lang="ja">（計測時点で約16ヶ月前）</span></td>
+              <td data-label="Source"><code>community-plugin-stats.json</code> <span lang="ja">の</span><code>updated</code><span lang="ja">フィールド</span></td>
             </tr>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">masterブランチのバージョン</span><span lang="en" data-lang="en">Version on <code>master</code></span></th>
-              <td data-label="Value">0.5.68<span lang="ja" data-lang="ja">（minAppVersion 0.13.11・isDesktopOnly: false）</span><span lang="en" data-lang="en"> (minAppVersion 0.13.11, isDesktopOnly: false)</span></td>
+              <th scope="row"><span lang="ja">masterブランチのバージョン</span></th>
+              <td data-label="Value">0.5.68<span lang="ja">（minAppVersion 0.13.11・isDesktopOnly: false）</span></td>
               <td data-label="Source"><code>manifest.json</code></td>
             </tr>
             <tr>
-              <th scope="row"><span lang="ja" data-lang="ja">GitHub Releasesの最新タグ</span><span lang="en" data-lang="en">Latest GitHub Releases tag</span></th>
-              <td data-label="Value">0.5.70<span lang="ja" data-lang="ja">（ベータ表記）</span><span lang="en" data-lang="en"> (marked beta)</span></td>
+              <th scope="row"><span lang="ja">GitHub Releasesの最新タグ</span></th>
+              <td data-label="Value">0.5.70<span lang="ja">（ベータ表記）</span></td>
               <td data-label="Source">github.com/blacksmithgu/obsidian-dataview/releases</td>
             </tr>
           </tbody>
         </table>
         </div>
         <p>
-          <span lang="ja" data-lang="ja"><strong>masterのバージョン（0.5.68）とReleasesページの最新タグ（0.5.70・ベータ）が一致していません。</strong>正式リリースとしてmanifestに反映される機能追加は止まって見えますが、Issueへの返信や小さな修正は続いています。あるユーザー向けブログは「3万行のコードが、ちゃんと動いている。壊れていない凍結プラグインは、壊れたプラグインとは違う」と評しており<sup>※</sup>、この実測結果と整合的です。</span><span lang="en" data-lang="en"><strong>The version on <code>master</code> (0.5.68) does not match the latest tag on the Releases page (0.5.70, marked beta).</strong> Feature work landing in a proper manifest release looks stopped, but issue replies and small fixes continue. One outside blog put it as "30,000 lines of code that works. Nothing broke... a frozen plugin that does its job is not the same as a broken one"<sup>※</sup> — consistent with what we measured here.</span>
+          <span lang="ja"><strong>masterのバージョン（0.5.68）とReleasesページの最新タグ（0.5.70・ベータ）が一致していません。</strong>正式リリースとしてmanifestに反映される機能追加は止まって見えますが、Issueへの返信や小さな修正は続いています。あるユーザー向けブログは「3万行のコードが、ちゃんと動いている。壊れていない凍結プラグインは、壊れたプラグインとは違う」と評しており<sup>※</sup>、この実測結果と整合的です。</span>
         </p>
-        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja" data-lang="ja">※ 参考文献の外部記事を参照。当サイトの一次計測ではなく、外部の見解として引用。</span><span lang="en" data-lang="en">※ See the external article in references — quoted as an outside opinion, not our own primary measurement.</span></p>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja">※ 参考文献の外部記事を参照。当サイトの一次計測ではなく、外部の見解として引用。</span></p>
       </section>
 
       <!-- Four query modes -->
       <section class="lp-section" id="query-modes">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">4つのクエリモード — 公式READMEのサンプルより</span><span lang="en" data-lang="en">Four query modes — from the official README</span>
+          <span lang="ja">4つのクエリモード — 公式READMEのサンプルより</span>
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">Dataviewには4つの書き方があります。以下は公式READMEに掲載されているサンプルをそのまま引用したものです（実際にObsidian上で実行した検証ではありません。範囲は下の検証環境欄で明記します）。</span><span lang="en" data-lang="en">Dataview offers four ways to query. The samples below are quoted directly from the official README (we did not run these inside Obsidian ourselves — see the verification-scope note below).</span>
+          <span lang="ja">Dataviewには4つの書き方があります。以下は公式READMEに掲載されているサンプルをそのまま引用したものです（実際にObsidian上で実行した検証ではありません。範囲は下の検証環境欄で明記します）。</span>
         </p>
 
         <div class="reason-cards" style="grid-template-columns:1fr;">
           <div class="reason-card">
-            <div class="reason-card__title">1. <span lang="ja" data-lang="ja">DQL（Dataview Query Language）</span><span lang="en" data-lang="en">DQL (Dataview Query Language)</span></div>
-            <p class="reason-card__desc"><span lang="ja" data-lang="ja">SQLに似た専用の記法。基本的な用途に向く。</span><span lang="en" data-lang="en">A dedicated, SQL-like syntax for common cases.</span></p>
+            <div class="reason-card__title">1. <span lang="ja">DQL（Dataview Query Language）</span></div>
+            <p class="reason-card__desc"><span lang="ja">SQLに似た専用の記法。基本的な用途に向く。</span></p>
             <pre class="note-sample"><code>```dataview
 TABLE file.name AS "File", rating AS "Rating" FROM #book
 ```</code></pre>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title">2. <span lang="ja" data-lang="ja">インライン式</span><span lang="en" data-lang="en">Inline expressions</span></div>
-            <p class="reason-card__desc"><span lang="ja" data-lang="ja">本文中に埋め込み、プレビューで評価される。</span><span lang="en" data-lang="en">Embedded directly in a note and evaluated in preview mode.</span></p>
+            <div class="reason-card__title">2. <span lang="ja">インライン式</span></div>
+            <p class="reason-card__desc"><span lang="ja">本文中に埋め込み、プレビューで評価される。</span></p>
             <pre class="note-sample"><code>We are on page `= this.file.name`.</code></pre>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">3. DataviewJS</div>
-            <p class="reason-card__desc"><span lang="ja" data-lang="ja">JavaScript APIをフル活用できる、最も強力なモード。</span><span lang="en" data-lang="en">The most powerful mode, with full access to the JavaScript API.</span></p>
+            <p class="reason-card__desc"><span lang="ja">JavaScript APIをフル活用できる、最も強力なモード。</span></p>
             <pre class="note-sample"><code>```dataviewjs
 dv.taskList(dv.pages().file.tasks.where(t =&gt; !t.completed));
 ```</code></pre>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title">4. <span lang="ja" data-lang="ja">インラインJS式</span><span lang="en" data-lang="en">Inline JS expressions</span></div>
-            <p class="reason-card__desc"><span lang="ja" data-lang="ja">インライン式のJavaScript版。任意のJSをその場で実行できる。</span><span lang="en" data-lang="en">The JavaScript equivalent of inline expressions — run arbitrary JS inline.</span></p>
+            <div class="reason-card__title">4. <span lang="ja">インラインJS式</span></div>
+            <p class="reason-card__desc"><span lang="ja">インライン式のJavaScript版。任意のJSをその場で実行できる。</span></p>
             <pre class="note-sample"><code>This page was last modified at `$= dv.current().file.mtime`.</code></pre>
           </div>
         </div>
 
         <p class="lp-section__lead" style="margin-top:1rem;">
-          <span lang="ja" data-lang="ja">データの入力側は2種類です。ノート先頭のYAML frontmatter（<code>---</code>で囲む）か、本文中に<code>フィールド名:: 値</code>と書くインラインフィールドで、どちらもDataviewが読み取ってクエリの対象にします。</span><span lang="en" data-lang="en">There are two ways to feed it data: YAML frontmatter at the top of a note (fenced by <code>---</code>), or inline fields written as <code>Field:: Value</code> in the body — both are indexed and become queryable.</span>
+          <span lang="ja">データの入力側は2種類です。ノート先頭のYAML frontmatter（<code>---</code>で囲む）か、本文中に<code>フィールド名:: 値</code>と書くインラインフィールドで、どちらもDataviewが読み取ってクエリの対象にします。</span>
         </p>
         <pre class="note-sample"><code>---
 alias: "document"
@@ -452,31 +450,31 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
       <!-- Security note -->
       <section class="lp-section" id="security">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">DataviewJSのセキュリティに関する注意</span><span lang="en" data-lang="en">A security note on DataviewJS</span>
+          <span lang="ja">DataviewJSのセキュリティに関する注意</span>
         </h2>
         <div class="tip-box">
-          <div class="tip-box__title"><span lang="ja" data-lang="ja">公式READMEより</span><span lang="en" data-lang="en">FROM THE OFFICIAL README</span></div>
-          <p style="margin:0;"><span lang="ja" data-lang="ja">DataviewJSは強力な分、他のObsidianプラグインと同じ権限で動きます。つまりファイルの書き換え・作成・削除や、ネットワーク通信も可能です。<strong>自分で書いたコードか、内容を理解している・信頼できる配布元のスクリプトだけ</strong>を使うことが公式に推奨されています。一方、通常のDataviewクエリ（DQL）はサンドボックス化されており、保管庫に変更を加えることはできません（その分できることは限られます）。</span><span lang="en" data-lang="en">DataviewJS is powerful because it runs at the same permission level as any other Obsidian plugin — meaning it can rewrite, create, or delete files, and make network calls. The README recommends writing your own JS, or only using scripts you understand and trust. Regular DQL queries, by contrast, are sandboxed and cannot make changes to your vault — in exchange for being more limited.</span></p>
+          <div class="tip-box__title"><span lang="ja">公式READMEより</span></div>
+          <p style="margin:0;"><span lang="ja">DataviewJSは強力な分、他のObsidianプラグインと同じ権限で動きます。つまりファイルの書き換え・作成・削除や、ネットワーク通信も可能です。<strong>自分で書いたコードか、内容を理解している・信頼できる配布元のスクリプトだけ</strong>を使うことが公式に推奨されています。一方、通常のDataviewクエリ（DQL）はサンドボックス化されており、保管庫に変更を加えることはできません（その分できることは限られます）。</span></p>
         </div>
       </section>
 
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">クエリを書く前に、まず1行を残す場所を決める</span><span lang="en" data-lang="en">Before you write your first query, decide where the first line lands</span>
+          <span lang="ja">クエリを書く前に、まず1行を残す場所を決める</span>
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">Dataviewは「保管庫の中にすでにあるノート」を検索・集計しますが、「思いついたことをノートにする」手前の工程は担いません。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。frontmatterやインラインフィールドを使い始める前の、いちばん最初の1行のための道具です。</span><span lang="en" data-lang="en">Dataview searches and rolls up notes that already exist in your vault; it does not handle the step before that — turning a passing thought into a note in the first place. Simple Memo emails each note to you and <strong>appends it straight into the daily note inside your vault folder on iCloud Drive</strong>. It is a tool for that very first line, before frontmatter or inline fields ever come into play.</span>
+          <span lang="ja">Dataviewは「保管庫の中にすでにあるノート」を検索・集計しますが、「思いついたことをノートにする」手前の工程は担いません。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。frontmatterやインラインフィールドを使い始める前の、いちばん最初の1行のための道具です。</span>
         </p>
         <div class="cta-box">
-          <div class="cta-box__title"><span lang="ja" data-lang="ja">クエリの対象になる1行を、まず作る</span><span lang="en" data-lang="en">Create the line Dataview will query</span></div>
-          <p class="cta-box__desc"><span lang="ja" data-lang="ja">思いついたら話すだけ。メールにもデイリーノートにも、同じ1行が残ります。ダウンロードは無料です。</span><span lang="en" data-lang="en">Say the thought and it lands in your inbox and your daily note alike. Free to download.</span></p>
+          <div class="cta-box__title"><span lang="ja">クエリの対象になる1行を、まず作る</span></div>
+          <p class="cta-box__desc"><span lang="ja">思いついたら話すだけ。メールにもデイリーノートにも、同じ1行が残ります。ダウンロードは無料です。</span></p>
           <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
             <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
           </a>
           <div class="cta-qr">
-            <img src="/assets/img/qr-obsidian-plugins-dataview-ja.svg?v=3b79301257" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja" data-lang="ja">
-            <img src="/assets/img/qr-obsidian-plugins-dataview-en.svg?v=807a3872bc" width="132" height="132" alt="QR code to download on the App Store" loading="lazy" lang="en" data-lang="en">
-            <small><span lang="ja" data-lang="ja">PCの方はスマホで読み取り</span><span lang="en" data-lang="en">On desktop? Scan with your phone</span></small>
+            <img src="/assets/img/qr-obsidian-plugins-dataview-ja.svg?v=3b79301257" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja">
+
+            <small><span lang="ja">PCの方はスマホで読み取り</span></small>
           </div>
         </div>
       </section>
@@ -484,36 +482,36 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+          <span lang="ja">よくある質問</span>
         </h2>
         <div class="faq-item">
           <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja" data-lang="ja">Dataviewは何をするプラグインですか？</span><span lang="en" data-lang="en">What does Dataview do?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">保管庫（Vault）をデータベースのように検索できるようにするプラグインです。ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASK・DataviewJSという4つのクエリモードで一覧化・集計できます。</span><span lang="en" data-lang="en">It turns your vault into something you can query like a database. Metadata in a note&#39;s frontmatter or inline fields becomes queryable through four modes: TABLE, LIST, TASK and DataviewJS.</span></div>
+            <summary class="faq-summary"><span lang="ja">Dataviewは何をするプラグインですか？</span></summary>
+            <div class="faq-answer"><span lang="ja">保管庫（Vault）をデータベースのように検索できるようにするプラグインです。ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASK・DataviewJSという4つのクエリモードで一覧化・集計できます。</span></div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja" data-lang="ja">Dataviewはどれくらい使われていますか？</span><span lang="en" data-lang="en">How widely used is Dataview?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">Obsidian公式のダウンロード数データを2026年8月22日に直接取得したところ、480万5,635件で、そのデータの中で<strong>3位</strong>でした（1位Excalidraw・2位Templater）。なお「登録プラグイン6,840個」はレジストリ一覧の件数で、順位を計算したダウンロード数データとは別ファイルです。</span><span lang="en" data-lang="en">Fetching the official download-count data directly on August 22, 2026 gave 4,805,635 downloads — <strong>#3</strong> within that data (behind Excalidraw and Templater). The often-quoted &quot;6,840 plugins&quot; is the registry listing, which is a separate file from the download-count data the ranking is computed over.</span></div>
+            <summary class="faq-summary"><span lang="ja">Dataviewはどれくらい使われていますか？</span></summary>
+            <div class="faq-answer"><span lang="ja">Obsidian公式のダウンロード数データを2026年8月22日に直接取得したところ、480万5,635件で、そのデータの中で<strong>3位</strong>でした（1位Excalidraw・2位Templater）。なお「登録プラグイン6,840個」はレジストリ一覧の件数で、順位を計算したダウンロード数データとは別ファイルです。</span></div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja" data-lang="ja">Dataviewは今も開発されていますか？</span><span lang="en" data-lang="en">Is Dataview still being developed?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">公式ダウンロード数データの更新日時は2025年4月7日で、本ページ計測時点から16ヶ月ほど新しい値の動きがありません。GitHubのリリースページには0.5.70というベータタグがありますが、masterブランチのmanifest.jsonは0.5.68のままです。目立った機能追加は止まって見えますが、Issueへの返信や小さな修正は続いており、動かなくなったわけではありません。</span><span lang="en" data-lang="en">The official stats data&#39;s <code>updated</code> timestamp is 2025-04-07 — about 16 months before this measurement, with no newer value since. GitHub&#39;s Releases page shows a beta tag, 0.5.70, but <code>manifest.json</code> on <code>master</code> still reads 0.5.68. Visible feature work looks stopped, but issue replies and small fixes continue — it has not stopped working.</span></div>
+            <summary class="faq-summary"><span lang="ja">Dataviewは今も開発されていますか？</span></summary>
+            <div class="faq-answer"><span lang="ja">公式ダウンロード数データの更新日時は2025年4月7日で、本ページ計測時点から16ヶ月ほど新しい値の動きがありません。GitHubのリリースページには0.5.70というベータタグがありますが、masterブランチのmanifest.jsonは0.5.68のままです。目立った機能追加は止まって見えますが、Issueへの返信や小さな修正は続いており、動かなくなったわけではありません。</span></div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja" data-lang="ja">Dataviewの基本的な書き方は？</span><span lang="en" data-lang="en">What's the basic syntax?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">ノートのfrontmatter（YAML）か、本文中に「フィールド名:: 値」の形で書くインラインフィールドでメタデータを付けます。そのうえで<code>dataview</code>コードブロックにTABLE・LIST・TASKいずれかのクエリを書くと、条件に合うノートが一覧になります。</span><span lang="en" data-lang="en">Tag metadata using a note&#39;s YAML frontmatter, or inline as <code>Field:: Value</code> in the body. Then write a TABLE, LIST or TASK query inside a <code>dataview</code> code block to list matching notes.</span></div>
+            <summary class="faq-summary"><span lang="ja">Dataviewの基本的な書き方は？</span></summary>
+            <div class="faq-answer"><span lang="ja">ノートのfrontmatter（YAML）か、本文中に「フィールド名:: 値」の形で書くインラインフィールドでメタデータを付けます。そのうえで<code>dataview</code>コードブロックにTABLE・LIST・TASKいずれかのクエリを書くと、条件に合うノートが一覧になります。</span></div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja" data-lang="ja">DataviewJSは安全に使えますか？</span><span lang="en" data-lang="en">Is DataviewJS safe to use?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">公式READMEによれば、DataviewJSは他のObsidianプラグインと同じ権限で動くため、ファイルの書き換え・削除やネットワーク通信が可能です。自分で書いたコードか、信頼できる配布元のスクリプトだけを使うことが推奨されています。通常のDQLクエリはサンドボックス化されており、保管庫に書き込みはできません。</span><span lang="en" data-lang="en">Per the official README, DataviewJS runs at the same permission level as any Obsidian plugin, so it can rewrite or delete files and make network calls. The README recommends writing your own code or only using trusted scripts. Regular DQL queries are sandboxed and cannot write to your vault.</span></div>
+            <summary class="faq-summary"><span lang="ja">DataviewJSは安全に使えますか？</span></summary>
+            <div class="faq-answer"><span lang="ja">公式READMEによれば、DataviewJSは他のObsidianプラグインと同じ権限で動くため、ファイルの書き換え・削除やネットワーク通信が可能です。自分で書いたコードか、信頼できる配布元のスクリプトだけを使うことが推奨されています。通常のDQLクエリはサンドボックス化されており、保管庫に書き込みはできません。</span></div>
           </details>
         </div>
       </section>
@@ -521,23 +519,23 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
       <!-- Verification environment (§28) -->
       <section class="lp-section" style="padding-top:1rem;">
         <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
-          <div class="tip-box__title"><span lang="ja" data-lang="ja">検証環境と検証範囲</span><span lang="en" data-lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
-          <p style="margin:0;"><span lang="ja" data-lang="ja">計測日: 2026年8月22日。ダウンロード数・登録数は <code>community-plugin-stats.json</code>・<code>community-plugins.json</code>（Obsidian公式配布元 <code>obsidianmd/obsidian-releases</code>）を<code>raw.githubusercontent.com</code>経由でこの環境に直接取得。バージョン情報は Dataview自身のリポジトリ（<code>blacksmithgu/obsidian-dataview</code>）の<code>manifest.json</code>・<code>README.md</code>を同じ経路で取得し、クエリのサンプルコードはREADMEの記載をそのまま引用しています。GitHubのウェブページ（スター数・フォーク数・Issue数・Releasesページの日付）はWebFetch経由の取得で、この環境のcurlでは<code>github.com</code>本体・<code>obsidian.md</code>・<code>blacksmithgu.github.io</code>（公式ドキュメントサイト）への直接アクセスがすべてブロックされています。<strong>今回はDataviewを実際にインストールしてクエリを実行する検証は行っていません</strong>（保管庫内部の実測は<a href="/obsidian/what-is-vault/">別ページ</a>で実施済み）。この点はコンテンツキューが当初想定していた「実機インストール＋動くクエリ例」という検証水準には届いておらず、今回は一次情報の直接取得と実カウントのみで出荷したことを明記します。</span><span lang="en" data-lang="en">Measured August 22, 2026. Download and registration counts came from <code>community-plugin-stats.json</code> and <code>community-plugins.json</code> (Obsidian&#39;s official distribution, <code>obsidianmd/obsidian-releases</code>), fetched directly into this environment via <code>raw.githubusercontent.com</code>. Version info came from Dataview&#39;s own repository (<code>blacksmithgu/obsidian-dataview</code>)&#39;s <code>manifest.json</code> and <code>README.md</code> via the same route; query samples are quoted verbatim from the README. GitHub web-page figures (stars, forks, issues, Releases-page dates) came via WebFetch — direct curl access to <code>github.com</code> itself, <code>obsidian.md</code>, and <code>blacksmithgu.github.io</code> (the official docs site) is blocked in this environment. <strong>We did not install Dataview and run queries ourselves this time</strong> (vault-contents testing was done separately on <a href="/obsidian/what-is-vault/">another page</a>). This falls short of the "hands-on install plus working query screenshots" bar the content queue originally set for this page — we are noting plainly that this round shipped on direct primary-source retrieval and measured counts only.</span></p>
+          <div class="tip-box__title"><span lang="ja">検証環境と検証範囲</span></div>
+          <p style="margin:0;"><span lang="ja">計測日: 2026年8月22日。ダウンロード数・登録数は <code>community-plugin-stats.json</code>・<code>community-plugins.json</code>（Obsidian公式配布元 <code>obsidianmd/obsidian-releases</code>）を<code>raw.githubusercontent.com</code>経由でこの環境に直接取得。バージョン情報は Dataview自身のリポジトリ（<code>blacksmithgu/obsidian-dataview</code>）の<code>manifest.json</code>・<code>README.md</code>を同じ経路で取得し、クエリのサンプルコードはREADMEの記載をそのまま引用しています。GitHubのウェブページ（スター数・フォーク数・Issue数・Releasesページの日付）はWebFetch経由の取得で、この環境のcurlでは<code>github.com</code>本体・<code>obsidian.md</code>・<code>blacksmithgu.github.io</code>（公式ドキュメントサイト）への直接アクセスがすべてブロックされています。<strong>今回はDataviewを実際にインストールしてクエリを実行する検証は行っていません</strong>（保管庫内部の実測は<a href="/obsidian/what-is-vault/">別ページ</a>で実施済み）。この点はコンテンツキューが当初想定していた「実機インストール＋動くクエリ例」という検証水準には届いておらず、今回は一次情報の直接取得と実カウントのみで出荷したことを明記します。</span></p>
         </div>
       </section>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+          <span lang="ja">関連ページ</span>
         </h2>
         <div class="internal-links">
-          <a href="/obsidian/plugins/"><span lang="ja" data-lang="ja">プラグイン入門（6,812個から実測トップ10）</span><span lang="en" data-lang="en">Plugins guide (measured top 10)</span></a>
-          <a href="/obsidian/what-is-vault/"><span lang="ja" data-lang="ja">保管庫（Vault）とは（実測）</span><span lang="en" data-lang="en">What is a vault (measured)</span></a>
-          <a href="/obsidian/getting-started/"><span lang="ja" data-lang="ja">Obsidianの始め方（実画面ガイド）</span><span lang="en" data-lang="en">Getting started with Obsidian</span></a>
-          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
-          <a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a>
-          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+          <a href="/obsidian/plugins/"><span lang="ja">プラグイン入門（6,812個から実測トップ10）</span></a>
+          <a href="/obsidian/what-is-vault/"><span lang="ja">保管庫（Vault）とは（実測）</span></a>
+          <a href="/obsidian/getting-started/"><span lang="ja">Obsidianの始め方（実画面ガイド）</span></a>
+          <a href="/obsidian/"><span lang="ja">Obsidian連携の詳細</span></a>
+          <a href="/glossary/"><span lang="ja">用語集</span></a>
+          <a href="/faq"><span lang="ja">FAQ</span></a>
         </div>
       </section>
 
@@ -546,16 +544,16 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <div class="container">
   <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">参考文献・データの出典</span><span lang="en" data-lang="en">References &amp; data sources</span>
+    <span lang="ja">参考文献・データの出典</span>
   </h2>
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://github.com/blacksmithgu/obsidian-dataview" target="_blank" rel="noopener" style="color:var(--accent);">blacksmithgu/obsidian-dataview（GitHub）</a> — <span lang="ja" data-lang="ja">Dataview公式リポジトリ。README.md・manifest.jsonを2026-08-22に<code>raw.githubusercontent.com</code>経由で直接取得</span><span lang="en" data-lang="en">Dataview&#39;s official repository. README.md and manifest.json fetched directly via <code>raw.githubusercontent.com</code> on 2026-08-22</span></li>
-    <li><a href="https://github.com/obsidianmd/obsidian-releases" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="ja" data-lang="ja">Obsidian公式の配布元。<code>community-plugin-stats.json</code>（ダウンロード数）・<code>community-plugins.json</code>（登録一覧・6,840件）を2026-08-22に直接取得</span><span lang="en" data-lang="en">Obsidian&#39;s official distribution. <code>community-plugin-stats.json</code> (downloads) and <code>community-plugins.json</code> (registry, 6,840 entries) fetched directly on 2026-08-22</span></li>
-    <li><a href="https://www.dsebastien.net/the-complete-guide-to-dataview-in-obsidian/" target="_blank" rel="noopener" style="color:var(--accent);">The Complete Guide to Dataview in Obsidian（dsebastien.net）</a> — <span lang="ja" data-lang="ja">外部記事。「凍結しているが壊れていない」という評価の引用元（当サイトの一次計測ではない）</span><span lang="en" data-lang="en">External article — source of the "frozen but not broken" framing quoted above (not our own primary measurement)</span></li>
-    <li><a href="/obsidian/plugins/" style="color:var(--accent);">Obsidianプラグイン入門（当サイト）</a> — <span lang="ja" data-lang="ja">プラグイン総数6,812個（2026-08-21実測）・トップ10ランキングの元ページ</span><span lang="en" data-lang="en">Our earlier page with the 6,812-plugin count (measured 2026-08-21) and the top-10 ranking</span></li>
-    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+    <li><a href="https://github.com/blacksmithgu/obsidian-dataview" target="_blank" rel="noopener" style="color:var(--accent);">blacksmithgu/obsidian-dataview（GitHub）</a> — <span lang="ja">Dataview公式リポジトリ。README.md・manifest.jsonを2026-08-22に<code>raw.githubusercontent.com</code>経由で直接取得</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-releases" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="ja">Obsidian公式の配布元。<code>community-plugin-stats.json</code>（ダウンロード数）・<code>community-plugins.json</code>（登録一覧・6,840件）を2026-08-22に直接取得</span></li>
+    <li><a href="https://www.dsebastien.net/the-complete-guide-to-dataview-in-obsidian/" target="_blank" rel="noopener" style="color:var(--accent);">The Complete Guide to Dataview in Obsidian（dsebastien.net）</a> — <span lang="ja">外部記事。「凍結しているが壊れていない」という評価の引用元（当サイトの一次計測ではない）</span></li>
+    <li><a href="/obsidian/plugins/" style="color:var(--accent);">Obsidianプラグイン入門（当サイト）</a> — <span lang="ja">プラグイン総数6,812個（2026-08-21実測）・トップ10ランキングの元ページ</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja">App Storeのダウンロードページ</span></li>
   </ul>
-  <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="ja" data-lang="ja">ObsidianはDynalist Inc.の商標です。本サイトはObsidianプロジェクトと提携関係にない独立メディアで、Obsidian連携シンプルメモは株式会社ユリカが開発する独立アプリです。Dataviewは blacksmithgu 氏（Michael Brenan）が開発するサードパーティ製プラグインで、当サイトはその開発者・権利者を保証・推奨するものではありません。</span><span lang="en" data-lang="en">Obsidian is a trademark of Dynalist Inc. This site is independent of the Obsidian project; Simple Memo - for Obsidian is an independent app by Yurica Inc. Dataview is a third-party plugin developed by blacksmithgu (Michael Brenan); this page does not constitute an endorsement of its developer or rights holder.</span></p>
+  <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="ja">ObsidianはDynalist Inc.の商標です。本サイトはObsidianプロジェクトと提携関係にない独立メディアで、Obsidian連携シンプルメモは株式会社ユリカが開発する独立アプリです。Dataviewは blacksmithgu 氏（Michael Brenan）が開発するサードパーティ製プラグインで、当サイトはその開発者・権利者を保証・推奨するものではありません。</span></p>
   </div>
 </section>
 
@@ -563,13 +561,13 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+        <span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
@@ -577,13 +575,13 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <div class="container">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+    <span lang="ja">関連コンテンツ</span>
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare</span></a></li>
-    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メソッド一覧</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
   </ul>
   </div>
 </section>
@@ -594,26 +592,26 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
-        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
-        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja">Apple Watch対応</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja">Obsidian連携</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja">比較</span></a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -621,8 +619,6 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

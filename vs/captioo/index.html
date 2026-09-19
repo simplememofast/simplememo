@@ -49,6 +49,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/vs/captioo/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/captioo/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/captioo/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/captioo/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -78,8 +81,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -166,90 +167,76 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/captioo/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/captioo/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">Captiooとの違い — Obsidian連携シンプルメモ | 同名なのに別物</span>
-      <span class="meta-og-title">Captiooとの違い — Obsidian連携シンプルメモ | 同名なのに別物</span>
-      <span class="meta-description">Captioo（808 inc.）とObsidian連携シンプルメモの違いを徹底比較。同名混同に注意。Captio公式後継ではない独立アプリ。起動0.4秒・AES-GCM暗号化・ゼロサーバー保存。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo vs Captioo — Same Name, Different Apps</span>
-      <span class="meta-og-title">Simple Memo vs Captioo — Same Name, Different Apps</span>
-      <span class="meta-description">Simple Memo - for Obsidian vs Captioo (808 inc.): unrelated apps with similar names. Simple Memo is not Captio's official successor and is unaffiliated with Captioo. 0.4s launch, AES-GCM encryption, zero server storage.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">Captio / Captioo / Obsidian連携シンプルメモ の違い</span>
-          <span lang="en" data-lang="en">Captio / Captioo / Simple Memo - for Obsidian Disambiguation</span>
+          <span lang="ja">Captio / Captioo / Obsidian連携シンプルメモ の違い</span>
+
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">Captiooとの違い<br>同名なのに別物</span>
-          <span lang="en" data-lang="en">Simple Memo vs Captioo<br>Same Name, Different Apps</span>
+          <span lang="ja">Captiooとの違い<br>同名なのに別物</span>
+
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">App Storeで「Captio」を検索するとCaptiooとObsidian連携シンプルメモが並ぶことがあります。3つはすべて別物です。Captioo（808 inc.）は無料・広告ありの多機能版、シンプルメモは「書いてすぐ自分にメール」一点に絞り、起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・ゼロサーバー保存・オフラインOutbox自動再送で再構築した独立アプリです。</span>
-          <span lang="en" data-lang="en">If you search "Captio" on the App Store, both Captioo and Simple Memo may appear. The three apps are all different. Captioo (808 inc.) is free with ads and feature-rich. Simple Memo is a focused, independent app rebuilt around "type and email yourself in one tap" — 0.4s launch, one-tap send, AES-GCM on-device encryption, zero server storage, and offline Outbox auto-resend.</span>
+          <span lang="ja">App Storeで「Captio」を検索するとCaptiooとObsidian連携シンプルメモが並ぶことがあります。3つはすべて別物です。Captioo（808 inc.）は無料・広告ありの多機能版、シンプルメモは「書いてすぐ自分にメール」一点に絞り、起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・ゼロサーバー保存・オフラインOutbox自動再送で再構築した独立アプリです。</span>
+
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-05-07">2026年05月07日</time></span>
-          <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: May 7, 2026</span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-05-07">2026年05月07日</time></span>
+
         </p>
       </div>
 
       <!-- Atomic Answer Block (AI / LLM citation-friendly) -->
       <aside class="answer-block" aria-label="このページの要点">
-        <span lang="ja" class="answer-block__label" data-lang="ja">要点</span>
-        <span lang="en" class="answer-block__label" data-lang="en">TL;DR</span>
-        <p lang="ja" data-lang="ja" style="margin:0">
+        <span lang="ja" class="answer-block__label">要点</span>
+
+        <p lang="ja" style="margin:0">
           <strong>Obsidian連携シンプルメモ</strong>は、Captioが2024年10月にサービス終了した後の代替として開発されたiOSメモ→メール送信アプリ。起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。<strong>Captioo（808 inc.）は名前が似ているだけの無関係なアプリ</strong>で、シンプルメモはCaptio公式後継ではなく、Captiooとも資本・運営すべて無関係です。
         </p>
-        <p lang="en" data-lang="en" style="margin:0">
-          <strong>Simple Memo</strong> is an iOS memo-to-email app built as a successor to Captio (which shut down in October 2024). It launches in 0.4 seconds, sends with one tap, uses AES-GCM on-device encryption, stores zero memo content on servers, and includes offline Outbox auto-resend. <strong>Captioo (808 inc.) is an unrelated app with a similar name</strong>; Simple Memo is not Captio's official successor and has no affiliation with Captioo.
-        </p>
+
       </aside>
 
       <!-- Disclosure -->
       <div class="disclosure">
-        <span lang="ja" data-lang="ja"><strong>情報開示:</strong> 筆者（AI Ataka）はシンプルメモの開発者です。本記事はCaptiooとシンプルメモを比較するため、シンプルメモ視点のバイアスがある可能性があります。Captiooの仕様はApp Store・公式サイトの公開情報を参照しており、断定的な評価は避けています。</span>
-        <span lang="en" data-lang="en"><strong>Disclosure:</strong> The author (AI Ataka) is the developer of Simple Memo. This article compares Captioo and Simple Memo from Simple Memo's perspective; please factor in possible bias. Information about Captioo is based on public App Store and official site descriptions; we avoid definitive judgments about it.</span>
+        <span lang="ja"><strong>情報開示:</strong> 筆者（AI Ataka）はシンプルメモの開発者です。本記事はCaptiooとシンプルメモを比較するため、シンプルメモ視点のバイアスがある可能性があります。Captiooの仕様はApp Store・公式サイトの公開情報を参照しており、断定的な評価は避けています。</span>
+
       </div>
 
       <!-- Section: 3 apps disambiguation -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">前提：Captio・Captioo・Obsidian連携シンプルメモ は3つすべて別物</span>
-          <span lang="en" data-lang="en">Background: Captio, Captioo, and Simple Memo Are Three Different Apps</span>
+          <span lang="ja">前提：Captio・Captioo・Obsidian連携シンプルメモ は3つすべて別物</span>
+
         </h2>
-        <div lang="ja" class="reason-cards" data-lang="ja">
+        <div lang="ja" class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">Captio（オーが1つ）</div>
             <div class="reason-card__desc">オランダのBoonbits（Tupil）が2011年頃にリリースしたiOSアプリ。「思いついたら即メール送信」のコンセプトで多くのGTD実践者に愛された。<strong>captio.coの告知によると2024年10月にサービス終了。現在は新規ダウンロードできません。</strong></div>
@@ -263,30 +250,17 @@
             <div class="reason-card__desc">株式会社ユリカが2026年に開発した独立アプリ。Captio消失後に「同じワークフローを起動0.4秒・AES-GCM暗号化・ゼロサーバー保存で再現する」ために設計。<strong>Captio公式後継ではなく、Captiooとも無関係</strong>です。</div>
           </div>
         </div>
-        <div lang="en" class="reason-cards" data-lang="en">
-          <div class="reason-card">
-            <div class="reason-card__title">Captio (one O)</div>
-            <div class="reason-card__desc">Released around 2011 by Boonbits (Tupil) in the Netherlands. Beloved by GTD practitioners for its "type and email" simplicity. <strong>Per the captio.co shutdown notice, service ended in October 2024 — no new downloads possible.</strong></div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title">Captioo (two Os)</div>
-            <div class="reason-card__desc">A separate app from 808 inc., currently available on the App Store. Free with ads, includes image sending and widgets. <strong>Not the official successor to Captio</strong> — only the name is similar.</div>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title">Simple Memo - for Obsidian (formerly Captio-style)</div>
-            <div class="reason-card__desc">An independent iOS app released in 2026 by YURIKA, K.K. Designed after Captio's removal to reproduce the same workflow with 0.4s launch, AES-GCM encryption, and zero server storage. <strong>Not Captio's official successor; unaffiliated with Captioo.</strong></div>
-          </div>
-        </div>
+
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">比較表：シンプルメモ vs Captioo</span>
-          <span lang="en" data-lang="en">Comparison Table: Simple Memo vs Captioo</span>
+          <span lang="ja">比較表：シンプルメモ vs Captioo</span>
+
         </h2>
         <div style="overflow-x:auto">
-          <table lang="ja" class="compare-table" data-lang="ja">
+          <table lang="ja" class="compare-table">
             <caption>同名Captioo（808 inc.）とシンプルメモ（株式会社ユリカ）の機能比較。出典：各社App Store掲載情報。</caption>
             <thead><tr><th scope="col">項目</th><th scope="col">シンプルメモ</th><th scope="col">Captioo</th></tr></thead>
             <tbody>
@@ -305,35 +279,17 @@
               <tr><th scope="row" scope="row">多言語対応</th><td class="yes">日本語・英語</td><td>App Store情報を要確認</td></tr>
             </tbody>
           </table>
-          <table lang="en" class="compare-table" data-lang="en">
-            <caption>Feature comparison between Captioo (808 inc.) and Simple Memo (YURIKA, K.K.). Source: App Store listings.</caption>
-            <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Captioo</th></tr></thead>
-            <tbody>
-              <tr><th scope="row" scope="row">Vendor</th><td>YURIKA, K.K. (Japan)</td><td>808 inc.</td></tr>
-              <tr><th scope="row" scope="row">Relation to Captio</th><td class="no">Unrelated (independent)</td><td class="no">Unrelated (independent)</td></tr>
-              <tr><th scope="row" scope="row">Launch Speed</th><td class="yes">0.4s (type immediately)</td><td>Standard</td></tr>
-              <tr><th scope="row" scope="row">Send Speed</th><td class="yes">one-tap (Cloudflare Workers)</td><td>Standard</td></tr>
-              <tr><th scope="row" scope="row">Ads</th><td class="yes">None</td><td class="no">Yes (free version)</td></tr>
-              <tr><th scope="row" scope="row">Image Sending</th><td class="no">Text-focused by design</td><td class="yes">Yes</td></tr>
-              <tr><th scope="row" scope="row">Widgets</th><td class="yes">Lock-screen widget</td><td class="yes">Yes</td></tr>
-              <tr><th scope="row" scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td>See App Store</td></tr>
-              <tr><th scope="row" scope="row">On-Device Encryption</th><td class="yes">AES-GCM</td><td>See App Store</td></tr>
-              <tr><th scope="row" scope="row">Server Storage</th><td class="yes">No memo body stored</td><td>See App Store</td></tr>
-              <tr><th scope="row" scope="row">Free Tier</th><td class="yes">3 sends/day, ad-free</td><td class="yes">Unlimited with ads</td></tr>
-              <tr><th scope="row" scope="row">Premium</th><td>Premium $2.99/mo (unlimited, ad-free)</td><td>See App Store</td></tr>
-              <tr><th scope="row" scope="row">Bilingual</th><td class="yes">Japanese / English</td><td>See App Store</td></tr>
-            </tbody>
-          </table>
+
         </div>
       </section>
 
       <!-- 4 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">4つの本質的な違い</span>
-          <span lang="en" data-lang="en">4 Key Differences</span>
+          <span lang="ja">4つの本質的な違い</span>
+
         </h2>
-        <ul lang="ja" class="diff-list" data-lang="ja">
+        <ul lang="ja" class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>無料の意味が違う：広告 vs 機能制限</strong><br>
@@ -355,37 +311,16 @@
             両アプリとも「Captio公式後継」を主張していません。シンプルメモの旧称「Captio式シンプルメモ」の「Captio式」は「ワンタップでメール送信するワークフローを継承している」ことを示す形容にすぎず、Captio開発元（Boonbits／Tupil）からの公認や継承ではありません。Captiooも独立アプリです。同名混同に注意してください。
           </li>
         </ul>
-        <ul lang="en" class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>How "Free" Differs: Ads vs Send Cap</strong><br>
-            Captioo is free with no feature gates but shows ads. Simple Memo is ad-free even on the free plan, with a 3-sends-per-day cap instead. Decide based on whether you'd rather see ads in your "type and send" flow, or limit yourself to 3 sends per day.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Feature Direction: Multimedia vs Text-Focused</strong><br>
-            Captioo includes multimedia features such as image sending. Simple Memo is intentionally limited to text-only memo email, with "no growing feature surface" as a design principle. If you prioritize "send as fast as possible with zero extra choices," text-focused fits better.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Send Infrastructure: Standard vs Cloudflare Workers Relay</strong><br>
-            Simple Memo relays memos through Cloudflare Workers without permanently storing memo content on any server. The on-device queue is encrypted with AES-GCM. For Captioo's send infrastructure, please consult its App Store and official site listings. This is the starting point if you want to compare privacy posture.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>Positioning: Both Are Independent Apps</strong><br>
-            Neither app claims to be "Captio's official successor." Simple Memo's former "Captio-style" name only indicated that it inherits Captio's one-tap email workflow — it is not endorsed by or derived from Captio's original developer (Boonbits / Tupil). Captioo is also independent. Beware of same-name confusion.
-          </li>
-        </ul>
+
       </section>
 
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">どちらを選ぶべきか</span>
-          <span lang="en" data-lang="en">Who Should Choose Which?</span>
+          <span lang="ja">どちらを選ぶべきか</span>
+
         </h2>
-        <div lang="ja" class="choose-grid" data-lang="ja">
+        <div lang="ja" class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">シンプルメモ向き</div>
             <ul>
@@ -408,38 +343,16 @@
             </ul>
           </div>
         </div>
-        <div lang="en" class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Simple Memo if you...</div>
-            <ul>
-              <li>Want the fastest re-creation of Captio's one-tap send</li>
-              <li>Refuse to see any ads</li>
-              <li>Need on-device encryption (AES-GCM)</li>
-              <li>Don't want memo content stored on any server</li>
-              <li>Need offline reliability with auto-resend on reconnect</li>
-              <li>Are fine with 3 sends/day free, or willing to pay for unlimited</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Captioo if you...</div>
-            <ul>
-              <li>Want to send media beyond text (images, etc.)</li>
-              <li>Tolerate ads in exchange for fully free usage</li>
-              <li>Need unlimited sends from day one without paying</li>
-              <li>Find Simple Memo's "text-only" stance too limiting</li>
-              <li>Prefer a feature-rich memo-sending app</li>
-            </ul>
-          </div>
-        </div>
+
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">よくある質問</span>
-          <span lang="en" data-lang="en">FAQ</span>
+          <span lang="ja">よくある質問</span>
+
         </h2>
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">CaptiooとCaptioは同じアプリですか？</summary><div class="faq-answer"><p>いいえ。名前は1文字違い（オーが2つかどうか）ですが、CaptiooとCaptioは別のアプリです。Captio（オー1つ）はオランダのBoonbits／Tupil製で2024年10月にApp Storeから削除されました。Captioo（オー2つ）は808 inc.が運営する別アプリで、現在もApp Storeで配信中です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモはCaptiooの関連アプリですか？</summary><div class="faq-answer"><p>いいえ。Obsidian連携シンプルメモ（旧称: Captio式シンプルメモ）は株式会社ユリカが開発した独立アプリで、Captioo（808 inc.）とは資本・開発・運営すべて無関係です。旧称の「Captio式」はCaptioのワークフロー（ワンタップでメモをメール送信）を継承していることを意味する形容であり、公式後継・公認関係ではありません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">App Storeで「Captio」を検索すると複数のアプリが出ます。どれを選ぶべきですか？</summary><div class="faq-answer"><p>目的次第です。Captio本体は2024年10月で配信終了しているため新規ダウンロードはできません。「ワンタップで自分にメール送信」というCaptioのコア体験を最速で再現したいなら、起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・オフラインOutbox自動再送のシンプルメモが最も近い再現です。画像送信やウィジェットなど多機能を無料で使いたい場合はCaptiooが選択肢です。</p></div></details></div>
@@ -447,64 +360,55 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料で長く使い続けられるのはどちらですか？</summary><div class="faq-answer"><p>両方とも無料で使い続けられますが、無料の意味が違います。Captiooは広告表示込みで機能制限なく無料、シンプルメモは広告ゼロ・1日3通までの送信枠で無料、Premium（月額¥500）で送信無制限です。広告を許容できるならCaptioo、広告ゼロを優先するならシンプルメモが向いています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">プライバシー設計に違いはありますか？</summary><div class="faq-answer"><p>シンプルメモはCloudflare Workersでメモを中継し、メモ本文をサーバーに永続保存しません。端末内のキューはAES-GCMで暗号化されます。Captiooのプライバシー設計はApp Store／公式サイトの記載をご確認ください。広告SDKを含むアプリは、トラッキング目的のデータ送信が発生する可能性があります（一般論）。</p></div></details></div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are Captioo and Captio the same app?</summary><div class="faq-answer"><p>No. Despite differing by only one letter ("o" vs "oo"), Captioo and Captio are separate apps. Captio (one O) was made by Boonbits / Tupil in the Netherlands and was removed from the App Store in October 2024. Captioo (two Os) is an unrelated app from 808 inc. and is currently available on the App Store.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo related to Captioo?</summary><div class="faq-answer"><p>No. Simple Memo - for Obsidian (formerly "Simple Memo - Captio-style") is an independent app developed by YURIKA, K.K. and has no capital, development, or operational relationship with Captioo (808 inc.). The former "Captio-style" name indicated that Simple Memo inherits Captio's one-tap memo-to-email workflow; it is not an officially endorsed successor.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app should I choose when "Captio" returns multiple apps in the App Store?</summary><div class="faq-answer"><p>It depends on what you want. Captio itself ended service in October 2024 and is no longer downloadable. If you want the closest reproduction of Captio's "type, one-tap, email" workflow, Simple Memo offers 0.4s launch, one-tap send, AES-GCM encryption, and offline Outbox auto-resend. If you want feature-rich memo sending (images, widgets) for free, Captioo is an option.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Captioo show ads?</summary><div class="faq-answer"><p>Per public App Store information, Captioo is free in exchange for showing ads. Simple Memo shows zero ads even on the free plan. Simple Memo prioritizes a clean send flow with nothing extra in the way.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app can I use for free long-term?</summary><div class="faq-answer"><p>Both can be used free indefinitely, but the meaning of "free" differs. Captioo is free with no feature gates but ad-supported. Simple Memo is ad-free with a 3-sends-per-day cap; Premium ($2.99/month) unlocks unlimited sends. Pick Captioo if ads are tolerable, or Simple Memo if you want zero ads.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are there privacy design differences?</summary><div class="faq-answer"><p>Simple Memo relays memos through Cloudflare Workers without permanently storing memo content on any server. The on-device queue is encrypted with AES-GCM. For Captioo's privacy design, please consult its App Store and official site listings. As a general note, apps that include ad SDKs may transmit data for tracking purposes.</p></div></details></div>
-        </div>
+
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja" data-lang="ja">広告ゼロで、Captioのワンタップ送信を最速で</span>
-          <span lang="en" data-lang="en">Captio's One-Tap Send, Ad-Free, at Maximum Speed</span>
+          <span lang="ja">広告ゼロで、Captioのワンタップ送信を最速で</span>
+
         </div>
         <div class="cta-box__desc">
-          <span lang="ja" data-lang="ja">起動 0.4秒・ワンタップ送信・AES-GCM暗号化・オフライン自動再送。ダウンロードは無料。</span>
-          <span lang="en" data-lang="en">0.4s launch, one-tap send, AES-GCM encryption, offline auto-resend. Free to download.</span>
+          <span lang="ja">起動 0.4秒・ワンタップ送信・AES-GCM暗号化・オフライン自動再送。ダウンロードは無料。</span>
+
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="bottom" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span>
-          <span lang="en" data-lang="en">Related Pages</span>
+          <span lang="ja">関連ページ</span>
+
         </h2>
         <div class="internal-links">
           <a href="/captio-alternative/">
-            <span lang="ja" data-lang="ja">Captio代替アプリ＋移行ガイド</span>
-            <span lang="en" data-lang="en">Captio Alternative + Migration Guide</span>
+            <span lang="ja">Captio代替アプリ＋移行ガイド</span>
+
           </a>
           <a href="/blog/captio-discontinued">
-            <span lang="ja" data-lang="ja">Captio が使えなくなった理由</span>
-            <span lang="en" data-lang="en">Why Captio Was Discontinued</span>
+            <span lang="ja">Captio が使えなくなった理由</span>
+
           </a>
           <a href="/blog/captioo-alternative">
-            <span lang="ja" data-lang="ja">CaptiooとObsidian連携シンプルメモの違い（深掘り記事）</span>
-            <span lang="en" data-lang="en">Captioo vs Simple Memo (Deep Dive)</span>
+            <span lang="ja">CaptiooとObsidian連携シンプルメモの違い（深掘り記事）</span>
+
           </a>
           <a href="/vs/">
-            <span lang="ja" data-lang="ja">メモアプリ比較一覧</span>
-            <span lang="en" data-lang="en">All App Comparisons</span>
+            <span lang="ja">メモアプリ比較一覧</span>
+
           </a>
           <a href="/note-to-email/">
-            <span lang="ja" data-lang="ja">自分にメールするメモとは</span>
-            <span lang="en" data-lang="en">Note-to-Email Guide</span>
+            <span lang="ja">自分にメールするメモとは</span>
+
           </a>
           <a href="/faq">
-            <span lang="ja" data-lang="ja">よくあるご質問</span>
-            <span lang="en" data-lang="en">FAQ</span>
+            <span lang="ja">よくあるご質問</span>
+
           </a>
         </div>
       </section>
@@ -518,46 +422,37 @@
     <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
       <a data-next-step="compare" href="/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
         <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-          <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+          <span lang="ja">次に読む</span>
         </span>
         <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-          <span lang="ja" data-lang="ja">比較の次は、実測値を見る</span><span lang="en" data-lang="en">Next: the measured numbers</span>
+          <span lang="ja">比較の次は、実測値を見る</span>
         </span>
         <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-          <span lang="ja" data-lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span><span lang="en" data-lang="en">A table of actual launch and time-to-input measurements across major apps.</span>
+          <span lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span>
         </span>
       </a>
     </aside>
 
     <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
       <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-        <span lang="ja" data-lang="ja">関連コンテンツ</span>
-        <span lang="en" data-lang="en">Related Content</span>
+        <span lang="ja">関連コンテンツ</span>
+
       </h3>
       <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-        <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-        <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">自分にメール送信する方法</span><span lang="en" data-lang="en">How to Email Yourself</span></a></li>
-        <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">使い方ガイド</span><span lang="en" data-lang="en">Setup Guides</span></a></li>
+        <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+        <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">自分にメール送信する方法</span></a></li>
+        <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
+        <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">使い方ガイド</span></a></li>
       </ul>
     </section>
 
-    <section lang="ja" class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+    <section lang="ja" class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
       <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
       <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
         <li>Captio (c. 2011-2024). App Store listing. Boonbits / Tupil.</li>
         <li><a href="https://simplememofast.com/blog/captioo-alternative" rel="noopener">CaptiooとObsidian連携シンプルメモの違い（深掘り）— Obsidian連携シンプルメモ blog</a></li>
         <li><a href="https://simplememofast.com/blog/captio-discontinued" rel="noopener">Captioが使えなくなった理由と代替アプリ — Obsidian連携シンプルメモ blog</a></li>
         <li><a href="https://simplememofast.com/captio-alternative/" rel="noopener">Captio代替アプリ比較・移行ガイド — Obsidian連携シンプルメモ</a></li>
-      </ul>
-    </section>
-    <section lang="en" class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-      <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-      <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-        <li>Captio (c. 2011-2024). App Store listing. Boonbits / Tupil.</li>
-        <li><a href="https://simplememofast.com/blog/captioo-alternative" rel="noopener">Captioo vs Simple Memo (Deep Dive) — Simple Memo blog</a></li>
-        <li><a href="https://simplememofast.com/blog/captio-discontinued" rel="noopener">Why Captio Was Discontinued — Simple Memo blog</a></li>
-        <li><a href="https://simplememofast.com/captio-alternative/" rel="noopener">Captio Alternative + Migration Guide — Simple Memo</a></li>
       </ul>
     </section>
 
@@ -568,25 +463,25 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span> <span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span> <span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">アプリ比較</span> <span lang="en" data-lang="en">Comparisons</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
+        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -594,8 +489,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

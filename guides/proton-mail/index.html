@@ -49,6 +49,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/guides/proton-mail/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/proton-mail/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/guides/proton-mail/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/proton-mail/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -72,8 +75,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -119,7 +120,7 @@
     .internal-links a:hover{border-color:var(--accent)}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -245,7 +246,6 @@
       }
     }
 
-
     .proton-summary{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;line-height:1.85}
     .proton-review{font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin:1rem 0}.lp-section p{line-height:1.85;margin:.85rem 0}.lp-section a{color:var(--accent);text-underline-offset:3px}.lp-section[id]{scroll-margin-top:76px}
     .proton-checks{padding-left:1.4rem;line-height:1.9}.proton-checks li{margin:1rem 0}.steps-list a{overflow-wrap:anywhere}
@@ -262,134 +262,120 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/guides/proton-mail/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/guides/proton-mail/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">Proton Mail設定ガイド — Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">Proton Mail設定ガイド — Obsidian連携シンプルメモ</span>
-      <span class="meta-description">Proton Mailをシンプルメモの宛先に設定し、確認コードと最初のメモを受信する手順。届かないときの迷惑メール・ゴミ箱・フィルター確認、Bridgeが不要な理由、暗号化の範囲、PC・MacでのEML形式の書き出しまで、公式資料に沿って解説します。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Proton Mail Setup Guide — Simple Memo</span>
-      <span class="meta-og-title">Proton Mail Setup Guide — Simple Memo</span>
-      <span class="meta-description">Receive Simple Memo notes in Proton Mail: verify your address, troubleshoot missing mail, check encryption limits, and export email. No Bridge required.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">Proton Mail 設定ガイド</span>
-          <span lang="en" data-lang="en">Proton Mail Setup Guide</span>
+          <span lang="ja">Proton Mail 設定ガイド</span>
+
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">Proton Mailで<br>Obsidian連携シンプルメモを使う</span>
-          <span lang="en" data-lang="en">Using Simple Memo<br>with Proton Mail</span>
+          <span lang="ja">Proton Mailで<br>Obsidian連携シンプルメモを使う</span>
+
         </h1>
-        <p class="lp-hero__sub"><span lang="ja" data-lang="ja">Proton Mailの有効なメールアドレスを宛先に登録し、確認コードと最初のメモが届くところまで進めます。受信できない場合の探し方、Bridgeの要否、メールの保護範囲も確認できます。</span><span lang="en" data-lang="en">Use an active Proton Mail address as your destination, verify it, and confirm your first note arrives. Follow the checks below for missing mail, Bridge requirements, and encryption scope.</span></p>
+        <p class="lp-hero__sub"><span lang="ja">Proton Mailの有効なメールアドレスを宛先に登録し、確認コードと最初のメモが届くところまで進めます。受信できない場合の探し方、Bridgeの要否、メールの保護範囲も確認できます。</span></p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
-          <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+
         </p>
       </div>
 
-      <div class="proton-summary"><p><span lang="ja" data-lang="ja"><strong>先に確認：</strong>シンプルメモからProton Mailへの受信にBridgeは必要ありません。通常のメール配信を使うため、Protonのパスワード・APIキー・SMTP設定をシンプルメモへ登録する手順もありません。</span><span lang="en" data-lang="en"><strong>Start here:</strong> receiving Simple Memo messages in Proton Mail does not require Bridge. Delivery uses ordinary email; you do not enter your Proton password, an API key, or SMTP settings in Simple Memo.</span></p></div><p class="proton-review"><span lang="ja" data-lang="ja">公式資料の最終確認: <time datetime="2026-09-09">2026年9月9日</time>。筆者はシンプルメモの開発者です。このガイドは設定と仕様の説明であり、すべてのProtonアカウントで到達性を実測した結果ではありません。</span><span lang="en" data-lang="en">Official documentation reviewed September 9, 2026. The author develops Simple Memo. This is a setup and specification guide, not a delivery test across all Proton accounts.</span></p><nav class="internal-links" aria-label="ページ内の目次"><a href="#proton-setup"><span lang="ja" data-lang="ja">設定する</span><span lang="en" data-lang="en">Set up</span></a><a href="#proton-missing"><span lang="ja" data-lang="ja">届かないとき</span><span lang="en" data-lang="en">Missing mail</span></a><a href="#proton-allowlist"><span lang="ja" data-lang="ja">許可リスト</span><span lang="en" data-lang="en">Allow list</span></a><a href="#proton-privacy"><span lang="ja" data-lang="ja">暗号化の範囲</span><span lang="en" data-lang="en">Encryption scope</span></a><a href="#proton-export"><span lang="ja" data-lang="ja">書き出す</span><span lang="en" data-lang="en">Export</span></a></nav>
-<section class="lp-section" id="proton-setup"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">最初のメモを受け取る5ステップ</span><span lang="en" data-lang="en">Five steps to receive your first note</span></h2><div lang="ja" data-lang="ja"><p>iPhoneにアプリを用意し、設定中はProton MailのアプリまたはWebで受信メールを確認できるようにします。初回の疎通確認には、個人情報を含まない短いメモを使います。</p><ol class="steps-list"><li><strong>アプリを用意する</strong><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="hero" data-cta-position="hero" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__hero&amp;mt=8" style="color:var(--accent)">こちらのリンク</a>からApp Storeを開きます。対応するiOSのバージョンや現在の配信条件はストアで確認できます。</li><li><strong>Proton側で有効なアドレスを確認する</strong>Proton Mailの設定に表示され、自分が受信できるアドレスをコピーします。@proton.meと@protonmail.comを文字列だけで置き換えず、そのアカウントで使えるアドレスを選びます。</li><li><strong>シンプルメモの宛先に登録する</strong>アプリの設定から宛先メールアドレスを入力し、確認コードの送信へ進みます。入力ミスや前後の空白を確認してください。</li><li><strong>確認メールのコードで認証を完了する</strong>Proton Mailで届いたメールを開き、アプリに戻ってコードを入力します。届かなければ下の確認順に沿って調べます。再送時はアプリに表示される待ち時間に従い、最新のメールを確認します。</li><li><strong>短いメモを送って本文を確かめる</strong>メモを入力して送信し、Proton Mailの受信箱で内容が読めることを確認します。アプリ側の送信受付と、受信箱への到着は別の確認です。Obsidianにも残す場合は、別途<a href="/obsidian/">保管庫と追記先の設定</a>を行います。</li></ol></div><div lang="en" data-lang="en"><p>Have the app on your iPhone and keep Proton Mail available in its app or on the web during setup. Use a short note without personal information for the first delivery check.</p><ol class="steps-list"><li><strong>Get the app</strong>Open the App Store using <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="hero" data-cta-position="hero" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__hero&amp;mt=8" style="color:var(--accent)">this direct link</a>. Check the current iOS requirement and availability in the listing.</li><li><strong>Check your active Proton address</strong>Copy an address shown in your Proton Mail settings that you can receive mail at. Do not simply replace @proton.me with @protonmail.com; use an address enabled for your account.</li><li><strong>Register it as your Simple Memo destination</strong>Enter the recipient address in the app settings and request a verification code. Check spelling and stray spaces.</li><li><strong>Finish verification using the emailed code</strong>Open the message in Proton Mail, then return to the app to enter the code. If it is missing, follow the checks below. For a resend, follow the wait shown in the app and check the latest message.</li><li><strong>Send a short note and read it in Proton Mail</strong>Write and send a note, then confirm its content in your inbox. App-side acceptance and inbox arrival are separate checks. To keep a copy in Obsidian, also configure the <a href="/en/obsidian/">vault and destination note</a>.</li></ol></div></section>
-<section class="lp-section" id="proton-missing"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">確認コードやメモが届かないときの確認順</span><span lang="en" data-lang="en">Where to look when a code or note is missing</span></h2><div lang="ja" data-lang="ja"><ol class="proton-checks"><li><strong>宛先と表示中のアカウントを照合する。</strong>シンプルメモに登録したアドレスと、現在開いているProtonアカウントを確認します。似た別アドレスへの誤入力や、無効なエイリアスを切り分けます。</li><li><strong>受信箱・迷惑メール・ゴミ箱をそれぞれ確認する。</strong>送信した時刻や件名で探します。「すべてのメール」は既定で迷惑メールとゴミ箱を除外するため、その画面だけでは見落とす場合があります。<a href="https://proton.me/support/using-folders-labels">Protonのフォルダー説明</a>。</li><li><strong>独自フォルダー、フィルター、ブロック設定を確認する。</strong>ルールで受信箱から移動している可能性があります。実際の送信元がブロックリストに入っていないかも確認します。</li><li><strong>空き容量と受信側の状態を確認する。</strong>容量が不足していないか、ほかの通常メールも受信できるかを確認します。現在の使用量はProton Mailの画面で確認できます。<a href="https://proton.me/support/increase-storage-space">容量の確認方法</a>。</li><li><strong>必要な場合だけ再送する。</strong>確認コードはアプリの待ち時間表示に従います。メモの再送前には履歴と受信箱を照合して、既に届いた同じメモを重複して送らないようにします。</li></ol><p>なお解決しない場合は、送信時刻とタイムゾーン、アプリに表示されたエラー、上記のどこまで確認したかを整理すると切り分けやすくなります。認証コードやパスワードを共有する必要はありません。</p></div><div lang="en" data-lang="en"><ol class="proton-checks"><li><strong>Match the destination to the account you are viewing.</strong>Check the address saved in Simple Memo and the currently open Proton account. Rule out a typo or an inactive alias.</li><li><strong>Check Inbox, Spam, and Trash separately.</strong>Look around the send time or by subject. All Mail excludes Spam and Trash by default, so that view alone can miss a message. See <a href="https://proton.me/support/using-folders-labels">Proton’s folder explanation</a>.</li><li><strong>Inspect custom folders, filters, and blocked senders.</strong>A rule may have moved the message out of Inbox. Check whether the actual sender is blocked.</li><li><strong>Check storage and ordinary mail delivery.</strong>Confirm available capacity and whether other normal email arrives. Proton Mail displays current storage usage; see <a href="https://proton.me/support/increase-storage-space">how to check capacity</a>.</li><li><strong>Resend only when needed.</strong>For verification codes, follow the wait displayed in the app. Before resending a note, compare history with received mail to avoid duplicate copies.</li></ol><p>If the issue persists, record the send time and time zone, the error shown in the app, and the checks already completed. You do not need to share a verification code or password.</p></div></section>
-<section class="lp-section" id="proton-allowlist"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">正しい送信元を確認して許可リストへ追加する</span><span lang="en" data-lang="en">Allow a sender after checking the actual message</span></h2><div lang="ja" data-lang="ja"><p>確認メールやメモが迷惑メールに入っていたら、そのメールが自分の操作に対応するものか確認し、送信元のメールアドレスを開いて確認します。表示名だけで判断せず、実際に届いたメールのアドレスを使ってください。</p><ol class="proton-checks"><li>Proton MailのWebで「設定」→「すべての設定」→「フィルター」を開きます。</li><li>迷惑メール・ブロック・許可リストの設定で、確認した送信元アドレスを許可リストに追加します。ブロック済みなら、その登録も確認します。</li><li>短いメモを1件送り、受信箱または自分の振り分け先で到着を確かめます。</li></ol><p>モバイルでは「設定」内の迷惑メールとフィルターの項目を確認します。画面名や配置は更新で変わるため、<a href="https://proton.me/support/spam-filtering">Protonの現在の手順</a>も参照してください。</p><div class="tip-box"><p>許可リストは、登録した送信元を迷惑メール扱いしないための設定です。入力した宛先の誤り、配信エラー、空き容量不足、独自フォルダーへの振り分けまで解消するものではありません。</p></div></div><div lang="en" data-lang="en"><p>If a verification message or note appears in Spam, first confirm that it corresponds to your own action and inspect its sender email address. Use the address from the actual message, rather than relying on a display name or guessing the sender.</p><ol class="proton-checks"><li>On Proton Mail’s web app, open Settings → All settings → Filters.</li><li>In the spam, block, and allow lists, add the verified sender address to the allow list. Inspect any existing block entry too.</li><li>Send one short note and confirm it arrives in Inbox or your chosen folder.</li></ol><p>On mobile, look for Spam and filters within Settings. Labels and placement may change; consult <a href="https://proton.me/support/spam-filtering">Proton’s current steps</a>.</p><div class="tip-box"><p>An allow list prevents an allowed sender from being treated as spam. It does not fix a mistyped recipient, delivery errors, insufficient storage, or rules moving mail to another folder.</p></div></div></section>
-<section class="lp-section" id="proton-bridge"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">Bridgeや有料プランは必要？</span><span lang="en" data-lang="en">Do you need Bridge or a paid plan?</span></h2><div lang="ja" data-lang="ja"><p><strong>Proton Mailでシンプルメモの通常メールを受け取るだけなら、Bridgeは不要です。</strong>BridgeはデスクトップのOutlook・Apple Mail・ThunderbirdなどからProton Mailを使うためのアプリです。受信先としてProtonアドレスを設定することとは別の機能です。<a href="https://proton.me/mail/bridge">Bridgeの公式説明</a>。</p><p>シンプルメモのメールは送信APIと外部配信基盤を通って届きます。「ProtonのAPIへ直接接続する設定」ではありません。無料のProtonアカウントでも、アドレスが有効で通常のメールを受信でき、容量に余裕があれば宛先として使えます。Proton側の容量と、<a href="/faq#pricing-ja">シンプルメモの無料・有料プラン</a>の送信条件は別々に確認してください。</p></div><div lang="en" data-lang="en"><p><strong>You do not need Bridge just to receive ordinary Simple Memo email in Proton Mail.</strong>Bridge lets desktop clients such as Outlook, Apple Mail, and Thunderbird work with Proton Mail. That is separate from using a Proton address as a recipient. See <a href="https://proton.me/mail/bridge">the official Bridge explanation</a>.</p><p>Simple Memo sends through its sending API and an external delivery provider; setup does not connect directly to a Proton API. A free Proton account can serve as the destination if the address is active, ordinary mail can be received, and storage is available. Check Proton capacity separately from <a href="/en/faq#pricing-en">Simple Memo’s free and paid sending limits</a>.</p></div></section>
-<section class="lp-section" id="proton-privacy"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">受信箱の暗号化と、送信経路の範囲</span><span lang="en" data-lang="en">Inbox encryption and the delivery route</span></h2><div lang="ja" data-lang="ja"><p>Protonは、PGPを使わない通常の外部メールについて、通信中のTLS保護と受信後のゼロアクセス暗号化を説明しています。<strong>Proton Mail宛にするだけで、シンプルメモからの経路全体がエンドツーエンド暗号化（E2EE）になるわけではありません。</strong><a href="https://proton.me/support/what-is-encrypted-within-protonmail">Protonで暗号化される範囲</a>。</p><p>シンプルメモではRelay APIとResendがメール配信のために本文を扱います。Proton側で受信後に保護されても、その前の配信処理や送信元側のコピーがなくなるわけではありません。具体的なデータの扱いは<a href="/privacy#technical">シンプルメモの技術説明</a>を参照してください。</p><p>メールの件名・送受信者アドレスなど、本文と同じE2EEの対象にならない項目もあります。本文、宛先情報、端末内履歴、エクスポート先を分けて考えると、保存範囲を把握しやすくなります。</p></div><div lang="en" data-lang="en"><p>For ordinary incoming external email without PGP, Proton documents TLS in transit and zero-access encryption after receipt. <strong>Choosing a Proton Mail recipient does not make the whole Simple Memo delivery route end-to-end encrypted (E2EE).</strong> See <a href="https://proton.me/support/what-is-encrypted-within-protonmail">what Proton encrypts</a>.</p><p>Simple Memo’s Relay API and Resend process content for delivery. Protection after receipt in Proton Mail does not remove the earlier delivery processing or copies held by the sender. See <a href="/en/privacy#technical">Simple Memo’s technical privacy explanation</a>.</p><p>Subjects and sender or recipient addresses are among the fields not covered by content E2EE. Review content, addressing information, local history, and export destinations separately to understand where copies exist.</p></div></section>
-<section class="lp-section" id="proton-export"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">メモメールを書き出す場合は、復号されたコピーを確認する</span><span lang="en" data-lang="en">Exports create decrypted copies to manage separately</span></h2><div lang="ja" data-lang="ja"><p>バックアップや移行が必要なら、<a href="https://proton.me/support/proton-mail-export-tool">Proton Mail Export Tool</a>を使えます。公式ツールはすべてのユーザー向けに提供され、Windows・macOS・Linuxのコンピューターで実行します。メモ以外も含むメールボックス全体を対象に、メールをEML、メタデータをJSONとして書き出します。<strong>出力は復号されたメールであり、Protonの受信箱内の暗号化がそのまま付いたファイルではありません。</strong></p><ol class="proton-checks"><li>自分が管理する保存先を選び、共有フォルダーや意図しないクラウド同期に入らないか確認します。</li><li>公式手順で書き出した後、必要なメールと添付が含まれ、EMLを開いて本文を読めることを確認します。</li><li>移行先で読み込める形式と、保存先の暗号化・アクセス権を確認します。元のメールを削除するのは、必要なコピーを読めることを確かめてからにします。</li></ol><p>この書き出しは、シンプルメモの送信に必要な作業ではありません。また、Proton Driveへ自動保存したり、Obsidianのノートへ自動変換したりする設定とも別です。</p></div><div lang="en" data-lang="en"><p>For backup or migration, the <a href="https://proton.me/support/proton-mail-export-tool">Proton Mail Export Tool</a> is available to all users. It runs on Windows, macOS, or Linux and exports the entire mailbox, including email unrelated to notes, as EML messages and JSON metadata. <strong>The email is decrypted; an exported file does not retain the inbox’s encryption automatically.</strong></p><ol class="proton-checks"><li>Choose storage you control and check whether the location is shared or synced to an unintended cloud service.</li><li>After following the official export steps, verify that needed messages and attachments are present and that you can open an EML and read it.</li><li>Check the destination’s import format, encryption, and access permissions. Verify the copies before deleting source messages.</li></ol><p>Exporting is optional and is not required to send notes from Simple Memo. It is also separate from automatic storage in Proton Drive or conversion into Obsidian notes.</p></div></section>
-<section class="lp-section" id="proton-faq"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">Frequently asked questions</span></h2><div lang="ja" data-lang="ja"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailに確認コードが届かない場合は？</summary><div class="faq-answer"><p>登録した宛先と表示中のアカウントを照合し、受信箱・迷惑メール・ゴミ箱をそれぞれ確認します。「すべてのメール」は既定で迷惑メールとゴミ箱を除外します。フィルター、ブロック、空き容量を確認し、再送はアプリの待ち時間表示に従ってください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mail Bridgeは必要ですか？</summary><div class="faq-answer"><p>シンプルメモのメールをProton Mailで受信するだけなら不要です。Bridgeはデスクトップのメールクライアント向けです。Protonのパスワード、APIキー、SMTP設定をシンプルメモに登録する必要はありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">@proton.meと@protonmail.comはどちらでも使えますか？</summary><div class="faq-answer"><p>自分のProtonアカウントで有効になっていて、実際に受信できるアドレスを使います。ドメインを置き換えただけのアドレスが、同じアカウントで有効とは限りません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailを宛先にすれば全経路がE2EEになりますか？</summary><div class="faq-answer"><p>いいえ。通常のメール配信ではシンプルメモの送信APIと外部配信基盤が本文を扱います。Proton Mailでの受信後の保護は、送信経路全体をE2EEへ変えるものではありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料のProton Mailアカウントで使えますか？</summary><div class="faq-answer"><p>有効なメールアドレスで通常のメールを受信でき、容量に余裕があれば宛先として使えます。Proton側の容量と、シンプルメモ側の無料・有料プランの送信条件は別々に確認してください。</p></div></details></div></div><div lang="en" data-lang="en"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">What if my Proton Mail verification code is missing?</summary><div class="faq-answer"><p>Match the saved recipient to the account you are viewing, then check Inbox, Spam, and Trash separately. All Mail excludes Spam and Trash by default. Check filters, blocked senders, and storage; follow the wait shown in the app before resending.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need Proton Mail Bridge?</summary><div class="faq-answer"><p>No, not just to receive Simple Memo messages in Proton Mail. Bridge is for desktop email clients. You do not need to enter a Proton password, API key, or SMTP settings in Simple Memo.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use either @proton.me or @protonmail.com?</summary><div class="faq-answer"><p>Use an address that is active for your Proton account and can receive mail. Simply replacing the domain does not establish that the resulting address is enabled for the same account.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does a Proton Mail destination make the whole route E2EE?</summary><div class="faq-answer"><p>No. Ordinary delivery passes through Simple Memo’s sending API and external delivery provider, which process content. Protection after receipt in Proton Mail does not convert the whole delivery route to E2EE.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use a free Proton Mail account?</summary><div class="faq-answer"><p>An active address that receives ordinary email and has available storage can be used as the destination. Check Proton capacity separately from Simple Memo’s free and paid sending limits.</p></div></details></div></div></section>
+      <div class="proton-summary"><p><span lang="ja"><strong>先に確認：</strong>シンプルメモからProton Mailへの受信にBridgeは必要ありません。通常のメール配信を使うため、Protonのパスワード・APIキー・SMTP設定をシンプルメモへ登録する手順もありません。</span></p></div><p class="proton-review"><span lang="ja">公式資料の最終確認: <time datetime="2026-09-09">2026年9月9日</time>。筆者はシンプルメモの開発者です。このガイドは設定と仕様の説明であり、すべてのProtonアカウントで到達性を実測した結果ではありません。</span></p><nav class="internal-links" aria-label="ページ内の目次"><a href="#proton-setup"><span lang="ja">設定する</span></a><a href="#proton-missing"><span lang="ja">届かないとき</span></a><a href="#proton-allowlist"><span lang="ja">許可リスト</span></a><a href="#proton-privacy"><span lang="ja">暗号化の範囲</span></a><a href="#proton-export"><span lang="ja">書き出す</span></a></nav>
+<section class="lp-section" id="proton-setup"><h2 class="lp-section__title"><span lang="ja">最初のメモを受け取る5ステップ</span></h2><div lang="ja"><p>iPhoneにアプリを用意し、設定中はProton MailのアプリまたはWebで受信メールを確認できるようにします。初回の疎通確認には、個人情報を含まない短いメモを使います。</p><ol class="steps-list"><li><strong>アプリを用意する</strong><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="hero" data-cta-position="hero" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__hero&amp;mt=8" style="color:var(--accent)">こちらのリンク</a>からApp Storeを開きます。対応するiOSのバージョンや現在の配信条件はストアで確認できます。</li><li><strong>Proton側で有効なアドレスを確認する</strong>Proton Mailの設定に表示され、自分が受信できるアドレスをコピーします。@proton.meと@protonmail.comを文字列だけで置き換えず、そのアカウントで使えるアドレスを選びます。</li><li><strong>シンプルメモの宛先に登録する</strong>アプリの設定から宛先メールアドレスを入力し、確認コードの送信へ進みます。入力ミスや前後の空白を確認してください。</li><li><strong>確認メールのコードで認証を完了する</strong>Proton Mailで届いたメールを開き、アプリに戻ってコードを入力します。届かなければ下の確認順に沿って調べます。再送時はアプリに表示される待ち時間に従い、最新のメールを確認します。</li><li><strong>短いメモを送って本文を確かめる</strong>メモを入力して送信し、Proton Mailの受信箱で内容が読めることを確認します。アプリ側の送信受付と、受信箱への到着は別の確認です。Obsidianにも残す場合は、別途<a href="/obsidian/">保管庫と追記先の設定</a>を行います。</li></ol></div></section>
+<section class="lp-section" id="proton-missing"><h2 class="lp-section__title"><span lang="ja">確認コードやメモが届かないときの確認順</span></h2><div lang="ja"><ol class="proton-checks"><li><strong>宛先と表示中のアカウントを照合する。</strong>シンプルメモに登録したアドレスと、現在開いているProtonアカウントを確認します。似た別アドレスへの誤入力や、無効なエイリアスを切り分けます。</li><li><strong>受信箱・迷惑メール・ゴミ箱をそれぞれ確認する。</strong>送信した時刻や件名で探します。「すべてのメール」は既定で迷惑メールとゴミ箱を除外するため、その画面だけでは見落とす場合があります。<a href="https://proton.me/support/using-folders-labels">Protonのフォルダー説明</a>。</li><li><strong>独自フォルダー、フィルター、ブロック設定を確認する。</strong>ルールで受信箱から移動している可能性があります。実際の送信元がブロックリストに入っていないかも確認します。</li><li><strong>空き容量と受信側の状態を確認する。</strong>容量が不足していないか、ほかの通常メールも受信できるかを確認します。現在の使用量はProton Mailの画面で確認できます。<a href="https://proton.me/support/increase-storage-space">容量の確認方法</a>。</li><li><strong>必要な場合だけ再送する。</strong>確認コードはアプリの待ち時間表示に従います。メモの再送前には履歴と受信箱を照合して、既に届いた同じメモを重複して送らないようにします。</li></ol><p>なお解決しない場合は、送信時刻とタイムゾーン、アプリに表示されたエラー、上記のどこまで確認したかを整理すると切り分けやすくなります。認証コードやパスワードを共有する必要はありません。</p></div></section>
+<section class="lp-section" id="proton-allowlist"><h2 class="lp-section__title"><span lang="ja">正しい送信元を確認して許可リストへ追加する</span></h2><div lang="ja"><p>確認メールやメモが迷惑メールに入っていたら、そのメールが自分の操作に対応するものか確認し、送信元のメールアドレスを開いて確認します。表示名だけで判断せず、実際に届いたメールのアドレスを使ってください。</p><ol class="proton-checks"><li>Proton MailのWebで「設定」→「すべての設定」→「フィルター」を開きます。</li><li>迷惑メール・ブロック・許可リストの設定で、確認した送信元アドレスを許可リストに追加します。ブロック済みなら、その登録も確認します。</li><li>短いメモを1件送り、受信箱または自分の振り分け先で到着を確かめます。</li></ol><p>モバイルでは「設定」内の迷惑メールとフィルターの項目を確認します。画面名や配置は更新で変わるため、<a href="https://proton.me/support/spam-filtering">Protonの現在の手順</a>も参照してください。</p><div class="tip-box"><p>許可リストは、登録した送信元を迷惑メール扱いしないための設定です。入力した宛先の誤り、配信エラー、空き容量不足、独自フォルダーへの振り分けまで解消するものではありません。</p></div></div></section>
+<section class="lp-section" id="proton-bridge"><h2 class="lp-section__title"><span lang="ja">Bridgeや有料プランは必要？</span></h2><div lang="ja"><p><strong>Proton Mailでシンプルメモの通常メールを受け取るだけなら、Bridgeは不要です。</strong>BridgeはデスクトップのOutlook・Apple Mail・ThunderbirdなどからProton Mailを使うためのアプリです。受信先としてProtonアドレスを設定することとは別の機能です。<a href="https://proton.me/mail/bridge">Bridgeの公式説明</a>。</p><p>シンプルメモのメールは送信APIと外部配信基盤を通って届きます。「ProtonのAPIへ直接接続する設定」ではありません。無料のProtonアカウントでも、アドレスが有効で通常のメールを受信でき、容量に余裕があれば宛先として使えます。Proton側の容量と、<a href="/faq#pricing-ja">シンプルメモの無料・有料プラン</a>の送信条件は別々に確認してください。</p></div></section>
+<section class="lp-section" id="proton-privacy"><h2 class="lp-section__title"><span lang="ja">受信箱の暗号化と、送信経路の範囲</span></h2><div lang="ja"><p>Protonは、PGPを使わない通常の外部メールについて、通信中のTLS保護と受信後のゼロアクセス暗号化を説明しています。<strong>Proton Mail宛にするだけで、シンプルメモからの経路全体がエンドツーエンド暗号化（E2EE）になるわけではありません。</strong><a href="https://proton.me/support/what-is-encrypted-within-protonmail">Protonで暗号化される範囲</a>。</p><p>シンプルメモではRelay APIとResendがメール配信のために本文を扱います。Proton側で受信後に保護されても、その前の配信処理や送信元側のコピーがなくなるわけではありません。具体的なデータの扱いは<a href="/privacy#technical">シンプルメモの技術説明</a>を参照してください。</p><p>メールの件名・送受信者アドレスなど、本文と同じE2EEの対象にならない項目もあります。本文、宛先情報、端末内履歴、エクスポート先を分けて考えると、保存範囲を把握しやすくなります。</p></div></section>
+<section class="lp-section" id="proton-export"><h2 class="lp-section__title"><span lang="ja">メモメールを書き出す場合は、復号されたコピーを確認する</span></h2><div lang="ja"><p>バックアップや移行が必要なら、<a href="https://proton.me/support/proton-mail-export-tool">Proton Mail Export Tool</a>を使えます。公式ツールはすべてのユーザー向けに提供され、Windows・macOS・Linuxのコンピューターで実行します。メモ以外も含むメールボックス全体を対象に、メールをEML、メタデータをJSONとして書き出します。<strong>出力は復号されたメールであり、Protonの受信箱内の暗号化がそのまま付いたファイルではありません。</strong></p><ol class="proton-checks"><li>自分が管理する保存先を選び、共有フォルダーや意図しないクラウド同期に入らないか確認します。</li><li>公式手順で書き出した後、必要なメールと添付が含まれ、EMLを開いて本文を読めることを確認します。</li><li>移行先で読み込める形式と、保存先の暗号化・アクセス権を確認します。元のメールを削除するのは、必要なコピーを読めることを確かめてからにします。</li></ol><p>この書き出しは、シンプルメモの送信に必要な作業ではありません。また、Proton Driveへ自動保存したり、Obsidianのノートへ自動変換したりする設定とも別です。</p></div></section>
+<section class="lp-section" id="proton-faq"><h2 class="lp-section__title"><span lang="ja">よくある質問</span></h2><div lang="ja"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailに確認コードが届かない場合は？</summary><div class="faq-answer"><p>登録した宛先と表示中のアカウントを照合し、受信箱・迷惑メール・ゴミ箱をそれぞれ確認します。「すべてのメール」は既定で迷惑メールとゴミ箱を除外します。フィルター、ブロック、空き容量を確認し、再送はアプリの待ち時間表示に従ってください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mail Bridgeは必要ですか？</summary><div class="faq-answer"><p>シンプルメモのメールをProton Mailで受信するだけなら不要です。Bridgeはデスクトップのメールクライアント向けです。Protonのパスワード、APIキー、SMTP設定をシンプルメモに登録する必要はありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">@proton.meと@protonmail.comはどちらでも使えますか？</summary><div class="faq-answer"><p>自分のProtonアカウントで有効になっていて、実際に受信できるアドレスを使います。ドメインを置き換えただけのアドレスが、同じアカウントで有効とは限りません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailを宛先にすれば全経路がE2EEになりますか？</summary><div class="faq-answer"><p>いいえ。通常のメール配信ではシンプルメモの送信APIと外部配信基盤が本文を扱います。Proton Mailでの受信後の保護は、送信経路全体をE2EEへ変えるものではありません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料のProton Mailアカウントで使えますか？</summary><div class="faq-answer"><p>有効なメールアドレスで通常のメールを受信でき、容量に余裕があれば宛先として使えます。Proton側の容量と、シンプルメモ側の無料・有料プランの送信条件は別々に確認してください。</p></div></details></div></div></section>
 <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja" data-lang="ja">最初のメモをProton Mailで受け取る</span>
-          <span lang="en" data-lang="en">Receive your first note in Proton Mail</span>
+          <span lang="ja">最初のメモをProton Mailで受け取る</span>
+
         </div>
         <div class="cta-box__desc">
-          <span lang="ja" data-lang="ja">宛先を確認して、短いメモが受信箱に届くところから始められます。</span>
-          <span lang="en" data-lang="en">Verify your recipient and start with one short note that you can read in your inbox.</span>
+          <span lang="ja">宛先を確認して、短いメモが受信箱に届くところから始められます。</span>
+
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" data-cta-position="mid" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" data-cta-position="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" data-cta-position="mid" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span>
-          <span lang="en" data-lang="en">Related Pages</span>
+          <span lang="ja">関連ページ</span>
+
         </h2>
         <div class="internal-links">
           <a href="/guides/">
-            <span lang="ja" data-lang="ja">設定ガイド一覧</span>
-            <span lang="en" data-lang="en">All Setup Guides</span>
+            <span lang="ja">設定ガイド一覧</span>
+
           </a>
           <a href="/guides/gmail/">
-            <span lang="ja" data-lang="ja">Gmail設定ガイド</span>
-            <span lang="en" data-lang="en">Gmail Setup Guide</span>
+            <span lang="ja">Gmail設定ガイド</span>
+
           </a>
           <a href="/guides/outlook/">
-            <span lang="ja" data-lang="ja">Outlook設定ガイド</span>
-            <span lang="en" data-lang="en">Outlook Setup Guide</span>
+            <span lang="ja">Outlook設定ガイド</span>
+
           </a>
           <a href="/guides/icloud/">
-            <span lang="ja" data-lang="ja">iCloudメール設定ガイド</span>
-            <span lang="en" data-lang="en">iCloud Mail Setup Guide</span>
+            <span lang="ja">iCloudメール設定ガイド</span>
+
           </a>
           <a href="/guides/custom-domain/">
-            <span lang="ja" data-lang="ja">独自ドメインメール設定ガイド</span>
-            <span lang="en" data-lang="en">Custom Domain Email Setup</span>
+            <span lang="ja">独自ドメインメール設定ガイド</span>
+
           </a>
           <a href="/captio-alternative/">
-            <span lang="ja" data-lang="ja">Captio代替アプリ比較</span>
-            <span lang="en" data-lang="en">Captio Alternative Guide</span>
+            <span lang="ja">Captio代替アプリ比較</span>
+
           </a>
         </div>
       </section>
 
     </div>
-  
+
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">参考文献</span>
-    <span lang="en" data-lang="en">References</span>
+    <span lang="ja">参考文献</span>
+
   </h2>
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://proton.me/support/mail" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Proton Mail サポート / Proton Mail Support</a> — <span lang="ja" data-lang="ja">Proton Mailの公式サポートページ。スパムフィルタや許可リストの設定に</span><span lang="en" data-lang="en">Official Proton Mail support page for spam filter and allow list configuration</span></li>
-    <li><a href="https://proton.me/mail/bridge" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Proton Mail Bridge</a> — <span lang="ja" data-lang="ja">デスクトップメールクライアントとのIMAP/SMTP連携のためのBridgeアプリ</span><span lang="en" data-lang="en">Bridge application for IMAP/SMTP integration with desktop email clients</span></li>
-    <li><a href="https://proton.me/learn/encryption/types-of-encryption/zero-access" target="_blank" rel="noopener" style="color:var(--accent);">Proton — ゼロアクセス暗号化 / Zero-Access Encryption</a> — <span lang="ja" data-lang="ja">Proton Mailのゼロアクセス暗号化の仕組み。受信メールの保護方法について</span><span lang="en" data-lang="en">How Proton Mail's zero-access encryption works to protect received emails</span></li>
-    <li><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Simple Memo - for Obsidian — App Store</a> — <span lang="ja" data-lang="ja">Obsidian連携シンプルメモのApp Storeダウンロードページ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian App Store download page</span></li>
+    <li><a href="https://proton.me/support/mail" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Proton Mail サポート / Proton Mail Support</a> — <span lang="ja">Proton Mailの公式サポートページ。スパムフィルタや許可リストの設定に</span></li>
+    <li><a href="https://proton.me/mail/bridge" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Proton Mail Bridge</a> — <span lang="ja">デスクトップメールクライアントとのIMAP/SMTP連携のためのBridgeアプリ</span></li>
+    <li><a href="https://proton.me/learn/encryption/types-of-encryption/zero-access" target="_blank" rel="noopener" style="color:var(--accent);">Proton — ゼロアクセス暗号化 / Zero-Access Encryption</a> — <span lang="ja">Proton Mailのゼロアクセス暗号化の仕組み。受信メールの保護方法について</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Simple Memo - for Obsidian — App Store</a> — <span lang="ja">Obsidian連携シンプルメモのApp Storeダウンロードページ</span></li>
   </ul>
 </section>
 
@@ -400,27 +386,27 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="method" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">書いたメモを、Obsidianに貯める</span><span lang="en" data-lang="en">Send what you capture into Obsidian</span>
+        <span lang="ja">書いたメモを、Obsidianに貯める</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Grant vault access and choose a target on iPhone to also save what you capture in Obsidian.</span>
+        <span lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">All Methods</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">自分にメール送信する方法</span><span lang="en" data-lang="en">How to Email Yourself</span></a></li>
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メソッド一覧</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">自分にメール送信する方法</span></a></li>
   </ul>
 </section>
 </main>
@@ -430,25 +416,25 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">ユースケース</span> <span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">ユースケース</span> </a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span> <span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span> <span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span> <span lang="en" data-lang="en">vs</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
+        <a href="/vs/" class="footer__link"><span lang="ja">比較</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -456,8 +442,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

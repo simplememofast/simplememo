@@ -47,6 +47,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/glossary/cornell-notes/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/cornell-notes/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/glossary/cornell-notes/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/cornell-notes/">
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
@@ -96,7 +99,6 @@
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
     [data-lang="en"]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
-    a.app-store-badge[data-lang].active{display:inline-flex}
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
     .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
@@ -125,7 +127,7 @@
     .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
     .internal-links a:hover{border-color:var(--accent)}
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -261,143 +263,115 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/glossary/cornell-notes/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/glossary/cornell-notes/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">コーネルノート式とは — Obsidian連携シンプルメモ用語集</span>
-      <span class="meta-og-title">コーネルノート式とは — Obsidian連携シンプルメモ用語集</span>
-      <span class="meta-description">コーネルノート式の使い方を解説。3分割ノート構造で学習効率を最大化する方法。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">What is the Cornell Note-Taking System? — Simple Memo Glossary</span>
-      <span class="meta-og-title">What is the Cornell Note-Taking System? — Simple Memo Glossary</span>
-      <span class="meta-description">Cornell Note-Taking System explained. A three-section note structure for maximizing study efficiency.</span>
-    </div>
-  </div>
 <main class="page-content">
     <div class="container">
 
       <div class="lp-hero">
-        <div class="lp-hero__label"><span lang="ja" data-lang="ja">用語集 — ノート術</span><span lang="en" data-lang="en">Glossary — Note-Taking</span></div>
-        <h1 class="lp-hero__title"><span lang="ja" data-lang="ja">コーネルノート式とは</span><span lang="en" data-lang="en">What is the Cornell Note-Taking System?</span></h1>
+        <div class="lp-hero__label"><span lang="ja">用語集 — ノート術</span></div>
+        <h1 class="lp-hero__title"><span lang="ja">コーネルノート式とは</span></h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">コーネルノート式（Cornell Note-Taking System）とは、コーネル大学の教育学者Walter Paukが1950年代に開発したノート術です。ページを「ノート欄」「キュー欄」「サマリー欄」の3つに分割し、記録・復習・要約を一枚のページで完結させます。70年以上の歴史を持ち、現在も世界中の学生や社会人に活用されています。</span>
-          <span lang="en" data-lang="en">The Cornell Note-Taking System was developed by education professor Walter Pauk at Cornell University in the 1950s. It divides each page into three sections — Notes, Cues, and Summary — completing recording, review, and synthesis on a single page. With over 70 years of history, it remains widely used by students and professionals worldwide.</span>
+          <span lang="ja">コーネルノート式（Cornell Note-Taking System）とは、コーネル大学の教育学者Walter Paukが1950年代に開発したノート術です。ページを「ノート欄」「キュー欄」「サマリー欄」の3つに分割し、記録・復習・要約を一枚のページで完結させます。70年以上の歴史を持ち、現在も世界中の学生や社会人に活用されています。</span>
+
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
-          <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+
         </p>
       </div>
 
-      <div lang="ja" class="definition-block" data-lang="ja">
+      <div lang="ja" class="definition-block">
         <div class="definition-block__label">定義</div>
         <p><strong>コーネルノート式</strong>は、ページを3つのセクションに分割するノート術です。右側の広い「ノート欄」に授業や会議の内容を記録し、左側の狭い「キュー欄」にキーワードや質問を後から追記、下部の「サマリー欄」にページ全体の要約を2-3行で書きます。この構造が「アクティブリコール（能動的想起）」を促し、単なる書き写しより遥かに深い記憶の定着を実現します。</p>
       </div>
-      <div lang="en" class="definition-block" data-lang="en">
-        <div class="definition-block__label">Definition</div>
-        <p><strong>The Cornell Note-Taking System</strong> divides each page into three sections. The wide right "Notes" column captures lecture or meeting content. The narrow left "Cue" column receives keywords and questions added after class. The bottom "Summary" section holds a 2-3 line summary of the entire page. This structure promotes active recall, producing far deeper retention than passive transcription.</p>
-      </div>
 
       <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">3つのセクションの使い方</span><span lang="en" data-lang="en">The Three Sections</span></h2>
+        <h2 class="lp-section__title"><span lang="ja">3つのセクションの使い方</span></h2>
         <div class="reason-cards">
           <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja" data-lang="ja">ノート欄（右側）</span><span lang="en" data-lang="en">Notes Column (Right)</span></div>
-            <div class="reason-card__desc"><span lang="ja" data-lang="ja">授業中や会議中にメインの内容を記録する領域。箇条書きや図表を使い、要点を簡潔に書きます。全体の約2/3の幅を占めます。</span><span lang="en" data-lang="en">The main recording area during class or meetings. Use bullet points and diagrams. Takes up about 2/3 of the page width.</span></div>
+            <div class="reason-card__title"><span lang="ja">ノート欄（右側）</span></div>
+            <div class="reason-card__desc"><span lang="ja">授業中や会議中にメインの内容を記録する領域。箇条書きや図表を使い、要点を簡潔に書きます。全体の約2/3の幅を占めます。</span></div>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja" data-lang="ja">キュー欄（左側）</span><span lang="en" data-lang="en">Cue Column (Left)</span></div>
-            <div class="reason-card__desc"><span lang="ja" data-lang="ja">授業後24時間以内にキーワード、質問、概念を追記。復習時はこの欄だけを見て内容を思い出す練習をします。</span><span lang="en" data-lang="en">Add keywords, questions, and concepts within 24 hours. During review, cover the Notes column and test yourself using only the Cues.</span></div>
+            <div class="reason-card__title"><span lang="ja">キュー欄（左側）</span></div>
+            <div class="reason-card__desc"><span lang="ja">授業後24時間以内にキーワード、質問、概念を追記。復習時はこの欄だけを見て内容を思い出す練習をします。</span></div>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja" data-lang="ja">サマリー欄（下部）</span><span lang="en" data-lang="en">Summary Section (Bottom)</span></div>
-            <div class="reason-card__desc"><span lang="ja" data-lang="ja">ページ全体の内容を2-3行に凝縮。自分の言葉で要約することで理解度が飛躍的に向上します。</span><span lang="en" data-lang="en">Condense the entire page into 2-3 lines. Summarizing in your own words dramatically deepens understanding.</span></div>
+            <div class="reason-card__title"><span lang="ja">サマリー欄（下部）</span></div>
+            <div class="reason-card__desc"><span lang="ja">ページ全体の内容を2-3行に凝縮。自分の言葉で要約することで理解度が飛躍的に向上します。</span></div>
           </div>
         </div>
       </section>
 
       <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">シンプルメモとコーネルノート式の連携</span><span lang="en" data-lang="en">Simple Memo + Cornell Notes</span></h2>
+        <h2 class="lp-section__title"><span lang="ja">シンプルメモとコーネルノート式の連携</span></h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">授業中のキャプチャ速度が命のコーネルノート式では、Obsidian連携シンプルメモが「ノート欄」の高速入力を担います。授業中に重要ポイントをワンタップでメール送信し、授業後にメールを見ながらNotionやGoogleドキュメントでコーネル式3分割に整理。キュー欄やサマリー欄は自宅で落ち着いて追記できるため、授業中は「取りこぼしゼロ」に集中できます。</span>
-          <span lang="en" data-lang="en">In the Cornell method, capture speed during class is critical. Simple Memo handles rapid "Notes column" input — send key points via one tap during class, then organize into Cornell format in Notion or Google Docs afterward. Since Cue and Summary columns are added at home, you can focus entirely on zero-miss capture during lectures.</span>
+          <span lang="ja">授業中のキャプチャ速度が命のコーネルノート式では、Obsidian連携シンプルメモが「ノート欄」の高速入力を担います。授業中に重要ポイントをワンタップでメール送信し、授業後にメールを見ながらNotionやGoogleドキュメントでコーネル式3分割に整理。キュー欄やサマリー欄は自宅で落ち着いて追記できるため、授業中は「取りこぼしゼロ」に集中できます。</span>
+
         </p>
       </section>
 
       <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">よくある質問（コーネルノート式）</span><span lang="en" data-lang="en">FAQ: Cornell Notes</span></h2>
-        <div lang="ja" data-lang="ja">
+        <h2 class="lp-section__title"><span lang="ja">よくある質問（コーネルノート式）</span></h2>
+        <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">コーネルノート式とは何ですか？</summary><div class="faq-answer"><p>コーネル大学のWalter Paukが1950年代に開発したノート術です。ページを「ノート欄」「キュー欄」「サマリー欄」の3分割にし、記録・復習・要約を体系化します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">コーネルノート式はデジタルでも使えますか？</summary><div class="faq-answer"><p>はい。NotionやGoogleドキュメントでテンプレートを作れば、デジタルでも同じ3分割構造を実現できます。検索性が加わるため、紙より効率的な場合もあります。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモとの相性は？</summary><div class="faq-answer"><p>授業中はシンプルメモで高速キャプチャし、授業後にコーネル式に整理するワークフローが最適です。取りこぼしゼロのキャプチャが、コーネルノートの質を高めます。</p></div></details></div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the Cornell Note-Taking System?</summary><div class="faq-answer"><p>A note-taking method by Walter Pauk (Cornell University, 1950s). Divides each page into Notes, Cues, and Summary sections, systematizing recording, review, and synthesis.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Cornell Notes digitally?</summary><div class="faq-answer"><p>Yes. Create templates in Notion or Google Docs to replicate the three-section structure digitally. The added searchability can make it even more efficient than paper.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Simple Memo pair with Cornell Notes?</summary><div class="faq-answer"><p>Use Simple Memo for rapid capture during class, then organize into Cornell format afterward. Zero-miss capture quality directly improves the quality of your Cornell notes.</p></div></details></div>
-        </div>
+
       </section>
 
-      <section lang="ja" class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+      <section lang="ja" class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
         <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献・外部リンク</h3>
         <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
         <li><a href="https://en.wikipedia.org/wiki/Cornell_Notes" target="_blank" rel="noopener">Cornell Notes — Wikipedia</a></li>
         <li><a href="https://lsc.cornell.edu/how-to-study/taking-notes/cornell-note-taking-system/" target="_blank" rel="noopener">Cornell Note Taking System — コーネル大学</a></li>
         </ul>
       </section>
-      <section lang="en" class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-        <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
-        <li><a href="https://en.wikipedia.org/wiki/Cornell_Notes" target="_blank" rel="noopener">Cornell Notes — Wikipedia</a></li>
-        <li><a href="https://lsc.cornell.edu/how-to-study/taking-notes/cornell-note-taking-system/" target="_blank" rel="noopener">Cornell Note Taking System — Cornell University</a></li>
-        </ul>
-      </section>
 
       <div class="cta-box">
-        <div class="cta-box__title"><span lang="ja" data-lang="ja">コーネルノートの素材を最速で集めよう</span><span lang="en" data-lang="en">Gather Cornell Note Material Instantly</span></div>
-        <div class="cta-box__desc"><span lang="ja" data-lang="ja">0.4秒起動のObsidian連携シンプルメモで、授業中の重要ポイントを即キャプチャ。後からコーネル式に整理。</span><span lang="en" data-lang="en">Capture key points in 0.4s with Simple Memo. Organize into Cornell format at your desk later.</span></div>
-        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="mid" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
-        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="mid" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
+        <div class="cta-box__title"><span lang="ja">コーネルノートの素材を最速で集めよう</span></div>
+        <div class="cta-box__desc"><span lang="ja">0.4秒起動のObsidian連携シンプルメモで、授業中の重要ポイントを即キャプチャ。後からコーネル式に整理。</span></div>
+        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
+
       </div>
 
       <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related Pages</span></h2>
+        <h2 class="lp-section__title"><span lang="ja">関連ページ</span></h2>
         <div class="internal-links">
-          <a href="/glossary/"><span lang="ja" data-lang="ja">用語集トップ</span><span lang="en" data-lang="en">Glossary Home</span></a>
-          <a href="/glossary/spaced-repetition/"><span lang="ja" data-lang="ja">間隔反復法とは</span><span lang="en" data-lang="en">What is Spaced Repetition?</span></a>
-          <a href="/glossary/zettelkasten/"><span lang="ja" data-lang="ja">ツェッテルカステンとは</span><span lang="en" data-lang="en">What is Zettelkasten?</span></a>
-          <a href="/glossary/mind-map/"><span lang="ja" data-lang="ja">マインドマップとは</span><span lang="en" data-lang="en">What is Mind Map?</span></a>
-          <a href="/glossary/markdown/"><span lang="ja" data-lang="ja">Markdownとは</span><span lang="en" data-lang="en">What is Markdown?</span></a>
-          <a href="/use-cases/students/"><span lang="ja" data-lang="ja">学生向け活用法</span><span lang="en" data-lang="en">Students Use Case</span></a>
-          <a href="/use-cases/teachers/"><span lang="ja" data-lang="ja">教師向け活用法</span><span lang="en" data-lang="en">Teachers Use Case</span></a>
+          <a href="/glossary/"><span lang="ja">用語集トップ</span></a>
+          <a href="/glossary/spaced-repetition/"><span lang="ja">間隔反復法とは</span></a>
+          <a href="/glossary/zettelkasten/"><span lang="ja">ツェッテルカステンとは</span></a>
+          <a href="/glossary/mind-map/"><span lang="ja">マインドマップとは</span></a>
+          <a href="/glossary/markdown/"><span lang="ja">Markdownとは</span></a>
+          <a href="/use-cases/students/"><span lang="ja">学生向け活用法</span></a>
+          <a href="/use-cases/teachers/"><span lang="ja">教師向け活用法</span></a>
         </div>
       </section>
 
     </div>
-  
+
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
@@ -405,26 +379,26 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="method" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">書いたメモを、Obsidianに貯める</span><span lang="en" data-lang="en">Send what you capture into Obsidian</span>
+        <span lang="ja">書いたメモを、Obsidianに貯める</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Grant vault access and choose a target on iPhone to also save what you capture in Obsidian.</span>
+        <span lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">All Methods</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メソッド一覧</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
   </ul>
 </section>
 </main>
@@ -434,29 +408,29 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span></a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span><span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">vs</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span></a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja">比較</span></a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/glossary/" class="footer__link"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a>
+        <a href="/glossary/" class="footer__link"><span lang="ja">用語集</span></a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -464,7 +438,6 @@
       </p>
     </div>
   </footer>
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

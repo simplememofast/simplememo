@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/relay-api-design" name="apple-itunes-app"/>
+<!-- Google tag (gtag.js) -->
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+<title>Relay API Design: Building Email Infrastructure on Cloudflare Workers</title>
+<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." name="description"/>
+<meta content="#070b14" name="theme-color"/>
+<!-- SEO keywords targeting -->
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+<!-- OGP -->
+<meta content="Relay API Design: Building Email Infrastructure on Cloudflare Workers" property="og:title"/>
+<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="2026-02-13T00:00:00+09:00" property="article:published_time"/>
+<meta content="https://simplememofast.com/en/devlog/relay-api-design" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="Relay API Design: Building Email Infrastructure on Cloudflare Workers" name="twitter:title"/>
+<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png" name="twitter:image"/>
+
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon"/>
+<link href="/assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/assets/favicon/site.webmanifest" rel="manifest"/>
+<!-- JSON-LD: BlogPosting -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/relay-api-design#article","headline":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","description":"Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.","url":"https://simplememofast.com/en/devlog/relay-api-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage"}}</script>
+<!-- JSON-LD: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","item":"https://simplememofast.com/en/devlog/relay-api-design"}]}</script>
+<!-- JSON-LD: Speakable (AIO / Voice Search) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage","inLanguage":"en","name":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body h2"]},"url":"https://simplememofast.com/en/devlog/relay-api-design"}</script>
+<link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .page-content__body h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-content__body h3 {
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .page-content__body p {
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .page-content__body ul,
+    .page-content__body ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    .page-content__body li {
+      line-height: 1.8;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    pre code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: #c8d6e5;
+      background: none;
+      padding: 0;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem;
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: #a8d8ff;
+    }
+    .code-comment { color: #5c6773; }
+    .code-keyword { color: #c678dd; }
+    .code-string { color: #98c379; }
+    .code-number { color: #d19a66; }
+    .code-type { color: #61afef; }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 1.5rem 0;
+      text-align: center;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.85rem;
+      color: #a8d8ff;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .arch-diagram .arrow {
+      color: rgba(82, 160, 255, 0.6);
+    }
+    .arch-diagram .node {
+      display: inline-block;
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      border-radius: 8px;
+      padding: 6px 14px;
+      margin: 4px;
+      color: #c8d6e5;
+      white-space: nowrap;
+    }
+
+    /* Feature / Info Cards */
+    .info-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .info-card__label {
+      font-size: 0.875rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .info-card__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .info-card__desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Related Card Grid */
+    .related-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 1.2rem 0;
+    }
+    @media (min-width: 600px) {
+      .related-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Cross Links */
+    .cross-links {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .cross-links h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .cross-links__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .cross-links__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .cross-links__item {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .cross-links__item:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .cross-links__item-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .cross-links__item-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* CTA Box */
+    .cta-box {
+      background: rgba(82, 160, 255, 0.06);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .cta-box p {
+      margin-bottom: 0.8rem;
+    }
+    .cta-box a {
+      display: inline-block;
+      background: rgba(82, 160, 255, 0.15);
+      border: 1px solid rgba(82, 160, 255, 0.3);
+      border-radius: 20px;
+      padding: 10px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+    .cta-box a:hover {
+      background: rgba(82, 160, 255, 0.25);
+      box-shadow: 0 0 16px rgba(82, 160, 255, 0.15);
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/devlog/relay-api-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/relay-api-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/devlog/relay-api-design" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/devlog/relay-api-design" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="other" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+<!-- Meta Templates for JS -->
+
+<!-- Header -->
+<!-- Content -->
+<main class="page-content">
+<div class="container">
+<h1 class="page-content__title">
+
+<span lang="en">Relay API Design: Building Email Infrastructure on Cloudflare Workers</span>
+</h1>
+<!-- Japanese Content -->
+
+<!-- English Content -->
+<div class="lang-content" lang="en">
+<p class="article-meta">Published February 13, 2026</p>
+<div class="page-content__body">
+<h2>1. Why We Didn't Use a Major Provider's Email API</h2>
+<p>When building an app that sends memos via email, a major mail provider's sending API is the first thing that comes to mind. However, for indie developers, the Google OAuth verification process presents a formidable barrier.</p>
+<p>Apps that haven't passed Google OAuth verification display a warning screen: "This app isn't verified by Google." For a memo app, this warning is devastating. Users send their personal thoughts and private information as memos. If "unverified" appears during their very first experience, who would trust this app?</p>
+<p>The Google OAuth verification process is a steep climb for solo developers. Preparing a privacy policy, justifying scope requirements, undergoing security assessments -- for a team at a large company, this is routine. But for a solo-developed app, the cost of going through all this just for a single email-sending feature is disproportionately high.</p>
+<p>What we needed was a solution that could send emails without compromising user trust and without the complexity of OAuth verification. The answer was building our own Relay API.</p>
+<h2>2. Cloudflare Workers + Resend API Architecture</h2>
+<p>The Relay API architecture is simple yet robust. It receives requests from the iOS app and relays them to an email delivery service -- a design focused on doing exactly one thing well.</p>
+<div class="arch-diagram">
+<span class="node">iOS App</span>
+<span class="arrow"> → </span>
+<span class="node">Relay API (Cloudflare Workers)</span>
+<span class="arrow"> → </span>
+<span class="node">Resend API</span>
+<span class="arrow"> → </span>
+<span class="node">Email Delivery</span>
+</div>
+<p><strong>Cloudflare Workers</strong> is a serverless platform that executes TypeScript code at edge locations around the world. Unlike traditional serverless platforms that suffer from cold starts, Workers starts processing requests almost instantly with near-zero cold start time.</p>
+<p><strong>Resend API</strong> is a modern email delivery service. It makes SPF/DKIM/DMARC configuration straightforward and achieves high delivery rates. Its developer-friendly API can be called simply from TypeScript.</p>
+<p>The cost advantage is significant. For a memo app's traffic volume, Cloudflare Workers' free tier (100,000 requests per day) is more than sufficient. Resend API is also free for up to 100 emails per month. For an indie-developed memo app, this means near-zero operational cost.</p>
+<h2>3. Email Address Verification (6-Digit Code)</h2>
+<p>The Relay API only sends memos to verified email addresses. This is the most fundamental layer of abuse prevention.</p>
+<p>Before any memos can be sent, the destination email address must go through a verification flow:</p>
+<ul>
+<li>User enters their email address in the app</li>
+<li>Relay API sends a 6-digit verification code to that address</li>
+<li>User enters the received 6-digit code back into the app</li>
+<li>Verification complete. Memo sending to that email address is now permitted</li>
+</ul>
+<p>This mechanism prevents unauthorized sending to other people's email addresses. Since only the email address owner can receive the verification code, impersonation is impossible.</p>
+<p>Verification is a one-time process per email address. Once verified, users can continue sending memos without re-entering any code.</p>
+<h2>4. Multi-Layer Rate Limiting</h2>
+<p>To prevent abuse of the email sending API, we implement rate limiting across multiple layers.</p>
+<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+  <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
+  <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
+  <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
+  <span class="code-string">globalPerDay</span>: <span class="code-number">300</span>,
+};</code></pre>
+<div class="info-card">
+<div class="info-card__label">Device Level</div>
+<div class="info-card__title">Per-Device Limiting</div>
+<div class="info-card__desc">Prevents excessive sending from a single device. Limits set at 30 per minute and 200 per day. These thresholds are unreachable during normal memo usage but reliably block automated mass sending.</div>
+</div>
+<div class="info-card">
+<div class="info-card__label">IP Level</div>
+<div class="info-card__title">Per-IP Address Limiting</div>
+<div class="info-card__desc">Limits mass requests from the same network. 120 per hour. Protects infrastructure even against attacks using multiple devices on the same network.</div>
+</div>
+<div class="info-card">
+<div class="info-card__label">Global</div>
+<div class="info-card__title">Global Limit</div>
+<div class="info-card__desc">Protects the entire infrastructure. A global cap of 300 per day serves as the final line of defense against any attack pattern.</div>
+</div>
+<p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This minimizes latency for legitimate requests while reliably blocking unauthorized access.</p>
+<h2>5. Idempotency: Ensuring Memos Never Arrive Twice</h2>
+<p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
+<p>Idempotency guarantees solve this problem:</p>
+<ul>
+<li>Each memo is assigned a unique UUID (message ID)</li>
+<li>The Relay API records every received message ID</li>
+<li>If a request with the same message ID arrives again, the email is not sent a second time</li>
+<li>A success response is returned to the client (notifying that it was already sent)</li>
+</ul>
+<p>With this design, even if retries occur due to network instability, the same memo will never be delivered twice. This is a critical design decision for maintaining user trust.</p>
+<h2>6. The Edge Computing Advantage</h2>
+<p>The primary reason for choosing Cloudflare Workers as our email infrastructure is the fundamental advantages of edge computing.</p>
+<div class="info-card">
+<div class="info-card__label">Latency</div>
+<div class="info-card__title">Global Edge Locations = Low Latency</div>
+<div class="info-card__desc">Cloudflare operates edge servers in over 300 cities worldwide. Requests are processed at the location closest to the user, delivering API responses in tens of milliseconds from any country.</div>
+</div>
+<div class="info-card">
+<div class="info-card__label">Cold Start</div>
+<div class="info-card__title">Near-Zero Cold Start</div>
+<div class="info-card__desc">Traditional serverless platforms (like AWS Lambda) can take hundreds of milliseconds to several seconds for cold starts. Cloudflare Workers essentially eliminates this problem. Processing begins the instant the send button is tapped.</div>
+</div>
+<div class="info-card">
+<div class="info-card__label">Operations</div>
+<div class="info-card__title">Auto-Scaling with No Infrastructure Management</div>
+<div class="info-card__desc">Server management, capacity planning, scaling configuration -- none of these are needed. The system scales automatically as requests increase, and incurs no cost when idle.</div>
+</div>
+<p>For a memo app, this combination is ideal. Fast, reliable, cheap. No matter where in the world the user is, processing completes the moment they send a memo. That's the strength of a Relay API built on edge computing.</p>
+<div class="cta-box">
+<p>Try Simple Memo - for Obsidian, built on this technical foundation.</p>
+<a data-cta-cluster="other" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" rel="noopener noreferrer" target="_blank">Download on the App Store</a>
+</div>
+</div>
+</div>
+<!-- FAQ Section (visible, mirrors JSON-LD) -->
+
+<div lang="en">
+<div class="page-content__body cross-links">
+<h2>Frequently Asked Questions</h2>
+<h3>Q. Why Cloudflare Workers?</h3>
+<p>Near-zero cold start, global edge delivery, and nearly free monthly cost. It's a platform that achieves both the speed and reliability a memo app demands.</p>
+<h3>Q. What's the email delivery rate?</h3>
+<p>Resend API achieves high delivery rates. SPF/DKIM/DMARC are pre-configured to minimize spam classification.</p>
+<h3>Q. Is memo content stored on the server?</h3>
+<p>The Relay API is pass-through. Memo content is not persistently stored. It is handled temporarily only as needed for the send operation.</p>
+<h3>Q. What happens when rate limited?</h3>
+<p>The app queues memos in the Outbox and automatically retries after the rate limit resets. No memos are lost.</p>
+</div>
+</div>
+<!-- Cross Links -->
+
+<div lang="en">
+<div class="cross-links">
+<h2>Related Articles</h2>
+<div class="cross-links__grid">
+<a class="cross-links__item" href="/en/devlog/day1">
+<div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+<div class="cross-links__item-desc">Launch in ~1s, send with one tap, zero message loss — the full first dev log entry.</div>
+</a>
+<a class="cross-links__item" href="/en/devlog/">
+<div class="cross-links__item-title">Dev Log Index</div>
+<div class="cross-links__item-desc">All dev log entries and technical deep dives in one place.</div>
+</a>
+<a class="cross-links__item" href="/en/devlog/outbox-architecture">
+<div class="cross-links__item-title">Outbox Architecture: Zero Message Loss</div>
+<div class="cross-links__item-desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+</a>
+<a class="cross-links__item" href="/devlog/uikit-vs-swiftui">
+<div class="cross-links__item-title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
+<div class="cross-links__item-desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
+</a>
+<a class="cross-links__item" href="/en/devlog/privacy-first-design">
+<div class="cross-links__item-title">Privacy-First Design: Obsessive Attention to Detail</div>
+<div class="cross-links__item-desc">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</div>
+</a>
+</div>
+</div>
+</div>
+</div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+
+<span lang="en">References</span>
+</h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://developers.cloudflare.com/workers/" rel="noopener" style="color:var(--accent);" target="_blank">Cloudflare Workers Documentation</a> — <span lang="en">Serverless execution platform for the relay API, processing requests at the edge</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc5321" rel="noopener" style="color:var(--accent);" target="_blank">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="en">Core email transmission protocol specification that the relay API adheres to</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc6376" rel="noopener" style="color:var(--accent);" target="_blank">RFC 6376 — DomainKeys Identified Mail (DKIM)</a> — <span lang="en">Digital signature specification for preventing email tampering and authenticating senders</span></li>
+<li><a href="https://www.rfc-editor.org/rfc/rfc7208" rel="noopener" style="color:var(--accent);" target="_blank">RFC 7208 — Sender Policy Framework (SPF)</a> — <span lang="en">Sender domain authentication verifying email is sent from authorized IP addresses</span></li>
+<li><a href="https://resend.com/docs/introduction" rel="noopener" style="color:var(--accent);" target="_blank">Resend API Documentation</a> — <span lang="en">Email sending API provider called from Cloudflare Workers for mail delivery</span></li>
+</ul>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Give your notes somewhere to accumulate</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+</span>
+</a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+
+<span lang="en">Related Content</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/en/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Captio Alternatives</span></a></li>
+<li><a href="/en/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">All Blog Posts</span></a></li>
+<li><a href="/en/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">Compare Memo Apps</span></a></li>
+</ul>
+</section>
+</main>
+<!-- Footer -->
+<footer class="footer">
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"> <span lang="en">Home</span></a>
+<a class="footer__link" href="/how-to/"> <span lang="en">How to Use</span></a>
+<a class="footer__link" href="/templates/"> <span lang="en">Templates</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/captio/"> <span lang="en">Captio Method</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/en/devlog/"> <span lang="en">Dev Log</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/terms"> <span lang="en">Terms</span></a>
+<a class="footer__link" href="/en/privacy"> <span lang="en">Privacy</span></a>
+<a class="footer__link" href="/contact"> <span lang="en">Contact</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p>
+</div>
+</footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+</body>
+</html>

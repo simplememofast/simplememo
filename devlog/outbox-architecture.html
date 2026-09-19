@@ -50,6 +50,9 @@
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -104,7 +107,7 @@
     .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
     .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
     .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -254,60 +257,47 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/devlog/outbox-architecture" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/devlog/outbox-architecture" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Obsidian連携シンプルメモ 開発日誌</span>
-      <span class="meta-og-title">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Obsidian連携シンプルメモ 開発日誌</span>
-      <span class="meta-description">送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log</span>
-      <span class="meta-og-title">Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log</span>
-      <span class="meta-description">UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.</span>
-    </div>
-  </div>
 
   <!-- Header -->
 <!-- Content -->
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja" data-lang="ja">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計</span>
-        <span lang="en" data-lang="en">Outbox Architecture: Zero Message Loss Design</span>
+        <span lang="ja">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計</span>
+
       </h1>
       <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-        <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
-        <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+        <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+
       </p>
 
       <!-- ======================== -->
       <!-- Japanese Content         -->
       <!-- ======================== -->
-      <div lang="ja" class="lang-content" data-lang="ja">
+      <div lang="ja" class="lang-content">
         <p class="page-content__date">2026年2月13日</p>
         <div class="page-content__body">
 
@@ -479,186 +469,19 @@
       <!-- ======================== -->
       <!-- English Content          -->
       <!-- ======================== -->
-      <div lang="en" class="lang-content" data-lang="en">
-        <p class="page-content__date">February 13, 2026</p>
-        <div class="page-content__body">
 
-          <!-- Section 1 -->
-          <h2>The Challenge: Instant UI Clear Without Losing Messages</h2>
-          <p>In Simple Memo (Captio-style), the UI clears the instant you tap send, letting you immediately start writing your next memo. This is the core of the Captio-style UX.</p>
-          <p>But real-world networks have 300ms-2s latency. They fail. They go offline entirely. Most apps wait for a network response before clearing the UI. Safe, but terrible UX. Clear immediately? You risk losing the message.</p>
-          <p>The <strong>Outbox pattern</strong> solves both simultaneously. The moment you tap send, the message is persisted to encrypted local storage (the Outbox), the UI clears instantly, and background network delivery begins. On success, the message is removed from the Outbox. On failure, automatic retry kicks in. The result: <strong>zero message loss</strong> with near-zero perceived latency.</p>
-
-          <!-- Section 2 -->
-          <h2>Outbox Pattern Design Flow</h2>
-          <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
-          <ol class="flow-list">
-            <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense for zero message loss.</li>
-            <li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: one-tap (0.25s with animation).</li>
-            <li><strong>Background Send via Relay API</strong><br>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
-            <li><strong>On Success: Remove from Outbox</strong><br>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
-            <li><strong>On Failure: Automatic Retry with Exponential Backoff</strong><br>For network or server errors, automatic retry with exponential backoff (1s → 2s → 4s → 8s...) kicks in. BGTaskScheduler ensures retries happen even when the app is in the background.</li>
-            <li><strong>If Offline: NWPathMonitor Detects Connectivity and Auto-Resends</strong><br>If the device is offline at send time, Network.framework's NWPathMonitor watches for connectivity changes. The moment Wi-Fi or cellular returns, all unsent messages in the Outbox are automatically resent.</li>
-          </ol>
-
-          <!-- Section 3 -->
-          <h2>SendManager Code</h2>
-          <p>The SendManager's <code>send()</code> function is the entry point for the Outbox pattern. It persists to the Outbox first, queues if offline, and sends immediately if connected.</p>
-<pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
-    // Persist to Outbox first (guarantees zero message loss)
-    let outboxMessage: OutboxMessage
-    do {
-        outboxMessage = try OutboxManager.shared.add(body: message)
-    } catch {
-        DispatchQueue.main.async { completion(.failure(error)) }
-        return
-    }
-
-    // If no network, notify that message has been queued
-    guard NetworkMonitor.shared.isConnected else {
-        BackgroundTaskManager.shared.scheduleRetryTask()
-        DispatchQueue.main.async { completion(.queued) }
-        return
-    }
-
-    // Execute the send
-    performSend(message: message, outboxId: outboxMessage.id, ...)
-}</code></pre>
-          <p>The critical point: <code>OutboxManager.shared.add(body:)</code> writes synchronously to persistent storage. Once this call succeeds, message safety is guaranteed. Regardless of what happens with the network send, the message remains in the Outbox until explicitly deleted after confirmed delivery.</p>
-
-          <!-- Section 4 -->
-          <h2>AES-GCM Encryption Implementation</h2>
-          <p>Messages stored in the Outbox are private user memos. Even on local storage, plaintext is unacceptable. We implemented encryption using Apple CryptoKit's AES-GCM, with no third-party SDK in the encryption path.</p>
-          <ul>
-            <li><strong>Apple CryptoKit</strong> — Available from iOS 13+. No external dependencies.</li>
-            <li><strong>256-bit Symmetric Key</strong> — Stored in Keychain, bound to the device.</li>
-            <li><strong>Authenticated Encryption</strong> — AES-GCM guarantees both confidentiality and integrity. Tampered data is detected on decryption.</li>
-          </ul>
-<pre><code>enum OutboxEncryption {
-    private static var encryptionKey: SymmetricKey {
-        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
-            return SymmetricKey(data: existingKey)
-        }
-        let newKey = SymmetricKey(size: .bits256)
-        let keyData = newKey.withUnsafeBytes { Data($0) }
-        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
-        return newKey
-    }
-
-    static func encrypt(_ plainText: String) throws -&gt; Data {
-        guard let data = plainText.data(using: .utf8) else {
-            throw OutboxError.encryptionFailed
-        }
-        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
-        guard let combined = sealedBox.combined else {
-            throw OutboxError.encryptionFailed
-        }
-        return combined
-    }
-}</code></pre>
-          <p>The key is auto-generated on first launch and securely stored in Keychain. Keychain is tied to the device's Secure Enclave, making it inaccessible to other apps or backups.</p>
-
-          <!-- Section 5 -->
-          <h2>Keeping the Data Path Free of External SDKs</h2>
-          <p>Every framework used in the Outbox architecture is Apple-native.</p>
-          <ul>
-            <li><strong>CryptoKit</strong> — AES-GCM encryption. No third-party crypto libraries needed.</li>
-            <li><strong>Network.framework</strong> — NWPathMonitor for connectivity monitoring. No Reachability library needed.</li>
-            <li><strong>BackgroundTasks</strong> — BGTaskScheduler for background retry.</li>
-          </ul>
-          <p>Zero external dependencies has significant implications:</p>
-          <ul>
-            <li><strong>No Breaking Changes</strong> — Third-party libraries won't break on OS updates.</li>
-            <li><strong>Security</strong> — No third-party code touches the user's memo data. The entire code path handling user content is first-party.</li>
-            <li><strong>Small Binary</strong> — No unnecessary frameworks means minimal download size.</li>
-            <li><strong>Faster Builds</strong> — No dependency resolution overhead. CI stays fast.</li>
-          </ul>
-
-          <!-- Section 6 -->
-          <h2>Decoupling UI Clear from Network Send</h2>
-          <p>The true value of the Outbox pattern is the complete separation of the UI layer and the network layer. Let's look at the send button tap handler.</p>
-<pre><code>@objc private func sendButtonTapped() {
-    PerformanceLogger.shared.beginSendToReset()
-    let message = textView.text ?? ""
-    isSending = true
-    sendBarButton.isEnabled = false
-
-    // Animation → UI clear (does NOT wait for network!)
-    performSendAnimation {
-        self.clearTextView()
-        PerformanceLogger.shared.endSendToReset()
-    }
-
-    // Send is async. Does not block UI.
-    SendManager.shared.send(message: message) { [weak self] result in
-        self?.isSending = false
-        self?.updateSendButtonState()
-        switch result {
-        case .success:
-            PerformanceLogger.shared.logEvent(name: "SendSuccess")
-        case .failure(let error):
-            self?.handleSendError(error)
-        case .queued:
-            self?.showQueuedFeedback()
-        }
-    }
-}</code></pre>
-          <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
-          <p>Send-to-Reset target: <strong>one-tap</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
-
-          <!-- FAQ -->
-          <h2>FAQ</h2>
-
-          <h3>Q. What happens to memos sent offline?</h3>
-          <p>They are encrypted and stored in the Outbox. When connectivity returns, NWPathMonitor detects it and automatically resends all pending messages. No user action required.</p>
-
-          <h3>Q. Are memos lost if I close the app?</h3>
-          <p>No. The Outbox uses persistent storage. Messages survive app termination and iPhone restarts. They are automatically retried on next app launch or via background tasks.</p>
-
-          <h3>Q. Why AES-GCM?</h3>
-          <p>Apple CryptoKit provides native AES-GCM support, offering authenticated encryption that detects data tampering during decryption. The encryption code path is entirely first-party — no third-party SDK touches the security-critical code.</p>
-
-          <h3>Q. How many retries on failure?</h3>
-          <p>Retries use exponential backoff and are scheduled as background tasks via BGTaskScheduler. They continue until the message is successfully delivered. The system is designed to never drop a user's memo.</p>
-
-          <!-- Related Articles -->
-          <h2>Related Articles</h2>
-          <div class="related-grid">
-            <a href="/devlog/day1" class="related-card">
-              <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-              <div class="related-card__desc">Launch in ~1s, send with one tap, zero message loss. It all started here.</div>
-            </a>
-            <a href="/devlog/" class="related-card">
-              <div class="related-card__title">Dev Log Index</div>
-              <div class="related-card__desc">The complete record of technical decisions and Captio experience recreation.</div>
-            </a>
-            <a href="/devlog/uikit-vs-swiftui" class="related-card">
-              <div class="related-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
-              <div class="related-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
-            </a>
-            <a href="/devlog/relay-api-design" class="related-card">
-              <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-              <div class="related-card__desc">Edge computing for global email delivery in milliseconds.</div>
-            </a>
-            <a href="/devlog/privacy-first-design" class="related-card">
-              <div class="related-card__title">Privacy-First Design: Obsessive Attention to Detail</div>
-              <div class="related-card__desc">Ephemeral URLSession, privacy overlay, sanitized logs.</div>
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
-  
+
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">参考文献</span>
-    <span lang="en" data-lang="en">References</span>
+    <span lang="ja">参考文献</span>
+
   </h2>
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — AES.GCM (CryptoKit)</a> — <span lang="ja" data-lang="ja">Outboxデータの暗号化に使用したAES-GCM認証付き暗号化の公式リファレンス</span><span lang="en" data-lang="en">Official reference for AES-GCM authenticated encryption used to protect Outbox data</span></li>
-    <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — NWPathMonitor (Network Framework)</a> — <span lang="ja" data-lang="ja">オフライン検知とネットワーク状態監視に使用</span><span lang="en" data-lang="en">Used for offline detection and network status monitoring</span></li>
-    <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — BGTaskScheduler</a> — <span lang="ja" data-lang="ja">バックグラウンドでの再送処理スケジューリングに使用</span><span lang="en" data-lang="en">Used for scheduling background retry processing</span></li>
-    <li>Wikipedia — Transactional Outbox Pattern — <span lang="ja" data-lang="ja">メッセージの信頼性保証を実現するトランザクショナルOutboxパターンの解説</span><span lang="en" data-lang="en">Explanation of the transactional Outbox pattern for reliable message delivery</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — AES.GCM (CryptoKit)</a> — <span lang="ja">Outboxデータの暗号化に使用したAES-GCM認証付き暗号化の公式リファレンス</span></li>
+    <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — NWPathMonitor (Network Framework)</a> — <span lang="ja">オフライン検知とネットワーク状態監視に使用</span></li>
+    <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — BGTaskScheduler</a> — <span lang="ja">バックグラウンドでの再送処理スケジューリングに使用</span></li>
+    <li>Wikipedia — Transactional Outbox Pattern — <span lang="ja">メッセージの信頼性保証を実現するトランザクショナルOutboxパターンの解説</span></li>
   </ul>
 </section>
 
@@ -669,26 +492,26 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Set up the integration and target on iPhone to also save your notes in Obsidian.</span>
+        <span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
   </ul>
 </section>
 </main>
@@ -699,26 +522,26 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/how-to/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span lang="ja">テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span lang="ja">Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発日誌</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja">利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシーポリシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -726,8 +549,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

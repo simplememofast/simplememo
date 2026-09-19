@@ -124,7 +124,7 @@ def build_plan() -> list[tuple[Path, str, str, list[tuple[str, str]], str | None
 EXCLUDED_DIR_PARTS = {
     "node_modules", "admin", "drafts", "docs", "scripts", "screenshots",
     "tools", "tiktok", "templates", ".git", ".github", ".claude", "js",
-    "assets", "functions",
+    "assets", "functions", "memo-inbox",
     # 検査用フィクスチャ（noindex + robots.txt Disallow）。公開面ではないので
     # canonical を持たせない。engine-divergence.html は </style></head> が同一行の
     # ため、挿入すると <style> 内に block が落ちて CSS ごと壊れる。

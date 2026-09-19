@@ -49,6 +49,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/use-cases/journaling/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/use-cases/journaling/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/use-cases/journaling/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/use-cases/journaling/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -82,8 +85,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -125,7 +126,7 @@
     .internal-links a:hover{border-color:var(--accent)}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -266,104 +267,92 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/use-cases/journaling/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/use-cases/journaling/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">メールジャーナリング — 日記が続かない人のための1行日記術 | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">メールジャーナリング — 日記が続かない人のための1行日記術</span>
-      <span class="meta-description">1〜3行をメモ→メール送信するだけ。検索可能な日記が自動で蓄積。日記の習慣化が簡単に。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Email Journaling — The One-Line Diary for People Who Can't Keep a Journal | Simple Memo</span>
-      <span class="meta-og-title">Email Journaling — The One-Line Diary for People Who Can't Keep a Journal</span>
-      <span class="meta-description">Send 1-3 lines to your email each day. A searchable journal builds up automatically. The easiest way to start a journaling habit.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">活用事例 / メールジャーナリング</span>
-          <span lang="en" data-lang="en">Use Case / Email Journaling</span>
+          <span lang="ja">活用事例 / メールジャーナリング</span>
+
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">日記が続かない人のための<br>メールジャーナリング</span>
-          <span lang="en" data-lang="en">Email Journaling<br>for People Who Can't Keep a Diary</span>
+          <span lang="ja">日記が続かない人のための<br>メールジャーナリング</span>
+
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">日記を始めては三日坊主、ジャーナリングアプリをダウンロードしては放置——心当たりはありませんか？問題は意志力ではなく、ハードルの高さです。Obsidian連携シンプルメモなら1〜3行をメール送信するだけ。10秒で終わる超低摩擦のジャーナリングで、検索可能な日記がメールに自動蓄積されます。</span>
-          <span lang="en" data-lang="en">Started a journal and quit after three days? Downloaded a journaling app only to forget about it? The problem isn't willpower — it's friction. With Simple Memo, just send 1-3 lines to your email. In 10 seconds, you're done. A searchable journal builds up automatically in your inbox with zero effort.</span>
+          <span lang="ja">日記を始めては三日坊主、ジャーナリングアプリをダウンロードしては放置——心当たりはありませんか？問題は意志力ではなく、ハードルの高さです。Obsidian連携シンプルメモなら1〜3行をメール送信するだけ。10秒で終わる超低摩擦のジャーナリングで、検索可能な日記がメールに自動蓄積されます。</span>
+
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
-          <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+
         </p>
       </div>
 
       <!-- Problem Statement -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">なぜ日記は続かないのか</span>
-          <span lang="en" data-lang="en">Why Journals Don't Stick</span>
+          <span lang="ja">なぜ日記は続かないのか</span>
+
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">日記が続かない理由は「怠け」ではありません。多くのジャーナリング方法が求めるハードルが高すぎるのです。毎日30分座って、きれいな文章で、1ページ分書く——これは最初の熱意が冷めたら続きません。</span>
-          <span lang="en" data-lang="en">The reason journals don't stick isn't laziness. Most journaling methods set the bar too high. Sit down for 30 minutes, write beautiful prose, fill a full page — this can't survive once the initial enthusiasm fades.</span>
+          <span lang="ja">日記が続かない理由は「怠け」ではありません。多くのジャーナリング方法が求めるハードルが高すぎるのです。毎日30分座って、きれいな文章で、1ページ分書く——これは最初の熱意が冷めたら続きません。</span>
+
         </p>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">問題1: 書く量のプレッシャー</span>
-              <span lang="en" data-lang="en">Problem 1: Pressure to write a lot</span>
+              <span lang="ja">問題1: 書く量のプレッシャー</span>
+
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">「日記」と聞くと、長い文章を書かなければという義務感が生まれます。1ページ書かないと「ちゃんとやった感」がない。このプレッシャーが挫折の原因です。</span>
-              <span lang="en" data-lang="en">The word "journal" creates pressure to write long entries. If you don't fill a page, it doesn't feel like you "did it properly." This pressure is the #1 cause of giving up.</span>
+              <span lang="ja">「日記」と聞くと、長い文章を書かなければという義務感が生まれます。1ページ書かないと「ちゃんとやった感」がない。このプレッシャーが挫折の原因です。</span>
+
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">問題2: 専用アプリを開く習慣がつかない</span>
-              <span lang="en" data-lang="en">Problem 2: Can't build the habit of opening a dedicated app</span>
+              <span lang="ja">問題2: 専用アプリを開く習慣がつかない</span>
+
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">ジャーナリングアプリは最初の1週間は使いますが、通知をオフにした瞬間に存在を忘れます。毎日使うアプリではないため、習慣に組み込めません。</span>
-              <span lang="en" data-lang="en">You'll use a journaling app for the first week, but the moment you turn off notifications, you forget it exists. It's not a daily-use app, so it never becomes a habit.</span>
+              <span lang="ja">ジャーナリングアプリは最初の1週間は使いますが、通知をオフにした瞬間に存在を忘れます。毎日使うアプリではないため、習慣に組み込めません。</span>
+
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">問題3: 後で読み返しにくい</span>
-              <span lang="en" data-lang="en">Problem 3: Hard to search and review</span>
+              <span lang="ja">問題3: 後で読み返しにくい</span>
+
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">紙の日記は検索できません。専用アプリの日記はそのアプリでしか読めません。「去年の今頃何してたっけ？」という疑問に、すぐに答えられません。</span>
-              <span lang="en" data-lang="en">Paper journals aren't searchable. App-based journals can only be read in that app. When you wonder "What was I doing this time last year?" there's no quick answer.</span>
+              <span lang="ja">紙の日記は検索できません。専用アプリの日記はそのアプリでしか読めません。「去年の今頃何してたっけ？」という疑問に、すぐに答えられません。</span>
+
             </div>
           </div>
         </div>
@@ -372,45 +361,39 @@
       <!-- Solution -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">解決策: メールに送るだけの1行日記</span>
-          <span lang="en" data-lang="en">The Solution: One-Line Diary Sent to Email</span>
+          <span lang="ja">解決策: メールに送るだけの1行日記</span>
+
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">メールジャーナリングのルールは1つだけ——「毎日1行以上、自分のメールに送る」。Obsidian連携シンプルメモなら起動0.4秒・ワンタップ送信で10秒以内に完了。1行でOK。メールに日付つきで蓄積されるから、GmailやOutlookの検索で過去の日記をすぐに見つけられます。毎日使うメールアプリが、そのまま日記帳になります。</span>
-          <span lang="en" data-lang="en">Email journaling has one rule: "Send at least one line to yourself every day." Simple Memo makes this a 10-second habit with its 0.4s launch and one-tap send. One line is enough. Entries accumulate in your email with timestamps, so you can search past entries instantly with Gmail or Outlook. Your daily email app becomes your journal.</span>
+          <span lang="ja">メールジャーナリングのルールは1つだけ——「毎日1行以上、自分のメールに送る」。Obsidian連携シンプルメモなら起動0.4秒・ワンタップ送信で10秒以内に完了。1行でOK。メールに日付つきで蓄積されるから、GmailやOutlookの検索で過去の日記をすぐに見つけられます。毎日使うメールアプリが、そのまま日記帳になります。</span>
+
         </p>
       </section>
 
       <!-- How To Steps -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">使い方ステップ（5ステップ）</span>
-          <span lang="en" data-lang="en">How to Use It (5 Steps)</span>
+          <span lang="ja">使い方ステップ（5ステップ）</span>
+
         </h2>
-        <ol lang="ja" class="steps-list" data-lang="ja">
+        <ol lang="ja" class="steps-list">
           <li><strong>毎日のリマインダーを設定する</strong> — iPhoneのリマインダーやアラームで、朝または夜の決まった時間に通知を設定。これがジャーナリングのきっかけになります。</li>
           <li><strong>アプリを起動する</strong> — 通知が来たら、Obsidian連携シンプルメモを起動。0.4秒でカーソルが点滅し、すぐに入力できます。</li>
           <li><strong>1〜3行で今日のことを書く</strong> — 「今日嬉しかったこと：同僚に褒められた」「感謝：天気が良かった」など。1行でOK、完璧な文章は不要です。</li>
           <li><strong>ワンタップで送信する</strong> — 送信ボタンを1回タップ。件名に「[JOURNAL]」を設定しておけば、後で日記だけをフィルタリングして読み返せます。</li>
           <li><strong>メールで日記を検索・振り返る</strong> — 週末や月末に「[JOURNAL]」で検索。過去の日記が時系列で一覧表示されます。「去年の今頃」を簡単に振り返れます。</li>
         </ol>
-        <ol lang="en" class="steps-list" data-lang="en">
-          <li><strong>Set a daily reminder</strong> — Use your iPhone's reminder or alarm app to set a notification at a fixed time, morning or evening. This becomes your journaling trigger.</li>
-          <li><strong>Launch the app</strong> — When the reminder fires, open Simple Memo. Cursor is ready in 0.4 seconds.</li>
-          <li><strong>Write 1-3 lines about your day</strong> — "Highlight: got a compliment from a coworker" or "Grateful for: beautiful weather." One line is fine. No need for perfect prose.</li>
-          <li><strong>Send with one tap</strong> — Tap send once. Set subject prefix [JOURNAL] so you can filter and review just your journal entries later.</li>
-          <li><strong>Search and reflect via email</strong> — On weekends or month-end, search "[JOURNAL]" in your email. Past entries appear chronologically. Easily look back at "this time last year."</li>
-        </ol>
+
       </section>
 
       <!-- Real Scenarios -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">実際のシナリオ例</span>
-          <span lang="en" data-lang="en">Real-World Scenario Examples</span>
+          <span lang="ja">実際のシナリオ例</span>
+
         </h2>
 
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="scenario-block">
             <div class="scenario-block__label">シナリオ 1</div>
             <div class="scenario-block__title">朝の意図設定（モーニングインテンション）</div>
@@ -437,115 +420,81 @@
           </div>
         </div>
 
-        <div lang="en" data-lang="en">
-          <div class="scenario-block">
-            <div class="scenario-block__label">Scenario 1</div>
-            <div class="scenario-block__title">Morning Intention Setting</div>
-            <div class="scenario-block__body">Every morning at 7am, the reminder pings. While brewing coffee, launch Simple Memo: "Today's intention: finish presentation / hit the gym in the evening." Send. Your day has direction. At night, check email to review what you achieved.</div>
-            <div class="scenario-block__memo">[JOURNAL] Today's intention: finish presentation / gym / early bedtime</div>
-          </div>
-          <div class="scenario-block">
-            <div class="scenario-block__label">Scenario 2</div>
-            <div class="scenario-block__title">Evening Gratitude Journal</div>
-            <div class="scenario-block__body">Before bed, write "3 things I'm grateful for today." In bed, launch the app: "1. Coworker helped me 2. Great lunch 3. Kid's smile." Send. Done in 10 seconds. Daily practice strengthens positive thinking over time.</div>
-            <div class="scenario-block__memo">[JOURNAL] Grateful: coworker's help / great lunch / kid's smile</div>
-          </div>
-          <div class="scenario-block">
-            <div class="scenario-block__label">Scenario 3</div>
-            <div class="scenario-block__title">Mood Tracking</div>
-            <div class="scenario-block__body">For mental health, you want to track your mood. During lunch break: "Today's mood: 7/10, focused in the morning, a bit tired in the afternoon." Memo and send. Review a month of emails to spot mood patterns.</div>
-            <div class="scenario-block__memo">[JOURNAL] Mood: 7/10 / morning focused / afternoon tired</div>
-          </div>
-          <div class="scenario-block">
-            <div class="scenario-block__label">Scenario 4</div>
-            <div class="scenario-block__title">One-Line-a-Day Diary</div>
-            <div class="scenario-block__body">"Sum up today in one sentence." While brushing your teeth at night: "A fulfilling day. New project kicked off." Send. A year later, read through 365 emails chronologically and see the story of your entire year unfold.</div>
-            <div class="scenario-block__memo">[JOURNAL] A fulfilling day. New project kicked off.</div>
-          </div>
-        </div>
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">よくある質問</span>
-          <span lang="en" data-lang="en">FAQ</span>
+          <span lang="ja">よくある質問</span>
+
         </h2>
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メールジャーナリングとは何ですか？</summary><div class="faq-answer"><p>メールジャーナリングとは、日々の出来事や感情を短いメモとして自分のメールアドレスに送信する日記法です。専用の日記アプリを使わず、メールの受信トレイに日記が蓄積されるため、検索が簡単で習慣化しやすいのが特徴です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">日記が続かない人でも続けられますか？</summary><div class="faq-answer"><p>はい。メールジャーナリングの最大の特徴は「ハードルの低さ」です。1行でOK、完璧な文章は不要、起動0.4秒・ワンタップ送信で10秒以内に完了。日記帳を開いてペンを取る必要もありません。このハードルの低さが継続の鍵です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">過去の日記を検索できますか？</summary><div class="faq-answer"><p>はい。メールに蓄積されるので、GmailやOutlookの検索機能でキーワード検索できます。「旅行」「嬉しかった」などで検索すれば、関連する日記が一覧で表示されます。紙の日記にはない大きなメリットです。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">朝と夜、どちらに書くのがおすすめですか？</summary><div class="faq-answer"><p>どちらでも効果的です。朝は「今日の意図・目標」を書くのに適しています。夜は「今日の振り返り・感謝」に向いています。まずはどちらか一方から始めて、慣れたら朝晩2回にすることもできます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">プライバシーは守られますか？</summary><div class="faq-answer"><p>はい。メモは自分のメールアドレスに送信されるだけです。アカウント登録不要、クラウドにデータを保存しません。オフライン時はAES-GCM暗号化で端末に保存されます。日記の内容は自分のメールサーバーにのみ存在します。</p></div></details></div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is email journaling?</summary><div class="faq-answer"><p>Email journaling is a practice of sending short daily reflections to your own email. Instead of using a dedicated journaling app, your inbox becomes your journal — searchable, timestamped, and always accessible.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can people who can't keep a journal stick with this?</summary><div class="faq-answer"><p>Yes. The key is ultra-low friction. One line is enough, perfect prose isn't needed, and the whole process takes under 10 seconds with a 0.4s launch and one-tap send. No journal to find, no pen to pick up. This low barrier is what makes the habit stick.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I search past journal entries?</summary><div class="faq-answer"><p>Yes. Since entries accumulate in your email, you can use Gmail or Outlook search to find entries by keyword. Search "vacation" or "grateful" and see all related entries at a glance — a major advantage over paper journals.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Should I journal in the morning or at night?</summary><div class="faq-answer"><p>Both work well. Morning is great for setting intentions and goals. Evening is ideal for reflection and gratitude. Start with one, and add the other when the habit feels natural.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is my journal private?</summary><div class="faq-answer"><p>Yes. Memos are sent only to your own email address. No account creation, no cloud storage of your data. Offline entries are saved with AES-GCM encryption on your device. Your journal content exists only on your email server.</p></div></details></div>
-        </div>
+
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja" data-lang="ja">メールジャーナリングを今日から始める</span>
-          <span lang="en" data-lang="en">Start email journaling today</span>
+          <span lang="ja">メールジャーナリングを今日から始める</span>
+
         </div>
         <div class="cta-box__desc">
-          <span lang="ja" data-lang="ja">ダウンロードは無料。設定は3分で完了します。</span>
-          <span lang="en" data-lang="en">Free to download. Setup takes 3 minutes.</span>
+          <span lang="ja">ダウンロードは無料。設定は3分で完了します。</span>
+
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="mid" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="mid" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span>
-          <span lang="en" data-lang="en">Related Pages</span>
+          <span lang="ja">関連ページ</span>
+
         </h2>
         <div class="internal-links">
           <a href="/use-cases/">
-            <span lang="ja" data-lang="ja">活用事例一覧</span>
-            <span lang="en" data-lang="en">All Use Cases</span>
+            <span lang="ja">活用事例一覧</span>
+
           </a>
           <a href="/use-cases/ideas/">
-            <span lang="ja" data-lang="ja">アイデアメモの活用事例</span>
-            <span lang="en" data-lang="en">Idea Capture Use Case</span>
+            <span lang="ja">アイデアメモの活用事例</span>
+
           </a>
           <a href="/use-cases/reading-notes/">
-            <span lang="ja" data-lang="ja">読書メモの活用事例</span>
-            <span lang="en" data-lang="en">Reading Notes Use Case</span>
+            <span lang="ja">読書メモの活用事例</span>
+
           </a>
           <a href="/note-to-email/">
-            <span lang="ja" data-lang="ja">自分にメールするメモとは</span>
-            <span lang="en" data-lang="en">Note-to-Email Guide</span>
+            <span lang="ja">自分にメールするメモとは</span>
+
           </a>
           <a href="/faq">
-            <span lang="ja" data-lang="ja">よくあるご質問</span>
-            <span lang="en" data-lang="en">FAQ</span>
+            <span lang="ja">よくあるご質問</span>
+
           </a>
         </div>
       </section>
 
     </div>
-  
+
 <!-- References -->
 <section class="lp-section references">
-  <h2 lang="ja" class="lp-section__title" data-lang="ja">参考文献</h2>
-  <h2 lang="en" class="lp-section__title" data-lang="en">References</h2>
+  <h2 lang="ja" class="lp-section__title">参考文献</h2>
+
   <ul style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;list-style:disc;padding-left:1.5rem;">
-    <li lang="ja" data-lang="ja"><a href="https://www.jstage.jst.go.jp/browse/jjpsy" target="_blank" rel="noopener">日本心理学会 — 心理学研究</a> — 日記・ジャーナリングの心理的効果に関する学術研究</li>
-    <li lang="en" data-lang="en"><a href="https://pubmed.ncbi.nlm.nih.gov/29946959/" target="_blank" rel="noopener">Smyth &amp; Pennebaker (2008) — Expressive Writing and Health</a> — Research on the mental and physical health benefits of journaling</li>
-    <li lang="ja" data-lang="ja"><a href="https://www.jspn.or.jp/" target="_blank" rel="noopener">日本精神神経学会</a> — メンタルヘルスとセルフケアにおける記録習慣の効果</li>
-    <li lang="en" data-lang="en"><a href="https://positivepsychology.com/benefits-of-journaling/" target="_blank" rel="noopener">Positive Psychology — Benefits of Journaling</a> — Evidence-based overview of how journaling improves well-being and self-reflection</li>
+    <li lang="ja"><a href="https://www.jstage.jst.go.jp/browse/jjpsy" target="_blank" rel="noopener">日本心理学会 — 心理学研究</a> — 日記・ジャーナリングの心理的効果に関する学術研究</li>
+
+    <li lang="ja"><a href="https://www.jspn.or.jp/" target="_blank" rel="noopener">日本精神神経学会</a> — メンタルヘルスとセルフケアにおける記録習慣の効果</li>
+
   </ul>
 </section>
 <!-- SEO: Auto-generated related content links -->
@@ -555,27 +504,27 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="method" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">書いたメモを、Obsidianに貯める</span><span lang="en" data-lang="en">Send what you capture into Obsidian</span>
+        <span lang="ja">書いたメモを、Obsidianに貯める</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span><span lang="en" data-lang="en">Grant vault access and choose a target on iPhone to also save what you capture in Obsidian.</span>
+        <span lang="ja">iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">使い方ガイド</span><span lang="en" data-lang="en">Setup Guides</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">使い方ガイド</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
   </ul>
 </section>
 </main>
@@ -585,25 +534,25 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">活用事例</span> <span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">活用事例</span> </a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span> <span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span> <span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span> <span lang="en" data-lang="en">vs</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
+        <a href="/vs/" class="footer__link"><span lang="ja">比較</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -611,8 +560,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

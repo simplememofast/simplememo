@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="index,follow,max-image-preview:large,max-snippet:-1" name="robots"/>
+<meta content="app-id=6758438948, app-argument=https://simplememofast.com/glossary/aes-gcm/" name="apple-itunes-app"/>
+<script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+<title>AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo</title>
+<meta content="Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo." name="description"/>
+<meta content="#070b14" name="theme-color"/>
+<!-- OGP -->
+<meta content="AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo" property="og:title"/>
+<meta content="Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo." property="og:description"/>
+<meta content="article" property="og:type"/>
+<meta content="2026-03-06T00:00:00+09:00" property="article:published_time"/>
+<meta content="https://simplememofast.com/en/glossary/aes-gcm/" property="og:url"/>
+<meta content="https://simplememofast.com/assets/img/og/glossary-aes-gcm.png" property="og:image"/>
+<meta content="1200" property="og:image:width"/>
+<meta content="630" property="og:image:height"/>
+<meta content="Simple Memo - for Obsidian" property="og:site_name"/>
+<meta content="en_US" property="og:locale"/>
+
+<!-- Twitter Card -->
+<meta content="summary_large_image" name="twitter:card"/>
+<meta content="@simplememofast" name="twitter:site"/>
+<meta content="AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo" name="twitter:title"/>
+<meta content="Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo." name="twitter:description"/>
+<meta content="https://simplememofast.com/assets/img/og/glossary-aes-gcm.png" name="twitter:image"/>
+<link href="https://analytics.ahrefs.com" rel="preconnect"/>
+
+<!-- Favicon -->
+<link href="/favicon.ico" rel="icon"/>
+<link href="/assets/favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="/assets/favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="/assets/favicon/site.webmanifest" rel="manifest"/>
+<!-- JSON-LD: Article -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/glossary/aes-gcm/#article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/glossary-aes-gcm.png","headline":"AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo","description":"Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo.","url":"https://simplememofast.com/en/glossary/aes-gcm/","datePublished":"2026-03-06","dateModified":"2026-09-09","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/glossary/aes-gcm/"}}</script>
+<!-- JSON-LD: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo","item":"https://simplememofast.com/glossary/"},{"@type":"ListItem","position":3,"name":"AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo","item":"https://simplememofast.com/en/glossary/aes-gcm/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"DefinedTerm","name":"AES-GCM暗号化","description":"Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo.","inDefinedTermSet":{"@type":"DefinedTermSet","name":"メモアプリ用語集","url":"https://simplememofast.com/glossary/"},"url":"https://simplememofast.com/en/glossary/aes-gcm/"}</script>
+<!-- JSON-LD: Speakable -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/glossary/aes-gcm/#webpage","inLanguage":"en","name":"AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".definition-block"]},"url":"https://simplememofast.com/en/glossary/aes-gcm/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+<link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
+<link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
+<style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+
+    #aes-demo [hidden]{display:none!important} .aes-demo-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin:1rem 0}.aes-demo-actions button{font:inherit;min-height:48px;padding:.65rem .85rem;border:1px solid var(--accent);border-radius:8px;background:var(--surface);color:var(--text);cursor:pointer}.aes-demo-actions button:disabled{opacity:.45;cursor:default}.aes-demo-actions button:focus-visible,.aes-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px}#aes-demo dd{margin:0 0 1rem}#aes-demo code{overflow-wrap:anywhere}#aes-demo dt{font-weight:700;margin-top:.7rem}.aes-table-scroll{max-width:100%;overflow-x:auto;margin:1rem 0}.aes-table-scroll .compare-table{display:table;min-width:640px;margin:0}#aes-demo[data-result="rejected"] [role="status"]{border-left:3px solid #f5c56b;padding-left:1rem}.lp-section>p{line-height:1.9;color:var(--text-secondary);margin:0 0 1.2rem}
+</style>
+<script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
+<!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/glossary/aes-gcm/#faq","inLanguage":"en","mainEntity":[]}</script>
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/glossary/aes-gcm/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/aes-gcm/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/glossary/aes-gcm/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/aes-gcm/">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+</head>
+<body>
+<div class="meta-template" hidden="" lang="en"><span class="meta-title">AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo</span><span class="meta-og-title">AES-GCM Explained: Nonces, Tags, and a Tamper-Detection Demo</span><span class="meta-description">Learn what AES-GCM ciphertext, nonces and tags do. Compare CBC, distinguish Keychain from Secure Enclave keys, and try a browser tamper-detection demo.</span></div>
+<!-- Global Navigation -->
+<nav aria-label="Main navigation" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/en/">
+<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
+<li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
+<li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
+<li><a href="/methods/"><span lang="en">Methods</span></a></li>
+<li><a href="/en/blog/"><span lang="en">Blog</span></a></li>
+<li><a href="/glossary/"><span lang="en">Glossary</span></a></li>
+<li><a href="/en/faq"><span lang="en">FAQ</span></a></li>
+<li><a href="/en/about/"><span lang="en">About</span></a></li>
+<li><a href="/en/devlog/"><span lang="en">Dev Log</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="glossary" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8"><span lang="en">Download</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/glossary/aes-gcm/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/glossary/aes-gcm/" hreflang="en" aria-label="Switch to English" aria-current="page" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="glossary" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8">
+<span lang="en">Download</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+</div>
+</div>
+</nav>
+
+<main class="page-content">
+<div class="container">
+<div class="lp-hero">
+<div class="lp-hero__label">
+
+<span lang="en">Glossary — Security</span>
+</div>
+<h1 class="lp-hero__title">
+
+<span lang="en">What is AES-GCM Encryption?</span>
+</h1>
+<p class="lp-hero__sub"><span lang="en">AES-GCM combines encryption with integrity verification. Learn what nonces and tags do, compare other modes, and try a tamper-detection demo in your browser.</span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
+
+<span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+</p>
+</div>
+<div class="definition-block"><span lang="en"><strong>AES-GCM encrypts data and lets the key holder verify its integrity.</strong> Correct key, nonce and authentication-tag handling matter. The algorithm name alone does not describe protection at an email destination or in a backup.</span></div><p class="lp-section__lead"><span lang="en">Updated September 9, 2026. Checked against NIST, IETF and Apple sources, plus Simple Memo 5.8.26 source. The author develops Simple Memo.</span></p><section class="lp-section" id="aes-parts"><h2 class="lp-section__title"><span lang="en">What do ciphertext, nonce and tag do?</span></h2><p><span lang="en">AES is a symmetric cipher; GCM is a mode of operation. AES-GCM is an AEAD scheme: it can encrypt a payload and authenticate additional data (AAD) without encrypting that data. For example, an application could bind a visible format-version field to an encrypted body. AAD itself is not secret.</span></p><p><span lang="en">The nonce (IV) distinguishes encryptions and must not be reused with the same key. Unlike the key, it can accompany ciphertext. The authentication tag is checked during decryption; failed verification must produce an error rather than accepted plaintext.</span></p><p><span lang="en">Definitions: <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" rel="noopener">NIST SP 800-38D</a>. Inputs and nonce requirements: <a href="https://www.rfc-editor.org/rfc/rfc5116.html" rel="noopener">RFC 5116</a>.</span></p></section><section class="lp-section" id="aes-try"><h2 class="lp-section__title"><span lang="en">Try changing the ciphertext</span></h2><p><span lang="en">This example uses only a fixed sentence with the browser’s Web Crypto API. First encrypt and recover it, then change one bit in a ciphertext copy and verify again. This is an educational browser demo, not an audit of the app’s encryption.</span></p><div class="definition-block" id="aes-demo"><p><span><span lang="en">Example:</span></span> <code>Review the draft at 10:00.</code></p><div class="aes-demo-actions"><button data-demo-create="" disabled="" type="button"><span><span lang="en">1. Encrypt and verify</span></span></button><button data-demo-tamper="" disabled="" type="button"><span><span lang="en">2. Change one bit</span></span></button><button data-demo-verify="" disabled="" type="button"><span><span lang="en">3. Verify original</span></span></button></div><div aria-atomic="true" aria-live="polite" role="status"><p data-demo-state="ready" hidden=""><span><span lang="en">Start with the first button.</span></span></p><p data-demo-state="working" hidden=""><span><span lang="en">Working…</span></span></p><p data-demo-state="verified" hidden=""><span><span lang="en">Verified: the original sentence was recovered.</span></span></p><p data-demo-state="rejected" hidden=""><span><span lang="en">Rejected: the changed ciphertext returned no plaintext.</span></span></p><p data-demo-state="error" hidden=""><span><span lang="en">The operation could not complete. Start again with the first button.</span></span></p><p data-demo-state="unsupported"><span><span lang="en">This environment cannot run the demo. It requires an HTTPS browser and JavaScript.</span></span></p></div><dl data-demo-bytes="" hidden=""><dt><span lang="en">Nonce (12 bytes)</span></dt><dd><code data-demo-nonce=""></code></dd><dt><span lang="en">Original ciphertext (hex)</span></dt><dd><code data-demo-cipher=""></code></dd><dt><span lang="en">Authentication tag (16 bytes)</span></dt><dd><code data-demo-tag=""></code></dd></dl></div><p><span lang="en">Each run creates a new 256-bit key and nonce. The demo does not save or transmit its key or results. Reloading resets it. API reference: <a href="https://www.w3.org/TR/2017/REC-WebCryptoAPI-20170126/#aes-gcm" rel="noopener">AES-GCM in Web Cryptography API</a>.</span></p></section><section class="lp-section" id="aes-comparison"><h2 class="lp-section__title"><span lang="en">Compare AES-CBC and ChaCha20-Poly1305</span></h2><p><span lang="en">The table separates encryption from authentication. Performance depends on hardware and implementation; this is not a speed ranking. Knowing that a product uses CBC alone does not establish how its full authenticated construction behaves.</span></p><div aria-label="Cipher comparison" class="aes-table-scroll" lang="en" role="region" tabindex="0"><table class="compare-table"><thead><tr><th scope="col">Aspect</th><th scope="col">AES-GCM</th><th scope="col">AES-CBC</th><th scope="col">ChaCha20-Poly1305</th></tr></thead><tbody><tr><th scope="row">Encryption and authentication</th><td>Combined (AEAD)</td><td>CBC alone encrypts only</td><td>Combined (AEAD)</td></tr><tr><th scope="row">Uses AES</th><td>Yes</td><td>Yes</td><td>No</td></tr><tr><th scope="row">Design checks</th><td>Key, nonce, tag and usage limits</td><td>Authentication composition, IV and padding</td><td>Key, nonce, tag and usage limits</td></tr></tbody></table></div><p><span lang="en">TLS 1.3 is not limited to AES-GCM. <a href="https://www.rfc-editor.org/rfc/rfc8446.html#section-9.1" rel="noopener">RFC 8446 §9.1</a> requires AES-128-GCM implementation and also recommends AES-256-GCM and ChaCha20-Poly1305. See <a href="https://www.rfc-editor.org/rfc/rfc8439.html" rel="noopener">RFC 8439</a> for ChaCha20-Poly1305.</span></p></section><section class="lp-section" id="aes-app-scope"><h2 class="lp-section__title"><span lang="en">What does this protect in Simple Memo?</span></h2><p><span lang="en">The checked release uses Apple CryptoKit AES-GCM with Keychain-managed keys for local storage. Newly generated keys are 256 bits. Outbox holds queued data; its encryption does not establish end-to-end encryption of a later email.</span></p><p><span lang="en">This implementation reads a symmetric key from Keychain. <strong>A Keychain-stored key is not the same claim as a private key generated and used inside Secure Enclave.</strong> Apple explains <a href="https://developer.apple.com/documentation/cryptokit/storing-cryptokit-keys-in-the-keychain" rel="noopener">storing CryptoKit keys</a> and <a href="https://developer.apple.com/documentation/security/protecting-keys-with-the-secure-enclave" rel="noopener">Secure Enclave private keys</a> separately.</span></p><p><span lang="en">Email passes through the app’s relay and delivery provider, and leaves a recipient-side copy. Check the <a href="/en/privacy">privacy policy</a>, <a href="/en/note-to-email/">recipient setup and arrival checks</a>, and device/account access. Removing an Outbox item is not proof that every copy has been securely erased.</span></p></section><section class="lp-section" id="aes-faq"><h2 class="lp-section__title"><span lang="en">Frequently asked questions</span></h2><div lang="en"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">What does 256 mean in AES-256-GCM?</summary><div class="faq-answer"><p>It is the AES key length in bits. It is not the nonce length, authentication-tag length, or a score for the safety of an entire device.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Must the nonce remain secret?</summary><div class="faq-answer"><p>Unlike the secret key, the nonce can be stored with ciphertext. The crucial requirement is not to reuse a nonce for encryption under the same key.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I display the body when tag verification fails?</summary><div class="faq-answer"><p>Do not use failed verification output as valid plaintext. Handle the authentication error and investigate corruption, an incorrect key, or changed data.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does AES-GCM mean end-to-end encryption?</summary><div class="faq-answer"><p>The algorithm name is insufficient. A system design must specify who holds keys and where decryption occurs. Local Outbox encryption is separate from email transport and recipient-side storage.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Keychain storage mean the key never leaves Secure Enclave?</summary><div class="faq-answer"><p>Not necessarily. The checked app implementation reads symmetric-key data from Keychain. That is different from an API that performs private-key operations inside Secure Enclave.</p></div></details></div></div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+
+<span lang="en">Choose where to keep your text notes</span>
+</div>
+<div class="cta-box__desc">
+
+<span lang="en">Simple Memo keeps text captured on iPhone in configured email or Obsidian destinations. Check the integration and destination settings before starting.</span>
+</div>
+
+<a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="glossary" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" lang="en">
+<img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="120"/>
+</a>
+</div>
+<!-- Internal Links -->
+<section class="lp-section">
+<h2 class="lp-section__title">
+
+<span lang="en">Related Pages</span>
+</h2>
+<div class="internal-links">
+<a href="/glossary/">
+
+<span lang="en">Glossary Home</span>
+</a>
+<a href="/glossary/e2e-encryption/">
+
+<span lang="en">What is E2E Encryption?</span>
+</a>
+<a href="/en/blog/memo-app-encryption-comparison">
+
+<span lang="en">Memo App Encryption Compared</span>
+</a>
+<a href="/en/blog/memo-app-security-comparison">
+
+<span lang="en">Memo App Security Compared</span>
+</a>
+<a href="/glossary/outbox-architecture/">
+
+<span lang="en">What is Outbox Architecture?</span>
+</a>
+<a href="/glossary/smtp/">
+
+<span lang="en">What is SMTP/IMAP?</span>
+</a>
+<a href="/vs/standard-notes/">
+
+<span lang="en">vs Standard Notes</span>
+</a>
+<a href="/guides/proton-mail/">
+
+<span lang="en">Proton Mail Setup Guide</span>
+</a>
+</div>
+</section>
+</div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="method" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="en">Read next</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="en">Send what you capture into Obsidian</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="en">Grant vault access and choose a target on iPhone to also save what you capture in Obsidian.</span>
+</span>
+</a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+
+<span lang="en">Related Content</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">All Methods</span></a></li>
+<li><a href="/en/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">All Blog Posts</span></a></li>
+<li><a href="/en/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="en">FAQ</span></a></li>
+</ul>
+</section>
+</main>
+<footer class="footer">
+<div class="container">
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Product</p>
+<a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
+<a class="footer__link" href="/en/"><span lang="en">Home</span></a>
+<a class="footer__link" href="/en/use-cases/"><span lang="en">Use Cases</span></a>
+<a class="footer__link" href="/en/guides/"><span lang="en">Guides</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Compare & Switch</p>
+<a class="footer__link" href="/en/captio-alternative/"><span lang="en">Captio Alternative</span></a>
+<a class="footer__link" href="/en/note-to-email/"><span lang="en">Note to Email</span></a>
+<a class="footer__link" href="/en/vs/"><span lang="en">vs</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Learn</p>
+<a class="footer__link" href="/glossary/"><span lang="en">Glossary</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Support</p>
+<a class="footer__link" href="/en/roadmap/"><span lang="en">Public roadmap</span></a>
+<a class="footer__link" href="/en/devlog/"><span lang="en">Dev log</span></a>
+<a class="footer__link" href="/en/about/"><span lang="en">About the developer</span></a>
+<a class="footer__link" href="/en/faq"><span lang="en">FAQ</span></a>
+<a class="footer__link" href="/en/privacy"><span lang="en">Privacy</span></a>
+<a class="footer__link" href="/contact"><span lang="en">Contact</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
+        © 2026 Simple Memo - for Obsidian / Yurika Inc.
+      </p>
+</div>
+</footer>
+
+<script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+<script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
+<script defer="" src="/js/aes-gcm-demo.js?v=2cc0ff3b5f"></script>
+</body>
+</html>

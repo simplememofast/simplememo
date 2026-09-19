@@ -49,6 +49,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/vs/moca/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/moca/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/moca/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/moca/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -75,8 +78,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -126,7 +127,7 @@
     .choose-card ul li::before{content:"✓ ";color:#3fb950;font-weight:700}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
-  
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
@@ -262,85 +263,73 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/moca/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/moca/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">Mocaとの比較 — Obsidian連携シンプルメモ | 自分にメール メモ帳アプリ比較</span>
-      <span class="meta-og-title">シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較</span>
-      <span class="meta-description">Moca（自分にメールを送るメモ帳）とObsidian連携シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度・セキュリティの観点で解説。Mocaが向く人・シンプルメモが向く人の結論と、併用パターンも比較表つきで紹介します。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo vs Moca — Email-to-Self Memo App Comparison</span>
-      <span class="meta-og-title">Simple Memo vs Moca — In-Depth Comparison</span>
-      <span class="meta-description">Simple Memo vs Moca: encryption, offline support, send speed, and security compared. Find out which email-to-self memo app is best for quick thought capture.</span>
-    </div>
-  </div>
+
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">メモアプリ比較</span>
-          <span lang="en" data-lang="en">Memo App Comparison</span>
+          <span lang="ja">メモアプリ比較</span>
+
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">シンプルメモ vs Moca<br>どちらを選ぶべきか</span>
-          <span lang="en" data-lang="en">Simple Memo vs Moca<br>Which Should You Choose?</span>
+          <span lang="ja">シンプルメモ vs Moca<br>どちらを選ぶべきか</span>
+
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">Mocaも「自分にメールを送るメモ帳」という同じコンセプトのアプリです。どちらも素晴らしいですが、シンプルメモはAES-GCM暗号化・Outboxオフライン自動送信・Cloudflare Workers経由のワンタップ高速配信という、エンタープライズグレードのセキュリティと信頼性を追加しています。</span>
-          <span lang="en" data-lang="en">Moca shares the same "email memo to yourself" concept. Both are great for quick capture, but Simple Memo adds enterprise-grade security (AES-GCM encryption), reliable offline delivery (Outbox architecture), and ultra-fast one-tap send times via Cloudflare Workers relay.</span>
+          <span lang="ja">Mocaも「自分にメールを送るメモ帳」という同じコンセプトのアプリです。どちらも素晴らしいですが、シンプルメモはAES-GCM暗号化・Outboxオフライン自動送信・Cloudflare Workers経由のワンタップ高速配信という、エンタープライズグレードのセキュリティと信頼性を追加しています。</span>
+
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
-          <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 6, 2026</span>
+          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
+
         </p>
       </div>
 
       <!-- Entity Definition -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">Mocaとは</span>
-          <span lang="en" data-lang="en">What is Moca?</span>
+          <span lang="ja">Mocaとは</span>
+
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">Mocaは、開発者Hiroki Ogata氏が作ったiOSアプリ「自分にメールを送るメモ帳」です。2023年にリリースされ、意図的にメモの編集・削除機能を持たないという独自の思想で設計されています。書いたらすぐ送る、余計な機能はいらないというミニマリスト的なアプローチが特徴です。Obsidian連携シンプルメモと同様に「自分にメールを送る」というコンセプトを共有しており、iOSのメモ→メール送信カテゴリにおける数少ないアプリの一つです。</span>
-          <span lang="en" data-lang="en">Moca is an iOS app by developer Hiroki Ogata, designed as a "memo pad that sends emails to yourself." Launched in 2023, it intentionally omits edit and delete functions — a deliberate design choice reflecting the philosophy of "write it, send it, move on." Moca shares the same core concept as Simple Memo: emailing notes to yourself. It is one of the few apps in the iOS memo-to-email category, making it a natural point of comparison.</span>
+          <span lang="ja">Mocaは、開発者Hiroki Ogata氏が作ったiOSアプリ「自分にメールを送るメモ帳」です。2023年にリリースされ、意図的にメモの編集・削除機能を持たないという独自の思想で設計されています。書いたらすぐ送る、余計な機能はいらないというミニマリスト的なアプローチが特徴です。Obsidian連携シンプルメモと同様に「自分にメールを送る」というコンセプトを共有しており、iOSのメモ→メール送信カテゴリにおける数少ないアプリの一つです。</span>
+
         </p>
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">比較表：シンプルメモ vs Moca</span>
-          <span lang="en" data-lang="en">Comparison Table: Simple Memo vs Moca</span>
+          <span lang="ja">比較表：シンプルメモ vs Moca</span>
+
         </h2>
         <div style="overflow-x:auto">
-          <table lang="ja" class="compare-table" data-lang="ja">
+          <table lang="ja" class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Moca</th></tr></thead>
             <tbody>
               <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>速い</td></tr>
@@ -355,31 +344,17 @@
               <tr><th scope="row">リレーインフラ</th><td class="yes">Cloudflare Workers + Resend</td><td>標準メール送信</td></tr>
             </tbody>
           </table>
-          <table lang="en" class="compare-table" data-lang="en">
-            <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Moca</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">Launch Speed</th><td class="yes">0.4s (type immediately)</td><td>Fast</td></tr>
-              <tr><th scope="row">One-Tap Send</th><td class="yes">Yes (direct email)</td><td class="yes">Yes</td></tr>
-              <tr><th scope="row">Send Speed</th><td class="yes">one-tap (Cloudflare Workers)</td><td>Standard</td></tr>
-              <tr><th scope="row">No Account Required</th><td class="yes">Use existing email</td><td class="yes">Use existing email</td></tr>
-              <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="no">No</td></tr>
-              <tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td class="no">No</td></tr>
-              <tr><th scope="row">Edit / Delete</th><td>Manageable in Outbox</td><td class="no">Intentionally none</td></tr>
-              <tr><th scope="row">Free Tier</th><td class="yes">3 sends/day, no feature gates</td><td class="yes">Available</td></tr>
-              <tr><th scope="row">Bilingual</th><td class="yes">Japanese / English</td><td>Japanese only</td></tr>
-              <tr><th scope="row">Relay Infrastructure</th><td class="yes">Cloudflare Workers + Resend</td><td>Standard email</td></tr>
-            </tbody>
-          </table>
+
         </div>
       </section>
 
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">4つのMocaとの違い</span>
-          <span lang="en" data-lang="en">4 Differences from Moca</span>
+          <span lang="ja">4つのMocaとの違い</span>
+
         </h2>
-        <ul lang="ja" class="diff-list" data-lang="ja">
+        <ul lang="ja" class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>メール送信 vs アプリ内保存</strong><br>
@@ -401,49 +376,28 @@
             シンプルメモは2026年も継続的にアップデートされ、新機能やセキュリティ改善が行われています。Mocaの最終更新時期はApp Storeで確認できますが、長期的なサポートやアクティブな開発継続が見込めるアプリを選ぶことも大切な判断基準です。
           </li>
         </ul>
-        <ul lang="en" class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>Email Delivery vs In-App Storage</strong><br>
-            While Moca brands itself as a "memo pad that emails yourself," its memos primarily stay within the app. Simple Memo is fully dedicated to email delivery — memos arrive in your inbox immediately. If you value email's searchability, permanence, and cross-device access, Simple Memo has the advantage.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Measured Launch Speed</strong><br>
-            Simple Memo displays the keyboard in 0.4 seconds, ready for immediate input. Moca also launches quickly, but Simple Memo's instant-keyboard design is specifically optimized to minimize the gap between app launch and first keystroke.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Backup Architecture</strong><br>
-            Simple Memo sends memos to your email inbox, so your email provider's backup infrastructure applies automatically. Moca stores memos in-app, which means data can be lost if the device is damaged or replaced. Email-as-backup gives Simple Memo a built-in safety net.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>Development Activity</strong><br>
-            Simple Memo continues to receive regular updates in 2026 with new features and security improvements. Moca's last update can be checked on the App Store. Choosing an app with active, ongoing development is an important factor for long-term reliability.
-          </li>
-        </ul>
+
       </section>
 
       <!-- How to Switch from Moca -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">Mocaからの乗り換え手順</span>
-          <span lang="en" data-lang="en">How to Switch from Moca</span>
+          <span lang="ja">Mocaからの乗り換え手順</span>
+
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">MocaからObsidian連携シンプルメモへの乗り換えは非常にシンプルです。どちらも「自分にメールを送る」アプリなので、データ移行の必要がありません。手順は以下の通りです。まず、App StoreからObsidian連携シンプルメモをダウンロードします（1分以内に完了）。次に、Mocaで使っているのと同じメールアドレスを送信先に設定します。これで設定完了です。以降、Obsidian連携シンプルメモで送ったメモはMocaで送ったメモと同じメール受信箱に届きます。Mocaで過去に送ったメモはメール受信箱にそのまま残っているため、何も失われません。しばらく両方を併用して違いを体感するのもおすすめです。Obsidian連携シンプルメモのAES-GCM暗号化、Outboxオフライン自動送信、0.4秒起動を体験すると、多くのユーザーがObsidian連携シンプルメモに統一しています。</span>
-          <span lang="en" data-lang="en">Switching from Moca to Simple Memo - for Obsidian is remarkably simple. Since both apps send memos to your email, there is no data migration needed. Here's how: First, download Simple Memo - for Obsidian from the App Store (takes under a minute). Then, set the same email address you use with Moca as your send destination. That's it — setup is complete. From now on, memos sent via Simple Memo - for Obsidian will arrive in the same inbox as your Moca memos. Your existing Moca emails stay right where they are in your inbox — nothing is lost. We recommend using both apps side by side for a while to feel the difference. After experiencing Simple Memo - for Obsidian's AES-GCM encryption, Outbox offline auto-send, and ~1-second launch, most users consolidate to Simple Memo - for Obsidian.</span>
+          <span lang="ja">MocaからObsidian連携シンプルメモへの乗り換えは非常にシンプルです。どちらも「自分にメールを送る」アプリなので、データ移行の必要がありません。手順は以下の通りです。まず、App StoreからObsidian連携シンプルメモをダウンロードします（1分以内に完了）。次に、Mocaで使っているのと同じメールアドレスを送信先に設定します。これで設定完了です。以降、Obsidian連携シンプルメモで送ったメモはMocaで送ったメモと同じメール受信箱に届きます。Mocaで過去に送ったメモはメール受信箱にそのまま残っているため、何も失われません。しばらく両方を併用して違いを体感するのもおすすめです。Obsidian連携シンプルメモのAES-GCM暗号化、Outboxオフライン自動送信、0.4秒起動を体験すると、多くのユーザーがObsidian連携シンプルメモに統一しています。</span>
+
         </p>
       </section>
 
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">どちらを選ぶべきか</span>
-          <span lang="en" data-lang="en">Who Should Choose Which?</span>
+          <span lang="ja">どちらを選ぶべきか</span>
+
         </h2>
-        <div lang="ja" class="choose-grid" data-lang="ja">
+        <div lang="ja" class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
@@ -467,110 +421,80 @@
             </ul>
           </div>
         </div>
-        <div lang="en" class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Simple Memo if you...</div>
-            <ul>
-              <li>Need reliable memo delivery even offline</li>
-              <li>Require on-device encryption for security</li>
-              <li>Want the fastest send speed (one-tap)</li>
-              <li>Need English language support</li>
-              <li>Want a free plan with 3 sends a day, forever</li>
-              <li>Handle sensitive or work-related memos</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Moca if you...</div>
-            <ul>
-              <li>Prefer the most minimal app possible</li>
-              <li>Don't need edit or delete functions</li>
-              <li>Always have internet connectivity</li>
-              <li>Don't require encryption</li>
-              <li>Only need Japanese language</li>
-              <li>Resonate with Moca's design philosophy</li>
-            </ul>
-          </div>
-        </div>
+
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">よくある質問</span>
-          <span lang="en" data-lang="en">FAQ</span>
+          <span lang="ja">よくある質問</span>
+
         </h2>
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaのメモはメール受信箱に届きますか？</summary><div class="faq-answer"><p>Mocaは「自分にメールを送る」コンセプトですが、メモの保存先はアプリ内が中心です。シンプルメモはメール受信箱に直接届くため、メールの検索やクロスデバイスアクセスが可能です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの端末を変更したらメモは引き継げますか？</summary><div class="faq-answer"><p>Mocaはアプリ内保存のため、機種変更時にデータが引き継げない場合があります。シンプルメモで送ったメモはメール受信箱に残っているため、端末を変えても過去のメモに常にアクセスできます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？</summary><div class="faq-answer"><p>シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaからシンプルメモに移行する手順は？</summary><div class="faq-answer"><p>App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけです。1分以内に使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。</p></div></details></div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do Moca memos arrive in your email inbox?</summary><div class="faq-answer"><p>Moca's "email yourself" concept primarily stores memos within the app. Simple Memo delivers memos directly to your email inbox, enabling email search and cross-device access.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I keep my memos when switching devices from Moca?</summary><div class="faq-answer"><p>Moca stores memos in-app, so data may not transfer when changing devices. Memos sent via Simple Memo live in your email inbox and are always accessible regardless of which device you use.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo share Moca's no-edit/no-delete philosophy?</summary><div class="faq-answer"><p>Simple Memo is also focused on sending, but unsent Outbox memos can be reviewed and managed. It shares Moca's "write it, send it" ethos while adding AES-GCM encryption and offline support.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I migrate from Moca to Simple Memo?</summary><div class="faq-answer"><p>Download Simple Memo from the App Store and set your email address. You will be ready in under a minute. Using the same email address as Moca unifies all your memos in one inbox.</p></div></details></div>
-        </div>
+
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja" data-lang="ja">Mocaユーザーのための次のステップ</span>
-          <span lang="en" data-lang="en">The Next Step for Moca Users</span>
+          <span lang="ja">Mocaユーザーのための次のステップ</span>
+
         </div>
         <div class="cta-box__desc">
-          <span lang="ja" data-lang="ja">Mocaの次のステップ。暗号化・オフライン対応。ダウンロードは無料。</span>
-          <span lang="en" data-lang="en">The next step from Moca. Encrypted, offline-ready. Free to download.</span>
+          <span lang="ja">Mocaの次のステップ。暗号化・オフライン対応。ダウンロードは無料。</span>
+
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span>
-          <span lang="en" data-lang="en">Related Pages</span>
+          <span lang="ja">関連ページ</span>
+
         </h2>
         <div class="internal-links">
           <a href="/vs/">
-            <span lang="ja" data-lang="ja">メモアプリ比較一覧</span>
-            <span lang="en" data-lang="en">All App Comparisons</span>
+            <span lang="ja">メモアプリ比較一覧</span>
+
           </a>
           <a href="/vs/memo-post/">
-            <span lang="ja" data-lang="ja">vs メモポスト</span>
-            <span lang="en" data-lang="en">vs NotePost</span>
+            <span lang="ja">vs メモポスト</span>
+
           </a>
           <a href="/vs/mail-to-self/">
-            <span lang="ja" data-lang="ja">vs Mail to Self</span>
-            <span lang="en" data-lang="en">vs Mail to Self</span>
+            <span lang="ja">vs Mail to Self</span>
+
           </a>
           <a href="/vs/note-to-self-mail/">
-            <span lang="ja" data-lang="ja">vs Note To Self Mail</span>
-            <span lang="en" data-lang="en">vs Note To Self Mail</span>
+            <span lang="ja">vs Note To Self Mail</span>
+
           </a>
           <a href="/captio-alternative/">
-            <span lang="ja" data-lang="ja">Captio代替ガイド</span>
-            <span lang="en" data-lang="en">Captio Alternative</span>
+            <span lang="ja">Captio代替ガイド</span>
+
           </a>
           <a href="/note-to-email/">
-            <span lang="ja" data-lang="ja">自分にメールするメモとは</span>
-            <span lang="en" data-lang="en">Note-to-Email Guide</span>
+            <span lang="ja">自分にメールするメモとは</span>
+
           </a>
           <a href="/faq">
-            <span lang="ja" data-lang="ja">よくあるご質問</span>
-            <span lang="en" data-lang="en">FAQ</span>
+            <span lang="ja">よくあるご質問</span>
+
           </a>
         </div>
       </section>
 
     </div>
-  
+
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
@@ -578,45 +502,36 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="compare" href="/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">比較の次は、実測値を見る</span><span lang="en" data-lang="en">Next: the measured numbers</span>
+        <span lang="ja">比較の次は、実測値を見る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span><span lang="en" data-lang="en">A table of actual launch and time-to-input measurements across major apps.</span>
+        <span lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span>
       </span>
     </a>
   </aside>
 
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja" data-lang="ja">関連コンテンツ</span>
-    <span lang="en" data-lang="en">Related Content</span>
+    <span lang="ja">関連コンテンツ</span>
+
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">Captio代替アプリ比較</span><span lang="en" data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">自分にメール送信する方法</span><span lang="en" data-lang="en">How to Email Yourself</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">使い方ガイド</span><span lang="en" data-lang="en">Setup Guides</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">自分にメール送信する方法</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">使い方ガイド</span></a></li>
   </ul>
 </section>
-<section lang="ja" class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<section lang="ja" class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li>MOCA（App Store）</li>
     <li>Wirecutter ベストメモアプリレビュー</li>
     <li>G2 メモアプリカテゴリ</li>
     <li><a href="https://hbr.org/topic/subject/personal-productivity" target="_blank" rel="noopener">Harvard Business Review — 生産性と情報整理</a></li>
-  </ul>
-</section>
-<section lang="en" class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-  <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-    <li>MOCA (App Store)</li>
-    <li>Wirecutter Best Note-Taking Apps</li>
-    <li>G2 Note-Taking Software Category</li>
-    <li><a href="https://hbr.org/topic/subject/personal-productivity" target="_blank" rel="noopener">Harvard Business Review - Productivity</a></li>
   </ul>
 </section>
 
@@ -627,25 +542,25 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span> <span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span> <span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">アプリ比較</span> <span lang="en" data-lang="en">Comparisons</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
+        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -653,8 +568,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=2bce131aed" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
