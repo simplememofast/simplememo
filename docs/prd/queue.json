@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T17:08:22.331636+00:00",
+  "updated_at": "2026-09-19T17:52:35.522786+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -15,7 +15,7 @@
     "source_preservation": "9/5のGit管理外原稿とローカル試作を保持。現在のPRDは9/19のmain・VISION・ADR・計測契約との照合版。",
     "initial_ios_main": "17dcad9",
     "initial_api_main": "c6ed249",
-    "ios_integration_base": "50b0585cdc0dfb4ee927eb103a43d220f9bf329d"
+    "ios_integration_base": "57fcafe73b711d6ec3bb5d17ad0ea843cc402510"
   },
   "target_release": {
     "version": "6.0 (proposal)",
@@ -51,33 +51,28 @@
       },
       "integration": {
         "state": "draft",
-        "head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 431,
+          "native_tests": 135,
           "native_failures": 0,
           "native_skipped": 0,
-          "suites": 9,
+          "suites": 4,
           "suite_names": [
-            "CaptureObservationCoordinatorTests",
-            "CaptureObservationDeliveryTests",
+            "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "DraftManagerTests",
-            "NotionIntegrationTests",
             "PendingVerifySendQueueTests",
-            "RoutingDeliveryJournalTests",
-            "RoutingObsidianAnnotationTests",
-            "RoutingSuggestionStoreTests"
+            "WatchCaptureActionTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
           "ci_authority": "current PR checks",
-          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
-          "post_clone_gate": "passed; all nine storage/recovery probes",
-          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -108,17 +103,99 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
-          "checks_succeeded": 5,
-          "unique_tests": 1485,
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "unique_tests": 1587,
           "simulator_models": 4,
-          "successful_executions": 5940,
+          "successful_executions": 6348,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1718
+          "cloud_build": 1735,
+          "result_pages": 8,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks"
+        "current_head_ci": "pending; consult the current PR checks",
+        "prior_admission_validation": {
+          "native_tests": 431,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 9,
+          "suite_names": [
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "DestinationRouterTests",
+            "DraftManagerTests",
+            "NotionIntegrationTests",
+            "PendingVerifySendQueueTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingObsidianAnnotationTests",
+            "RoutingSuggestionStoreTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "ci_authority": "current PR checks",
+          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
+          "post_clone_gate": "passed; all nine storage/recovery probes",
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+        },
+        "historical_ci_validation": [
+          {
+            "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+            "checks_succeeded": 5,
+            "unique_tests": 1551,
+            "simulator_models": 4,
+            "successful_executions": 6204,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1730,
+            "result_pages": 8
+          },
+          {
+            "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+            "checks_succeeded": 5,
+            "unique_tests": 1485,
+            "simulator_models": 4,
+            "successful_executions": 5940,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1718
+          }
+        ],
+        "prior_reminder_validation": {
+          "native_tests": 494,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 10,
+          "suite_names": [
+            "ReminderCaptureAdapterTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "CaptureSourceEntryJournalTests",
+            "CaptureInventoryUploadTests",
+            "WatchCaptureActionTests",
+            "DialogueMemoTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "ci_authority": "current PR checks",
+          "source_scope": "unregistered primary-reminders adapter, EventKit date configuration and merged Capture/Watch/Dialogue behavior",
+          "source_hashes_unchanged": true,
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge"
+        },
+        "origin_observation": {
+          "direct_text_host": "iPhone, iPad or Mac UI idiom at original Compose admission",
+          "watch_origin": "Apple Watch from WatchConnectivity admission",
+          "voice_accessory_observed": false,
+          "legacy_ticket_source": "unknown; excluded from learned matching",
+          "retry_relabels_origin": false,
+          "physical_validation": "pending"
+        }
       }
     },
     {
@@ -141,33 +218,28 @@
       },
       "integration": {
         "state": "draft",
-        "head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 431,
+          "native_tests": 135,
           "native_failures": 0,
           "native_skipped": 0,
-          "suites": 9,
+          "suites": 4,
           "suite_names": [
-            "CaptureObservationCoordinatorTests",
-            "CaptureObservationDeliveryTests",
+            "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "DraftManagerTests",
-            "NotionIntegrationTests",
             "PendingVerifySendQueueTests",
-            "RoutingDeliveryJournalTests",
-            "RoutingObsidianAnnotationTests",
-            "RoutingSuggestionStoreTests"
+            "WatchCaptureActionTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
           "ci_authority": "current PR checks",
-          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
-          "post_clone_gate": "passed; all nine storage/recovery probes",
-          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -198,17 +270,99 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
-          "checks_succeeded": 5,
-          "unique_tests": 1485,
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "unique_tests": 1587,
           "simulator_models": 4,
-          "successful_executions": 5940,
+          "successful_executions": 6348,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1718
+          "cloud_build": 1735,
+          "result_pages": 8,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks"
+        "current_head_ci": "pending; consult the current PR checks",
+        "prior_admission_validation": {
+          "native_tests": 431,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 9,
+          "suite_names": [
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "DestinationRouterTests",
+            "DraftManagerTests",
+            "NotionIntegrationTests",
+            "PendingVerifySendQueueTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingObsidianAnnotationTests",
+            "RoutingSuggestionStoreTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "ci_authority": "current PR checks",
+          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
+          "post_clone_gate": "passed; all nine storage/recovery probes",
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+        },
+        "historical_ci_validation": [
+          {
+            "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+            "checks_succeeded": 5,
+            "unique_tests": 1551,
+            "simulator_models": 4,
+            "successful_executions": 6204,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1730,
+            "result_pages": 8
+          },
+          {
+            "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+            "checks_succeeded": 5,
+            "unique_tests": 1485,
+            "simulator_models": 4,
+            "successful_executions": 5940,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1718
+          }
+        ],
+        "prior_reminder_validation": {
+          "native_tests": 494,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 10,
+          "suite_names": [
+            "ReminderCaptureAdapterTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "CaptureSourceEntryJournalTests",
+            "CaptureInventoryUploadTests",
+            "WatchCaptureActionTests",
+            "DialogueMemoTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "ci_authority": "current PR checks",
+          "source_scope": "unregistered primary-reminders adapter, EventKit date configuration and merged Capture/Watch/Dialogue behavior",
+          "source_hashes_unchanged": true,
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge"
+        },
+        "origin_observation": {
+          "direct_text_host": "iPhone, iPad or Mac UI idiom at original Compose admission",
+          "watch_origin": "Apple Watch from WatchConnectivity admission",
+          "voice_accessory_observed": false,
+          "legacy_ticket_source": "unknown; excluded from learned matching",
+          "retry_relabels_origin": false,
+          "physical_validation": "pending"
+        }
       }
     },
     {
@@ -231,33 +385,28 @@
       },
       "integration": {
         "state": "draft",
-        "head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+        "head": "013858dedabeef2ff85d73201148fd617055a9cf",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
-          "native_tests": 431,
+          "native_tests": 135,
           "native_failures": 0,
           "native_skipped": 0,
-          "suites": 9,
+          "suites": 4,
           "suite_names": [
-            "CaptureObservationCoordinatorTests",
-            "CaptureObservationDeliveryTests",
+            "RoutingSuggestionStoreTests",
             "DestinationRouterTests",
-            "DraftManagerTests",
-            "NotionIntegrationTests",
             "PendingVerifySendQueueTests",
-            "RoutingDeliveryJournalTests",
-            "RoutingObsidianAnnotationTests",
-            "RoutingSuggestionStoreTests"
+            "WatchCaptureActionTests"
           ],
           "runtime": "iOS 26.5 Simulator",
-          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "tested_head": "013858dedabeef2ff85d73201148fd617055a9cf",
           "ci_authority": "current PR checks",
-          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
-          "post_clone_gate": "passed; all nine storage/recovery probes",
-          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+          "source_scope": "original source/device admission, legacy exclusion, candidate matching, verification queue and Watch actions",
+          "source_hashes_unchanged": true,
+          "independent_review": "one legacy-source P2 corrected; final review has no P1/P2"
         },
         "prior_local_validation": {
           "native_tests": 307,
@@ -288,17 +437,99 @@
           "en_suite_nonempty_unique_sentences": 81
         },
         "prior_ci_validation": {
-          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
-          "checks_succeeded": 5,
-          "unique_tests": 1485,
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "unique_tests": 1587,
           "simulator_models": 4,
-          "successful_executions": 5940,
+          "successful_executions": 6348,
           "failed": 0,
           "skipped": 0,
           "runtime": "iOS 27.0 Simulator",
-          "cloud_build": 1718
+          "cloud_build": 1735,
+          "result_pages": 8,
+          "cloud_build_and_test": "succeeded",
+          "checks_succeeded": 5
         },
-        "current_head_ci": "pending; consult the current PR checks"
+        "current_head_ci": "pending; consult the current PR checks",
+        "prior_admission_validation": {
+          "native_tests": 431,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 9,
+          "suite_names": [
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "DestinationRouterTests",
+            "DraftManagerTests",
+            "NotionIntegrationTests",
+            "PendingVerifySendQueueTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingObsidianAnnotationTests",
+            "RoutingSuggestionStoreTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+          "ci_authority": "current PR checks",
+          "source_scope": "merged main plus routing admission, cancellation/restored drafts, local choices and callback fences",
+          "post_clone_gate": "passed; all nine storage/recovery probes",
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge resolution"
+        },
+        "historical_ci_validation": [
+          {
+            "tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76",
+            "checks_succeeded": 5,
+            "unique_tests": 1551,
+            "simulator_models": 4,
+            "successful_executions": 6204,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1730,
+            "result_pages": 8
+          },
+          {
+            "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+            "checks_succeeded": 5,
+            "unique_tests": 1485,
+            "simulator_models": 4,
+            "successful_executions": 5940,
+            "failed": 0,
+            "skipped": 0,
+            "runtime": "iOS 27.0 Simulator",
+            "cloud_build": 1718
+          }
+        ],
+        "prior_reminder_validation": {
+          "native_tests": 494,
+          "native_failures": 0,
+          "native_skipped": 0,
+          "suites": 10,
+          "suite_names": [
+            "ReminderCaptureAdapterTests",
+            "RoutingDeliveryJournalTests",
+            "RoutingSuggestionStoreTests",
+            "DestinationRouterTests",
+            "CaptureObservationCoordinatorTests",
+            "CaptureObservationDeliveryTests",
+            "CaptureSourceEntryJournalTests",
+            "CaptureInventoryUploadTests",
+            "WatchCaptureActionTests",
+            "DialogueMemoTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+          "ci_authority": "current PR checks",
+          "source_scope": "unregistered primary-reminders adapter, EventKit date configuration and merged Capture/Watch/Dialogue behavior",
+          "source_hashes_unchanged": true,
+          "independent_review": "no remaining P1/P2 findings in completed changes and merge"
+        },
+        "origin_observation": {
+          "direct_text_host": "iPhone, iPad or Mac UI idiom at original Compose admission",
+          "watch_origin": "Apple Watch from WatchConnectivity admission",
+          "voice_accessory_observed": false,
+          "legacy_ticket_source": "unknown; excluded from learned matching",
+          "retry_relabels_origin": false,
+          "physical_validation": "pending"
+        }
       },
       "local_choice_storage": {
         "state": "implemented_and_locally_tested",
@@ -318,8 +549,10 @@
         "capture-object",
         "routing-level1-2-reminders-calendar"
       ],
-      "prs": [],
-      "note": "通常のSiri/Shortcutsを保持。製品外SDK定義のコンパイル・メタデータ生成と2負例、再利用検査6回帰に成功。実app/widgetに未出荷スキーマがないことも確認。perform・Entity解決・本文非公開・未対応入力・将来の登録制御は別の残実装。",
+      "prs": [
+        "https://github.com/simplememofast/simplememo-ios/pull/594"
+      ],
+      "note": "既存Siri/Shortcutsを保持。製品外SDK契約検査に加え、未登録のprimary-reminders adapterを実装・native検証。共通Capture、保存/読戻し、暗号化受付/receipt、本文を返さないID解決、未対応入力拒否を含む。Notesの保存方式、perform/schema宣言、索引opt-in/消去、primary-reminders計測、実機実行は未完了。",
       "blocked_by_scope": "product release acceptance; independent contract implementation is not blocked",
       "contract_validation": {
         "sdk": "Xcode 27.0 (27A266a), iPhone Simulator 27.0",
@@ -334,11 +567,26 @@
         "built_app_actions": 5,
         "built_widget_actions": 1,
         "built_app_unshipped_schemas_registered": false,
-        "product_metadata_tested_head": "b4afd1e65451a1bc91a4f957ab40beeeb95eab76"
+        "product_metadata_tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b"
       },
       "contract_prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
-      ]
+      ],
+      "adapter_validation": {
+        "tested_head": "44f2d783a6063c1cce43ca43b6a6854a974dca9b",
+        "state": "implemented_unregistered",
+        "native_adapter_tests": 22,
+        "combined_native_tests": 494,
+        "failures": 0,
+        "skipped": 0,
+        "real_eventkit_object_date_checks": true,
+        "destination_mock_lifecycle_tests": true,
+        "physical_destination_save_verified": false,
+        "production_caller_enabled": false,
+        "registered_entity_query": false,
+        "spotlight_index_donation": false,
+        "nsm_arrival_evidence": false
+      }
     },
     {
       "id": "notion-enable",
