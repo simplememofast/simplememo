@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-09-19T14:06:17.737441+00:00",
+  "updated_at": "2026-09-19T15:25:35.477184+00:00",
   "maintainer": "SimpleMemo Developer",
   "execution": {
     "mode": "tracked_handoff",
@@ -42,7 +42,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で既存MemoCapture/MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。同一アプリ/テストソースで関連307テスト成功。CIはPRの現在のチェックを参照し、同一配布版の確認は未完了。",
+      "note": "PR594（Draft）で既存MemoCapture/MemoDeliveryへ統合。受付ID・時刻・元の保存先を保持。旧headの関連307テストと現headの日時判定29テストを区別。CIはPRの現在のチェックを参照し、同一配布版の確認は未完了。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -51,19 +51,37 @@
       },
       "integration": {
         "state": "draft",
-        "head": "90f230210849f300940435ef8e1cd76102520de9",
+        "head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
+          "native_tests": 29,
+          "native_failures": 0,
+          "suites": 1,
+          "suite_names": [
+            "DestinationRouterTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+          "source_scope": "date parser change; older full CI is separate evidence",
+          "ja_corpus_input_cases": 50,
+          "ja_corpus_nonempty_sentences": 49,
+          "ja_suite_nonempty_unique_sentences": 66,
+          "en_corpus_input_cases": 50,
+          "en_corpus_nonempty_sentences": 49,
+          "en_suite_nonempty_unique_sentences": 81
+        },
+        "prior_local_validation": {
           "native_tests": 307,
           "native_failures": 0,
           "suites": 14,
           "runtime": "iOS 26.5 Simulator",
           "ci_authority": "current PR checks",
           "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
-          "app_and_test_sources_unchanged": true,
+          "app_and_test_sources_unchanged": false,
           "post_clone_gate": "passed; all nine storage/recovery probes"
         }
       }
@@ -88,19 +106,37 @@
       },
       "integration": {
         "state": "draft",
-        "head": "90f230210849f300940435ef8e1cd76102520de9",
+        "head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
+          "native_tests": 29,
+          "native_failures": 0,
+          "suites": 1,
+          "suite_names": [
+            "DestinationRouterTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+          "source_scope": "date parser change; older full CI is separate evidence",
+          "ja_corpus_input_cases": 50,
+          "ja_corpus_nonempty_sentences": 49,
+          "ja_suite_nonempty_unique_sentences": 66,
+          "en_corpus_input_cases": 50,
+          "en_corpus_nonempty_sentences": 49,
+          "en_suite_nonempty_unique_sentences": 81
+        },
+        "prior_local_validation": {
           "native_tests": 307,
           "native_failures": 0,
           "suites": 14,
           "runtime": "iOS 26.5 Simulator",
           "ci_authority": "current PR checks",
           "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
-          "app_and_test_sources_unchanged": true,
+          "app_and_test_sources_unchanged": false,
           "post_clone_gate": "passed; all nine storage/recovery probes"
         }
       }
@@ -116,7 +152,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "PR594（Draft）で明示操作後のEventKit追加と暗号化候補/選択ログ・書込journal、Capture別receiptに基づくObsidian本文内注記を実装。未ack追記中は注記を延期する。routingSuggest/routingUseModelは既定OFF。実FileProvider・実保存・権限・日時精度・同一版QAは残る。",
+      "note": "PR594（Draft）で明示操作後のEventKit追加と暗号化候補/選択ログ・書込journal、Capture別receiptに基づくObsidian本文内注記を実装。JA50/EN50入力ケースを含む日時判定29テスト成功。3フラグは既定OFF。Correctionのsource/device・保存/移行、実FileProvider・実保存・権限・モデル精度・同一版QAは残る。",
       "local_prototype": {
         "branch": "claude/prd-routing-level1-2",
         "sha": "6ddc66a78e101e015f2db3a1124d3d1f6c78a166",
@@ -125,19 +161,37 @@
       },
       "integration": {
         "state": "draft",
-        "head": "90f230210849f300940435ef8e1cd76102520de9",
+        "head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
         "flags_enabled": false,
         "device_qa": "pending",
         "testflight_distributed": false,
         "formal_score_credit": 0,
         "local_validation": {
+          "native_tests": 29,
+          "native_failures": 0,
+          "suites": 1,
+          "suite_names": [
+            "DestinationRouterTests"
+          ],
+          "runtime": "iOS 26.5 Simulator",
+          "ci_authority": "current PR checks",
+          "tested_head": "bb527d5998400c1a2fd98fddb9f647ab3b61fde0",
+          "source_scope": "date parser change; older full CI is separate evidence",
+          "ja_corpus_input_cases": 50,
+          "ja_corpus_nonempty_sentences": 49,
+          "ja_suite_nonempty_unique_sentences": 66,
+          "en_corpus_input_cases": 50,
+          "en_corpus_nonempty_sentences": 49,
+          "en_suite_nonempty_unique_sentences": 81
+        },
+        "prior_local_validation": {
           "native_tests": 307,
           "native_failures": 0,
           "suites": 14,
           "runtime": "iOS 26.5 Simulator",
           "ci_authority": "current PR checks",
           "tested_head": "9beff2cf9f55470db05b7f8a1c4f00b81a952549",
-          "app_and_test_sources_unchanged": true,
+          "app_and_test_sources_unchanged": false,
           "post_clone_gate": "passed; all nine storage/recovery probes"
         }
       }
@@ -146,13 +200,23 @@
       "id": "app-intents-schemas",
       "prd": "docs/prd/app-intents-schemas.md",
       "repo": "simplememo-ios",
-      "status": "blocked",
+      "status": "in_progress",
       "blocked_by": [
         "capture-object",
         "routing-level1-2-reminders-calendar"
       ],
       "prs": [],
-      "note": "通常のSiri/Shortcutsは既存。現行Xcode 27 SDKとApple資料で対象スキーマのiOS 27要件・マクロ・パラメータを照合。追加スキーマと既定OFF索引は依存PRD完了待ち。本文非公開、未対応入力の扱い、未出荷版での登録抑止、実行試験は未完了。"
+      "note": "通常のSiri/Shortcutsは既存。Xcode 27の製品外定義でNotes/Remindersのコンパイル・メタデータ生成成功。不正な型と必須項目欠落の2比較も検出。保存処理・Entity解決・本文非公開・未対応入力・登録抑止は独立して進める残実装。製品公開と実行試験は共通Capture/Routingの受入後。",
+      "blocked_by_scope": "product release acceptance; independent contract implementation is not blocked",
+      "contract_validation": {
+        "sdk": "Xcode 27.0 (27A266a), iPhone Simulator 27.0",
+        "swift_compile": "passed",
+        "metadata_extraction": "passed",
+        "negative_controls_detected": 2,
+        "product_target_registration": false,
+        "destination_access": false,
+        "runtime_or_siri_validation": false
+      }
     },
     {
       "id": "notion-enable",

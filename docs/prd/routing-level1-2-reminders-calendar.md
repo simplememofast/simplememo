@@ -4,7 +4,7 @@
 状態: 実装中
 対象リポジトリ: `simplememo-ios`
 
-2026-09-19再照合。端末内推論の判断は9/7 ADR-001へ更新済み。
+2026-09-20再照合。端末内推論の判断は9/7 ADR-001へ更新済み。
 
 ## 0. 一行定義
 
@@ -14,7 +14,8 @@
 
 `docs/VISION.md` §4.2、§5.1、§6と `docs/adr/ADR-001-text-inference-placement.md` に対応する。
 ローカルRoutingブランチ `6ddc66a` にDestinationRouter / EventKitWriter / RoutingCoordinator / Correction記録の試作がある。
-iOS main `17dcad9` へ未統合。同名ブランチのPRは9/19照合時0件。
+元の試作ブランチは保全し、[iOS PR594](https://github.com/simplememofast/simplememo-ios/pull/594)（Draft）で既存Captureへ統合中。
+最新照合headは `bb527d5998400c1a2fd98fddb9f647ab3b61fde0`。機能フラグは既定OFF、mainへの統合と出荷は未完了。
 既存MemoCapture・CaptureInstructionを置き換えて計測を失う統合はしない。
 
 ## 2. VISION §13 のチェック
@@ -36,7 +37,7 @@ iOS main `17dcad9` へ未統合。同名ブランチのPRは9/19照合時0件。
 - [ ] RemindersとCalendarを同じ版に含め、作成・権限拒否・重複・取消・オフラインを検証する。
 - [ ] 保存先への書込が確認できた場合だけ成功を表示し、失敗時に本文と元宛先を保全する。
 - [ ] Correction記録は端末内のinput_hash / predicted / confidence / selected / source / device / atのみとし、本文そのものは保存しない。保護・保存期間・削除・移行を定め、本文を分析へ載せない。
-- [ ] 日本語・英語の日時解釈を各50文以上で検証し、誤りも保持する。
+- [x] 日本語・英語の日時解釈を各50文以上で検証し、誤りも保持する。上記headのDestinationRouterTests 29件がiOS 26.5 Simulatorで成功。専用corpusは各50入力（49例文と空入力1件）。既存・追加回帰を含む同suite全体では空入力を除く日本語66・英語81の異なる例文を検証した。修正前の100入力では6文の不一致を再現し、失敗結果を非公開で保全した。夜中をまたぐ時刻、開始・終了時刻の順序、不正入力の追加回帰も成功。端末内モデルの精度や実配送の合格ではない。
 - [ ] 同じ配布版でWatchを含む現行入口を確認する。片方未完了なら同梱版を出さない。
 
 ## 4. UX
@@ -55,6 +56,7 @@ iOS main `17dcad9` へ未統合。同名ブランチのPRは9/19照合時0件。
 ## 6. 決めていないこと
 
 端末内Correctionの保存・移行方法は未完了。決めるのは: 実装担当が現行保護・削除契約と照合して具体化する。
+現在のChoice記録はCapture UUIDのハッシュ・予測先・選択先・確信度・時刻を暗号化し、30日/200件で保持する。本文のハッシュではなく、source/deviceも未収録のため、上記Correction契約やPersonal Routing Graphの完成とは扱わない。保存形式・移行・消去の設計と実装は、実機確認とは独立して進められる残作業。
 当面無料という9/5の案は料金変更の実行指示ではない。課金の変更は既存の判断・公開手順で別途扱う。
 
 ## 7. 測り方
