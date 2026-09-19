@@ -1,11 +1,10 @@
-# Obsidianオートパイロットの実行基盤（GitHub Actions主・CCR Routine副）。
+# Obsidianオートパイロットの独立フォールバック（GitHub Actions / Claude OAuth）。
 #
-# 【なぜActionsか】2026-08-12朝、Claude側の定期タスク（CCR Routine）が
-# 「発火記録あり・実行痕跡ゼロ」で初回を落とした。スケジュール起動された
-# セッションはセッション一覧に出ず、外からログを確認できない。実行主体は
-# 「起動したか・何をしたか・なぜ失敗したか」が後から読める場所に置くべきで、
-# それがこのワークフロー。CCR Routine（07:30 JST）は本ワークフローが
-# 動かなかった日のフォールバックとして残す。
+# 【2026-09-19 再有効化】06:00 JST のMac Codex主系が利用枠で2日続けて
+# 出荷できず、同じCodex枠の補完だけでは経路冗長化にならないことが実測された。
+# このActions経路を07:30 JSTに戻し、主系が当日claim/statusを残していればGateで
+# 何もせず終了、主系が出せなかった日だけ別プロバイダーのOAuth枠で引き継ぐ。
+# 起動・失敗・成果はGitHub Actionsに残るため、外から後追いできる。
 #
 # 【二重実行の防止】主・副どちらも実行前に同じ2つを見る:
 #   (1) origin に claude/obsidian-auto-<当日JST> ブランチが既にある
@@ -16,28 +15,24 @@
 # 「追加チャージなら使わない方向」。API課金はサブスクとは別勘定で、
 # data/autopilot-cost.json の monthly_usd_cap（$280）の外に**第2の請求経路**ができる。
 #
-# **この鍵を 429（週次上限）のフォールバックに使う案は、意図的に採らない。**
-# 帰結（枠の単一障害点が残ること）は docs/autopilot-roadmap.md §4 に書いてある ——
-# 08-31 に主系も副系も同じ 429 で落ちたのは両方が同じアカウントの枠を食うからで、
-# 別勘定を足さないなら**枠を分ける手段は無い。**残るのはペーシング（当たらないようにする）だけ。
-# **下の入力に anthropic_api_key が残っているのは、鍵が未設定なら無害だから。**
-# 設定すれば課金経路が開く —— 開けるかどうかはオーナーの判断で、AIからは提案しない。
+# **ANTHROPIC_API_KEY はこの経路から完全に外す。**429の回避を追加API課金へ
+# すり替えない。独立性は、Mac Codexとは別の既存CLAUDE_CODE_OAUTH_TOKEN
+# （サブスク枠）で持つ。API key がrepoに存在しても、このworkflowは読まない。
 #
-# 【秘密鍵が無い間は静かに寝る】CLAUDE_CODE_OAUTH_TOKEN（推奨・サブスク課金。
-# オーナーがローカルで `claude setup-token` → repo secret 登録）か
-# ANTHROPIC_API_KEY（API課金）のどちらかが必要。未設定の間は毎日緑のまま
-# スキップし、CCR側だけが動く。赤い通知を毎日出さないための設計。
+# 【OAuthが無い間は静かに寝る】CLAUDE_CODE_OAUTH_TOKEN が必要。
+# 未設定ならGateで実行せず、課金経路を自動で増やさない。
 #
 # 【GH_PAT】checkout と PR 作成に GH_PAT を優先使用（seo-daily.yml と同じ理由:
 # GITHUB_TOKEN の push はSEO Validationを起動せず、auto-merge が永久に来ない）。
 
 name: Obsidian Autopilot
 
-# 2026-09-07: the scheduled primary moved to the Mac Codex automation
-# obsidian-autopilot-retry-standby (06:00 JST; retries 09:20/12:20).
-# Keep this workflow for explicitly requested manual rollback/diagnosis only.
-# The shared route remains actions; see docs/codex-autopilot-execution.md.
+# Mac Codex remains the 06:00 JST primary. This workflow is the independent
+# 07:30 JST fallback; the shared daily claim/status Gate prevents double shipping.
+# workflow_dispatch remains for explicit recovery/diagnosis.
 on:
+  schedule:
+    - cron: '30 22 * * *' # 07:30 JST
   workflow_dispatch:
     inputs:
       force:
@@ -99,7 +94,8 @@ jobs:
         id: gate
         env:
           HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
-          HAS_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+          # This fallback is OAuth-only. Never open a second API-billing path.
+          HAS_ANTHROPIC_KEY: 'false'
           FORCE: ${{ inputs.force == true }}
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -356,7 +352,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
           # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
@@ -458,7 +453,6 @@ jobs:
         if: always() && steps.credprobe_ready.outcome == 'success'
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set +e
           out="$(claude -p 'Reply with exactly the word PROBE_OK and nothing else.' \
