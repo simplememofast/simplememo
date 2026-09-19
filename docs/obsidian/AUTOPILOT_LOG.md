@@ -3971,3 +3971,101 @@ Company候補はcontent:ai-visibility-gap（優先度35.7550875）と第三者�
 監視Issue1379は06:00主系の前、01:46 JSTに作成された当日記録待ちだった。既存health-intake経路で記録し、回復時のcloseは元の監視へ任せる。Codex実費と金銭予測は観測不能でnull、Claude実費台帳へ推計や0ドルを追記していない。
 
 運用記録PR: #1386。事業施策はno_artifactのまま。Local SEOは281 HTML・0 errors/0 warnings、台帳・権限・予算・生成表・静的レイアウト検査は成功。最終HEADのCIと配信結果はPRおよび私的実行証拠へ保存する。
+
+---
+
+## 2026-09-19（GitHub Actions主系・手動起動 run 35415451723）— レーンF。レーンEの走査停止条件を訂正
+
+### 判定
+
+`data/emergency-stop.json` は全体・`agents.actions` とも `stopped: false`。当日ブランチ
+`claude/obsidian-auto-20260919` は origin に無く、本番 `data/autopilot-status.json` の
+`date_jst` は 2026-09-17 だったため、冪等チェックを通って空コミットで占有した
+（`GATE_TAKEOVER=false`・`GATE_STALE_DECLARATIONS` 空）。
+
+`node scripts/autopilot-selfheal.mjs` が 🔧 修理対象2件・🤝 人へ渡す6件を出したため、
+Runbook §2 に従い**記事を書かず**にレーンFへ入った。
+
+### 直したもの
+
+`ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26`（`no_artifact`）。
+
+09-15 の回はレーンEの pending を C13 → C14 → C15 と正しく走査した。C15 の固有価値である
+事前計測が `brand-2026-08-11-entity-merge` の全サイトスコープで拒否され、**そこで走査ごと
+止まり、C17 以降を1件も見ずに終わった。**実験を避けて候補名だけ変えなかったのは正しい。
+誤っていたのは止め方で、根拠は 2026-09-11 に足した
+「別の未知の前提を新たに調べる必要が出たら、そこで走査を止める」。
+
+**実験スコープによる拒否は未知の前提ではない。**`growth/experiments/experiments.json` と
+`node growth/scripts/check-experiments.mjs` でその場で確定する。外へ調べに行く必要が無い
+判定を「新たに調べる必要が出た」に数えると、**リポジトリの中だけで答えが出る壁のたびに
+走査が止まる。**
+
+Runbook §2 レーンEの停止条件を切り替えた:
+
+- **走査を続ける** … リポジトリ内のデータだけでその回のうちに確定する不適格
+  （実験スコープの拒否・`collides_with` の衝突・実測済みの環境不在）。件数の上限は置かない
+- **走査を止める** … 外部の未知を新たに調べないと適否が決まらないもの
+- **走査の記録はリポジトリに残す** … 09-15 の走査はローカル実行記録にしか無く、翌日以降から
+  読めなかった。status JSON の `reason` と本ログに「候補ID → 不適格の種別 → 続けた／止めた」を残す
+
+品質80点・§28・固有価値・実験非干渉のゲートは1つも触っていない。`data/kpi-definitions.json` の
+`noise_floor` は v54 → v55（**定義は無変更**・計算元ファイルの checksum が動いたため）。
+
+**今日の修理は規定の訂正であって、同じ形が再発しないことの実測ではない。**確かめられるのは、
+次にレーンEの走査が実験スコープの壁に当たった回。
+
+### 直していないもの
+
+もう1件の修理対象 `ap-20260917-owner-session-pagespeed-poster`（post-merge-performance-budget）は
+`index.html` を触る必要があり、**レーンFの `self_repair.may_modify` の外**。手を付けず
+`owner_requests` へ上げた。`usage_limit` 6件は `escalation-rules` が `who: owner` と宣言している
+種別なので `repair_of` を書かない。
+
+### 価値契約
+
+`lane-f-scan-blocker-class-20260919` を実装より先に別コミットで push した。
+`unresolved_failures` / `predicted_delta: -1` / `p: 0.03` / horizon 1日 / lane F / maintenance。
+
+p が低いのは較正の結果で、施策への評価ではない。凍結された null forecast は 5、今日の実測
+baseline は 8。うち6件は `usage_limit` で `repair_of` に書けないため**今日直せるのは1件だけで
+5 を下回れない。**同じ形が `lane-f-close-postfix-failures-20260907`（p=0.05・event=0・
+Brier 0.0025）で一度決済されている。順位1位にしたのは Runbook がレーンFを記事より先に置くから。
+次点は `lane-e-ai-plugins-c18-20260919`（C18 `/obsidian/ai-plugins/`・`publishing_day_rate` /
+p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 が全部 event=0 で、
+唯一当たったのが最低の p=0.30）。
+
+### 台帳
+
+- run_id: `ap-20260919-actions-35415451723`（同日の Codex 主系
+  `ap-20260919-actions-codex-01a0b653` は `usage_limit` で落ちている。当日占有はこの run が取った）
+- PR: #1470 / `repair_of: ["ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26"]`
+- **オーナー依頼2件は本日の実測で充足を確認し、`owner_requests` から外れたままにした** ——
+  `gh run view 35415451723` の Checkout が success（＝ `CLAUDE_CODE_OAUTH_TOKEN` **または**
+  `ANTHROPIC_API_KEY` のどちらかが入っている。どちらかは断定しない）、
+  `gh run view 35404294290` の `Credentials are configured` が success
+  （＝ `GCP_SERVICE_ACCOUNT_JSON` は登録済み）
+- `AUTOPILOT_DATA_REPORT` は `state: ready` / `bq_checked: true` / 最新 data_date 2026-09-16 /
+  **28日**（`full_window: true`）/ lag 3日。一時スナップショットは公開リポジトリへ写していない
+- `health-intake.mjs`（open な監視Issue 1件・`last_seen` は当日で既に一致＝差分なし）
+- 実費はこの回のステップが完了していないと読めないため**台帳に入れていない**（0 ではなく未観測）
+
+### レーンEの走査記録
+
+**本日は走査していない。**レーンFが優先するため、候補の評価そのものを行っていない
+（候補ID → 不適格の種別 → 続けた／止めた の行は無し）。
+
+### 検証
+
+ローカルで exit 0: `seo-check`（0 errors / 0 warnings）・`check-css-version`・
+`check-benchmark`・`check-url-normalization`・`check-internal-redirects`・
+`sync_constants --check`・`tag-cta-placements --check`・`check-experiments`・
+`autopilot-budget --check`・`check-authority --check`・`autopilot-selfheal --check`・
+`automation-rate --check`・`check-pr-facts --check`・`check-landing-freshness --check`・
+`check-viewport-overflow --static`・`d-score --check`・`check-definitions --check`・
+`check-emergency-stop`・`autopilot-runs --check`・`generate_sitemap.py --dry-run`。
+
+**検証していないこと:** 本文HTMLを1行も変えていないため、ブラウザを使う
+`check-viewport-overflow --check`（動的）は回していない。WebKitGTK でも測っていない。
+
+`ROUTINE_MCP_PROBE: not_applicable Actions経路のためCCRのMCPは対象外`
