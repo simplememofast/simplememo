@@ -22,7 +22,7 @@ iOSの既存ローカルブランチにある `docs/proposals/feature-autopilot.
 | サイドボタン | 9/5のローカル試作あり。同名ブランチのPRは0件 | 共通Capture統合、最新SDK/要件照合、同じ版での実機確認 |
 | Reminders / Calendar | ローカル試作あり。同名ブランチのPRは0件 | Level 1→2、端末内推論、両宛先を同じ版で検証 |
 | App Intentsスキーマ | 通常のSiri/Shortcutsは実装済み。提案のNotes/Remindersスキーマ・索引はmainで未確認 | 共通CaptureとRoutingの統合後、現行SDKで対象スキーマを確認 |
-| Notion提供 | iOS/APIに実装済み。実OAuth→実保存の完了証拠は未確認 | 現行公開手順・提供状態・利用者同意・同じ版の実配送を確認 |
+| Notion提供 | iOS/APIに実装済み。9/4のサーバーOAuth・実保存・本文読取・同一ID再送は確認済み | 現在の提供状態・同意範囲・同じ配布版の実機配送を確認 |
 
 iOS main `17dcad9`、API main `c6ed249` と照合した時点の記録。iOS PR #590は別担当の計測整備で、このキューの機能完成や新しい配布証拠に数えない。
 

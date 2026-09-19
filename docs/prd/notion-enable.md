@@ -16,7 +16,13 @@ API main `c6ed249` に `src/notion.ts`、iOS main `17dcad9` に `NotionManager.s
 `docs/notion-v1.md` がある。Notionの宛先カードは `notion_destination_row` が既定false。
 設定画面の連携と宛先カードは別条件である。
 現在の公開API読取はこの確認環境でHTTP403だったため、availableの現在値は不明。9/4のfalseを現在値へ転記しない。
-実OAuth→実保存の完了証拠は今回確認できていない。
+9/4 13:21 UTCの既存記録では、公開OAuthの開始・同意・交換、Private Inbox作成、
+1件の実保存、本文・タイトルの一致、同じCapture IDの再送で同じページになることを確認済み。
+関連するAPI [#240](https://github.com/simplememofast/simplememo-api/pull/240)・
+[#241](https://github.com/simplememofast/simplememo-api/pull/241)・
+[#242](https://github.com/simplememofast/simplememo-api/pull/242) はmainへ統合済み。
+これは過去のサーバー経路の証拠であり、現在の健康度や1686の実機合格ではない。
+原記録は非公開で保管し、接続先・ページID・資格・本文は公開しない。
 
 ## 2. VISION §13 のチェック
 
@@ -32,7 +38,7 @@ API main `c6ed249` に `src/notion.ts`、iOS main `17dcad9` に `NotionManager.s
 ## 3. 受入条件
 
 - [ ] APIの現行 `docs/notion-release.md` と既存migration・設定状態を照合し、実施済みの処理を重複しない。
-- [ ] 同意済みの検証用ワークスペースでOAuth→Private Inbox→保存→ページIDと本文の実読取を確認する。
+- [x] 9/4のサーバー検証でOAuth→Private Inbox→実保存→ページと本文の実読取・同一ID再送を確認済み。今回の再実行ではない。
 - [ ] iPhone・Siri・Watch、再試行、重複防止、認可取消・回復を同じ版で検証する。
 - [ ] 受付時の保存先を保持し、認証失敗で以前のメールへ勝手に転送しない。
 - [ ] 本文、トークン、個人名を公開証拠や分析へ出さない。保存データの既存保護・削除を維持する。
@@ -57,7 +63,8 @@ API main `c6ed249` に `src/notion.ts`、iOS main `17dcad9` に `NotionManager.s
 
 ## 6. 決めていないこと
 
-検証用Notionワークスペースと同意が必要。決めるのは: そのアカウントの所有者。
+過去の検証用ワークスペースを再利用する場合も、今回必要な端末検証の範囲・同意を確認する。決めるのは: そのアカウントの所有者。
+過去に成功したOAuth作成・migration・秘密情報登録を、未実施として繰り返さない。
 旧11/10〜12の計画は公開日・設定変更の実行根拠にしない。
 本番状態が不明のまま秘密情報・フラグを変更しない。
 
