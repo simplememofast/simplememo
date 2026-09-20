@@ -880,7 +880,7 @@
       "prs": [
         "https://github.com/simplememofast/simplememo-ios/pull/594"
       ],
-      "note": "Remindersの実perform/EntityQuery、本文を含まない任意タイトル索引と解除/消去を実装しnative検証。検証用Debugのみ登録し、標準版は未登録・Draft/OFFを維持。Notes保存先、primary-reminders outcome計測、実機Siri/EventKit/Spotlight受入は未完了。",
+      "note": "Remindersの実perform/EntityQuery・任意タイトル索引に加え、元listと実save/readback時計の非公開outcome接続をnative検証。標準版未登録・Draft/OFFを維持。新remote projection/declaration/API collector、Notes保存先、完全な操作観測・実機Siri/EventKit/Spotlight受入は未完了。",
       "blocked_by_scope": "product release acceptance; independent contract implementation is not blocked",
       "contract_validation": {
         "sdk": "Xcode 27.0 (27A266a), iPhone Simulator 27.0",
@@ -958,6 +958,63 @@
           "skip_reason": "physical-device transfer protection metadata",
           "configuration": "standard; reminder schema compile gate remains off"
         }
+      },
+      "private_outcome_validation": {
+        "tested_head": "531e484d645ff5fe2a316a5ca160b0661368c964",
+        "state": "implemented_private_only_build_gated",
+        "native_total": 380,
+        "native_passed": 379,
+        "native_failures": 0,
+        "native_skipped": 1,
+        "native_skip_reason": "iOS 27 schema execution unavailable on local iOS 26.5",
+        "standard_native_passed": 47,
+        "standard_native_failures": 0,
+        "standard_native_skipped": 0,
+        "source_hash_count": 275,
+        "source_hashes_unchanged": true,
+        "review_p1_p2": 0,
+        "private_instruction_version": 3,
+        "original_default_list_frozen": true,
+        "actual_save_readback_native_clock": true,
+        "canonical_encrypted_receipt_and_typed_reader": true,
+        "body_or_title_in_observation": false,
+        "new_legacy_capture_envelopes": false,
+        "native_partial_v1_evidence": "null; admitted ID retained",
+        "old_wire_contracts_changed": false,
+        "complete_action_coverage": false,
+        "remote_outcome_supported": false,
+        "remaining_code_work": [
+          "new remote projection",
+          "declaration negotiation",
+          "API destination validation/storage",
+          "collector",
+          "complete action-source closure"
+        ],
+        "standard_app_actions": 5,
+        "standard_widget_actions": 1,
+        "standard_notes_reminders_registered": false,
+        "physical_siri_verified": false,
+        "physical_eventkit_save_verified": false,
+        "nsm_reportable": false,
+        "remote_ci": "all_5_passed",
+        "cloud_validation": {
+          "build_number": 1751,
+          "source_sha": "531e484d645ff5fe2a316a5ca160b0661368c964",
+          "status": "succeeded",
+          "result_pages": 9,
+          "unique_tests": 1732,
+          "models": 4,
+          "executions": 6928,
+          "passed": 6924,
+          "failed": 0,
+          "skipped": 4,
+          "skip_reason": "physical-device transfer protection metadata",
+          "new_regression_tests": 13,
+          "new_regression_executions_passed": 52,
+          "configuration": "standard; reminder schema compile gate remains off"
+        },
+        "testflight_distributed": false,
+        "formal_score_credit": 0
       }
     },
     {
