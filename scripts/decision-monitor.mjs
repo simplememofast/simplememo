@@ -239,16 +239,38 @@ async function probe(p) {
   } catch { return { path: p, known: false, healthy: false, reason: 'transport_or_redirect_unknown' }; }
 }
 
-async function deployment(sha) {
-  const checks = api(`commits/${sha}/check-runs`).check_runs;
-  return checks.filter(c => c.name === 'Cloudflare Pages').sort((a, b) => b.id - a.id)[0] ?? null;
+export function decisionCheckRuns(sha, name, request = api) {
+  assert(shaOK(sha) && ['Cloudflare Pages', 'seo-check'].includes(name), 'invalid decision check identity');
+  // Unrelated workflow checks can push the deployment beyond GitHub's default
+  // first 30 results. Filter by name and require a complete bounded inventory.
+  const checks = [], seen = new Set();
+  let total;
+  for (let page = 1; page <= 5; page++) {
+    const result = request(`commits/${sha}/check-runs?check_name=${encodeURIComponent(name)}&per_page=100&page=${page}`);
+    assert(Number.isSafeInteger(result?.total_count) && result.total_count >= 0 && result.total_count <= 500
+      && Array.isArray(result.check_runs), 'decision check inventory is unavailable or too large');
+    total ??= result.total_count;
+    assert(result.total_count === total && result.check_runs.length === Math.min(100, total - checks.length),
+      'decision check inventory changed or is incomplete');
+    for (const check of result.check_runs) {
+      assert(Number.isSafeInteger(check?.id) && check.id > 0 && !seen.has(check.id)
+        && check.name === name && check.head_sha === sha, 'decision check inventory has a duplicate or mismatched check');
+      seen.add(check.id); checks.push(check);
+    }
+    if (checks.length === total) return checks;
+  }
+  throw new Error('decision check inventory is incomplete');
+}
+
+export function deployment(sha, request = api) {
+  return decisionCheckRuns(sha, 'Cloudflare Pages', request).sort((a, b) => b.id - a.id)[0] ?? null;
 }
 
 async function delivery(c, run) {
   if (!Number.isInteger(run?.pr)) return null;
   const pr = api(`pulls/${run.pr}`);
   if (!pr.merged || pr.base.ref !== 'main' || pr.head.repo?.full_name !== REPO || !shaOK(pr.merge_commit_sha)) return null;
-  const validations = api(`commits/${pr.head.sha}/check-runs`).check_runs;
+  const validations = decisionCheckRuns(pr.head.sha, 'seo-check');
   if (!validations.some(c => c.name === 'seo-check' && c.conclusion === 'success')) return null;
   git('fetch', 'origin', pr.head.sha, pr.merge_commit_sha);
   const base = git('merge-base', `${pr.merge_commit_sha}^`, pr.head.sha);
@@ -351,7 +373,7 @@ async function main() {
       if (pr.merged && (await deployment(pr.merge_commit_sha))?.conclusion === 'success') {
         git('fetch', 'origin', pr.head.sha, incident.execution_head);
         verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
-        const checks = api(`commits/${pr.head.sha}/check-runs`).check_runs;
+        const checks = decisionCheckRuns(pr.head.sha, 'seo-check');
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
         const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
         if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
@@ -404,6 +426,42 @@ async function main() {
 }
 
 function selftest() {
+  const checkSha = 'a'.repeat(40);
+  const check = (id, name = 'Cloudflare Pages', conclusion = 'success') => ({ id, name, head_sha: checkSha, conclusion });
+  const buriedChecks = [...Array.from({ length: 41 }, (_, i) => check(100 + i, 'unrelated')), check(1)];
+  const filteredRequest = route => {
+    const url = new URL(route, 'https://api.github.test/');
+    assert.equal(url.pathname, `/commits/${checkSha}/check-runs`);
+    assert.equal(url.searchParams.get('per_page'), '100');
+    const matches = buriedChecks.filter(c => c.name === url.searchParams.get('check_name'));
+    return { total_count: matches.length, check_runs: matches };
+  };
+  assert.equal(buriedChecks.slice(0, 30).find(c => c.name === 'Cloudflare Pages'), undefined);
+  assert.equal(deployment(checkSha, filteredRequest).id, 1, 'a real deployment cannot disappear behind unrelated checks');
+  assert.deepEqual(decisionCheckRuns(checkSha, 'seo-check', filteredRequest), [], 'missing validation remains missing');
+  const repeatedChecks = Array.from({ length: 101 }, (_, i) => check(i + 1));
+  repeatedChecks[100].conclusion = 'failure';
+  const pageCalls = [];
+  const pagedRequest = route => {
+    const page = Number(new URL(route, 'https://api.github.test/').searchParams.get('page'));
+    pageCalls.push(page);
+    return { total_count: repeatedChecks.length, check_runs: repeatedChecks.slice((page - 1) * 100, page * 100) };
+  };
+  assert.equal(deployment(checkSha, pagedRequest).conclusion, 'failure', 'latest failed deployment must not be replaced by an older success');
+  assert.deepEqual(pageCalls, [1, 2]);
+  for (const result of [null, {}, { total_count: 501, check_runs: [] }, { total_count: 2, check_runs: [check(1)] },
+    { total_count: 1, check_runs: [check(1, 'seo-check')] },
+    { total_count: 1, check_runs: [{ ...check(1), head_sha: 'b'.repeat(40) }] },
+    { total_count: 2, check_runs: [check(1), check(1)] }]) {
+    assert.throws(() => deployment(checkSha, () => result), /decision check inventory/, 'partial or unbound evidence must fail closed');
+  }
+  assert.throws(() => deployment(checkSha, route => route.endsWith('page=1')
+    ? { total_count: 101, check_runs: repeatedChecks.slice(0, 100) }
+    : { total_count: 102, check_runs: repeatedChecks.slice(100) }), /changed or is incomplete/);
+  assert.throws(() => deployment(checkSha, route => route.endsWith('page=1')
+    ? { total_count: 101, check_runs: repeatedChecks.slice(0, 100) }
+    : { total_count: 101, check_runs: [] }), /changed or is incomplete/);
+  assert.throws(() => decisionCheckRuns('main', 'Cloudflare Pages', () => assert.fail('must not request')), /invalid decision check identity/);
   const launcher = `/fixture/.local/libexec/${NATIVE_SCRIPT}`;
   const launchState = `gui/501/${NATIVE_LABEL} = {\n\tstate = running\n\tprogram = /usr/bin/python3\n\targuments = {\n\t\t/usr/bin/python3\n\t\t${launcher}\n\t\t--once\n\t}\n\tpid = 123\n}`;
   const originOptions = { env: { DECISION_MONITOR_NATIVE_TIMER: '1' }, platform: 'darwin', uid: 501,
