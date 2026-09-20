@@ -12,6 +12,7 @@ import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisio
 import {verifyMeasurementInput,verifyMeasurementDelivery} from './company-measurement.mjs';
 import {observe,opportunities} from './company-loop.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
+import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -121,9 +122,9 @@ export function verifyIntegrationLedger(receipt,merge,call=run) {
 }
 
 export async function verifyOperationalDelivery(merge,call=run,fetchImpl=fetch) {
-  const checks=JSON.parse(call('gh',['api',`repos/simplememofast/simplememo/commits/${merge.merge_sha}/check-runs`]));
-  const pages=checks.check_runs?.find(c=>c.name==='Cloudflare Pages' && c.status==='completed' && c.conclusion==='success' && c.head_sha===merge.merge_sha);
-  if(!pages) throw new Error('Merged integration has no successful exact-commit Pages deployment');
+  const checks=decisionCheckRuns(merge.merge_sha,'Cloudflare Pages',route=>JSON.parse(call('gh',['api',`repos/simplememofast/simplememo/${route}`])));
+  const pages=checks.sort((a,b)=>b.id-a.id)[0];
+  if(pages?.status!=='completed' || pages.conclusion!=='success') throw new Error('Merged integration has no successful exact-commit Pages deployment');
   // The middleware intentionally returns 404 for /scripts and /growth. Keep
   // that boundary; verify the actual public status consumed by the site.
   const publicOutput=await verifyPublishedArtifact('/data/autopilot-status.json',merge.merge_sha,call,fetchImpl);
