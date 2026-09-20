@@ -4,7 +4,7 @@
 状態: 実装中
 対象リポジトリ: `simplememo-ios`
 
-2026-09-20再照合。SDK契約検証と未登録adapterのnative検証まで完了。製品登録・公開は既存の保存方式の決定、接続実装、共通CaptureとRoutingの受入条件待ち。
+2026-09-20再照合。Remindersの実perform/EntityQuery・任意のタイトル索引と消去を接続し、native検証と2種類のビルドのmetadata照合まで完了。標準版は未登録、Draft・機能OFFを維持。Notesの保存先、primary-remindersの計測契約、実機受入は未完了。
 
 ## 0. 一行定義
 
@@ -42,7 +42,7 @@ Query識別子の一意性と文字列解決もメタデータ検査で確認し
 この検証ではQueryは空配列を返し、performは常にエラーを返す。宛先へアクセスせず、アプリ登録・Siri実行・保存成功・プライバシー契約の完成を証明しない。
 既存Obsidianの日次ファイル追記を「新しいNoteの作成」と同一視せず、保存済みEntityのID・再解決・削除・未対応入力・登録抑止を具体化する。これらのコード作業は実機待ちで一括停止する項目ではない。
 
-再利用するSDK契約検査と、JSON構造・破損・未対応形式・拡張内の登録漏れを検出する6回帰をPR594へ追加した。実際にビルドしたappの5 actionsとwidgetの1 actionを読み取り、未出荷のNotes/Remindersスキーマが登録されていないことを確認した。最新head `c52db6925a8c2b2081c1c638b0209d7b65d8bcd4` のビルド済みappも5 actions、widgetも1 actionで、Notes/Remindersスキーマが未登録であることを再確認した。これは現在の登録内容の検査であり、将来の登録を自動制御する機能ではない。
+再利用するSDK契約検査と、JSON構造・破損・未対応形式・拡張内の登録漏れを検出する6回帰をPR594へ追加した。実際にビルドしたappの5 actionsとwidgetの1 actionを読み取り、未出荷のNotes/Remindersスキーマが登録されていないことを確認した。音声変更時のhead `c52db6925a8c2b2081c1c638b0209d7b65d8bcd4` のビルド済みappも5 actions、widgetも1 actionで、Notes/Remindersスキーマが未登録であることを再確認した。これは現在の登録内容の検査であり、将来の登録を自動制御する機能ではない。
 
 ### 未登録primary-reminders adapterの実装
 
@@ -52,7 +52,28 @@ PR594 head `44f2d783a6063c1cce43ca43b6a6854a974dca9b` で、明示Reminders宛�
 
 関連10 suite・494 native testsが成功（失敗/skip0）。このうちadapterは22件で、実EKReminderオブジェクトの必須開始日/Gregorian/TZ/通知設定と、模擬保存先による保存失敗・二重作成防止・消去・再起動を確認した。実機での権限、EventKit保存/同期、Siriの成功ではない。ビルド済みapp5 actionsとwidget1 actionにNotes/Remindersスキーマが未登録であることも読戻した。
 
-このadapterに製品callerはなく、AppIntentのperform/schema宣言・EntityQuery・索引設定/寄贈/消去は未接続。primary-remindersの計測契約も未接続で、補助Routing journalからNSMを作らない。Notesは別の残件で、廃止済みのObsidian「1メモ=1ファイル」を日次/Inbox追記の代わりに無断で復活させない。
+この時点のadapterには製品callerがなかった。下記の変更で接続したが、primary-remindersのoutcome計測契約は未接続で、補助Routing journalからNSMを作らない。Notesは別の残件で、廃止済みのObsidian「1メモ=1ファイル」を日次/Inbox追記の代わりに無断で復活させない。
+
+### Remindersの製品接続と登録境界
+
+PR594 head `6a304f1743843e2e702738958dbabb52a27db86a` で、実際のcreateReminder performから共通MemoCaptureと既存adapterへ接続した。権限拒否後など同じOS invocationの再試行は同じ受付を保持し、不確かな保存を再作成しない。別の新しいユーザー要求を本文一致で統合する仕組みではない。
+
+EntityQueryは確認済みreceiptのID・元のlist・capture markerを再照合し、現在のタイトル・期日などを返す。list IDは端末内の不透明なUUIDに変換し、本文やEventKitの識別子を外へ返さない。未対応のlist指定、添付、タグなどは従来のvalidatorで保存前に拒否する。
+
+検索設定は既定オフ。明示オン時だけ、タイトル専用の別IndexedEntityを使う。schemaに必須のlist/日付/本文などが自動索引に混ざらないよう分け、実CSSearchableItemで本文・textContent・URL・keywordsがないことを確認した。タグは未対応のため登録しない。オフ・消去は探索を先に閉じ、処理中の寄贈の後で削除する。設定/通知/performの更新予約は同期化し、後着Taskで順序を入れ替えない。
+
+同意と削除待ち状態は暗号化した保護ファイルへatomic writeと読戻しで保存する。解除時は旧オン記録を先に削除し、置換書込みが失敗しても再起動でオンが復活しない。全Routing storeの世代を同期失効させてからOSの削除を待つ。OSがファイル削除自体を拒否した場合は解除未完了として扱う。Core Spotlightの削除受付は、実機UIから検索結果が消えた証明ではない。
+
+すべての非空要求は機能/入力/権限判定の前に既存の受付と因果順序フックへ入る。primary-remindersをemail/Obsidian/Notionへ置き換えず、到達の未確認IDはunknownに残す。分母自体が不明なら率を出さない。読取Queryと索引操作は保存件数にしない。
+
+検証用Debugだけ `SIMPLEMEMO_REMINDER_INTENT_CONDITIONS=SIMPLEMEMO_REMINDER_INTENTS` を指定する。実schema/queriesはこのコンパイル条件の内側で、標準Debug/Releaseには設定しない。実行にはiOS 27と既存のRouting gateも必要。
+
+- 検証用ビルド: 8 suite、389件中387成功・失敗0・skip2。skipはiOS 27専用schema実行と実機の保護属性。手元はiOS 26.5。タイトル専用IndexedEntity投影はiOS 18以降で動くため、その実オブジェクトは26.5で検査した。
+- 検証用metadata: 6 actions、5 entities、5 queries。createReminder登録あり、Notesなし、タイトル投影の自動索引プロパティなし。
+- 標準ビルド: 39成功・失敗/skip0。appは既存5 actions、widgetは1 action、Notes/Reminders登録なし。
+- 275 source hashが実行前後/commitで一致。独立再レビューP1/P2なし。同headの全5 remote CI成功。Cloud1744の全9ページを照合し、1,718試験×4モデル=6,872実行、6,868成功・失敗0・実機保護属性4skipを確認した。Cloudは標準構成のため、検証用schemaの実行や実機受入を証明しない。
+
+Siriでの実行、実権限/EventKit同期、Spotlight実表示の消去、同一配布版の計測適格性は未受入。Notesの保存先も未決定。追加TestFlight、機能有効化、App Review提出、実行率への加点は行っていない。
 
 ## 2. VISION §13 のチェック
 
