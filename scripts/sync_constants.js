@@ -28,7 +28,7 @@ const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json')
 const OWN_VALUE_PAGES = new Set([
   // /download/ shows the rating and the price table and names no competitor,
   // so every number on it is ours and belongs under enforcement.
-  'download/index.html',
+  'download/index.html', 'en/download/index.html',
   // Both show our rating in a hero block (visible text + aria-label) and
   // neither quotes a competitor's rating or price, so free-text enforcement
   // is safe here. Until 2026-08-12 they were outside it, and both still read
@@ -36,7 +36,7 @@ const OWN_VALUE_PAGES = new Set([
   // own JSON-LD.
   'ai-tags/index.html', 'en/ai-tags/index.html',
   'captio-alternative/index.html', 'en/captio-alternative/index.html',
-  'index.html', 'en/index.html', 'voices/index.html',
+  'index.html', 'en/index.html', 'voices/index.html', 'en/voices/index.html',
   'ar/index.html', 'es/index.html', 'id/index.html', 'ko/index.html',
   'pt-BR/index.html', 'tr/index.html', 'zh/index.html', 'zh-Hant/index.html',
 ]);
@@ -86,6 +86,9 @@ const RULES = [
   ['rating pair EN "4.4 … 10 ratings"',
     /(\d\.\d)((?:[^{}\d]|<[^>]+>|\d(?! ratings)){0,90}?)(\d+)( ratings\b)/g,
     (m, v, mid, n, tail) => C.ratingValue + mid + C.ratingCount + tail, 'own'],
+  ['rating pair JA compact summary',
+    /(★\s*)(\d\.\d)(\s*[・·]\s*)(\d+)(件)(?=[）)])/g,
+    (m, star, value, middle, count, label) => star + C.ratingValue + middle + C.ratingCount + label, 'own'],
   // Localized hero ratings use the same source as JSON-LD. Keep the star
   // and translated count label intact, and retain the own-page boundary.
   ['rating pair localized hero',
@@ -272,6 +275,23 @@ if (SELFTEST) {
     drift(visibleRating, 'vs/captio/index.html').length === 0);
   t('見える評価は自社値の面では見る', drift(visibleRating, 'index.html').length === 1);
 
+  // Review quotations remain historical; only the surrounding aggregate
+  // rating pair follows the ledger. Exercise the formerly omitted pages.
+  const reviewQuote = '<blockquote>Five stars. Input is smooth.</blockquote>';
+  const voiceSummary = '<p>公開レビュー（★1.0・1件）</p>' + reviewQuote;
+  const enVoiceSummary = '<meta content="App Store review (★1.0 from 1 ratings)">' + reviewQuote;
+  const enDownload = '<p>App Store 1.0 (1 ratings)</p>';
+  for (const [rel, html, expected] of [
+    ['voices/index.html', voiceSummary, `<p>公開レビュー（★${C.ratingValue}・${C.ratingCount}件）</p>` + reviewQuote],
+    ['en/voices/index.html', enVoiceSummary, `<meta content="App Store review (★${C.ratingValue} from ${C.ratingCount} ratings)">` + reviewQuote],
+    ['en/download/index.html', enDownload, `<p>App Store ${C.ratingValue} (${C.ratingCount} ratings)</p>`],
+  ]) {
+    t(`${rel}: omitted aggregate form fails`, drift(html, rel).length === 1);
+    t(`${rel}: sync fixes aggregate without rewriting quote`, scanHtml(html, rel, { write: true }).out === expected);
+    t(`${rel}: corrected form passes`, drift(expected, rel).length === 0);
+    t(`${rel}: same form on competitor page is untouched`, scanHtml(html, 'vs/competitor/index.html', { write: true }).out === html);
+  }
+
   const localizedRatings = [
     ["ar", "★ 1.0 (1 تقييمات في App Store)"],
     ["es", "★ 1.0 · 1 valoraciones en App Store"],
@@ -322,7 +342,7 @@ if (SELFTEST) {
   t('--check は書き換えない', scanHtml(drifted, 'fixture/x.html').out === drifted);
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 56 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 68 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
