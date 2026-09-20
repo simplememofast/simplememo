@@ -350,9 +350,9 @@ test('a saved integration and open PR are not execution success',()=>{
 });
 
 test('operational delivery requires exact Pages deployment and fresh public status while scripts stay blocked',async()=>{
-  const merge={merge_sha:'merged'};
-  let head='merged',body='new status',internalStatus=404;
-  const call=(name)=>name==='gh'?JSON.stringify({check_runs:[{id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:head}]}):'new status';
+  const merge={merge_sha:'a'.repeat(40)};
+  let head=merge.merge_sha,body='new status',internalStatus=404;
+  const call=(name)=>name==='gh'?JSON.stringify({total_count:1,check_runs:[{id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:head}]}):'new status';
   const remote=async url=>url.includes('/scripts/')?{status:internalStatus}:{ok:true,url,text:async()=>body};
   const proof=await verifyOperationalDelivery(merge,call,remote);
   assert.equal(proof.artifact_source,'data/autopilot-status.json');assert.equal(proof.internal_script_status,404);
@@ -360,7 +360,30 @@ test('operational delivery requires exact Pages deployment and fresh public stat
   await assert.rejects(()=>verifyActionDelivery(undefined,merge,call,remote),/same-site artifact/);
   body='old status';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/differs/);
   body='new status';internalStatus=200;await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/publication boundary/);
-  internalStatus=404;head='different';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit/);
+  internalStatus=404;head='different';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit|mismatched check/);
+});
+
+test('operational delivery finds a buried deployment but rejects a newer failure and incomplete inventories',async()=>{
+  const merge={merge_sha:'b'.repeat(40)};
+  const deployment={id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:merge.merge_sha};
+  let checks=[...Array.from({length:41},(_,i)=>({...deployment,id:100+i,name:'unrelated'})),deployment];
+  let partial=false,remoteCalls=0;
+  const call=(name,args)=>{
+    if(name!=='gh')return 'original status';
+    const url=new URL(args[1],'https://api.github.test/');
+    const filtered=url.searchParams.has('check_name')?checks.filter(c=>c.name===url.searchParams.get('check_name')):checks;
+    const size=Number(url.searchParams.get('per_page')??30);
+    return JSON.stringify({total_count:filtered.length,check_runs:partial?[]:filtered.slice(0,size)});
+  };
+  const remote=async url=>{remoteCalls++;return url.includes('/scripts/')?{status:404}:{ok:true,url,text:async()=> 'original status'};};
+  assert.equal((await verifyOperationalDelivery(merge,call,remote)).pages_check_id,1);
+  assert.equal(remoteCalls,2);
+  checks=[deployment,{...deployment,id:2,conclusion:'failure'}];remoteCalls=0;
+  await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit/);
+  assert.equal(remoteCalls,0,'a failed deployment cannot proceed to public output verification');
+  checks=[deployment];partial=true;
+  await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/incomplete/);
+  assert.equal(remoteCalls,0);
 });
 
 test('integration proof rejects historical or mismatched ledger rows and retains the human request',()=>{

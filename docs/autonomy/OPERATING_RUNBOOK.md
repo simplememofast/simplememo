@@ -77,6 +77,14 @@ Commit and push that declaration alone, then `bind`. Binding requires the clean 
 
 The regular finish evidence is `{ "kind": "autopilot_run", "run_id": "<bound ID>", "pr": 123, "learning": "Observed result and limitation" }`. The verifier requires that the matching canonical row is introduced in that real merge, exact final-SHA PR validation succeeds, and the same-site artifact matches its merged source. For the existing explicit `artifact: null` code-wiring case, verify the exact merge's successful Pages deployment and the public `data/autopilot-status.json` bytes instead. Internal `/scripts` and `/growth` paths are intentionally blocked by middleware; do not expose them to satisfy delivery verification. Domain-specific tests and impact still use the existing PR and experiment gates. The initial data integration additionally uses `{ "kind": "pipeline_integration", "pr": 123, "collection_receipt": "<private AppsFlyer receipt>" }` and verifies the new bound ledger row, original-parser parity and actual native-owner persistence.
 
+Operational delivery uses the decision monitor's existing protected check reader:
+the complete named Pages inventory must match the exact merge SHA, within five
+pages of 100 records. Missing, partial, duplicate or mismatched evidence fails
+closed. The highest check ID must be completed and successful; an older success
+cannot override a newer failed or active deployment. Exact served status bytes,
+the internal-script boundary, prospective binding and all other completion gates
+still apply. This reader correction alone earns no completion or score credit.
+
 ### Prospective SEO / AIO measurement and learning
 
 New Company observations use receipt schema 3. Every content action must carry a source-derived measurement plan before `prepare-decision`. Previously recorded schema 2 decisions and historical deliveries retain their original meaning; no retrospective measurement credit is added.
