@@ -1,14 +1,14 @@
 {
-  "as_of_jst": "2026-09-20",
+  "as_of_jst": "2026-09-21",
   "routine_snapshot_sha256": "ca17d17c13b83d1a8933777b920185963838a836e2eb31bad31a1bdd52f22f5f",
   "viewport_measurement": {
-    "main_sha": "332b291260e724639ab7beaa93173e65702671f3",
-    "head_sha": "7c8a4ba82f84ecfda5513cc3cbbe38c23d5a09bc",
-    "run_id": 35481437183,
+    "main_sha": "06fa3aafeaf0a51993816d8cdb114e7856fe1f65",
+    "head_sha": "1d1246bdcc012254ba74e780a1ce6bbd8d05cc5c",
+    "run_id": 35544130780,
     "attempt": 1,
-    "started_at": "2026-09-20T01:27:34Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/35481437183/attempts/1",
-    "job_id": 105999863990,
+    "started_at": "2026-09-20T23:15:57Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/35544130780/attempts/1",
+    "job_id": 106166925784,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -38,10 +38,10 @@
       }
     }
   },
-  "open_total": 1,
+  "open_total": 2,
   "deferred": [],
   "pending_pr": [],
-  "oldest_open_days": 0,
+  "oldest_open_days": 1,
   "acknowledged": 7,
   "closed_today": [
     {
@@ -90,12 +90,21 @@
       "id": "act-selfheal-escalated-no_artifact",
       "title": "no_artifact を上限回数（3回）直しても再発している",
       "detail": "対象 ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9（2026-09-20 / actions）。self_repair.stop_after_failed_repairs に達したため、修理をやめて人間に上げる。同時に該当経路の封じ込め（--contain）を実行する。",
-      "age_days": 0,
+      "age_days": 1,
       "why": "修理の上限に達した故障は人が原因を見るまで自動で触らない（policy.ai_may_resume:false）",
       "evidence": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9 は未修理のまま（repair_of で名指しされていない）",
       "not_before_jst": null
     }
   ],
-  "ai": [],
+  "ai": [
+    {
+      "id": "act-shipping-outage",
+      "title": "どの経路も 2日連続で出荷していない（2026-09-20〜2026-09-21）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-20 / 2026-09-21）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "2026-09-19 以降どの経路も出荷していない"
+    }
+  ],
   "executed": []
 }
