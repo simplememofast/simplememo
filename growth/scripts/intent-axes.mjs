@@ -429,7 +429,7 @@ if (isMain) {
     const current = readUndecided();
     const result = pruneObservedBelowThreshold(snap, current);
     if (result.removed.length) fs.writeFileSync(UNDECIDED_PATH, `${JSON.stringify(result.ledger, null, 2)}\n`);
-    console.log(`Observed below threshold: removed ${result.removed.length} existing intent rows`);
+    console.error(`Observed below threshold: removed ${result.removed.length} existing intent rows`);
   }
   const a = axes(snap);
   const cov = coverage(snap, readUndecided());
