@@ -2496,6 +2496,101 @@
         "ハブまたは子ページの title が変わった → その後の期間を別に読む",
         "子ページ→voice-input の内部遷移が GA4 で計測できていないと分かった（page_referrer が取れない等）→ 順位だけで判定し、遷移の欄は『測れなかった』と書く"
       ]
+    },
+    {
+      "id": "gsc-obsidian-install-20260922-r2",
+      "page": "/obsidian/getting-started/",
+      "change_paths": [
+        "obsidian/getting-started/index.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20260922-obsidian-install-guide"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20260922-obsidian-install-guide"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "The existing exact-page GSC row has 1371 impressions and 9 clicks. The retained query-page source is dominated by installation and download intent. Make official downloads and OS-specific first steps visible before the historical tutorial, and align the title with that intent. Existing verified screenshots and historical dates remain unchanged.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-22",
+      "evaluation_at": "2026-10-23",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.006564551422319475,
+        "clicks": 9,
+        "impressions": 1371,
+        "ctr": 0.006564551422319475,
+        "position": 8.409190371991247,
+        "window": "2026-08-23..2026-09-19",
+        "source": "gsc:cad87a305ce9a506abf221f224f06a0565a058831ad66182851575e7bdd2f419"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/obsidian/getting-started/"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/obsidian/getting-started/"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact GSC WEB page, 28 days before versus 28 days after; no randomized control.",
+        "confounders": "Seasonality, ranking changes, query/country/device composition, Google title rewrites, other global observations and prior September 9 changes cannot be isolated."
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 1000,
+        "rationale": "Baseline has 1371 impressions but only 9 clicks. A 1000-impression floor avoids interpreting a tiny post cohort; even above it small differences remain noisy, not proof of a win."
+      },
+      "stop_conditions": [
+        "Broken official download or application CTA, unintended noindex/canonical change, or mobile overflow: repair or revert immediately and retain original observation window.",
+        "Do not repeatedly retitle before the fixed October 23 evaluation; missing sources or incompatible cohorts yield inconclusive, never a zero or a WIN."
+      ],
+      "guardrails": [
+        "Keep canonical, hreflang, existing CTAs and analytics scripts unchanged; do not add new paid services or change consent.",
+        "Check country/device/query mix and average position before interpretation; changing demand or concurrent global work prevents isolated causal attribution.",
+        "Retain old verified Linux screenshot date and identify new Windows/Mac instructions as official-documentation guidance, not fresh hands-on verification."
+      ],
+      "decision_rule": "Descriptive pre/post only: retain if CTR improves by at least 0.003 absolute with impressions at least 1000 and clicks above baseline; iterate if evidence is mixed; revert if CTR drops by at least 0.003 with impressions at least 1000 and no material country/device/query/position shift. Otherwise inconclusive. This is not causal proof or installation uplift.",
+      "post_window": {
+        "start": "2026-09-23",
+        "end": "2026-10-20",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "12fc083d72538555230c4e49a24f3dbb06df77317a9626b25172be94720be908",
+        "company_run_id": "6b41f9e5-79d6-425d-92f8-d8da34cbf523",
+        "decision_sha256": "8d23d6f90cf592f67e85c0c048705bbcf50d684b4f30dd7fbd83fe0fc6b4d749"
+      }
     }
   ],
   "measurement_changes": [
