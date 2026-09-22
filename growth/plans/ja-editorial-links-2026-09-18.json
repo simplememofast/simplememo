@@ -165,12 +165,12 @@
       "initial_shortlist_rank": 2,
       "proposal": "Apple Watchから保存確認までの実機レビュー",
       "action": "Watch・iPhone・メール・Markdownそれぞれにいつ記録が残るかを、正常時と通信不良時に分けて示す。再現条件付きの日本語手順書を参照先にする。",
-      "status": "planned",
-      "verification": "needs_live_recheck",
+      "status": "submission_sent_pending_review",
+      "verification": "listing_not_confirmed",
       "deduplication": "pending_complete_history",
       "contact_url": "https://www.macotakara.jp/contact/",
-      "outreach_authorized": false,
-      "sent_at": null,
+      "outreach_authorized": true,
+      "sent_at": "2026-09-22",
       "published_article_url": null,
       "target_link_url": null,
       "link_rel": null,
@@ -183,8 +183,8 @@
         "does_not_guarantee_future_link": true
       },
       "execution_classification": {
-        "bucket": "ASSET_REQUIRED",
-        "basis": "inferred_from_action_text | asset_reaudit_2026-09-19: ASSET_PARTIAL",
+        "bucket": "SUBMISSION",
+        "basis": "Apple製品関連の情報提供を受け付ける公開フォーム。2026-09-22 送信済み。",
         "submission_route_url": null,
         "classified_at_jst": "2026-09-19"
       },
@@ -206,9 +206,10 @@
         "publicly_open": true,
         "login_required": false,
         "bot_protection": "未確認",
-        "observation": "公開フォーム（必須：内容／名前／メールアドレス、任意：所属・電話・住所、プライバシーポリシー同意）。「メールに対してのお返事は、多忙に付き御遠慮させて頂いております」「個人的なトラブルに関するご相談は受付けておりません」と明記。 2026-09-22 に入力を開始したが identity の修正のため中断し、1文字も送信していない。",
-        "outcome": "NOT_SENT_INTERRUPTED"
-      }
+        "observation": "公開フォーム（必須：内容／名前／メールアドレス＋プライバシーポリシー同意、任意：所属・電話・住所）。ログイン不要、CAPTCHA無し。「メールに対してのお返事は、多忙に付き御遠慮させて頂いております」「個人的なトラブルに関するご相談は受付けておりません」と明記。2026-09-22 送信完了。",
+        "outcome": "SUBMITTED"
+      },
+      "execution_note": "2026-09-22 送信。3段（内容の入力→内容の確認→送信完了）を経て /contact/thanks.html に到達したことを確認。「メールに対してのお返事は、多忙に付き御遠慮させて頂いております」と明記されている媒体なので、本文冒頭で「返信は不要です」と断り、情報提供のみにとどめた。**この1件は identity policy に沿って送っている**（送信者名「SimpleMemo Developer（株式会社ユリカ）」、署名も SimpleMemo Developer。確認画面で表示を目視確認済み）。掲載の確約ではない。"
     },
     {
       "id": "JA-003",
@@ -4413,6 +4414,13 @@
       "detail": "AAPL Ch. / 技術評論社 gihyo.jp（記事寄稿）/ ガジェットショット / bamka.info の4媒体へ、媒体ごとに別の本文で送信し、それぞれの完了表示を確認した。気になる、記になる… は窓口の実体が公開コメント欄だったため送らず、Macお宝鑑定団は入力途中で中断した。",
       "result": "送信完了4件。いずれも掲載の確約ではないため PUBLISHED には上げていない。",
       "caveat": "**送信済み4件の送信者名・本文の名乗り・署名に、開発者個人の実名を使ってしまった。identity policy 違反であり、送信済みのため取り消せない。** 対外名乗りは SimpleMemo Developer（個人名必須欄のみ AI ATAKA）、会社名は株式会社ユリカ が正。下書き（media-pitch-drafts-2026-09-22.md）からは実名を全て除去し、送信前チェックの1番を identity の規則に差し替えた。訂正連絡の要否は人の判断。"
+    },
+    {
+      "date_jst": "2026-09-22",
+      "action": "Macお宝鑑定団へ再送信（identity 修正後）と、routine-runs の追加調査",
+      "detail": "中断していた JA-002 を、送信者名・署名ともに SimpleMemo Developer / 株式会社ユリカ で送信し直し、確認画面で表示を目視したうえで送信完了ページに到達した。あわせて data/routine-runs.json の件で2つ実測した：(1) 週次の掲載確認タスクは 2026-09-22 10:29 の手動発火が SUCCEEDED（10:44 終了・約15分）で、2026-09-21 の 4 秒 FAILED は一過性だった。(2) list_triggers に include_completed=true を付けると open_findings の単発予約は戻るが、100件で has_more=true になるページングがあり、全件同期すると routines が完了済み単発予約で膨れる。",
+      "result": "2026-09-22 の送信は計5媒体（AAPL Ch. / 技術評論社 / ガジェットショット / bamka.info / Macお宝鑑定団）。うち identity policy に沿っているのは Macお宝鑑定団の1件のみ。",
+      "caveat": "routine-runs の整合は「台帳が生きている routine だけを追うのか、完了・削除済みも残すのか」という方針判断が要るため、こちらでは直さず Codex へ回した（docs/codex-request-routine-runs-2026-09-22.md）。"
     }
   ]
 }
