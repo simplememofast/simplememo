@@ -97,6 +97,14 @@
       "needs": "siblings"
     },
     {
+      "cmd": "growth/scripts/intent-axes.mjs --write",
+      "writes": [
+        "data/relevance-undecided.json"
+      ],
+      "why": "Reconcile only observed below-threshold intent exceptions when a weekly GSC snapshot changes.",
+      "deterministic_why": "Uses the committed complete weekly snapshot and existing threshold. No network, new intent declaration, missing-page inference, or wall-clock timestamp."
+    },
+    {
       "cmd": "growth/scripts/build-queues.mjs --write",
       "writes": [
         "growth/content/refresh-queue.json"
