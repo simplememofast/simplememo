@@ -491,10 +491,29 @@ GitHub の awesome 系リストは、登録フォームこそ無いが**PRとい
 | GitHub | リンクは既にあった | 表示名が `Simple Memo Faset - Captio-style`（**誤字＋旧ブランド**）だったので `Simple Memo - for Obsidian` に修正。bio と所在地も追加 |
 | Product Hunt | 既にリンク済み | Website / App Store / LinkedIn / Twitter が揃っている。追加不要 |
 | note | 既にリンク済み | 追加不要 |
-| Indie Hackers | 到達不能 | `/settings` が Not found、`/<user>` はリダイレクトループ。products 作成不可と同じ制限と見られる |
+| Indie Hackers | 到達不能（2026-09-19 時点） | `/settings` が Not found、`/<user>` はリダイレクトループ。products 作成不可と同じ制限と見られる。**→ 2026-09-22 に到達方法が判明（下記）** |
 
 GitHub の表示名修正は副次的だが効く —— **本日出した awesome系6件のPRすべてに、
 この名前が投稿者名として並ぶ。**誤字のまま6リストのメンテナに見せずに済んだ。
+
+### 追記（2026-09-22）Indie Hackers は埋められたが、**SEO 的には無価値**だった
+
+到達できなかったのは URL の推測が違っていただけだった。正しい経路は
+**ヘッダーのアバター → SETTINGS → `/<user>/settings`、編集は `/<user>/editing`**。
+アカウントは `memolife23` でログイン済み。
+
+`NAME` と `BIO` がどちらも空だったので、**SimpleMemo Developer** と、
+アプリの説明＋`https://simplememofast.com/` を入れて保存した（`?saved=profile` を確認）。
+
+**ただし公開プロフィールは `<meta name="robots" content="noindex">` だった。**
+さらに、保存した bio が公開ページに描画されていない（表示されるのはユーザー名・アバター・
+最近のコメントのみ）。**参照ドメインとしては数えられない。**
+
+`Social Links` セクションを足す導線もあるが、ページ自体が noindex なので**足さなかった**。
+
+**ここから得た手順**：プロフィール欄を埋めに行く前に、まず公開ページの
+`meta robots` とリンクの `rel` を実測する。noindex なら埋める価値は
+（SEO 目的では）無い。forum.obsidian.md は index されていたから効いた。
 
 ### 出さなかった候補
 
