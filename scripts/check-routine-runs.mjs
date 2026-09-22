@@ -398,7 +398,13 @@ function selftest() {
     }],
     ['**止めたはずのものが動いていたら落とす**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.id === d.intentional_stops[0].id);
+        const index = d.routines.findIndex((x) => x.id === d.intentional_stops[0].id);
+        // Model a current API record returning, not a contradictory unavailable
+        // marker. Contradictory markers have a separate rejection test.
+        if (d.routines[index].observation_state === 'unavailable') {
+          d.routines[index] = structuredClone(d.routines[index].last_verified.routine);
+        }
+        const r = d.routines[index];
         // [2026-08-31] 固定日付だと写しの観測時刻を追い越されて overdue のまま残り、
         // 「動いている」形にならない（上の『直ったのに〜』と同じ理由）。
         const after = new Date(Date.parse(d.observed_at) + DAY).toISOString().replace(/\.\d+Z$/, 'Z');
