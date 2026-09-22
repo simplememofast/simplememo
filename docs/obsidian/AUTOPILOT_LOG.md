@@ -4093,3 +4093,13 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 - Declaration: first plan included an unchanged sitemap index and was retired before implementation publication. Its history remains intact; revised declaration was pushed and bound before the registry-only commit and implementation.
 - QA: SEO 0 errors / existing llms freshness warning; static structure, CTA, URL, experiment, authority and public-copy checks passed. Browser target overflow 0 at 320/390/800/1280px, completed-draft adversarial review found no blocker. Chrome broad rendering: 1798 measured combinations, zero overflow/failures. WebKitWebDriver is unavailable, so WebKit is not verified. Exact-head CI is tracked in the PR.
 - Costs: no new paid service or separate source query. Actual Codex dollars unavailable; no zero-cost entry added. Shared initial setup and broad QA overhead must not recur for every small refresh.
+
+
+## 2026-09-23 — Refresh: self-email clarity (owner Goal)
+
+- Compare: /note-to-email/ has 549 impressions/10 clicks; /blog/email-yourself-memo has 632/10 but already explains sending and receipt. No additional paid source query or model probe.
+- Change: clarify sending, receipt checking and task follow-through; remove unsupported guarantees and the sharing image's unqualified speed comparison. Existing neutral app icon, CTA and analytics retained.
+- PR: #1534. Branch record becomes a shipment only after exact-head validated merge. Manual owner request and original owner-session gate; not scheduled execution and no actions repair-stop override.
+- Prospective declaration f69196a6, registry-only commit 8c2aeef7, then implementation. Experiment gsc-note-to-email-20260923: September 23–October 20 Pacific, evaluation October 23; baseline 10/549, minimum 500 post impressions. Descriptive only, no causal or installation gain claimed.
+- QA: SEO zero errors / pre-existing llms freshness warning; FAQ, CTA, product constants, benchmark, URL and public-copy checks; independent review found no blocker; Chrome target viewport checks 320/390/800/1280px have zero overflow. Exact-head CI and public readback follow.
+- Actual Codex cost remains unavailable; no zero-dollar expense entry or new subscription. Implementation/validation checkpoint is 90 minutes. Waiting is not credited as productive work.

@@ -189,3 +189,16 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: Obsidianの導入記事に、Windows・Macの公式ダウンロード先と手順を冒頭からたどれる案内を追加。過去のLinux実画面は撮影日を残し、今回確認した公式資料と区別しました。
 - **英語圏向け**: An installation guide should begin with the official download and the reader's OS. We separated current documentation from dated hands-on Linux screenshots, so readers can see what was tested.
 - **使わない表現**: 全OSを実機検証した、検索流入が増えた、インストール数が増えたという未確認の主張。クリックをインストールと呼ぶ表現。
+
+
+## S-20260923-note-to-email
+
+- **対象URL**: https://simplememofast.com/note-to-email/
+- **媒体**: note / X / reddit
+- **分類**: readers
+- **一行の主張**: 自分宛メールの到着確認と、書いた用事の完了を分けて説明する。
+- **引用できる数字**: 2026-09-23、送信・受信確認・作業管理を区別する案内へ更新（出典: note-to-email/index.html）。速度や検索効果の新しい実測値はない。
+- **note向け**: 受信箱に集める習慣が自分に合うかを考え、見返す時間とタスクの移し先を決める。
+- **X向け**: 自分にメールでメモを送ったら、まず受信箱で到着を確認。届くことと、用事が終わることは別です。見返す時間と、実行するタスクの置き場所を決めて使います。
+- **英語圏向け**: Confirm that a self-email arrived, then track the task separately. A delivered note is a record, not a completed task.
+- **使わない表現**: 必ず気づく／確認忘れゼロ／管理コストゼロ／記録すれば完了／速度や検索効果の未検証の向上。
