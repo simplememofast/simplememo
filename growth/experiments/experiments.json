@@ -2591,6 +2591,101 @@
         "company_run_id": "6b41f9e5-79d6-425d-92f8-d8da34cbf523",
         "decision_sha256": "8d23d6f90cf592f67e85c0c048705bbcf50d684b4f30dd7fbd83fe0fc6b4d749"
       }
+    },
+    {
+      "id": "gsc-note-to-email-20260923",
+      "page": "/note-to-email/",
+      "change_paths": [
+        "note-to-email/index.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20260923-note-to-email"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20260923-note-to-email"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "The source-qualified exact-page GSC baseline has 549 impressions and 10 clicks. Align metadata and opening answers with self-email setup and receipt checking, remove unsupported task-completion and speed guarantees, and retain verified product limits. AIO fixed questions motivate source clarity but do not show that these claims caused absence or that this treatment will earn citations.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-22",
+      "evaluation_at": "2026-10-23",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.018214936247723135,
+        "clicks": 10,
+        "impressions": 549,
+        "ctr": 0.018214936247723135,
+        "position": 6.539162112932605,
+        "window": "2026-08-23..2026-09-19",
+        "source": "gsc:cad87a305ce9a506abf221f224f06a0565a058831ad66182851575e7bdd2f419"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/note-to-email/"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/note-to-email/"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact GSC WEB page, 28 days before versus 28 days after; no randomized control.",
+        "confounders": "Seasonality, ranking changes, query/country/device composition, Google title rewrites, other global observations and prior September 9 changes cannot be isolated."
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 500,
+        "rationale": "549 baseline impressions and only 10 clicks are noisy. The 500-impression floor prevents reading tiny cohorts; crossing it does not establish statistical significance."
+      },
+      "stop_conditions": [
+        "Repair broken links, noindex/canonical changes or overflow immediately while retaining the original observation dates.",
+        "No repeat retitling before October 23. Missing comparable sources yield inconclusive, never zero or a WIN."
+      ],
+      "guardrails": [
+        "Keep canonical, hreflang, CTAs and analytics unchanged. Preserve verified free limit, initial recipient verification and delivery troubleshooting.",
+        "Compare query, country, device and position composition. Concurrent global observations mean the result cannot isolate causation.",
+        "Do not add unverified speed, usage, safety or completion guarantees; do not change price or app release behavior."
+      ],
+      "decision_rule": "Descriptive pre/post only: retain if CTR rises by at least 0.005 absolute, impressions at least 500, and clicks above 10 without material query, device, country or position change. Investigate an absolute CTR fall of at least 0.005 at the same floor; never reinstate false guarantees. Otherwise inconclusive; no causal claim, statistical significance claim or inferred installs.",
+      "post_window": {
+        "start": "2026-09-23",
+        "end": "2026-10-20",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "d2274faa89e0b4677913983f52019712e6b69083aac104cc978229385d9dbc07",
+        "company_run_id": "d6d5399f-13b7-4e96-9e53-0d2b24527a13",
+        "decision_sha256": "69dbbd4a3db2ee1bfa8197a23c01e018b5564c731c4b0d49120b57422c48a799"
+      }
     }
   ],
   "measurement_changes": [
