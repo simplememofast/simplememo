@@ -53,6 +53,8 @@ export const OVERDUE_GRACE_HOURS = 6;
  */
 export function diagnose(r, { now, observedAt = now }) {
   if (!r || typeof r !== 'object') return 'malformed';
+  // Historical disabled status is not the current state of an unreadable row.
+  if (r.observation_state === 'unavailable') return 'observation_unavailable';
   const endedOneShot = r.ended_reason === 'run_once_fired';
   if (r.enabled !== true && !endedOneShot) return 'stopped';
   if (r.last_run_status === 'FAILED') return 'failed';
@@ -141,6 +143,24 @@ export function validate(doc, { now = Date.now() } = {}) {
   const ref = Number.isFinite(observedAt) ? observedAt : now;
   const unhealthy = [];
   for (const r of doc.routines) {
+    if (r.observation_state === 'unavailable') {
+      const p = r.source_observation, last = r.last_verified;
+      const oldAt = Date.parse(last?.observed_at), readAt = Date.parse(p?.observed_at);
+      const emptyCurrent = ['enabled', 'cron_expression', 'run_once_at', 'next_run_at',
+        'last_fired_at', 'last_run_status', 'last_run_fired_at', 'last_run_finished_at', 'last_run_session_id']
+        .every(k => r[k] === null);
+      if (!intentionalIds.has(r.id) || openIds.has(r.id) || !emptyCurrent
+        || p?.id !== r.id || p.method !== 'GET' || p.http_status !== 404
+        || p.endpoint !== '/v1/code/triggers/' + r.id
+        || !Number.isFinite(readAt) || readAt > ref || ref - readAt > 60000
+        || !Number.isFinite(oldAt) || oldAt > readAt
+        || last?.routine?.id !== r.id || last.routine.enabled !== false
+        || diagnose(last.routine, { now: oldAt }) !== 'stopped') {
+        problems.push(`${r.id}: 参照不可の現在証跡・元の意図的停止・履歴が不整合`);
+      } else {
+        warnings.push(`${r.id}: 個別GETは404。現在の有効状態・削除・実行結果は不明。意図的停止の判断と最後の実測履歴を保持し、復旧成功には数えない`);
+      }
+    }
     const what = diagnose(r, { now, observedAt: ref });
     if (!what) continue;
     unhealthy.push({ id: r.id, name: r.name, what });
@@ -378,7 +398,13 @@ function selftest() {
     }],
     ['**止めたはずのものが動いていたら落とす**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.id === d.intentional_stops[0].id);
+        const index = d.routines.findIndex((x) => x.id === d.intentional_stops[0].id);
+        // Model a current API record returning, not a contradictory unavailable
+        // marker. Contradictory markers have a separate rejection test.
+        if (d.routines[index].observation_state === 'unavailable') {
+          d.routines[index] = structuredClone(d.routines[index].last_verified.routine);
+        }
+        const r = d.routines[index];
         // [2026-08-31] 固定日付だと写しの観測時刻を追い越されて overdue のまま残り、
         // 「動いている」形にならない（上の『直ったのに〜』と同じ理由）。
         const after = new Date(Date.parse(d.observed_at) + DAY).toISOString().replace(/\.\d+Z$/, 'Z');
