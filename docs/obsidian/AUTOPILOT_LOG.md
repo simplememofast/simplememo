@@ -4081,3 +4081,15 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 - One observe-profile service-notice query covered last48h/max49rows, all49inactive; latest errors0/eligible0. More than48h since prior saved observation: the earlier uncovered interval remains unknown. No active notice in retained rows and no task134 score credit.
 - Daily, existing Weekly appendix and follow-up refreshed; existing Monthly retained. AppsFlyer7-day evaluation is not yet due at this06:00slot. Existing human requests not repeated.
 - Canonical run attempted:true/no_artifact; this PR only publishes observations and bookkeeping. Company business execution remains unfinished. Codex billedUSD null; Claude actual-cost ledger unchanged. Full-scope policy blocker retained privately without changing permissions, scores or experiment ownership.
+
+
+## 2026-09-22 — Refresh: Obsidian installation guide (owner Goal)
+
+- Evidence: admitted GSC 2026-08-23..09-19, exact page 1371 impressions / 9 clicks. Installation query 314 impressions / 0 clicks; download query 154 / 1. Email-yourself has 632 impressions / 10 clicks and lower modeled click headroom.
+- Change: expose official downloads and OS-specific steps before the historical Linux tutorial; align metadata. Keep historical screenshot dates, canonical, hreflang, CTA and analytics intact.
+- Primary source: https://obsidian.md/help/install, checked 2026-09-22. Windows/Mac/mobile execution remains untested.
+- PR: #1527; this branch record counts as shipped only after validated merge. Owner-requested session, not scheduled execution or a repair-stop override.
+- Measurement: gsc-obsidian-install-20260922-r2, post 2026-09-23..10-20, evaluate from 10-23. September 19 language URL split and traffic composition can confound comparison. No causal SEO or installation uplift claimed.
+- Declaration: first plan included an unchanged sitemap index and was retired before implementation publication. Its history remains intact; revised declaration was pushed and bound before the registry-only commit and implementation.
+- QA: SEO 0 errors / existing llms freshness warning; static structure, CTA, URL, experiment, authority and public-copy checks passed. Browser target overflow 0 at 320/390/800/1280px, completed-draft adversarial review found no blocker. Chrome broad rendering: 1798 measured combinations, zero overflow/failures. WebKitWebDriver is unavailable, so WebKit is not verified. Exact-head CI is tracked in the PR.
+- Costs: no new paid service or separate source query. Actual Codex dollars unavailable; no zero-cost entry added. Shared initial setup and broad QA overhead must not recur for every small refresh.
