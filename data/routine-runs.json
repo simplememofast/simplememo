@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-22T10:59:15.546Z",
+  "observed_at": "2026-09-22T21:49:17.585Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-22T10:59:15.546Z",
+        "observed_at": "2026-09-22T21:49:17.585Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -577,7 +577,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_018EyeYcJiVLFQeAHArMpGtM",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:07.135Z"
+        "observed_at": "2026-09-22T21:49:16.323Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -643,7 +643,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01GphcHzTuH1A1JUGq8dYkWa",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:14.567Z"
+        "observed_at": "2026-09-22T21:49:16.611Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -752,7 +752,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01RcUDUaFDf86KffssLRsQdw",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:14.825Z"
+        "observed_at": "2026-09-22T21:49:16.921Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -790,7 +790,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01TixKQ5Sovfjfn8rRVQCrYf",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:15.050Z"
+        "observed_at": "2026-09-22T21:49:17.161Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -842,7 +842,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01VuJravpvATQPBuAigHCZJi",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:15.297Z"
+        "observed_at": "2026-09-22T21:49:17.378Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -880,7 +880,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01XUeM9mCTkoqdWhUMac6jD1",
         "http_status": 404,
-        "observed_at": "2026-09-22T10:59:15.546Z"
+        "observed_at": "2026-09-22T21:49:17.585Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -910,9 +910,9 @@
     "pages": 2,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 199,
+    "total_records": 193,
     "unregistered_current_count": 3,
-    "ended_records": 186,
+    "ended_records": 180,
     "unavailable_registered_count": 6,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。既存の意図的停止が一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。削除・成功・現在の停止を断定しない。稼働中タスクの欠落は受理しない。予定や停止の判断は変更しない。"
@@ -1021,7 +1021,7 @@
   ],
   "codex_observation": {
     "schema_version": 4,
-    "observed_at": "2026-09-22T10:59:15.763Z",
+    "observed_at": "2026-09-22T21:49:11.338Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -1034,8 +1034,8 @@
         "id": "obsidian",
         "status": "ACTIVE",
         "kind": "cron",
-        "next_run_at": "2026-09-22T21:00:04.000Z",
-        "last_run_at": "2026-09-21T21:00:30.236Z"
+        "next_run_at": "2026-09-23T21:00:19.000Z",
+        "last_run_at": "2026-09-22T21:00:33.461Z"
       },
       {
         "id": "obsidian-2",
@@ -1984,6 +1984,53 @@
           "input_sha256": "f4aea80dd61943a74fd21a2f28c430d4d8e5ce795c354f14d9252b8280bd43d1",
           "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
           "sha256": "d1b06e800205c0b0c68e344a70fefc9b078f5add95e05923d9a32e287602f906"
+        }
+      },
+      {
+        "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
+        "automation_id": "obsidian",
+        "scheduler_status": "PENDING_REVIEW",
+        "created_at": "2026-09-22T21:00:33.512Z",
+        "updated_at": "2026-09-22T21:04:31.641Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "be8179e3268e0877a8d9343fd3aeceeab128332c518463375ef1cfe70c510ea0",
+          "bytes": 1781619,
+          "turns": [
+            {
+              "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
+              "started_at": "2026-09-22T21:00:34.278Z",
+              "finished_at": "2026-09-22T21:04:31.587Z",
+              "state": "completed",
+              "tool_calls": 18,
+              "tool_outputs": 18,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 0
+            }
+          ]
+        },
+        "gate_receipt": {
+          "version": 1,
+          "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
+          "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
+          "observed_at": "2026-09-22T21:03:30.248Z",
+          "admitted": false,
+          "code": "agent_stopped",
+          "input_sha256": "701c957ba93459fe5bfd866cad4890a6d0e14a4de8f662906181e9407b578be6",
+          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+          "sha256": "7c5683f6ce11d492c85ab333399b3689ea46e998694a348842223be44852809b"
+        },
+        "detection_receipt": {
+          "kind": "launchd_interval",
+          "observed_at": "2026-09-22T21:49:11.338Z",
+          "parent_pid": 25725,
+          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+          "version": 1,
+          "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
+          "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
+          "transcript_sha256": "be8179e3268e0877a8d9343fd3aeceeab128332c518463375ef1cfe70c510ea0",
+          "sha256": "d78de7f7cd4707aaeb8596cb0b665ac968e0e7a7dce251525d83eca3cd53ba58"
         }
       }
     ]
