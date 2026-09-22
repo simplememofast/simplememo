@@ -173,3 +173,19 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: 故障2件が毎朝「未修理」で上がっていた。直すPRはすでにマージ済み。足りなかったのは、それを踏んで最後まで走った実行のほう。台帳は修理済みをコードではなく記録で判定するので、確かめる実行が無い限り開いたままになる。誤報ではなく、未確認という意味。
 - **英語圏向け**: Two failures kept showing up as unrepaired every morning. The fixes had already been merged days earlier. What was missing was a run that went all the way through with those fixes in place. The ledger decides "repaired" from the record, not from the code, so without a confirming run it stays open. That is not a false alarm — it means nobody has checked yet.
 - **使わない表現**: 「台帳が誤検知していた」と書かない（判定は設計どおりで、確認材料が無かっただけ）。「自己修復が働いた」とも書かない（原因を直したのは別の回で、この回がしたのは確認と記帳）。
+
+---
+
+## S-20260922-obsidian-install-guide
+
+- **対象URL**: https://simplememofast.com/obsidian/getting-started/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: 導入記事の冒頭で、読者が自分のOSの公式ダウンロード先と最初の操作を見つけられるようにした。
+- **引用できる数字**
+  - 2026-09-22：Windows・Macの導入手順を公式資料で確認（出典: obsidian/getting-started/index.html、https://obsidian.md/help/install）。
+  - 2026-08-12：Linux版1.13.6の実画面6枚は当時の検証記録（出典: obsidian/getting-started/index.html）。
+- **note向け**: 読者が最初に必要とするダウンロード先を先に置き、詳しい実画面の解説へつなぐ。公式資料の確認日と実機検証日を分けると、どこまで試した手順かが伝わる。
+- **X向け**: Obsidianの導入記事に、Windows・Macの公式ダウンロード先と手順を冒頭からたどれる案内を追加。過去のLinux実画面は撮影日を残し、今回確認した公式資料と区別しました。
+- **英語圏向け**: An installation guide should begin with the official download and the reader's OS. We separated current documentation from dated hands-on Linux screenshots, so readers can see what was tested.
+- **使わない表現**: 全OSを実機検証した、検索流入が増えた、インストール数が増えたという未確認の主張。クリックをインストールと呼ぶ表現。
