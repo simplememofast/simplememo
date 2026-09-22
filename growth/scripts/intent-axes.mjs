@@ -34,6 +34,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import {
   ROOT, GSC_DIR, listSnapshots, loadSnapshot, toPath,
   BUSINESS_RELEVANCE, MONETIZATION_RELEVANCE,
@@ -406,6 +407,15 @@ function selftest() {
     const c = coverage(sn, readUndecided());
     t('**実データで台帳が門を通る**（未宣言はすべて理由つき）', c.unlisted.length === 0);
     t('実データで台帳に古い行が無い', c.stale.length === 0);
+    const child = spawnSync(process.execPath, [fileURLToPath(import.meta.url), '--json'],
+      { encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 });
+    let complete = false;
+    try {
+      const decoded = JSON.parse(child.stdout);
+      complete = child.status === 0 && decoded.label === sn.label
+        && decoded.rows.length === a.rows.length;
+    } catch { /* A truncated JSON stream is a failed check. */ }
+    t('実CLIのJSONはパイプでも全行を読み戻せる', complete);
   } else {
     t('**スナップショットが無い**', false);
   }
@@ -433,12 +443,16 @@ if (isMain) {
   }
   const a = axes(snap);
   const cov = coverage(snap, readUndecided());
-  if (process.argv.includes('--json')) { console.log(JSON.stringify({ ...a, coverage: cov }, null, 2)); process.exit(0); }
-  console.log(render(a, cov));
-  const problems = validate(a, cov);
-  if (problems.length) {
-    console.error('\n宣言まわりの問題:');
-    for (const p of problems) console.error(`  - ${p}`);
-    if (process.argv.includes('--check')) process.exit(1);
+  if (process.argv.includes('--json')) {
+    // Let Node drain stdout; explicit exit truncates large snapshots when piped.
+    console.log(JSON.stringify({ ...a, coverage: cov }, null, 2));
+  } else {
+    console.log(render(a, cov));
+    const problems = validate(a, cov);
+    if (problems.length) {
+      console.error('\n宣言まわりの問題:');
+      for (const p of problems) console.error(`  - ${p}`);
+      if (process.argv.includes('--check')) process.exit(1);
+    }
   }
 }
