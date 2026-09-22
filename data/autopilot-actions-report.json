@@ -1,14 +1,14 @@
 {
   "as_of_jst": "2026-09-22",
-  "routine_snapshot_sha256": "ca17d17c13b83d1a8933777b920185963838a836e2eb31bad31a1bdd52f22f5f",
+  "routine_snapshot_sha256": "1c6b6472154d7cc4c3f36dcc9734b5a4e00983d68b0b7d1b849cc860df470742",
   "viewport_measurement": {
-    "main_sha": "30831e0182c958756d8fe3549d9dd067e66d6b3c",
-    "head_sha": "4f21d0e75ea3fe2b76e68c6b3ededfc489c599b5",
-    "run_id": 35674578437,
+    "main_sha": "3fee2adda5692197fa5738ff594777772ef24f6a",
+    "head_sha": "72e4fa5ddf5a348cd2c8c10e232bb52fb2f69ad3",
+    "run_id": 35719311528,
     "attempt": 1,
-    "started_at": "2026-09-22T01:07:05Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/35674578437/attempts/1",
-    "job_id": 106578299119,
+    "started_at": "2026-09-22T11:03:13Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/35719311528/attempts/1",
+    "job_id": 106718195492,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -83,6 +83,11 @@
       "evidence": "ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b より後に ccr-0920 は 1回着手し usage_limit の再発なし"
     },
     {
+      "id": "act-codex-ledger-sync",
+      "title": "Codex実行の未記帳 2 件・原因分類 0 件を同期する",
+      "evidence": "観測有効=true、未記帳のCodex結果 0 件、原因分類 0 件"
+    },
+    {
       "id": "act-selfheal-ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
       "title": "未修理の故障: ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09（usage_limit）— セッション側に打つ手が無い種別",
       "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし"
@@ -142,5 +147,12 @@
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1"
     }
   ],
-  "executed": []
+  "executed": [
+    {
+      "handler": "reconcile-codex-runs",
+      "ok": true,
+      "changed": 2,
+      "log": "Codex original outcomes appended: 2; causes classified: 0; shipments not inferred"
+    }
+  ]
 }
