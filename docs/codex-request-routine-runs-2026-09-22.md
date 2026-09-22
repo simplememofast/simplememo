@@ -1,7 +1,7 @@
 # Codex への依頼：`data/routine-runs.json` の写し更新と整合（2026-09-22）
 
 依頼元: SimpleMemo Developer（Cowork セッション側）。
-照合基準: main `4f7b814e`。この依頼は **CI が赤いまま止まっているため**のものであり、
+照合基準: main `4f7b814e`。最終更新 2026-09-22（4-3 を実測で解決済みに更新、`include_completed` の検証結果を追記）。この依頼は **CI が赤いまま止まっているため**のものであり、
 自律運転の成果点や実験成功には加算しない。
 
 ---
@@ -72,15 +72,27 @@ budget を勝手に広げるのはこの見張りを無効化することにな�
 と報告する。**実体は「動いている」のではなく「一覧から消えた」**なので、
 `diagnose()` が不在を健全と読んでいる可能性が高い。ここは Codex 側で確認してほしい。
 
-**決めてほしいこと**：一覧から消えた routine を
-(a) 台帳からも落とす／(b) `closed_findings` へ移す／(c) 不在として別扱いにする、のどれにするか。
-`include_completed=true` で取り直せば戻るのかも、こちらでは未検証。
+**`include_completed=true` は検証した。単純な解決にはならない。**
+
+- `trig_01N1SWZdPwKTot2SbT71UV2U`（open_findings の1件）は **戻る**。
+  既定で隠れるのは「発火済みの単発予約」だからで、これは想定どおり。
+- 残り6本は `enabled=false` + `include_completed=true` の**先頭100件には入っていない**
+  （`has_more: true`）。削除済みなのか、単に後ろのページなのかは未確定。
+- ただし `applySync()` は `routines` を payload で**丸ごと置き換える**実装なので、
+  全ページを結合して同期すると、**過去の完了済み単発予約が全部 `routines` に入って膨れる。**
+  「フラグを足すだけ」では直らない。
+
+**決めてほしいこと**：この台帳が追う対象は
+(a) 生きている routine だけ（＝消えたものは台帳からも落とす）、
+(b) 一度追い始めたものは完了・削除後も残す（＝`closed_findings` へ移す）、
+(c) 「一覧から消えた」を健全とは別の状態として扱う、
+のどれか。**`diagnose()` が不在を健全と読んでいるのは (c) が未実装だからに見える。**
 
 ### 3-2. 新しく写しに入る 3 本
 
 | trigger id | 名前 | 実測状態 | 備考 |
 | --- | --- | --- | --- |
-| `trig_01Fseho31MSgzsxuWZJqxvAm` | 被リンク掲載確認（申請中ディレクトリ・awesome系PR） | 2026-09-21 の定期実行が **FAILED**（fired 00:09:44Z → finished 00:09:48Z の **4秒**、`failure_reason: UNSPECIFIED`） | **2026-09-22 10:29 に手動発火したら PENDING で正常に走り出した。**一過性の可能性が高い。次の走行が SUCCEEDED なら健全に戻るので、findings に積む前にそれを待つのが安い |
+| `trig_01Fseho31MSgzsxuWZJqxvAm` | 被リンク掲載確認（申請中ディレクトリ・awesome系PR） | 2026-09-21 の定期実行が **FAILED**（fired 00:09:44Z → finished 00:09:48Z の **4秒**、`failure_reason: UNSPECIFIED`） | **解決済み。**2026-09-22 10:29 の手動発火が `SUCCEEDED`（10:44:53 終了・約15分）。4秒 FAILED は一過性だった。**findings に積む必要は無い** |
 | `trig_014e8va7SYk1UEfPuaqfHHrV` | 【空回し報告 2026-09-05】clone=OK｜push=NG(403)… | enabled=true・cron 無し・run_once_at 無し・`next_run_at` が `0001-01-01T00:00:00Z` | **poke-only（自分では発火しない）トリガー。**`next_run_at` が年 0001 なので overdue と判定されている。**これは検査側の取りこぼしではないか** |
 | `trig_01Genu5KTKbe7fjvNXxVkC8r` | PR⑥ D+14 取得（2026-09-17・device版・Chrome必須） | enabled=false・run_once_at=2026-09-17T00:30:00Z・`last_fired_at: null`・`last_run: null` | 一度も発火しないまま対象日を過ぎて無効化されている。意図的だったかは不明 |
 
@@ -109,10 +121,12 @@ budget を勝手に広げるのはこの見張りを無効化することにな�
   **その場合は必ず `--selftest` にケースを追加すること**（この検査は
   「緩めない仕掛け」が売りなので、静かに緩めると意味が無くなる）。
 
-### 4-3.（低優先）`trig_01Fseho31MSgzsxuWZJqxvAm` は先に1回様子を見る
+### 4-3.（解決済み・対応不要）`trig_01Fseho31MSgzsxuWZJqxvAm`
 
-2026-09-22 10:29 の手動発火が SUCCEEDED で終わっていれば、findings に積む必要はない。
-`last_run.status` を見てから判断してほしい。
+2026-09-22 10:29 の手動発火が `SUCCEEDED` で終わった（10:44:53、約15分）。
+2026-09-21 の 4 秒 FAILED は一過性。**この1本は findings に積まなくてよい。**
+
+つまり **判断が要るのは実質2件**（3-1 の消えた7本の扱い方針と、3-2 の poke-only 1本）に絞れている。
 
 ---
 
