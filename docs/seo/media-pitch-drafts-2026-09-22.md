@@ -45,7 +45,7 @@ Captioとの関係は「着想を得た」までにとどめる。
 ```
 さくらのナレッジ編集部 御中
 
-はじめまして。株式会社ユリカの安宅（あたか）と申します。
+はじめまして。株式会社ユリカのSimpleMemo Developerと申します。
 著者募集のページを拝見し、「さくナレ著者希望」としてご連絡しました。
 
 ■ 書きたいテーマ（案）
@@ -84,7 +84,7 @@ Captioとの関係は「着想を得た」までにとどめる。
 3,500〜4,500字程度を想定しています。構成案を先にお送りして、テーマの可否や切り口を
 ご相談させていただければと思います。ご不要であればその旨だけご返信いただければ追いません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -115,7 +115,7 @@ https://simplememofast.com/
 ```
 Mac Fan編集部 御中
 
-株式会社ユリカの安宅と申します。Apple製品関連のサービス情報を募集されているとのことでしたので、
+株式会社ユリカのSimpleMemo Developerと申します。Apple製品関連のサービス情報を募集されているとのことでしたので、
 自社で開発しているiOSアプリの情報をお送りします。
 
 ■ 製品
@@ -149,7 +149,7 @@ Apple Watchからも入力できます（Watchは入力側で、送信はペア�
 実機での検証に送信上限なしの状態が必要であれば、プロモコードをお送りします。
 取り上げるかどうか、掲載の可否はすべて編集部にお任せします。原稿の事前確認はお願いしません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -176,7 +176,7 @@ https://simplememofast.com/
 ```
 CoRRiENTE編集部 御中
 
-株式会社ユリカの安宅と申します。
+株式会社ユリカのSimpleMemo Developerと申します。
 お問い合わせのご案内に「製品のレビュー依頼」を受け付けている旨がありましたので、
 自社開発のiOSアプリについてご相談させてください。
 
@@ -206,7 +206,7 @@ Apple Watchからも入力できます（Watchは入力側で、送信はペア�
 
 ご返信が難しい場合はそのままで構いません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -232,7 +232,7 @@ https://simplememofast.com/
 ```
 Think IT編集部 御中
 
-株式会社ユリカの安宅と申します。プレスリリースをお送りします。
+株式会社ユリカのSimpleMemo Developerと申します。プレスリリースをお送りします。
 
 ■ 製品
 シンプルメモ - Obsidian連携・高速音声入力
@@ -263,7 +263,7 @@ https://simplememofast.com/blog/benchmark-methodology
 記事化のご検討、あるいは技術記事としての寄稿のご相談も可能でしたらお声がけください。
 取り上げるかどうかはお任せします。原稿の事前確認はお願いしません。
 
-安宅 基（あたか はじめ）
+SimpleMemo Developer
 株式会社ユリカ
 support@simplememofast.com
 https://simplememofast.com/
@@ -271,11 +271,16 @@ https://simplememofast.com/
 
 ---
 
-## 送る前の確認（前回と同じ）
+## 送る前の確認
 
-1. 価格（¥500 / ¥5,000）は機械検証できない項目。`data/site-constants.json` を目視で確認してから送る。
-2. **バージョン番号と評価は本文に書かない。** 2026-09-19 時点でストア（5.8.66 / 4.12・26件）と
+1. **送信者名・署名は `SimpleMemo Developer`（日本語なら「シンプルメモ開発者」）。
+   個人名が必須の欄だけ `AI ATAKA`。会社名は「株式会社ユリカ / YURIKA, K.K.」。
+   **開発者個人の実名は、いかなる欄にも使わない。**
+   返信先は `support@simplememofast.com`。送信直前に、送信者欄・署名・引用を含む全文を
+   読み戻し、私有の identity policy と照合する。
+2. 価格（¥500 / ¥5,000）は機械検証できない項目。`data/site-constants.json` を目視で確認してから送る。
+3. **バージョン番号と評価は本文に書かない。** 2026-09-19 時点でストア（5.8.66 / 4.12・26件）と
    `site-constants.json`（5.8.9 / 4.2・25件）が乖離している。
-3. 1媒体ずつ送る。同日にまとめて送らない。
-4. 送ったら `growth/plans/ja-editorial-links-2026-09-18.json` の `status` / `sent_at` /
+4. 1媒体ずつ送る。同日にまとめて送らない。
+5. 送ったら `growth/plans/ja-editorial-links-2026-09-18.json` の `status` / `sent_at` /
    `verification` を更新する。掲載を確認できるまで `verification` は `listing_not_confirmed` のまま。
