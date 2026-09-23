@@ -945,6 +945,7 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   2. 前回は「無料・登録不要のブラウザツールで、アプリとは独立して使える」として出して採用された。2週間あまりで同じ名義から
      有料アプリの自薦を続けると、個人運営の媒体に宣伝と受け取られかねない。本当に伝える価値のある話題が出たときに窓口を失う。
   3. 出し直す条件：Obsidian 利用者に直接効く変更（vault への書き込み方式など）が公開され、前回から1か月以上空いたときに1件だけ。
+  4. **2026-09-23 夜、オーナーも「出さない」を選んだ**（選択肢で確認）。
 - 同じ検索で、§6.5 の awesome 系6件が**すべて Open のまま、メンテナの反応が無い**（最後の動きは 2026-09-19 の提出）ことも確かめた。
   こちらから催促はしない（毎週の掲載確認タスクで見ている）。
 - **AlternativeTo**（オーナー判断待ち #3）：2026-09-23 夜、alternativeto.net は開けるようになっていた（昼は Chrome の権限で拒否されていた）。
@@ -952,7 +953,7 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   2026-07-01 付けで利用者の否定コメント（*This is not the correct Captio app.*）が付いている。
   外すにはログインが要るので、オーナーのログイン待ちのまま。
 
-## 5.18 Memo Inbox を awesome-no-login-web-apps へ出す準備（2026-09-23 夜・未提出）
+## 5.18 Memo Inbox を awesome-no-login-web-apps へ提出（2026-09-23 夜、オーナー了承のうえ PR #612）
 
 §5.17 のあと、登録不要のブラウザツール（Memo Inbox）に合う「受付が明記された」一覧を探した。
 
@@ -968,10 +969,16 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   * [Memo Inbox](https://simplememofast.com/memo-inbox/) - Open-source (MIT) note inbox that runs entirely in the browser, with tags, search, trash and Markdown ZIP export. Notes stay in this browser's local storage with no sync, so export a backup regularly.
   ```
 
-- **状態：未提出。**フォーク（`simplememofast/awesome-no-login-web-apps`、上流と同一で変更なし）は作ったが、
-  変更した README をフォークへ上げる操作が、実行環境の権限確認（公開の場を新しく作る操作）で止められた。
-  回避はしていない。出すかどうかはオーナーの判断待ち（オーナー判断待ち表 #14）。出さない場合、フォークは不要なので
-  オーナーが削除してよい（こちらは削除を行わない）。
+- **経緯：**フォーク（`simplememofast/awesome-no-login-web-apps`）を作ったところで、変更した README をフォークへ上げる操作が
+  実行環境の権限確認（公開の場を新しく作る操作）で止められた。回避はせず、オーナーに選択肢で確認した。
+  **2026-09-23 夜、オーナーが「出す」を選んだ**ので、同じ1行で提出した。
+- **提出：[aviaryan/awesome-no-login-web-apps#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612)**
+  （2026-09-23 21:54 JST、`Add Memo Inbox`）。差分は `1 addition & 0 deletions`。本文は PR テンプレートどおり
+  （アプリの URL・説明・3項目のチェック）。「Memo Inbox の保守者（Simple Memo Developer）である」と明記し、
+  合わなければ閉じてよいと書いた。送信前に、ログイン名（simplememofast）・タイトル・本文・提出先（上流リポジトリ）を読み戻し、
+  実名が無いことを確かめた。
+- リンクの価値：GitHub 上のリンクなので **nofollow**（PR 本文のリンクで実測。README に載っても同じ）。
+  主な効果は一覧を見る人に知ってもらうこと。**掲載の確約ではない。**
 
 同じ時間帯に確かめたこと：
 
@@ -1018,6 +1025,7 @@ GitHub の awesome 系リストは、登録フォームこそ無いが**PRとい
 | pjpoulose/awesome-second-brain | — | Note-Taking & PKM Apps | [#1](https://github.com/pjpoulose/awesome-second-brain/pull/1) | 同リポジトリ初のPR。1文・130字以内・タグ指定を遵守 |
 | jyguyomarch/awesome-productivity | — | Tools and Apps › Note Management | [#386](https://github.com/jyguyomarch/awesome-productivity/pull/386) | 節の末尾へ |
 | doanhthong/awesome-pkm | 108 | Note-taking Tools › SaaS with free plan | [#23](https://github.com/doanhthong/awesome-pkm/pull/23) | 未処理PR9件 |
+| aviaryan/awesome-no-login-web-apps（**Memo Inbox**、2026-09-23 追加） | — | Notepads and Notebooks | [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) | 登録不要の Web アプリ一覧。§5.18 |
 
 守ったこと：
 
@@ -1178,7 +1186,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | --- | --- | --- | --- |
 | 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13）→ 同日、**SourceForge は GPT に依頼**（依頼文を渡した）。**alternative.me は未登録**（オーナーの「登録済み」は AlternativeTo のことだった）→ 同日、**登録すると判断**し、GPT への依頼文を渡した（外部リンクは nofollow で価値は小さいことは説明済み） | アカウント作成は行わない | SourceForge は公開されたら §1 の行でリンク属性を実測する（毎週の掲載確認タスクにも入れた） |
 | 2 | G2・Uneed などアカウント必須の登録（~~Indie Hackers の制限解除~~ → 2026-09-23 不要と判明。`SimpleMemo` 名義の製品ページが既にある。ただし noindex、§5.15） | 同上 | 同上 |
-| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない。**2026-09-23 夜：サイトは開けるようになったが、Mac の Chrome は未ログインだった** | ログインを確認したら外し、公開ページで外れたことを確かめる |
+| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない。**2026-09-23 夜：サイトは開けるようになったが、Mac の Chrome は未ログインだった。オーナーは「あとでログインする」を選んだ** | ログインを確認したら外し、公開ページで外れたことを確かめる |
 | 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
 | 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
 | 6 | ~~受付方針の記載が無い窓口へ送るか~~ → **2026-09-23 判断：keinolog と Publickey の2件だけ**。Publickey は送信済み、keinolog はサーバー側 403 で `BLOCKED`（§5.13）。残る13件は送らない | — | — |
@@ -1189,4 +1197,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 11 | **CI の赤（`Corporate obligations`）** —— apple / google_cloud / firebase / registrar の16マス → **2026-09-23 判断：Codex に依頼C を渡す** | 条項の判定は法的判断の欄で、この作業の範囲外 | 解けたら PR #1541 をリベースで最新化して再検証する |
 | 12 | 美崎様向けオファーコードの上限（500） | ASC の操作はサインインが要る | オファーは**最初の1年間無料**・新規登録者のみ。記事などで共有されると、最大500人が1年間無料になる。意図していなければ、引き換えを確認したあと ASC の「無効化」で新しい引き換えを止められる（引き換え済みの分への影響は未確認）。止めるかどうかはオーナーが判断する（§5.14） |
 | 13 | ~~美崎様へのメールの訂正（「1か月無料・請求なし」と送ったが、実際は1年無料・自動更新は未確認）~~ → **2026-09-23 判断：訂正しない** | — | 残るリスク：自動更新する設定なら、2027年9月ごろに請求が始まる（§5.14） |
-| 14 | Memo Inbox を awesome-no-login-web-apps へ PR で出すか（§5.18） | 変更をフォークへ上げる操作が、実行環境の権限確認で止まった。回避しない | 出すと決めてもらえれば、用意した1行で PR を作り、本文を読み戻してから提出する。出さないなら、作ったフォークをオーナーが削除する |
+| 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
