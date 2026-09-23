@@ -986,6 +986,9 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   alternative.me の検索は0件。まだ公開されていない。
 - **awesome 系ミラーへの波及（§1 の「後日確認」）**：trackawesomelist.com は awesome-obsidian/awesome-obsidian を追跡しておらず 404。
   awesome.ecosyste.ms はボット確認の画面が出たので、回避せずに打ち切った。**ミラー経由のリンクは確認できていない。**
+- **OpenAlternative**（オープンソースの代替ソフト一覧。Memo Inbox の候補）：`/submit` はサインイン画面へ転送される＝アカウントが要る。
+  こちらはアカウントを作らないので見送り。出すならオーナーがアカウントを作る（§6 の候補と同じ扱い）。
+- **媒体からの返信**：21:58 JST に Gmail（support@ 宛て・直近1日）を確認。新しい返信は無し（美崎様の1件は対応済み。ほかは自動受付・ニュースレター・Product Hunt のフォーラム通知）。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
