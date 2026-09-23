@@ -46,6 +46,9 @@
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 発見 | This Week in Obsidian（週刊ニュースレター・Substack） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 #38 に掲載** | **dofollow**（本文の `<a>` に rel なし・meta robots / X-Robots-Tag なし）→ `https://simplememofast.com/en/resources/obsidian-inbox/` | https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38 | — | 2026-09-23 に発見（§5.17）。公式の提案テンプレート（z08-studio/this-week-in-obsidian#8、simplememofast 名義）経由。GitHub 側の issue とアーカイブの .md は nofollow。**2件目の提案は出さない** |
 | 発見 | Swift Package Index | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-07 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/voice-input/`（README 内。README 部分は後から読み込まれ、初回 HTML には無い） | https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic | — | 2026-09-23 に発見（§5.17）。PackageList#15105 → 自動 PR #15107 がマージ。参照ドメインとしては nofollow なので価値は小さい |
+| 追加 | iOS Dev Directory（Dev Log） | SUBMISSION | SUBMITTED | 2026-09-23 | no | pending（一覧のリンクは **dofollow**：サーバーの HTML で rel なし・meta robots なし） | https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432 | メンテナのマージ待ち（ほぼ毎日マージされている） | マージ後に https://iosdevdirectory.com/ で自社リンクを実測。フィード公開後に `feed_url` を足す PR（§5.19） |
+| 追加 | Indie Dev Monday（Look at me 欄） | SUBMISSION | SUBMITTED_EMAIL | 2026-09-23 | no | pending（号内リンクは大半が rel なし＝dofollow） | https://indiedevmonday.com/ | 採用は編集者次第。返事は来ないこともある | 新しい号（https://indiedevmonday.com/issues ）に載ったかを見る。催促しない（§5.19） |
+| 候補 | Uneed / Microlaunch / Fazier | SELF_REGISTER | 未登録（GPT 依頼文を用意） | — | — | 3つとも公開ページの「Visit website」が **dofollow**（2026-09-23 実測） | https://www.uneed.best/ ・ https://microlaunch.net/ ・ https://fazier.com/ | アカウント作成が要る（こちらでは作らない） | オーナーが GPT に依頼文を渡す（オーナー判断待ち #15） |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
 | 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
@@ -990,6 +993,31 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   こちらはアカウントを作らないので見送り。出すならオーナーがアカウントを作る（§6 の候補と同じ扱い）。
 - **媒体からの返信**：21:58 JST に Gmail（support@ 宛て・直近1日）を確認。新しい返信は無し（美崎様の1件は対応済み。ほかは自動受付・ニュースレター・Product Hunt のフォーラム通知）。
 
+## 5.19 開発者コミュニティ向けの窓口（2026-09-23 夜、オーナー承認）
+
+オーナーの「他にできること」に対して、**開発者向けの記事（Dev Log と iOS 26 SpeechAnalyzer の2本）**を足場に、
+iOS 開発者のニュースレター・一覧を調べた。受付の書き方とリンク属性を実測してから、オーナーに選択肢で確認した。
+
+| 窓口 | 受付（公式の書き方） | リンク属性（2026-09-23 実測） | 結果 |
+| --- | --- | --- | --- |
+| **iOS Dev Directory**（iOS 開発ブログの一覧） | GitHub の `blogs.json` に PR。会社のブログは「Company Blogs」へ（MAINTAINERS.md が一番多い間違いとして名指し）。**迷ったら載せる方針** | 一覧の外部リンクはサーバーの HTML で rel なし（DOM では `noopener` のみ）＝**dofollow**、meta robots なし | **提出**：[#1432](https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432)（23:24 JST）。`Simple Memo Dev Log` / 著者 `YURIKA, K.K.` / `https://simplememofast.com/en/devlog/`。6行追加 |
+| **Indie Dev Monday**（個人開発者の週刊ニュースレター） | 号内の「Look at me」欄に *Send it to lookatme@indiedevmonday.com*。最新号は #149（2026-08-17） | 号内リンクは18本中14本が rel なし＝**dofollow** | **送信**：support@ から1通（23:26 JST）。件名 *Look at me: Simple Memo adds Dialogue Memo*。送信済みで差出人・宛先を確認 |
+| iOS Dev Weekly（Dave Verwer） | 公式のリンク提案フォーム（アカウント不要、*I wrote it* を選べる） | 号内リンクは18本中16本が rel なし | **送らない**（オーナーの選択）。候補だった記事は 9/18 のカスタム語彙記事 |
+| iOS Feeds | 登録はしない。**iOS Dev Directory に載ったブログのフィードを読む**とサイトに明記 | 外部リンク 101本中80本が rel なし | フィードが要る → 下の PR #1546 |
+| SwiftLee Weekly | 受付なし。**iOS Dev Directory と iOS Feeds を巡回**すると明記 | — | 対象外（一覧経由で見つけてもらう） |
+| Fatbobman's Swift Weekly | X での連絡だけ | — | 対象外 |
+| iOS Goodies | GitHub の PR | — | 2021-11 で更新が止まっているので対象外 |
+
+- **本文の事実**：Indie Dev Monday へのメールは、§5.16 と同じく App Store の公開情報（iTunes Lookup）とサイトの定数だけで書いた
+  （1タップで自分宛てに送信、選んだフォルダ（Obsidian の vault など）へ Markdown で追記、Apple Watch、Dialogue Memo の条件、無料は1日3通・Premium $2.99/月・$29.99/年）。
+  **バージョン番号・評価・起動速度は書いていない。**iOS Dev Directory の PR 本文も、Dev Log の各記事の題名にある事柄だけを書いた。
+- **RSS フィード（オーナーの選択：こちらで PR を作る）**：[#1546](https://github.com/simplememofast/simplememo/pull/1546)。
+  `en/devlog/feed.xml`（Dev Log 5本＋SpeechAnalyzer 2本）と生成器 `scripts/generate_dev_feed.py`（`--check` / `--selftest`）、`_headers` の Content-Type。
+  HTML は変えていない。手元では main と同じ検査結果（`seo-check.js` 0件ほか8本）。**main の CI が `Corporate obligations` で赤のままなので、#1546 も止まる。**
+  main が直ったら #1546 を最新化（Update branch）→ 再検証が通れば自動マージ → 公開を確かめてから、iOS Dev Directory に `feed_url` を足す PR を出す。
+- **アカウントが要る新製品紹介サイト**：Uneed・Microlaunch・Fazier の公開ページを1件ずつ開き、「Visit website」の rel を実測した（3つとも nofollow なし、Uneed と Fazier は `index, follow`、Microlaunch は robots 指定なし）。
+  こちらはアカウントを作らないので、GPT に渡す依頼文を用意した（無料枠のみ・有料の順番飛ばしは選ばない・名乗り・CAPTCHA は人）。Peerlist と G2 は今回外した。
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1201,3 +1229,5 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 12 | 美崎様向けオファーコードの上限（500） | ASC の操作はサインインが要る | オファーは**最初の1年間無料**・新規登録者のみ。記事などで共有されると、最大500人が1年間無料になる。意図していなければ、引き換えを確認したあと ASC の「無効化」で新しい引き換えを止められる（引き換え済みの分への影響は未確認）。止めるかどうかはオーナーが判断する（§5.14） |
 | 13 | ~~美崎様へのメールの訂正（「1か月無料・請求なし」と送ったが、実際は1年無料・自動更新は未確認）~~ → **2026-09-23 判断：訂正しない** | — | 残るリスク：自動更新する設定なら、2027年9月ごろに請求が始まる（§5.14） |
 | 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
+| 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
+| 16 | main の CI（#11）が直ったあとの #1546 の最新化 | — | 直ったと分かれば、こちらで Update branch → 自動マージ → iOS Dev Directory に `feed_url` を足す PR まで進める |
