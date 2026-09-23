@@ -723,6 +723,11 @@
         "bot_protection": "reCAPTCHA v3（不可視・スコア判定）",
         "observation": "フォームの用件選択に「レビューの依頼」が明示されている公開窓口。2026-09-19 に個別本文で送信を試みたところ、Contact Form 7 が data-status=\"spam\" を返し「メッセージの送信に失敗しました。」と表示された。reCAPTCHA v3 のスコア判定による自動拒否であり、これを回避する操作は行わない。",
         "outcome": "BLOCKED"
+      },
+      "owner_handoff": {
+        "decided_at_jst": "2026-09-23",
+        "decision": "オーナーが手動で送る（2026-09-23 のオーナー回答）",
+        "note": "reCAPTCHA v3 のため自動送信は成立しない。送信用の本文（名乗り・事実を点検済み）をオーナーに渡した。送信後に日付を受け取り SUBMITTED へ更新する。"
       }
     },
     {
@@ -1554,11 +1559,11 @@
       "initial_shortlist_rank": null,
       "proposal": "デイリーノートを使わないObsidian運用",
       "action": "日付ノートを強制せず短文Inboxから必要なノートへ移す手順。相手の既存運用を変えず追加できる形にし、媒体規模ではなくテーマ一致で評価する。",
-      "status": "planned",
-      "verification": "needs_live_recheck",
+      "status": "submission_attempted_blocked",
+      "verification": "not_delivered",
       "deduplication": "pending_complete_history",
       "contact_url": null,
-      "outreach_authorized": false,
+      "outreach_authorized": true,
       "sent_at": null,
       "published_article_url": null,
       "target_link_url": null,
@@ -1567,22 +1572,27 @@
       "domain_rating": null,
       "domain_registered_at": null,
       "execution_classification": {
-        "bucket": "EDITORIAL_OUTREACH",
-        "basis": "inferred_from_action_text",
+        "bucket": "SUBMISSION",
+        "basis": "受付方針の記載が無い一般窓口のため保留していたが、2026-09-23 にオーナーが「関連の強い2件だけ送る」と判断。送信はサーバー側で拒否された。",
         "submission_route_url": null,
-        "classified_at_jst": "2026-09-19"
+        "classified_at_jst": "2026-09-19",
+        "bucket_before_send": "EDITORIAL_OUTREACH"
       },
       "submission_window": {
         "checked_at_jst": "2026-09-22",
         "url": "https://keinolog.com/お問い合わせ",
         "publicly_open": true,
         "login_required": false,
-        "bot_protection": "CAPTCHA無し",
+        "bot_protection": "reCAPTCHA v3（不可視・スコア判定）。送信時の REST API（contact-form-7 feedback）が HTTP 403",
         "observation": "前回 /contact 系が当たらなかったが、**日本語スラッグの「/お問い合わせ」にフォームがある**（氏名・メールアドレス・件名・メッセージ本文）。タスク管理・思考整理・手帳・プログラミングを扱う個人ブログで、Obsidian から WordPress へ Markdown を上げる記事もあり関連性は高い。ただし受付方針の記載が無い一般窓口のため、§5.7 の方針に従って今回は送っていない。",
-        "outcome": "WINDOW_VERIFIED",
+        "outcome": "BLOCKED",
         "rechecked_at_jst": "2026-09-22",
-        "outcome_before_recheck": "WINDOW_UNVERIFIED"
-      }
+        "outcome_before_recheck": "WINDOW_UNVERIFIED",
+        "outcome_before_send": "WINDOW_VERIFIED",
+        "attempted_at_jst": "2026-09-23",
+        "owner_decision": "2026-09-23 オーナー判断「関連の強い2件だけ送る」（keinolog と Publickey）"
+      },
+      "execution_note": "2026-09-23 Contact Form 7 から1回だけ送信を試みたが、フォームの送信先（/wp-json/contact-form-7/v1/contact-forms/2458/feedback）が HTTP 403 を返し、状態は submitting のまま完了表示は出なかった。reCAPTCHA v3 を含むサーバー側の拒否と見られる。ボット判定の回避や再送は行わない。フォーム以外の公開連絡先（メール）は見当たらない。本文は 名乗りは「シンプルメモ開発者（株式会社ユリカ）」、返信先は support@simplememofast.com。開発者個人の実名は使用していない。"
     },
     {
       "id": "JA-031",
@@ -1700,12 +1710,12 @@
       "initial_shortlist_rank": null,
       "proposal": "メモを閉じ込めない公開仕様・実装",
       "action": "保存形式・取り出し方法を明文化し再利用可能な小さなライブラリを公開。一般向けリリースではなく開発者が使える新しい公開物として情報提供する。",
-      "status": "planned",
-      "verification": "needs_live_recheck",
+      "status": "submission_sent_pending_review",
+      "verification": "listing_not_confirmed",
       "deduplication": "pending_complete_history",
       "contact_url": null,
-      "outreach_authorized": false,
-      "sent_at": null,
+      "outreach_authorized": true,
+      "sent_at": "2026-09-23",
       "published_article_url": null,
       "target_link_url": null,
       "link_rel": null,
@@ -1713,10 +1723,11 @@
       "domain_rating": null,
       "domain_registered_at": null,
       "execution_classification": {
-        "bucket": "EDITORIAL_OUTREACH",
-        "basis": "inferred_from_action_text",
+        "bucket": "SUBMISSION",
+        "basis": "about-us ページがプレスリリースの送付先（release@）を明示。受付方針の記載がある窓口だが媒体の軸がエンタープライズITのため保留していたところ、2026-09-23 にオーナーが「関連の強い2件だけ送る」と判断し、技術寄りの切り口で送信。",
         "submission_route_url": null,
-        "classified_at_jst": "2026-09-19"
+        "classified_at_jst": "2026-09-19",
+        "bucket_before_send": "EDITORIAL_OUTREACH"
       },
       "submission_window": {
         "checked_at_jst": "2026-09-19",
@@ -1725,10 +1736,18 @@
         "login_required": false,
         "bot_protection": "フォーム無し",
         "observation": "前回 404 だった /contact.html ではなく **/about-us.html に窓口がある**。全般の問い合わせは comment[at]publickey.jp、**プレスリリース送付先は release[at]publickey.jp** で「ITベンダのみなさまのプレスリリースや発表会のご案内などをお待ちしております」と明示。ただし媒体の軸はエンタープライズIT・クラウド・Web標準で、個人向けメモアプリとは距離がある。送るなら Relay API（Cloudflare Workers）側の話に寄せる必要があり、今回は送っていない。",
-        "outcome": "WINDOW_VERIFIED_EMAIL_ONLY",
+        "outcome": "SUBMITTED_EMAIL",
         "rechecked_at_jst": "2026-09-22",
-        "outcome_before_recheck": "WINDOW_UNVERIFIED"
-      }
+        "outcome_before_recheck": "WINDOW_UNVERIFIED",
+        "outcome_before_send": "WINDOW_VERIFIED_EMAIL_ONLY",
+        "sent_channel": "email",
+        "sent_to": "release@publickey.jp",
+        "sent_subject": "【情報提供】iOSメモアプリのメール配送を Cloudflare Workers で自前中継／ブラウザ完結のメモ受け箱をMITで公開（株式会社ユリカ）",
+        "sent_at_jst": "2026-09-23",
+        "sent_route": "about-us ページ記載のプレスリリース送付先",
+        "owner_decision": "2026-09-23 オーナー判断「関連の強い2件だけ送る」（keinolog と Publickey）"
+      },
+      "execution_note": "2026-09-23 メール送信、送信済みフォルダの先頭行を確認。差出人は Simple Memo <support@simplememofast.com> を明示選択し、送信直前に差出人・件名・本文（1,131字）・署名を読み戻した。個人向けアプリの小さな話題である旨を冒頭に書き、(1) メモのメール配送を Cloudflare Workers の Relay API で中継し本文を恒常保存しない設計（/devlog/relay-api-design、/privacy-architecture/）、(2) ブラウザ内で完結する Memo Inbox（MIT・2026年9月公開・GitHub 公開リポジトリ）を情報提供した。E2E暗号化ではない点も明記。名乗りは「シンプルメモ開発者（株式会社ユリカ）」、返信先は support@simplememofast.com。開発者個人の実名は使用していない。掲載の確約ではない。"
     },
     {
       "id": "JA-034",
@@ -4884,6 +4903,13 @@
       "detail": "受付内容に製品情報・プレスリリース・レビュー依頼の受付が明記されている窓口だけを選んで送った：美崎栄一郎公式サイト（JA-016）、STUDY HACKER（JA-062）、ushigyu（JA-006・メール）、エンジニアtype（JA-036）、Gadgetouch（JA-009）、男子ハック（JA-007）、ディレイマニア（JA-008）。英語圏では MakeUseOf の editorial@ が「Topic Ideas, Feedback, Corrections or Suggestions」を明記していたので、2012年記事で Captio が現行アプリとして載ったままになっている点の訂正提案として送った（候補JSONの外、台帳 §5.12）。窓口未確認の10件は実ブラウザで開き直して全件の状態を確定した。ASSET_REQUIRED の51件は、窓口の実地確認（11件）と資料の性質から制作判断を付けた。",
       "result": "送信8件はすべて完了表示（メールは送信済みフォルダ）を確認。これで候補JSON上の送信は SUBMITTED 12 / SUBMITTED_EMAIL 5（計17件）。WINDOW_UNVERIFIED は0件（NOT_AVAILABLE 3・NOT_ELIGIBLE 4・WINDOW_VERIFIED 2・WINDOW_VERIFIED_EMAIL_ONLY 1）。ASSET_REQUIRED は資料なしで送れた2件（JA-007/JA-008 は SUBMISSION へ移動）を除く49件に asset_decision を付けた：DEFER_BUILDABLE 5 / DEFER_OWNER_EVIDENCE 17 / DEFER_HIGH_COST 5 / NOT_ELIGIBLE_INHOUSE 8 / LONG_TERM_ONLY 14。",
       "caveat": "いずれも掲載の確約ではなく、PUBLISHED には上げていない。すべて identity policy に準拠（名乗り・署名は「シンプルメモ開発者／株式会社ユリカ」、返信先 support@simplememofast.com）。JA-016 は本文の全文控えを残していない。ushigyu のフォームにある「送信の前にチェックを外す」欄はボット対策なので操作せず、ページが併記するメールアドレスを使った。ディレイマニアの窓口は請負メニューを兼ねているため、有償依頼ではないと本文で明記した。"
+    },
+    {
+      "date_jst": "2026-09-23",
+      "action": "オーナー判断の反映（CI の赤は Codex、英語圏は2つだけアカウント作成、方針なし窓口は2件だけ、すまほん!! は手動）と、keinolog・Publickey への送信",
+      "detail": "AskUserQuestion でオーナーの判断を得た：(1) Corporate obligations の赤は Codex に依頼C を渡す、(2) 英語圏ディレクトリは SourceForge と alternative.me の2つだけオーナーがアカウントを作り、入力はこちらで行う、(3) 受付方針の記載が無い窓口は keinolog と Publickey の2件だけ送る、(4) すまほん!! はオーナーが手で送る。",
+      "result": "Publickey（JA-033）は release@ へメール送信（SUBMITTED_EMAIL）。keinolog（JA-030）はフォーム送信がサーバー側 403 で失敗（BLOCKED・再送しない）。すまほん!!（JA-012）は送信用本文をオーナーに渡した。候補JSON上の送信は SUBMITTED 12・SUBMITTED_EMAIL 6（計18件）。",
+      "caveat": "いずれも掲載の確約ではない。identity policy に準拠。"
     }
   ]
 }
