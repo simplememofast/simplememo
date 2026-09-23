@@ -952,6 +952,34 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
   2026-07-01 付けで利用者の否定コメント（*This is not the correct Captio app.*）が付いている。
   外すにはログインが要るので、オーナーのログイン待ちのまま。
 
+## 5.18 Memo Inbox を awesome-no-login-web-apps へ出す準備（2026-09-23 夜・未提出）
+
+§5.17 のあと、登録不要のブラウザツール（Memo Inbox）に合う「受付が明記された」一覧を探した。
+
+- **[aviaryan/awesome-no-login-web-apps](https://github.com/aviaryan/awesome-no-login-web-apps)**：ログイン不要で使える Web アプリの一覧。
+  CONTRIBUTING に追加の書き方（節の末尾に足す・長所と大きな短所を書く・文末はピリオド）があり、PR テンプレートもある。
+  2026-09-08 にメンテナが外部からの追加 PR を十数件まとめてマージしている＝**活動中で自薦を受け付けている**。
+  一方で、アプリが実際に動かない PR は理由を書いて閉じている（例：ドメインが売りに出ていた #547）。
+- 追加先は **Notepads and Notebooks** の末尾。重複なし（`memo` で PR を検索して該当なし）。公開アプリは 200 を返し、
+  読み込むスクリプトは自前の `app.*.js` と JSON-LD だけ（Google Analytics なし）であることを確かめた。
+- 用意した1行（事実は `simplememofast/memo-inbox` の README から。短所の「同期なし・バックアップが要る」も書いた）：
+
+  ```
+  * [Memo Inbox](https://simplememofast.com/memo-inbox/) - Open-source (MIT) note inbox that runs entirely in the browser, with tags, search, trash and Markdown ZIP export. Notes stay in this browser's local storage with no sync, so export a backup regularly.
+  ```
+
+- **状態：未提出。**フォーク（`simplememofast/awesome-no-login-web-apps`、上流と同一で変更なし）は作ったが、
+  変更した README をフォークへ上げる操作が、実行環境の権限確認（公開の場を新しく作る操作）で止められた。
+  回避はしていない。出すかどうかはオーナーの判断待ち（オーナー判断待ち表 #14）。出さない場合、フォークは不要なので
+  オーナーが削除してよい（こちらは削除を行わない）。
+
+同じ時間帯に確かめたこと：
+
+- **SourceForge / alternative.me（GPT に依頼中）**：20:50 JST 時点で、`/projects/memo-inbox/` と `/u/simplememofast/` は 404、
+  alternative.me の検索は0件。まだ公開されていない。
+- **awesome 系ミラーへの波及（§1 の「後日確認」）**：trackawesomelist.com は awesome-obsidian/awesome-obsidian を追跡しておらず 404。
+  awesome.ecosyste.ms はボット確認の画面が出たので、回避せずに打ち切った。**ミラー経由のリンクは確認できていない。**
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1161,3 +1189,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 11 | **CI の赤（`Corporate obligations`）** —— apple / google_cloud / firebase / registrar の16マス → **2026-09-23 判断：Codex に依頼C を渡す** | 条項の判定は法的判断の欄で、この作業の範囲外 | 解けたら PR #1541 をリベースで最新化して再検証する |
 | 12 | 美崎様向けオファーコードの上限（500） | ASC の操作はサインインが要る | オファーは**最初の1年間無料**・新規登録者のみ。記事などで共有されると、最大500人が1年間無料になる。意図していなければ、引き換えを確認したあと ASC の「無効化」で新しい引き換えを止められる（引き換え済みの分への影響は未確認）。止めるかどうかはオーナーが判断する（§5.14） |
 | 13 | ~~美崎様へのメールの訂正（「1か月無料・請求なし」と送ったが、実際は1年無料・自動更新は未確認）~~ → **2026-09-23 判断：訂正しない** | — | 残るリスク：自動更新する設定なら、2027年9月ごろに請求が始まる（§5.14） |
+| 14 | Memo Inbox を awesome-no-login-web-apps へ PR で出すか（§5.18） | 変更をフォークへ上げる操作が、実行環境の権限確認で止まった。回避しない | 出すと決めてもらえれば、用意した1行で PR を作り、本文を読み戻してから提出する。出さないなら、作ったフォークをオーナーが削除する |
