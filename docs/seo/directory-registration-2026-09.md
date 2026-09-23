@@ -1018,12 +1018,12 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - **アカウントが要る新製品紹介サイト**：Uneed・Microlaunch・Fazier の公開ページを1件ずつ開き、「Visit website」の rel を実測した（3つとも nofollow なし、Uneed と Fazier は `index, follow`、Microlaunch は robots 指定なし）。
   こちらはアカウントを作らないので、GPT に渡す依頼文を用意した（無料枠のみ・有料の順番飛ばしは選ばない・名乗り・CAPTCHA は人）。Peerlist と G2 は今回外した。
 
-## 5.20 開発記事を1本（Foundation Models）—— 下書き PR でオーナー確認待ち（2026-09-24 未明）
+## 5.20 開発記事を1本（Foundation Models）—— オーナーが公開を承認し Ready にした（2026-09-24）
 
 §5.19 のあと、オーナーが「開発記事をもう1本」を選んだ。狙いは、開発者向けの経路（iOS Dev Directory → iOS Feeds・iOS Dev Weekly・SwiftLee）に
 流せる、**実装の実体験に基づいた記事**を増やすこと。
 
-- **記事**：[#1547（draft）](https://github.com/simplememofast/simplememo/pull/1547) `/en/blog/foundation-models-choose-not-write`
+- **記事**：[#1547](https://github.com/simplememofast/simplememo/pull/1547) `/en/blog/foundation-models-choose-not-write`
   *Let the on-device model choose, not write: a voice follow-up loop with Foundation Models*。英語ブログ一覧の先頭と sitemap にも追加。
 - **事実の出どころ**：非公開の iOS リポジトリ（`simplememo-ios` main `a40b270`）の対話メモ実装
   （`DialogueMemoEngine.swift` ほか3ファイル）と、リリース・QA 文書だけ。Chrome のログイン済みセッションで読んだ（書き込みはしていない）。
@@ -1036,6 +1036,15 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
   Ready にすれば、main の CI が直ったあとの検証成功で自動マージされる（CI が赤の間は止まる）。公開日を変えるなら日付と sitemap を直す。
 - **公開後の予定**：iOS Dev Weekly のリンク提案フォームに出すか判断（前回はオーナーが見送り）。フィード PR #1546 がマージ済みなら
   `EXTRA_PAGES` にこの記事を足してフィードを作り直す。
+- **2026-09-24 07時台（JST）：オーナーが確認用 PDF を見て「このまま公開する」を選んだ。**指摘なし・本文の変更なしで Ready に切り替え、
+  PR 題名から「（下書き・オーナー確認待ち）」を外した（auto-merge は squash なので、PR 題名がそのまま main のコミット題名になる）。
+  Ready に切り替えたことで検証が走り直すが、main の CI が `Corporate obligations` で赤いので、ここでは止まる。**まだ公開されていない。**
+- **CI で走っていない検査を手元で補った**：CI は `Corporate obligations` で失敗した時点で後ろの約40本を飛ばしており、
+  sitemap の検査（`generate_sitemap.py --selftest` / `--check`）も、この PR の CI ではまだ走っていない。PR の head（`34251b6`）そのものを
+  別の作業ツリーで検査し、両方とも通った（`208 URLs`・`lastmod が内容履歴と一致`）。
+- **公開日のずれに注意**：`generate_sitemap.py` は lastmod を first-parent の**コミット日時（JST）**から出す。PR の検証はマージ用の
+  コミット、main ではマージ時の squash コミットが基準になるので、**マージが 9/25 以降にずれたら、その日付で sitemap を作り直さないと
+  検証が落ちる。**そのときは本文の `Published:` と JSON-LD の `datePublished` / `dateModified` も実際の公開日に直す（公開前の日付を残さない）。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -1230,7 +1239,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 - **`ASSET_REQUIRED` の `DEFER_BUILDABLE` 5件（記入例・運用図・テンプレート・シート）は、窓口が見つかれば工数Sで作れる。**
   送り先が無い今は作らない。ページ単体でサイトに置く価値があると判断した場合は別途。
 
-### オーナー判断待ち（2026-09-23 時点）
+### オーナー判断待ち（2026-09-24 時点）
 
 | # | 事項 | こちらでできないこと・理由 | 判断してもらえれば、こちらで進められること |
 | --- | --- | --- | --- |
@@ -1250,4 +1259,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
 | 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
 | 16 | main の CI（#11）が直ったあとの #1546 の最新化 | — | 直ったと分かれば、こちらで Update branch → 自動マージ → iOS Dev Directory に `feed_url` を足す PR まで進める |
-| 17 | 開発記事 #1547（draft）の公開可否と事実確認（§5.20） | 非公開の実装の中身を公開するかは、こちらで決めない | 確認してもらえれば、指摘を直して Ready にする。公開後に iOS Dev Weekly への提案とフィードへの追加まで進める |
+| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） |
