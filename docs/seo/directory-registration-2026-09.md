@@ -761,6 +761,65 @@ Toolfinder（有料）、ClickUp Blog・AppSumo（適合が低い）、SaaSHub�
    規約の読み直しは法的判断の欄なので、こちらでは触らず **Codex 依頼の最優先（依頼C）** にした。
    同じ形で 2026-09-30（anthropic / search_console / github）と 2026-10-07（appsflyer）にも落ちる。
 
+## 5.13 オーナー判断の反映（2026-09-23）
+
+§7 の「オーナー判断待ち」から4点を選択式で確認した。
+
+| 事項 | オーナーの判断 | こちらで実行したこと |
+| --- | --- | --- |
+| CI の赤（`Corporate obligations`） | **Codex に依頼C を渡す** | 依頼文をファイルで渡した。解けたら PR #1541 をリベースで最新化して再検証し、自動マージまで見届ける |
+| 英語圏ディレクトリのアカウント | **SourceForge と alternative.me の2つだけ作る** | アカウント作成はオーナー。入力する文面は下に用意した |
+| 受付方針の記載が無い窓口（15件） | **関連の強い2件（keinolog・Publickey）だけ送る** | Publickey は送信、keinolog は送信がサーバー側で拒否された（下記） |
+| オーナーの手作業 | **すまほん!! に手で送る** | 送信用の本文（名乗り・数値を点検済み）を渡した。送信日を受け取ったら JA-012 を更新する |
+
+AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier への寄稿、Product Hunt の下書きは選ばれなかったので**保留のまま**。
+
+### Publickey（JA-033）—— 送信済み
+
+`release@publickey.jp`（about-us ページのプレスリリース送付先）へ、差出人 `Simple Memo <support@simplememofast.com>` で送った。
+送信前に差出人・件名・本文（1,131字）・署名を読み戻した。媒体の軸（エンタープライズIT・クラウド）に合わせ、製品紹介ではなく次の2点を情報提供した。
+
+1. メモのメール配送を Cloudflare Workers の Relay API で中継し、本文は TLS で通過するだけで恒常保存もログ記録もしない設計（出典 `/devlog/relay-api-design`・`/privacy-architecture/`）。SMTP 配送なので E2E 暗号化ではない、という限界も書いた。
+2. ブラウザ内で完結する Memo Inbox（MIT、2026-09-07 公開、GitHub の公開リポジトリあり）。
+
+### keinolog（JA-030）—— `BLOCKED`
+
+フォーム（Contact Form 7・reCAPTCHA v3）から**1回だけ**送信を試みたが、送信先の REST API
+（`/wp-json/contact-form-7/v1/contact-forms/2458/feedback`）が **HTTP 403** を返し、完了表示は出なかった。
+ボット判定の回避や再送はしない。フォーム以外の公開連絡先は見当たらない。
+
+### 英語圏ディレクトリに入力する文面（アカウント作成待ち）
+
+**SourceForge —— Memo Inbox を「Import from GitHub」で登録する**（オープンソースのディレクトリなので、MIT の Memo Inbox が適合）
+
+| 項目 | 入力値 |
+| --- | --- |
+| Project name | Memo Inbox |
+| Repository | https://github.com/simplememofast/memo-inbox |
+| Homepage | https://simplememofast.com/memo-inbox/ |
+| Summary | A browser-local note inbox with search, tags, trash recovery, and Markdown export |
+| License / OS / Language | MIT / Web-based (OS independent) / JavaScript |
+| Category | Note taking |
+
+> Memo Inbox is a standalone, open-source (MIT) note inbox that runs entirely in your browser. Save short notes with an optional title and tags, search them, move them to trash and restore them, and export everything as a Markdown ZIP you can drop into an Obsidian vault or any Markdown folder. There is no account, no cloud sync, and no analytics or external scripts; notes are not sent to a server. Notes live in this browser's storage, so export a backup regularly. Made by Simple Memo Developer (YURIKA, K.K.).
+
+**alternative.me —— Simple Memo（iOS アプリ）を登録する**
+
+| 項目 | 入力値 |
+| --- | --- |
+| Name | Simple Memo |
+| Website | https://simplememofast.com/en/ |
+| App Store | https://apps.apple.com/app/id6758438948 |
+| Platforms | iPhone, iPad, Apple Watch |
+| Pricing | Freemium（Free: 3 notes/day; Premium $2.99/month or $29.99/year; no free trial） |
+| Category / tags | Note-taking, Productivity, email-yourself, quick capture |
+| Alternative to | 既存エントリを見てから付ける。**Captio は同名の経費精算アプリと取り違えやすい**（AlternativeTo で実際に起きた・§5.12）ので、email-yourself の Captio が無ければ付けない。候補は Email Me / Note To Self Mail |
+
+> Simple Memo is an iPhone app for capturing a short note and emailing it to yourself in one tap: open it, type or dictate, and send — the note lands in your own inbox. It also works from Apple Watch (voice memos are relayed via the paired iPhone) and can optionally append notes to an Obsidian vault. It is free for up to 3 notes a day; Premium is $2.99/month or $29.99/year, with no free trial. The on-device outbox is encrypted with AES-GCM, but delivery uses standard SMTP, so it is not end-to-end encrypted. Inspired by Captio's workflow; not affiliated with Captio or its developer.
+
+数値の出所は §4 と同じ（価格は 2026-09-22 にオーナー確認、`data/site-constants.json`）。**起動速度とバージョン番号は入れていない**
+（速度は測定条件の説明なしに一覧へ載せない。バージョンは日々動く）。登録後は、公開ページの `meta robots` と自社リンクの `rel` を実測してから台帳に記録する。
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -915,7 +974,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 - ~~**さくらのナレッジの著者募集が最有力。**~~ **2026-09-22 に応募メールを送信済み（§5.9）。**
   自社への言及が許容されていて資産も揃っているため、返信が来た場合の優先度は依然として最も高い。
   返信が無ければ追わない（本文にもその旨を書いてある）。
-- **送信済みの返信待ち。** 候補JSON上で SUBMITTED 12・SUBMITTED_EMAIL 5（計17件）に、英語の MakeUseOf 1件。
+- **送信済みの返信待ち。** 候補JSON上で SUBMITTED 12・SUBMITTED_EMAIL 6（計18件、2026-09-23 の Publickey を含む）に、英語の MakeUseOf 1件。
   **いずれも掲載の確約ではない。** 2026-09-23 時点で届いているのは自動受付の返信だけで、人からの返信は0件。
   掲載を確認できるまで `PUBLISHED` には上げない。週次の掲載確認タスクが Gmail とこの台帳を見て追う。
 - ~~**`llms.txt` の「Current facts」が期限切れ。**~~ **2026-09-22 に解消（§5.10）。**
@@ -956,14 +1015,14 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 
 | # | 事項 | こちらでできないこと・理由 | 判断してもらえれば、こちらで進められること |
 | --- | --- | --- | --- |
-| 1 | 英語圏ディレクトリのアカウント作成（SourceForge / alternative.me / OpenAlternative / F6S） | アカウント作成は行わない | 作成後の説明文・カテゴリ・URL入力 |
+| 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13） | アカウント作成は行わない | 入力文面は §5.13 に用意済み。作成の連絡を受けたら入力する |
 | 2 | G2・Uneed などアカウント必須の登録、Indie Hackers の制限解除 | 同上 | 同上 |
 | 3 | AlternativeTo の代替一覧から経費精算 Captio を外す | ログイン（パスワード入力）を行わない | 外した後の確認 |
-| 4 | すまほん!! へ手動送信 | reCAPTCHA は回避しない | 本文は用意済み |
+| 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
 | 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
-| 6 | keinolog / Publickey / 増井技術士事務所 など、受付方針の記載が無い窓口へ送るか（MacStories は 2026-09-06 に別経路で送信済みなので対象外） | 受付方針の記載が無い窓口には送らない方針（§5.7） | 送ると決めた窓口への送信 |
+| 6 | ~~受付方針の記載が無い窓口へ送るか~~ → **2026-09-23 判断：keinolog と Publickey の2件だけ**。Publickey は送信済み、keinolog はサーバー側 403 で `BLOCKED`（§5.13）。残る13件は送らない | — | — |
 | 7 | Zapier Blog へのゲスト寄稿 | 「AI生成の文章は不可」が条件 | 企画の骨子づくり（本文は本人） |
 | 8 | Product Hunt の未投稿下書き（投稿か削除か） | 削除は行わない | 投稿文面の見直し |
 | 9 | Gmail の既定の差出人を `support@simplememofast.com` にするか | アカウント設定の変更は行わない | — （今は毎回手で切り替えて読み戻している） |
 | 10 | Gmail に残る体裁の崩れた CoRRiENTE 宛て旧下書き1通 | 削除は行わない | — |
-| 11 | **CI の赤（`Corporate obligations`）を解くための規約の読み直し** —— apple / google_cloud / firebase / registrar の16マス | 条項の判定は法的判断の欄で、この作業の範囲外 | Codex への依頼文（依頼C）は用意済み。解けたらこのPRの検証を再実行する |
+| 11 | **CI の赤（`Corporate obligations`）** —— apple / google_cloud / firebase / registrar の16マス → **2026-09-23 判断：Codex に依頼C を渡す** | 条項の判定は法的判断の欄で、この作業の範囲外 | 解けたら PR #1541 をリベースで最新化して再検証する |
