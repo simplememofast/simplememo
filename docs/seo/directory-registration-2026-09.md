@@ -45,7 +45,8 @@
 | 既存 | Product Hunt | — | ALREADY_EXISTS | — | yes | **ugc**（`rel="noreferrer noopener ugc"`）・当該ページは `noindex, nofollow` | https://www.producthunt.com/products/simple-memo-captio-style | — | 重複ローンチを作らない。下書き1件は未投稿のまま |
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
-| 追加 | Indie Hackers Products DB | SELF_REGISTER | BLOCKED | — | — | — | https://www.indiehackers.com/products/new | アカウント `memolife23` が **"Your account cannot create or edit products"** | IH サポートに制限解除を問い合わせる（人の操作1回） |
+| 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
+| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **配信予約済み**（所有者の作業） | 2026-09-23 予約 | 2026-09-24 08:30 予定 | 未確認 | https://prtimes.jp/main/html/rd/p/000000011.000182412.html （予定URL） | — | 公開後にリンクの `rel`・`meta robots`・転載先を実測する（2026-09-24 10:30 JST に自己確認を予約済み） |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
@@ -865,6 +866,33 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 - 引き換えURL の形式は `https://apps.apple.com/redeem?ctx=offercodes&id=6758438948&code=<CODE>`。
   カスタムコードが使えるようになるまでの時間は Apple のヘルプに書かれていない（使い捨てコードは「最大1時間」）。本文では「少し時間がかかることがある」とだけ書いた。
 
+## 5.15 自分だけで進められる施策の再点検（2026-09-23 午後）
+
+オーナーの操作なしで完了できる施策が残っていないかを、もう一度洗い出した。**結論：今は残っていない。**
+先へ進むには、オーナーの操作（アカウント作成・ログイン）か、判断（受付方針が書かれていない窓口へ送るか）が要る。
+
+| 確認したもの | 結果 | 判断 |
+| --- | --- | --- |
+| 媒体からの返信（Gmail） | 人からの返信は美崎様1件だけ（§5.14）。ほかはガジェタッチ・Macお宝鑑定団・技術評論社の自動受付と、ニュースレター | 対応済み |
+| CI（`Corporate obligations`） | main は `b33946b` のまま、16マスで赤 | Codex 依頼C の待ち。PR #1541 は止まったまま |
+| SaaSHub の所有者認証（Verify） | ログインが要る（ログアウト状態） | 見送り。Simple Memo の訂正は反映済みで、認証しても増えるものが小さい |
+| Indie Hackers の製品ページ | `SimpleMemo` 名義の `/product/simple-memo` が既にある。**`noindex`**・リンクは nofollow | 数えない。§1 を更新 |
+| App Store の製品ページ | 「デベロッパWebサイト」「プライバシーポリシー」から自社へリンク済み（`nofollow noopener noreferrer`、jp・us とも） | 追加でやることは無い |
+| SourceForge / alternative.me | アカウントはまだ無い（SourceForge はログイン画面、確認メールも無い） | オーナーの作成待ち（§5.13） |
+| Ness Labs（Tools for Thought の紹介インタビュー） | partnerships ページに *We conduct sponsored interviews* とある＝**有料** | 対象外（有料掲載は買わない） |
+| iPhone Life | 「アプリの宣伝方法」ページ（/getpublicity）が消えてトップへ転送。残る窓口は寄稿者の募集だけ | 対象外 |
+| Apple World Today | *we do not accept unsolicited items* | 対象外 |
+| iDownloadBlog / 9to5Mac など | 窓口はニュースのタレコミ用アドレスだけで、アプリの紹介を受け付けるとは書いていない | §5.7 の方針で送らない（送るならオーナー判断） |
+| AppAdvice | ドメインが解決しない | 対象外 |
+| alexanderop/awesome-local-first（Memo Inbox の候補） | 作例の節に localStorage だけで動く小さなアプリも並ぶが、メンテナが「すでに多くの人に使われているものだけ」と明記 | Memo Inbox（v0.1.0）は条件を満たさないので出さない |
+| mundimark/awesome-markdown-editors | Markdown エディタの一覧。Simple Memo も Memo Inbox もエディタではない | 適合が弱いので出さない |
+| 738/awesome-apple-watch | watchOS のライブラリ・サンプルコードの一覧 | 対象外 |
+| PKM Weekly | 投稿・情報提供の受付が書かれていない | §5.7 の方針で送らない |
+| Obsidian Roundup | 休刊。ドメインは別サイト（カジノ）になっていた | 対象外 |
+
+**新たに分かったこと：**2026-09-24 08:30 に、所有者の PR TIMES リリース（「対話メモ」の提供開始）が配信予約されている（§1 に追記）。
+公開されたら、リリースページと転載先のリンク属性を実測する。**リリース本文の機能・数値は、こちらでは検証していないので、ほかの送信文に転記しない。**
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1061,7 +1089,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | # | 事項 | こちらでできないこと・理由 | 判断してもらえれば、こちらで進められること |
 | --- | --- | --- | --- |
 | 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13） | アカウント作成は行わない | 入力文面は §5.13 に用意済み。作成の連絡を受けたら入力する |
-| 2 | G2・Uneed などアカウント必須の登録、Indie Hackers の制限解除 | 同上 | 同上 |
+| 2 | G2・Uneed などアカウント必須の登録（~~Indie Hackers の制限解除~~ → 2026-09-23 不要と判明。`SimpleMemo` 名義の製品ページが既にある。ただし noindex、§5.15） | 同上 | 同上 |
 | 3 | AlternativeTo の代替一覧から経費精算 Captio を外す | ログイン（パスワード入力）を行わない | 外した後の確認 |
 | 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
 | 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
