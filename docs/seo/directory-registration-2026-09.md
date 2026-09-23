@@ -41,9 +41,11 @@
 | P0-4 | G2 | SELF_REGISTER | BLOCKED | — | — | — | https://sell.g2.com/create-a-profile | セラー登録に **LinkedIn またはビジネスメール認証**が必須。当セッションはアカウントを作成しない | 人が myG2 にビジネスメールで登録 → `/products/new` から無料プロフィール申請（審査3〜5営業日） |
 | P0-5 | Capterra | — | NOT_ELIGIBLE | — | — | — | https://www.capterra.com/legal/listing-guidelines/ | 掲載基準が「personal productivity solutions, product clones and/or personal apps」を除外 | 対象外。GetApp / Software Advice も同系列のため同じ基準とみなす |
 | P0-6 | フリーソフト100（JA-091） | SUBMISSION | SUBMITTED | 2026-09-19 | no | pending | https://freesoft-100.com/about/form_software.html | 掲載まで1〜2か月・不採用時は連絡なし | 11月頃に `freesoft-100.com` 内検索で掲載有無を確認 |
-| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要。**2026-09-23 確認：オーナーは iPhone で `SimpleMemoFast`（2026-03-26 登録）としてログイン済み**。代替一覧5件（Pensieve / Email Me App / Note To Self Mail / Captio / Note To Myself）のうち **Captio は経費精算アプリ**のまま | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新。経費精算の Captio を代替一覧から外す（オーナー判断待ち #3） |
+| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要。**2026-09-23 確認：オーナーは iPhone で `SimpleMemoFast`（2026-03-26 登録）としてログイン済み**。代替一覧5件（Pensieve / Email Me App / Note To Self Mail / Captio / Note To Myself）のうち **Captio は経費精算アプリ**のまま。**2026-09-23 夜：代替一覧の件数表示は10件（上の5件は昼の記録。増えたのか数え方の違いかは未確認）で、経費精算の Captio が先頭（3 likes）。Mac の Chrome は未ログイン**（§5.17） | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新。経費精算の Captio を代替一覧から外す（オーナー判断待ち #3） |
 | 既存 | Product Hunt | — | ALREADY_EXISTS | — | yes | **ugc**（`rel="noreferrer noopener ugc"`）・当該ページは `noindex, nofollow` | https://www.producthunt.com/products/simple-memo-captio-style | — | 重複ローンチを作らない。下書き1件は未投稿のまま |
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
+| 発見 | This Week in Obsidian（週刊ニュースレター・Substack） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 #38 に掲載** | **dofollow**（本文の `<a>` に rel なし・meta robots / X-Robots-Tag なし）→ `https://simplememofast.com/en/resources/obsidian-inbox/` | https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38 | — | 2026-09-23 に発見（§5.17）。公式の提案テンプレート（z08-studio/this-week-in-obsidian#8、simplememofast 名義）経由。GitHub 側の issue とアーカイブの .md は nofollow。**2件目の提案は出さない** |
+| 発見 | Swift Package Index | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-07 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/voice-input/`（README 内。README 部分は後から読み込まれ、初回 HTML には無い） | https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic | — | 2026-09-23 に発見（§5.17）。PackageList#15105 → 自動 PR #15107 がマージ。参照ドメインとしては nofollow なので価値は小さい |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
 | 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
@@ -78,8 +80,12 @@
 | Obsidian フォーラム | `/u/SimpleMemoFast/summary` | `noopener nofollow ugc` | 指定なし |
 | note | `/simplememo` | `noopener nofollow` | 指定なし |
 | awesome-obsidian（GitHub） | リポジトリのREADME | `nofollow`（GitHubの仕様） | — |
+| This Week in Obsidian（2026-09-23 追記） | Substack `/p/this-week-in-obsidian-38` | **なし＝dofollow**（サーバーが返す HTML で確認） | 指定なし（X-Robots-Tag も無し） |
+| Swift Package Index（2026-09-23 追記） | `/simplememofast/ios26-speechanalyzer-live-mic` | `nofollow`（README 内） | 指定なし |
 
 **現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
+> **2026-09-23 追記：** 台帳の外で 2026-09-06 に出ていた This Week in Obsidian #38（Substack）も dofollow だった（§5.17）。dofollow の確認は**2本**になった。
+
 Product Hunt のプロフィールは `rel` に nofollow が無いが、ページ自体が `noindex, nofollow` を
 返すため評価は期待しない（**ログイン状態での観測**であり、クローラ向けの応答は未確認）。
 ただし AlternativeTo と Product Hunt は実ユーザーのいる媒体なので、nofollow でも掲載価値は残す。
@@ -917,6 +923,35 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 - 送信前に、差出人 `Simple Memo <support@simplememofast.com>`・宛先1件・件名・本文を読み戻し、実名・バージョン番号が無いことを確かめた。3件とも送信済みフォルダで確認した。
 - 3媒体とも Gmail の送信済みに過去の連絡は無い（5月の1件は社内メモで無関係）。「返信不要」と書いた。**掲載の確約ではない。**
 
+## 5.17 台帳の外で出ていた掲載申請2件を発見・実測（2026-09-23 夜）
+
+週刊ニュースレター **This Week in Obsidian** の README が、情報提供を GitHub の issue テンプレートで受け付けている
+（Name / Link / Why is it useful? / 「作者か関係者か」の4欄）。Simple Memo を出す前に重複を確かめたところ、
+**同じ窓口を simplememofast 名義で 2026-09-06 に使っていて、既に掲載されていた。**この台帳には記録が無かった。
+
+そこで GitHub で `author:simplememofast -user:simplememofast`（自社リポジトリ以外で simplememofast が立てた issue / PR）を検索し、
+全件を台帳と突き合わせた。**9件のうち7件は記録済み**（§6.5 の awesome 系6件、§1 の awesome-obsidian #10）。
+**残る2件が記録漏れ**だった。同じ条件で「コメントだけした issue / PR」も検索したが0件。
+
+| 窓口 | 提出（simplememofast 名義） | 掲載 | 自社リンク | リンク属性（2026-09-23 実測） |
+| --- | --- | --- | --- | --- |
+| This Week in Obsidian（Substack） | 2026-09-06 09:06 JST、提案 issue [z08-studio/this-week-in-obsidian#8](https://github.com/z08-studio/this-week-in-obsidian/issues/8)。公式テンプレートで、「作者か関係者か」は Yes | [#38](https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38)（2026-09-08 19:29 JST 公開）の Community Discussions に `[Show]` として掲載。メンテナが掲載 URL を付けて issue を閉じた | `https://simplememofast.com/en/resources/obsidian-inbox/` | Substack 本文：サーバーが返す HTML の `<a>` に **rel なし（dofollow）**、meta robots・X-Robots-Tag なし。GitHub の issue 本文とアーカイブの .md は nofollow |
+| Swift Package Index | 2026-09-06、PackageList#15105（パッケージ追加の定型 issue。自動 PR の作成は 20:04 JST） | 自動 PR #15107 が 2026-09-07 15:14 JST にマージ。[パッケージページ](https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic)が公開中 | README 内の `https://simplememofast.com/voice-input/` | **nofollow**。README 部分は後から読み込まれ、初回 HTML には無い。meta robots なし |
+
+- **誰が出したかは、このリポジトリからは分からない。**同じ日に Codex のブランチ（`codex/add-inbox-generator`）から
+  awesome-obsidian #10 が出ているので、同じ作業の一部と見られる。ただし確認はしていない。
+- **This Week in Obsidian に、アプリ本体の2件目は出さない。**理由は3つ。
+  1. 同じ参照ドメイン（`thisweekinobsidian.substack.com`）から、すでに dofollow のリンクがある。2件目では参照ドメインが増えない。
+  2. 前回は「無料・登録不要のブラウザツールで、アプリとは独立して使える」として出して採用された。2週間あまりで同じ名義から
+     有料アプリの自薦を続けると、個人運営の媒体に宣伝と受け取られかねない。本当に伝える価値のある話題が出たときに窓口を失う。
+  3. 出し直す条件：Obsidian 利用者に直接効く変更（vault への書き込み方式など）が公開され、前回から1か月以上空いたときに1件だけ。
+- 同じ検索で、§6.5 の awesome 系6件が**すべて Open のまま、メンテナの反応が無い**（最後の動きは 2026-09-19 の提出）ことも確かめた。
+  こちらから催促はしない（毎週の掲載確認タスクで見ている）。
+- **AlternativeTo**（オーナー判断待ち #3）：2026-09-23 夜、alternativeto.net は開けるようになっていた（昼は Chrome の権限で拒否されていた）。
+  ただし Mac の Chrome は**未ログイン**。代替一覧の件数表示は10件（昼は5件と記録。増えたのか数え方の違いかは未確認）で、**経費精算の Captio が先頭**（3 likes）。そのカードには
+  2026-07-01 付けで利用者の否定コメント（*This is not the correct Captio app.*）が付いている。
+  外すにはログインが要るので、オーナーのログイン待ちのまま。
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1115,7 +1150,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | --- | --- | --- | --- |
 | 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13）→ 同日、**SourceForge は GPT に依頼**（依頼文を渡した）。**alternative.me は未登録**（オーナーの「登録済み」は AlternativeTo のことだった）→ 同日、**登録すると判断**し、GPT への依頼文を渡した（外部リンクは nofollow で価値は小さいことは説明済み） | アカウント作成は行わない | SourceForge は公開されたら §1 の行でリンク属性を実測する（毎週の掲載確認タスクにも入れた） |
 | 2 | G2・Uneed などアカウント必須の登録（~~Indie Hackers の制限解除~~ → 2026-09-23 不要と判明。`SimpleMemo` 名義の製品ページが既にある。ただし noindex、§5.15） | 同上 | 同上 |
-| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない | ログインを確認したら外し、公開ページで外れたことを確かめる |
+| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない。**2026-09-23 夜：サイトは開けるようになったが、Mac の Chrome は未ログインだった** | ログインを確認したら外し、公開ページで外れたことを確かめる |
 | 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
 | 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
 | 6 | ~~受付方針の記載が無い窓口へ送るか~~ → **2026-09-23 判断：keinolog と Publickey の2件だけ**。Publickey は送信済み、keinolog はサーバー側 403 で `BLOCKED`（§5.13）。残る13件は送らない | — | — |
