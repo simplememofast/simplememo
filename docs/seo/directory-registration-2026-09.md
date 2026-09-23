@@ -893,6 +893,28 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 **新たに分かったこと：**2026-09-24 08:30 に、所有者の PR TIMES リリース（「対話メモ」の提供開始）が配信予約されている（§1 に追記）。
 公開されたら、リリースページと転載先のリンク属性を実測する。**リリース本文の機能・数値は、こちらでは検証していないので、ほかの送信文に転記しない。**
 
+## 5.16 英語圏の Apple 系メディアへ3件送信（2026-09-23、オーナー判断）
+
+§5.15 のあと、オーナーが「英語圏メディアに数件送る」を選んだ（AskUserQuestion の回答）。
+アプリ紹介の受付が窓口に**明記されていない**所も含むので、§5.7 の方針（明記のある窓口だけ）の**例外としてオーナーが承認した**扱い。件数は3件に絞った。
+
+| 媒体 | 宛先 | 窓口の文面 | 件名 | 送信（JST） |
+| --- | --- | --- | --- | --- |
+| MacRumors | tips@macrumors.com | contact ページに *Please send any product information for consideration for coverage directly to our editorial team*（tips@ と share.php を案内）＝**製品情報の受付が明記されている** | Product info: Simple Memo adds Dialogue Memo, which asks follow-up questions using Apple Intelligence | 13:38 |
+| 9to5Mac | tips@9to5mac.com | contact ページに *For news tips, email the newsroom at tips@9to5mac.com*（ニュースのタレコミ用。アプリ紹介の受付は明記なし） | Tip: Simple Memo adds Dialogue Memo, a note that asks follow-up questions with Apple Intelligence | 13:39 |
+| iDownloadBlog | tips@idownloadblog.com | contact ページに *News tips: tips@idownloadblog.com*（同上） | Tip: iPhone capture app Simple Memo adds Dialogue Memo (Apple Intelligence) | 13:40 |
+
+- **話題は「対話メモ（Dialogue Memo）」。**事実は App Store の公開情報（iTunes Lookup の `description` と `releaseNotes`、2026-09-23 取得）だけから書いた：
+  「未完成の考えを話し、音声の短い追加質問に答えて読めるメモにする」「質問とメモの整理は iPhone 上の Apple Intelligence を使う（ストアの記載どおりと明記）」
+  「iOS 26 以降・Apple Intelligence が有効な対応 iPhone・対応言語モデルが必要」「通常の入力と音声入力はそのまま使える」。
+  PR TIMES の未公開リリース（9/24 08:30）の文面は使っていない。
+- ほかの事実：1タップで自分宛てに送信（英語サイトの表記）、Apple Watch・Siri ショートカット、Markdown で選んだフォルダ（Obsidian の vault など）へ追記、
+  無料は1日3通・Premium $2.99/月・$29.99/年・無料体験なし（`data/site-constants.json`、価格は 2026-09-22 にオーナー確認）、
+  Captio のワークフローに着想を得た独立アプリ（Captio のサービス終了は 2024年10月、captio.co の告知）、SMTP 配送なので E2E 暗号化ではない。
+- **バージョン番号と評価は書いていない。**起動速度（0.40秒）も今回は入れていない。
+- 送信前に、差出人 `Simple Memo <support@simplememofast.com>`・宛先1件・件名・本文を読み戻し、実名・バージョン番号が無いことを確かめた。3件とも送信済みフォルダで確認した。
+- 3媒体とも Gmail の送信済みに過去の連絡は無い（5月の1件は社内メモで無関係）。「返信不要」と書いた。**掲載の確約ではない。**
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1047,7 +1069,8 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 - ~~**さくらのナレッジの著者募集が最有力。**~~ **2026-09-22 に応募メールを送信済み（§5.9）。**
   自社への言及が許容されていて資産も揃っているため、返信が来た場合の優先度は依然として最も高い。
   返信が無ければ追わない（本文にもその旨を書いてある）。
-- **送信済みの返信待ち。** 候補JSON上で SUBMITTED 12・SUBMITTED_EMAIL 6（計18件、2026-09-23 の Publickey を含む）に、英語の MakeUseOf 1件。
+- **送信済みの返信待ち。** 候補JSON上で SUBMITTED 12・SUBMITTED_EMAIL 6（計18件、2026-09-23 の Publickey を含む）に、英語の MakeUseOf 1件と、
+  2026-09-23 午後に送った英語圏 Apple 系メディア3件（MacRumors / 9to5Mac / iDownloadBlog、§5.16）。
   **いずれも掲載の確約ではない。** 2026-09-23 時点で届いているのは自動受付の返信だけで、人からの返信は0件。
   掲載を確認できるまで `PUBLISHED` には上げない。週次の掲載確認タスクが Gmail とこの台帳を見て追う。
 - ~~**`llms.txt` の「Current facts」が期限切れ。**~~ **2026-09-22 に解消（§5.10）。**
