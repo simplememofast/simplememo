@@ -4,7 +4,7 @@
  *
  *   node scripts/check-store-facts.mjs --check      # CI（ネットに触らない）
  *   node scripts/check-store-facts.mjs --net        # 実物と突き合わせる
- *   node scripts/check-store-facts.mjs --net --write # 差分を台帳へ書く
+ *   node scripts/check-store-facts.mjs --net --write # 検証済みの値と確認日を台帳へ書く
  *
  * 【なぜ作るか】
  * `data/site-constants.json` の `ratingValue` / `ratingCount` は
@@ -12,9 +12,8 @@
  * `appVersion` も同じくサイトに出る。ところがどちらも
  * **人が App Store Connect を見て手で書いた値**だった。
  *
- * 台帳のメモにはこう書いてある:
- *   「NOT machine-verified: エージェントのサンドボックスはプロキシ越しで、
- *     itunes.apple.com への CONNECT が拒否されるため再確認できなかった」
+ * 過去にはエージェントの実行環境から iTunes Lookup に到達できないこともあった。
+ * 到達できても CDN の古い応答を受ける場合があるため、取得元と公開日を残す。
  *
  * つまり**古くなっても誰も気づかない。**評価の集計はGoogleのポリシー上も
  * 実体のある値であることが要る表示で、「更新を忘れていた」は理由にならない。
@@ -24,7 +23,7 @@
  *   PRのたびに外部APIを叩くと、向こうの不調でCIが赤くなり、
  *   やがて無視されるようになる（`check-benchmark` を報告のみにしたのと同じ理由）。
  * - `--net` … 実物を取りに行く。**日次のワークフローで回す。**
- *   GitHub のランナーは itunes.apple.com に到達できる（サンドボックスと違う）。
+ *   実行環境ごとに到達性や CDN の応答が異なりうる。
  *
  * 【この検査が保証しないこと】
  * iTunes Lookup API が返すのは**そのストアフロントの集計**で、
@@ -134,19 +133,84 @@ export function displayRating(raw) {
   return Number(raw.toFixed(1));
 }
 
-async function fetchStore(country = 'jp') {
-  const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${country}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+export async function fetchStore(country = 'jp', { request = fetch, nonce = Date.now() } = {}) {
+  const url = new URL('https://itunes.apple.com/lookup');
+  url.searchParams.set('id', APP_ID);
+  url.searchParams.set('country', country);
+  // On 2026-09-23, Node received 5.8.66 from an Akamai edge even with
+  // cache: no-store; a unique query key returned the current jp version 5.9.9.
+  url.searchParams.set('_', String(nonce));
+  const res = await request(url, {
+    cache: 'no-store',
+    headers: { 'Cache-Control': 'no-cache' },
+    signal: AbortSignal.timeout(20_000),
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
   const r = json?.results?.[0];
   if (!r) throw new Error('results が空 — アプリが見つからない');
+  if (typeof r.version !== 'string' || !/^\d+(?:\.\d+){1,3}$/.test(r.version)) {
+    throw new Error('公開バージョンが読めない');
+  }
+  if (!Number.isInteger(r.userRatingCount) || r.userRatingCount < 0) {
+    throw new Error('評価件数が読めない');
+  }
+  if (!r.currentVersionReleaseDate || !Number.isFinite(Date.parse(r.currentVersionReleaseDate))) {
+    throw new Error('currentVersionReleaseDate が読めない — バージョンの鮮度を確認できない');
+  }
   return {
     ratingValue: displayRating(r.averageUserRating),
     rawRatingValue: r.averageUserRating,
     ratingCount: r.userRatingCount,
     appVersion: r.version,
+    releaseDate: r.currentVersionReleaseDate,
+    country,
+    cacheStatus: res.headers.get('x-cache') ?? 'not provided',
   };
+}
+
+/** Separate jp App Store page corroboration for a Lookup response. */
+export function parseAppStoreVersion(html) {
+  const history = html.indexOf('バージョン履歴');
+  if (history < 0) return null;
+  const first = html.slice(history, history + 10_000)
+    .match(/<span[^>]*>\s*(\d+(?:\.\d+){1,3})\s*<\/span>\s*<time\b/);
+  return first?.[1] ?? null;
+}
+
+export function parseAppStoreRating(html) {
+  const script = html.match(/<script\b[^>]*\bid=["']?software-application["']?[^>]*>([\s\S]*?)<\/script>/i);
+  if (!script) return null;
+  let data;
+  try { data = JSON.parse(script[1]); } catch { return null; }
+  const rating = data?.aggregateRating;
+  if (data?.['@type'] !== 'SoftwareApplication' || !rating) return null;
+  const ratingValue = Number(rating.ratingValue);
+  const ratingCount = Number(rating.reviewCount);
+  if (!Number.isFinite(ratingValue) || ratingValue < 0 || ratingValue > 5
+    || !Number.isInteger(ratingCount) || ratingCount < 0) return null;
+  return { ratingValue, ratingCount };
+}
+
+export async function fetchAppStorePageFacts({ request = fetch } = {}) {
+  const res = await request(`https://apps.apple.com/jp/app/id${APP_ID}`, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (!res.ok) throw new Error(`App Store page HTTP ${res.status}`);
+  const html = await res.text();
+  const version = parseAppStoreVersion(html);
+  const rating = parseAppStoreRating(html);
+  if (!version) throw new Error('App Store page の現行バージョンを読めない');
+  if (!rating) throw new Error('App Store page の評価と件数を読めない');
+  return { version, ...rating, cacheStatus: res.headers.get('x-cache') ?? 'not provided' };
+}
+
+export function corroboratedFacts(lookup, page) {
+  return Boolean(page?.version
+    && lookup.appVersion === page.version
+    && lookup.ratingValue === page.ratingValue
+    && lookup.ratingCount === page.ratingCount);
 }
 
 
@@ -173,9 +237,60 @@ SCENARIOS.push(
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
+  if (process.argv.includes('--selftest')) {
+    let failed = run(SCENARIOS);
+    try {
+      const live = await fetchStore('jp', {
+        nonce: 12345,
+        request: async (url, options) => {
+          assert(url.searchParams.get('country') === 'jp', 'wrong storefront');
+          assert(url.searchParams.get('_') === '12345', 'cache-busting key missing');
+          assert(options.cache === 'no-store', 'no-store missing');
+          return {
+            ok: true,
+            headers: { get: () => 'TCP_MISS' },
+            json: async () => ({ results: [{
+              averageUserRating: 4.24,
+              userRatingCount: 25,
+              version: url.searchParams.has('_') ? '5.9.9' : '5.8.66',
+              currentVersionReleaseDate: '2026-09-22T23:13:13Z',
+            }] }),
+          };
+        },
+      });
+      assert(live.appVersion === '5.9.9', 'stale cached version accepted');
+      assert(live.releaseDate === '2026-09-22T23:13:13Z', 'release provenance lost');
+      console.log('  ok   cache-busted jp lookup retains release provenance');
+
+      const page = await fetchAppStorePageFacts({
+        request: async (url, options) => {
+          assert(url === `https://apps.apple.com/jp/app/id${APP_ID}`, 'wrong App Store page');
+          assert(options.cache === 'no-store', 'App Store page cache option missing');
+          return {
+            ok: true,
+            headers: { get: () => 'MISS' },
+            text: async () => '<script id=software-application type="application/ld+json">{"@type":"SoftwareApplication","aggregateRating":{"ratingValue":4.2,"reviewCount":25}}</script><h2>バージョン履歴</h2><span>5.9.9</span><time>9月23日</time>',
+          };
+        },
+      });
+      assert(page.version === '5.9.9' && corroboratedFacts(live, page), 'matching page rejected');
+      assert(!corroboratedFacts({ ...live, appVersion: '5.8.66' }, page),
+        'stale Lookup accepted despite current App Store page');
+      assert(!corroboratedFacts({ ...live, ratingValue: 4.1, ratingCount: 26 }, page),
+        'stale Lookup rating accepted despite current App Store page');
+      assert(parseAppStoreVersion('<h2>バージョン履歴</h2><span>旧版</span>') === null,
+        'unreadable page accepted');
+      assert(parseAppStoreRating('<script id=software-application>invalid JSON</script>') === null,
+        'unreadable rating accepted');
+      console.log('  ok   separate App Store page rejects stale version or rating');
+    } catch (e) {
+      failed += 1;
+      console.log(`  FAIL live source corroboration\n       ${e.message}`);
+    }
+    process.exit(failed === 0 ? 0 : 1);
+  }
   const doc = JSON.parse(fs.readFileSync(CONSTANTS, 'utf8'));
-  const { problems, rows } = validateOffline(doc);
+  let { problems, rows } = validateOffline(doc);
 
   console.log('App Store 由来の公開表示 — **確認していない値を出し続けない**\n');
   console.log('  「記載」はメモに書かれた日付。**機械が確認した日とは限らない** —');
@@ -187,49 +302,58 @@ if (isMain) {
   }
 
   if (process.argv.includes('--net')) {
-    console.log('\n  実物を取りに行く（GitHub のランナーからは到達できる。'
-      + 'エージェントのサンドボックスからはプロキシが CONNECT を拒否する）…');
+    console.log('\n  実物を取りに行く（環境ごとに接続可否や CDN の応答が異なりうる）…');
     let live;
+    let page;
     try {
       live = await fetchStore();
+      page = await fetchAppStorePageFacts();
     } catch (e) {
-      // **取れなかったことを「一致」と書かない。**
       console.error(`  取得できなかった: ${e.message}`);
-      console.error('  **これは「ずれていない」ではない。**取得できなかった、という結果。');
-      process.exit(process.argv.includes('--strict') ? 1 : 0);
     }
-    const drift = [];
-    if (String(doc.ratingValue) !== String(live.ratingValue)) {
-      drift.push(`ratingValue ${doc.ratingValue} → ${live.ratingValue}`);
+    if (live) {
+      console.log(`  iTunes Lookup ${live.country}（cache-busted）: v${live.appVersion} / 公開日 ${live.releaseDate} / x-cache ${live.cacheStatus}`);
+      console.log(`  評価: ${live.ratingValue} / ${live.ratingCount}件`);
     }
-    if (String(doc.ratingCount) !== String(live.ratingCount)) {
-      drift.push(`ratingCount ${doc.ratingCount} → ${live.ratingCount}`);
-    }
-    if (String(doc.appVersion) !== String(live.appVersion)) {
-      drift.push(`appVersion ${doc.appVersion} → ${live.appVersion}`);
-    }
-    console.log(`  実物: 評価 ${live.ratingValue} / ${live.ratingCount}件 / v${live.appVersion}`);
-    if (!drift.length) {
-      console.log('  **ずれなし。**');
+    if (page) console.log(`  App Store ${live.country} ページ: v${page.version} / 評価 ${page.ratingValue} / ${page.ratingCount}件 / x-cache ${page.cacheStatus}`);
+    if (!live || !page || !corroboratedFacts(live, page)) {
+      console.error('  **未検証: Lookup と App Store ページのバージョン・評価・件数が一致しないか、片方を取得できない。**');
+      console.error('  「ずれなし」とは判定せず、台帳は更新しない。');
+      if (process.argv.includes('--strict') || process.argv.includes('--write')) problems.push('ネット取得を検証できない');
     } else {
-      console.log('  ずれ:');
-      for (const d of drift) console.log(`    - ${d}`);
+      const drift = [];
+      if (String(doc.ratingValue) !== String(live.ratingValue)) {
+        drift.push(`ratingValue ${doc.ratingValue} → ${live.ratingValue}`);
+      }
+      if (String(doc.ratingCount) !== String(live.ratingCount)) {
+        drift.push(`ratingCount ${doc.ratingCount} → ${live.ratingCount}`);
+      }
+      if (String(doc.appVersion) !== String(live.appVersion)) {
+        drift.push(`appVersion ${doc.appVersion} → ${live.appVersion}`);
+      }
+      if (!drift.length) {
+        console.log('  **両取得元を確認し、台帳とのずれなし。**');
+      } else {
+        console.log('  ずれ:');
+        for (const d of drift) console.log(`    - ${d}`);
+      }
       if (process.argv.includes('--write')) {
         const today = new Date().toISOString().slice(0, 10);
         doc.ratingValue = String(live.ratingValue);
         doc.ratingCount = String(live.ratingCount);
         doc.appVersion = String(live.appVersion);
-        doc.ratingNote = `Machine-verified from iTunes Lookup (jp) on ${today}. `
+        doc.ratingNote = `Machine-verified from cache-busted iTunes Lookup (${live.country}) and corroborated on the jp App Store page on ${today}. `
           + `Raw average ${live.rawRatingValue}, ${live.ratingCount} ratings; visible ratings and JSON-LD use the same one-decimal value ${live.ratingValue}. `
           + 'Run node scripts/sync_constants.js --write after changing the ledger.';
-        doc.appVersionNote = `Machine-verified from iTunes Lookup (jp) on ${today}: public version ${live.appVersion}. `
+        doc.appVersionNote = `Machine-verified from cache-busted iTunes Lookup (${live.country}) and corroborated on the jp App Store page on ${today}: public version ${live.appVersion}, released ${live.releaseDate}. `
           + 'This is the publicly available storefront version, not a TestFlight build, a version waiting for review, or MARKETING_VERSION. '
           + 'Re-check with node scripts/check-store-facts.mjs --net --write, then sync_constants.js --write.';
         fs.writeFileSync(CONSTANTS, `${JSON.stringify(doc, null, 2)}\n`);
-        console.log('  台帳を更新した。**`node scripts/sync_constants.js --write` で'
+        problems = validateOffline(doc).problems;
+        console.log('  台帳の値と確認日を更新した。**`node scripts/sync_constants.js --write` で'
           + 'ページのJSON-LDへ反映すること。**');
       } else {
-        console.log('  --write で台帳を更新する（そのあと sync_constants.js --write）。');
+        console.log('  --write で台帳の確認日を更新できる（変更値があれば sync_constants.js --write）。');
       }
     }
   } else {
