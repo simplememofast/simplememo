@@ -459,7 +459,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "35673983920（2026-09-22 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "35803503166（2026-09-23 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -473,13 +473,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-22",
-      "last_seen_jst": "2026-09-22",
-      "closed_jst": "2026-09-22",
+      "created_jst": "2026-09-23",
+      "last_seen_jst": "2026-09-23",
+      "closed_jst": "2026-09-23",
       "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-22",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n35673983920 -> ap-20260922-actions: appended ap-20260922-actions (skipped_gate)",
-      "reopened_jst": "2026-09-22"
+      "last_run_jst": "2026-09-23",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n35803503166 -> ap-20260923-actions: appended ap-20260923-actions (skipped_gate)",
+      "reopened_jst": "2026-09-23"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -1965,7 +1965,7 @@
     },
     {
       "id": "act-orphaned-branch-Codex-routine-observations",
-      "title": "PR #1448 の反映待ち: Codex/routine-observations",
+      "title": "PR #1543 の反映待ち: Codex/routine-observations",
       "detail": "開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。",
       "source": "orphan",
       "domain": null,
@@ -1979,12 +1979,17 @@
           "branch": "Codex/routine-observations"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-18",
-      "last_seen_jst": "2026-09-18",
-      "closed_jst": "2026-09-18",
-      "evidence": "Codex/routine-observations の取り残しは解消（走査に出てこない）",
-      "reopened_jst": "2026-09-18"
+      "state": "open",
+      "created_jst": "2026-09-23",
+      "last_seen_jst": "2026-09-23",
+      "closed_jst": null,
+      "evidence": "PR #1543 へ引き継いだhead 9539ff4408e5161ed1a296fbf2bd1b48c78d62f0 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
+      "reopened_jst": "2026-09-23",
+      "pending_pr": {
+        "number": 1543,
+        "branch": "Codex/routine-observations",
+        "head_sha": "9539ff4408e5161ed1a296fbf2bd1b48c78d62f0"
+      }
     },
     {
       "id": "act-ep-ratification-2026-09",
@@ -3015,11 +3020,59 @@
           "issue": 1520
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-22",
       "last_seen_jst": "2026-09-23",
+      "closed_jst": "2026-09-23",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1520 の state=closed をGitHub APIで確認"
+    },
+    {
+      "id": "act-health-1540",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "source": "health",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "issue_closed",
+        "params": {
+          "issue": 1540
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-09-23",
+      "last_seen_jst": "2026-09-23",
+      "closed_jst": "2026-09-23",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1540 の state=closed をGitHub APIで確認"
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260923",
+      "title": "PR #1542 の反映待ち: claude/autopilot-act-20260923",
+      "detail": "開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "claude/autopilot-act-20260923"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-23",
+      "last_seen_jst": "2026-09-23",
       "closed_jst": null,
-      "evidence": "#1520 がまだ open"
+      "evidence": "PR #1542 へ引き継いだhead 339bed673b27dadb8fab8ab33f4cf89cd72e8ae4 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
+      "pending_pr": {
+        "number": 1542,
+        "branch": "claude/autopilot-act-20260923",
+        "head_sha": "339bed673b27dadb8fab8ab33f4cf89cd72e8ae4"
+      }
     }
   ],
   "escalation_review_authorization": {
