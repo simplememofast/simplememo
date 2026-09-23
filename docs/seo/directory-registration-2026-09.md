@@ -1018,6 +1018,25 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - **アカウントが要る新製品紹介サイト**：Uneed・Microlaunch・Fazier の公開ページを1件ずつ開き、「Visit website」の rel を実測した（3つとも nofollow なし、Uneed と Fazier は `index, follow`、Microlaunch は robots 指定なし）。
   こちらはアカウントを作らないので、GPT に渡す依頼文を用意した（無料枠のみ・有料の順番飛ばしは選ばない・名乗り・CAPTCHA は人）。Peerlist と G2 は今回外した。
 
+## 5.20 開発記事を1本（Foundation Models）—— 下書き PR でオーナー確認待ち（2026-09-24 未明）
+
+§5.19 のあと、オーナーが「開発記事をもう1本」を選んだ。狙いは、開発者向けの経路（iOS Dev Directory → iOS Feeds・iOS Dev Weekly・SwiftLee）に
+流せる、**実装の実体験に基づいた記事**を増やすこと。
+
+- **記事**：[#1547（draft）](https://github.com/simplememofast/simplememo/pull/1547) `/en/blog/foundation-models-choose-not-write`
+  *Let the on-device model choose, not write: a voice follow-up loop with Foundation Models*。英語ブログ一覧の先頭と sitemap にも追加。
+- **事実の出どころ**：非公開の iOS リポジトリ（`simplememo-ios` main `a40b270`）の対話メモ実装
+  （`DialogueMemoEngine.swift` ほか3ファイル）と、リリース・QA 文書だけ。Chrome のログイン済みセッションで読んだ（書き込みはしていない）。
+  主題は「モデルには `@Generable` の enum と文番号しか返させず、見える言葉はすべてコードが書く」設計と、実機テストで見つかった3件
+  （繰り返し・注釈・顔文字、言語混在で付いた前置き、Boolean の組み合わせが stop に偏った件）。
+- **書かなかったもの**：プロンプトの全文、アプリの版番号、速度・精度などの性能値。数値は実装の定数だけ（最大6問、文脈上限3,600字など）。
+  Apple の一次資料9本は、ドキュメントの JSON で実在を確かめた（存在しないパスは 404 になることも確認）。
+- **手元の検査**：main と同じ18本の検査がすべて通過（`seo-check.js` 0件）。幅390px・1280pxで横スクロールなし。確認用 PDF をオーナーに渡した。
+- **draft にした理由**：非公開の実装の中身を公開することになるので、公開の可否と事実の確認をオーナーに任せる。
+  Ready にすれば、main の CI が直ったあとの検証成功で自動マージされる（CI が赤の間は止まる）。公開日を変えるなら日付と sitemap を直す。
+- **公開後の予定**：iOS Dev Weekly のリンク提案フォームに出すか判断（前回はオーナーが見送り）。フィード PR #1546 がマージ済みなら
+  `EXTRA_PAGES` にこの記事を足してフィードを作り直す。
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1231,3 +1250,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
 | 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
 | 16 | main の CI（#11）が直ったあとの #1546 の最新化 | — | 直ったと分かれば、こちらで Update branch → 自動マージ → iOS Dev Directory に `feed_url` を足す PR まで進める |
+| 17 | 開発記事 #1547（draft）の公開可否と事実確認（§5.20） | 非公開の実装の中身を公開するかは、こちらで決めない | 確認してもらえれば、指摘を直して Ready にする。公開後に iOS Dev Weekly への提案とフィードへの追加まで進める |
