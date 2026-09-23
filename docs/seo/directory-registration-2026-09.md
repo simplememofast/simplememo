@@ -958,7 +958,7 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 
 - **[aviaryan/awesome-no-login-web-apps](https://github.com/aviaryan/awesome-no-login-web-apps)**：ログイン不要で使える Web アプリの一覧。
   CONTRIBUTING に追加の書き方（節の末尾に足す・長所と大きな短所を書く・文末はピリオド）があり、PR テンプレートもある。
-  2026-09-08 にメンテナが外部からの追加 PR を十数件まとめてマージしている＝**活動中で自薦を受け付けている**。
+  2026-09-08 にメンテナが外部からの追加 PR を**少なくとも29件**まとめてマージしている（直近50コミットの浅い clone で数えた下限）＝**活動中で自薦を受け付けている**。
   一方で、アプリが実際に動かない PR は理由を書いて閉じている（例：ドメインが売りに出ていた #547）。
 - 追加先は **Notepads and Notebooks** の末尾。重複なし（`memo` で PR を検索して該当なし）。公開アプリは 200 を返し、
   読み込むスクリプトは自前の `app.*.js` と JSON-LD だけ（Google Analytics なし）であることを確かめた。
@@ -975,7 +975,7 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 
 同じ時間帯に確かめたこと：
 
-- **SourceForge / alternative.me（GPT に依頼中）**：20:50 JST 時点で、`/projects/memo-inbox/` と `/u/simplememofast/` は 404、
+- **SourceForge / alternative.me（GPT に依頼中）**：20:50 ごろ（JST）の時点で、`/projects/memo-inbox/` と `/u/simplememofast/` は 404、
   alternative.me の検索は0件。まだ公開されていない。
 - **awesome 系ミラーへの波及（§1 の「後日確認」）**：trackawesomelist.com は awesome-obsidian/awesome-obsidian を追跡しておらず 404。
   awesome.ecosyste.ms はボット確認の画面が出たので、回避せずに打ち切った。**ミラー経由のリンクは確認できていない。**
