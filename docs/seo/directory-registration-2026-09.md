@@ -85,9 +85,11 @@
 | awesome-obsidian（GitHub） | リポジトリのREADME | `nofollow`（GitHubの仕様） | — |
 | This Week in Obsidian（2026-09-23 追記） | Substack `/p/this-week-in-obsidian-38` | **なし＝dofollow**（サーバーが返す HTML で確認） | 指定なし（X-Robots-Tag も無し） |
 | Swift Package Index（2026-09-23 追記） | `/simplememofast/ios26-speechanalyzer-live-mic` | `nofollow`（README 内） | 指定なし |
+| dev.to（2026-09-24 追記・台帳の外の既存リンク） | `/simple_memo` の記事33本のうち16本 | **22本すべて nofollow なし＝dofollow**（サーバーが返す HTML で確認） | `max-snippet:-1, …` のみ（noindex なし） |
 
 **現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
 > **2026-09-23 追記：** 台帳の外で 2026-09-06 に出ていた This Week in Obsidian #38（Substack）も dofollow だった（§5.17）。dofollow の確認は**2本**になった。
+> **2026-09-24 追記：** 台帳の外で投稿されていた dev.to（`simple_memo`、2026-05-08〜09-18）からのリンク22本も dofollow だった（§5.21）。この作業で得たリンクではないが、dofollow の参照ドメインとしては**3つ目**。
 
 Product Hunt のプロフィールは `rel` に nofollow が無いが、ページ自体が `noindex, nofollow` を
 返すため評価は期待しない（**ログイン状態での観測**であり、クローラ向けの応答は未確認）。
@@ -1038,13 +1040,45 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
   `EXTRA_PAGES` にこの記事を足してフィードを作り直す。
 - **2026-09-24 07時台（JST）：オーナーが確認用 PDF を見て「このまま公開する」を選んだ。**指摘なし・本文の変更なしで Ready に切り替え、
   PR 題名から「（下書き・オーナー確認待ち）」を外した（auto-merge は squash なので、PR 題名がそのまま main のコミット題名になる）。
-  Ready に切り替えたことで検証が走り直すが、main の CI が `Corporate obligations` で赤いので、ここでは止まる。**まだ公開されていない。**
+  Ready に切り替えたことで検証が走り直したが（run 35927524798）、失敗は `Corporate obligations` の1手順だけで、予想どおりマージされていない。
+  **まだ公開されていない。**
 - **CI で走っていない検査を手元で補った**：CI は `Corporate obligations` で失敗した時点で後ろの約40本を飛ばしており、
   sitemap の検査（`generate_sitemap.py --selftest` / `--check`）も、この PR の CI ではまだ走っていない。PR の head（`34251b6`）そのものを
   別の作業ツリーで検査し、両方とも通った（`208 URLs`・`lastmod が内容履歴と一致`）。
 - **公開日のずれに注意**：`generate_sitemap.py` は lastmod を first-parent の**コミット日時（JST）**から出す。PR の検証はマージ用の
   コミット、main ではマージ時の squash コミットが基準になるので、**マージが 9/25 以降にずれたら、その日付で sitemap を作り直さないと
   検証が落ちる。**そのときは本文の `Published:` と JSON-LD の `datePublished` / `dateModified` も実際の公開日に直す（公開前の日付を残さない）。
+
+## 5.21 公開前の点検、台帳の外の既存リンク、窓口の追加調査（2026-09-24 朝）
+
+- **CI が飛ばした検査を手元で実行した（#1547・#1546）**：CI は `Corporate obligations`（139手順のうち98番目）で失敗した時点で、後ろの41本を飛ばしている。
+  PR の head（#1547 `34251b6`・#1546 `dd4f76d`）と main（`b33946b`）で、その41本を同じ手順で走らせた。
+  **40本は3つとも通過し、残る1本（`Autopilot page vs ledger`）は3つとも同じ内容で失敗した。**
+  失敗は `/autopilot/` の自律スコア4項目（合計・vdc・umr・tuc）で、ページが 2026-09-23 時点の値のまま JST の日付が変わったため
+  （CLAUDE.md「/autopilot/ の自律スコアは日付で動く」と同じ形）。main で時計だけを 9/23 12時（JST）にすると不一致0件、9/24 12時にすると4件で、
+  **日付だけが原因**と確かめた。記事・フィードの変更とは関係がない。
+  → **`Corporate obligations` が直っても、それだけでは main は緑にならない。**`/autopilot/` を書き換える #1548（`Codex/decision-observe-*`）か
+  日次同期が main に入れば解ける見込み（未確認）。
+- **`Corporate obligations` の現状**：Codex の [#1544](https://github.com/simplememofast/simplememo/pull/1544)（draft）の本文によると、規約台帳の16項目は
+  **人が条項を確認し終えるまで失敗が続く**（#1544 はその確認を代わりにしないので draft のまま）。
+  つまり #1541・#1546・#1547 の自動マージは、オーナー側の規約確認が終わるまで止まる。
+- **台帳の外の既存リンク（dev.to）**：`dev.to/simple_memo` の記事33本（2026-05-08〜09-18）のうち16本に、サイトへのリンクが計22本ある。
+  サーバーが返す HTML で**22本とも nofollow なし**、ページの robots は `max-snippet:-1, …` だけで noindex は無い。
+  リンク先は `/`（7本）・`/obsidian/`（4本）・SpeechAnalyzer の2記事（各4本。この2記事は dev.to 側の正規 URL もサイトを指す）・
+  `/en/obsidian/`・`/voice-input/`・`/captio-alternative/`（各1本）。**この投稿はこの作業で行ったものではない**（投稿の運用は別にある）。
+- **SourceForge**：2026-09-23 23:53 に support@ 宛てで「Confirm your SourceForge account」が届いている
+  （ユーザー名 `simplememofast`、名前 `AI ATAKA`。名乗りは規則どおり）。有効化のリンクを押すのはアカウント作成の一部なので、こちらでは押さない
+  （依頼文でもオーナーの作業にしてある）。メールには「ニュースレターの購読もあわせて確認」とあるので、有効化のあとで購読がオフかを確かめる。
+- **開発者向けの窓口を追加で調べた（受付の書き方を確認）**：
+
+  | 窓口 | 結果 |
+  | --- | --- |
+  | Mobile Dev Weekly | ドメインの登録が切れている（2026-09-24、「registration has expired」の表示）→ 対象外 |
+  | Those Who Swift（Substack） | about ページに受付の記載が無い（連絡先は LinkedIn / X だけ）→ 明示の受付が無いので対象外 |
+  | awesome-core-ai（GitHub） | 対象は iOS 27 の Core AI（Core ML の後継）に限られる。Foundation Models / SpeechAnalyzer の記事は枠の外 → 対象外 |
+
+- **掲載の確認（07時台）**：iOS Dev Directory #1432・awesome-no-login-web-apps #612・awesome 系6本（#144 / #83 / #135 / #1 / #386 / #23）は
+  すべて open でコメントなし。媒体からの返信も無い（support@ 宛ては自動応答と配信メールだけ）。AlternativeTo は Chrome が未ログインのまま（判断待ち #3）。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
