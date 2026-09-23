@@ -41,11 +41,13 @@
 | P0-4 | G2 | SELF_REGISTER | BLOCKED | — | — | — | https://sell.g2.com/create-a-profile | セラー登録に **LinkedIn またはビジネスメール認証**が必須。当セッションはアカウントを作成しない | 人が myG2 にビジネスメールで登録 → `/products/new` から無料プロフィール申請（審査3〜5営業日） |
 | P0-5 | Capterra | — | NOT_ELIGIBLE | — | — | — | https://www.capterra.com/legal/listing-guidelines/ | 掲載基準が「personal productivity solutions, product clones and/or personal apps」を除外 | 対象外。GetApp / Software Advice も同系列のため同じ基準とみなす |
 | P0-6 | フリーソフト100（JA-091） | SUBMISSION | SUBMITTED | 2026-09-19 | no | pending | https://freesoft-100.com/about/form_software.html | 掲載まで1〜2か月・不採用時は連絡なし | 11月頃に `freesoft-100.com` 内検索で掲載有無を確認 |
-| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要 | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新 |
+| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要。**2026-09-23 確認：オーナーは iPhone で `SimpleMemoFast`（2026-03-26 登録）としてログイン済み**。代替一覧5件（Pensieve / Email Me App / Note To Self Mail / Captio / Note To Myself）のうち **Captio は経費精算アプリ**のまま | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新。経費精算の Captio を代替一覧から外す（オーナー判断待ち #3） |
 | 既存 | Product Hunt | — | ALREADY_EXISTS | — | yes | **ugc**（`rel="noreferrer noopener ugc"`）・当該ページは `noindex, nofollow` | https://www.producthunt.com/products/simple-memo-captio-style | — | 重複ローンチを作らない。下書き1件は未投稿のまま |
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
+| 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
+| 追加 | SourceForge（Memo Inbox） | SELF_REGISTER | **外部エージェントに依頼中**（2026-09-23、オーナーが GPT に依頼） | — | — | — | https://sourceforge.net/projects/memo-inbox/ （予定。取れなければ `memoinbox` など） | アカウント作成はこちらでは行わない。依頼文は §5.13 の入力値に、名乗り・有料不可・CAPTCHA は人・GitHub 連携（OAuth）は使わない、を加えたもの | 報告を受けたら公開ページの `rel`・`meta robots` を実測（`curl` は 403 になるのでブラウザで見る） |
 | 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **配信予約済み**（所有者の作業） | 2026-09-23 予約 | 2026-09-24 08:30 予定 | 未確認 | https://prtimes.jp/main/html/rd/p/000000011.000182412.html （予定URL） | — | 公開後にリンクの `rel`・`meta robots`・転載先を実測する（2026-09-24 10:30 JST に自己確認を予約済み） |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
@@ -1111,9 +1113,9 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 
 | # | 事項 | こちらでできないこと・理由 | 判断してもらえれば、こちらで進められること |
 | --- | --- | --- | --- |
-| 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13） | アカウント作成は行わない | 入力文面は §5.13 に用意済み。作成の連絡を受けたら入力する |
+| 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13）→ 同日、**SourceForge は GPT に依頼**（依頼文を渡した）。**alternative.me は未登録**（オーナーの「登録済み」は AlternativeTo のことだった）→ 同日、**登録すると判断**し、GPT への依頼文を渡した（外部リンクは nofollow で価値は小さいことは説明済み） | アカウント作成は行わない | SourceForge は公開されたら §1 の行でリンク属性を実測する（毎週の掲載確認タスクにも入れた） |
 | 2 | G2・Uneed などアカウント必須の登録（~~Indie Hackers の制限解除~~ → 2026-09-23 不要と判明。`SimpleMemo` 名義の製品ページが既にある。ただし noindex、§5.15） | 同上 | 同上 |
-| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す | ログイン（パスワード入力）を行わない | 外した後の確認 |
+| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない | ログインを確認したら外し、公開ページで外れたことを確かめる |
 | 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
 | 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
 | 6 | ~~受付方針の記載が無い窓口へ送るか~~ → **2026-09-23 判断：keinolog と Publickey の2件だけ**。Publickey は送信済み、keinolog はサーバー側 403 で `BLOCKED`（§5.13）。残る13件は送らない | — | — |
