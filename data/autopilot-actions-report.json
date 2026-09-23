@@ -2,13 +2,13 @@
   "as_of_jst": "2026-09-23",
   "routine_snapshot_sha256": "2d0433bcb24c59050620e2ad445fcac8510ec0a565e64fcee751720ff491d0e9",
   "viewport_measurement": {
-    "main_sha": "a40f0f03261e23e5d07fa69f688458cb1c0b790d",
-    "head_sha": "7d6b0e2035b98884ef13d3bbca3987bcfe2aeb15",
-    "run_id": 35788911804,
+    "main_sha": "b33946b60c802b179b69878965a1822417ddb4a5",
+    "head_sha": "f2d8e0238ea2a49dd20eea2f9a4a71c10f57f623",
+    "run_id": 35798226645,
     "attempt": 1,
-    "started_at": "2026-09-22T21:49:38Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/35788911804/attempts/1",
-    "job_id": 106952414952,
+    "started_at": "2026-09-22T23:36:30Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/35798226645/attempts/1",
+    "job_id": 106982379409,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -44,6 +44,11 @@
   "oldest_open_days": 3,
   "acknowledged": 7,
   "closed_today": [
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
+    },
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
@@ -98,6 +103,11 @@
       "id": "act-selfheal-ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
       "title": "未修理の故障: ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（usage_limit）— セッション側に打つ手が無い種別",
       "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし"
+    },
+    {
+      "id": "act-health-1520",
+      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1520 の state=closed をGitHub APIで確認"
     }
   ],
   "human": [
@@ -109,16 +119,17 @@
       "why": "修理の上限に達した故障は人が原因を見るまで自動で触らない（policy.ai_may_resume:false）",
       "evidence": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9 は未修理のまま（repair_of で名指しされていない）",
       "not_before_jst": null
+    },
+    {
+      "id": "act-health-1540",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "#1540 がまだ open",
+      "not_before_jst": null
     }
   ],
   "ai": [
-    {
-      "id": "act-health-1520",
-      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "age_days": 1,
-      "auto": null,
-      "evidence": "#1520 がまだ open"
-    },
     {
       "id": "act-route-silent-actions",
       "title": "actions が 4日ぶん出荷していない（2026-09-20〜2026-09-23・最後の出荷 2026-09-19）",
@@ -130,10 +141,10 @@
   ],
   "executed": [
     {
-      "handler": "reconcile-codex-runs",
+      "handler": "reconcile-runs",
       "ok": true,
       "changed": 1,
-      "log": "Codex original outcomes appended: 1; causes classified: 0; shipments not inferred"
+      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n35803503166 -> ap-20260923-actions: appended ap-20260923-actions (skipped_gate)"
     }
   ]
 }
