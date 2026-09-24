@@ -166,6 +166,14 @@ export function score(record) {
     // 採点し直されなかった。**85点は配信されなかった見出しの点だった。**
     // 散文（追記D-4・レコードの $comment）は「見出し確定稿でもう一度回す」と
     // 書いていたが、**散文は手を挙げない。**
+    // **何を採点したかが書かれていない。**PR⑥ の穴は「いつ」だけでなく「何を」でもあった。
+    // scored_at を直しても、採点対象が分からなければ次のセッションは検算できない。
+    if (!record.d_score_pre?.headline) {
+      problems.push(
+        'd_score_pre.headline が無い — **何を採点したのかが台帳から読めない。**'
+        + '配信される見出しそのものを書くこと（PR⑥ は採点した見出しと配信した見出しが別物だった）',
+      );
+    }
     if (scoredBefore(record)) {
       problems.push(
         `採点日 ${record.d_score_pre.scored_at} が配信日 ${record.started_at} より前 — `
@@ -315,6 +323,7 @@ const SCENARIOS = [
     for (const [k, max] of AXES) pre[k] = max;
     pre.total = AXES.reduce((a, [, max]) => a + max, 0);
     pre.scored_at = '2026-09-03';
+    pre.headline = '採点対象の見出し';
     pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
     const r = score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre });
     if (r.problems.length) throw new Error(r.problems.join(' / '));
@@ -324,6 +333,7 @@ const SCENARIOS = [
     for (const [k, max] of AXES) pre[k] = max;
     pre.total = AXES.reduce((a, [, max]) => a + max, 0);
     pre.scored_at = '2026-08-25';
+    pre.headline = '採点対象の見出し';
     pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
     if (score({ status: 'running', started_at: null, d_score_pre: pre }).problems.length) {
       throw new Error('started_at が null なら判定しない');
@@ -346,7 +356,8 @@ const SCENARIOS = [
     // PR⑥ の形そのもの。45点・S2=3・boarded:false。**これで赤になると CI が二度と緑に戻らない。**
     const pre = { S1_novelty: 25, S2_entity_reach: 3, S3_concrete_nouns: 0,
       S4_transformation: 5, S5_timing: 3, S6_news_verb: 4, S7_launch_design: 5, total: 45,
-      scored_at: '2026-09-24', gates: Object.fromEntries(GATES.map(([k]) => [k, true])) };
+      scored_at: '2026-09-24', headline: '採点対象の見出し',
+      gates: Object.fromEntries(GATES.map(([k]) => [k, true])) };
     const r = score({ status: 'evaluated', started_at: '2026-09-03', d_score_pre: pre });
     if (r.problems.length) throw new Error(r.problems.join(' / '));
   }],
@@ -356,6 +367,17 @@ const SCENARIOS = [
       scored_at: '2026-09-24', gates: Object.fromEntries(GATES.map(([k]) => [k, null])) };
     const r = score({ status: 'evaluated', started_at: '2026-09-03', d_score_pre: pre });
     if (!r.problems.some((p) => p.includes('未判定のゲート'))) throw new Error('ゲート未判定は evaluated でも落とす');
+  }],
+  ['**採点対象の見出しが無ければ落とす**（PR⑥ の穴は「いつ」だけでなく「何を」でもあった）', () => {
+    const pre = {};
+    for (const [k, max] of AXES) pre[k] = max;
+    pre.total = AXES.reduce((a, [, max]) => a + max, 0);
+    pre.scored_at = '2026-09-03';
+    pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
+    const r = score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre });
+    if (!r.problems.some((p) => p.includes('何を採点したのか'))) {
+      throw new Error(`見出しが無ければ落とすべき: ${r.problems.join(' / ') || '(problem 無し)'}`);
+    }
   }],
   ['配信していないレコードには当てない（planned は見出しがまだ無い）', () => {
     const pre = {};
@@ -435,7 +457,10 @@ if (isMain) {
     }
     // **採点が配信物に当たっているか。**PR⑥ は 08-25 の採点のまま 09-03 に
     // 別の見出しで配信され、台帳の85点はどこにも存在しない見出しの点になった。
-    // 採点日 < 配信日 は score() が problems に出す（2026-09-24 に報告だけから格上げ）。
+    // 採点日 < 配信日 と headline の欠落は score() が problems に出す（2026-09-24）。
+    if (r.d_score_pre?.headline) {
+      console.log(`   採点対象: ${r.d_score_pre.headline}`);
+    }
 
     if (s.problems.length) {
       bad++;
