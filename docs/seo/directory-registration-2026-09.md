@@ -53,7 +53,7 @@
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
 | 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
 | 追加 | SourceForge（Memo Inbox） | SELF_REGISTER | **外部エージェントに依頼中**（2026-09-23、オーナーが GPT に依頼） | — | — | — | https://sourceforge.net/projects/memo-inbox/ （予定。取れなければ `memoinbox` など） | アカウント作成はこちらでは行わない。依頼文は §5.13 の入力値に、名乗り・有料不可・CAPTCHA は人・GitHub 連携（OAuth）は使わない、を加えたもの | 報告を受けたら公開ページの `rel`・`meta robots` を実測（`curl` は 403 になるのでブラウザで見る） |
-| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **配信予約済み**（所有者の作業） | 2026-09-23 予約 | 2026-09-24 08:30 予定 | 未確認 | https://prtimes.jp/main/html/rd/p/000000011.000182412.html （予定URL） | — | 公開後にリンクの `rel`・`meta robots`・転載先を実測する（2026-09-24 10:30 JST に自己確認を予約済み） |
+| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
@@ -905,6 +905,22 @@ AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier 
 
 **新たに分かったこと：**2026-09-24 08:30 に、所有者の PR TIMES リリース（「対話メモ」の提供開始）が配信予約されている（§1 に追記）。
 公開されたら、リリースページと転載先のリンク属性を実測する。**リリース本文の機能・数値は、こちらでは検証していないので、ほかの送信文に転記しない。**
+
+> **2026-09-24 追記（10:30 JST の自己確認）：**リリースは **09:12 に公開**されていた（ページの表示。予約は 08:30）。
+> リリースページのサイトへのリンク5本は**すべて nofollow**（本文4本・会社概要1本）、ページは `index,follow`（§1 の PR TIMES 行）。
+> **転載先はまだ見つからない**：Google の過去24時間の検索（`"対話メモ" シンプルメモ`）では、リリースページと PR TIMES 公式の X（@PRTIMES_TECH / @PRTIMES_STUP）の投稿だけ。
+> 時事ドットコム（`/jc/article?k=000000011.000182412&g=prt`）とエキサイト（`/news/article/Prtimes_2026-09-24-182412-11/`）は URL の型で直接開いたが、どちらも 404。
+> CLASSY の PR TIMES 一覧は先頭がまだ 9/23 の分で、今日のリリースは未取り込み。
+> **参考（過去のリリースの転載先を実測）**：
+>
+> | 転載先（過去のリリース） | サイトへのリンク | ページの robots |
+> | --- | --- | --- |
+> | CLASSY（`/prtimes/item-110367/`、Obsidian 連携のリリース） | 5本すべて `nofollow ugc noopener` | `max-image-preview:large`（index） |
+> | ウレぴあ総研（`/articles/-/3407166`、Siri 送信のリリース） | サーバーが返す HTML にリンクなし | `max-image-preview:large` |
+> | BCN＋R（`/news/detail/20260818_652609.html`、同じリリース） | **1本、`rel="noopener"` のみ＝dofollow** | `INDEX,FOLLOW` |
+>
+> BCN＋R は前回のリリースを当日のうちに記事にしていた。今回も載れば dofollow のリンクが1本増える見込み（載るかどうかは先方次第）。
+> 夜の見回り（`trig_01RuicHFnFnh2LgcAcAx7FTE`）で転載先をもう一度探す。**リリース本文の機能・数値はほかの送信文に転記しない**方針は変えない。
 
 ## 5.16 英語圏の Apple 系メディアへ3件送信（2026-09-23、オーナー判断）
 
