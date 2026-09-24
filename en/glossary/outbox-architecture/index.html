@@ -230,7 +230,7 @@
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/glossary/outbox-architecture/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What is the Outbox architecture pattern?","acceptedAnswer":{"@type":"Answer","text":"A design pattern that stores messages in a local queue and automatically sends them when connectivity is available. It ensures no data loss during network failures and guarantees delivery upon reconnection."}},{"@type":"Question","name":"How does Simple Memo's Outbox work?","acceptedAnswer":{"@type":"Answer","text":"When a memo is sent without connectivity, it is AES-256-GCM encrypted and saved to the Outbox. iOS background tasks detect when connectivity returns, then memos are decrypted, sent via Cloudflare Workers + Resend API, and deleted from the Outbox upon success."}},{"@type":"Question","name":"Are memos in the Outbox secure?","acceptedAnswer":{"@type":"Answer","text":"The Outbox stored on your device is encrypted with AES-256-GCM. Its key is stored in iOS Keychain and read by the app for encryption and decryption. The key is configured not to migrate to another device. Email delivery is not end-to-end encrypted. Read the backup and key management details."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/glossary/outbox-architecture/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What is the Outbox architecture pattern?","acceptedAnswer":{"@type":"Answer","text":"A design pattern that stores messages in a local queue and automatically sends them when connectivity is available. It keeps messages through network failures and sends them when the connection returns."}},{"@type":"Question","name":"How does Simple Memo's Outbox work?","acceptedAnswer":{"@type":"Answer","text":"When a memo is sent without connectivity, it is AES-256-GCM encrypted and saved to the Outbox. iOS background tasks detect when connectivity returns, then memos are decrypted, sent via Cloudflare Workers + Resend API, and deleted from the Outbox upon success."}},{"@type":"Question","name":"Are memos in the Outbox secure?","acceptedAnswer":{"@type":"Answer","text":"The Outbox stored on your device is encrypted with AES-256-GCM. Its key is stored in iOS Keychain and read by the app for encryption and decryption. The key is configured not to migrate to another device. Email delivery is not end-to-end encrypted. Read the backup and key management details."}}]}</script>
 </head>
 <body>
 <!-- Global Navigation -->
@@ -266,7 +266,7 @@
 <h1 class="lp-hero__title"><span lang="en">What is Outbox Architecture?</span></h1>
 <p class="lp-hero__sub">
 
-<span lang="en">Outbox Architecture (Outbox Pattern) is a design pattern that queues messages locally and automatically sends them when network connectivity is restored. In Simple Memo, this ensures memos are never lost — even in subways, airplanes, or any offline environment.</span>
+<span lang="en">Outbox Architecture (Outbox Pattern) is a design pattern that queues messages locally and automatically sends them when network connectivity is restored. In Simple Memo, this keeps memos on the device until they can be sent — even in subways, airplanes, or any offline environment.</span>
 </p>
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
 
@@ -276,14 +276,14 @@
 
 <div class="definition-block" lang="en">
 <div class="definition-block__label">Definition</div>
-<p><strong>Outbox Architecture</strong> is a message delivery guarantee pattern used in distributed systems. The sender first persists messages in a local Outbox, and a background process monitors the Outbox to send messages when network connectivity is available. After confirming successful delivery, messages are removed from the Outbox. This prevents both data loss during network failures and duplicate sends. In mobile apps, it forms the foundation of offline-first design.</p>
+<p><strong>Outbox Architecture</strong> is a reliable-messaging pattern used in distributed systems. The sender first persists messages in a local Outbox, and a background process monitors the Outbox to send messages when network connectivity is available. After confirming successful delivery, messages are removed from the Outbox. This prevents both data loss during network failures and duplicate sends. In mobile apps, it forms the foundation of offline-first design.</p>
 </div>
 <section class="lp-section">
 <h2 class="lp-section__title"><span lang="en">Three Components of the Outbox Pattern</span></h2>
 <div class="reason-cards">
 <div class="reason-card"><div class="reason-card__title"><span lang="en">Local Persistence</span></div><div class="reason-card__desc"><span lang="en">Memos are first saved to on-device storage regardless of network state, so user actions complete instantly. Simple Memo encrypts stored memos with AES-256-GCM.</span></div></div>
 <div class="reason-card"><div class="reason-card__title"><span lang="en">Background Monitoring</span></div><div class="reason-card__desc"><span lang="en">iOS background tasks and NWPathMonitor (network state monitoring API) automatically detect connectivity restoration. Monitoring continues at the OS level even when the app is closed.</span></div></div>
-<div class="reason-card"><div class="reason-card__title"><span lang="en">Confirmed Deletion</span></div><div class="reason-card__desc"><span lang="en">Outbox data is deleted only after receiving a successful delivery response from Cloudflare Workers + Resend API. On API errors, the system retries — memos are never lost.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span lang="en">Confirmed Deletion</span></div><div class="reason-card__desc"><span lang="en">Outbox data is deleted only after receiving a successful delivery response from Cloudflare Workers + Resend API. On API errors, the system retries instead of dropping the memo.</span></div></div>
 </div>
 </section>
 <section class="lp-section">
@@ -311,7 +311,7 @@
 <h2 class="lp-section__title"><span lang="en">FAQ: Outbox Architecture</span></h2>
 
 <div lang="en">
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the Outbox architecture pattern?</summary><div class="faq-answer"><p>A design pattern that stores messages in a local queue and automatically sends them when connectivity is available. It ensures no data loss during network failures and guarantees delivery upon reconnection.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the Outbox architecture pattern?</summary><div class="faq-answer"><p>A design pattern that stores messages in a local queue and automatically sends them when connectivity is available. It keeps messages through network failures and sends them when the connection returns.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Simple Memo's Outbox work?</summary><div class="faq-answer"><p>When a memo is sent without connectivity, it is AES-256-GCM encrypted and saved to the Outbox. iOS background tasks detect when connectivity returns, then memos are decrypted, sent via Cloudflare Workers + Resend API, and deleted from the Outbox upon success.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are memos in the Outbox secure?</summary><div class="faq-answer"><p>The Outbox stored on your device is encrypted with AES-256-GCM. Its key is stored in iOS Keychain and read by the app for encryption and decryption. The key is configured not to migrate to another device. Email delivery is not end-to-end encrypted. Read the <a href="/en/privacy">backup and key management details</a>.</p></div></details></div>
 </div>
