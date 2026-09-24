@@ -26,13 +26,13 @@
     });
   </script>
 <title>Relay API Design: Building Email Infrastructure on Cloudflare Workers</title>
-<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." name="description"/>
+<meta content="How Simple Memo sends email without mailbox OAuth: the iOS app uses Cloudflare Workers and Resend, with address verification and rate limits." name="description"/>
 <meta content="#070b14" name="theme-color"/>
 <!-- SEO keywords targeting -->
 <link href="https://analytics.ahrefs.com" rel="preconnect"/>
 <!-- OGP -->
 <meta content="Relay API Design: Building Email Infrastructure on Cloudflare Workers" property="og:title"/>
-<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." property="og:description"/>
+<meta content="How Simple Memo sends email without mailbox OAuth: the iOS app uses Cloudflare Workers and Resend, with address verification and rate limits." property="og:description"/>
 <meta content="article" property="og:type"/>
 <meta content="2026-02-13T00:00:00+09:00" property="article:published_time"/>
 <meta content="https://simplememofast.com/en/devlog/relay-api-design" property="og:url"/>
@@ -46,7 +46,7 @@
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="@simplememofast" name="twitter:site"/>
 <meta content="Relay API Design: Building Email Infrastructure on Cloudflare Workers" name="twitter:title"/>
-<meta content="Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API." name="twitter:description"/>
+<meta content="How Simple Memo sends email without mailbox OAuth: the iOS app uses Cloudflare Workers and Resend, with address verification and rate limits." name="twitter:description"/>
 <meta content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png" name="twitter:image"/>
 
 <!-- Favicon -->
@@ -56,7 +56,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: BlogPosting -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/relay-api-design#article","headline":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","description":"Breaking free from external email API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.","url":"https://simplememofast.com/en/devlog/relay-api-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/relay-api-design#article","headline":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","description":"Sending without mailbox OAuth. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.","url":"https://simplememofast.com/en/devlog/relay-api-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage"}}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Relay API Design: Building Email Infrastructure on Cloudflare Workers","item":"https://simplememofast.com/en/devlog/relay-api-design"}]}</script>
 <!-- JSON-LD: Speakable (AIO / Voice Search) -->

@@ -241,8 +241,19 @@ test('importing the legacy validator is silent and does not execute its CLI self
   const out=execFileSync(process.execPath,['--input-type=module','-e',"import './growth/scripts/check-mentions.mjs'; console.log('imported');",'--','--selftest'],{encoding:'utf8'});
   assert.equal(out.trim(),'imported');
 });
+// **本物の観測を読むテストは、時計も本物の観測に合わせる。**
+// [2026-09-24] ここは固定の now（2026-09-14）で本物の growth/data/mentions/ を読んでいた。
+// companyMentions() は now より後の日付を future observation として弾くので、
+// **9/14 より後のスナップショットが1件入った時点でこのテストが落ちる**（#1552 の 9/24 分で実測）。
+// 検査（future observation）は緩めず、テスト側の時計を最新の観測の日付に合わせる。
+function realObservationNow() {
+  const directory=path.join(path.dirname(new URL(import.meta.url).pathname),'../data/mentions');
+  const newest=fs.readdirSync(directory).filter(f=>/^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort().at(-1);
+  assert.ok(newest,'no real mention snapshot');
+  return new Date(`${newest.slice(0,10)}T05:00:00Z`);
+}
 test('real existing observation feeds both status and selector while unknown source claims stay unknown',t=>{
-  const f=fixture(t),o=observe({stateRoot:f.stateRoot,now});
+  const f=fixture(t),o=observe({stateRoot:f.stateRoot,now:realObservationNow()});
   assert.equal(o.growth.mentions.status,'ready');assert.equal(o.growth.mentions.evidence.fixed_query_count,6);
   assert.ok(opportunities(o).some(c=>c.kind==='review_mention_observation' || c.mention_context));
   assert.equal(compactGrowth(o).mentions.evidence.sha256,o.growth.mentions.evidence.sha256);

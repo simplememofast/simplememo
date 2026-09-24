@@ -121,7 +121,7 @@ if (!WRITE && !CHECK && !SELFTEST) {
 /** Topic cluster from the URL — the axis the growth loop reports on. */
 function clusterOf(urlPath) {
   const p = urlPath.replace(/^\/(en|es|ko|zh|zh-Hant|ar|id|pt-BR|tr)\//, '/');
-  if (/^\/(obsidian|apple-watch-obsidian)\/|^\/blog\/obsidian-/.test(p)) return 'obsidian';
+  if (/^\/(obsidian|apple-watch-obsidian)\/|^\/blog\/obsidian-|^\/resources\/obsidian-uri\//.test(p)) return 'obsidian';
   if (/^\/(siri|voice-input|hands-free|fastest-voice-memo)\//.test(p)) return 'voice';
   if (/^\/apple-watch\//.test(p)) return 'watch';
   if (/^\/(captio|captio-alternative)\/|^\/blog\/captio/.test(p)) return 'captio';
@@ -318,7 +318,7 @@ if (SELFTEST) {
     placements(stripCtaAttrs(tagged1))[0] === placements(`<main>${long}${own()}${long}</main>`)[0]);
 
   // クラスタとロケール。
-  t('クラスタは URL から引く', clusterOf('/obsidian/airpods/') === 'obsidian' && clusterOf('/vs/notion/') === 'vs' && clusterOf('/') === 'home');
+  t('クラスタは URL から引く', clusterOf('/obsidian/airpods/') === 'obsidian' && clusterOf('/resources/obsidian-uri/') === 'obsidian' && clusterOf('/vs/notion/') === 'vs' && clusterOf('/') === 'home');
   t('ロケール接頭辞はクラスタを変えない', clusterOf('/en/obsidian/') === 'obsidian');
   // **言語はトークンから引く。**ページの位置からではない（実測で 182 件食い違っている）。
   t('トークンの接尾辞が言語を決める', langOf('foo-en', 'index.html') === 'en' && langOf('foo-jp', 'en/index.html') === 'jp');
