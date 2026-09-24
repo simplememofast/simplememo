@@ -344,7 +344,7 @@
           <div class="app-card__desc">
             <p>シンプルメモは、Captioの終了を受けて「あの体験を現代の技術で再現する」ことを目標に開発されたiOSアプリです。Captioの核心だった「ワンタップでメモをメールに送る」というコンセプトを忠実に継承しつつ、Captioにはなかった現代的な改善を加えています。</p>
             <p style="margin-top:.75rem"><strong>同じ哲学:</strong> シンプルメモもCaptioと同様に「書いて、送る」だけに特化しています。アプリを開くと即座にカーソルが入力位置にフォーカスし、メモを書いて送信ボタンをタップするだけ。フォルダ分けもタグ付けもありません。Captioユーザーなら違和感なく使い始められます。</p>
-            <p style="margin-top:.75rem"><strong>現代的な改善:</strong> シンプルメモはCaptioが持っていなかった機能を3つ追加しています。(1) <strong>AES-GCM暗号化</strong> -- 端末内に保存されるキューデータを暗号化して保護。(2) <strong>Outboxアーキテクチャ</strong> -- 圏外でもメモを書いてキューに入れ、通信回復後に自動送信。Captioのオフライン機能をさらに強化しました。(3) <strong>サーバーにデータを保持しない設計</strong> -- Cloudflare Workers経由で送信し、サーバーにメモを一切保存しません。</p>
+            <p style="margin-top:.75rem"><strong>現代的な改善:</strong> シンプルメモはCaptioが持っていなかった機能を3つ追加しています。(1) <strong>AES-GCM暗号化</strong> -- 端末内に保存されるキューデータを暗号化して保護。(2) <strong>Outboxアーキテクチャ</strong> -- 圏外でもメモを書いてキューに入れ、通信回復後に自動送信。Captioのオフライン機能をさらに強化しました。(3) <strong>メモ本文をサーバーに残さない設計</strong> -- 送信時に Cloudflare Workers と Resend を通過するだけで、恒常的な保存もログへの記録もしません。</p>
             <p style="margin-top:.75rem"><strong>0.4秒の起動速度:</strong> シンプルメモはアプリ起動から0.4秒でカーソルが入力位置にフォーカスします。Captio以上の速度感を実現しており、「思いついた瞬間に書き始められる」体験を提供します。</p>
             <p style="margin-top:.75rem"><strong>開発の原点:</strong> シンプルメモの開発者であるAI ATAKAは、自身もCaptioの長年のユーザーでした。Captio終了の知らせを聞いたとき、「同じ体験を提供するアプリが他にない」という実感から開発を決意しました。詳しい開発ストーリーは<a href="/about/" style="color:var(--accent)">開発者ページ</a>をご覧ください。</p>
           </div>
@@ -396,7 +396,7 @@
               <tr>
                 <th scope="row">サーバーデータ保持</th>
                 <td>不明</td>
-                <td class="highlight-col"><strong>なし（ゼロ保持）</strong></td>
+                <td class="highlight-col"><strong>本文は恒常的に保存しない</strong>（送信時に通過するのみ）</td>
               </tr>
               <tr>
                 <th scope="row">送信速度</th>
@@ -425,7 +425,7 @@
         <div class="app-card" style="margin-top:1rem;">
           <div class="app-card__desc">
             <p><strong>同じ点:</strong> 「書いて送るだけ」のコンセプト、ワンタップ送信、即座の起動、ミニマルUI、オフラインキュー。Captioの核心的な体験はすべてシンプルメモに引き継がれています。</p>
-            <p style="margin-top:.75rem"><strong>改善された点:</strong> ワンタップ送信フロー、端末内暗号化（なし→AES-GCM）、サーバーにデータを保持しない設計、Outboxアーキテクチャによるオフライン機能の強化。（起動速度はCaptioと同等の速さ、実測0.4秒）</p>
+            <p style="margin-top:.75rem"><strong>改善された点:</strong> ワンタップ送信フロー、端末内暗号化（なし→AES-GCM）、メモ本文をサーバーに残さない設計、Outboxアーキテクチャによるオフライン機能の強化。</p>
             <p style="margin-top:.75rem"><strong>異なる点:</strong> 料金モデルが買い切りからサブスクリプション（月額¥500）に変更。ただし無料プランでも1日3通まで（ずっと無料）送信可能。</p>
           </div>
         </div>
@@ -529,7 +529,7 @@
               <tr>
                 <th scope="row"><strong>サーバーデータ保持</strong></th>
                 <td>不明</td>
-                <td class="highlight-col"><strong>ゼロ保持</strong>（Cloudflare Workers経由）</td>
+                <td class="highlight-col"><strong>本文は恒常的に保存しない</strong>（Cloudflare Workers と Resend を通過するのみ）</td>
                 <td style="color:#4CAF50;font-weight:700;">新機能</td>
               </tr>
               <tr>
@@ -664,7 +664,7 @@
             <p><strong>暗号化が追加された安心感:</strong> Captioにはなかったセキュリティ機能として、シンプルメモはAES-GCM暗号化を実装しています。オフラインキューに保存されるメモデータは暗号化されるため、万が一端末を紛失しても送信待ちのメモが第三者に読まれるリスクがありません。特に業務メモを扱うビジネスユーザーにとって、この安心感は大きいでしょう。</p>
             <p style="margin-top:.75rem"><strong>オフラインキューの進化:</strong> Captioのオフライン機能は「圏外では書いて保存、電波が戻ったら送信」という基本的なものでした。シンプルメモのOutboxアーキテクチャはこれを大幅に強化しています。通信が不安定な状態でも自動リトライが行われ、送信キューの状態を視覚的に確認できます。「送れたのか送れていないのか分からない」というCaptioの弱点が解消されています。</p>
             <p style="margin-top:.75rem"><strong>モダンなUIデザイン:</strong> CaptioのUIは2012年のiOS 6時代のデザインがベースでした。シンプルメモは最新のiOSデザインガイドラインに沿った、ダークモード対応のモダンなインターフェースを採用しています。機能的には同じ「ミニマル思想」ですが、視覚的な体験は格段に洗練されています。</p>
-            <p style="margin-top:.75rem"><strong>サーバーにデータを残さない設計:</strong> Captioがサーバーにデータを保持していたかどうかは公式には不明でしたが、シンプルメモはCloudflare Workers経由でメモを送信し、サーバーにデータを一切保持しないゼロ保持アーキテクチャを明確に採用しています。プライバシー意識の高いユーザーにとって、この透明性は重要です。</p>
+            <p style="margin-top:.75rem"><strong>メモ本文をサーバーに残さない設計:</strong> シンプルメモのメモ本文は、送信時に当社の中継（Cloudflare Workers）と配信サービス（Resend）を通過しますが、恒常的な保存は行わず、ログにも記録しません（<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計</a>）。通常のメールはエンドツーエンド暗号化ではありません。</p>
           </div>
         </div>
 
@@ -736,7 +736,7 @@
         <div lang="ja" style="flex:1;min-width:min(280px,100%);">
           <h3 style="font-size:1rem;margin:0 0 .5rem;">AI ATAKA — Obsidian連携シンプルメモ 開発者・元Captioユーザー</h3>
           <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.7;margin:0;">iOS開発歴10年以上のソフトウェアエンジニア。2014〜2024年の10年間、Captio をメインのメモ→メール入口として日常使用。2024年10月のApp Store削除を機に、「起動即入力・ワンタップ送信という Captio の体験を、独自の送信基盤で再構築する」というテーマでシンプルメモの開発に着手。Cloudflare Workers + Resend APIの独自送信基盤、AES-GCM端末内暗号化、オフラインOutboxアーキテクチャの設計と実装を担当。</p>
-          <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin:.75rem 0 0;"><strong>本記事の根拠：</strong>Captio利用期間の実体験、2024年3月〜10月のCaptio動作不良の自己観測、複数のnoteユーザー報告群（@chronos0909、@39thankyou、@masatakashida 等）の照合、developer.apple.com / developers.google.com の API 変更履歴の確認に基づく。すべての速度測定値（起動 0.4秒・ワンタップ送信）は iPhone 15 / iOS 17 で20回コールドスタートを実測した平均値。</p>
+          <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin:.75rem 0 0;"><strong>本記事の根拠：</strong>Captio利用期間の実体験、2024年3月〜10月のCaptio動作不良の自己観測、複数のnoteユーザー報告群（@chronos0909、@39thankyou、@masatakashida 等）の照合、developer.apple.com / developers.google.com の API 変更履歴の確認に基づく。本文の 0.4秒は、開発者が iPhone 16e で計測した、アイコンのタップから入力できるようになるまでの時間（ウォーム起動・5回の中央値、2026-08-11。<a href="/blog/fastest-memo-app-benchmark" style="color:var(--accent);">起動速度ベンチマーク</a>）。</p>
           <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin:.75rem 0 0;"><strong>運営：</strong>株式会社ユリカ（YURIKA, K.K.） / プレスリリース：<a href="https://prtimes.jp/main/html/rd/p/000000001.000182412.html" rel="nofollow noopener" target="_blank" style="color:var(--accent)">PR TIMES</a></p>
           <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;margin:.75rem 0 0;opacity:.85;"><strong>商標・非提携の明記：</strong>本サービスおよび株式会社ユリカは、Captio（Tupil B.V. 製）および同社共同創業者 Ben Lenarts 氏と、提携・後援・公認・スポンサーシップなど一切の関係を持ちません。「Captio」「Tupil」は各社の商標であり、各権利者に帰属します。本記事は Captio 終了後の代替アプリを探すユーザー向けの情報提供を目的とし、Captio 自体のレビューを意図したものではありません。</p>
         </div>
