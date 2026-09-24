@@ -253,6 +253,23 @@ function selftest() {
   const real = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const NOW = Date.parse('2026-08-28T00:30:00Z');
   const V = (d) => validate(d, { now: NOW });
+  // All currently observed routines may legitimately be recorded as unhealthy.
+  // Keep the negative tests independent of that live mix by adding one healthy,
+  // unrecorded control to the cloned snapshot before making it unhealthy.
+  const healthyControl = (d) => {
+    const id = 'selftest-healthy-unrecorded';
+    assert(!d.routines.some((r) => r.id === id), 'selftest control ID is already in the snapshot');
+    const observed = Date.parse(d.observed_at);
+    assert(Number.isFinite(observed), 'snapshot observation time is invalid');
+    const r = {
+      id, name: 'selftest healthy control', enabled: true,
+      cron_expression: '0 0 * * *', run_once_at: null,
+      next_run_at: new Date(observed + DAY).toISOString(),
+      last_fired_at: d.observed_at, last_run_status: 'SUCCEEDED',
+    };
+    d.routines.push(r);
+    return r;
+  };
 
   const scenarios = [
     ['実データが検査を通る', () => {
@@ -295,30 +312,26 @@ function selftest() {
     // [2026-08-31] **実データに結びついていた。**`find(r => r.enabled)` は
     // 先頭の有効な routine を取るだけなので、そこが**既に open_findings に載っている**
     // 日（＝いま）は、止めても「一覧に無い」にならず、この検査が黙って空回りする。
-    // **どちらの一覧にも居ない健全な1本**を選ぶ形にして、件数から切り離した。
+    // **どちらの一覧にも居ない健全な1本**を検体にして、件数から切り離した。
+    // 現在の実データにその行が無い日も、合成検体で検出力を保つ。
     ['**新しく止まった routine を通さない**', () => {
-      // [2026-08-31] **`find((r) => r.enabled)` だと、先頭が記録済みの行に当たると鳴らない。**
-      // 記録が増えた日に実際に踏んだ。**どちらの一覧にも居ない行**を選ぶ。
       const p = V(broken(real, (d) => {
-        const recorded = new Set([...d.open_findings, ...d.intentional_stops].map((f) => f.id));
-        const r = d.routines.find((x) => x.enabled && !recorded.has(x.id));
-        if (!r) throw new Error('記録されていない enabled な routine が実データに無い'
-          + ' — **この検査は空回りしている**');
+        const r = healthyControl(d);
         r.enabled = false;
       })).problems;
       assert(p.some((x) => x.includes('どちらの一覧にも無い')), p.join(' / '));
     }],
     ['**新しく失敗した routine を通さない**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.enabled && x.last_run_status !== 'FAILED');
+        const r = healthyControl(d);
         r.last_run_status = 'FAILED';
       })).problems;
       assert(p.some((x) => x.includes('failed')), p.join(' / '));
     }],
     ['**発火予定を過ぎたものを通さない**', () => {
       const p = V(broken(real, (d) => {
-        const r = d.routines.find((x) => x.enabled && x.last_run_status !== 'FAILED');
-        r.next_run_at = '2026-08-20T00:00:00Z';
+        const r = healthyControl(d);
+        r.next_run_at = new Date(Date.parse(d.observed_at) - DAY).toISOString();
       })).problems;
       assert(p.some((x) => x.includes('overdue')), p.join(' / '));
     }],
