@@ -309,6 +309,54 @@ const SCENARIOS = ledgerScenarios(
   );
 }
 
+// ── 封じ込めの不変条件（2026-09-24追加） ──────────────────────
+// 2026-09-21 に route actions が止まったのは、この判定が 09-20 のゲートの拒否
+// （行の自己申告では eligibility_verdict: blocked）を4回目の no_artifact と数えたから。
+// **それでもここで固定するのは、いまの fail-closed の挙動のほう。**判定を緩める変更は、
+// ゲート自身が run_id・gate_code つきで書く拒否の受領ができてからにする。
+// 受領が無いまま緩めると、行の中の自己申告ラベルひとつで封じ込めが外れる経路になる。
+// 受領ができたら、下の「自己申告ラベルでは免除されない」は「受領と照合できた行だけを
+// 免除する」形に書き換える（照合できない行は引き続き故障に数える）。
+// 解除は人が一次資料で行う（policy.ai_may_resume: false）。このテストは解除の方向には何も効かない。
+{
+  const MATRIX = { self_repair: { may_modify: ['x'], must_not: ['y'], stop_after_failed_repairs: 3 } };
+  const fail = (id, cls, extra = {}) => ({ run_id: id, date_jst: '2026-09-01', route: 'actions', attempted: true,
+    outcome: 'no_artifact', failure_class: cls, source: 'test', ...extra });
+  const repair = (id, target) => ({ run_id: id, date_jst: '2026-09-02', route: 'actions', attempted: true,
+    outcome: 'shipped', source: 'test', repair_of: [target] });
+  const repairedThrice = cls => [1, 2, 3].flatMap(i => [fail(`f-${i}`, cls), repair(`r-${i}`, `f-${i}`)]);
+
+  SCENARIOS.push(
+    ['同じ種別を3回直した後の未修理の再発は、上限に達して人へ上がる', () => {
+      const a = analyze({ runs: [...repairedThrice('no_artifact'), fail('f-4', 'no_artifact')] }, MATRIX, []);
+      assert(a.unrepaired_count === 1 && a.escalate.length === 1
+        && a.escalate[0].run_id === 'f-4' && a.escalate[0].repair_attempts_for_class === 3,
+      '3回直した種別の再発が上限に達しなかった');
+      assert(!a.lane_f_required, '上限に達した故障を、また直させようとした');
+    }],
+    ['修理を挟まない再発は、何回あっても上限に数えない（数えるのは修理の回数）', () => {
+      const a = analyze({ runs: [1, 2, 3, 4].map(i => fail(`f-${i}`, 'no_artifact')) }, MATRIX, []);
+      assert(a.unrepaired_count === 4 && a.escalate.length === 0 && a.lane_f_required,
+        '修理していない再発で上限に達した');
+    }],
+    ['上限は種別ごと。別の種別を3回直しても、この種別は上限に達しない', () => {
+      const a = analyze({ runs: [...repairedThrice('claim_without_completion'), fail('f-4', 'no_artifact')] }, MATRIX, []);
+      assert(a.escalate.length === 0 && a.targets[0].repair_attempts_for_class === 0, '別の種別の修理を数えた');
+    }],
+    ['**故障の outcome を持つ行は、行の中の自己申告ラベルでは免除されない**（fail-closed）', () => {
+      // 09-20 の行と同じ形：outcome は故障、行の中ではゲートの拒否だと申告している。
+      const labelled = fail('f-4', 'no_artifact', { eligibility_verdict: 'blocked', gate_code: 'measurement_scope_conflict' });
+      const a = analyze({ runs: [...repairedThrice('no_artifact'), labelled] }, MATRIX, []);
+      assert(a.unrepaired_count === 1 && a.escalate.length === 1,
+        '自己申告のラベルで故障から外れた — 受領と照合できない免除は、封じ込めを行1つで外す経路になる');
+      for (const verdict of ['declined_by_design', 'declined_by_fault', 'declined_unrecorded']) {
+        const b = analyze({ runs: [{ ...labelled, eligibility_verdict: verdict }] }, MATRIX, []);
+        assert(b.unrepaired_count === 1, `eligibility_verdict=${verdict} で故障から外れた`);
+      }
+    }],
+  );
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
