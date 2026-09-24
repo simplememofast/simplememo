@@ -195,10 +195,26 @@ PR #1430 を閉じた時点で窓は9時間から十数分に縮んでいて、*
     WRONG LASTMOD sitemap-ja.xml: https://simplememofast.com/: 2026-09-22 -> 2026-09-23
     （/contact・/legal・/en/ 系も同じ。計7件）
 
-`lastmod` は**コミット日時の JST 日付**から引く。JST 0時をまたいでコミットを足すと、
-手元で生成済みの sitemap の日付だけが古くなる。同じブランチが29分後（15:51Z）に
-緑で通っているので、**直し方は push の直前に `python3 scripts/generate_sitemap.py` を
-もう一度回すだけ。**
+**最初はここに「コミット日時の JST 日付から引くので、0時をまたいでコミットを足すと
+手元で生成済みの sitemap だけが古くなる。直し方は push 直前にもう一度回すだけ」と
+書いた。測ったら誤り。**`scripts/sitemap_lastmod.py` には基準が2つある:
+
+    basis=git_content_change  … そのファイルを変えた first-parent コミットの JST 日付
+    basis=unpublished_content … **実行時の today（JST）**（157 / 184 / 199 行）
+
+現在の内容が「最後にそのファイルを触った first-parent コミットの after blob」と
+一致しないと後者に落ちる。**後者はコミットに焼かれていない、実行した瞬間の日付。**
+だから「押す直前に回す」では直らない —— #1532 のコミットメッセージが切り分けている:
+
+    ブランチ単体で --check   → 2026-09-22 で一致（ページ編集コミットが 09-22 JST）
+    refs/pull/1532/merge 上  → 2026-09-23（**CI が実際に見るのはこちら**）
+
+squash 後に main へ載るコミットもその日付になるので **09-23 側が正しい。**
+直し方は**マージ参照の上で `generate_sitemap.py` を回し、その出力を採用する。**
+
+**この差は 2026-09-24 には再現できていない**（#1554 の head と
+`refs/pull/1554/merge` の両方で `--check` が通る）。境界をまたいでいない日には出ない。
+**再現できた条件は #1532 の1件だけで、こちらの手では確かめ直せていない。**
 
 **時刻だけで「窓の赤」とまとめない。**同じ時間帯の 09-23 15:14Z（run 35880089345）は、
 日付と無関係なベンダー規約の未確認8社で落ちている。この時間帯は他の鮮度ゲート
@@ -218,6 +234,31 @@ Autopilot Health の main push 分は走らない。**意図的かどうかは�
 
 **run が無いことを故障の証拠にしない。**このファイルが 08-26 / 08-27 / 09-19 と
 繰り返している誤りと同じ形で、あと一歩で4回目だった。
+
+
+### PageSpeed の production browser checks が 2026-09-19 から走っていない
+
+上の節の「未確認」を1つ潰した。**走っていない。**
+
+`pagespeed-audit.yml` は `paths` 絞り込み（`index.html` / `en/index.html` /
+`assets/**` / `scripts/perf/**` / 自分自身）で、**`schedule` は無い。**
+PR でも push でも local と production の両方を Lighthouse で3回ずつ測るが、
+**`PERF_BASE_URL=https://simplememofast.com` を渡す `browser_checks.cjs` だけは
+`push && refs/heads/main` の中でしか走らない**（同ファイル86行）。この環境変数を
+production へ向ける経路は**リポジトリ内に他に無い**（`grep -rn PERF_BASE_URL`）。
+
+auto-merge の `GITHUB_TOKEN` マージは push run を起こさないので、
+**2026-09-19T02:35Z 以降、production browser checks は1回も走っていない。**
+その間に監査対象パスへ触れて main に入ったコミットは **8件**:
+
+    #1477 フォント太さ   #1484 #1491 日英分離   #1510 App Store facts
+    #1532 電話番号       #1555 CI修復           #1562 #1564 言い過ぎ修正
+
+**PR 側の run は代わりにならない。**PR でも production を測ってはいるが、
+それは**そのマージが出る前の本番**であって、出した後の本番ではない。
+
+**意図的かどうかは未確認。**直すなら `schedule` を足すか、auto-merge が
+IndexNow と同じように production の計測まで引き受けるか。**どちらも未提案。**
 
 ## Site Structure
 
