@@ -415,7 +415,16 @@
         "ip": "ok",
         "personal_data": "ok",
         "governing_law": "risk",
-        "source": "https://www.appsflyer.com/legal/terms-of-use/",
+        "source": "https://www.appsflyer.com/legal/msa",
+        "review_basis": {
+          "document": "Public AppsFlyer Master Services Agreement",
+          "visible_revision": "2024-12-16",
+          "account_adopted_version_verified": false,
+          "order_form_contracting_entity_verified": false,
+          "dpa_revision_verified": false,
+          "dpa_change_monitored": false,
+          "scope": "The owner accepted the four recorded assessments before this public MSA observation. The later observation is not a new human review and does not establish which MSA revision or contracting entity the SimpleMemo account adopted. The MSA fingerprint does not monitor DPA changes."
+        },
         "reviewed_at": "2026-09-24",
         "reviewed_by": "human",
         "risk_note": "**SDK が端末から直接送る構造だが、契約はそれを Processor の枠から外していない。**DPA §3.2 が、Customer の Developer Tools の implementation / configuration / use を通じて**AppsFlyer へ直接届いた情報も、Customer から受領した Customer Personal Information とみなす**と明示している。**サーバを経由しないことで枠外になる、とは書かれていない。**\n\n**ただし同意取得の責任はこちら側。**MSA §9.4 が、End User への privacy notice の提供・rights / lawful basis の確保・**法律上必要な consent の取得**・cookies 等の配置についてCustomer が責任を負うと定める。**SDK 直送でも、そこは動かない。**\n\n**risk は責任上限と管轄の2つだけ。**個人情報と知財は ok。",
@@ -424,9 +433,9 @@
         "$personal_data": "**この台帳で初めての `personal_data: ok`。**\n\nMSA §9.5 が DPA を incorporated by reference し、DPA 自身も**別途署名なしに Agreement 締結時に binding / integral part になる**と規定 ——**セルフサービス小規模顧客にも契約本文上組み込まれる。**\n\n**Customer = Controller / AppsFlyer = Processor**（DPA §2.1）。documented instructions 以外では原則処理しない。CCPA 対象についてsell / share しない、許可された目的外で retain / use / disclose しない、**Customer との直接関係外で利用しない**と明記。\n\n**SDK 直送も枠内**（§3.2・上の risk_note 参照）。\n\n**取得される識別子が Schedule 1 に列挙されている:** IDFA / Android ID / Google Advertiser ID / app IDs / 条件付き Customer User ID、IP address / User agent、広告クリック・impression、install、in-app purchases。**IDFV は明示列挙が見つからなかった。**\n\n**保持は『Agreement の期間』**（Schedule 1）。終了後は原則 delete / unrecoverable / anonymize。**Anthropic と同じ形**（契約が続くかぎり）だが、**あちらと違って Processor 条項と instructions の縛りが効いている。**\n\n**`ok` にした理由:** 役割が明確で、自社目的利用がAggregated and De-Identified Data に限定され、Customer Personal Data そのものをAppsFlyer 自身のマーケティングに使う条項が**探した上で見つからなかった。****cloudflare / firebase を risk にしたのは『DPA本文を読んでいない』からだったが、ここは DPA 本文まで読めている。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$governing_law": "**契約主体がどちらか、規約本文からは決まらない。**\n\n原則は **New York 州法・New York City の裁判所の exclusive jurisdiction**（§21.10）。ただし契約主体が **AppsFlyer UK Ltd.** の場合は England and Wales 法・London。\n\n**オンライン注文では契約主体が Customer の domicile に依存すると書かれているだけで、MSA 本文に国別対応表が無い。**日本からの申込がどちらに当たるかは**Order Form を見ないと確定しない。**\n\n強制仲裁・仲裁機関・仲裁地・opt-out・class action waiver はいずれも見つからなかった。**この4社で唯一、仲裁が無い。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。\n\n**読めた:** AppsFlyer Master Services Agreement §9 / §12 / §15 / §16(d) / §21.9 / §21.10、AppsFlyer Data Processing Addendum §2.1 / §3.1–3.2 / §10 / Schedule 1。\n\n**未確認: Order Form 上の contracting entity。**New York 型か UK 型かはそこでしか決まらない。オーナー側の確認事項。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
-        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**`governing_law` の `human` は「New York 型か UK 型か未確定」を含んだままの承認。**Order Form を見ないと決まらない。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Terms of Use は「Last updated November 23, 2025」で、前回の読みより前の日付。**ただし前回の根拠は MSA（記録上 July 16, 2024）で、MSA の今の版は未確認**（オーナーはこの点を承知で判断した）。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
-        "fingerprint": "071a9ca33b58",
-        "fetched_at": "2026-09-22",
+        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**`governing_law` の `human` は「New York 型か UK 型か未確定」を含んだままの承認。**Order Form を見ないと決まらない。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Terms of Use は「Last updated November 23, 2025」と表示される。この別文書の観測に基づき、オーナーは以前の4観点の判定を維持すると判断した。ただし、その時点で判定根拠である MSA の表示日には July 16 / December 16, 2024 の不一致があり、公開現行版とアカウント採用版は未確認だった。後からエージェントが公式公開 MSA の表示改定日 December 16, 2024 と本文指紋を確認したが、その新観測に対する追加の本人判断は記録されていない。アカウント採用版、Order Form の契約主体、DPA の現行適用版も未確認。原文を人が通読していない点は前回と同じ。",
+        "fingerprint": "0f51e859c3f0",
+        "fetched_at": "2026-09-24",
         "source_history": [
           {
             "url": "https://www.appsflyer.com/legal/services-agreement/",
@@ -434,10 +443,20 @@
             "http_status": 404,
             "replacement": "https://www.appsflyer.com/legal/terms-of-use/",
             "note": "Public Terms of Use page retrieved; MSA also exists separately. This monitoring repair does not establish the applicable agreement or reapprove historical findings."
+          },
+          {
+            "url": "https://www.appsflyer.com/legal/terms-of-use/",
+            "fingerprint": "071a9ca33b58",
+            "observed_at": "2026-09-22",
+            "retired_at": "2026-09-24",
+            "replacement": "https://www.appsflyer.com/legal/msa",
+            "note": "The four reviewed clauses cite the MSA and DPA, not the Terms of Use. The monitored source was corrected to the public MSA without asserting account adoption or a new human clause review."
           }
         ],
         "analysis_sources": [
-          "https://www.appsflyer.com/legal/msa"
+          "https://www.appsflyer.com/legal/terms-of-use/",
+          "https://www.appsflyer.com/legal/dpa/",
+          "https://www.appsflyer.com/gatedpdfs/Data-Processing-Addendum-February2023-DPA.pdf"
         ]
       },
       {
