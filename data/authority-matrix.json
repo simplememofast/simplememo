@@ -692,6 +692,29 @@
       ],
       "status": "active",
       "note": "2026-09-12の必要な実行・デプロイを承認し都度確認不要というオーナー委任を具体化。今回の実行対象はAct経路。アプリKill・資格情報失効・全体停止の実証や、本物の停止の無条件解除を今回の記録から推定しない。カナリアガードの既存権限は変更していない。"
+    },
+    {
+      "domain": "開発者向け外部ブログへの記事投稿（dev.to・はてなブログ）",
+      "reversible": true,
+      "ai_may": [
+        "devlog-syndication.yml の門（緊急停止・公開面の最新投稿から66時間・1日1本）と機械検査を通った記事を、dev.to（simple_memo）とはてなブログ（simplememofast）へ公式APIで公開し、公開ページの自社リンクの rel と meta robots を読み戻す"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "投稿用の鍵（DEVTO_API_KEY・HATENA_API_KEY）の発行・登録・失効",
+        "公開済み記事の取り下げ・削除",
+        "対象アカウント・媒体の追加",
+        "コメントへの返信・他人の記事への反応"
+      ],
+      "gate": "scripts/devlog-syndication.mjs が投稿前に、停止・間隔・1日1本・数字の出典・禁止表現・名乗り・リンク先・重複を機械的に確かめる。AI開示は dev.to が API の ai_disclosure_level=fully_autonomous、はてなが本文末尾の固定文で、どちらもスクリプト側が付ける。公開記事は各サービスの管理画面から取り下げられるので reversible に分類したが、**読まれた事実は戻らない**。",
+      "evidence": [
+        ".github/workflows/devlog-syndication.yml",
+        "scripts/devlog-syndication.mjs",
+        "docs/syndication/RUNBOOK.md",
+        "data/emergency-stop.json"
+      ],
+      "status": "active",
+      "note": "**2026-09-24 オーナーの依頼で追加。**依頼は「DoFollowリンクを獲得するために定期投稿するべきアカウントを過去の履歴からすべて見直して、定期タスク化していない場合は適切かつ最大限パフォーマンスし必ず自動化が成功するように設定して」。棚卸し（docs/seo/directory-registration-2026-09.md §5.27）の結果と方式（GitHub Actions＋公式API・AI開示・事実の機械検査・約3日間隔）を示し、オーナーが「go」と応答した。self_repair.must_not の『権限表を自分で書き換えない』の例外として、経緯をここに残す。\n\n**CLAUDE.md「新しい種類の対外送信は、錠前ができるまで始めない」（2026-09-24・L4-03 A）との関係 —— オーナーが名指しで判断した。**同日、選択式で「dev.to（2026-05〜）とはてなブログ（2026-02〜）への記事投稿は既存の種類で、変わるのは経路（Mac のローカル定期タスク → GitHub Actions）だけ」と示し、オーナーは「既存の種類として継続」を選んだ。あわせて旧ローカルタスク（dev.to・はてな）はオーナーが止めると決めた。この経路は投稿の直前に本文を名前一覧と機械で照合する（scripts/devlog-syndication.mjs の identityHits。一覧はハッシュと、リポジトリの外の Secrets IDENTITY_DENYLIST）。**この判断は dev.to の simple_memo とはてなブログ simplememofast への記事投稿に限る。**媒体・アカウント・送信の種類を足すのは、この記録を根拠にしない。"
     }
   ],
   "self_repair": {

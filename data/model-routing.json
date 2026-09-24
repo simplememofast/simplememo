@@ -73,6 +73,14 @@
       "irreversible": false,
       "max_usd_per_run": 1.0,
       "why": "**監査される側のうち、歯止めを触れる repair（opus）と違うモデルにする。**同じモデルは同じ盲点を共有し、自己修復レーンがCIや権限表を緩めたときに見逃す。article とは同じ sonnet になるが、article は成果物を書くだけで歯止めに触れないため利害の衝突が弱い（残る弱点は audit-charter.json の $model_note に明記）"
+    },
+    "syndication": {
+      "model": "claude-sonnet-5",
+      "fallback": "claude-opus-5",
+      "irreversible": true,
+      "max_usd_per_run": 6,
+      "why": "**公開面へ出る記事**（dev.to・はてなブログ。devlog-syndication.yml）。取り下げはできても、読まれた事実は戻らないので不可逆に分類し、最安ティアへは落とさない。記事は1本で、必要な事実は文脈ファイルにまとめてあり、数字の出典・禁止表現・名乗り・リンクはスクリプトが機械的に落とす（scripts/devlog-syndication.mjs validate）。だから1回目は sonnet、検査で落ちた手直しだけ梯子で opus に上げる。",
+      "$max_usd_per_run_note": "2026-09-24 新設。実測はまだ無い。記事（article・$20）より短く、読むファイルも少ないので、その3割を置いた。実測が出たら引き直す。OAuth（サブスク枠）で動くので請求額ではなく SDK の見積りに対する歯止め。"
     }
   },
   "policy": {
@@ -120,13 +128,19 @@
       "qa_triage": [
         "both",
         "human"
+      ],
+      "syndication": [
+        "claude-sonnet-5",
+        "claude-opus-5",
+        "human"
       ]
     },
     "$ladder_note": {
       "repair": "**haiku も sonnet も挟まない。**故障の原因特定を安いモデルで外すと、レーンFの『同一 failure_class 3回で人間へ』に早く当たる。安いほうが高くつく",
       "pr": "**不可逆。**1回目から最良で書き、駄目なら人間",
       "analysis": "**唯一 haiku から始める。**集計はスクリプトが持っていて、モデルは説明を書く役なので、外しても安い",
-      "qa_triage": "2モデル同時。**平均も多数決も取らない**ので ladder ではなく both"
+      "qa_triage": "2モデル同時。**平均も多数決も取らない**ので ladder ではなく both",
+      "syndication": "1回目は sonnet。検査で落ちた手直しは同じモデルで回さず opus（同じ盲点で同じ失敗をしない）。それでも落ちたら投稿せずに終わり、次の枠と監視に任せる"
     }
   }
 }

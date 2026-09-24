@@ -183,6 +183,14 @@
       "reviewed_by": null
     },
     {
+      "domain": "開発者向け外部ブログへの記事投稿（dev.to・はてなブログ）",
+      "class": "R2",
+      "matrix_reversible": true,
+      "why": "**外部への送信は R2。**SNS投稿と同じく、記事は取り下げられても、読まれた先からは消えない",
+      "conflict": "権限表は reversible: true・requires_approval: false（SNS投稿と同じ扱い）。**設計ノートの定義では外部送信は不可逆**なので、UMR では R2 の重みで数える。投稿前の機械検査（scripts/devlog-syndication.mjs validate）と経路ごとの停止（agents.syndication）はあるが、人の事前承認は無い。権限表側を変えるか、この分類を変えるかは L4 の判断",
+      "reviewed_by": null
+    },
+    {
       "domain": "ユーザーデータの削除（アプリ内の自己削除）",
       "class": "R2",
       "matrix_reversible": false,
