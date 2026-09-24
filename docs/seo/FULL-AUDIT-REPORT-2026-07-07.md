@@ -30,7 +30,7 @@
 2. **HIGH — hidden-EN FAQ recurrence ×3**: `blog/meeting-memo-template.html:79`, `blog/memo-app-encryption-comparison.html:210`, `blog/memo-app-privacy.html:224` mark up EN Q&As that exist only inside default-hidden `<div data-lang="en">` — the exact #334/#369 invisible-content class, on 3 pages the 07-02 sweep never reached.
 3. **HIGH — FAQ answer-layer parity: 38 questions / 12 pages**: #369 synced Question *names* only; `acceptedAnswer.text` was never in scope and has drifted from served text. Worst: `en/blog/best-note-to-self-apps-2026` 8/8, `en/blog/ios26-speechanalyzer-live-mic` 5/5, `hands-free/` 5/5, `faq.html` 5, `blog/line-keep-alternative` 4 (JA brand token inside EN answers). Combined with #2: 41 questions / 13 unique pages fail at the answer layer. Site-wide question-visibility (Q_MISSING) = 0 — the #369 fix itself holds.
 4. **HIGH — `/en/apple-watch-obsidian/` shipped incomplete** vs its JA sister: no hero image at all (JA has the 760×571 WebP `<picture>`; EN LCP falls back to text), meta description 247ch = site's worst (reintroduces the just-fixed #17 class), title 76ch, generic `og/index.png` instead of a dedicated OG, and an unverifiable speed-equivalence claim ("Send to yourself **as fast as Captio did**" / desc "the same self-email **speed** as Captio") where the JA page hedges correctly (「Captioのような」). One completion PR closes the whole gap on the active Yahoo!ニュースPR target (already pos 3.2 after 4 days).
-5. **MEDIUM — homepage entity-graph staleness + dead identity links**: both homepages define `#organization` **twice** (`index.html:91`, `en/index.html:89`) — the first block still ships the live-404 `qiita.com/organizations/simplememo` that cowork-A excluded (unification landed on only one of the two blocks); and author Person sameAs carries live-404 `github.com/hajimeataka` in 7 blocks (E-E-A-T identity link dead).
+5. **MEDIUM — homepage entity-graph staleness + dead identity links**: both homepages define `#organization` **twice** (`index.html:91`, `en/index.html:89`) — the first block still ships the live-404 `qiita.com/organizations/simplememo` that cowork-A excluded (unification landed on only one of the two blocks); and author Person sameAs carries live-404 `github.com/<personal-handle>` in 7 blocks (E-E-A-T identity link dead).
 
 ## Top 5 quick wins
 
@@ -107,7 +107,7 @@ Above-fold: H1 visible 24/24 loads; App Store badge above fold on all conversion
 | CRITICAL | `en/send-email-to-yourself/index.html:117` | ItemList: all 8 "best apps" items named "Simple Memo - for Obsidian" (PR #342 overwrote 7 competitor names). Markup misrepresents visible content + 8× self-promotion = spammy-structured-markup class. Restore from `git show c37349a0` (the other 4 single-name #342 replacements verified legit). Same page: "8 Best Apps" headline/WebPage.name vs "5 Methods" title, dateModified 06-09. |
 | HIGH | 3 JA pages (:79/:210/:224) | Hidden-EN Q&As marked up (invisible-content class) — delete from JA-page schema; EN sisters carry them visibly. |
 | HIGH | 12 pages / 38 questions | `acceptedAnswer.text` ≠ served text (names were synced by #369; answers never were). Mechanical fix: regenerate from served `faq-answer` innerHTML (quote-glyph transforms already tolerated). |
-| MEDIUM | `index.html:91`, `en/index.html:89` (+ Person blocks ×7) | Duplicate stale `#organization` (live-404 qiita-org in sameAs, missing prtimes) conflicting with the corrected block; `github.com/hajimeataka` live-404 in 7 author sameAs blocks. |
+| MEDIUM | `index.html:91`, `en/index.html:89` (+ Person blocks ×7) | Duplicate stale `#organization` (live-404 qiita-org in sameAs, missing prtimes) conflicting with the corrected block; `github.com/<personal-handle>` live-404 in 7 author sameAs blocks. |
 | LOW | `en/apple-watch-obsidian/` | og:image = generic `og/index.png`. |
 | INFO | Both watch LPs | Schema PASS (WebPage+Speakable+Breadcrumb+FAQPage, honest 07-03 dates, 16/16 FAQ parity — best FAQ pages on the site). Opportunity: neither @id-references the rated `#app` entity (anonymous inline `about`; sibling-consistent, no conflicts). |
 | INFO | Eligibility | SoftwareApplication rich-result eligibility (rating+offers) achieved on the 12; ratings store-verified + source-labeled — not the fake-ratings class. FAQ rich results remain gov/health-only (kept for AIO by design). |
@@ -146,7 +146,7 @@ llms.txt banned claim gone, Current-facts line on canon (v3.8 / 4.4·10 / price 
 - **Cloudflare Scrape Shield → Email Obfuscation OFF** (~1 min) — kills the 22 phantom `/cdn-cgi/l/email-protection` internal links Ahrefs counts.
 - **CF Web Analytics decision** — currently CSP-blocked and collecting nothing (see On-Page findings): either whitelist `static.cloudflareinsights.com` or turn the injection off.
 - **PSI API key** — third audit running without field data.
-- **github.com/hajimeataka** — restore the handle or approve removal from the 7 author sameAs blocks.
+- **github.com/<personal-handle>** — restore the handle or approve removal from the 7 author sameAs blocks.
 
 ## Measurement (continuity)
 

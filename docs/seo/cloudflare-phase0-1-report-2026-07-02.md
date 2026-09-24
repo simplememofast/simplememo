@@ -104,7 +104,7 @@ curl -I  https://simplememofast.com/captio/         # → 200
 ### オーナー作業(WMT本登録)
 
 1. https://www.bing.com/webmasters にサインイン(Microsoftアカウント)
-2. **「GSCからインポート」**を選択 → Googleアカウント(hajimeataka@gmail.com)で認可 → `simplememofast.com` を選択 → 即時認証完了(DNS変更不要)
+2. **「GSCからインポート」**を選択 → Googleアカウント（オーナーの個人アカウント）で認可 → `simplememofast.com` を選択 → 即時認証完了(DNS変更不要)
 3. Sitemaps で `https://simplememofast.com/sitemap.xml` を送信 → 子サイトマップ3件(ja/en/locales)が認識されることを確認
 4. 数日後、「URL検査」で主要ページ(トップ, /captio/, /obsidian/)のインデックス状況を確認
 
