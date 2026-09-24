@@ -1,5 +1,7 @@
 # Codex への依頼：Captio の「App Store 撤退時期」の誤記、ストア検査の CDN 取り違え、CI を止めている条項マス（2026-09-23）
 
+> **2026-09-24 追記：依頼D（3つの赤が互いの PR を止めている件と、#1552 に隠れた失敗）を末尾に足した。**
+
 依頼元: SimpleMemo Developer（Cowork セッション側）。照合基準: main `b33946b60`。
 A・B は**公開表示の正確さ**の修正、C は**全PRの自動マージを止めている CI の赤**で、いちばん急ぐ。
 自律運転の成果点や実験成功には加算しない。3件は独立しているので、別PRにしてよい。
@@ -156,3 +158,51 @@ MakeUseOf への訂正提案だけは告知どおり「約2年前に撤退、202
    （`appVersionNote` の方針どおり、人が実物を読んで動かす欄であれば、その手順に従う）。
 
 **反証条件:** キャッシュ回避を入れても Node から 5.8.66 が返り続けるなら、原因は CDN ではない。
+
+---
+
+## 依頼D（2026-09-24 追加）. 赤が長引くほど、日付で落ちる検査が増える —— 3つの赤が互いの PR を止めている
+
+2026-09-24 の時点で、main と全 PR を止めている赤は**3つ**ある（依頼C の `Corporate obligations` だけではない）。
+main（`b33946b`）で SEO Validation の全手順を手元で流して確かめた（WebKit の導入と report-only の横スクロール検査の2本は除く。
+手元だけで落ちた2本は、サンドボックスの `GIT_CONFIG_COUNT` が原因で、CI では通っている）。
+
+| 手順 | 落ちている理由 | 直す PR |
+| --- | --- | --- |
+| `Mention watch cadence`（44番目） | 言及ウォッチの最新が 2026-09-13（上限10日を超えた。**9/24 から**） | #1552（draft）が 9/24 のスナップショットを足している |
+| `Corporate obligations`（98番目） | 規約の条項マス16件が、改定後14日を過ぎても読み直されていない | 人の読み直し（依頼C） |
+| `Autopilot page vs ledger` | `/autopilot/` の点数が日付だけで古くなる（CLAUDE.md の既知の形） | #1551（9/24 の日次同期） |
+
+**どの PR も、ほかの2つの赤で落ちる**（#1552 は 98番目で、#1551 は 44番目で、規約を直す PR は 44番目と #1551 の分で）。
+自動マージは緑の PR しか入れないので、**別々の PR のままでは、どれも永久に入らない。**
+同じ日に作って同じ日に入れる1本にまとめるか、オーナーが1回だけ手でマージするしかない（どちらにするかはオーナーの判断）。
+
+### 待つほど増える（時計だけを進めた試算）
+
+main に 9/24 のスナップショットを足した状態で、Node の `Date` だけを先の日付に固定して全手順を流した
+（データは今のまま動かない前提。Python 側の日付は動かしていない）。
+
+| 日付（JST 正午） | 新しく落ちる手順 |
+| --- | --- |
+| 9/25 | `Autopilot run ledger`（台帳が2日書かれていない・許容1日）、`Waiting progress`（「売上の日次観測範囲と取得の鮮度」が5日止まっている・上限4日） |
+| 9/30 までに | `Routine runs`（list_triggers の写しが3日より古い。9/30 時点で7.2日） |
+| 9/30 | `Corporate obligations` が **16件 → 28件**（anthropic / github / search_console の各4マスが加わる） |
+| 10/07 | `Corporate obligations` が **32件**（appsflyer の4マス）、`Mention watch cadence` が再び（9/24 から13日） |
+| 10/14 | `App release ledger` の自己テスト、`Vendor register`（microsoft が未登録・レビュー日の期限切れ） |
+
+**規約の読み直しは、今の16マスだけでなく 8社32マスをまとめて済ませないと、9/30 と 10/07 にまた止まる。**
+
+### #1552 に隠れている失敗（`Corporate obligations` の後ろなので CI にまだ出ていない）
+
+`growth/lib/company-mentions.test.mjs` は時計を `2026-09-14T05:00Z` に固定したまま、**本物の** `growth/data/mentions/` を読む。
+`companyMentions()` は `now` より後の日付のスナップショットを `future observation` として弾き、`status: 'unavailable'` を返すので、
+**9/14 より後のスナップショットが1件でも入ると** 82番目のテスト
+（*real existing observation feeds both status and selector while unknown source claims stay unknown*）が落ちる。
+#1552 のブランチ（`4768ef3`）で `node --test growth/lib/company.test.mjs …` を流して、202件成功・この1件だけ失敗を確かめた。
+CI では `Autonomous Company source boundaries and recovery` の手順に当たる。
+
+直し方の案：テストの fixture に専用の mentions ディレクトリを持たせるか、`now` を最新スナップショットの日付から決める。
+**`future observation` の検査そのものを緩めるのは、見張りを消すのでやらない。**
+
+こちらで直さない理由：どれも自動運転（Codex / 日次同期）側の持ち場で、#1551・#1552 はいま Codex が動かしている。
+被リンク施策の PR（#1541・#1546・#1547）は、この3つが解けるまで止まったまま待つ。
