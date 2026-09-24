@@ -396,7 +396,7 @@ private func performSendAnimation() {
 <li><strong>Failure</strong>: Retry with exponential backoff (1s, 2s, 4s, 8s...)</li>
 <li><strong>Offline</strong>: Monitor connectivity with NWPathMonitor, auto-resend when restored</li>
 </ol>
-<p>The critical point is that <strong>the message is saved to the Outbox before the network send</strong>. This means even if the app crashes suddenly or the device loses power, the message is never lost.</p>
+<p>The critical point is that <strong>the message is saved to the Outbox before the network send</strong>. This means even if the app crashes suddenly or the device loses power, the message is still in the Outbox.</p>
 <p>Messages stored in the Outbox are protected with AES-GCM encryption using CryptoKit. Encryption keys are stored in the Keychain, inaccessible from outside the app's sandbox.</p>
 <pre><code>// OutboxManager.swift
 func enqueue(message: OutboxMessage) throws {
@@ -435,7 +435,7 @@ const RATE_LIMITS = {
 };</code></pre>
 <p>By applying rate limits at three layers -- device, IP, and global -- we can block both single device runaway and botnet attacks.</p>
 <h3>Idempotency Guarantee</h3>
-<p>To prevent duplicate sends due to network instability, each message is assigned a UUID, and the Relay API performs duplicate checking. If the same UUID is resent, subsequent attempts return a success response without actually sending the email. Combined with the Outbox pattern's retry mechanism, this ensures users never receive the same memo twice.</p>
+<p>To prevent duplicate sends due to network instability, each message is assigned a UUID, and the Relay API performs duplicate checking. If the same UUID is resent, subsequent attempts return a success response without actually sending the email. Combined with the Outbox pattern's retry mechanism, this keeps users from receiving the same memo twice.</p>
 </section>
 <!-- Section 6 -->
 <section id="en-section6">
@@ -593,7 +593,7 @@ func applyLanguageChange() {
 </div>
 <div class="related-card__desc">
 
-<span lang="en">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</span>
+<span lang="en">Instant UI clear on send, with unsent messages kept and retried. The full AES-GCM encrypted Outbox pattern.</span>
 </div>
 </a>
 <a class="related-card" href="/en/devlog/relay-api-design">

@@ -577,7 +577,7 @@
 <div class="info-card__desc">Protects the entire infrastructure. A global cap of 300 per day serves as the final line of defense against any attack pattern.</div>
 </div>
 <p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This minimizes latency for legitimate requests while reliably blocking unauthorized access.</p>
-<h2>5. Idempotency: Ensuring Memos Never Arrive Twice</h2>
+<h2>5. Idempotency: Keeping Memos from Arriving Twice</h2>
 <p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
 <p>Idempotency guarantees solve this problem:</p>
 <ul>
@@ -586,7 +586,7 @@
 <li>If a request with the same message ID arrives again, the email is not sent a second time</li>
 <li>A success response is returned to the client (notifying that it was already sent)</li>
 </ul>
-<p>With this design, even if retries occur due to network instability, the same memo will never be delivered twice. This is a critical design decision for maintaining user trust.</p>
+<p>With this design, even if retries occur due to network instability, the relay does not send the same memo twice. This is a critical design decision for maintaining user trust.</p>
 <h2>6. The Edge Computing Advantage</h2>
 <p>The primary reason for choosing Cloudflare Workers as our email infrastructure is the fundamental advantages of edge computing.</p>
 <div class="info-card">
@@ -642,7 +642,7 @@
 </a>
 <a class="cross-links__item" href="/en/devlog/outbox-architecture">
 <div class="cross-links__item-title">Outbox Architecture: Designing Against Message Loss</div>
-<div class="cross-links__item-desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+<div class="cross-links__item-desc">Instant UI clear on send, with unsent messages kept and retried. The full AES-GCM encrypted Outbox pattern.</div>
 </a>
 <a class="cross-links__item" href="/en/devlog/uikit-vs-swiftui">
 <div class="cross-links__item-title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
