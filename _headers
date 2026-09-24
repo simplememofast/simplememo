@@ -69,6 +69,12 @@
   Content-Type: application/xml; charset=utf-8
   Cache-Control: public, max-age=3600
 
+# Developer feed (RSS 2.0), referenced from the iOS Dev Directory listing.
+# Content-Type only: Cache-Control stays with the /* rule (no-cache), so the
+# additive-headers problem described above for /en/* does not come back.
+/en/devlog/feed.xml
+  Content-Type: application/rss+xml; charset=utf-8
+
 # /admin/* is gated by Cloudflare Access (Zero Trust). The middleware in
 # functions/admin/_middleware.js also forces these headers on its responses,
 # but this rule covers any static asset under /admin/ (e.g. /admin/bg/*.jpg)
