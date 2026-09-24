@@ -27,7 +27,7 @@ Scope: 270 HTML files + `llms.txt` in `wt/` (source @ 0a4bd04c), served DOM from
 | #20 robots-meta stragglers ×18 | HELD | 0 pages without robots meta |
 | llms.txt Last-updated stamp (LOW, 07-07) | REGRESSED (same defect, new dates) | header 2026-08-20 set 08-21 (2e177e99); facts line changed 08-25 (16e9a78a) and 09-02 (49161797) without the header moving — F-12 |
 | #8 cargo-cult font preloads (10 inline-CSS pages) | HELD | 0 font preloads on all 10 (`vs/mem` now lives at `vs/memo-post`) |
-| Person sameAs `github.com/hajimeataka` (live-404) | HELD | all Person sameAs now `github.com/simplememofast` |
+| Person sameAs `github.com/<personal-handle>` (live-404) | HELD | all Person sameAs now `github.com/simplememofast` |
 
 ## 3. Findings
 

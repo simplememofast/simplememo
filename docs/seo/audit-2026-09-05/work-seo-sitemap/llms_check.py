@@ -1,6 +1,6 @@
 import json, re
 from pathlib import Path
-S = Path('/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
+S = Path('/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad')
 txt = (S/'wt/llms.txt').read_text()
 crawl = {json.loads(l)['url']: json.loads(l) for l in open(S/'crawl/crawl.jsonl')}
 sm = json.load(open(S/'work-seo-sitemap/llms_dummy.json')) if False else None

@@ -1,7 +1,7 @@
 import json, re, os, unicodedata
 from collections import Counter, defaultdict
 from bs4 import BeautifulSoup
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 WT=S+'/wt'; P=S+'/crawl/pages'; W=S+'/work-seo-schema'
 R=json.load(open(W+'/census.json'))['results']
 def norm(s): return re.sub(r'[^\w]','',unicodedata.normalize('NFKC',s or '')).lower()

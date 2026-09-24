@@ -1,6 +1,6 @@
 import re,os,json
 from bs4 import BeautifulSoup
-S='/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
+S='/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad'
 html=open(S+'/wt/autopilot/index.html',encoding='utf-8').read()
 soup=BeautifulSoup(html,'html.parser')
 for t in soup(['script','style','noscript','nav','footer','header']): t.decompose()
