@@ -46,7 +46,7 @@
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
 | 発見 | This Week in Obsidian（週刊ニュースレター・Substack） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 #38 に掲載** | **dofollow**（本文の `<a>` に rel なし・meta robots / X-Robots-Tag なし）→ `https://simplememofast.com/en/resources/obsidian-inbox/` | https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38 | — | 2026-09-23 に発見（§5.17）。公式の提案テンプレート（z08-studio/this-week-in-obsidian#8、simplememofast 名義）経由。GitHub 側の issue とアーカイブの .md は nofollow。**2件目の提案は出さない** |
 | 発見 | Swift Package Index | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-07 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/voice-input/`（README 内。README 部分は後から読み込まれ、初回 HTML には無い） | https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic | — | 2026-09-23 に発見（§5.17）。PackageList#15105 → 自動 PR #15107 がマージ。参照ドメインとしては nofollow なので価値は小さい |
-| 追加 | iOS Dev Directory（Dev Log） | SUBMISSION | SUBMITTED | 2026-09-23 | no | pending（一覧のリンクは **dofollow**：サーバーの HTML で rel なし・meta robots なし） | https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432 | メンテナのマージ待ち（ほぼ毎日マージされている） | マージ後に https://iosdevdirectory.com/ で自社リンクを実測。フィード公開後に `feed_url` を足す PR（§5.19） |
+| 追加 | iOS Dev Directory（Dev Log） | SUBMISSION | SUBMITTED | 2026-09-23 | no | pending（一覧のリンクは **dofollow**：サーバーの HTML で rel なし・meta robots なし） | https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432 | メンテナのマージ待ち（ほぼ毎日マージされている） | マージ後に https://iosdevdirectory.com/ で自社リンクを実測。**2026-09-24：フィードの公開（#1546）を確かめ、#1432 に `feed_url` を追加済み**（§5.26） |
 | 追加 | Indie Dev Monday（Look at me 欄） | SUBMISSION | SUBMITTED_EMAIL | 2026-09-23 | no | pending（号内リンクは大半が rel なし＝dofollow） | https://indiedevmonday.com/ | 採用は編集者次第。返事は来ないこともある | 新しい号（https://indiedevmonday.com/issues ）に載ったかを見る。催促しない（§5.19） |
 | 候補 | Uneed / Microlaunch / Fazier | SELF_REGISTER | 未登録（GPT 依頼文を用意） | — | — | 3つとも公開ページの「Visit website」が **dofollow**（2026-09-23 実測） | https://www.uneed.best/ ・ https://microlaunch.net/ ・ https://fazier.com/ | アカウント作成が要る（こちらでは作らない） | オーナーが GPT に依頼文を渡す（オーナー判断待ち #15） |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
@@ -1187,6 +1187,48 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
   サイト内でも `en/send-email-to-yourself/` は「約1.0秒」、`en/blog/best-note-to-self-apps-2026` は「0.4s」で食い違う（判断待ち #26）。
 - Captio 以外のページの「永久保存」（`/line-keep/` など）や「送信前に暗号化」（英語の比較ページに多数）も、英語版の修正の基準で見ると言い過ぎ（判断待ち #27）。
 
+## 5.26 赤が解けてからの半日（2026-09-24 午後）：main に8本、言い過ぎの直し、iOS Dev Directory にフィード
+
+### オーナー判断（午後、選択式）
+
+- **規約の読み直し（#21）**：版が変わった3社の抜き書きを見て **「12マスとも前回どおり」**、残る5社20マスも「前回どおり」→ 32マスを付け直した（#1555）。
+- **3つの赤（#22）**：#1555 で1本にまとめて解いた。**#1553（#23）**は「赤が解けたら自動マージ」。
+- **残り3件（#25〜#27）**：Reddit の下書きを直す／日本語 `/captio-alternative/` の速度を英語版に合わせる／他ページの言い過ぎを洗い出して直す —— **3つとも**。
+- **規約の指紋**：「本文だけに絞る PR を作る」→ #1560。**定期タスク（#24）**：オーナーがデスクトップの一覧を自分で見る。
+
+### main に入ったもの（2026-09-24、JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 14:24 | [#1555](https://github.com/simplememofast/simplememo/pull/1555) | CI の3つの赤をまとめて解く（規約32マスの付け直し・言及ウォッチ・日次同期・テストの時計・sitemap） |
+| 14:50 | [#1556](https://github.com/simplememofast/simplememo/pull/1556) | Reddit／note 返信の下書き20本の事実・名乗り・表現（#25） |
+| 14:53 | [#1553](https://github.com/simplememofast/simplememo/pull/1553) | Captio の事実（依頼A）。日本語 `/captio-alternative/` の速度の扱いも英語版に合わせて同じ PR に入れた（#23・#26） |
+| 14:56 | [#1546](https://github.com/simplememofast/simplememo/pull/1546) | 開発記事の RSS フィード。公開を確認（`application/rss+xml`、7件） |
+| 15:16 | [#1559](https://github.com/simplememofast/simplememo/pull/1559) | サービス終了リスク記事の `dateModified` |
+| 15:39 | [#1560](https://github.com/simplememofast/simplememo/pull/1560) | 規約の指紋を本文だけに取る（メニューの揺れで人の判定を戻さない）＋ search_console を日本版に |
+| 15:57 | [#1561](https://github.com/simplememofast/simplememo/pull/1561) | （Codex）AppsFlyer の見張りを公開 MSA に。main で週次取得と同じ処理を流し、**11社とも unchanged**（9/28 の週次で戻るマスは無い見込み） |
+| 16:10 | [#1562](https://github.com/simplememofast/simplememo/pull/1562) | サイトの言い過ぎ 第1弾（35ページ：本文の保存・配達の保証・測定条件・「外部メールAPIからの脱却」）（#27） |
+
+ほかに #1557・#1558・#1548（運用・Codex）も入った。
+
+### 出したもの
+
+- **[#1564](https://github.com/simplememofast/simplememo/pull/1564) 言い過ぎ 第2弾（検証が通れば自動マージ）**：比較記事2本（英 `best-note-to-self-apps-2026`・日 `email-yourself-app-comparison`）。
+  英語版は**リンク切れ5本**（Pigeon・EmailMe・MeMail・Note to Self Mail・Apple Notes）と、App Store の説明と逆の記述（Pigeon の料金・添付・宛先、MeMail は有料、EmailMe の「無料・課金なし」）が見つかった。
+  他社の事実は 9/24 に App Store と公式情報で確かめ直し、確かめられない点は「Not verified here／ここでは未確認」。記録の無い計測（端末・回数・秒数）は表ごと外した。
+  **9/24 のうちにマージされなければ sitemap の作り直しが要る。**
+- **iOS Dev Directory [#1432](https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432) に `feed_url` を追加**（1行。相手のスキーマで検査済み。フィードと一覧の URL はどちらも 200 でリダイレクトなし）。PR 本文の「フィードはまだ無い」も直した。メンテナのワークフロー承認待ちは変わらない。
+
+### 意外な残タスク（午後に見つけたもの）
+
+| 対象 | 分かったこと | 対応 |
+| --- | --- | --- |
+| **#1547（開発記事）** | 9/24 11:24 に**同じアカウントで draft に戻っている**（こちらの操作ではない）。待つ理由だった規約の読み直し（#18）は #1555 で済んだ。公開するなら、#1546・#1562 の後なので、フィード（`EXTRA_PAGES`）への追加と sitemap の作り直しが要る | 判断待ち #29 |
+| **公開リポジトリの実名** | オーナー個人のユーザー名が `docs/` の31ファイル・40か所に残る（手元の作業パス、個人の Gmail アドレス4か所、`github.com/` のハンドル）。サイトの HTML には無い。今の版から消しても履歴には残る | 判断待ち #30 |
+| 宣伝文句 | トップなどの「起動 0.4秒」（記録はウォーム起動）、「Never lose an idea」系の見出し、開発記録の題「Zero Message Loss」（フィードにも出る）、「永久保存」の見出し | 判断待ち #31 |
+| 言い過ぎの次の候補 | `en/send-email-to-yourself/` の Pigeon の料金・オフライン（今日の App Store の説明と合わない）、比較ハブのカード（「実測検証」「Fastest 0.4s」）、`en/vs/ios-shortcuts/`「オフラインでは黙って失敗」、`vs/mail-to-self/` | 判断待ち #32 |
+| 他人の PR | #1552（言及ウォッチ）・#1551（9/24 の日次同期）は #1555 に同じ中身が入った。#1542・#1543・#1550 は赤の時期に作られたまま | 持ち主（Codex・運用）の判断。こちらは触らない |
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1399,16 +1441,20 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 13 | ~~美崎様へのメールの訂正（「1か月無料・請求なし」と送ったが、実際は1年無料・自動更新は未確認）~~ → **2026-09-23 判断：訂正しない** | — | 残るリスク：自動更新する設定なら、2027年9月ごろに請求が始まる（§5.14） |
 | 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
 | 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
-| 16 | main の CI（#11）が直ったあとの #1546 の最新化 | — | 直ったと分かれば、こちらで Update branch → 自動マージ → iOS Dev Directory に `feed_url` を足す PR まで進める |
-| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） → #19 で判断済み |
-| 18 | ~~記事 #1547・RSS #1546 を、規約の読み直しを待たずに手動でマージするか~~ → **2026-09-24 判断：待つ（規約の読み直しを先に）**（§5.22） | 規約の条項の読み直しは人の判断 | 読み直しを反映する PR には、同じ日の `/autopilot/` の更新も入れないと main が緑にならない（§5.22）。緑になったら、こちらで3本の PR を最新化し、#1547 の日付を公開日に直す |
+| 16 | ~~main の CI（#11）が直ったあとの #1546 の最新化~~ → **2026-09-24 14:56 マージ**（フィードの公開を確認） | — | 同日、iOS Dev Directory #1432 に `feed_url` を追加した（§5.26） |
+| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） → #19 で判断済み **→ 9/24 11:24 に同じアカウントで draft に戻っていた（#29）** |
+| 18 | ~~記事 #1547・RSS #1546 を、規約の読み直しを待たずに手動でマージするか~~ → **2026-09-24 判断：待つ（規約の読み直しを先に）**（§5.22） | 規約の条項の読み直しは人の判断 | 読み直しを反映する PR には、同じ日の `/autopilot/` の更新も入れないと main が緑にならない（§5.22）。緑になったら、こちらで3本の PR を最新化し、#1547 の日付を公開日に直す **→ 読み直しは #1555（9/24 14:24）で済んだ** |
 | 19 | ~~公開後に記事をどこへ出すか~~ → **2026-09-24 判断：iOS Dev Weekly に提案＋dev.to に転載** | — | 公開を確かめてから実行する（手順と文面は `docs/seo/post-publication-drafts-2026-09-24.md`）。iOS Dev Directory にフィード付きで載っていれば、iOS Dev Weekly のフォームは使わない |
 | 20 | SourceForge のアカウント有効化（2026-09-23 23:53 に確認メール） → **2026-09-24 判断：オーナーが有効化する** | 有効化はアカウント作成の一部なので押さない | 有効化とプロジェクト公開のあと、rel と robots を実測して §1 に記録する |
-| 21 | ~~規約の読み直しの範囲~~ → **2026-09-24 判断：8社32マスをまとめて（オーナー）** | 条項の判定は人の判断 | 版が変わった3社12マスの本文と、版が同じ5社20マスの確認材料を用意した（依頼D）。判定を受け取ったら `data/corporate-obligations.json` に記録する |
-| 22 | ~~3つの赤の解き方~~ → **2026-09-24 判断：Claude がまとめ役** | 規約の判定そのもの | 読み直しが終わった日に、#1552 の中身・テストの直し・その日の同期・sitemap を1本にまとめて出す（手元の通し稽古は済み） |
-| 23 | ~~依頼A を誰が直すか~~ → **2026-09-24 判断：Claude が PR を作る** → 同日 [#1553](https://github.com/simplememofast/simplememo/pull/1553) を出した（§5.25） | — | main の赤が解けた日に、まとめの PR のあとで Update branch → sitemap を作り直して足す |
-| 24 | dev.to と note の投稿の停止 → **2026-09-24 調査：2つのタスクだけが 9/18〜19 から動いていない**（X の自動返信は今日も動く。§5.25） | タスクの記録（`~/Documents/Claude/Scheduled`）はこのセッションに付与できない | デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見てもらうか、そのフォルダをフォルダ選択でつないでもらえれば、記録から原因を確定する |
-| 25 | `admin/reddit/drafts.json` の古い Captio の事実・「spiritual successor」・名乗り方（§5.25） | 生成元ごとの書き直しは運用の判断 | 使わない印を付けるか、生成元を直して作り直す PR |
-| 26 | 日本語 `/captio-alternative/` の「実測」速度比較と「起動0.4秒」（英語版は 9/6 に外した） | 速度の数字の扱いは人の判断 | 英語版に合わせる PR |
-| 27 | Captio 以外のページの「永久保存」「送信前に暗号化」など（§5.25） | 範囲が広い | ページごとの一覧を作って直す PR |
+| 21 | ~~規約の読み直しの範囲~~ → **2026-09-24 判断：8社32マスをまとめて（オーナー）** → 同日、**3社の抜き書きを見て「12マスとも前回どおり」**、5社20マスも前回どおり | — | #1555 で記録（マージ済み） |
+| 22 | ~~3つの赤の解き方~~ → **2026-09-24 判断：Claude がまとめ役** → 同日 [#1555](https://github.com/simplememofast/simplememo/pull/1555) でまとめて解いた（14:24 マージ） | — | — |
+| 23 | ~~依頼A を誰が直すか~~ → **2026-09-24 判断：Claude が PR を作る** → 同日 [#1553](https://github.com/simplememofast/simplememo/pull/1553)（14:53 マージ） | — | — |
+| 24 | dev.to と note の投稿の停止 → **2026-09-24 調査：2つのタスクだけが 9/18〜19 から動いていない**（X の自動返信は今日も動く。§5.25） | タスクの記録（`~/Documents/Claude/Scheduled`）はこのセッションに付与できない | デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見てもらうか、そのフォルダをフォルダ選択でつないでもらえれば、記録から原因を確定する **→ 9/24 判断：オーナーがデスクトップの定期タスク一覧を自分で見る** |
+| 25 | ~~`admin/reddit/drafts.json` の古い Captio の事実・「spiritual successor」・名乗り方~~ → **2026-09-24 判断：直す** → 同日 [#1556](https://github.com/simplememofast/simplememo/pull/1556)（14:50 マージ） | — | — |
+| 26 | ~~日本語 `/captio-alternative/` の「実測」速度比較と「起動0.4秒」~~ → **2026-09-24 判断：英語版に合わせる** → #1553 に入れた（14:53 マージ） | — | — |
+| 27 | ~~Captio 以外のページの「永久保存」「送信前に暗号化」など~~ → **2026-09-24 判断：洗い出して直す** → 第1弾 [#1562](https://github.com/simplememofast/simplememo/pull/1562)（35ページ、16:10 マージ）、第2弾 [#1564](https://github.com/simplememofast/simplememo/pull/1564)（比較記事2本） | 見出しや宣伝文句の言い方は人の判断（#31） | 次の候補は #32 |
 | 28 | dev.to に残る重複下書き（9/16 の記事と同じ題） | 削除は行わない | — |
+| 29 | **開発記事 #1547 が draft に戻っている**（9/24 11:24、同じアカウント。§5.26） | 公開の判断 | Ready に戻すなら、こちらでフィード（`EXTRA_PAGES`）への追加と sitemap の作り直しを入れてから Ready にする（検証が通れば自動マージ）。その後 #19（iOS Dev Weekly・dev.to） |
+| 30 | **公開リポジトリの `docs/` に残るオーナー個人のユーザー名**（31ファイル・40か所：作業パス、個人の Gmail アドレス、`github.com/` のハンドル） | 履歴の書き換えは行わない | 今の版から伏せ字にする PR（履歴には残る） |
+| 31 | 宣伝文句：「起動 0.4秒」（記録はウォーム起動）、「Never lose an idea」系の見出し、開発記録の題「Zero Message Loss」、「永久保存」の見出し | 見出し・宣伝の言い方は人の判断 | 決まった言い方で一括して直す PR |
+| 32 | 言い過ぎの第3弾（`en/send-email-to-yourself/` の他社の料金・オフライン、比較ハブのカード、`en/vs/ios-shortcuts/`、`vs/mail-to-self/`） | — | 第2弾と同じやり方（公式情報で確かめ直す）で PR |
