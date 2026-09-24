@@ -1067,6 +1067,18 @@
       "expr": "current",
       "disposition": "検体の生成",
       "note": "2026-09-05: リモートブランチrefが404で消えている検体を生成する。マージ済みPRの照合はhead SHAで続行し、open PRのref欠落はunknownにする。"
+    },
+    {
+      "file": "scripts/vendor-terms.mjs",
+      "expr": "bodyScope",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-09-24: scopeKey の `bodyScope === undefined || bodyScope === null` → 'page'。**設定が無い行はページ全体を見る**（いちばん広い範囲・これまでどおりの動き）ので、範囲の設定が欠けても見張りは外れない。読めない設定（空文字・from だけ等）は null を返し、scopeProblems が PR の時点で落とす（CI の `vendor-terms.mjs --selftest` が台帳も見る）"
+    },
+    {
+      "file": "scripts/vendor-terms.mjs",
+      "expr": "body",
+      "disposition": "向きが逆",
+      "note": "2026-09-24: reconcile の `body === null` / `!bodyShape.ok`。**範囲が取れない・本文らしくないときに発火する側**で、戻す（changed）へ倒す判定。消える方向ではない —— 取れなかった範囲を unknown や unchanged にしない（ページ全体が前回と1文字も同じときだけ戻さない）。自己テスト「<main> が消えたのに戻していない」「殻の <main> の指紋を『前回と同じ本文』と読んでいる」で固定し、unknown に変える壊しで6件落ちることを確認した"
     }
   ]
 }
