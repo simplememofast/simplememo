@@ -86,10 +86,19 @@
 | This Week in Obsidian（2026-09-23 追記） | Substack `/p/this-week-in-obsidian-38` | **なし＝dofollow**（サーバーが返す HTML で確認） | 指定なし（X-Robots-Tag も無し） |
 | Swift Package Index（2026-09-23 追記） | `/simplememofast/ios26-speechanalyzer-live-mic` | `nofollow`（README 内） | 指定なし |
 | dev.to（2026-09-24 追記・台帳の外の既存リンク） | `/simple_memo` の記事33本のうち16本 | **22本すべて nofollow なし＝dofollow**（サーバーが返す HTML で確認） | `max-snippet:-1, …` のみ（noindex なし） |
+| はてなブログ（2026-09-24 追記・台帳の外の既存リンク） | `simplememofast.hatenablog.com` の本文（フィード30件中6件にサイトへのリンク） | **なし＝dofollow**（本文の `<a>` に rel なし） | `max-image-preview:large` のみ |
+| WordPress.com（2026-09-24 追記） | `simplememofast.wordpress.com`（記事は 2026-09-06 の1本だけ） | **なし＝dofollow** | 指定なし |
+| note（2026-09-24 追記・記事本文） | `/simplememo/n/…` 51本の本文リンク82本 | `noopener nofollow`（**82本すべて**） | `max-image-preview:large` |
+| Zenn（2026-09-24 追記） | `zenn.dev/simplememo` の記事12本 | `nofollow noopener noreferrer`（34本すべて） | 指定なし |
+| Qiita（2026-09-24 追記） | `qiita.com/simplememo` の記事 | `nofollow noopener` | `max-image-preview:large` |
+| Medium（2026-09-24 追記） | `medium.com/@simplememo.com` の記事 | `noopener ugc nofollow` | `index,follow` |
+| Hashnode（2026-09-24 追記） | `simplememo.hashnode.dev`（記事0本。他ブログの記事で実測） | `noopener noreferrer nofollow ugc` | — |
+| Substack（2026-09-24 追記） | `simplememo.substack.com` の記事（2026-03-27 の1本だけ） | 本文のリンク自体は rel なし | **`noindex`**（記事ページ）→ 効果なし |
 
 **現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
 > **2026-09-23 追記：** 台帳の外で 2026-09-06 に出ていた This Week in Obsidian #38（Substack）も dofollow だった（§5.17）。dofollow の確認は**2本**になった。
 > **2026-09-24 追記：** 台帳の外で投稿されていた dev.to（`simple_memo`、2026-05-08〜09-18）からのリンク22本も dofollow だった（§5.21）。この作業で得たリンクではないが、dofollow の参照ドメインとしては**3つ目**。
+> **2026-09-24 追記（2）：** 自分で記事を出せる投稿先を全部実測した（§5.27）。**dofollow で定期投稿できるのは dev.to とはてなブログの2つだけ**（WordPress.com も dofollow だが1本で止まっている）。note・Zenn・Qiita・Medium・Hashnode は本文のリンクまで nofollow、Substack は記事ページが noindex だった。
 
 Product Hunt のプロフィールは `rel` に nofollow が無いが、ページ自体が `noindex, nofollow` を
 返すため評価は期待しない（**ログイン状態での観測**であり、クローラ向けの応答は未確認）。
@@ -1229,6 +1238,76 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 言い過ぎの次の候補 | `en/send-email-to-yourself/` の Pigeon の料金・オフライン（今日の App Store の説明と合わない）、比較ハブのカード（「実測検証」「Fastest 0.4s」）、`en/vs/ios-shortcuts/`「オフラインでは黙って失敗」、`vs/mail-to-self/` | 判断待ち #32 |
 | 他人の PR | #1552（言及ウォッチ）・#1551（9/24 の日次同期）は #1555 に同じ中身が入った。#1542・#1543・#1550 は赤の時期に作られたまま | 持ち主（Codex・運用）の判断。こちらは触らない |
 
+## 5.27 DoFollow の定期投稿先の棚卸しと、投稿の GitHub Actions への移設（2026-09-24〜25）
+
+オーナーの依頼：「simplememofast.com の DoFollow リンクを獲得するために定期投稿するべきアカウントを過去の履歴からすべて見直して、
+定期タスク化していない場合は適切かつ最大限パフォーマンスし必ず自動化が成功するように設定して、設定済みのタスクについても
+自動投稿が直近で失敗していたら必ず自動化が成功するように修正もしくは新しく立ち上げて」。
+
+### 棚卸し（公開面で実測。2026-09-24 夜）
+
+| 投稿先 | 自社リンク | 記事数 | 最後の公開 | 状態 |
+| --- | --- | ---: | --- | --- |
+| dev.to `simple_memo` | **dofollow** | 34 | 9/24 18:01（Foundation Models の短縮転載・§5.22 の告知） | 定期の連載は 9/16 が最後。3〜4日おきだった |
+| はてなブログ `simplememofast` | **dofollow** | 30+ | 9/22 21:29 | 9/8 → 9/17 に9日空き。**同じ題材の「Day20」が2本**（9/8・9/17） |
+| WordPress.com `simplememofast` | **dofollow** | 1 | 9/6 | 1本で止まっている |
+| Substack `simplememo` | 記事ページが noindex | 1 | 3/27 | 効果なし |
+| note / Zenn / Qiita / Medium | nofollow | 51 / 41 / 20+ / 10+ | 9/19 / 9/22 / 9/19 / 9/22 | DoFollow の対象外（ブランド・AI 検索向けとしては残る） |
+| X / Reddit / Indie Hackers / Obsidian フォーラム | nofollow（ugc） | — | — | 同上 |
+
+- クラウドの定期タスクに、dev.to・はてな・note・Zenn・Qiita・Medium の投稿タスクは**1件も無い。**全部 Mac のローカル定期タスクで、
+  設定とログ（`~/Claude/Scheduled`）はこのセッションに付与できない保護領域だった（フォルダ要求はシステムが拒否、Claude アプリは画面操作の対象外）。
+  **止まった原因は確定できていない。**9/2〜9/5 を境に、どの媒体も「決まった時刻に3日おき」から「ばらばらの時刻」に変わっている。
+- **過去記事の品質の問題**（DoFollow の維持に直結する）:
+  - リポジトリに出典の無い数値：はてなの「起動187ms」「開封率83%（通知をやめて46%→83%）」、dev.to の「cold start 280 ms」など。
+    公式の値は約0.4秒（ウォーム起動・`data/benchmark.json`）。187ms は 3月の旧計測（iPhone 15 Pro・v1.0）由来の可能性があるが、確かめていない
+  - はてなの 9/17 の記事は「収益は買い切りひとつだけ」と書いている（実際はサブスクリプション。9/8 の記事は正しい価格を書いている）
+  - dev.to の33本のうち AI 開示（Fully Autonomous）が付いているのは2本だけ。多くが一人称の体験談の形
+- **反証として重く見たもの**:
+  - DEV は 2026-08-26 に AI 開示の欄を導入し、「未開示の AI 記事」「合成した内容を本人の体験として出すこと」をアカウント停止の対象と明記した。
+    2022 年のガイドラインは AI 記事の目的が「主に個人のブランディングや SEO 操作」であることも禁じている。**停止されると過去の dofollow リンクごと失う**
+  - Forem のソースで確かめた：`ai_disclosure_level` は API で渡せる（`fully_autonomous` など）。Fully Autonomous は一部のフィードから外れ、
+    関連度も下がるが、**リンクの rel は変わらない**（9/8・9/12 の記事で実測）。ページが noindex / nofollow になるのは記事のスコアが基準未満のとき（`skip_indexing?`）
+  - はてな利用規約 6-3 は「検索サイトが認めていない手段による検索サイト最適化行為」を禁じている。Google のスパムポリシーはリンク目的の大量生成（scaled content abuse）を名指ししている
+  - → **投稿数を増やす方向ではなく、読者に役立つ記事を約3日に1本・正直な開示つきで続ける**のが、DoFollow を最も長く保つやり方と判断した
+
+### オーナー判断（選択式）
+
+- 方式の提案（対象は dev.to とはてな／GitHub Actions＋公式API／正直な開示と事実ガード／各3日に1本）に **「go」**
+- CLAUDE.md の「新しい種類の対外送信は、錠前ができるまで始めない」（同日 18:21 マージ）との関係 → **「既存の種類として継続」**。権限表に名指しで記録した
+- GitHub への反映 → **Chrome で PR を作る**／投稿用の鍵 → **オーナーが自分で Secrets に貼る**（AI は鍵を読まない・入力しない）
+- 旧ローカルタスク → **dev.to・はてなの分は止める**（デスクトップアプリの定期タスク画面でオーナーが行う）
+
+### 作ったもの
+
+- `.github/workflows/devlog-syndication.yml` — 12:17 / 20:47 JST の1日2枠、matrix で dev.to → はてなの順に1本ずつ。手動実行の既定は dry_run
+- `scripts/devlog-syndication.mjs` — 門（緊急停止・**公開面の最新投稿**から66時間・24時間に1本）、文脈、検査、投稿、公開確認。自己テスト18件
+  - **状態ファイルを持たない。**公開面を見るので、旧タスクが投稿しても二重にならず、落ちた枠は次の枠が拾い直す
+  - 検査：本文の数字は記事が宣言した出典ファイルか一次ファイルにあるものだけ（字で書いた数量も同じ）／`check-pr-facts.mjs` の配信原稿の規則／
+    禁止表現・売り込み／人間の開発者を名乗る文・一人称の上限／自社リンクは sitemap の正規URLだけ（1〜2本、はてなは1〜3本）・全リンクの実在／既存記事との題名の近さ／名前一覧との照合（ハッシュ＋Secrets `IDENTITY_DENYLIST`）
+  - 投稿：dev.to は `ai_disclosure_level=fully_autonomous` を付け、公開面で読み戻す（付いていなければ付け直し、それでも駄目なら落とす）。はてなは本文末尾に固定の開示文
+  - 公開確認：公開ページで自社リンクの rel と meta robots を実測し、nofollow / noindex なら落とす
+  - **鍵を持つのは投稿ステップだけ。**執筆（Claude Code）には Read / Write / Edit / Glob / Grep しか渡さない
+- `docs/syndication/RUNBOOK.md` — 執筆の手順書（題材は記事ネタ台帳の種 → 無ければサイトのページ）
+- 台帳：`data/emergency-stop.json`（経路 `syndication`）・`data/credential-expiry.json`（`DEVTO_API_KEY`・`HATENA_API_KEY`、`IDENTITY_DENYLIST` は対象外の欄）・
+  `data/model-routing.json`（`syndication`：sonnet、手直しは opus）・`data/injection-surface.json`・`data/authority-matrix.json`（新しい領域）・`data/autonomy-score.json`（R2）
+
+### 手元で確かめたこと
+
+- `node scripts/preflight.mjs`：失敗は main と同じ環境依存の6件だけ（qrcode 等の未導入）。`seo-check.js` は 0 errors
+- actionlint で新しいワークフローの式を検査（問題なし）
+- 検査の較正：人が書いた見本（英語896語・日本語2,072字）で、英語は通過、日本語は長さだけ不足（下限2,500字）を正しく指摘。数字の捏造・本人の名乗り・旧名は落ちる
+- 公開確認：既存の dev.to とはてなの記事で、dofollow と robots を正しく読めることを確認
+
+### 残ること
+
+- マージ後：dry_run → はてなの実投稿 → dev.to の実投稿（24時間の上限が明けてから）で、公開ページの rel・robots・AI 開示まで確認する
+- 毎日の見張り（クラウドの定期タスク）：両媒体の最後の投稿からの時間・最新記事の rel と robots・Actions の失敗を見て、異常のときだけ通知する
+- **旧ローカルタスクの停止（オーナー）**。止めないと、出典の無い数値を含む記事が出続ける可能性がある
+- 過去記事の誤り（187ms・開封率・「買い切り」など）の訂正をするかは未決（判断待ち #34）
+- WordPress.com（dofollow・1本）は API に OAuth アプリが要るので、今回は対象外（判断待ち #35）
+- GitHub Pages の `simplememofast.github.io`（Developer Hub・dofollow）が旧名「Captio式シンプルメモ」のまま
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1449,7 +1528,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 21 | ~~規約の読み直しの範囲~~ → **2026-09-24 判断：8社32マスをまとめて（オーナー）** → 同日、**3社の抜き書きを見て「12マスとも前回どおり」**、5社20マスも前回どおり | — | #1555 で記録（マージ済み） |
 | 22 | ~~3つの赤の解き方~~ → **2026-09-24 判断：Claude がまとめ役** → 同日 [#1555](https://github.com/simplememofast/simplememo/pull/1555) でまとめて解いた（14:24 マージ） | — | — |
 | 23 | ~~依頼A を誰が直すか~~ → **2026-09-24 判断：Claude が PR を作る** → 同日 [#1553](https://github.com/simplememofast/simplememo/pull/1553)（14:53 マージ） | — | — |
-| 24 | dev.to と note の投稿の停止 → **2026-09-24 調査：2つのタスクだけが 9/18〜19 から動いていない**（X の自動返信は今日も動く。§5.25） | タスクの記録（`~/Documents/Claude/Scheduled`）はこのセッションに付与できない | デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見てもらうか、そのフォルダをフォルダ選択でつないでもらえれば、記録から原因を確定する **→ 9/24 判断：オーナーがデスクトップの定期タスク一覧を自分で見る** |
+| 24 | dev.to と note の投稿の停止 → **2026-09-24 調査：2つのタスクだけが 9/18〜19 から動いていない**（X の自動返信は今日も動く。§5.25） | タスクの記録（`~/Documents/Claude/Scheduled`）はこのセッションに付与できない | デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見てもらうか、そのフォルダをフォルダ選択でつないでもらえれば、記録から原因を確定する **→ 9/24 判断：オーナーがデスクトップの定期タスク一覧を自分で見る**  **→ 9/24 夜：dev.to・はてなの投稿は GitHub Actions へ移すと決まった（§5.27）。旧ローカルタスクの dev.to・はてな分はオーナーが止める** |
 | 25 | ~~`admin/reddit/drafts.json` の古い Captio の事実・「spiritual successor」・名乗り方~~ → **2026-09-24 判断：直す** → 同日 [#1556](https://github.com/simplememofast/simplememo/pull/1556)（14:50 マージ） | — | — |
 | 26 | ~~日本語 `/captio-alternative/` の「実測」速度比較と「起動0.4秒」~~ → **2026-09-24 判断：英語版に合わせる** → #1553 に入れた（14:53 マージ） | — | — |
 | 27 | ~~Captio 以外のページの「永久保存」「送信前に暗号化」など~~ → **2026-09-24 判断：洗い出して直す** → 第1弾 [#1562](https://github.com/simplememofast/simplememo/pull/1562)（35ページ、16:10 マージ）、第2弾 [#1564](https://github.com/simplememofast/simplememo/pull/1564)（比較記事2本） | 見出しや宣伝文句の言い方は人の判断（#31） | 次の候補は #32 |
@@ -1458,3 +1537,6 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 30 | **公開リポジトリの `docs/` に残るオーナー個人のユーザー名**（31ファイル・40か所：作業パス、個人の Gmail アドレス、`github.com/` のハンドル） | 履歴の書き換えは行わない | 今の版から伏せ字にする PR（履歴には残る） |
 | 31 | 宣伝文句：「起動 0.4秒」（記録はウォーム起動）、「Never lose an idea」系の見出し、開発記録の題「Zero Message Loss」、「永久保存」の見出し | 見出し・宣伝の言い方は人の判断 | 決まった言い方で一括して直す PR |
 | 32 | 言い過ぎの第3弾（`en/send-email-to-yourself/` の他社の料金・オフライン、比較ハブのカード、`en/vs/ios-shortcuts/`、`vs/mail-to-self/`） | — | 第2弾と同じやり方（公式情報で確かめ直す）で PR |
+| 33 | 投稿用の鍵を GitHub Secrets に登録（`DEVTO_API_KEY`・`HATENA_API_KEY`、任意で `IDENTITY_DENYLIST`）（§5.27） | 鍵の値を読む・入力することは行わない | 登録されれば、devlog-syndication の dry_run → 実投稿 → 公開面での rel・robots・AI 開示の確認まで進める |
+| 34 | はてな・dev.to の過去記事にある出典の無い数値（起動187ms・開封率83%・「収益は買い切り」など）を訂正するか（§5.27） | 公開済み記事の書き換えは人の判断 | 訂正するなら、記事ごとに正しい値（`data/benchmark.json`・`data/site-constants.json`）と出典を並べた一覧を作る |
+| 35 | WordPress.com（`simplememofast.wordpress.com`・dofollow・1本）を定期投稿の対象に加えるか（§5.27） | 投稿 API に OAuth アプリの登録が要る（アカウント設定の操作） | 加えるなら、同じ門・検査を使う投稿先として devlog-syndication に足す |
