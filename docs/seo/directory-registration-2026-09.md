@@ -26,6 +26,11 @@
   `producthunt-launch.md`）は**未読**である。各サイトの現況は下表のとおり
   一次情報（当該サイト本体）から取り直した。
 
+> **その後の変更（2026-09-22〜23）：** オーナーの指示により、`support@simplememofast.com` からの Gmail 送信と、
+> 窓口が受付を明示している媒体への送信を行っている（§5.8〜§5.12）。上の「メール送信を伴う売り込みを行わない」は
+> 2026-09-19 時点の制約である。`simplememofast/simplememo-ops` は 2026-09-23 にブラウザ経由で読んだ（§5.12）。
+> アカウント作成・パスワード入力・CAPTCHA の回答・有料掲載を行わない点は変わっていない。
+
 ## 1. 登録・申請台帳
 
 | Priority | Service | Type | Status | Submitted | Published | Website backlink | Public URL | Blocker | Next action |
@@ -36,11 +41,19 @@
 | P0-4 | G2 | SELF_REGISTER | BLOCKED | — | — | — | https://sell.g2.com/create-a-profile | セラー登録に **LinkedIn またはビジネスメール認証**が必須。当セッションはアカウントを作成しない | 人が myG2 にビジネスメールで登録 → `/products/new` から無料プロフィール申請（審査3〜5営業日） |
 | P0-5 | Capterra | — | NOT_ELIGIBLE | — | — | — | https://www.capterra.com/legal/listing-guidelines/ | 掲載基準が「personal productivity solutions, product clones and/or personal apps」を除外 | 対象外。GetApp / Software Advice も同系列のため同じ基準とみなす |
 | P0-6 | フリーソフト100（JA-091） | SUBMISSION | SUBMITTED | 2026-09-19 | no | pending | https://freesoft-100.com/about/form_software.html | 掲載まで1〜2か月・不採用時は連絡なし | 11月頃に `freesoft-100.com` 内検索で掲載有無を確認 |
-| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要 | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新 |
+| 既存 | AlternativeTo | — | ALREADY_EXISTS | — | yes | **nofollow**（`rel="nofollow noopener"`） | https://alternativeto.net/software/simple-memo--captio-style/about/ | 編集にはアカウント必要。**2026-09-23 確認：オーナーは iPhone で `SimpleMemoFast`（2026-03-26 登録）としてログイン済み**。代替一覧5件（Pensieve / Email Me App / Note To Self Mail / Captio / Note To Myself）のうち **Captio は経費精算アプリ**のまま。**2026-09-23 夜：代替一覧の件数表示は10件（上の5件は昼の記録。増えたのか数え方の違いかは未確認）で、経費精算の Captio が先頭（3 likes）。Mac の Chrome は未ログイン**（§5.17） | 情報は最新（2026-09-06更新）。App Store リンクの旧スラッグのみ将来更新。経費精算の Captio を代替一覧から外す（オーナー判断待ち #3） |
 | 既存 | Product Hunt | — | ALREADY_EXISTS | — | yes | **ugc**（`rel="noreferrer noopener ugc"`）・当該ページは `noindex, nofollow` | https://www.producthunt.com/products/simple-memo-captio-style | — | 重複ローンチを作らない。下書き1件は未投稿のまま |
 | 発見 | awesome-obsidian（GitHub） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/en/obsidian/` | https://github.com/awesome-obsidian/awesome-obsidian | — | 既に公開済。GitHub の README リンクは常に nofollow なので、価値は awesome 系ミラー（awesome.ecosyste.ms 等）への波及側にある。後日確認 |
+| 発見 | This Week in Obsidian（週刊ニュースレター・Substack） | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-08 #38 に掲載** | **dofollow**（本文の `<a>` に rel なし・meta robots / X-Robots-Tag なし）→ `https://simplememofast.com/en/resources/obsidian-inbox/` | https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38 | — | 2026-09-23 に発見（§5.17）。公式の提案テンプレート（z08-studio/this-week-in-obsidian#8、simplememofast 名義）経由。GitHub 側の issue とアーカイブの .md は nofollow。**2件目の提案は出さない** |
+| 発見 | Swift Package Index | SUBMISSION | **PUBLISHED** | 2026-09-06 | **2026-09-07 マージ済** | あり（**nofollow**）→ `https://simplememofast.com/voice-input/`（README 内。README 部分は後から読み込まれ、初回 HTML には無い） | https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic | — | 2026-09-23 に発見（§5.17）。PackageList#15105 → 自動 PR #15107 がマージ。参照ドメインとしては nofollow なので価値は小さい |
+| 追加 | iOS Dev Directory（Dev Log） | SUBMISSION | SUBMITTED | 2026-09-23 | no | pending（一覧のリンクは **dofollow**：サーバーの HTML で rel なし・meta robots なし） | https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432 | メンテナのマージ待ち（ほぼ毎日マージされている） | マージ後に https://iosdevdirectory.com/ で自社リンクを実測。**2026-09-24：フィードの公開（#1546）を確かめ、#1432 に `feed_url` を追加済み**（§5.26） |
+| 追加 | Indie Dev Monday（Look at me 欄） | SUBMISSION | SUBMITTED_EMAIL | 2026-09-23 | no | pending（号内リンクは大半が rel なし＝dofollow） | https://indiedevmonday.com/ | 採用は編集者次第。返事は来ないこともある | 新しい号（https://indiedevmonday.com/issues ）に載ったかを見る。催促しない（§5.19） |
+| 候補 | Uneed / Microlaunch / Fazier | SELF_REGISTER | 未登録（GPT 依頼文を用意） | — | — | 3つとも公開ページの「Visit website」が **dofollow**（2026-09-23 実測） | https://www.uneed.best/ ・ https://microlaunch.net/ ・ https://fazier.com/ | アカウント作成が要る（こちらでは作らない） | オーナーが GPT に依頼文を渡す（オーナー判断待ち #15） |
 | 追加 | SaaSHub（Memo Inbox） | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.saashub.com/memo-inbox （承認後） | 無料枠のため最大32日待ち | 承認後にロゴ・価格・詳細説明を追記 |
-| 追加 | Indie Hackers Products DB | SELF_REGISTER | BLOCKED | — | — | — | https://www.indiehackers.com/products/new | アカウント `memolife23` が **"Your account cannot create or edit products"** | IH サポートに制限解除を問い合わせる（人の操作1回） |
+| 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
+| 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
+| 追加 | SourceForge（Memo Inbox） | SELF_REGISTER | **外部エージェントに依頼中**（2026-09-23、オーナーが GPT に依頼） | — | — | — | https://sourceforge.net/projects/memo-inbox/ （予定。取れなければ `memoinbox` など） | アカウント作成はこちらでは行わない。依頼文は §5.13 の入力値に、名乗り・有料不可・CAPTCHA は人・GitHub 連携（OAuth）は使わない、を加えたもの | 報告を受けたら公開ページの `rel`・`meta robots` を実測（`curl` は 403 になるのでブラウザで見る） |
+| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
@@ -70,8 +83,14 @@
 | Obsidian フォーラム | `/u/SimpleMemoFast/summary` | `noopener nofollow ugc` | 指定なし |
 | note | `/simplememo` | `noopener nofollow` | 指定なし |
 | awesome-obsidian（GitHub） | リポジトリのREADME | `nofollow`（GitHubの仕様） | — |
+| This Week in Obsidian（2026-09-23 追記） | Substack `/p/this-week-in-obsidian-38` | **なし＝dofollow**（サーバーが返す HTML で確認） | 指定なし（X-Robots-Tag も無し） |
+| Swift Package Index（2026-09-23 追記） | `/simplememofast/ios26-speechanalyzer-live-mic` | `nofollow`（README 内） | 指定なし |
+| dev.to（2026-09-24 追記・台帳の外の既存リンク） | `/simple_memo` の記事33本のうち16本 | **22本すべて nofollow なし＝dofollow**（サーバーが返す HTML で確認） | `max-snippet:-1, …` のみ（noindex なし） |
 
 **現時点で dofollow が確認できているのは SaaSHub の一覧ページ1本だけ。**
+> **2026-09-23 追記：** 台帳の外で 2026-09-06 に出ていた This Week in Obsidian #38（Substack）も dofollow だった（§5.17）。dofollow の確認は**2本**になった。
+> **2026-09-24 追記：** 台帳の外で投稿されていた dev.to（`simple_memo`、2026-05-08〜09-18）からのリンク22本も dofollow だった（§5.21）。この作業で得たリンクではないが、dofollow の参照ドメインとしては**3つ目**。
+
 Product Hunt のプロフィールは `rel` に nofollow が無いが、ページ自体が `noindex, nofollow` を
 返すため評価は期待しない（**ログイン状態での観測**であり、クローラ向けの応答は未確認）。
 ただし AlternativeTo と Product Hunt は実ユーザーのいる媒体なので、nofollow でも掲載価値は残す。
@@ -188,7 +207,7 @@ meta 要素に `.value` を代入しても expando プロパティが生える�
 | 暗号化 | 端末内 Outbox・送信履歴を AES-GCM-256（鍵は Keychain）。**E2EEではない** | `llms.txt`, `/privacy-architecture/` |
 | 会社 | 株式会社ユリカ / YURIKA, K.K.（日本） | `/about/`, iTunes `sellerName` |
 | サポート窓口 | support@simplememofast.com | サイト内 |
-| Captio との関係 | 2024年10月に App Store から消えた Captio の**独立した代替実装**。公式後継でも承認済みでもない | `/about/`, `/en/` |
+| Captio との関係 | Captio のワークフローに着想を得た**独立した代替アプリ**。公式後継でも承認済みでもない。Captio 側の事実は開発元の終了告知どおり「**クラウドサービスは 2024-10-01 に終了**、App Store からは**その告知の約2年前に撤退**」（2026-09-23 訂正。当初この行は「2024年10月に App Store から消えた」と書いていたが、告知と矛盾する —— §5.12） | `/about/`, `/en/`, https://captio.co/ |
 
 **使わなかった数値：** レーティング（`site-constants.json` は 2026-09-05 時点で 4.2/25 だが、
 2026-09-19 の JP Lookup は 4.39/23 を返した。日々動くため登録文面には入れていない）、
@@ -631,6 +650,585 @@ productivity / pkm）がホームページリンクだったのは、それら�
 費用対効果が高い順に SourceForge（Memo Inbox が MIT なので適合）、alternative.me、
 OpenAlternative、F6S。
 
+## 5.12 明示的に受け付けている窓口への送信と、残タスクの棚卸し（2026-09-23）
+
+選んだ基準は1つだけ —— **窓口の文面に、製品情報・プレスリリース・レビュー依頼を受け付けると書いてあること。**
+§5.7 で決めた「受付方針の記載が無い一般の問い合わせ窓口には送らない」はそのまま守っている。
+
+### 送信した8件
+
+| ID | 媒体 | 受け付けている根拠（窓口の文面） | 経路 | 完了表示 |
+| --- | --- | --- | --- | --- |
+| JA-016 | 美崎栄一郎公式サイト | 受付内容に「…商品のご提供などに関するお問い合わせ」 | Googleフォーム | 「回答を記録しました。」 |
+| JA-062 | STUDY HACKER | お問い合わせの種類に **「取材・プレスリリース送付など」** | Googleフォーム | 「回答を記録しました。」 |
+| JA-006 | ushigyu | /advertisement/ に **「記事掲載の確約が無くてもよいのであれば製品・サービスの提供は基本的に歓迎」** | メール（info@ushigyu.net） | Gmail「メッセージを送信しました」 |
+| JA-036 | エンジニアtype | フォーム名が **「取材や情報提供に関するお問い合わせ（エンジニアtype）」**、区分に「情報提供、タイアップ記事などのご相談」 | 専用フォーム（確認画面あり） | 「送信が完了しました。」 |
+| JA-009 | Gadgetouch | /contact/ に **「…プレスリリース・情報提供…などは以下のフォームからお願いします」** | form-mailer（確認画面あり） | 「回答の送信が完了しました。」＋自動返信 |
+| JA-007 | 男子ハック | 「掲載をご希望のテーマ/商品/サービスのご連絡は下記お申し込みフォームより」、アプリのレビュー依頼はアプリへのリンク等を添えるよう明記 | Contact Form 7（種別＝サービスのご紹介（アプリ）） | 「ありがとうございます。メッセージは送信されました。」 |
+| JA-008 | ディレイマニア | **「製品・WEBサービスのレビュー依頼なども受け付けております」** | Contact Form 7 | 「あなたのメッセージは送信されました。ありがとうございました。」 |
+| — | MakeUseOf（英語） | Contact の Editorial Inquiries に **「Topic Ideas, Feedback, Corrections or Suggestions」** | メール（editorial@makeuseof.com） | Gmail「メッセージを送信しました」 |
+
+守ったこと（JA-016 は本文の全文控えを残していないため、下の2〜3点目は残り7件について確認できた範囲）：
+
+- 名乗り・署名は「シンプルメモ開発者／株式会社ユリカ」（英語は *Simple Memo Developer / YURIKA, K.K.*）、返信先は `support@simplememofast.com`。
+  メールは差出人に `Simple Memo <support@simplememofast.com>` を明示選択し、送信直前に `input[name=from]`・件名・本文の長さ・署名を読み戻した。
+  フォームも送信前に入力値を読み戻し、**開発者個人の実名が入っていないこと**を確認した。
+- 数値は送信前に一次情報と照合した：価格・無料枠・トライアルなしは `data/site-constants.json`、対応OS・公開日・アプリ名は iTunes Lookup、
+  0.40秒は `/blog/benchmark-methodology`（iPhone 16e・iOS 26.5.2・ウォーム起動・5回の中央値）。**第三者検証は受けていない**と毎回書いた。
+- 「金銭を対価とする記事広告の依頼ではない」「リンクの指定はしない」「返信不要」を書いた。**掲載の確約ではない**ので `PUBLISHED` には上げていない。
+
+### 媒体ごとの判断
+
+- **ushigyu（JA-006）** — フォームに既定オンのチェック欄があり「送信の前にチェックを外してください」と指示している。
+  **これはボット対策なので操作していない。**ページ自体が「送信がうまくいかない場合は」と併記しているメールアドレスへ送った。
+  「デメリットも正直に書く方針」とあったので、無料枠が1日3通であること・E2E暗号化ではないことを先に書いた。
+- **エンジニアtype（JA-036）** — 前回の記録（汎用フォーム・区分未確認）は誤りで、エンジニアtype専用の情報提供窓口だった。
+  区分名に「タイアップ記事」が含まれるので、本文冒頭で**有償タイアップの相談ではない**と明記した。
+- **Gadgetouch（JA-009）** — 前回の記録（レビュー依頼の可否は明記なし）は、フォーム側だけを見ていたため。
+  サイト側の /contact/ に「プレスリリース・情報提供」の受付が明記されていた。Apple Watch 対応時の PR TIMES リリースを添えた。
+- **男子ハック（JA-007）・ディレイマニア（JA-008）** — どちらも `ASSET_REQUIRED`（比較動画・会議録音機との検証が未作成）だったが、
+  **窓口がアプリのレビュー依頼そのものを受け付けていた**ので、資料なしで成立する用件（アプリの紹介）に絞って送った。
+  男子ハックはプロモーションコードを求めているが**約束はしていない**（有料機能も確認したい場合は知らせてほしい、とだけ書いた）。
+  ディレイマニアの窓口は請負メニュー（レビュー記事執筆依頼など）を兼ねているので、**有償の依頼ではない**と冒頭に書いた。
+  男子ハックは1回目の操作でフォームの状態が `validating` のまま止まり送信要求が出なかった。応答が無いことを確かめてから
+  読み込み直して**1回だけ**送った（二重送信なし）。
+- **MakeUseOf（英語）** — 2012年の記事 *Open, Write, And Send: 5 Alternative Note Apps For iOS Devices* が、
+  Squarespace Note には [No Longer Available] を付けているのに **Captio（$1.99）を現行アプリとして載せたまま**だった。
+  **訂正提案**として、開発元の終了告知（captio.co：App Store からは告知の約2年前に撤退、クラウドサービスは2024-10-01に終了）を示し、
+  あわせて「Captio のワークフローに着想を得た独立アプリを開発している」と開示した（公認・後継とは書いていない）。
+  候補JSONの外（英語媒体）なので、ここにだけ記録する。
+
+### 英語圏メディア（ops リポジトリの TODO にあった4件＋競合1件）
+
+| 媒体 | 結論 | 理由 |
+| --- | --- | --- |
+| MakeUseOf | **送信済み**（上記） | 訂正・提案の受付を明記 |
+| MacStories | **送らない（既送）** | Gmail の送信済みに **2026-09-06 付で編集長宛ての英文ピッチ**がある（別経路で送信済み）。二重に送らない。なお about ページは編集者の個人アドレスのみで、アプリ紹介の受付方針は書かれていない |
+| Zapier Blog | 送らない（オーナー判断） | ゲスト寄稿は受付中。ただし「アプリ比較・ベストアプリ一覧は受け付けない」「**AI生成の文章は不可**」「本人の実務経験に基づくこと」が条件。こちらでは書けない。オーナー本人が書くなら候補 |
+| ろぼいんブログ（roboin.io） | 送らない | 連絡はメール・X の DM。受付が明記されているのは **記事広告（有償）だけ**。有料掲載は買わない |
+| note2selfmail.app | 対象外 | ops の案は「相互リンク／メンション提案」で、禁止事項（不自然な相互リンク契約）に当たる |
+
+ops リポジトリ（`simplememofast/simplememo-ops`、非公開）の `drafts/TODO-seo-next-actions.md`（2026-03-21）は
+ブラウザ経由で読めた。上記以外の項目の現況：NoteApps（§1・訂正コメント承認待ち）、AlternativeTo（下記「見つかった問題」）、
+Indie Hackers / Show HN / Reddit（コミュニティ投稿はアカウント所有者の判断。IH は§6.6のとおり noindex）、
+Toolfinder（有料）、ClickUp Blog・AppSumo（適合が低い）、SaaSHub・Capterra・G2（§1）。
+**March 版のピッチ文面には現在の事実と合わない数値（0.3秒・150ms など）が含まれている可能性があるので、再利用しない。**
+
+### 窓口未確認10件 → 全件確定（`WINDOW_UNVERIFIED` は0件）
+
+実ブラウザで開き直し、トップの全リンクから問い合わせ・運営者情報への導線を抽出した。
+
+| ID | 媒体 | 確定した状態 | 分かったこと |
+| --- | --- | --- | --- |
+| JA-017 | OZPA表4 | `NOT_AVAILABLE` | 問い合わせ・運営者情報への導線なし。外部リンクは X のみ（2026年も更新あり） |
+| JA-020 | SMATU.net | `NOT_AVAILABLE` | 導線なし。最新は2025年12月の1件 |
+| JA-023 | シゴタノ！ | `NOT_ELIGIBLE` | フォームに **「協業・営業・広告・宣伝・情報交換に類するお問い合わせには一切対応しておりません」**。最新記事は2023-08 |
+| JA-040 | PC-Webzine | `NOT_ELIGIBLE` | ダイワボウ情報システムの**IT販売店向けB2B媒体**。外部の情報提供窓口なし |
+| JA-048 | IIJ Engineers Blog | `NOT_ELIGIBLE` | 自社技術者の発信媒体。外部からの窓口なし |
+| JA-066 | THE LANCER | `WINDOW_VERIFIED` | 運営会社のコーポレート窓口のみ（「メディア取材・プレスリリースについて」区分あり）。媒体への掲載受付は書かれていない → 送らない |
+| JA-067 | クラウドワークスのメディア | `WINDOW_VERIFIED_EMAIL_ONLY` | 運営者情報にメールアドレス。受付方針なし → 送らない |
+| JA-085 | SendGrid日本語サイト | `NOT_ELIGIBLE` | 窓口は SendGrid 利用者向け。当アプリの配送は SendGrid ではない |
+| JA-092 | 初心者のためのOffice講座 | `NOT_AVAILABLE` | 「間違いがあれば連絡を」とあるだけで、製品情報の受付は無い |
+| JA-100 | TOMUPのメディア | `WINDOW_VERIFIED` | メールアドレス＋本文だけの汎用フォーム。受付方針なし → 送らない |
+
+### `ASSET_REQUIRED` 51件の制作判断
+
+判断の軸は「資料を作れば被リンクに近づくか」。**送り先が外部からの持ち込みを受け付けていなければ、
+資料を作っても送れない。**そこで11件は窓口を実地で確認し、残りは資料の性質と媒体の種類で分けた。
+各候補の `asset_audit.asset_decision` に理由と工数（S/M/L）を書いてある。
+
+| 判断 | 件数 | ID | 中身 |
+| --- | ---: | --- | --- |
+| `SENT_WITHOUT_ASSET` | 2 | JA-007, JA-008 | 窓口がレビュー依頼を明示的に受け付けていたので、資料なしで送った（上記） |
+| `DEFER_BUILDABLE` | 5 | JA-014, 018, 037, 061, 093 | 記入例・運用図・テンプレート・シートは**こちらで作れる（工数S）**が、送り先に明示の受付窓口が無い（確認済み：014 は有償の相談窓口、018・037 は窓口 404、061 は受付方針なし、093 は導線なし）。窓口が見つかるか、ページ単体でサイトに置く価値があると判断したら作る |
+| `DEFER_OWNER_EVIDENCE` | 17 | JA-019, 022, 039, 052, 057, 071, 078, 079, 080, 081, 083, 084, 086, 087, 088, 089, 090 | 実機での確認・本人の実例・実利用者の事例・社内の判断記録など**実在の証拠**が要る。**作り話で埋められない**ので、オーナー（か実利用者）の協力が前提 |
+| `DEFER_HIGH_COST` | 5 | JA-034, 038, 043, 053, 054 | デモツール・調査・ユーザーテスト・共同調査。工数Lで、被リンクの見込みに割に合わない |
+| `NOT_ELIGIBLE_INHOUSE` | 8 | JA-041, 042, 044, 045, 046, 047, 049, 051 | 自社の技術者・社員が書く媒体（Goodpatch の月次まとめは社内で話題になったものの紹介）。外部の資料を受け付ける前提が無い |
+| `LONG_TERM_ONLY` | 14 | JA-055, 070, 072–077, 094–099 | 出版社・学会・業界団体・NPO。書籍企画・研究発表・共同実証などの**長期共同企画**としてしか成立しない。優先順位は最下位なので今回は着手しない |
+
+**結論：今すぐ作る価値がある資料は無い。**作れるもの（5件）は送り先が無く、送り先がありうるもの（17件）は実在の証拠が要る。
+
+### 既存施策の現況（2026-09-22〜23 に確認）
+
+- **awesome 系 6PR** — すべて Open、メンテナのコメントなし。こちらから追加で送るものは無い。
+- **SaaSHub** — 訂正は反映済みで、リンクは dofollow のまま。**Memo Inbox の掲載ページは noindex でリンクも無い**ので、参照ドメインには数えない（`PUBLISHED` にしない）。
+- **NoteApps.info** — 訂正コメントは承認待ち。
+- **返信** — 届いているのは自動受付だけ（Macお宝鑑定団の受付確認、技術評論社の受付案内、本日の Gadgetouch の自動返信）。人からの返信は0件。
+- **`data/routine-runs.json`** — Codex 側の #1537 で解消済み。`check-routine-runs.mjs --check` は緑（未対応の注意書きは残る）。
+
+### 見つかった問題（4件）
+
+1. **AlternativeTo の Simple Memo の代替一覧に、経費精算アプリの「Captio」（Captio Tech・スペイン）が載っている。**
+   AlternativeTo の `/software/captio/` はこの経費精算アプリで、活動履歴では **`simplememo` アカウントが約7か月前に
+   「Simple Memo の代替」として追加**している。読者には無関係のアプリを案内していることになる。
+   外すにはログインが要るので**オーナー作業**（こちらはパスワードを入力しない）。
+2. **Captio の App Store 撤退時期の誤記がサイト13ファイルにある。**開発元の告知（captio.co）は
+   「App Store からは約2年前に撤退、クラウドサービスは2024-10-01に終了」なのに、サイトは「2024年10月に App Store から削除」と書き、
+   英語版の一部は「開発元は公式発表をしていない」とも書いている。**この台帳の §4 事実表にも同じ誤りがあったので直した。**
+   公開ページの修正は一括編集が向くので **Codex へ回した**（`docs/codex-request-captio-dates-and-store-facts-2026-09-23.md` 依頼A）。
+3. **App Store の公開版が 5.9.9 に上がった（2026-09-22 23:13 UTC）のに、`check-store-facts.mjs --net` は「ずれなし」と出す。**
+   このサンドボックスからは Node の `fetch` が CDN の古い応答（5.8.66）を掴み、`curl` や時刻付きクエリでは 5.9.9 が返った。
+   サイトは26ファイルで 5.8.66 を名乗っている。検査の修正と同期は **Codex へ回した**（同じ依頼文の依頼B）。
+4. **2026-09-23 09:00 JST から、`SEO Validation` の `Corporate obligations` が全PRで落ちている。**
+   `data/corporate-obligations.json` で、規約改定により 2026-09-08 に `unreviewed` へ戻された4社（apple / google_cloud / firebase / registrar）の
+   16マスが猶予14日を越えた（UTC の日付で判定するので 09:00 JST に一斉に赤くなった）。**このPRも含め、`claude/`・`Codex/` の自動マージが止まる。**
+   規約の読み直しは法的判断の欄なので、こちらでは触らず **Codex 依頼の最優先（依頼C）** にした。
+   同じ形で 2026-09-30（anthropic / search_console / github）と 2026-10-07（appsflyer）にも落ちる。
+
+## 5.13 オーナー判断の反映（2026-09-23）
+
+§7 の「オーナー判断待ち」から4点を選択式で確認した。
+
+| 事項 | オーナーの判断 | こちらで実行したこと |
+| --- | --- | --- |
+| CI の赤（`Corporate obligations`） | **Codex に依頼C を渡す** | 依頼文をファイルで渡した。解けたら PR #1541 をリベースで最新化して再検証し、自動マージまで見届ける |
+| 英語圏ディレクトリのアカウント | **SourceForge と alternative.me の2つだけ作る** | アカウント作成はオーナー。入力する文面は下に用意した |
+| 受付方針の記載が無い窓口（15件） | **関連の強い2件（keinolog・Publickey）だけ送る** | Publickey は送信、keinolog は送信がサーバー側で拒否された（下記） |
+| オーナーの手作業 | **すまほん!! に手で送る** | 送信用の本文（名乗り・数値を点検済み）を渡した。送信日を受け取ったら JA-012 を更新する |
+
+AlternativeTo の誤った Captio の除去、Gmail の既定差出人、Zapier への寄稿、Product Hunt の下書きは選ばれなかったので**保留のまま**。
+
+### Publickey（JA-033）—— 送信済み
+
+`release@publickey.jp`（about-us ページのプレスリリース送付先）へ、差出人 `Simple Memo <support@simplememofast.com>` で送った。
+送信前に差出人・件名・本文（1,131字）・署名を読み戻した。媒体の軸（エンタープライズIT・クラウド）に合わせ、製品紹介ではなく次の2点を情報提供した。
+
+1. メモのメール配送を Cloudflare Workers の Relay API で中継し、本文は TLS で通過するだけで恒常保存もログ記録もしない設計（出典 `/devlog/relay-api-design`・`/privacy-architecture/`）。SMTP 配送なので E2E 暗号化ではない、という限界も書いた。
+2. ブラウザ内で完結する Memo Inbox（MIT、2026-09-07 公開、GitHub の公開リポジトリあり）。
+
+### keinolog（JA-030）—— `BLOCKED`
+
+フォーム（Contact Form 7・reCAPTCHA v3）から**1回だけ**送信を試みたが、送信先の REST API
+（`/wp-json/contact-form-7/v1/contact-forms/2458/feedback`）が **HTTP 403** を返し、完了表示は出なかった。
+ボット判定の回避や再送はしない。フォーム以外の公開連絡先は見当たらない。
+
+### 英語圏ディレクトリに入力する文面（アカウント作成待ち）
+
+**SourceForge —— Memo Inbox を「Import from GitHub」で登録する**（オープンソースのディレクトリなので、MIT の Memo Inbox が適合）
+
+| 項目 | 入力値 |
+| --- | --- |
+| Project name | Memo Inbox |
+| Repository | https://github.com/simplememofast/memo-inbox |
+| Homepage | https://simplememofast.com/memo-inbox/ |
+| Summary | A browser-local note inbox with search, tags, trash recovery, and Markdown export |
+| License / OS / Language | MIT / Web-based (OS independent) / JavaScript |
+| Category | Note taking |
+
+> Memo Inbox is a standalone, open-source (MIT) note inbox that runs entirely in your browser. Save short notes with an optional title and tags, search them, move them to trash and restore them, and export everything as a Markdown ZIP you can drop into an Obsidian vault or any Markdown folder. There is no account, no cloud sync, and no analytics or external scripts; notes are not sent to a server. Notes live in this browser's storage, so export a backup regularly. Made by Simple Memo Developer (YURIKA, K.K.).
+
+**alternative.me —— Simple Memo（iOS アプリ）を登録する**
+
+| 項目 | 入力値 |
+| --- | --- |
+| Name | Simple Memo |
+| Website | https://simplememofast.com/en/ |
+| App Store | https://apps.apple.com/app/id6758438948 |
+| Platforms | iPhone, iPad, Apple Watch |
+| Pricing | Freemium（Free: 3 notes/day; Premium $2.99/month or $29.99/year; no free trial） |
+| Category / tags | Note-taking, Productivity, email-yourself, quick capture |
+| Alternative to | 既存エントリを見てから付ける。**Captio は同名の経費精算アプリと取り違えやすい**（AlternativeTo で実際に起きた・§5.12）ので、email-yourself の Captio が無ければ付けない。候補は Email Me / Note To Self Mail |
+
+> Simple Memo is an iPhone app for capturing a short note and emailing it to yourself in one tap: open it, type or dictate, and send — the note lands in your own inbox. It also works from Apple Watch (voice memos are relayed via the paired iPhone) and can optionally append notes to an Obsidian vault. It is free for up to 3 notes a day; Premium is $2.99/month or $29.99/year, with no free trial. The on-device outbox is encrypted with AES-GCM, but delivery uses standard SMTP, so it is not end-to-end encrypted. Inspired by Captio's workflow; not affiliated with Captio or its developer.
+
+数値の出所は §4 と同じ（価格は 2026-09-22 にオーナー確認、`data/site-constants.json`）。**起動速度とバージョン番号は入れていない**
+（速度は測定条件の説明なしに一覧へ載せない。バージョンは日々動く）。登録後は、公開ページの `meta robots` と自社リンクの `rel` を実測してから台帳に記録する。
+
+## 5.14 媒体からの返信と対応（2026-09-23）
+
+### 美崎栄一郎公式サイト（JA-016）—— プレミアムの無料オファーコードを送付（メールの記述と実際の設定が食い違っている）
+
+- **10:38** 本人から support@ 宛てに返信。フォームの内容を確認した、いろいろ確認してみたいのでプロモーションコードを送ってほしい、という内容。
+- **12:23** `Simple Memo <support@simplememofast.com>` から返信で送付。本文の中身は、コード、使い方（アプリのURL → 引き換えURL → 反映されないときは「購入を復元」）、
+  「プレミアムプラン1か月無料」、「無料期間が終わると自動で終了し、請求は発生しない・解約不要」、「紹介の有無・内容は任せる」。
+  送信前に差出人・宛先1件・件名・本文・署名を読み戻し、送信済みフォルダでも確かめた。
+- コードはオーナーが App Store Connect で作った（こちらには ASC にサインインする手段が無い）。**コードの文字列はこの公開リポジトリに書かない。**
+- 掲載の確約ではないので `PUBLISHED` には上げていない（候補JSON の `media_response` に記録）。
+
+**送信後（12:20 のスクリーンショット）に分かった、実際のオファー設定：**
+
+| 項目 | 実際の設定 | 12:23 のメールに書いたこと |
+| --- | --- | --- |
+| 無料期間 | **最初の1年間は無料**（参照名「Sample」） | 1か月無料 |
+| 期間後の自動更新 | **未確認**（スクリーンショットに写っていない） | 自動で終了し、請求は発生しない・解約不要 |
+| 対象 | 新規サブスクリプション登録者のみ | （書いていない） |
+| プラン | 未確認（月額か年額か） | 「月額プランへの切り替えは発生しない」 |
+| コード | カスタムコード・プロダクション500件・期限 2026-12-31・175の国と地域 | コードとリンクのみ |
+
+- **原因はこちらにある。**メール本文を、オーナーの回答（「自動更新しない・無料1か月」）だけを根拠に書き、オファーの詳細画面を見ずに送った。
+- **リスク：**自動更新する設定なら、1年後（2027年9月ごろ）に通常料金の請求が始まる。そうなると、メールの「請求は発生しない」が誤りになる。期間の食い違いは長い方向なので、相手の不利益になりうるのは請求の点だけ。
+- **オーナー判断（2026-09-23）：訂正メールは送らない。**
+
+### 分かったこと —— 「プロモーションコード」を頼まれたら、オファーコードで応じる
+
+| | アプリ本体のプロモコード | サブスクのオファーコード（カスタムコード） |
+| --- | --- | --- |
+| できること | アプリの無料ダウンロード | プレミアムを無料・割引で提供（今回は最初の1年間無料） |
+| シンプルメモでの意味 | **無い**（アプリはもともと無料） | ある |
+| 今も作れるか | 作れる（今回も1件発行された。未使用なら 2026-10-20 米国太平洋時間に失効） | 作れる |
+| 引き換え方法 | App Store でコードを入力 | **引き換えURL か、アプリ内**。App Store の「ギフトカードまたはコードを使う」では使えない場合がある |
+
+- 2026-03-26 以降は、**アプリ内課金向けのプロモコードを新しく作れない**（Apple Developer News、2025-10-29 発表）。
+  ASC の「プロモーションコード」で作れるのはアプリ本体のコードだけで、見出しは「『iOS 5.9.9』用プロモーションコード」のようにバージョン名になる。
+- 今回も、最初に発行されたのはこのアプリ本体のコードだった。送る前に止めた。**見出しが月額プランの名前になっているかどうか**で見分けられる。
+- 次に頼まれたときの手順（男子ハック JA-007 も、窓口の案内で「プロモーションコード」に触れている）：
+  月額プラン →「オファーコードを作成」→「自動更新しない」にチェック → 対象は新規・既存・期限切れ → 無料・1か月 →
+  カスタムコード（媒体ごとに別のコードにし、上限は小さく）。
+  **本文を書く前に、オファーの詳細画面（オファータイプ・カスタマーの利用資格・期間後の自動更新）とプラン名を、画面かスクリーンショットで確かめる。**
+  口頭の回答だけで期間や「請求は発生しない」を書かない（今回はそれで期間を誤り、自動更新も未確認のまま送った）。
+- 引き換えURL の形式は `https://apps.apple.com/redeem?ctx=offercodes&id=6758438948&code=<CODE>`。
+  カスタムコードが使えるようになるまでの時間は Apple のヘルプに書かれていない（使い捨てコードは「最大1時間」）。本文では「少し時間がかかることがある」とだけ書いた。
+
+## 5.15 自分だけで進められる施策の再点検（2026-09-23 午後）
+
+オーナーの操作なしで完了できる施策が残っていないかを、もう一度洗い出した。**結論：今は残っていない。**
+先へ進むには、オーナーの操作（アカウント作成・ログイン）か、判断（受付方針が書かれていない窓口へ送るか）が要る。
+
+| 確認したもの | 結果 | 判断 |
+| --- | --- | --- |
+| 媒体からの返信（Gmail） | 人からの返信は美崎様1件だけ（§5.14）。ほかはガジェタッチ・Macお宝鑑定団・技術評論社の自動受付と、ニュースレター | 対応済み |
+| CI（`Corporate obligations`） | main は `b33946b` のまま、16マスで赤 | Codex 依頼C の待ち。PR #1541 は止まったまま |
+| SaaSHub の所有者認証（Verify） | ログインが要る（ログアウト状態） | 見送り。Simple Memo の訂正は反映済みで、認証しても増えるものが小さい |
+| Indie Hackers の製品ページ | `SimpleMemo` 名義の `/product/simple-memo` が既にある。**`noindex`**・リンクは nofollow | 数えない。§1 を更新 |
+| App Store の製品ページ | 「デベロッパWebサイト」「プライバシーポリシー」から自社へリンク済み（`nofollow noopener noreferrer`、jp・us とも） | 追加でやることは無い |
+| SourceForge / alternative.me | アカウントはまだ無い（SourceForge はログイン画面、確認メールも無い） | オーナーの作成待ち（§5.13） |
+| Ness Labs（Tools for Thought の紹介インタビュー） | partnerships ページに *We conduct sponsored interviews* とある＝**有料** | 対象外（有料掲載は買わない） |
+| iPhone Life | 「アプリの宣伝方法」ページ（/getpublicity）が消えてトップへ転送。残る窓口は寄稿者の募集だけ | 対象外 |
+| Apple World Today | *we do not accept unsolicited items* | 対象外 |
+| iDownloadBlog / 9to5Mac など | 窓口はニュースのタレコミ用アドレスだけで、アプリの紹介を受け付けるとは書いていない | §5.7 の方針で送らない（送るならオーナー判断） |
+| AppAdvice | ドメインが解決しない | 対象外 |
+| alexanderop/awesome-local-first（Memo Inbox の候補） | 作例の節に localStorage だけで動く小さなアプリも並ぶが、メンテナが「すでに多くの人に使われているものだけ」と明記 | Memo Inbox（v0.1.0）は条件を満たさないので出さない |
+| mundimark/awesome-markdown-editors | Markdown エディタの一覧。Simple Memo も Memo Inbox もエディタではない | 適合が弱いので出さない |
+| 738/awesome-apple-watch | watchOS のライブラリ・サンプルコードの一覧 | 対象外 |
+| PKM Weekly | 投稿・情報提供の受付が書かれていない | §5.7 の方針で送らない |
+| Obsidian Roundup | 休刊。ドメインは別サイト（カジノ）になっていた | 対象外 |
+
+**新たに分かったこと：**2026-09-24 08:30 に、所有者の PR TIMES リリース（「対話メモ」の提供開始）が配信予約されている（§1 に追記）。
+公開されたら、リリースページと転載先のリンク属性を実測する。**リリース本文の機能・数値は、こちらでは検証していないので、ほかの送信文に転記しない。**
+
+> **2026-09-24 追記（10:30 JST の自己確認）：**リリースは **09:12 に公開**されていた（ページの表示。予約は 08:30）。
+> リリースページのサイトへのリンク5本は**すべて nofollow**（本文4本・会社概要1本）、ページは `index,follow`（§1 の PR TIMES 行）。
+> **転載先はまだ見つからない**：Google の過去24時間の検索（`"対話メモ" シンプルメモ`）では、リリースページと PR TIMES 公式の X（@PRTIMES_TECH / @PRTIMES_STUP）の投稿だけ。
+> 時事ドットコム（`/jc/article?k=000000011.000182412&g=prt`）とエキサイト（`/news/article/Prtimes_2026-09-24-182412-11/`）は URL の型で直接開いたが、どちらも 404。
+> CLASSY の PR TIMES 一覧は先頭がまだ 9/23 の分で、今日のリリースは未取り込み。
+> **参考（過去のリリースの転載先を実測）**：
+>
+> | 転載先（過去のリリース） | サイトへのリンク | ページの robots |
+> | --- | --- | --- |
+> | CLASSY（`/prtimes/item-110367/`、Obsidian 連携のリリース） | 5本すべて `nofollow ugc noopener` | `max-image-preview:large`（index） |
+> | ウレぴあ総研（`/articles/-/3407166`、Siri 送信のリリース） | サーバーが返す HTML にリンクなし | `max-image-preview:large` |
+> | BCN＋R（`/news/detail/20260818_652609.html`、同じリリース） | **1本、`rel="noopener"` のみ＝dofollow** | `INDEX,FOLLOW` |
+>
+> BCN＋R は前回のリリースを当日のうちに記事にしていた。今回も載れば dofollow のリンクが1本増える見込み（載るかどうかは先方次第）。
+> 夜の見回り（`trig_01RuicHFnFnh2LgcAcAx7FTE`）で転載先をもう一度探す。**リリース本文の機能・数値はほかの送信文に転記しない**方針は変えない。
+
+## 5.16 英語圏の Apple 系メディアへ3件送信（2026-09-23、オーナー判断）
+
+§5.15 のあと、オーナーが「英語圏メディアに数件送る」を選んだ（AskUserQuestion の回答）。
+アプリ紹介の受付が窓口に**明記されていない**所も含むので、§5.7 の方針（明記のある窓口だけ）の**例外としてオーナーが承認した**扱い。件数は3件に絞った。
+
+| 媒体 | 宛先 | 窓口の文面 | 件名 | 送信（JST） |
+| --- | --- | --- | --- | --- |
+| MacRumors | tips@macrumors.com | contact ページに *Please send any product information for consideration for coverage directly to our editorial team*（tips@ と share.php を案内）＝**製品情報の受付が明記されている** | Product info: Simple Memo adds Dialogue Memo, which asks follow-up questions using Apple Intelligence | 13:38 |
+| 9to5Mac | tips@9to5mac.com | contact ページに *For news tips, email the newsroom at tips@9to5mac.com*（ニュースのタレコミ用。アプリ紹介の受付は明記なし） | Tip: Simple Memo adds Dialogue Memo, a note that asks follow-up questions with Apple Intelligence | 13:39 |
+| iDownloadBlog | tips@idownloadblog.com | contact ページに *News tips: tips@idownloadblog.com*（同上） | Tip: iPhone capture app Simple Memo adds Dialogue Memo (Apple Intelligence) | 13:40 |
+
+- **話題は「対話メモ（Dialogue Memo）」。**事実は App Store の公開情報（iTunes Lookup の `description` と `releaseNotes`、2026-09-23 取得）だけから書いた：
+  「未完成の考えを話し、音声の短い追加質問に答えて読めるメモにする」「質問とメモの整理は iPhone 上の Apple Intelligence を使う（ストアの記載どおりと明記）」
+  「iOS 26 以降・Apple Intelligence が有効な対応 iPhone・対応言語モデルが必要」「通常の入力と音声入力はそのまま使える」。
+  PR TIMES の未公開リリース（9/24 08:30）の文面は使っていない。
+- ほかの事実：1タップで自分宛てに送信（英語サイトの表記）、Apple Watch・Siri ショートカット、Markdown で選んだフォルダ（Obsidian の vault など）へ追記、
+  無料は1日3通・Premium $2.99/月・$29.99/年・無料体験なし（`data/site-constants.json`、価格は 2026-09-22 にオーナー確認）、
+  Captio のワークフローに着想を得た独立アプリ（Captio のサービス終了は 2024年10月、captio.co の告知）、SMTP 配送なので E2E 暗号化ではない。
+- **バージョン番号と評価は書いていない。**起動速度（0.40秒）も今回は入れていない。
+- 送信前に、差出人 `Simple Memo <support@simplememofast.com>`・宛先1件・件名・本文を読み戻し、実名・バージョン番号が無いことを確かめた。3件とも送信済みフォルダで確認した。
+- 3媒体とも Gmail の送信済みに過去の連絡は無い（5月の1件は社内メモで無関係）。「返信不要」と書いた。**掲載の確約ではない。**
+
+## 5.17 台帳の外で出ていた掲載申請2件を発見・実測（2026-09-23 夜）
+
+週刊ニュースレター **This Week in Obsidian** の README が、情報提供を GitHub の issue テンプレートで受け付けている
+（Name / Link / Why is it useful? / 「作者か関係者か」の4欄）。Simple Memo を出す前に重複を確かめたところ、
+**同じ窓口を simplememofast 名義で 2026-09-06 に使っていて、既に掲載されていた。**この台帳には記録が無かった。
+
+そこで GitHub で `author:simplememofast -user:simplememofast`（自社リポジトリ以外で simplememofast が立てた issue / PR）を検索し、
+全件を台帳と突き合わせた。**9件のうち7件は記録済み**（§6.5 の awesome 系6件、§1 の awesome-obsidian #10）。
+**残る2件が記録漏れ**だった。同じ条件で「コメントだけした issue / PR」も検索したが0件。
+
+| 窓口 | 提出（simplememofast 名義） | 掲載 | 自社リンク | リンク属性（2026-09-23 実測） |
+| --- | --- | --- | --- | --- |
+| This Week in Obsidian（Substack） | 2026-09-06 09:06 JST、提案 issue [z08-studio/this-week-in-obsidian#8](https://github.com/z08-studio/this-week-in-obsidian/issues/8)。公式テンプレートで、「作者か関係者か」は Yes | [#38](https://thisweekinobsidian.substack.com/p/this-week-in-obsidian-38)（2026-09-08 19:29 JST 公開）の Community Discussions に `[Show]` として掲載。メンテナが掲載 URL を付けて issue を閉じた | `https://simplememofast.com/en/resources/obsidian-inbox/` | Substack 本文：サーバーが返す HTML の `<a>` に **rel なし（dofollow）**、meta robots・X-Robots-Tag なし。GitHub の issue 本文とアーカイブの .md は nofollow |
+| Swift Package Index | 2026-09-06、PackageList#15105（パッケージ追加の定型 issue。自動 PR の作成は 20:04 JST） | 自動 PR #15107 が 2026-09-07 15:14 JST にマージ。[パッケージページ](https://swiftpackageindex.com/simplememofast/ios26-speechanalyzer-live-mic)が公開中 | README 内の `https://simplememofast.com/voice-input/` | **nofollow**。README 部分は後から読み込まれ、初回 HTML には無い。meta robots なし |
+
+- **誰が出したかは、このリポジトリからは分からない。**同じ日に Codex のブランチ（`codex/add-inbox-generator`）から
+  awesome-obsidian #10 が出ているので、同じ作業の一部と見られる。ただし確認はしていない。
+- **This Week in Obsidian に、アプリ本体の2件目は出さない。**理由は3つ。
+  1. 同じ参照ドメイン（`thisweekinobsidian.substack.com`）から、すでに dofollow のリンクがある。2件目では参照ドメインが増えない。
+  2. 前回は「無料・登録不要のブラウザツールで、アプリとは独立して使える」として出して採用された。2週間あまりで同じ名義から
+     有料アプリの自薦を続けると、個人運営の媒体に宣伝と受け取られかねない。本当に伝える価値のある話題が出たときに窓口を失う。
+  3. 出し直す条件：Obsidian 利用者に直接効く変更（vault への書き込み方式など）が公開され、前回から1か月以上空いたときに1件だけ。
+  4. **2026-09-23 夜、オーナーも「出さない」を選んだ**（選択肢で確認）。
+- 同じ検索で、§6.5 の awesome 系6件が**すべて Open のまま、メンテナの反応が無い**（最後の動きは 2026-09-19 の提出）ことも確かめた。
+  こちらから催促はしない（毎週の掲載確認タスクで見ている）。
+- **AlternativeTo**（オーナー判断待ち #3）：2026-09-23 夜、alternativeto.net は開けるようになっていた（昼は Chrome の権限で拒否されていた）。
+  ただし Mac の Chrome は**未ログイン**。代替一覧の件数表示は10件（昼は5件と記録。増えたのか数え方の違いかは未確認）で、**経費精算の Captio が先頭**（3 likes）。そのカードには
+  2026-07-01 付けで利用者の否定コメント（*This is not the correct Captio app.*）が付いている。
+  外すにはログインが要るので、オーナーのログイン待ちのまま。
+
+## 5.18 Memo Inbox を awesome-no-login-web-apps へ提出（2026-09-23 夜、オーナー了承のうえ PR #612）
+
+§5.17 のあと、登録不要のブラウザツール（Memo Inbox）に合う「受付が明記された」一覧を探した。
+
+- **[aviaryan/awesome-no-login-web-apps](https://github.com/aviaryan/awesome-no-login-web-apps)**：ログイン不要で使える Web アプリの一覧。
+  CONTRIBUTING に追加の書き方（節の末尾に足す・長所と大きな短所を書く・文末はピリオド）があり、PR テンプレートもある。
+  2026-09-08 にメンテナが外部からの追加 PR を**少なくとも29件**まとめてマージしている（直近50コミットの浅い clone で数えた下限）＝**活動中で自薦を受け付けている**。
+  一方で、アプリが実際に動かない PR は理由を書いて閉じている（例：ドメインが売りに出ていた #547）。
+- 追加先は **Notepads and Notebooks** の末尾。重複なし（`memo` で PR を検索して該当なし）。公開アプリは 200 を返し、
+  読み込むスクリプトは自前の `app.*.js` と JSON-LD だけ（Google Analytics なし）であることを確かめた。
+- 用意した1行（事実は `simplememofast/memo-inbox` の README から。短所の「同期なし・バックアップが要る」も書いた）：
+
+  ```
+  * [Memo Inbox](https://simplememofast.com/memo-inbox/) - Open-source (MIT) note inbox that runs entirely in the browser, with tags, search, trash and Markdown ZIP export. Notes stay in this browser's local storage with no sync, so export a backup regularly.
+  ```
+
+- **経緯：**フォーク（`simplememofast/awesome-no-login-web-apps`）を作ったところで、変更した README をフォークへ上げる操作が
+  実行環境の権限確認（公開の場を新しく作る操作）で止められた。回避はせず、オーナーに選択肢で確認した。
+  **2026-09-23 夜、オーナーが「出す」を選んだ**ので、同じ1行で提出した。
+- **提出：[aviaryan/awesome-no-login-web-apps#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612)**
+  （2026-09-23 21:54 JST、`Add Memo Inbox`）。差分は `1 addition & 0 deletions`。本文は PR テンプレートどおり
+  （アプリの URL・説明・3項目のチェック）。「Memo Inbox の保守者（Simple Memo Developer）である」と明記し、
+  合わなければ閉じてよいと書いた。送信前に、ログイン名（simplememofast）・タイトル・本文・提出先（上流リポジトリ）を読み戻し、
+  実名が無いことを確かめた。
+- リンクの価値：GitHub 上のリンクなので **nofollow**（PR 本文のリンクで実測。README に載っても同じ）。
+  主な効果は一覧を見る人に知ってもらうこと。**掲載の確約ではない。**
+
+同じ時間帯に確かめたこと：
+
+- **SourceForge / alternative.me（GPT に依頼中）**：20:50 ごろ（JST）の時点で、`/projects/memo-inbox/` と `/u/simplememofast/` は 404、
+  alternative.me の検索は0件。まだ公開されていない。
+- **awesome 系ミラーへの波及（§1 の「後日確認」）**：trackawesomelist.com は awesome-obsidian/awesome-obsidian を追跡しておらず 404。
+  awesome.ecosyste.ms はボット確認の画面が出たので、回避せずに打ち切った。**ミラー経由のリンクは確認できていない。**
+- **OpenAlternative**（オープンソースの代替ソフト一覧。Memo Inbox の候補）：`/submit` はサインイン画面へ転送される＝アカウントが要る。
+  こちらはアカウントを作らないので見送り。出すならオーナーがアカウントを作る（§6 の候補と同じ扱い）。
+- **媒体からの返信**：21:58 JST に Gmail（support@ 宛て・直近1日）を確認。新しい返信は無し（美崎様の1件は対応済み。ほかは自動受付・ニュースレター・Product Hunt のフォーラム通知）。
+
+## 5.19 開発者コミュニティ向けの窓口（2026-09-23 夜、オーナー承認）
+
+オーナーの「他にできること」に対して、**開発者向けの記事（Dev Log と iOS 26 SpeechAnalyzer の2本）**を足場に、
+iOS 開発者のニュースレター・一覧を調べた。受付の書き方とリンク属性を実測してから、オーナーに選択肢で確認した。
+
+| 窓口 | 受付（公式の書き方） | リンク属性（2026-09-23 実測） | 結果 |
+| --- | --- | --- | --- |
+| **iOS Dev Directory**（iOS 開発ブログの一覧） | GitHub の `blogs.json` に PR。会社のブログは「Company Blogs」へ（MAINTAINERS.md が一番多い間違いとして名指し）。**迷ったら載せる方針** | 一覧の外部リンクはサーバーの HTML で rel なし（DOM では `noopener` のみ）＝**dofollow**、meta robots なし | **提出**：[#1432](https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432)（23:24 JST）。`Simple Memo Dev Log` / 著者 `YURIKA, K.K.` / `https://simplememofast.com/en/devlog/`。6行追加 |
+| **Indie Dev Monday**（個人開発者の週刊ニュースレター） | 号内の「Look at me」欄に *Send it to lookatme@indiedevmonday.com*。最新号は #149（2026-08-17） | 号内リンクは18本中14本が rel なし＝**dofollow** | **送信**：support@ から1通（23:26 JST）。件名 *Look at me: Simple Memo adds Dialogue Memo*。送信済みで差出人・宛先を確認 |
+| iOS Dev Weekly（Dave Verwer） | 公式のリンク提案フォーム（アカウント不要、*I wrote it* を選べる） | 号内リンクは18本中16本が rel なし | **送らない**（オーナーの選択）。候補だった記事は 9/18 のカスタム語彙記事 |
+| iOS Feeds | 登録はしない。**iOS Dev Directory に載ったブログのフィードを読む**とサイトに明記 | 外部リンク 101本中80本が rel なし | フィードが要る → 下の PR #1546 |
+| SwiftLee Weekly | 受付なし。**iOS Dev Directory と iOS Feeds を巡回**すると明記 | — | 対象外（一覧経由で見つけてもらう） |
+| Fatbobman's Swift Weekly | X での連絡だけ | — | 対象外 |
+| iOS Goodies | GitHub の PR | — | 2021-11 で更新が止まっているので対象外 |
+
+- **本文の事実**：Indie Dev Monday へのメールは、§5.16 と同じく App Store の公開情報（iTunes Lookup）とサイトの定数だけで書いた
+  （1タップで自分宛てに送信、選んだフォルダ（Obsidian の vault など）へ Markdown で追記、Apple Watch、Dialogue Memo の条件、無料は1日3通・Premium $2.99/月・$29.99/年）。
+  **バージョン番号・評価・起動速度は書いていない。**iOS Dev Directory の PR 本文も、Dev Log の各記事の題名にある事柄だけを書いた。
+- **RSS フィード（オーナーの選択：こちらで PR を作る）**：[#1546](https://github.com/simplememofast/simplememo/pull/1546)。
+  `en/devlog/feed.xml`（Dev Log 5本＋SpeechAnalyzer 2本）と生成器 `scripts/generate_dev_feed.py`（`--check` / `--selftest`）、`_headers` の Content-Type。
+  HTML は変えていない。手元では main と同じ検査結果（`seo-check.js` 0件ほか8本）。**main の CI が `Corporate obligations` で赤のままなので、#1546 も止まる。**
+  main が直ったら #1546 を最新化（Update branch）→ 再検証が通れば自動マージ → 公開を確かめてから、iOS Dev Directory に `feed_url` を足す PR を出す。
+- **アカウントが要る新製品紹介サイト**：Uneed・Microlaunch・Fazier の公開ページを1件ずつ開き、「Visit website」の rel を実測した（3つとも nofollow なし、Uneed と Fazier は `index, follow`、Microlaunch は robots 指定なし）。
+  こちらはアカウントを作らないので、GPT に渡す依頼文を用意した（無料枠のみ・有料の順番飛ばしは選ばない・名乗り・CAPTCHA は人）。Peerlist と G2 は今回外した。
+
+## 5.20 開発記事を1本（Foundation Models）—— オーナーが公開を承認し Ready にした（2026-09-24）
+
+§5.19 のあと、オーナーが「開発記事をもう1本」を選んだ。狙いは、開発者向けの経路（iOS Dev Directory → iOS Feeds・iOS Dev Weekly・SwiftLee）に
+流せる、**実装の実体験に基づいた記事**を増やすこと。
+
+- **記事**：[#1547](https://github.com/simplememofast/simplememo/pull/1547) `/en/blog/foundation-models-choose-not-write`
+  *Let the on-device model choose, not write: a voice follow-up loop with Foundation Models*。英語ブログ一覧の先頭と sitemap にも追加。
+- **事実の出どころ**：非公開の iOS リポジトリ（`simplememo-ios` main `a40b270`）の対話メモ実装
+  （`DialogueMemoEngine.swift` ほか3ファイル）と、リリース・QA 文書だけ。Chrome のログイン済みセッションで読んだ（書き込みはしていない）。
+  主題は「モデルには `@Generable` の enum と文番号しか返させず、見える言葉はすべてコードが書く」設計と、実機テストで見つかった3件
+  （繰り返し・注釈・顔文字、言語混在で付いた前置き、Boolean の組み合わせが stop に偏った件）。
+- **書かなかったもの**：プロンプトの全文、アプリの版番号、速度・精度などの性能値。数値は実装の定数だけ（最大6問、文脈上限3,600字など）。
+  Apple の一次資料9本は、ドキュメントの JSON で実在を確かめた（存在しないパスは 404 になることも確認）。
+- **手元の検査**：main と同じ18本の検査がすべて通過（`seo-check.js` 0件）。幅390px・1280pxで横スクロールなし。確認用 PDF をオーナーに渡した。
+- **draft にした理由**：非公開の実装の中身を公開することになるので、公開の可否と事実の確認をオーナーに任せる。
+  Ready にすれば、main の CI が直ったあとの検証成功で自動マージされる（CI が赤の間は止まる）。公開日を変えるなら日付と sitemap を直す。
+- **公開後の予定**：iOS Dev Weekly のリンク提案フォームに出すか判断（前回はオーナーが見送り）。フィード PR #1546 がマージ済みなら
+  `EXTRA_PAGES` にこの記事を足してフィードを作り直す。
+- **2026-09-24 07時台（JST）：オーナーが確認用 PDF を見て「このまま公開する」を選んだ。**指摘なし・本文の変更なしで Ready に切り替え、
+  PR 題名から「（下書き・オーナー確認待ち）」を外した（auto-merge は squash なので、PR 題名がそのまま main のコミット題名になる）。
+  Ready に切り替えたことで検証が走り直したが（run 35927524798）、失敗は `Corporate obligations` の1手順だけで、予想どおりマージされていない。
+  **まだ公開されていない。**
+- **CI で走っていない検査を手元で補った**：CI は `Corporate obligations` で失敗した時点で後ろの約40本を飛ばしており、
+  sitemap の検査（`generate_sitemap.py --selftest` / `--check`）も、この PR の CI ではまだ走っていない。PR の head（`34251b6`）そのものを
+  別の作業ツリーで検査し、両方とも通った（`208 URLs`・`lastmod が内容履歴と一致`）。
+- **公開日のずれに注意**：`generate_sitemap.py` は lastmod を first-parent の**コミット日時（JST）**から出す。PR の検証はマージ用の
+  コミット、main ではマージ時の squash コミットが基準になるので、**マージが 9/25 以降にずれたら、その日付で sitemap を作り直さないと
+  検証が落ちる。**そのときは本文の `Published:` と JSON-LD の `datePublished` / `dateModified` も実際の公開日に直す（公開前の日付を残さない）。
+
+## 5.21 公開前の点検、台帳の外の既存リンク、窓口の追加調査（2026-09-24 朝）
+
+- **CI が飛ばした検査を手元で実行した（#1547・#1546）**：CI は `Corporate obligations`（139手順のうち98番目）で失敗した時点で、後ろの41本を飛ばしている。
+  PR の head（#1547 `34251b6`・#1546 `dd4f76d`）と main（`b33946b`）で、その41本を同じ手順で走らせた。
+  **40本は3つとも通過し、残る1本（`Autopilot page vs ledger`）は3つとも同じ内容で失敗した。**
+  失敗は `/autopilot/` の自律スコア4項目（合計・vdc・umr・tuc）で、ページが 2026-09-23 時点の値のまま JST の日付が変わったため
+  （CLAUDE.md「/autopilot/ の自律スコアは日付で動く」と同じ形）。main で時計だけを 9/23 12時（JST）にすると不一致0件、9/24 12時にすると4件で、
+  **日付だけが原因**と確かめた。記事・フィードの変更とは関係がない。
+  → **`Corporate obligations` が直っても、それだけでは main は緑にならない。**`/autopilot/` を書き換える #1548（`Codex/decision-observe-*`）か
+  日次同期が main に入れば解ける見込み（未確認）。
+- **`Corporate obligations` の現状**：Codex の [#1544](https://github.com/simplememofast/simplememo/pull/1544)（draft）の本文によると、規約台帳の16項目は
+  **人が条項を確認し終えるまで失敗が続く**（#1544 はその確認を代わりにしないので draft のまま）。
+  つまり #1541・#1546・#1547 の自動マージは、オーナー側の規約確認が終わるまで止まる。
+- **台帳の外の既存リンク（dev.to）**：`dev.to/simple_memo` の記事33本（2026-05-08〜09-18）のうち16本に、サイトへのリンクが計22本ある。
+  サーバーが返す HTML で**22本とも nofollow なし**、ページの robots は `max-snippet:-1, …` だけで noindex は無い。
+  リンク先は `/`（7本）・`/obsidian/`（4本）・SpeechAnalyzer の2記事（各4本。この2記事は dev.to 側の正規 URL もサイトを指す）・
+  `/en/obsidian/`・`/voice-input/`・`/captio-alternative/`（各1本）。**この投稿はこの作業で行ったものではない**（投稿の運用は別にある）。
+- **SourceForge**：2026-09-23 23:53 に support@ 宛てで「Confirm your SourceForge account」が届いている
+  （ユーザー名 `simplememofast`、名前 `AI ATAKA`。名乗りは規則どおり）。有効化のリンクを押すのはアカウント作成の一部なので、こちらでは押さない
+  （依頼文でもオーナーの作業にしてある）。メールには「ニュースレターの購読もあわせて確認」とあるので、有効化のあとで購読がオフかを確かめる。
+- **開発者向けの窓口を追加で調べた（受付の書き方を確認）**：
+
+  | 窓口 | 結果 |
+  | --- | --- |
+  | Mobile Dev Weekly | ドメインの登録が切れている（2026-09-24、「registration has expired」の表示）→ 対象外 |
+  | Those Who Swift（Substack） | about ページに受付の記載が無い（連絡先は LinkedIn / X だけ）→ 明示の受付が無いので対象外 |
+  | awesome-core-ai（GitHub） | 対象は iOS 27 の Core AI（Core ML の後継）に限られる。Foundation Models / SpeechAnalyzer の記事は枠の外 → 対象外 |
+
+- **掲載の確認（07時台）**：iOS Dev Directory #1432・awesome-no-login-web-apps #612・awesome 系6本（#144 / #83 / #135 / #1 / #386 / #23）は
+  すべて open でコメントなし。媒体からの返信も無い（support@ 宛ては自動応答と配信メールだけ）。AlternativeTo は Chrome が未ログインのまま（判断待ち #3）。
+
+## 5.22 オーナー判断（2026-09-24 朝）：記事は規約の読み直しを待つ、公開後は iOS Dev Weekly と dev.to
+
+§5.21 の点検結果を渡して、選択肢で3点を確認した。
+
+- **記事 #1547 と RSS #1546 の公開 →「規約の読み直しを先に」（推奨を選択）。**手動マージはしない。
+  `Corporate obligations` は、読み直しが済むまで全マージを止めて確認を促す仕組みなので、その意図どおりに待つ。
+  - **注意（読み直しを反映する PR を作る人へ）**：その PR 自身も、作った日の `/autopilot/` が最新でないと `Autopilot page vs ledger` で落ちる。
+    日次同期の PR（`claude/autopilot-act-*`）や #1548 は `Corporate obligations` で落ちて先に入れないので、**どちらか一方だけでは main が緑にならない。**
+    CLAUDE.md の手順どおり、同じ PR に `node scripts/decision-monitor.mjs --publish-report` の結果（と `python3 scripts/generate_sitemap.py`）も入れるのが確実。
+  - main が緑になったら、こちらで #1547・#1546・#1541 を最新化する。公開が 9/25 以降になる #1547 は、同じ更新で本文の日付・JSON-LD・sitemap を実際の公開日に直す
+    （直さなければ、PR の検証用マージコミットの日付と sitemap の lastmod がずれて検査が落ちるはずなので、古い日付のまま自動で出る可能性は低い。
+    ただしマージコミットの日付の付き方は GitHub の仕様を読んで確かめたわけではない）。
+- **公開後の告知 →「iOS Dev Weekly に提案」と「dev.to に転載」の両方。**手順と文面は `docs/seo/post-publication-drafts-2026-09-24.md` に置いた。
+  - iOS Dev Weekly のフォーム（`suggest.iosdevweekly.com`、2026-09-24 に項目を確認、CAPTCHA なし）には
+    *If this link is from a blog already listed in the iOS Dev Directory, Dave will already see it … via RSS* とある。
+    **iOS Dev Directory（#1432）にフィード付きで載り、そのフィードに記事が入っているなら、フォームは使わない。**それ以外ならフォームで提案する。
+  - dev.to は `simple_memo` アカウントで、正規 URL をサイトに向けた短縮版（SpeechAnalyzer の2本と同じ形）。
+- **SourceForge の確認メール →「自分で有効化する」。**オーナーが「Activate Your Account」を押し、ニュースレター購読がオンなら外す。
+  プロジェクトページが公開されたら、こちらで rel と robots を実測して §1 に記録する。
+
+## 5.23 意外な残タスクの洗い出し（2026-09-24 昼、オーナーの「意外な残タスクを、徹底」）
+
+外から見て「進んでいるはず」のものを、実物（API・git・公開ページ・手元での検査の実行）で1件ずつ確かめ直した。
+
+| 対象 | 分かったこと | 対応 |
+| --- | --- | --- |
+| **CI の赤** | 赤は1つではなく**3つ**（`Mention watch cadence` が 9/24 から、`Corporate obligations`、`Autopilot page vs ledger`）。直す PR がそれぞれ別で（#1552 / 人の規約読み直し / #1551）、**どの PR もほかの2つで落ちる**ので、自動マージでは永久に入らない。時計だけを進めた試算では、9/25 に2件、9/30 までにさらに1件増え、規約の未読マスは 9/30 に28件・10/07 に32件になる | Codex への依頼文に**依頼D**として書いた（`docs/codex-request-captio-dates-and-store-facts-2026-09-23.md`）。規約の読み直しは8社32マスをまとめて行う必要がある |
+| **#1552 に隠れた失敗** | 言及ウォッチを再開する #1552（Codex・draft）は、`company-mentions.test.mjs` の固定時計（2026-09-14）のせいで、9/14 より後のスナップショットを「未来の観測」として弾かれ、テストが1件落ちる。`Corporate obligations` より後ろの手順なので、CI にはまだ出ていない（#1552 のブランチで実行して確認） | 依頼D に原因と直し方の案を書いた。検査を緩める方向は取らない |
+| 言及ウォッチ | 最新が 9/13 で期限切れ。こちらでも固定6クエリを検索してスナップショットを作ったが、**#1552 が同じ日付の分を先に出していた**ので、重複する PR は出さずに捨てた | #1552 に任せる |
+| iOS Dev Directory #1432 | 相手の `Validate JSON` は「初めての投稿者なのでメンテナの承認待ち」（action_required）。失敗ではない。手元で相手のスキーマ検査を通し、並び順も正しいことを確かめた | 待つだけ |
+| **awesome 系 PR の相手先** | 7件のうち4件は、相手のリストの保守が止まっていた：kmaasrud/awesome-obsidian（最後のマージ 2023-11）、jyguyomarch/awesome-productivity（2023-05）、doanhthong/awesome-pkm（2022-03）、pjpoulose/awesome-second-brain（マージの実績なし）。動いているのは awesome-knowledge-management（最後のマージ 9/12）・awesome-no-login-web-apps（9/08）で、awesome-note-taking は遅い（4/20） | 4件は開けたままにする（害はない）が、**掲載の見込みには数えない**。代わりになる、保守されているリストは見つからなかった（knowfox/awesome-pkm は2021年、devrsi0n/awesome-apple-notes は2024年で止まっている） |
+| アカウントが要る登録 | SourceForge は予定の URL（`/projects/memo-inbox/`）が 404（有効化待ち）。alternative.me は検索0件。Uneed・Microlaunch・Fazier は、推測した製品 URL（`/tool/simple-memo` など）がどれも無かった（サイト内検索のページが無いので、確証ではない） | オーナー側の作業待ち（判断待ち #15・#20） |
+| **投稿の流れ** | dev.to（`simple_memo`）の最後の投稿は 9/18（それまでは2〜4日おき）、note（`@simplememo`）は 9/19（3〜4日おき）で、**どちらも止まって見える**。dev.to のリンクは dofollow なので、止まると被リンクの増え方が落ちる | 運用はこの作業の外。意図的かどうかをオーナーに確認する |
+| Codex への依頼A | Captio の撤退時期の誤記（13ファイル）は、まだどの PR も触っていない。検索結果に出る自社記事 `/blog/captio-discontinued` の題名には「後継アプリ」が残っている | 誰が直すかをオーナーに確認する |
+| こちらの PR | #1541・#1546・#1547 に固有の失敗は無い（CI が飛ばした手順も手元で確認済み）。#1547 と #1551 は `sitemap.xml` の同じ行に触れるので、先に #1551 が入ったら #1547 の最新化で sitemap を作り直す | 最新化のときに対応 |
+| Gmail の下書き | Simple Memo 関連の下書き9通のうち、送り忘れの外部向けは無い（CoRRiENTE 宛ての旧下書き1通はオーナー判断で残している） | なし |
+| 定期タスク | 有効なタスクはすべて最後の実行が成功。失敗は無い | なし |
+
+## 5.24 オーナー判断（2026-09-24 昼）：規約は8社まとめて、まとめ役は Claude、依頼A も Claude、投稿の停止は原因を調べる
+
+§5.23 を渡して、選択肢で4点を確認した。
+
+- **規約の読み直し →「8社32マスをまとめて」。**公開ページで各社の今の版を確かめたところ、前回の読み（8/28〜8/29）の後に本文の版が変わったのは
+  **google_cloud・firebase・registrar の3社（12マス）だけ**だった。残る5社（apple・anthropic・github・search_console・appsflyer）は版の日付が前回より前のままで、
+  「同じ版であることを確かめて前回の判定を付け直す」で済む見込み（詳細と未確定の点は Codex への依頼文の依頼D）。
+- **3つの赤の解き方 →「Claude がまとめ役」。**手元で main に #1552・#1551・テストの時計の直し・規約の仮の読み直しを重ねて全手順を流し、
+  **#1552 に隠れた2つ目の失敗（18ページを変えたのに sitemap を作り直していない）**以外は全部通ることを確かめた。
+  1本にまとめる PR は、**オーナーの読み直しが終わった日に**、その日の日次同期と sitemap の作り直しを入れて作る（同期と sitemap が日付で古くなるため）。
+- **依頼A（Captio の撤退時期と「後継」）→「Claude が直す PR を作る」。**作業中（別 PR）。
+- **dev.to と note の投稿の停止 →「原因を調べてほしい」。**作業中。
+
+## 5.25 依頼A を PR #1553 で出した／投稿の停止を調べた（2026-09-24 午後）
+
+### 依頼A → [PR #1553](https://github.com/simplememofast/simplememo/pull/1553)（Claude が作成・Ready）
+
+28ファイル。依頼Aの3種類（撤退とサービス終了の混同・「公式発表なし」・「後継」）に加えて、直す途中で見つけた**同じ系統の誤り**も入れた。
+
+- **日本語 `/captio-alternative/` と関連ページが、英語版の修正から取り残されていた。**2026-09-06 に `en/captio-alternative/` だけが直されている
+  （commit 551358b99：終了原因の推測を削り、Cloudflare と Resend への依存を明記）。日本語版には「Captioの終了原因は公式には不明ですが、外部API依存が一因と推測」が残り、
+  これは captio.co の告知（理由を述べている）と矛盾する誤り。`/blog/memo-app-service-shutdown-risk` にも同じ文があった。
+- **シンプルメモの継続性・独立性の言い過ぎ**：「外部プロバイダのポリシー変更で停止するリスクがありません」「単一障害点がありません」「データは永久に残ります」
+  「doesn't depend on any third-party email API」「encrypts on-device … before transmission」。英語版の修正と `/privacy`（E2E 暗号化ではない）に合わせた。
+- **Captio のリリース年「2011年頃」は誤り。**Engadget（2010-09-30）の時点で App Store に出ていた（開発者は Boonbits の Ben Lenarts、当時 $0.99）。44か所を 2010 に直した。
+- **出典と食い違う数字を削除**：「$2.99 の買い切り」「$1.99 でリリース」「4.5★以上」「v2.90」（第三者のアプリ一覧では最終版 2.9.1・2021年6月17日）。
+- 段落を書き直した14ページの `dateModified` と表示上の最終更新日を 2026-09-24 に。
+- **sitemap は入れていない。**先にマージされる PR の sitemap と衝突するため。main の赤が解けた日に「Update branch」→ sitemap を作り直して足す（手順は PR 本文）。
+- 手元の全137手順：失敗は main と同じ3件だけ（出力もバイト単位で同じ）。アップロード後、28ファイルの blob が手元と一致することを確認した。
+
+### dev.to と note の投稿の停止 —— 分かったことと、分からないこと
+
+| 見たもの | 分かったこと |
+| --- | --- |
+| note（`@simplememo`、Chrome で確認） | ログインは切れていない。最後の公開は **9/19 09:49**。下書きも 9/5 の「タイトル未設定」1件以降は増えていない（＝公開に失敗して下書きに逃げた形跡も無い）。9/2 までは3日おきの 16:3x に規則的で、9/5 以降は時刻がばらばら |
+| dev.to（`simple_memo`、Chrome で確認） | ログインは切れていない。最後の公開は **9/18 20:59**（SpeechAnalyzer の転載）、連載は 9/16 が最後。**9/16 の記事と同じ題の下書きが1件残っている**（重複。削除はしていない） |
+| X の自動返信（同じ Mac の定期タスク） | 9/23 10:56・19:42〜19:48、9/24 10:56〜11:02 と**1日2回動いている**。Mac・デスクトップアプリ・定期タスクの仕組み・Chrome 拡張は今日も動いている |
+| クラウドの定期タスク | note・dev.to の投稿タスクは無い（どちらも Mac 上のタスク。9/5 にクラウドから移したものと同じ系統） |
+| タスクの記録 | `~/Documents/Claude/Scheduled`（note の state.json と logs/ の置き場所）は、このセッションに付与できないとシステムが拒否した。記録は読めていない |
+
+**読み**：全体が止まったのではなく、**note と dev.to の2つのタスクだけ**が 9/18〜19 から動いていない。一時停止・オフになっている、承認待ちで止まっている、
+途中の条件で抜けている、のどれかと読むが、**確定できていない**。確定には、デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見るか、
+`~/Documents/Claude/Scheduled` をデスクトップのフォルダ選択でこのセッションにつないでもらい、記録を読む必要がある（判断待ち #24）。
+
+### ついでに見つけたもの（この PR には入れていない）
+
+- **`admin/reddit/drafts.json`（Reddit 返信の下書き、5/6 生成）**：古い「2024年10月に App Store から削除」「開発元は声明なし」「spiritual successor」を含む。
+  1件は日本語の問い合わせ文で、今の名乗りの規則（本文は「シンプルメモ開発者」）に合わない名乗り方をしている。人がコピーして投稿する運用なので、
+  このまま使うと誤りが外に出る。生成元は `docs/cross-platform-engagement/`（判断待ち #25）。
+- **日本語 `/captio-alternative/` の「2026年5月実測」の速度比較と「起動0.4秒」**：英語版は 9/6 に「計測比較ではない」と書き直している。
+  サイト内でも `en/send-email-to-yourself/` は「約1.0秒」、`en/blog/best-note-to-self-apps-2026` は「0.4s」で食い違う（判断待ち #26）。
+- Captio 以外のページの「永久保存」（`/line-keep/` など）や「送信前に暗号化」（英語の比較ページに多数）も、英語版の修正の基準で見ると言い過ぎ（判断待ち #27）。
+
+## 5.26 赤が解けてからの半日（2026-09-24 午後）：main に8本、言い過ぎの直し、iOS Dev Directory にフィード
+
+### オーナー判断（午後、選択式）
+
+- **規約の読み直し（#21）**：版が変わった3社の抜き書きを見て **「12マスとも前回どおり」**、残る5社20マスも「前回どおり」→ 32マスを付け直した（#1555）。
+- **3つの赤（#22）**：#1555 で1本にまとめて解いた。**#1553（#23）**は「赤が解けたら自動マージ」。
+- **残り3件（#25〜#27）**：Reddit の下書きを直す／日本語 `/captio-alternative/` の速度を英語版に合わせる／他ページの言い過ぎを洗い出して直す —— **3つとも**。
+- **規約の指紋**：「本文だけに絞る PR を作る」→ #1560。**定期タスク（#24）**：オーナーがデスクトップの一覧を自分で見る。
+
+### main に入ったもの（2026-09-24、JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 14:24 | [#1555](https://github.com/simplememofast/simplememo/pull/1555) | CI の3つの赤をまとめて解く（規約32マスの付け直し・言及ウォッチ・日次同期・テストの時計・sitemap） |
+| 14:50 | [#1556](https://github.com/simplememofast/simplememo/pull/1556) | Reddit／note 返信の下書き20本の事実・名乗り・表現（#25） |
+| 14:53 | [#1553](https://github.com/simplememofast/simplememo/pull/1553) | Captio の事実（依頼A）。日本語 `/captio-alternative/` の速度の扱いも英語版に合わせて同じ PR に入れた（#23・#26） |
+| 14:56 | [#1546](https://github.com/simplememofast/simplememo/pull/1546) | 開発記事の RSS フィード。公開を確認（`application/rss+xml`、7件） |
+| 15:16 | [#1559](https://github.com/simplememofast/simplememo/pull/1559) | サービス終了リスク記事の `dateModified` |
+| 15:39 | [#1560](https://github.com/simplememofast/simplememo/pull/1560) | 規約の指紋を本文だけに取る（メニューの揺れで人の判定を戻さない）＋ search_console を日本版に |
+| 15:57 | [#1561](https://github.com/simplememofast/simplememo/pull/1561) | （Codex）AppsFlyer の見張りを公開 MSA に。main で週次取得と同じ処理を流し、**11社とも unchanged**（9/28 の週次で戻るマスは無い見込み） |
+| 16:10 | [#1562](https://github.com/simplememofast/simplememo/pull/1562) | サイトの言い過ぎ 第1弾（35ページ：本文の保存・配達の保証・測定条件・「外部メールAPIからの脱却」）（#27） |
+
+ほかに #1557・#1558・#1548（運用・Codex）も入った。
+
+### 出したもの
+
+- **[#1564](https://github.com/simplememofast/simplememo/pull/1564) 言い過ぎ 第2弾（検証が通れば自動マージ）**：比較記事2本（英 `best-note-to-self-apps-2026`・日 `email-yourself-app-comparison`）。
+  英語版は**リンク切れ5本**（Pigeon・EmailMe・MeMail・Note to Self Mail・Apple Notes）と、App Store の説明と逆の記述（Pigeon の料金・添付・宛先、MeMail は有料、EmailMe の「無料・課金なし」）が見つかった。
+  他社の事実は 9/24 に App Store と公式情報で確かめ直し、確かめられない点は「Not verified here／ここでは未確認」。記録の無い計測（端末・回数・秒数）は表ごと外した。
+  **9/24 のうちにマージされなければ sitemap の作り直しが要る。**
+- **iOS Dev Directory [#1432](https://github.com/iOSDevDirectory/iOSDevDirectory/pull/1432) に `feed_url` を追加**（1行。相手のスキーマで検査済み。フィードと一覧の URL はどちらも 200 でリダイレクトなし）。PR 本文の「フィードはまだ無い」も直した。メンテナのワークフロー承認待ちは変わらない。
+
+### 意外な残タスク（午後に見つけたもの）
+
+| 対象 | 分かったこと | 対応 |
+| --- | --- | --- |
+| **#1547（開発記事）** | 9/24 11:24 に**同じアカウントで draft に戻っている**（こちらの操作ではない）。待つ理由だった規約の読み直し（#18）は #1555 で済んだ。公開するなら、#1546・#1562 の後なので、フィード（`EXTRA_PAGES`）への追加と sitemap の作り直しが要る | 判断待ち #29 |
+| **公開リポジトリの実名** | オーナー個人のユーザー名が `docs/` の31ファイル・40か所に残る（手元の作業パス、個人の Gmail アドレス4か所、`github.com/` のハンドル）。サイトの HTML には無い。今の版から消しても履歴には残る | 判断待ち #30 |
+| 宣伝文句 | トップなどの「起動 0.4秒」（記録はウォーム起動）、「Never lose an idea」系の見出し、開発記録の題「Zero Message Loss」（フィードにも出る）、「永久保存」の見出し | 判断待ち #31 |
+| 言い過ぎの次の候補 | `en/send-email-to-yourself/` の Pigeon の料金・オフライン（今日の App Store の説明と合わない）、比較ハブのカード（「実測検証」「Fastest 0.4s」）、`en/vs/ios-shortcuts/`「オフラインでは黙って失敗」、`vs/mail-to-self/` | 判断待ち #32 |
+| 他人の PR | #1552（言及ウォッチ）・#1551（9/24 の日次同期）は #1555 に同じ中身が入った。#1542・#1543・#1550 は赤の時期に作られたまま | 持ち主（Codex・運用）の判断。こちらは触らない |
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -669,6 +1267,7 @@ GitHub の awesome 系リストは、登録フォームこそ無いが**PRとい
 | pjpoulose/awesome-second-brain | — | Note-Taking & PKM Apps | [#1](https://github.com/pjpoulose/awesome-second-brain/pull/1) | 同リポジトリ初のPR。1文・130字以内・タグ指定を遵守 |
 | jyguyomarch/awesome-productivity | — | Tools and Apps › Note Management | [#386](https://github.com/jyguyomarch/awesome-productivity/pull/386) | 節の末尾へ |
 | doanhthong/awesome-pkm | 108 | Note-taking Tools › SaaS with free plan | [#23](https://github.com/doanhthong/awesome-pkm/pull/23) | 未処理PR9件 |
+| aviaryan/awesome-no-login-web-apps（**Memo Inbox**、2026-09-23 追加） | — | Notepads and Notebooks | [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) | 登録不要の Web アプリ一覧。§5.18 |
 
 守ったこと：
 
@@ -746,26 +1345,29 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 
 ## 7. 未解決の課題
 
-- **`simplememofast-ops` を読めていない。** 過去ドラフトに今回と矛盾する記述や、
-  既に送信済みの窓口が書かれている可能性がある。次回はこのリポジトリを
-  セッションのソースに含めてから実行すること。
+> **2026-09-23 の整理：** 解消済みの項目は取り消し線を付けて残し、新しく見つかった課題は末尾に足した。
+> いま人の判断が要るものは末尾の「オーナー判断待ち（2026-09-23 時点）」にまとめてある。
+
+- ~~**`simplememofast-ops` を読めていない。**~~ **2026-09-23 に解消。** 非公開リポジトリ
+  `simplememofast/simplememo-ops` の `drafts/TODO-seo-next-actions.md`（2026-03-21）をブラウザ経由で読み、
+  各項目の現況を §5.12 にまとめた。March 版のピッチ文面は現在の事実と合わない数値を含む可能性があるので再利用しない。
 - **Product Hunt の未投稿ローンチ下書きが1件残っている。** 投稿するか消すかは人の判断。
-- **NoteApps.info の提案は2026-03に立てられたまま "Under consideration"。** 今回の訂正コメントが
-  承認されても索引入りは別判断。
-- **窓口を確認済みの5媒体への送信が保留中。** applech2 / Macお宝鑑定団 /
-  気になる、記になる… / ガジェットショット / 技術評論社。
-  **本文は媒体ごとに個別に書いて `docs/seo/media-pitch-drafts-2026-09-19.md` に置いてある**
-  （5本とも別文面・未送信）。送信の可否は人の承認が要る。
+- **NoteApps.info の提案は2026-03に立てられたまま "Under consideration"。** 今回の訂正コメントは
+  2026-09-23 時点でも承認待ち。承認されても索引入りは別判断。
+- ~~**窓口を確認済みの5媒体への送信が保留中。**~~ **2026-09-22 に送信済み（§5.8）。**
+  ただし先行4件は実名入り（identity policy 違反）で、訂正連絡は出さないとオーナーが決めた（下記）。
 - **すまほん!! は reCAPTCHA v3 で自動送信できない。** 本文は
   `docs/seo/media-pitch-drafts-2026-09-19.md` にあるので、人が手で送れば通る可能性が高い。
-- **CodeZine（403）と Publickey（404）は窓口の所在が未確認。** 別経路を探す必要がある。
-- **`ASSET_MISSING` 29件は制作判断が必要。** ユーザーテスト・小規模調査・サンプルコード・
-  動画など、いずれも相応の工数がかかる。費用対効果を見てから着手すること。
+- ~~**CodeZine（403）と Publickey（404）は窓口の所在が未確認。**~~ **解消（§5.11）。** CodeZine は応募済み、
+  Publickey はプレスリリース用アドレスを確認（送るかは人の判断・下記）。
+- ~~**`ASSET_MISSING` 29件は制作判断が必要。**~~ **2026-09-23 に判断済み（§5.12）。**
+  `ASSET_REQUIRED` 51件のうち2件は資料なしで送れる窓口だったので送信、残り49件に `asset_decision` を付けた。
+  今すぐ作る価値がある資料は無い、という結論。
 - ~~**`data/site-constants.json` がストアとずれている。**~~ **2026-09-20 に解消済み。**
   2026-09-19 時点では version 5.8.9 / 評価 4.2・25件で実態（5.8.66 / 4.12・26件）とずれていたが、
   2026-09-22 に再確認したところ `appVersion` 5.8.66・`ratingValue` 4.1・`ratingCount` 26 に
   同期されており、ストアの値と一致している。
-- **代わりに `llms.txt` の「Current facts (as of …)」が期限切れになった（2026-09-22 から）。**
+- ~~**代わりに `llms.txt` の「Current facts (as of …)」が期限切れになった（2026-09-22 から）。**~~ **同日解消（下の項目と §5.10）。**
   `scripts/seo-check.js` が警告を出す（errors 0 / warnings 1）。
   **CI は落ちない**（`.github/workflows/seo-check.yml` は「Exit code 1 = warnings only (acceptable)」
   として exit 1 を許容し、2以上だけで落とす）ので、PRのマージは止まらない。
@@ -782,15 +1384,15 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 - ~~**さくらのナレッジの著者募集が最有力。**~~ **2026-09-22 に応募メールを送信済み（§5.9）。**
   自社への言及が許容されていて資産も揃っているため、返信が来た場合の優先度は依然として最も高い。
   返信が無ければ追わない（本文にもその旨を書いてある）。
-- **メール送信4件の返信待ち。** さくらのナレッジ / Mac Fan / Think IT / CoRRiENTE。
-  **いずれも掲載の確約ではない。** 掲載を確認できるまで `PUBLISHED` には上げない。
-  週次の掲載確認タスクの対象に入れるかどうかは、返信の有無を見てから決める。
+- **送信済みの返信待ち。** 候補JSON上で SUBMITTED 12・SUBMITTED_EMAIL 6（計18件、2026-09-23 の Publickey を含む）に、英語の MakeUseOf 1件と、
+  2026-09-23 午後に送った英語圏 Apple 系メディア3件（MacRumors / 9to5Mac / iDownloadBlog、§5.16）。
+  **いずれも掲載の確約ではない。** 2026-09-23 時点で届いているのは自動受付の返信だけで、人からの返信は0件。
+  掲載を確認できるまで `PUBLISHED` には上げない。週次の掲載確認タスクが Gmail とこの台帳を見て追う。
 - ~~**`llms.txt` の「Current facts」が期限切れ。**~~ **2026-09-22 に解消（§5.10）。**
   オーナーが ¥500 / ¥5,000 が現行であることを確認したため `priceNote` の日付を更新し、
   `node scripts/sync_constants.js --write` を実行した。`seo-check` は **0 errors / 0 warnings**。
-- ~~**`WINDOW_UNVERIFIED` 16件は窓口の所在が分からないまま。**~~ **10件に減った（§5.11）。**
-  ブラウザ相当のUser-Agentでの再プローブと導線抽出で6件が確定し、うちCodeZineへは実際に応募した。
-  残る10件は依然として不明。必要なら人が手で開いて確認する。
+- ~~**`WINDOW_UNVERIFIED` 16件は窓口の所在が分からないまま。**~~ **0件になった（§5.11 で10件、§5.12 で残り10件を確定）。**
+  明示的な受付のある窓口は無く、送信対象は増えなかった。
 - **英語圏ディレクトリは、人がアカウントを1回作るかどうかの判断待ち（§5.11）。**
   主要ディレクトリはすべてアカウント必須で、このセッションからは登録できない。
   作ってもらえれば、あとの入力・説明文・カテゴリ選択はこちらで進められる。
@@ -799,13 +1401,60 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
   題材は計測手法（公開済みの `/blog/benchmark-methodology` が下地）で、新規取材は不要。
   返信が来てから着手すればよい。
 - **先行して送った4件に開発者個人の実名が入っている（identity policy 違反）。**
-  5件目（Macお宝鑑定団）は修正後なので問題ない。 訂正連絡を出すかどうかの判断が要る。
-  下書き側は修正済みで、以後の送信では `SimpleMemo Developer` / `AI ATAKA` のみを使う。
+  5件目（Macお宝鑑定団）は修正後なので問題ない。 ~~訂正連絡を出すかどうかの判断が要る。~~
+  **2026-09-22 にオーナーが「訂正連絡は出さない」と決めた。**
+  下書き側は修正済みで、以後の送信では `SimpleMemo Developer` / `AI ATAKA` のみを使う（2026-09-23 の8件も準拠）。
 - **気になる、記になる… の窓口は公開コメント欄だった。** 公開投稿になるので送っていない。
   送るかどうかは人の判断。
 - **週次の掲載確認タスクは動いている。** 2026-09-21 の定期実行は4秒で FAILED だったが、
   2026-09-22 10:29 の手動発火は `SUCCEEDED`（10:44 終了・約15分）。一過性だった。
-- **`data/routine-runs.json` の整合は Codex へ回した**（`docs/codex-request-routine-runs-2026-09-22.md`）。
-  `include_completed=true` は単純な解決にならないことまで実測で確認済み
-  （open_findings の単発予約は戻るが、ページングがあり全件同期すると台帳が膨れる）。
-  判断が要るのは実質2件に絞れている。
+  2026-09-23 に指示文を更新し、確認対象に CodeZine と 2026-09-23 の8件、Captio の事実の書き方、
+  Codex 依頼の進捗確認を足した（次回は 2026-09-28 の 09:00 JST 頃、承認不要で実行される設定）。
+- ~~**`data/routine-runs.json` の整合は Codex へ回した**（`docs/codex-request-routine-runs-2026-09-22.md`）。~~
+  **Codex 側の #1537 で解消済み。** 2026-09-23 に `node scripts/check-routine-runs.mjs --check` が緑（exit 0）であることを確認した
+  （個別GETが404の停止済みタスクについての注意書きは残る）。
+- **AlternativeTo の Simple Memo の代替一覧に、経費精算アプリの Captio が載っている（§5.12）。**
+  `simplememo` アカウントが約7か月前に追加したもの。外すにはログインが要るのでオーナー作業。
+- **Captio の App Store 撤退時期の誤記（サイト13ファイル）と、ストア検査が CDN の古い応答で 5.9.9 を見落とす件は
+  Codex へ回した**（`docs/codex-request-captio-dates-and-store-facts-2026-09-23.md` 依頼A・B）。この台帳の §4 事実表は直した。
+- **CI が 2026-09-23 09:00 JST から赤い（`Corporate obligations`・§5.12）。**全PRの自動マージが止まる。
+  規約の読み直し（法的判断）が要るので同じ依頼文の依頼C（最優先）に回した。オーナー判断待ち表の #11。
+- **`ASSET_REQUIRED` の `DEFER_BUILDABLE` 5件（記入例・運用図・テンプレート・シート）は、窓口が見つかれば工数Sで作れる。**
+  送り先が無い今は作らない。ページ単体でサイトに置く価値があると判断した場合は別途。
+
+### オーナー判断待ち（2026-09-24 時点）
+
+| # | 事項 | こちらでできないこと・理由 | 判断してもらえれば、こちらで進められること |
+| --- | --- | --- | --- |
+| 1 | ~~英語圏ディレクトリのアカウント作成~~ → **2026-09-23 判断：SourceForge と alternative.me の2つだけオーナーが作る**（§5.13）→ 同日、**SourceForge は GPT に依頼**（依頼文を渡した）。**alternative.me は未登録**（オーナーの「登録済み」は AlternativeTo のことだった）→ 同日、**登録すると判断**し、GPT への依頼文を渡した（外部リンクは nofollow で価値は小さいことは説明済み） | アカウント作成は行わない | SourceForge は公開されたら §1 の行でリンク属性を実測する（毎週の掲載確認タスクにも入れた） |
+| 2 | G2・Uneed などアカウント必須の登録（~~Indie Hackers の制限解除~~ → 2026-09-23 不要と判明。`SimpleMemo` 名義の製品ページが既にある。ただし noindex、§5.15） | 同上 | 同上 |
+| 3 | AlternativeTo の代替一覧から経費精算 Captio を外す（2026-09-23 時点でまだ載っている）→ **2026-09-23 判断：オーナーが Mac の Chrome でログインし、操作はこちらで行う** | ログイン（パスワード入力）を行わない。**2026-09-23 夜：サイトは開けるようになったが、Mac の Chrome は未ログインだった。オーナーは「あとでログインする」を選んだ** | ログインを確認したら外し、公開ページで外れたことを確かめる |
+| 4 | ~~すまほん!! へ手動送信~~ → **2026-09-23 判断：オーナーが手で送る**（本文は渡した） | reCAPTCHA は回避しない | 送信日を受け取ったら JA-012 を更新 |
+| 5 | 気になる、記になる… の公開コメント欄へ投稿するか | 公開投稿は人の判断 | 文面の用意 |
+| 6 | ~~受付方針の記載が無い窓口へ送るか~~ → **2026-09-23 判断：keinolog と Publickey の2件だけ**。Publickey は送信済み、keinolog はサーバー側 403 で `BLOCKED`（§5.13）。残る13件は送らない | — | — |
+| 7 | Zapier Blog へのゲスト寄稿 | 「AI生成の文章は不可」が条件 | 企画の骨子づくり（本文は本人） |
+| 8 | Product Hunt の未投稿下書き（投稿か削除か） | 削除は行わない | 投稿文面の見直し |
+| 9 | Gmail の既定の差出人を `support@simplememofast.com` にするか | アカウント設定の変更は行わない | — （今は毎回手で切り替えて読み戻している） |
+| 10 | Gmail に残る体裁の崩れた CoRRiENTE 宛て旧下書き1通 | 削除は行わない | — |
+| 11 | **CI の赤（`Corporate obligations`）** —— apple / google_cloud / firebase / registrar の16マス → **2026-09-23 判断：Codex に依頼C を渡す** | 条項の判定は法的判断の欄で、この作業の範囲外 | 解けたら PR #1541 をリベースで最新化して再検証する |
+| 12 | 美崎様向けオファーコードの上限（500） | ASC の操作はサインインが要る | オファーは**最初の1年間無料**・新規登録者のみ。記事などで共有されると、最大500人が1年間無料になる。意図していなければ、引き換えを確認したあと ASC の「無効化」で新しい引き換えを止められる（引き換え済みの分への影響は未確認）。止めるかどうかはオーナーが判断する（§5.14） |
+| 13 | ~~美崎様へのメールの訂正（「1か月無料・請求なし」と送ったが、実際は1年無料・自動更新は未確認）~~ → **2026-09-23 判断：訂正しない** | — | 残るリスク：自動更新する設定なら、2027年9月ごろに請求が始まる（§5.14） |
+| 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
+| 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
+| 16 | ~~main の CI（#11）が直ったあとの #1546 の最新化~~ → **2026-09-24 14:56 マージ**（フィードの公開を確認） | — | 同日、iOS Dev Directory #1432 に `feed_url` を追加した（§5.26） |
+| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） → #19 で判断済み **→ 9/24 11:24 に同じアカウントで draft に戻っていた（#29）** |
+| 18 | ~~記事 #1547・RSS #1546 を、規約の読み直しを待たずに手動でマージするか~~ → **2026-09-24 判断：待つ（規約の読み直しを先に）**（§5.22） | 規約の条項の読み直しは人の判断 | 読み直しを反映する PR には、同じ日の `/autopilot/` の更新も入れないと main が緑にならない（§5.22）。緑になったら、こちらで3本の PR を最新化し、#1547 の日付を公開日に直す **→ 読み直しは #1555（9/24 14:24）で済んだ** |
+| 19 | ~~公開後に記事をどこへ出すか~~ → **2026-09-24 判断：iOS Dev Weekly に提案＋dev.to に転載** | — | 公開を確かめてから実行する（手順と文面は `docs/seo/post-publication-drafts-2026-09-24.md`）。iOS Dev Directory にフィード付きで載っていれば、iOS Dev Weekly のフォームは使わない |
+| 20 | SourceForge のアカウント有効化（2026-09-23 23:53 に確認メール） → **2026-09-24 判断：オーナーが有効化する** | 有効化はアカウント作成の一部なので押さない | 有効化とプロジェクト公開のあと、rel と robots を実測して §1 に記録する |
+| 21 | ~~規約の読み直しの範囲~~ → **2026-09-24 判断：8社32マスをまとめて（オーナー）** → 同日、**3社の抜き書きを見て「12マスとも前回どおり」**、5社20マスも前回どおり | — | #1555 で記録（マージ済み） |
+| 22 | ~~3つの赤の解き方~~ → **2026-09-24 判断：Claude がまとめ役** → 同日 [#1555](https://github.com/simplememofast/simplememo/pull/1555) でまとめて解いた（14:24 マージ） | — | — |
+| 23 | ~~依頼A を誰が直すか~~ → **2026-09-24 判断：Claude が PR を作る** → 同日 [#1553](https://github.com/simplememofast/simplememo/pull/1553)（14:53 マージ） | — | — |
+| 24 | dev.to と note の投稿の停止 → **2026-09-24 調査：2つのタスクだけが 9/18〜19 から動いていない**（X の自動返信は今日も動く。§5.25） | タスクの記録（`~/Documents/Claude/Scheduled`）はこのセッションに付与できない | デスクトップアプリの定期タスク一覧で2つの状態と最後の実行結果を見てもらうか、そのフォルダをフォルダ選択でつないでもらえれば、記録から原因を確定する **→ 9/24 判断：オーナーがデスクトップの定期タスク一覧を自分で見る** |
+| 25 | ~~`admin/reddit/drafts.json` の古い Captio の事実・「spiritual successor」・名乗り方~~ → **2026-09-24 判断：直す** → 同日 [#1556](https://github.com/simplememofast/simplememo/pull/1556)（14:50 マージ） | — | — |
+| 26 | ~~日本語 `/captio-alternative/` の「実測」速度比較と「起動0.4秒」~~ → **2026-09-24 判断：英語版に合わせる** → #1553 に入れた（14:53 マージ） | — | — |
+| 27 | ~~Captio 以外のページの「永久保存」「送信前に暗号化」など~~ → **2026-09-24 判断：洗い出して直す** → 第1弾 [#1562](https://github.com/simplememofast/simplememo/pull/1562)（35ページ、16:10 マージ）、第2弾 [#1564](https://github.com/simplememofast/simplememo/pull/1564)（比較記事2本） | 見出しや宣伝文句の言い方は人の判断（#31） | 次の候補は #32 |
+| 28 | dev.to に残る重複下書き（9/16 の記事と同じ題） | 削除は行わない | — |
+| 29 | **開発記事 #1547 が draft に戻っている**（9/24 11:24、同じアカウント。§5.26） | 公開の判断 | Ready に戻すなら、こちらでフィード（`EXTRA_PAGES`）への追加と sitemap の作り直しを入れてから Ready にする（検証が通れば自動マージ）。その後 #19（iOS Dev Weekly・dev.to） |
+| 30 | **公開リポジトリの `docs/` に残るオーナー個人のユーザー名**（31ファイル・40か所：作業パス、個人の Gmail アドレス、`github.com/` のハンドル） | 履歴の書き換えは行わない | 今の版から伏せ字にする PR（履歴には残る） |
+| 31 | 宣伝文句：「起動 0.4秒」（記録はウォーム起動）、「Never lose an idea」系の見出し、開発記録の題「Zero Message Loss」、「永久保存」の見出し | 見出し・宣伝の言い方は人の判断 | 決まった言い方で一括して直す PR |
+| 32 | 言い過ぎの第3弾（`en/send-email-to-yourself/` の他社の料金・オフライン、比較ハブのカード、`en/vs/ios-shortcuts/`、`vs/mail-to-self/`） | — | 第2弾と同じやり方（公式情報で確かめ直す）で PR |
