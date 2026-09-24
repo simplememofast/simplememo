@@ -1317,6 +1317,16 @@ jobs:
       - name: PR release D-SCORE consistency
         run: node growth/scripts/d-score.mjs --check
 
+      # 【配信が両方の台帳に載っているか】上の --check は**レコードがあるもの**しか見ない。
+      # 2026-09-24、PR⑦（対話メモ）は annotations.json にだけ入り experiments.json に
+      # 無かった。帰結は pr-evaluation-due.mjs が **2026-10-08 の D+14 を永久に拾わない**
+      # こと（実測: due(ledger,'2026-10-08') が [] を返す）。
+      # 「レコードが存在しない」はレコードを見ても分からないので、別の検査にしてある。
+      - name: PR release ledger completeness
+        run: |
+          node scripts/check-pr-release-ledger.mjs --selftest
+          node scripts/check-pr-release-ledger.mjs --check
+
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
       # 鍵の無いCIでも走る。ここが壊れると毎日の測定が丸ごと止まるが、

@@ -65,6 +65,17 @@
   "repository_is_public": true,
   "$repository_is_public": "2026-08-26 に api.github.com/repos/simplememofast/simplememo を叩いて確かめた（private: false）。**この欄が true である限り、served_by_site: false は『非公開』を意味しない。**CI は seo-check.yml が REPO_PRIVATE として github.event.repository.private の生の値を渡し、ここと食い違ったら落ちる（リポジトリを非公開にしたときも、公開に戻したときも気づける）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを『一致』と書かない。",
   "files": {
+    "ai-visibility-probe.json": {
+      "served_by_site": true,
+      "why": "公開質問への独立AI回答・モデル名・検索呼び出し検証・自社言及率。利用者情報や資格情報を含めない。従来の手動3社観測とは別系列。",
+      "ok_in_public_repo": "ok",
+      "allow_unreferenced": true
+    },
+    "app-releases.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §2 が Lane B（アプリ本体）の台帳として参照。版・タグ・実機確認の有無・App Store の状態・公開の観測幅・コード差分。鍵も個人名も入れていない（実機確認は recorded_from だけ）",
+      "ok_in_public_repo": "ok"
+    },
     "audit-charter.json": {
       "served_by_site": false,
       "why": "監査の設計。攻撃面に準ずる",
@@ -83,6 +94,16 @@
     "automation-coverage.json": {
       "served_by_site": true,
       "why": "/autopilot/ が棚卸しとして参照。数え方を外から再現できることが売り",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-score-history.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が推移として参照。**アンチゲーミングの非退行制約の基準**（検査被覆率が下がった窓ではスコアを上げない）がこの履歴を読むので、履歴を隠すと据え置きが効いたかを外から確かめられない",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-score.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が配点として参照。**点数の付け方を見せることが訴求そのもの** —— 「自律スコア35.5点」だけを出して配点を隠すと、都合よく数えていないことを確かめる手段が読み手に無い。このファイルは L4（人間の持ち分）で、AIが書き換えられない側に置いてある",
       "ok_in_public_repo": "ok"
     },
     "autonomy-timeline.json": {
@@ -105,14 +126,14 @@
       "why": "/autopilot/ が実費として参照。AI原価を公開している",
       "ok_in_public_repo": "ok"
     },
+    "autopilot-research-2026-09-02.json": {
+      "served_by_site": true,
+      "why": "英語の実測レポートが参照する、公開済み運転台帳の期間固定抽出。実行ID・日付・経路・成否・PR・介入種別のみ。元の公開Gitリビジョンを明記。",
+      "ok_in_public_repo": "ok"
+    },
     "autopilot-runs.json": {
       "served_by_site": true,
       "why": "/autopilot/ が運転台帳として参照。失敗も含めて出している",
-      "ok_in_public_repo": "ok"
-    },
-    "app-releases.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §2 が Lane B（アプリ本体）の台帳として参照。版・タグ・実機確認の有無・App Store の状態・公開の観測幅・コード差分。鍵も個人名も入れていない（実機確認は recorded_from だけ）",
       "ok_in_public_repo": "ok"
     },
     "autopilot-status.json": {
@@ -123,6 +144,11 @@
     "benchmark.json": {
       "served_by_site": false,
       "why": "競合ベンチマーク。内部の見立て",
+      "ok_in_public_repo": "ok"
+    },
+    "billing-recovery-readiness-20260913.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ の課金回復1業務の採点条件とテスト・本番監視の証拠。集計件数、検証ID、コミット、配信・監視時刻と限界だけ。顧客・取引識別子、生通知、秘密、原本は含めない。本番の実回復と準備完了を区別する。",
       "ok_in_public_repo": "ok"
     },
     "check-blindspots.json": {
@@ -141,10 +167,26 @@
       "why": "/autopilot/ がAI著者率として参照。導出をscriptで再現できる",
       "ok_in_public_repo": "ok"
     },
+    "company-monthly-budget-execution.json": {
+      "served_by_site": true,
+      "why": "月次予算の実適用証拠。公開済み決定ID・main SHA・検証run・設定読戻しと支出判定のみ。実額、口座や個人の識別子、原本メール・取引明細・資格情報は含めない。",
+      "ok_in_public_repo": "ok"
+    },
+    "company-monthly-budget.json": {
+      "served_by_site": true,
+      "allow_unreferenced": true,
+      "why": "本番設定の読戻し用URL。全社月次予算の期間・追加任意支出0円という運用制約・非公開決定と原本集約のハッシュのみ。全社予算額、残高、精算額、給与、取引明細、口座・個人識別子、資格情報は公開しない。",
+      "ok_in_public_repo": "ok"
+    },
     "content-graph.json": {
       "served_by_site": false,
       "why": "内部リンク構造。運用データ",
       "ok_in_public_repo": "ok"
+    },
+    "contract-coverage.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "**公開レーンの出荷に、事前登録した予測が付いているかを数える門の方針。**eligibility-policy.json と同じ側 —— 何を止め、何を止めないかを見せる。enforcement は当面 record_only で、**「数えてはいるが止めていない」を隠さずに出せる。**そして中身のいちばん重要な事実は、**契約の仕組みを 2026-09-04 に配線しておきながら、公開レーンの出荷 14 件に起案が1本も付いていなかった**こと。配点（autonomy-score.json）と指標（value-metrics.json）を公開しておいて、**「その仕組みが実際には使われていなかった」だけを隠すのは、いちばん都合の悪い部分を隠すことになる。**値は方針・日付・レーン名・目標本数だけで、個人データも資格情報も持たない。"
     },
     "corporate-obligations.json": {
       "served_by_site": false,
@@ -168,10 +210,35 @@
       "why": "リポジトリ横断の検査。内部構造",
       "ok_in_public_repo": "ok"
     },
+    "decision-recovery.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
+    "decision-review.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
+    "delegated-review-acceptance-20260912.json": {
+      "served_by_site": true,
+      "why": "恒常委任によるApp Review提出1件の受付証拠。版・ビルド・SHA・公開ワークフロー・提出日時・受付状態・対象版の照合用IDと非公開原本のハッシュのみ。資格情報、審査連絡先、審査メモ、却下理由、生ログ、利用者の情報は含めない。審査通過や公開の実績ではない。",
+      "ok_in_public_repo": "ok"
+    },
     "distribution-queue.json": {
       "served_by_site": true,
       "why": "Runbook §5-5。X/note/Reddit/Indie Hackersの定期配信タスクが https://simplememofast.com/data/distribution-queue.json を読んで消費する。サイトのHTMLからはリンクしない機械消費用のフィードなので allow_unreferenced",
       "allow_unreferenced": true,
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-log.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が判定台帳として参照。中身は候補のID・判定・理由で、**候補そのものは data/autopilot-actions.json（既に公開）から来ている**ので新しく出るものは無い。**運転台帳とは別の表にしてあることが要点**なので、片方だけ公開すると分けた意味が読み手に伝わらない",
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-policy.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が実行前の判定基準として参照。**何を止め、何を止めないかを見せる側**。enforcement（いまは R2 だけ止める）が書いてあるので、「判定はしているが実行は止めていない」を隠さずに出せる",
       "ok_in_public_repo": "ok"
     },
     "emergency-stop.json": {
@@ -182,6 +249,11 @@
     "escalation-rules.json": {
       "served_by_site": false,
       "why": "誰にどう上げるかの規則。連絡経路は出さない",
+      "ok_in_public_repo": "ok"
+    },
+    "execution-priorities.json": {
+      "served_by_site": false,
+      "why": "AI実行率の改善作業順と期限付き評価。個人・認証・財務の原本は持たず、サイトの公開実績表示には使わない。",
       "ok_in_public_repo": "ok"
     },
     "expert-escalation.json": {
@@ -249,9 +321,19 @@
       "why": "監視の穴がどこにあるかを含む",
       "ok_in_public_repo": "ok"
     },
+    "obsidian-feature-observation-20260911.json": {
+      "served_by_site": false,
+      "why": "事前宣言した階層保存の途中診断。本文・パス・利用者や端末の識別子を含まない集計と欠損・限界のみ。公開Gitには保存できるが、正式な成功率ではなくfeature-outcomesと同じくサイト配信しない。",
+      "ok_in_public_repo": "ok"
+    },
     "operating-memory.json": {
       "served_by_site": true,
       "why": "**オーナー判断で公開（2026-08-25）。**判断→実行→結果→次の判断がどう変わったかを、失敗も含めてそのまま出す。この原稿の唯一の売りが『数え方を公開していること』なので、**うまくいかなかった回こそ出す価値がある**（海外4社はどこも出していない）。",
+      "ok_in_public_repo": "ok"
+    },
+    "physical-device-verification-20260911.json": {
+      "served_by_site": true,
+      "why": "実機確認1業務の完遂を説明する項目別の公開証拠。配布版・SHA・実施時刻・購読状態の変化・証拠のハッシュと限界を記録する。アカウント、端末識別子、下書き本文、元の画面や実行ログ、資格情報は含めない。公開内容は独立レビュー済み。",
       "ok_in_public_repo": "ok"
     },
     "pr-claims.json": {
@@ -259,9 +341,40 @@
       "why": "配信前の原稿の主張。**出す前の文面**なので公開しない",
       "ok_in_public_repo": "ok"
     },
+    "pr-release-ledger.json": {
+      "served_by_site": false,
+      "why": "PR配信が2つの台帳の両方に載っているかの管理。持つのは突き合わせの基準・確認日・未記録の一覧だけで、**配信本文も分析画面の数値も入らない**。公開済みのPR TIMES URLだけが入る",
+      "ok_in_public_repo": "ok"
+    },
+    "press-release-next.json": {
+      "served_by_site": false,
+      "why": "次回PRの準備状態。秘密情報は含まないが、未配信のスナップショットをサイト経由で配信しない。公開GitHubからは閲覧できる。",
+      "ok_in_public_repo": "ok"
+    },
+    "prior-art.json": {
+      "served_by_site": false,
+      "why": "他社の主張の検証記録。公開URLと判定しか入っていないが、サイトが参照する面が無い。原稿に他社名を書かない方針なので配信面にも出さない",
+      "ok_in_public_repo": "ok"
+    },
+    "production-stop-exercise-20260912.json": {
+      "served_by_site": true,
+      "why": "本番Act経路の停止・所有状態の復元を説明する公開証拠。公開PR・SHA・実行日時・ワークフロー結果・影響件数・非公開原本のハッシュと観測の限界のみ。資格情報、通知先、利用者情報、生ログは含めない。全停止機構やアプリKillの実証ではない。",
+      "ok_in_public_repo": "ok"
+    },
     "publication-policy.json": {
       "served_by_site": false,
       "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
+      "ok_in_public_repo": "ok"
+    },
+    "radar-research.json": {
+      "served_by_site": true,
+      "why": "公開ソース取得方式の研究仮説・試作参照・実測時間・比較成立性と判定。秘密・利用者データは含まない。",
+      "ok_in_public_repo": "ok",
+      "allow_unreferenced": true
+    },
+    "refund-readiness-20260913.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ の返金検出1業務について、テスト完了と本番監視による採点条件・実行証拠を公開する。テスト件数、コミット・実行ID、配信結果、監視時刻、集計件数と限界のみ。利用者情報、取引ID、生通知、認証情報、非公開原本は含めない。本番返金の検出実績とは区別する。",
       "ok_in_public_repo": "ok"
     },
     "release-gate-pin.json": {
@@ -315,6 +428,16 @@
       "ok_in_public_repo": "ok",
       "$ok_note": "リポジトリは公開だが、**中身は cron と発火時刻と状態だけ**でセッションの本文は入らない（そこは元から外から読めない）。プロンプトも写していない"
     },
+    "service-notice-readiness-20260913.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ の障害案内1業務の採点条件とテスト・本番監視の証拠。集計件数、検証ID、コミット、配信・監視時刻と限界のみ。顧客情報、非公開の障害内容、秘密、原本を含めない。実障害配信・全利用者到達・法的通知完了とは区別する。",
+      "ok_in_public_repo": "ok"
+    },
+    "service-reconciliation-execution.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ から参照する会社サービス1件の実照合証拠。検証結果・例外・原本のハッシュのみ。実額、会社・カード・書類の識別情報、原本PDF、非公開URL、資格情報を含めない。",
+      "ok_in_public_repo": "ok"
+    },
     "signal-ledger.json": {
       "served_by_site": false,
       "why": "ユーザー要望・問い合わせ由来。**第三者の声を含むので出さない**",
@@ -341,6 +464,28 @@
       "why": "停止機構の一覧と、どこまで確かめたか。**配信はしない** —— どの経路をどう止められるかの地図なので、サイトから引ける形にはしない（リポジトリが公開なので非公開にはならないが、既定を配信にはしない）",
       "ok_in_public_repo": "ok"
     },
+    "trend-radar.json": {
+      "served_by_site": true,
+      "why": "公開RSSとApp Storeランキングの見出し・URL・順位、および取得状態を示す自動観測の証跡。利用者データや資格情報を含まない。",
+      "ok_in_public_repo": "ok",
+      "allow_unreferenced": true
+    },
+    "value-contracts.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
+    "value-metrics.json": {
+      "served_by_site": true,
+      "why": "**L2（価値契約）が名指ししてよい指標の許可リストと null model。**/autopilot/ §5 が参照。中身は指標名・出典・**どう歪められるか**で、値そのものは持たない。配点（autonomy-score.json）と基準（eligibility-policy.json）を出しておいて**「どの指標で価値を測るか」だけ隠すのは、いちばん歪めやすい部分を隠すことになる。**起案（drafted_by: ai）と承認（approved_by）を別の欄にしてあるので、**まだ1件も承認されていないことも公開面から読める**",
+      "ok_in_public_repo": "ok"
+    },
+    "vendor-operating-review.json": {
+      "served_by_site": false,
+      "why": "既存14社のDPA・データ利用・SLA・撤退計画についてのAI運用判断と未解決事項。サイト表示用のデータではない。",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "公開資料と既存の承認/観測記録を根拠にした審査。資格情報、原契約、請求書、担当者名・連絡先、個別顧客データは含めない。公開リポジトリに残ることを前提とし、サイトでは404にする。"
+    },
     "vendor-register.json": {
       "served_by_site": false,
       "why": "取引先と、何を渡しているか。**依存の地図**なので出さない",
@@ -352,149 +497,9 @@
       "why": "「待つだけ」と分類した行が本当に進んでいるかの観測。持つのは**カウンタの値と最終更新日と停止の理由**だけで、金額も個人データも運ばない（収入の行が持つのは covered_days 2/28 という進み具合であって、売上額ではない）。サイトからは参照していない",
       "ok_in_public_repo": "ok"
     },
-    "prior-art.json": {
-      "served_by_site": false,
-      "why": "他社の主張の検証記録。公開URLと判定しか入っていないが、サイトが参照する面が無い。原稿に他社名を書かない方針なので配信面にも出さない",
-      "ok_in_public_repo": "ok"
-    },
-    "autonomy-score.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が配点として参照。**点数の付け方を見せることが訴求そのもの** —— 「自律スコア35.5点」だけを出して配点を隠すと、都合よく数えていないことを確かめる手段が読み手に無い。このファイルは L4（人間の持ち分）で、AIが書き換えられない側に置いてある",
-      "ok_in_public_repo": "ok"
-    },
-    "autonomy-score-history.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が推移として参照。**アンチゲーミングの非退行制約の基準**（検査被覆率が下がった窓ではスコアを上げない）がこの履歴を読むので、履歴を隠すと据え置きが効いたかを外から確かめられない",
-      "ok_in_public_repo": "ok"
-    },
-    "eligibility-policy.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が実行前の判定基準として参照。**何を止め、何を止めないかを見せる側**。enforcement（いまは R2 だけ止める）が書いてあるので、「判定はしているが実行は止めていない」を隠さずに出せる",
-      "ok_in_public_repo": "ok"
-    },
-    "eligibility-log.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が判定台帳として参照。中身は候補のID・判定・理由で、**候補そのものは data/autopilot-actions.json（既に公開）から来ている**ので新しく出るものは無い。**運転台帳とは別の表にしてあることが要点**なので、片方だけ公開すると分けた意味が読み手に伝わらない",
-      "ok_in_public_repo": "ok"
-    },
-    "value-metrics.json": {
-      "served_by_site": true,
-      "why": "**L2（価値契約）が名指ししてよい指標の許可リストと null model。**/autopilot/ §5 が参照。中身は指標名・出典・**どう歪められるか**で、値そのものは持たない。配点（autonomy-score.json）と基準（eligibility-policy.json）を出しておいて**「どの指標で価値を測るか」だけ隠すのは、いちばん歪めやすい部分を隠すことになる。**起案（drafted_by: ai）と承認（approved_by）を別の欄にしてあるので、**まだ1件も承認されていないことも公開面から読める**",
-      "ok_in_public_repo": "ok"
-    },
-    "value-contracts.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
-    },
-    "decision-review.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
-    },
-    "decision-recovery.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
-    },
-    "autopilot-research-2026-09-02.json": {
-      "served_by_site": true,
-      "why": "英語の実測レポートが参照する、公開済み運転台帳の期間固定抽出。実行ID・日付・経路・成否・PR・介入種別のみ。元の公開Gitリビジョンを明記。",
-      "ok_in_public_repo": "ok"
-    },
-    "contract-coverage.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "**公開レーンの出荷に、事前登録した予測が付いているかを数える門の方針。**eligibility-policy.json と同じ側 —— 何を止め、何を止めないかを見せる。enforcement は当面 record_only で、**「数えてはいるが止めていない」を隠さずに出せる。**そして中身のいちばん重要な事実は、**契約の仕組みを 2026-09-04 に配線しておきながら、公開レーンの出荷 14 件に起案が1本も付いていなかった**こと。配点（autonomy-score.json）と指標（value-metrics.json）を公開しておいて、**「その仕組みが実際には使われていなかった」だけを隠すのは、いちばん都合の悪い部分を隠すことになる。**値は方針・日付・レーン名・目標本数だけで、個人データも資格情報も持たない。"
-    },
-    "trend-radar.json": {
-      "served_by_site": true,
-      "why": "公開RSSとApp Storeランキングの見出し・URL・順位、および取得状態を示す自動観測の証跡。利用者データや資格情報を含まない。",
-      "ok_in_public_repo": "ok",
-      "allow_unreferenced": true
-    },
-    "radar-research.json": {
-      "served_by_site": true,
-      "why": "公開ソース取得方式の研究仮説・試作参照・実測時間・比較成立性と判定。秘密・利用者データは含まない。",
-      "ok_in_public_repo": "ok",
-      "allow_unreferenced": true
-    },
-    "ai-visibility-probe.json": {
-      "served_by_site": true,
-      "why": "公開質問への独立AI回答・モデル名・検索呼び出し検証・自社言及率。利用者情報や資格情報を含めない。従来の手動3社観測とは別系列。",
-      "ok_in_public_repo": "ok",
-      "allow_unreferenced": true
-    },
-    "press-release-next.json": {
-      "served_by_site": false,
-      "why": "次回PRの準備状態。秘密情報は含まないが、未配信のスナップショットをサイト経由で配信しない。公開GitHubからは閲覧できる。",
-      "ok_in_public_repo": "ok"
-    },
-    "vendor-operating-review.json": {
-      "served_by_site": false,
-      "why": "既存14社のDPA・データ利用・SLA・撤退計画についてのAI運用判断と未解決事項。サイト表示用のデータではない。",
-      "ok_in_public_repo": "review",
-      "public_repo_why": "公開資料と既存の承認/観測記録を根拠にした審査。資格情報、原契約、請求書、担当者名・連絡先、個別顧客データは含めない。公開リポジトリに残ることを前提とし、サイトでは404にする。"
-    },
     "x-japanese-execution.json": {
       "served_by_site": true,
       "why": "/autopilot/ から参照する日本語投稿1業務の実行証拠。公開済み投稿と操作の要約のみ。私的ログ本文や認証情報は含まない。",
-      "ok_in_public_repo": "ok"
-    },
-    "execution-priorities.json": {
-      "served_by_site": false,
-      "why": "AI実行率の改善作業順と期限付き評価。個人・認証・財務の原本は持たず、サイトの公開実績表示には使わない。",
-      "ok_in_public_repo": "ok"
-    },
-    "physical-device-verification-20260911.json": {
-      "served_by_site": true,
-      "why": "実機確認1業務の完遂を説明する項目別の公開証拠。配布版・SHA・実施時刻・購読状態の変化・証拠のハッシュと限界を記録する。アカウント、端末識別子、下書き本文、元の画面や実行ログ、資格情報は含めない。公開内容は独立レビュー済み。",
-      "ok_in_public_repo": "ok"
-    },
-    "production-stop-exercise-20260912.json": {
-      "served_by_site": true,
-      "why": "本番Act経路の停止・所有状態の復元を説明する公開証拠。公開PR・SHA・実行日時・ワークフロー結果・影響件数・非公開原本のハッシュと観測の限界のみ。資格情報、通知先、利用者情報、生ログは含めない。全停止機構やアプリKillの実証ではない。",
-      "ok_in_public_repo": "ok"
-    },
-    "delegated-review-acceptance-20260912.json": {
-      "served_by_site": true,
-      "why": "恒常委任によるApp Review提出1件の受付証拠。版・ビルド・SHA・公開ワークフロー・提出日時・受付状態・対象版の照合用IDと非公開原本のハッシュのみ。資格情報、審査連絡先、審査メモ、却下理由、生ログ、利用者の情報は含めない。審査通過や公開の実績ではない。",
-      "ok_in_public_repo": "ok"
-    },
-    "refund-readiness-20260913.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ の返金検出1業務について、テスト完了と本番監視による採点条件・実行証拠を公開する。テスト件数、コミット・実行ID、配信結果、監視時刻、集計件数と限界のみ。利用者情報、取引ID、生通知、認証情報、非公開原本は含めない。本番返金の検出実績とは区別する。",
-      "ok_in_public_repo": "ok"
-    },
-    "service-reconciliation-execution.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ から参照する会社サービス1件の実照合証拠。検証結果・例外・原本のハッシュのみ。実額、会社・カード・書類の識別情報、原本PDF、非公開URL、資格情報を含めない。",
-      "ok_in_public_repo": "ok"
-    },
-    "obsidian-feature-observation-20260911.json": {
-      "served_by_site": false,
-      "why": "事前宣言した階層保存の途中診断。本文・パス・利用者や端末の識別子を含まない集計と欠損・限界のみ。公開Gitには保存できるが、正式な成功率ではなくfeature-outcomesと同じくサイト配信しない。",
-      "ok_in_public_repo": "ok"
-    },
-    "company-monthly-budget.json": {
-      "served_by_site": true,
-      "allow_unreferenced": true,
-      "why": "本番設定の読戻し用URL。全社月次予算の期間・追加任意支出0円という運用制約・非公開決定と原本集約のハッシュのみ。全社予算額、残高、精算額、給与、取引明細、口座・個人識別子、資格情報は公開しない。",
-      "ok_in_public_repo": "ok"
-    },
-    "company-monthly-budget-execution.json": {
-      "served_by_site": true,
-      "why": "月次予算の実適用証拠。公開済み決定ID・main SHA・検証run・設定読戻しと支出判定のみ。実額、口座や個人の識別子、原本メール・取引明細・資格情報は含めない。",
-      "ok_in_public_repo": "ok"
-    },
-    "billing-recovery-readiness-20260913.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ の課金回復1業務の採点条件とテスト・本番監視の証拠。集計件数、検証ID、コミット、配信・監視時刻と限界だけ。顧客・取引識別子、生通知、秘密、原本は含めない。本番の実回復と準備完了を区別する。",
-      "ok_in_public_repo": "ok"
-    },
-    "service-notice-readiness-20260913.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ の障害案内1業務の採点条件とテスト・本番監視の証拠。集計件数、検証ID、コミット、配信・監視時刻と限界のみ。顧客情報、非公開の障害内容、秘密、原本を含めない。実障害配信・全利用者到達・法的通知完了とは区別する。",
       "ok_in_public_repo": "ok"
     }
   },

@@ -1,0 +1,19 @@
+{
+  "$comment": "PR配信が**2つの台帳の両方に**載っているかの管理。採点そのものは growth/experiments/experiments.json と growth/data/annotations.json が持つ。ここが持つのは突き合わせの基準だけ。2026-09-24、PR⑦（対話メモ）が annotations.json にだけ入り experiments.json に無かったため、pr-evaluation-due.mjs が 2026-10-08 の D+14 を**永久に拾わない**状態になっていたので新設した（実測: due(ledger,'2026-10-08') が [] を返す）。",
+  "cross_check_from": "2026-09-03",
+  "$comment_cross_check_from": "experiments.json で PR 実験を追い始めたのが pr-2026-rsi-autopilot（PR⑥・2026-09-03）から。PR①〜⑤ はこの機構より前なので突き合わせの対象外にする。**遡って埋めるべきだという主張ではない** —— 当時の分析画面はもう取れない。",
+  "last_confirmed_complete": "2026-09-24",
+  "max_days_between_confirmations": 21,
+  "$comment_threshold": "21日。過去の配信間隔は 15〜38日（PR①〜⑦）なので、21日を超えて確認が無ければ『1本出ていても両方の台帳に無い』窓に入る。短くすると平時に鳴り続ける。**この値は間隔の実測から置いただけで、最適だと確かめたわけではない。**",
+  "known_unrecorded": [
+    {
+      "id": "pr7-dialogue-memo",
+      "url": "https://prtimes.jp/main/html/rd/p/000000011.000182412.html",
+      "published_at": "2026-09-24",
+      "subject_hint": "「シンプルメモ」、Apple Intelligence活用の新機能「対話メモ」を提供開始",
+      "why_unrecorded": "annotations.json には #1568 で行が入ったが、experiments.json にレコードが無い。そのため (a) --backtest が『1 件は書式が違い拾えなかった』として n=6 のまま数え、(b) pr-evaluation-due.mjs が 2026-10-08 の D+14 を拾わない。配信前採点は行われていない。prtimes.jp はこの環境から到達できない（CONNECT tunnel 403 を 2026-09-24 に実測）ので、本文を読んでの採点は機械にはできない。",
+      "resolve_by": "2026-10-08",
+      "$comment": "D+14 が 2026-10-08。それまでに experiments.json へ status:running のレコードを作れば、pr-evaluation-due.mjs が当日に拾う。**採点は人の仕事**（台帳の既存の規約と同じ）。"
+    }
+  ]
+}
