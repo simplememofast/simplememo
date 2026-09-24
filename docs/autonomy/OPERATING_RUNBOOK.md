@@ -85,6 +85,28 @@ cannot override a newer failed or active deployment. Exact served status bytes,
 the internal-script boundary, prospective binding and all other completion gates
 still apply. This reader correction alone earns no completion or score credit.
 
+Published squash merges may contain dates already updated on main while the PR
+was being validated. `company-merge-scope-v2` handles this only when the original
+sealed measurement plan already declares `sitemap_lastmod` support. It verifies
+the original declaration-to-head edits, a unique actual squash parent and common
+ancestor, and a conflict-free reconstruction of the entire published tree. Only
+non-target dates inherited from that parent may differ: dates must be valid,
+nonfuture and nondecreasing, all other XML bytes stay unchanged, and the target
+block and every other declared file must match the reviewed head. The original
+support validator also checks the actual-parent-to-merge sitemap edit. Missing
+plans, changed treatment files, conflicts and ambiguous history still fail.
+
+The same predicate runs during initial completion, measurement delivery and
+retained delivery verification. Initial completion saves its version, commit/tree
+identities and inherited locations in the private decision trace; retained checks
+must reproduce that proof exactly. Existing exact-head CI remains mandatory.
+Git reconstruction proves provenance; it does not assert that historical CI
+tested the final merged tree. Retry the original bound run with normal `finish`
+evidence after deploying the reviewed verifier. Preserve the original plan,
+baseline, launch/evaluation dates, manual origin and prior failure evidence; do
+not rewrite old completed receipts or claim another shipment, formal score gain
+or measured Growth improvement for repairing this linkage.
+
 ### Prospective SEO / AIO measurement and learning
 
 New Company observations use receipt schema 3. Every content action must carry a source-derived measurement plan before `prepare-decision`. Previously recorded schema 2 decisions and historical deliveries retain their original meaning; no retrospective measurement credit is added.

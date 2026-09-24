@@ -9,7 +9,7 @@ import { atomicJson, privateState, acquireLock } from './company-loop.mjs';
 import { verifyAppsFlyer } from './company-data.mjs';
 import { startOperationalFollowup } from './company-followup.mjs';
 import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
-import {verifyMeasurementInput,verifyMeasurementDelivery} from './company-measurement.mjs';
+import {verifyMeasurementInput,verifyMeasurementDelivery,verifyMeasurementMergeScope} from './company-measurement.mjs';
 import {observe,opportunities} from './company-loop.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
 import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
@@ -53,7 +53,8 @@ export function verifyRetainedCompanyDelivery(receipt,{stateRoot,root=ROOT,call=
     if(contract.id!==receipt.decision.input.contract_id||contract.run_id!==receipt.bound_autopilot_run_id||
       !isDeepStrictEqual(contract.candidates?.find(c=>c.id===contract.id)?.company_decision,seal))throw new Error('Git declaration does not bind retained decision');
   }
-  call('git',['diff','--quiet',merge.head_sha,merge.merge_sha,'--',...receipt.decision.input.scope.paths]);
+  const mergeScope=verifyMeasurementMergeScope(receipt,{stateRoot,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
+  if(!isDeepStrictEqual(mergeScope,receipt.evidence_of_completion?.decision_trace?.merge_scope_verification??null))throw new Error('Retained merge scope proof changed');
   const measurement=verifyMeasurementDelivery(receipt,{stateRoot,root,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});
   if(!isDeepStrictEqual(measurement,receipt.followup))throw new Error('Retained measurement delivery changed');
   return merge;
@@ -165,7 +166,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
     if(prior.runs.some(r=>r.run_id===evidence.run_id)) throw new Error('Merge did not introduce this run');
     const contract=JSON.parse(call('git',['show',merge.merge_sha+':'+intentPath(receipt.decision.input.contract_id)]));
     call('git',['fetch','origin',`refs/pull/${merge.pr}/head`]);
-    const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd);
+    const trace=await verifyDecisionDelivery(receipt,contract,row,prior.runs,ledger.runs,merge,call,cwd,{stateRoot:dir});
     const artifactProof=await verifyActionDelivery(row.artifact,merge,call,fetchImpl);
     if(row.artifact!==null && !receipt.decision.input.scope.paths.includes(artifactProof.artifact_source))throw new Error('Actually served source was not the declared changed target');
     const measurement=verifyMeasurementDelivery(receipt,{stateRoot:dir,root:cwd,head:merge.head_sha,mergeSha:merge.merge_sha,mergedAt:merge.merged_at,call});

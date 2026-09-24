@@ -7,7 +7,8 @@ import os from 'node:os';
 import {randomUUID} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 import {ROOT,digest} from './company-metrics.mjs';
-import {prepareMeasurement,loadMeasurement,verifyMeasurementInput,registerMeasurement,verifyMeasurementDelivery,measurementComparison,evaluateMeasurement,measurementStatus,measurementHandoffEvidence,EXPERIMENTS} from './company-measurement.mjs';
+import {prepareMeasurement,loadMeasurement,verifyMeasurementInput,registerMeasurement,verifyMeasurementDelivery,verifyMeasurementMergeScope,measurementComparison,evaluateMeasurement,measurementStatus,measurementHandoffEvidence,EXPERIMENTS} from './company-measurement.mjs';
+import {verifyRetainedCompanyDelivery} from './company-proof.mjs';
 import {candidateDigest,decisionTrace,decisionCommitment,prepareCompanyDecision} from './company-decision.mjs';
 import {opportunities,experimentView} from './company-loop.mjs';
 import {measuresPageCtr} from './ledger.mjs';
@@ -101,6 +102,46 @@ test('registry must follow binding, precede the page in a separate commit and pr
   assert.throws(()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-16T12:00:00Z',call:f.call}),/actual launch day/);
   const l=f.read(path.join(f.root,EXPERIMENTS));l.experiments[0].baseline.value=.9;f.write(path.join(f.root,EXPERIMENTS),l);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture invalid change');
   assert.throws(()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call}),/contract changed/);
+});
+test('sealed sitemap inheritance survives delivery and retained verification without changing measurement or manual origin',async t=>{
+  const f=fixture(t),sitemap='sitemap-ja.xml';
+  f.input.change_paths.push(sitemap);f.input.supporting_changes=[{path:sitemap,kind:'sitemap_lastmod'}];f.write(f.inputFile,f.input);
+  const original='<urlset>\n<url><loc>https://simplememofast.com'+f.page+'</loc><lastmod>2026-09-13</lastmod></url>'+'\n'.repeat(12)+
+    '<url><loc>https://simplememofast.com/other/</loc><lastmod>2026-09-12</lastmod></url>\n</urlset>\n';
+  const put=text=>fs.writeFileSync(path.join(f.root,sitemap),text);
+  put(original);f.git('add',sitemap);f.git('commit','-qm','fixture original sitemap');
+  const r=await f.register(),planFile=path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'),planBytes=fs.readFileSync(planFile);
+  put(original.replace('2026-09-13','2026-09-15'));fs.writeFileSync(path.join(f.root,f.target),'after\n');
+  f.write(path.join(f.root,'data/autopilot-runs.json'),{runs:[{run_id:'fixture-run',outcome:'shipped',attempted:true,route:r.route,pr:1,artifact:f.page}]});
+  f.git('add','.');f.git('commit','-qm','fixture treatment');const head=f.git('rev-parse','HEAD');
+  f.git('checkout','-qb','parallel',r.bound_declaration_sha);put(original.replace('2026-09-12','2026-09-14'));
+  f.git('add',sitemap);f.git('commit','-qm','fixture concurrent date');
+  f.git('merge','--squash',head);f.git('commit','-qm','fixture published squash');const mergeSha=f.git('rev-parse','HEAD'),mergedAt='2026-09-15T12:00:00Z';
+  f.git('update-ref','refs/remotes/origin/main',mergeSha);
+  const options={stateRoot:f.stateRoot,root:f.root,head,mergeSha,mergedAt,call:f.call};
+  const proof=verifyMeasurementMergeScope(r,options),followup=verifyMeasurementDelivery(r,options);
+  assert.equal(proof.version,'company-merge-scope-v2');assert.equal(followup.state,'registered_waiting_for_mature_evidence');
+  assert.equal(followup.evaluation_at,f.input.evaluation_at);assert.equal(r.route,'owner-session');assert.deepEqual(fs.readFileSync(planFile),planBytes);
+  const merge={pr:1,head_sha:head,merge_sha:mergeSha,merged_at:mergedAt,validation_run:2};
+  Object.assign(r,{status:'verified_existing_autopilot',followup,evidence_of_completion:{merge,decision_trace:{state:'verified',decision_sha256:r.decision.sha256,merge_scope_verification:proof}}});
+  const call=(name,args)=>{
+    if(name!=='gh')return f.call(name,args);
+    if(args[0]==='pr')return JSON.stringify({state:'MERGED',baseRefName:'main',headRefOid:head,mergeCommit:{oid:mergeSha},mergedAt,files:[]});
+    assert.deepEqual(args,['api','repos/simplememofast/simplememo/actions/runs/2']);
+    return JSON.stringify({id:2,head_sha:head,event:'pull_request',status:'completed',conclusion:'success',name:'SEO Validation',path:'.github/workflows/seo-check.yml'});
+  };
+  const retained=()=>verifyRetainedCompanyDelivery(r,{stateRoot:f.stateRoot,root:f.root,call});
+  assert.equal(retained().merge_sha,mergeSha);
+  delete r.evidence_of_completion.decision_trace.merge_scope_verification;
+  assert.throws(retained,/Retained merge scope proof changed/,'old receipts cannot silently acquire the new proof');
+  r.evidence_of_completion.decision_trace.merge_scope_verification={...proof,published_tree:'a'.repeat(40)};
+  assert.throws(retained,/Retained merge scope proof changed/);
+  r.evidence_of_completion.decision_trace.merge_scope_verification=proof;
+  const plan=f.read(planFile);plan.experiment.evaluation_at='2026-10-16';f.write(planFile,plan);
+  assert.throws(retained,/hash|changed|differs|mismatch/);fs.writeFileSync(planFile,planBytes);
+  const loaded=loadMeasurement({stateRoot:f.stateRoot,...r.decision.input.measurement}),sourceFile=path.join(f.stateRoot,loaded.source.file),sourceBytes=fs.readFileSync(sourceFile);
+  fs.appendFileSync(sourceFile,' ');assert.throws(retained,/hash|changed|differs|mismatch/);fs.writeFileSync(sourceFile,sourceBytes);
+  assert.equal(retained().merge_sha,mergeSha);assert.equal(r.route,'owner-session');
 });
 test('page edits before registry are rejected even if the final files appear correct',async t=>{
   const f=fixture(t),r=f.bind();fs.writeFileSync(path.join(f.root,f.target),'too early\n');
