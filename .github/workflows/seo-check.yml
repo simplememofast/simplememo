@@ -1357,6 +1357,13 @@ jobs:
         run: python3 scripts/generate_sitemap.py --selftest
       - name: Sitemap lists every page with content-derived dates
         run: python3 scripts/generate_sitemap.py --check
+      # 開発記事のフィード（en/devlog/feed.xml）は、記事の h1・meta description・dateModified から作る。
+      # 2026-09-24 に #1563 が relay-api-design の説明文を変えたままフィードを作り直さず、
+      # フィードだけ古い説明文で配られていた。記事を直したら `python3 scripts/generate_dev_feed.py` を回す。
+      - name: Developer feed matches the articles
+        run: |
+          python3 scripts/generate_dev_feed.py --selftest
+          python3 scripts/generate_dev_feed.py --check
 
       # --since 1 = HEAD~1..HEAD（マージは首親差分）で実際に変わった .html だけを
       # 通知する。以前は mtime 判定で、新規 checkout では全ファイルが「更新済み」に
