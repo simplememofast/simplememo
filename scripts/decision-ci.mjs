@@ -9,6 +9,7 @@ import os from 'node:os';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback } from './value-contracts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -147,7 +148,8 @@ async function selftest() {
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/auto-merge.yml'), 'utf8');
   const body = workflow.match(/          script: \|\n((?:            .*\n|\n)+)/)?.[1];
   assert(body, 'auto-merge workflow script required');
-  const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', body);
+  const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', 'require', body);
+  const identityGuard = createRequire(import.meta.url)('./merge-identity-check.js');
   for (const [branch, event, expected, overrides = {}] of [
     ['claude/obsidian-auto-test', 'push', 0], ['claude/obsidian-auto-test', undefined, 0],
     ['claude/obsidian-auto-test', 'pull_request', 1], ['Codex/user-directed', 'push', 0],
@@ -157,14 +159,31 @@ async function selftest() {
     ['Codex/user-directed', 'pull_request', 0, { sha: 'c'.repeat(40) }],
     ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
     ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
+    ['Codex/user-directed', 'pull_request', 0, { authorName: 'Private Person' }],
+    ['Codex/user-directed', 'pull_request', 0, { openerName: 'SimpleMemo Developer (Private Person)' }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 2 }],
+    ['Codex/user-directed', 'pull_request', 0, { commitCount: 251 }],
   ]) {
     let merged = 0;
     const sha = 'a'.repeat(40);
+    const pr = { number: 123, draft: overrides.draft ?? false,
+      base: { ref: overrides.base ?? 'main' },
+      head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } },
+      user: { login: 'simplememofast' }, commits: overrides.commitCount ?? 1 };
     await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
       { rest: { pulls: {
-        list: async () => ({ data: [{ number: 123, draft: overrides.draft ?? false, base: { ref: overrides.base ?? 'main' }, head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } } }] }),
+        list: async () => ({ data: [pr] }),
+        get: async () => ({ data: pr }),
+        listCommits: async () => ({}),
         merge: async args => { assert.equal(args.sha, sha); merged++; return { data: { sha: 'b'.repeat(40) } }; },
-      } } }, { info() {}, notice() {}, setOutput() {} });
+      }, users: { getByUsername: async () => ({ data: { login: 'simplememofast',
+        name: overrides.openerName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' } }) } },
+      paginate: async () => [{ sha, commit: {
+        author: { name: overrides.authorName ?? 'SimpleMemo Developer', email: 'simplememo.com@gmail.com' },
+        committer: { name: 'GitHub', email: 'noreply@github.com' }, message: 'Safe fixture',
+      } }],
+      }, { info() {}, notice() {}, setOutput() {}, setFailed() {} },
+      source => { assert(source.endsWith('/scripts/merge-identity-check.js')); return identityGuard; });
     assert.equal(merged, expected, `auto-merge must respect declaration/PR boundary: ${branch} ${event}`);
   }
 
