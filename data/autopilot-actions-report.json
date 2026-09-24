@@ -1,14 +1,14 @@
 {
   "as_of_jst": "2026-09-25",
-  "routine_snapshot_sha256": "fcef5eed358040f4d5f3e717d31edb146f5dc79437a184a58862099aa599d4fc",
+  "routine_snapshot_sha256": "6edada89fb7db243a04500969cfaf448a534c2549ec6d2027af09047889ec388",
   "viewport_measurement": {
-    "main_sha": "809275c29b2683d6db63495c811c0eb2aac46c80",
-    "head_sha": "9d428c9f1e83ec20717d892ad0def4526dcaad48",
-    "run_id": 36027796672,
+    "main_sha": "e8f6745e8b3dd7fbd1e29bdd02e986d033440272",
+    "head_sha": "bd648f4e098cbdd0ebb36ea1e525f4f72225f9f4",
+    "run_id": 36059425680,
     "attempt": 1,
-    "started_at": "2026-09-24T16:30:06Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/36027796672/attempts/1",
-    "job_id": 107728823517,
+    "started_at": "2026-09-24T21:07:33Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/36059425680/attempts/1",
+    "job_id": 107834468171,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -38,7 +38,7 @@
       }
     }
   },
-  "open_total": 5,
+  "open_total": 6,
   "deferred": [],
   "pending_pr": [
     {
@@ -142,8 +142,8 @@
   "ai": [
     {
       "id": "act-route-silent-actions",
-      "title": "actions が 5日ぶん出荷していない（2026-09-20〜2026-09-24・最後の出荷 2026-09-19）",
-      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
+      "title": "actions が 6日ぶん出荷していない（2026-09-20〜2026-09-25・最後の出荷 2026-09-19）",
+      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24 / 2026-09-25）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
       "age_days": 3,
       "auto": null,
       "evidence": "2026-09-19 以降 actions の出荷は台帳に無い"
@@ -154,6 +154,14 @@
       "age_days": 1,
       "auto": null,
       "evidence": "#1549 がまだ open"
+    },
+    {
+      "id": "act-shipping-outage",
+      "title": "どの経路も 2日連続で出荷していない（2026-09-24〜2026-09-25）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-24 / 2026-09-25）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "2026-09-23 以降どの経路も出荷していない"
     },
     {
       "id": "act-status-stale",
