@@ -24,13 +24,13 @@
       });
     });
   </script>
-  <title>Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Obsidian連携シンプルメモ 開発日誌</title>
-  <meta name="description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。Outboxパターンの設計フロー、SendManagerの実装、AES-GCM暗号化、指数バックオフリトライ、NWPathMonitorによる回線復帰検知まで、その全容を解説します。">
+  <title>Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌</title>
+  <meta name="description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。Outboxパターンの設計フロー、SendManagerの実装、AES-GCM暗号化、指数バックオフリトライ、NWPathMonitorによる回線復帰検知まで、その全容を解説します。">
   <meta name="theme-color" content="#070b14">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
-  <meta property="og:title" content="Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Obsidian連携シンプルメモ 開発日誌">
-  <meta property="og:description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta property="og:title" content="Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌">
+  <meta property="og:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/devlog/outbox-architecture">
@@ -44,8 +44,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
-  <meta name="twitter:title" content="Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Obsidian連携シンプルメモ 開発日誌">
-  <meta name="twitter:description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta name="twitter:title" content="Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌">
+  <meta name="twitter:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png">
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -67,7 +67,7 @@
   "@type": "WebPage",
   "@id": "https://simplememofast.com/devlog/outbox-architecture#webpage",
   "inLanguage": "ja",
-  "name": "Outboxアーキテクチャ：取りこぼしゼロ設計",
+  "name": "Outboxアーキテクチャ：取りこぼしを防ぐ設計",
   "isPartOf": {
     "@id": "https://simplememofast.com/#website"
   },
@@ -236,7 +236,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計","description":"送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし ゼロ"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -286,7 +286,7 @@
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span lang="ja">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計</span>
+        <span lang="ja">Outboxアーキテクチャ：メッセージを取りこぼさないための設計</span>
 
       </h1>
       <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
@@ -302,16 +302,16 @@
         <div class="page-content__body">
 
           <!-- Section 1 -->
-          <h2>課題：送信即クリアなのにメッセージを失わない</h2>
+          <h2>課題：送信即クリアでも、メッセージを取りこぼさないには</h2>
           <p>Obsidian連携シンプルメモでは、ユーザーが送信ボタンをタップした瞬間にUIがクリアされ、すぐに次のメモを書き始められる。これがCaptioスタイルの根幹をなすUXだ。</p>
           <p>しかし現実のネットワークは300ms〜2秒のレイテンシがあり、失敗もするし、そもそもオフラインかもしれない。多くのアプリはネットワーク応答を待ってからUIをクリアする。安全だが、UXは悪い。逆に即座にクリアすると、メッセージを失うリスクがある。</p>
-          <p><strong>Outboxパターン</strong>は、この相反する要件を同時に解決する。送信タップの瞬間にメッセージをローカルの暗号化ストレージ（Outbox）に永続保存し、UIを即座にクリアし、バックグラウンドでネットワーク送信を行う。送信に成功したらOutboxから削除し、失敗したら自動リトライする。これにより<strong>メッセージ取りこぼしゼロ</strong>を実現しながら、体感レイテンシはゼロに近づく。</p>
+          <p><strong>Outboxパターン</strong>は、この相反する要件を同時に解決する。送信タップの瞬間にメッセージをローカルの暗号化ストレージ（Outbox）に永続保存し、UIを即座にクリアし、バックグラウンドでネットワーク送信を行う。送信に成功したらOutboxから削除し、失敗したら自動リトライする。これにより<strong>未送信のメッセージを端末に残して再送</strong>しつつ、体感レイテンシはゼロに近づく。</p>
 
           <!-- Section 2 -->
           <h2>Outboxパターンの設計フロー</h2>
           <p>以下が、送信ボタンをタップしてからメッセージが確実に送信されるまでの全フローだ。</p>
           <ol class="flow-list">
-            <li><strong>送信タップ → まずOutboxにAES-GCM暗号化して永続保存</strong><br>ユーザーが送信ボタンをタップした瞬間、メッセージはAES-GCM 256bitで暗号化され、デバイスのローカルストレージに永続保存される。このステップが完了するまで、UIクリアは行わない。つまり、Outbox保存が「取りこぼしゼロ」の最初の防波堤になる。</li>
+            <li><strong>送信タップ → まずOutboxにAES-GCM暗号化して永続保存</strong><br>ユーザーが送信ボタンをタップした瞬間、メッセージはAES-GCM 256bitで暗号化され、デバイスのローカルストレージに永続保存される。このステップが完了するまで、UIクリアは行わない。つまり、Outbox保存が取りこぼしを防ぐ最初の防波堤になる。</li>
             <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標はワンタップ（アニメーション込みで0.25秒）。</li>
             <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
             <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
@@ -323,7 +323,7 @@
           <h2>SendManagerのコード</h2>
           <p>SendManagerの<code>send()</code>関数は、Outboxパターンのエントリーポイントだ。まずOutboxに保存し、ネットワーク接続がなければキューイングし、接続があれば即座に送信を実行する。</p>
 <pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
-    // まずOutboxに保存（取りこぼしゼロを保証）
+    // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
         outboxMessage = try OutboxManager.shared.add(body: message)
@@ -444,7 +444,7 @@
           <div class="related-grid">
             <a href="/devlog/day1" class="related-card">
               <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
-              <div class="related-card__desc">起動 約1秒・ワンタップ送信、取りこぼしゼロ。すべてはここから始まった。</div>
+              <div class="related-card__desc">起動 約1秒・ワンタップ送信、取りこぼしを防ぐ設計。すべてはここから始まった。</div>
             </a>
             <a href="/devlog/" class="related-card">
               <div class="related-card__title">開発日誌一覧</div>

@@ -63,7 +63,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: BlogPosting -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/day1#article","headline":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","description":"Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, zero message loss.","url":"https://simplememofast.com/en/devlog/day1","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/day1#article","headline":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","description":"Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, and keep unsent notes for retry.","url":"https://simplememofast.com/en/devlog/day1","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage"}}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience","item":"https://simplememofast.com/en/devlog/day1"}]}</script>
 <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -285,7 +285,7 @@
 <li><a href="#en-section1">What Made Captio So Good -- Deconstructing the Experience</a></li>
 <li><a href="#en-section2">Architecture: Why UIKit Instead of SwiftUI</a></li>
 <li><a href="#en-section3">Achieving "Send and Clear" in a Single Tap</a></li>
-<li><a href="#en-section4">Zero Message Loss: The Outbox Architecture</a></li>
+<li><a href="#en-section4">Designing Against Message Loss: The Outbox Architecture</a></li>
 <li><a href="#en-section5">Relay API: Sending Without Mailbox OAuth</a></li>
 <li><a href="#en-section6">Today's Work: Eliminating Small Annoyances One by One</a></li>
 <li><a href="#en-section7">Fixing History Status Display Inconsistencies</a></li>
@@ -384,7 +384,7 @@ private func performSendAnimation() {
 </section>
 <!-- Section 4 -->
 <section id="en-section4">
-<h2>4. Zero Message Loss: The Outbox Architecture</h2>
+<h2>4. Designing Against Message Loss: The Outbox Architecture</h2>
 <p>Decoupling the send UI from the network response means that "the UI cleared but the email actually failed to send" could happen. This is absolutely unacceptable. A user thinking they sent a memo that was never actually delivered -- this is a fatal loss of trust for a memo app.</p>
 <p>That's why we adopted the <strong>Outbox pattern</strong>.</p>
 <p>The message send flow works as follows:</p>
@@ -550,7 +550,7 @@ func applyLanguageChange() {
 <p>But all these metrics converge on a single goal: trust.</p>
 <p>Fast launch: the trust that "I can always write immediately."<br/>
             Send and clear: the trust that "it's been processed."<br/>
-            Zero message loss: the trust that "it will absolutely be delivered."<br/>
+            Designing against message loss: the trust that an unsent note is kept and retried, not silently dropped.<br/>
             Encryption: the trust that "nobody can see it."</p>
 <p>Captio wasn't loved because its features were superior. It was loved because it had meticulously polished an experience you could use with complete trust. That's what we want to carry forward.</p>
 </section>
@@ -589,7 +589,7 @@ func applyLanguageChange() {
 <a class="related-card" href="/en/devlog/outbox-architecture">
 <div class="related-card__title">
 
-<span lang="en">Outbox Architecture: Zero Message Loss</span>
+<span lang="en">Outbox Architecture: Designing Against Message Loss</span>
 </div>
 <div class="related-card__desc">
 

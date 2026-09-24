@@ -25,12 +25,12 @@
       });
     });
   </script>
-<title>Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log</title>
+<title>Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log</title>
 <meta content="UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and…" name="description"/>
 <meta content="#070b14" name="theme-color"/>
 <link href="https://analytics.ahrefs.com" rel="preconnect"/>
 <!-- OGP -->
-<meta content="Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log" property="og:title"/>
+<meta content="Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log" property="og:title"/>
 <meta content="UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and…" property="og:description"/>
 <meta content="article" property="og:type"/>
 <meta content="2026-02-13T00:00:00+09:00" property="article:published_time"/>
@@ -44,7 +44,7 @@
 <!-- Twitter Card -->
 <meta content="summary_large_image" name="twitter:card"/>
 <meta content="@simplememofast" name="twitter:site"/>
-<meta content="Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log" name="twitter:title"/>
+<meta content="Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log" name="twitter:title"/>
 <meta content="UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and…" name="twitter:description"/>
 <meta content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png" name="twitter:image"/>
 
@@ -55,7 +55,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: Speakable (AIO / Voice Search) -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture#webpage","inLanguage":"en","name":"Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body h2"]},"url":"https://simplememofast.com/en/devlog/outbox-architecture"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture#webpage","inLanguage":"en","name":"Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body h2"]},"url":"https://simplememofast.com/en/devlog/outbox-architecture"}</script>
 <link href="/assets/css/style.min.css?v=aa4747a0f6" rel="stylesheet"/>
 <link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" rel="preload" type="font/woff2"/>
 <link as="font" crossorigin="" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" rel="preload" type="font/woff2"/>
@@ -209,9 +209,9 @@
 
   </style>
 <!-- JSON-LD: TechArticle -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/en/devlog/outbox-architecture#article","inLanguage":"en","headline":"Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log","description":"UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.","url":"https://simplememofast.com/en/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし ゼロ"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/en/devlog/outbox-architecture#article","inLanguage":"en","headline":"Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log","description":"UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.","url":"https://simplememofast.com/en/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 <!-- JSON-LD: BreadcrumbList -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Outbox Architecture: Zero Message Loss Design","item":"https://simplememofast.com/en/devlog/outbox-architecture"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Outbox Architecture: Designing Against Message Loss","item":"https://simplememofast.com/en/devlog/outbox-architecture"}]}</script>
 <script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/en/devlog/outbox-architecture">
@@ -255,7 +255,7 @@
 <div class="container">
 <h1 class="page-content__title">
 
-<span lang="en">Outbox Architecture: Zero Message Loss Design</span>
+<span lang="en">Outbox Architecture: Designing Against Message Loss</span>
 </h1>
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
 
@@ -275,12 +275,12 @@
 <h2>The Challenge: Instant UI Clear Without Losing Messages</h2>
 <p>In Simple Memo (Captio-style), the UI clears the instant you tap send, letting you immediately start writing your next memo. This is the core of the Captio-style UX.</p>
 <p>But real-world networks have 300ms-2s latency. They fail. They go offline entirely. Most apps wait for a network response before clearing the UI. Safe, but terrible UX. Clear immediately? You risk losing the message.</p>
-<p>The <strong>Outbox pattern</strong> solves both simultaneously. The moment you tap send, the message is persisted to encrypted local storage (the Outbox), the UI clears instantly, and background network delivery begins. On success, the message is removed from the Outbox. On failure, automatic retry kicks in. The result: <strong>zero message loss</strong> with near-zero perceived latency.</p>
+<p>The <strong>Outbox pattern</strong> solves both simultaneously. The moment you tap send, the message is persisted to encrypted local storage (the Outbox), the UI clears instantly, and background network delivery begins. On success, the message is removed from the Outbox. On failure, automatic retry kicks in. The result: <strong>unsent messages are kept and retried</strong>, with near-zero perceived latency.</p>
 <!-- Section 2 -->
 <h2>Outbox Pattern Design Flow</h2>
 <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
 <ol class="flow-list">
-<li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br/>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense for zero message loss.</li>
+<li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br/>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense against message loss.</li>
 <li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br/>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: one-tap (0.25s with animation).</li>
 <li><strong>Background Send via Relay API</strong><br/>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
 <li><strong>On Success: Remove from Outbox</strong><br/>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
@@ -291,7 +291,7 @@
 <h2>SendManager Code</h2>
 <p>The SendManager's <code>send()</code> function is the entry point for the Outbox pattern. It persists to the Outbox first, queues if offline, and sends immediately if connected.</p>
 <pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
-    // Persist to Outbox first (guarantees zero message loss)
+    // Persist to Outbox first (so a crash or lost connection does not drop it)
     let outboxMessage: OutboxMessage
     do {
         outboxMessage = try OutboxManager.shared.add(body: message)
@@ -403,7 +403,7 @@
 <div class="related-grid">
 <a class="related-card" href="/en/devlog/day1">
 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-<div class="related-card__desc">Launch in ~1s, send with one tap, zero message loss. It all started here.</div>
+<div class="related-card__desc">Launch in ~1s, send with one tap, and keep unsent notes for retry. It all started here.</div>
 </a>
 <a class="related-card" href="/en/devlog/">
 <div class="related-card__title">Dev Log Index</div>

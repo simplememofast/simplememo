@@ -62,6 +62,7 @@ FEED_PATH = REPO_ROOT / "en" / "devlog" / "feed.xml"
 EXTRA_PAGES = [
     "en/blog/ios26-speechanalyzer-live-mic.html",
     "en/blog/ios26-speechanalyzer-custom-vocabulary.html",
+    "en/blog/foundation-models-choose-not-write.html",
 ]
 
 SITE_URL = "https://simplememofast.com"
@@ -293,6 +294,14 @@ def selftest() -> int:
         t("a description cut with an ellipsis falls back to the JSON-LD description",
           d_item["description"] == "Full summary.")
         (devlog / "d.html").unlink()
+
+        (devlog / "e.html").write_text(page.format(slug="a", ld=json.dumps(ld_ok)), encoding="utf-8")
+        try:
+            collect(root, ["en/blog/b.html"])
+            t("two pages with the same canonical URL are an error", False)
+        except FeedError:
+            t("two pages with the same canonical URL are an error", True)
+        (devlog / "e.html").unlink()
 
         (devlog / "c.html").write_text(
             page.format(slug="c", ld=json.dumps({"@type": "BlogPosting"})), encoding="utf-8")
