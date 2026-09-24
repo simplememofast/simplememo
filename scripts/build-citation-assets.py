@@ -192,8 +192,8 @@ research = f"""
 put("en/autopilot/index.html", page("/en/autopilot/", "AI app operations: 23 days of results | Simple Memo", "A dated field report from Simple Memo: 41 ledger records, 28 attempted runs, 19 shipments, human interventions, failures, and downloadable source data.", research, "/autopilot/", "/en/autopilot/", "en"))
 
 summaries = {
-    "en": """Simple Memo - for Obsidian is an independent iPhone app for capturing a thought and sending it to your own email address, with optional appending to an Obsidian vault. It supports typed notes, Siri capture, and Apple Watch. Dialogue Memo can ask short follow-up questions with Apple Intelligence on a supported iPhone before the user reviews the note and taps Send; regular typing and dictation remain available. With a compatible folder selected, the app writes to the vault on the iPhone without an Obsidian community plugin. Email delivery and vault appending are separate paths: offline email waits in the Outbox, while folder-based appending can work locally. A vault must be accessible in the Files picker for the direct-folder method. The app also publishes a dated operations ledger describing work performed by AI, human interventions, and failures. Those records are available for inspection and reuse as research material. Simple Memo is developed by YURIKA, K.K. It is not an official Obsidian product and does not claim to be an official successor to Captio. Setup instructions and limitations are available on its website.""",
-    "ja": """「Obsidian連携シンプルメモ」は、思いついたことを自分のメールへ送り、必要に応じてObsidianの保管庫にも追記できるiPhoneアプリです。文字入力、Siriからの音声キャプチャ、Apple Watchに対応しています。対話メモは対応するiPhoneでApple Intelligenceを使い、短い追加質問をした後、内容を確認して既存の送信ボタンを使います。通常の文字入力・音声入力も使えます。対応するフォルダを選択すると、ObsidianのコミュニティプラグインなしでiPhoneから追記できます。メール配送と保管庫への追記は別の処理で、オフライン時のメールはOutboxで待機します。開発・運営は株式会社ユリカ。AIが行った運営業務、失敗、人間の介入を記録した台帳も公開しています。Obsidianの公式製品ではなく、Captioの正式な後継・承継製品でもありません。"""
+    "en": """Simple Memo is an independent iPhone app for capturing a thought and sending it to your own email address, with optional appending to an Obsidian vault. It supports typed notes, Siri capture, and Apple Watch. Dialogue Memo can ask short follow-up questions with Apple Intelligence on a supported iPhone before the user reviews the note and taps Send; regular typing and dictation remain available. With a compatible folder selected, the app writes to the vault on the iPhone without an Obsidian community plugin. Email delivery and vault appending are separate paths: offline email waits in the Outbox, while folder-based appending can work locally. A vault must be accessible in the Files picker for the direct-folder method. The app also publishes a dated operations ledger describing work performed by AI, human interventions, and failures. Those records are available for inspection and reuse as research material. Simple Memo is developed by YURIKA, K.K. It is not an official Obsidian product and does not claim to be an official successor to Captio. Setup instructions and limitations are available on its website.""",
+    "ja": """「シンプルメモ」は、思いついたことを自分のメールへ送り、必要に応じてObsidianの保管庫にも追記できるiPhoneアプリです。文字入力、Siriからの音声キャプチャ、Apple Watchに対応しています。対話メモは対応するiPhoneでApple Intelligenceを使い、短い追加質問をした後、内容を確認して既存の送信ボタンを使います。通常の文字入力・音声入力も使えます。対応するフォルダを選択すると、ObsidianのコミュニティプラグインなしでiPhoneから追記できます。メール配送と保管庫への追記は別の処理で、オフライン時のメールはOutboxで待機します。開発・運営は株式会社ユリカ。AIが行った運営業務、失敗、人間の介入を記録した台帳も公開しています。Obsidianの公式製品ではなく、Captioの正式な後継・承継製品でもありません。"""
 }
 
 for lang in ("ja", "en"):
@@ -201,11 +201,17 @@ for lang in ("ja", "en"):
     prefix = "/en" if english else ""
     title = "Simple Memo media kit: facts, screenshots and research" if english else "紹介・取材用資料｜Obsidian連携シンプルメモ"
     desc = "Product facts, setup screenshots, explanatory videos, downloadable descriptions, and a dated AI operations dataset for writers covering Simple Memo." if english else "Obsidian連携シンプルメモの紹介・取材用資料。製品の説明文、設定画面、説明動画、対応条件、公開済みのAI運営実測データと引用用図表をまとめています。検証に必要な手順や制約、素材の原本、開発者への問い合わせ先まで、このページから確認できます。"
-    put(f"assets/downloads/simplememo-facts-{lang}.txt", summaries[lang] + "\n\n" + BASE + prefix + "/press/\n" + BASE + prefix + "/obsidian/\n" + BASE + prefix + "/siri/\n")
+    listing = (
+        "App Store listing (25 Sep 2026): Simple Memo - Obsidian Voice"
+        if english else
+        "App Store掲載名（2026年9月25日）：シンプルメモ - Obsidian連携・高速音声入力"
+    )
+    put(f"assets/downloads/simplememo-facts-{lang}.txt", summaries[lang] + "\n\n" + listing + "\n\n" + BASE + prefix + "/press/\n" + BASE + prefix + "/obsidian/\n" + BASE + prefix + "/siri/\n")
     screenshots = ["onboarding-en-1.png", "onboarding-en-2.png", "onboarding-en-3.png"] if english else ["onboarding-1.png", "onboarding-2.png", "onboarding-3.png"]
     screen_html = '<div class="screens">' + "".join(f'<figure><a href="{asset("assets/img/siri/" + s)}"><img src="{asset("assets/img/siri/" + s)}" width="220" height="476" alt="{e(("Siri setup screen " if english else "Siri設定画面 ") + str(i+1))}" loading="lazy"></a><figcaption>{"Open original PNG" if english else "PNG原本を開く"}</figcaption></figure>' for i,s in enumerate(screenshots)) + '</div>'
     facts = [
-        ("Product" if english else "製品", constants["appNameEn"] if english else constants["appNameJa"]),
+        ("Product" if english else "製品", "Simple Memo" if english else "シンプルメモ"),
+        ("App Store listing (25 Sep 2026)" if english else "App Store掲載名（2026年9月25日）", "Simple Memo - Obsidian Voice" if english else "シンプルメモ - Obsidian連携・高速音声入力"),
         ("Developer" if english else "開発・運営", "YURIKA, K.K." if english else "株式会社ユリカ"),
         ("Capture" if english else "入力", "Typed notes, Siri and Apple Watch" if english else "文字入力、Siri、Apple Watch"),
         ("Obsidian" if english else "Obsidian連携", "Optional; no community plugin required" if english else "任意で設定。コミュニティプラグイン不要"),
