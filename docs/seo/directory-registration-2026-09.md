@@ -1080,6 +1080,26 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - **掲載の確認（07時台）**：iOS Dev Directory #1432・awesome-no-login-web-apps #612・awesome 系6本（#144 / #83 / #135 / #1 / #386 / #23）は
   すべて open でコメントなし。媒体からの返信も無い（support@ 宛ては自動応答と配信メールだけ）。AlternativeTo は Chrome が未ログインのまま（判断待ち #3）。
 
+## 5.22 オーナー判断（2026-09-24 朝）：記事は規約の読み直しを待つ、公開後は iOS Dev Weekly と dev.to
+
+§5.21 の点検結果を渡して、選択肢で3点を確認した。
+
+- **記事 #1547 と RSS #1546 の公開 →「規約の読み直しを先に」（推奨を選択）。**手動マージはしない。
+  `Corporate obligations` は、読み直しが済むまで全マージを止めて確認を促す仕組みなので、その意図どおりに待つ。
+  - **注意（読み直しを反映する PR を作る人へ）**：その PR 自身も、作った日の `/autopilot/` が最新でないと `Autopilot page vs ledger` で落ちる。
+    日次同期の PR（`claude/autopilot-act-*`）や #1548 は `Corporate obligations` で落ちて先に入れないので、**どちらか一方だけでは main が緑にならない。**
+    CLAUDE.md の手順どおり、同じ PR に `node scripts/decision-monitor.mjs --publish-report` の結果（と `python3 scripts/generate_sitemap.py`）も入れるのが確実。
+  - main が緑になったら、こちらで #1547・#1546・#1541 を最新化する。公開が 9/25 以降になる #1547 は、同じ更新で本文の日付・JSON-LD・sitemap を実際の公開日に直す
+    （直さなければ、PR の検証用マージコミットの日付と sitemap の lastmod がずれて検査が落ちるはずなので、古い日付のまま自動で出る可能性は低い。
+    ただしマージコミットの日付の付き方は GitHub の仕様を読んで確かめたわけではない）。
+- **公開後の告知 →「iOS Dev Weekly に提案」と「dev.to に転載」の両方。**手順と文面は `docs/seo/post-publication-drafts-2026-09-24.md` に置いた。
+  - iOS Dev Weekly のフォーム（`suggest.iosdevweekly.com`、2026-09-24 に項目を確認、CAPTCHA なし）には
+    *If this link is from a blog already listed in the iOS Dev Directory, Dave will already see it … via RSS* とある。
+    **iOS Dev Directory（#1432）にフィード付きで載り、そのフィードに記事が入っているなら、フォームは使わない。**それ以外ならフォームで提案する。
+  - dev.to は `simple_memo` アカウントで、正規 URL をサイトに向けた短縮版（SpeechAnalyzer の2本と同じ形）。
+- **SourceForge の確認メール →「自分で有効化する」。**オーナーが「Activate Your Account」を押し、ニュースレター購読がオンなら外す。
+  プロジェクトページが公開されたら、こちらで rel と robots を実測して §1 に記録する。
+
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
 優先度順。すべて無料・自薦可のものだけを残し、有料掲載専用・相互リンク必須・
@@ -1293,4 +1313,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 14 | ~~Memo Inbox を awesome-no-login-web-apps へ PR で出すか~~ → **2026-09-23 判断：出す** → 同日 [#612](https://github.com/aviaryan/awesome-no-login-web-apps/pull/612) を提出（§5.18） | — | 審査の結果を毎週の掲載確認で見る |
 | 15 | Uneed・Microlaunch・Fazier への登録（§5.19） | アカウント作成を行わない | 依頼文（`Uneed・Microlaunch・Fazier登録_GPT依頼文.txt`）を GPT に渡してもらえれば、公開後に rel と robots を実測して §1 に記録する |
 | 16 | main の CI（#11）が直ったあとの #1546 の最新化 | — | 直ったと分かれば、こちらで Update branch → 自動マージ → iOS Dev Directory に `feed_url` を足す PR まで進める |
-| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） |
+| 17 | ~~開発記事 #1547（draft）の公開可否と事実確認（§5.20）~~ → **2026-09-24 判断：このまま公開する** → 同日 Ready に切り替えた | — | main の CI（#11）が直れば、検証成功で自動マージされる。**マージが 9/25 以降になるなら、先に日付と sitemap を直す**。公開後、フィード（#1546 がマージ済みなら）に足す。iOS Dev Weekly へ出すかは、公開後にあらためて判断してもらう（前回は見送り） → #19 で判断済み |
+| 18 | ~~記事 #1547・RSS #1546 を、規約の読み直しを待たずに手動でマージするか~~ → **2026-09-24 判断：待つ（規約の読み直しを先に）**（§5.22） | 規約の条項の読み直しは人の判断 | 読み直しを反映する PR には、同じ日の `/autopilot/` の更新も入れないと main が緑にならない（§5.22）。緑になったら、こちらで3本の PR を最新化し、#1547 の日付を公開日に直す |
+| 19 | ~~公開後に記事をどこへ出すか~~ → **2026-09-24 判断：iOS Dev Weekly に提案＋dev.to に転載** | — | 公開を確かめてから実行する（手順と文面は `docs/seo/post-publication-drafts-2026-09-24.md`）。iOS Dev Directory にフィード付きで載っていれば、iOS Dev Weekly のフォームは使わない |
+| 20 | SourceForge のアカウント有効化（2026-09-23 23:53 に確認メール） → **2026-09-24 判断：オーナーが有効化する** | 有効化はアカウント作成の一部なので押さない | 有効化とプロジェクト公開のあと、rel と robots を実測して §1 に記録する |
