@@ -4,6 +4,8 @@
 **Status**: L1 MVP (Phase 1)
 **Updated**: 2026-05-05
 
+> **2026-09-24 — the draft source is no longer in this repository.** `docs/cross-platform-engagement/` moved to the private ops repo on 2026-05-08 (#208), so `scripts/build_admin_drafts.py` cannot rebuild `drafts.json` here. The 20 draft bodies were corrected in place and their `lint` / `word_count` recomputed with the builder's own functions: Captio's cloud service ended on 2024-10-01 per the developer's notice on captio.co (the app had left the App Store about two years earlier), "alternative" instead of "successor", no personal name or personal email address (sign as SimpleMemo Developer / シンプルメモ開発者, reply to support@simplememofast.com), and no unverified launch times, competitor prices or competitor limits. **Apply the same corrections to the private source before regenerating**, or the old text will come back.
+
 ---
 
 ## What this is
@@ -44,7 +46,7 @@ What's NOT here (intentionally — these were in the brief but require a server)
 When `docs/cross-platform-engagement/01-priority-P0-drafts.md` or `02-priority-P1-drafts.md` is edited, regenerate the JSON:
 
 ```bash
-cd /Users/hajimeataka/simplememo
+cd <repository root>
 python3 scripts/build_admin_drafts.py
 ```
 
