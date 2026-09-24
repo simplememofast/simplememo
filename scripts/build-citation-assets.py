@@ -218,10 +218,25 @@ for lang in ("ja", "en"):
         ("Direct-folder requirement" if english else "フォルダ直接追記の条件", "A writable vault folder accessible through Files" if english else "「ファイル」から選択できる書き込み可能な保管庫フォルダ"),
         ("Offline behavior" if english else "オフライン時", "Email queues in Outbox; folder append can run locally" if english else "メールはOutboxで待機。フォルダ追記は端末内で実行可能"),
     ]
+    store_region = "us" if english else "jp"
+    store_campaign = "en__hero" if english else "jp__hero"
+    store_url = f"https://apps.apple.com/{store_region}/app/id6758438948?pt=128498560&ct={store_campaign}&mt=8"
+    store_label = "Open the App Store listing to test" if english else "App Storeでアプリを確認"
+    resource_links = [
+        (f"/assets/downloads/simplememo-facts-{lang}.txt", "Download description (TXT)" if english else "説明文をダウンロード（TXT）"),
+        (prefix + "/obsidian/", "Obsidian setup" if english else "Obsidianの設定"),
+        (prefix + "/siri/", "Siri setup" if english else "Siriの設定"),
+    ]
+    press_actions = (
+        '<div class="actions">'
+        f'<a class="button" data-cta-position="hero" data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="hero" href="{e(store_url)}">{e(store_label)}</a>'
+        + "".join(f'<a class="button secondary" href="{e(url)}">{e(label)}</a>' for url, label in resource_links)
+        + "</div>"
+    )
     if english:
         body = f"""<p class="eyebrow">For writers and reviewers</p><h1>Product facts, visuals, and the original sources.</h1><p class="lead">A compact kit for covering email-to-self capture, Siri, Obsidian workflows, or the operations of a small app. Descriptions are ready to copy; setup conditions and source data are linked alongside them.</p><p class="stamp">Updated 25 September 2026 · Maintained by the Simple Memo development team</p>
 <h2>A short product description</h2><div class="quote">{e(summaries[lang])}</div>
-{links([(f'/assets/downloads/simplememo-facts-{lang}.txt','Download description (TXT)'),('/en/obsidian/','Obsidian setup'),('/en/siri/','Siri setup')])}
+{press_actions}
 <h2>Check the facts before reviewing</h2>{table(['Item','What the product does'],facts)}
 <p>The vault picker and the URL-scheme fallback behave differently. With no compatible folder selected, the fallback may open Obsidian. Apple Watch hands off the append to the iPhone. Cloud synchronization can add delay. Normal email sending is not end-to-end encrypted email; local encryption and transport security are separate properties. Read the <a href="/en/privacy-architecture/">privacy architecture</a> before making privacy claims.</p>
 <h2>Current release: Dialogue Memo</h2><p>The <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="reference" href="https://apps.apple.com/us/app/id6758438948">current App Store listing</a> describes optional follow-up questions inside the memo composer. The questions and note organization use Apple Intelligence on a supported iPhone with iOS 26 or later, Apple Intelligence enabled, and a supported language model; voice input also needs microphone permission. The user can stop, edit, and use the existing Send button. Typing and regular dictation remain available when the model cannot be used. This feature does not itself confirm a vault write, email delivery, or sync to another device; check those separately.</p>
@@ -235,7 +250,7 @@ for lang in ("ja", "en"):
     else:
         body = f"""<p class="eyebrow">紹介・レビュー・取材向け</p><h1>紹介に必要な説明と、確かめられる原本を。</h1><p class="lead">自分宛メールメモ、Siri、Obsidian連携、小さなアプリのAI運営。記事で扱う切り口ごとに、説明文・画面・対応条件・実測資料をまとめました。</p><p class="stamp">2026年9月25日更新 ／ シンプルメモ開発チーム</p>
 <h2>そのまま使える製品説明</h2><div class="quote">{e(summaries[lang])}</div>
-{links([(f'/assets/downloads/simplememo-facts-{lang}.txt','説明文をダウンロード（TXT）'),('/obsidian/','Obsidianの設定'),('/siri/','Siriの設定')])}
+{press_actions}
 <h2>紹介前に確認できる製品情報</h2>{table(['項目','内容'],facts)}
 <p>対応するフォルダを選べない場合はURLスキーム経由となり、Obsidianが開くことがあります。Apple Watchからの追記はiPhoneが担当します。クラウド同期には時間差が生じます。メール配送をエンドツーエンド暗号化と表現しないでください。端末内の暗号化と通信経路は別の性質です。詳細は<a href="/privacy-architecture/">プライバシー設計</a>で確認できます。</p>
 <h2>公開中の対話メモ</h2><p><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948">現在のApp Store掲載</a>では、メモ入力画面で短い追加質問に答え、内容を確認して既存の送信ボタンを使う機能を案内しています。質問と整理には、iOS 26以降の対応するiPhone、Apple Intelligenceの有効化、対応言語モデルが必要です。音声入力にはマイクの許可も必要です。利用できない場合も通常の文字入力・音声入力は残ります。対話を終えただけでは、保管庫への保存、メールの配送、他端末への同期は確認できません。それぞれ別に確かめてください。</p>
