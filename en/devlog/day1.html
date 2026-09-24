@@ -63,7 +63,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: BlogPosting -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/day1#article","headline":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","description":"Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, zero message loss.","url":"https://simplememofast.com/en/devlog/day1","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/day1#article","headline":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian","description":"Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, zero message loss.","url":"https://simplememofast.com/en/devlog/day1","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/day1#webpage"}}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience","item":"https://simplememofast.com/en/devlog/day1"}]}</script>
 <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -286,7 +286,7 @@
 <li><a href="#en-section2">Architecture: Why UIKit Instead of SwiftUI</a></li>
 <li><a href="#en-section3">Achieving "Send and Clear" in a Single Tap</a></li>
 <li><a href="#en-section4">Zero Message Loss: The Outbox Architecture</a></li>
-<li><a href="#en-section5">Relay API: Breaking Free from External Email API Dependency</a></li>
+<li><a href="#en-section5">Relay API: Sending Without Mailbox OAuth</a></li>
 <li><a href="#en-section6">Today's Work: Eliminating Small Annoyances One by One</a></li>
 <li><a href="#en-section7">Fixing History Status Display Inconsistencies</a></li>
 <li><a href="#en-section8">An Obsessive Commitment to Privacy</a></li>
@@ -417,8 +417,8 @@ func enqueue(message: OutboxMessage) throws {
 </section>
 <!-- Section 5 -->
 <section id="en-section5">
-<h2>5. Relay API: Breaking Free from External Email API Dependency</h2>
-<p>Captio's sending mechanism was never officially documented, but it is believed to have relied on sending mail through an external provider from the device. In general, when an external email API's OAuth requirements change and access restrictions pile up, this kind of approach tends to become unsustainable.</p>
+<h2>5. Relay API: Sending Without Mailbox OAuth</h2>
+<p>Captio's sending mechanism was never officially documented. The developer's shutdown notice attributes the closure to the resources needed to keep the app stable and secure; it does not name the sending method as a reason. As a general point, sending that relies on an external email API is exposed to the provider's requirement changes and access restrictions.</p>
 <p>We chose a <strong>Cloudflare Workers + Resend API</strong> architecture.</p>
 <p>Cloudflare Workers is an edge computing platform where code runs at the data center closest to each user. Requests from Japan are processed at Japan's edge, requests from the US at the US edge. This virtually eliminates the cold start problem compared to traditional serverless platforms (AWS Lambda, etc.).</p>
 <p>For email delivery, we use the Resend API. Resend is a developer-friendly email API offering high deliverability and reliability.</p>
@@ -603,7 +603,7 @@ func applyLanguageChange() {
 </div>
 <div class="related-card__desc">
 
-<span lang="en">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</span>
+<span lang="en">Sending without mailbox OAuth: a relay API on the edge (Cloudflare Workers) that sends through Resend.</span>
 </div>
 </a>
 <a class="related-card" href="/en/devlog/privacy-first-design">
