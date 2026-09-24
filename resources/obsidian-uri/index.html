@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/resources/obsidian-uri/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>Obsidian URIジェネレーター｜iPhoneショートカット用URLを作成</title>
+<meta name="description" content="Obsidian公式のopen・new・daily URIをブラウザ内で組み立てる無料ツール。保管庫名、ノートのパス、本文を入力してコピーし、iPhoneショートカットなどで使えます。日本語や記号もURI用に変換し、入力内容はサーバーに送信しません。">
+<link rel="canonical" href="https://simplememofast.com/resources/obsidian-uri/">
+<link rel="alternate" hreflang="ja" href="https://simplememofast.com/resources/obsidian-uri/">
+<meta property="og:title" content="Obsidian URIジェネレーター｜シンプルメモ">
+<meta property="og:description" content="Obsidianのノートを開く・作る・日次ノートに追記するURIを、無料で組み立ててコピーできます。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simplememofast.com/resources/obsidian-uri/">
+<meta property="og:site_name" content="Obsidian連携シンプルメモ">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://simplememofast.com/assets/img/og/guides.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@simplememofast">
+<meta name="twitter:image" content="https://simplememofast.com/assets/img/og/guides.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/css/editorial-resources.css?v=72b185e854">
+<link rel="stylesheet" href="/assets/css/safety-net.css?v=b380c7e070">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/resources/obsidian-uri/#webpage","name":"Obsidian URIジェネレーター","url":"https://simplememofast.com/resources/obsidian-uri/","inLanguage":"ja","description":"Obsidian公式のopen・new・daily URIをブラウザ内で作る無料ツール。","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+<script src="/js/obsidian-uri-generator.js?v=950e6e7a12" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="resource-nav"><div>
+<a class="resource-brand" href="/">Obsidian連携シンプルメモ</a>
+<a href="/obsidian/">Obsidian</a><a href="/resources/obsidian-inbox/">Markdownツール</a><a href="/resources/obsidian-uri/" aria-current="page">URIツール</a>
+</div></header>
+<main id="main" class="resource-main">
+<p class="eyebrow">無料・アカウント不要</p>
+<h1>Obsidian用のURLを、入力して作る。</h1>
+<p class="lead">iPhoneのショートカットなどで使う <code>obsidian://</code> URIを作れます。ノートを開く・新しく作る・日次ノートを開く操作に対応。URLを作るだけならObsidianのインストールは不要です。</p>
+
+<div class="tool-grid">
+<form id="uri-tool" class="tool-panel" autocomplete="off">
+<label for="action">操作</label>
+<select id="action" name="action"><option value="new">ノートを作る・既存ノートに追記</option><option value="daily">日次ノートを開く・追記</option><option value="open">既存ノートを開く</option></select>
+<label for="vault">保管庫名</label>
+<input id="vault" name="vault" value="My Vault" maxlength="200" required spellcheck="false" aria-describedby="vault-help">
+<p id="vault-help" class="small">Obsidianに表示される保管庫名を入れます。名前に空白や日本語があってもエンコードします。</p>
+<div id="file-row"><label for="file">ノートのパス</label><input id="file" name="file" value="Inbox.md" maxlength="500" required spellcheck="false" aria-describedby="file-help"><p id="file-help" class="small">保管庫のルートからの相対パス。例：<code>Inbox.md</code> または <code>Ideas/Inbox.md</code>。</p></div>
+<div id="content-row"><label id="content-label" for="content">本文（任意）</label><textarea id="content" name="content" maxlength="10000" spellcheck="false" aria-describedby="content-help"></textarea><p id="content-help" class="small">ここに入れた本文は生成URIに固定されます。URLを共有すると相手にも本文が見えるため、秘密の内容は入れないでください。</p></div>
+<div id="append-row"><label class="check-label" for="append"><input id="append" name="append" type="checkbox" checked>既存ノートに本文を末尾追記する</label></div>
+<div id="silent-row"><label class="check-label" for="silent"><input id="silent" name="silent" type="checkbox">ノートを開かずに処理する（Obsidian公式の <code>silent</code>）</label></div>
+<p class="small">入力内容はこのブラウザ内でURLに変換します。保存・送信・分析イベントへの本文の追加は行いません。</p>
+</form>
+<section class="tool-panel" aria-label="生成したObsidian URI"><h2>生成したURI</h2>
+<label for="uri-output">コピーしてショートカットの「URLを開く」などへ貼り付け</label>
+<textarea id="uri-output" rows="6" readonly spellcheck="false" aria-describedby="uri-status"></textarea>
+<div class="actions"><button id="copy-uri" type="button">URIをコピー</button></div>
+<p id="uri-status" role="status" aria-live="polite"></p>
+<p class="small">この画面ではURIを実行せず、保管庫も変更しません。コピーしたURIを使うときは、まずテスト用のノートで試し、保存結果をObsidianで確認してください。</p>
+</section>
+</div>
+<noscript><p class="note">このツールにはJavaScriptが必要です。<a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI">Obsidian公式のURI仕様</a>には手作業で作る方法があります。</p></noscript>
+
+<h2>どの操作を選ぶ？</h2>
+<div class="table-scroll"><table><thead><tr><th>操作</th><th>できること</th><th>確認すること</th></tr></thead><tbody>
+<tr><th><code>new</code></th><td>指定したノートを作成。追記を選ぶと、既存のノートがあれば末尾に追加。</td><td>既存ノートへ本文を追加したい場合だけ「追記」を選ぶ。このツールは上書きURIを作らない。</td></tr>
+<tr><th><code>daily</code></th><td>日次ノートを作成・表示。本文を入れる場合は追記も選択可能。</td><td>Obsidianのコアプラグイン「Daily notes」を有効にする。</td></tr>
+<tr><th><code>open</code></th><td>指定した既存ノートを表示。</td><td>ノートが存在することを確認する。</td></tr>
+</tbody></table></div>
+<p>このツールが作るのはObsidian公式の標準URIです。Advanced URIコミュニティプラグイン専用の <code>obsidian://adv-uri</code> は作りません。記号・日本語・改行はURI用にエンコードします。本文を入れると固定文のURLになります。ショートカットで毎回異なる文章を渡すには、その変数をURIエンコードして <code>content</code> パラメータへ組み込む設定が別途必要です。動作はObsidianの設定と端末に依存するため、まず個人情報のない短文で試してください。<a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI">出典：Obsidian公式「Obsidian URI」</a>。</p>
+
+<h2>毎回ショートカットを組みたくない場合</h2>
+<p>このツールはURIを一度作るためのものです。iPhoneから短文や音声を繰り返しObsidianへ残すなら、<a href="/obsidian/">シンプルメモの設定ガイド</a>で、Filesで選んだ保管庫フォルダへの追記方法と、保存を確認する手順を見られます。アプリの直接書き込みにはフォルダのアクセス許可が必要で、正常に書けたかどうかは保存先で確認してください。</p>
+<div class="actions"><a class="button" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8">iPhoneアプリをApp Storeで見る</a></div>
+<p class="small">アプリを入れなくても、このURIツールは無料で使えます。リンクはApp Storeに移動します。</p>
+</main>
+<footer class="resource-footer"><div><nav aria-label="フッターナビゲーション"><a href="/about/">開発者について</a><a href="/privacy">プライバシー</a><a href="/contact">お問い合わせ</a></nav><p>© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p></div></footer>
+<script src="/js/analytics.js?v=594a4939aa" defer></script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>
