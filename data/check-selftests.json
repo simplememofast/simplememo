@@ -718,6 +718,12 @@
       "broke": "2026-09-19: 隔離した写しでlang-content除去を無効化すると本文表示の回帰検査が失敗。未処理のJA/EN検体は両方が差分として検出され、apply後は差分0。後から生成される英語リンク・言語切替保持・非空FAQ再生成・祖先別パンくず名・他ItemListのラベル保持を8件で検証する。 同日補完: 計17件に拡張。英語aria/alt、表示ラベル、構造化データ名の変換を個別に無効化すると各1件失敗（例外0）。実際の旧head整形処理へ差し替えるとscript/comment保持の検査が1件失敗（例外0）。inline head、RSS、Smart App Banner、本文、コメント内html例、商品schemaのロケール別定数価格・ID・US導線、抽出後の英語offers復元と生成位置の保持・再実行一致も確認した。"
     },
     {
+      "script": "scripts/generate_dev_feed.py",
+      "state": "demonstrated",
+      "at": "2026-09-24",
+      "broke": "**[2026-09-24] CI に配線した日に、壊し6通りと実データ1通りを実測した。**(1) `--check` がずれを報告しない（`if have != want` を潰す）→ 自己テスト2件（無い／古いフィード）／(2) 読めないページを `--check` が飛ばす（FeedError で 0 を返す）→ 1件／(3) `EXTRA_PAGES` を読まない → 1件／(4) 古い順に並べる → 3件／(5) lastBuildDate を最古の dateModified にする → 1件／(6) 正規 URL の重複を通す → **最初は素通りした**（重複の検体が無かった）。検体（同じ canonical の2ページ）を足して 1件で落ちることを確かめた。**実データ**：記事の meta description だけを変えてフィードを作り直さないと `--check` が exit 1（stale）。これは同じ日に #1563 が relay-api-design の説明文を変えたまま main に入り、フィードだけ古い説明文で配られていた形そのもの。"
+    },
+    {
       "script": "scripts/generate_sitemap.py",
       "state": "demonstrated",
       "at": "2026-09-06",
