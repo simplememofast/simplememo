@@ -112,6 +112,7 @@ const UNSERVED_DATA = new Set([
   "monitoring-coverage.json",
   "obsidian-feature-observation-20260911.json",
   "pr-claims.json",
+  "pr-release-ledger.json",
   "press-release-next.json",
   "prior-art.json",
   "publication-policy.json",

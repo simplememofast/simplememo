@@ -502,6 +502,12 @@
       "broke": "DRAFT リボンが draft フラグから切れる／文字列 DRAFT で判定してしまう罠／寸法ずれ／見出しの「」が長すぎる を落とすことを観測"
     },
     {
+      "script": "scripts/check-pr-release-ledger.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-24",
+      "broke": "壊し3通りで落ちることを観測し、あわせて**実データでも確かめた。****(1) 突き合わせを殺す**（experiments の status 判定を外して planned も「出た」と数える）と「planned は『出た』と数えない」が落ちる —— これが効かなくなると、**出す予定の日付が入っているだけで『配信済み』と見なされ、本当に出た配信の欠落が隠れる。****(2) park を無期限の棚上げにする**（resolve_by の比較を外す）と2件が落ちる —— 未記録を `known_unrecorded` に入れた時点で永久に黙り、**把握していることが放置の道具になる。****(3) 設定が読めないときに通す**と「設定が消えたら落ちる」が落ちる —— `data/pr-release-ledger.json` を消すだけで黙る検査になる（check-guard-shapes が言う『地面を失うと消える見張り』）。**実データ:** `known_unrecorded` から PR⑦ の行を外すと、実際の annotations/experiments に対して「2026-09-24 の配信が annotations にあるのに experiments に無い」が出る。これは仕込んだ検体ではなく、**2026-09-24 時点で実際に起きている食い違い**である（`due(ledger,'2026-10-08')` が [] を返すことを別途実測）。**自分の書いたコードの欠陥も1件これで見つかった** —— 当初 `age !== null && age > limit` と書いており、`ISO_DATE` が形しか見ないため `2026-13-01` が通って `Date.parse` が NaN になり、**上限超過の判定ごと素通りしていた。**null を独立した problem に変え、自己テストで固定した。"
+    },
+    {
       "script": "scripts/check-prd.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
