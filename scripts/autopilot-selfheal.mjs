@@ -39,6 +39,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { stageProblems } from './autopilot-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -310,24 +311,45 @@ const SCENARIOS = ledgerScenarios(
 }
 
 // ── 封じ込めの不変条件（2026-09-24追加） ──────────────────────
-// 2026-09-21 に route actions が止まったのは、この判定が 09-20 のゲートの拒否
-// （行の自己申告では eligibility_verdict: blocked）を4回目の no_artifact と数えたから。
-// **それでもここで固定するのは、いまの fail-closed の挙動のほう。**判定を緩める変更は、
-// ゲート自身が run_id・gate_code つきで書く拒否の受領ができてからにする。
-// 受領が無いまま緩めると、行の中の自己申告ラベルひとつで封じ込めが外れる経路になる。
-// 受領ができたら、下の「自己申告ラベルでは免除されない」は「受領と照合できた行だけを
-// 免除する」形に書き換える（照合できない行は引き続き故障に数える）。
-// 解除は人が一次資料で行う（policy.ai_may_resume: false）。このテストは解除の方向には何も効かない。
+// 2026-09-21 に route actions が止まったのは、この判定が 09-20 の拒否（行の自己申告では
+// failure_stage: eligibility / eligibility_verdict: blocked）を4回目の no_artifact と数えたから。
+// **それでもここで固定するのは、いまの fail-closed の挙動のほう。**
+// 合成行は 09-20 と 09-15 の実際の行の形（段・判定・ゲートコード・source・external_ref）を写し、
+// 台帳の検査（stageProblems）を通る形にしてある。形を写さないと「段で免除する」
+// 「source で免除する」といった緩め方がテストを素通りする（09-24 のレビューで実測）。
+//
+// このテストが固定するのは判定コード側の免除だけ。
+// 判定を緩める変更は、ゲート自身が run_id・gate_code つきで書く拒否の受領ができてからにする。
+// そのときも draft で出し、Ready にするのは人。受領の台帳は self_repair.may_modify の外に置く。
+// 受領と照合できない行は、緩めた後も故障に数える。
 {
   const MATRIX = { self_repair: { may_modify: ['x'], must_not: ['y'], stop_after_failed_repairs: 3 } };
   const fail = (id, cls, extra = {}) => ({ run_id: id, date_jst: '2026-09-01', route: 'actions', attempted: true,
-    outcome: 'no_artifact', failure_class: cls, source: 'test', ...extra });
+    outcome: 'no_artifact', failure_class: cls, failure_stage: 'execution', source: 'test', ...extra });
   const repair = (id, target) => ({ run_id: id, date_jst: '2026-09-02', route: 'actions', attempted: true,
     outcome: 'shipped', source: 'test', repair_of: [target] });
   const repairedThrice = cls => [1, 2, 3].flatMap(i => [fail(`f-${i}`, cls), repair(`r-${i}`, `f-${i}`)]);
+  // 09-20・09-15 の行と同じ形：outcome は故障、行の中では適格性の段で止まったと申告している。
+  const codexDecline = (id, gate) => fail(id, 'no_artifact', { failure_stage: 'eligibility',
+    eligibility_verdict: 'blocked', gate_code: gate, source: 'codex-automation',
+    external_ref: 'codex:00000000-0000-7000-8000-000000000000' });
+  // 3回目の修理の対象が 09-15 形の行（実台帳でも3回目の修理 #1470 の対象はこの形）。
+  const repairedThriceMixed = () => [
+    fail('f-1', 'no_artifact'), repair('r-1', 'f-1'),
+    fail('f-2', 'no_artifact'), repair('r-2', 'f-2'),
+    codexDecline('f-3', 'measurement_experiment_overlap'), repair('r-3', 'f-3'),
+  ];
+  const ledgerShaped = (runs) => runs.flatMap((r) => stageProblems(r, r.run_id));
 
   SCENARIOS.push(
-    ['同じ種別を3回直した後の未修理の再発は、上限に達して人へ上がる', () => {
+    ['合成行は台帳の検査を通る形（実際の行の形から外れた合成では、緩め方の検出が効かない）', () => {
+      const shapes = [...repairedThrice('no_artifact'), ...repairedThriceMixed(),
+        codexDecline('f-4', 'measurement_scope_conflict')];
+      const problems = ledgerShaped(shapes);
+      assert(problems.length === 0, `合成行が台帳の形を満たしていない: ${problems[0]}`);
+    }],
+    ['同じ種別を3回直した状態で未修理の故障が残れば、前後を問わず上限に達して人へ上がる', () => {
+      // analyze() は日付の順序を見ない。修理より前の日付の故障でも上限に数える（止める方向の意図）。
       const a = analyze({ runs: [...repairedThrice('no_artifact'), fail('f-4', 'no_artifact')] }, MATRIX, []);
       assert(a.unrepaired_count === 1 && a.escalate.length === 1
         && a.escalate[0].run_id === 'f-4' && a.escalate[0].repair_attempts_for_class === 3,
@@ -343,15 +365,30 @@ const SCENARIOS = ledgerScenarios(
       const a = analyze({ runs: [...repairedThrice('claim_without_completion'), fail('f-4', 'no_artifact')] }, MATRIX, []);
       assert(a.escalate.length === 0 && a.targets[0].repair_attempts_for_class === 0, '別の種別の修理を数えた');
     }],
-    ['**故障の outcome を持つ行は、行の中の自己申告ラベルでは免除されない**（fail-closed）', () => {
-      // 09-20 の行と同じ形：outcome は故障、行の中ではゲートの拒否だと申告している。
-      const labelled = fail('f-4', 'no_artifact', { eligibility_verdict: 'blocked', gate_code: 'measurement_scope_conflict' });
-      const a = analyze({ runs: [...repairedThrice('no_artifact'), labelled] }, MATRIX, []);
-      assert(a.unrepaired_count === 1 && a.escalate.length === 1,
-        '自己申告のラベルで故障から外れた — 受領と照合できない免除は、封じ込めを行1つで外す経路になる');
+    ['上限は権限表の値に従う（stop_after_failed_repairs を 3 以外にしても一致する）', () => {
+      const two = { self_repair: { ...MATRIX.self_repair, stop_after_failed_repairs: 2 } };
+      const twice = [1, 2].flatMap(i => [fail(`f-${i}`, 'no_artifact'), repair(`r-${i}`, `f-${i}`)]);
+      const a = analyze({ runs: [...twice, fail('f-3', 'no_artifact')] }, two, []);
+      assert(a.escalate.length === 1 && a.escalate[0].repair_attempts_for_class === 2 && a.limit === 2,
+        '上限2で、2回直した種別の再発が上がらなかった');
+      const b = analyze({ runs: [...twice.slice(0, 2), fail('f-3', 'no_artifact')] }, two, []);
+      assert(b.escalate.length === 0 && b.lane_f_required, '上限2で、1回しか直していない種別を上げた');
+    }],
+    ['**故障の outcome を持つ行は、行の中の自己申告では免除されない**（段・判定・ゲートコード・source・external_ref のどれでも）', () => {
+      const labelled = codexDecline('f-4', 'measurement_scope_conflict');
+      const a = analyze({ runs: [...repairedThriceMixed(), labelled] }, MATRIX, []);
+      assert(a.unrepaired_count === 1 && a.escalate.length === 1 && a.escalate[0].repair_attempts_for_class === 3,
+        '自己申告で故障から外れた、または申告つきの修理対象を修理回数から外した'
+        + ' — 受領と照合できない免除は、封じ込めを行1つで外す経路になる');
       for (const verdict of ['declined_by_design', 'declined_by_fault', 'declined_unrecorded']) {
         const b = analyze({ runs: [{ ...labelled, eligibility_verdict: verdict }] }, MATRIX, []);
         assert(b.unrepaired_count === 1, `eligibility_verdict=${verdict} で故障から外れた`);
+      }
+      for (const [key, value] of [['failure_stage', 'eligibility'], ['eligibility_verdict', 'blocked'],
+        ['gate_code', 'measurement_scope_conflict'], ['source', 'codex-automation'],
+        ['external_ref', 'codex:00000000-0000-7000-8000-000000000000']]) {
+        const c = analyze({ runs: [fail('f-9', 'no_artifact', { [key]: value })] }, MATRIX, []);
+        assert(c.unrepaired_count === 1, `${key} だけで故障から外れた`);
       }
     }],
   );

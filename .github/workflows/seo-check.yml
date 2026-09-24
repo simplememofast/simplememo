@@ -578,8 +578,13 @@ jobs:
       # may_modify が承認制領域を含んでいないか、停止条件があるか。
       # 未修理の故障が残っていること自体では落とさない（それは運用の話であって、
       # PRを止める理由ではない）。
+      #
+      # --selftest は封じ込め判定の不変条件（修理上限・自己申告では免除しない）を固定する。
+      # 2026-09-24 まで CI はこれを走らせておらず、判定を緩める PR が緑のまま通れた。
       - name: Self-repair boundary
-        run: node scripts/autopilot-selfheal.mjs --check
+        run: |
+          node scripts/autopilot-selfheal.mjs --check
+          node scripts/autopilot-selfheal.mjs --selftest
 
       # 【権限表】不可逆な領域が承認制になっているか、根拠のファイルが実在するかを見る。
       #
