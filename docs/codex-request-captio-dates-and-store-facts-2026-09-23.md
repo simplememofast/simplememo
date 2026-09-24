@@ -206,3 +206,48 @@ CI では `Autonomous Company source boundaries and recovery` の手順に当た
 
 こちらで直さない理由：どれも自動運転（Codex / 日次同期）側の持ち場で、#1551・#1552 はいま Codex が動かしている。
 被リンク施策の PR（#1541・#1546・#1547）は、この3つが解けるまで止まったまま待つ。
+
+### 追記（2026-09-24 昼）：まとめ役は Claude。手元での通し稽古の結果
+
+オーナーの判断で、3つの赤を解く**まとめ役は Claude**（規約の条項の判定はオーナー）、**規約は8社32マスをまとめて読み直す**ことになった。
+main に #1552 と #1551 を重ね、上のテストの時計を直し、**規約の読み直しを手元だけで仮に埋めて**（コミットしない。前回の判定を戻しただけ）全手順を流した。
+
+- **失敗は1件だけ残った：** `Sitemap lists every page with content-derived dates` が18件のずれ。
+  **#1552 は18ページ（著者表記の統一）を変えたのに `python3 scripts/generate_sitemap.py` を回していない**（CLAUDE.md の「ページを変えたら sitemap も同じコミットに」）。
+  これも `Corporate obligations` より後ろなので、CI にはまだ出ていない。**#1552 に隠れた2つ目の失敗。**
+- それ以外は全部通った（9/24 の時点）。つまり、1本にまとめるときの中身は次の5つ:
+  1. 規約の読み直し（オーナーの判定。`data/corporate-obligations.json` の8社・32マスに `reviewed_by: human` と `reviewed_at`）
+  2. #1552 の中身（言及ウォッチの 9/24 分と `gaps.json`、著者表記、Firefox）
+  3. `growth/lib/company-mentions.test.mjs` の時計の直し（本物の観測を読むテストは、最新の観測の日付に合わせる）
+  4. **マージする日の**日次同期（その日の #1551 にあたるもの。`/autopilot/` の点数と実行台帳は日付で古くなる）
+  5. 同じコミットで `python3 scripts/generate_sitemap.py`
+- 9/25 以降は、上の表の `Autopilot run ledger` と `Waiting progress` も効いてくるので、4 がその日の分であることが前提になる（`Waiting progress` は日次同期で動くかどうか未確認）。
+
+### 読み直しても戻る恐れ（指紋の揺れ）
+
+`vendor-terms.mjs` が毎週取る指紋の履歴を追うと、**読み直しの直後にまた変わっている社がある:**
+registrar（ムームードメイン）は 9/02・9/08・9/15・9/22 と**毎週違う指紋**、apple・anthropic・github も戻された後にもう一度変わっている
+（google_cloud・firebase・search_console・cloudflare・resend・prtimes は変わっていない）。
+指紋は `source` のページ全体なので、本文以外の揺れでも「改定」と数えている可能性が高い（`$note` にも「粗いほうへ倒してある」とある）。
+**このままだと、8社を読み直しても registrar などは次の週にまた戻され、14日後にまた全マージが止まる。**
+指紋を本文だけに絞る（あるいは揺れる社の取り方を変える）かどうかは、見張りの設計に関わるのでオーナーと Codex の判断。
+
+### 各社の「今の版」を公開ページで確かめた（2026-09-24 昼）
+
+戻された32マスのうち、**本文の版（効力日・最終更新日）が前回の読み（8/28〜8/29）の後に変わっているのは3社だけ**だった。
+残る5社は、ページに出ている版の日付が前回の読みより前のままで、指紋の変化は本文の改定ではない可能性が高い。
+
+| 社 | 前回の判定（上限・知財・個人データ・準拠法） | 今の版（公開ページの表示） | 読み直しの要否（こちらの読み） |
+| --- | --- | --- | --- |
+| google_cloud | risk・ok・risk・risk | Google Cloud Terms「Last modified September 2, 2026」 | **改定あり。読み直しが要る** |
+| firebase | risk・ok・risk・risk | Firebase Terms「last modified: September 02, 2026」 | **改定あり。読み直しが要る** |
+| registrar | risk・risk・risk・risk | ムームードメイン利用規約の改定履歴に「2026年9月14日 改定」 | **改定あり。読み直しが要る** |
+| apple | risk・ok・risk・risk | DPLA「Schedule 1 last updated August 18, 2026」（LYL255） | 前回（8/28）の読みより前の版のまま。指紋は一覧ページ（`/terms/`）の揺れと読める |
+| anthropic | risk・ok・risk・risk | Commercial Terms「Effective June 17, 2025」 | 前回の記録にも同じ日付がある。版は同じと読める |
+| github | risk・ok・risk・risk | Terms of Service「Effective date: April 27, 2026」 | 前回の記録（2026-04-27）と同じ |
+| search_console | risk・risk・risk・risk | Google Terms of Service「Effective July 30, 2026」 | 前回（8/29）の読みより前の日付。前回の記録に版が無いので、同じ版かは未確定 |
+| appsflyer | risk・ok・ok・risk | Terms of Use「Last updated November 23, 2025」 | 前回の読みより前の日付。ただし前回の根拠は MSA（記録に July 16, 2024）で、MSA の今の版は未確認 |
+
+- **人が本文を読み直す必要が確かなのは3社12マス。**残る5社20マスは「版が変わっていないことを確かめて、前回の判定のまま付け直す」で済む見込み
+  （同じ版であることの確認はオーナーの判断。search_console と appsflyer は上のとおり未確定の点がある）。
+- **5社の指紋の変化が本文の改定でないなら、上の「指紋の揺れ」は実際に起きている**ことになる。見張りを版の日付か本文だけに寄せると、2週間ごとの赤はかなり減る。
