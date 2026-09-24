@@ -88,6 +88,19 @@ export const GATES = [
 /** 配信済み/配信中とみなす status。ここではゲートが埋まっていなければならない。 */
 const SHIPPING = new Set(['running', 'evaluated']);
 
+/**
+ * 採点日が配信日より前か。**配信物を採点していない**ことの機械判定。
+ *
+ * どちらかが欠けていたら false（「読めなかった」を「違反」と混ぜない）。
+ * 比較は ISO の日付文字列どうしなので辞書順でよい。
+ */
+export function scoredBefore(record = {}) {
+  const scoredAt = record.d_score_pre?.scored_at;
+  const startedAt = record.started_at;
+  if (!scoredAt || !startedAt) return false;
+  return scoredAt < startedAt;
+}
+
 export function score(record) {
   const d = record.d_score_pre || {};
   const problems = [];
@@ -116,19 +129,49 @@ export function score(record) {
   const needFailed = need.filter((n) => n.ok === false);
 
   const shipping = SHIPPING.has(record.status);
-  if (shipping) {
+  // **「これから出る」と「もう出た」を分ける。**
+  //
+  // ヘッダの一覧は最初から「4. 合格ライン未満のまま **running** になっている」と
+  // 書いていたが、実装は SHIPPING（running / evaluated）に当てていた。**実装のほうがずれていた。**
+  //
+  // 2026-09-24、PR⑥ を配信物で採り直して 85 → 45 にしたら、その差が実害になった ——
+  // `evaluated` の過去レコードが「45 < 60」で永久に赤を出し、**CI が二度と緑に戻らない。**
+  // だが 45 は誤りではなく**測り終えた事実**（D+14 で boarded:false）であって、直しようが無い。
+  // 履歴が模型より低いことは `--backtest` が読む仕事で、`--check` が止める仕事ではない。
+  //
+  // **止める力は落としていない。**必要条件も合格ラインも `running` には当たり続けるので、
+  // 「85点だから撃てた」は再発しない。ゲート（ヘッダの3）は文書どおり両方に当てる。
+  const aboutToShip = record.status === 'running';
+  if (aboutToShip) {
     // **合計点が足りていても、ここが落ちていたら撃たない。**
     // 60点は足し算なので S3〜S7 で S2 の欠落を埋められてしまう（PR⑥がそうなった）。
     for (const n of needFailed) {
       problems.push(`${n.key} = ${n.value} < 必要条件 ${n.floor}（${n.label}）— 合計点では代替できない。乗車2本は両方を満たし、非乗車3本はどちらかが下回る`);
     }
+    if (sum < PASS_MARK) problems.push(`status=${record.status} だがスコア ${sum} < 合格 ${PASS_MARK}`);
+  }
+  if (shipping) {
     if (gateUnknown.length) {
       problems.push(`status=${record.status} なのに未判定のゲートが ${gateUnknown.length} 件（${gateUnknown.map((g) => g.key).join(', ')}）`);
     }
     if (gateFailed.length) {
       problems.push(`status=${record.status} なのに不合格のゲートが ${gateFailed.length} 件（${gateFailed.map((g) => g.key).join(', ')}）— 1つでも落ちたら配信不可`);
     }
-    if (sum < PASS_MARK) problems.push(`status=${record.status} だがスコア ${sum} < 合格 ${PASS_MARK}`);
+    // **採点日が配信日より前なら、配信物を採点していない。**
+    // 2026-09-04 に報告だけの警告として入れ、「9/17 に PR⑥ を再採点したら problems へ移す」
+    // と書いた。**2026-09-24 に移した** —— PR⑥ の再採点（85→45）が済み、
+    // D+14（09-19）で boarded:false も確定したので、赤にしても開けなくなる弾は無い。
+    //
+    // これが PR⑥ が落ちた穴そのものである: 見出しは最後に決まり、決まったあとで
+    // 採点し直されなかった。**85点は配信されなかった見出しの点だった。**
+    // 散文（追記D-4・レコードの $comment）は「見出し確定稿でもう一度回す」と
+    // 書いていたが、**散文は手を挙げない。**
+    if (scoredBefore(record)) {
+      problems.push(
+        `採点日 ${record.d_score_pre.scored_at} が配信日 ${record.started_at} より前 — `
+        + `**配信見出しで採点し直していない。**配信物を採り直してから status を進めること（追記D-4）`,
+      );
+    }
   }
 
   const verdict = gateFailed.length ? 'BLOCKED（ゲート不合格）'
@@ -254,6 +297,74 @@ const SCENARIOS = [
     const r = score({ d_score_pre: pre });
     if (r.problems.length) throw new Error(r.problems.join(' / '));
   }],
+  // ---- 採点日 < 配信日（PR⑥ が落ちた穴。2026-09-24 に報告だけから problems へ格上げ）----
+  ['**配信日より前の採点は落とす**（配信物を採点していない）', () => {
+    const pre = {};
+    for (const [k, max] of AXES) pre[k] = max;
+    pre.total = AXES.reduce((a, [, max]) => a + max, 0);
+    pre.scored_at = '2026-08-25';
+    pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
+    const r = score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre });
+    // **満点・ゲート全通過でも落ちる。**これが PR⑥ の形（85点・ゲート全通過・未再採点）。
+    if (!r.problems.some((p) => p.includes('配信見出しで採点し直していない'))) {
+      throw new Error(`満点でも落ちるべき: ${r.problems.join(' / ') || '(problem 無し)'}`);
+    }
+  }],
+  ['採点日が配信日以降なら通す', () => {
+    const pre = {};
+    for (const [k, max] of AXES) pre[k] = max;
+    pre.total = AXES.reduce((a, [, max]) => a + max, 0);
+    pre.scored_at = '2026-09-03';
+    pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
+    const r = score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre });
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
+  ['**配信日が無ければ落とさない**（「読めなかった」を「違反」と混ぜない）', () => {
+    const pre = {};
+    for (const [k, max] of AXES) pre[k] = max;
+    pre.total = AXES.reduce((a, [, max]) => a + max, 0);
+    pre.scored_at = '2026-08-25';
+    pre.gates = Object.fromEntries(GATES.map(([k]) => [k, true]));
+    if (score({ status: 'running', started_at: null, d_score_pre: pre }).problems.length) {
+      throw new Error('started_at が null なら判定しない');
+    }
+    delete pre.scored_at;
+    if (score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre }).problems.length) {
+      throw new Error('scored_at が無ければ判定しない');
+    }
+  }],
+  // ---- running と evaluated の分岐（2026-09-24）。**止める力が落ちていないこと**を固定する ----
+  ['**running なら合格ライン未満で落とす**（PR⑥ の再発を止める側）', () => {
+    const pre = { S1_novelty: 25, S2_entity_reach: 3, S3_concrete_nouns: 0,
+      S4_transformation: 5, S5_timing: 3, S6_news_verb: 4, S7_launch_design: 5, total: 45,
+      scored_at: '2026-09-03', gates: Object.fromEntries(GATES.map(([k]) => [k, true])) };
+    const r = score({ status: 'running', started_at: '2026-09-03', d_score_pre: pre });
+    if (!r.problems.some((p) => p.includes('合格'))) throw new Error('合格ライン未満を落とすべき');
+    if (!r.problems.some((p) => p.includes('必要条件'))) throw new Error('必要条件も落とすべき');
+  }],
+  ['**evaluated は合格ライン未満でも落とさない**（測り終えた事実は直せない）', () => {
+    // PR⑥ の形そのもの。45点・S2=3・boarded:false。**これで赤になると CI が二度と緑に戻らない。**
+    const pre = { S1_novelty: 25, S2_entity_reach: 3, S3_concrete_nouns: 0,
+      S4_transformation: 5, S5_timing: 3, S6_news_verb: 4, S7_launch_design: 5, total: 45,
+      scored_at: '2026-09-24', gates: Object.fromEntries(GATES.map(([k]) => [k, true])) };
+    const r = score({ status: 'evaluated', started_at: '2026-09-03', d_score_pre: pre });
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
+  ['**ゲートの矛盾は evaluated にも当てる**（ヘッダの3。履歴のデータ欠損は直せる）', () => {
+    const pre = { S1_novelty: 25, S2_entity_reach: 15, S3_concrete_nouns: 10,
+      S4_transformation: 12, S5_timing: 5, S6_news_verb: 5, S7_launch_design: 5, total: 77,
+      scored_at: '2026-09-24', gates: Object.fromEntries(GATES.map(([k]) => [k, null])) };
+    const r = score({ status: 'evaluated', started_at: '2026-09-03', d_score_pre: pre });
+    if (!r.problems.some((p) => p.includes('未判定のゲート'))) throw new Error('ゲート未判定は evaluated でも落とす');
+  }],
+  ['配信していないレコードには当てない（planned は見出しがまだ無い）', () => {
+    const pre = {};
+    for (const [k, max] of AXES) pre[k] = max;
+    pre.total = AXES.reduce((a, [, max]) => a + max, 0);
+    pre.scored_at = '2026-08-25';
+    const r = score({ status: 'planned', started_at: '2026-09-03', d_score_pre: pre });
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
 ];
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -324,14 +435,7 @@ if (isMain) {
     }
     // **採点が配信物に当たっているか。**PR⑥ は 08-25 の採点のまま 09-03 に
     // 別の見出しで配信され、台帳の85点はどこにも存在しない見出しの点になった。
-    // 追記D-4 と レコードの $comment は「見出し確定稿でもう一度回す」と書いていたが、
-    // 散文なので誰も落とせなかった。**ここは報告だけする**（落とすと、いま
-    // 未再採点のまま running の PR⑥ で CI が赤になり、9/17 の評価まで開けられない）。
-    // 9/17 に PR⑥ を配信見出しで再採点したら、これを problems へ移すこと。
-    const scoredAt = r.d_score_pre?.scored_at;
-    if (SHIPPING.has(r.status) && scoredAt && r.started_at && scoredAt < r.started_at) {
-      console.log(`   ⚠ 採点日 ${scoredAt} が配信日 ${r.started_at} より前。**配信見出しで再採点していない可能性がある**（追記D-4）`);
-    }
+    // 採点日 < 配信日 は score() が problems に出す（2026-09-24 に報告だけから格上げ）。
 
     if (s.problems.length) {
       bad++;
