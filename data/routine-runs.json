@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-23T21:59:45.540Z",
+  "observed_at": "2026-09-24T00:00:22.142Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-23T21:59:45.540Z",
+        "observed_at": "2026-09-24T00:00:22.142Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -518,20 +518,6 @@
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
   "routines": [
     {
-      "id": "trig_012aCdg76uEznmXT54eqG2mf",
-      "name": "GSC 未登録11件の9月再判定（9/24）",
-      "cron_expression": "",
-      "run_once_at": "2026-09-23T23:00:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-09-23T23:00:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null,
-      "last_run_session_id": null
-    },
-    {
       "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
       "name": "【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0）",
       "cron_expression": "30 10 * * *",
@@ -577,7 +563,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_018EyeYcJiVLFQeAHArMpGtM",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:44.338Z"
+        "observed_at": "2026-09-24T00:00:20.659Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -643,7 +629,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01GphcHzTuH1A1JUGq8dYkWa",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:44.605Z"
+        "observed_at": "2026-09-24T00:00:20.945Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -752,7 +738,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01RcUDUaFDf86KffssLRsQdw",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:44.854Z"
+        "observed_at": "2026-09-24T00:00:21.323Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -790,7 +776,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01TixKQ5Sovfjfn8rRVQCrYf",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:45.083Z"
+        "observed_at": "2026-09-24T00:00:21.539Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -842,7 +828,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01VuJravpvATQPBuAigHCZJi",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:45.315Z"
+        "observed_at": "2026-09-24T00:00:21.762Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -880,7 +866,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01XUeM9mCTkoqdWhUMac6jD1",
         "http_status": 404,
-        "observed_at": "2026-09-23T21:59:45.540Z"
+        "observed_at": "2026-09-24T00:00:22.142Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -910,11 +896,22 @@
     "pages": 2,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 194,
-    "unregistered_current_count": 5,
-    "ended_records": 179,
+    "total_records": 195,
+    "unregistered_current_count": 6,
+    "ended_records": 180,
     "unavailable_registered_count": 6,
-    "ended_since_previous": [],
+    "ended_since_previous": [
+      {
+        "id": "trig_012aCdg76uEznmXT54eqG2mf",
+        "name": "GSC 未登録11件の9月再判定（9/24）",
+        "ended_reason": "run_once_fired",
+        "last_fired_at": "2026-09-23T23:00:08.218565Z",
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-23T23:00:08.206437389Z",
+        "last_run_finished_at": "2026-09-23T23:00:08.215719Z",
+        "last_run_session_id": "cse_01ScEXc4WggE8TYQkE65YvM7"
+      }
+    ],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。既存の意図的停止が一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。削除・成功・現在の停止を断定しない。稼働中タスクの欠落は受理しない。予定や停止の判断は変更しない。"
   },
   "closed_findings": [
@@ -1021,7 +1018,7 @@
   ],
   "codex_observation": {
     "schema_version": 4,
-    "observed_at": "2026-09-23T21:59:41.108Z",
+    "observed_at": "2026-09-24T00:00:14.346Z",
     "registered": [
       "obsidian",
       "obsidian-2"
