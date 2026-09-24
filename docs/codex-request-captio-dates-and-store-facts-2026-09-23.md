@@ -52,6 +52,10 @@ node -e "import('./scripts/check-corporate.mjs').then(async m=>{const fs=await i
 
 ## 依頼A. Captio の App Store 撤退時期・開発元告知の有無を、一次情報に合わせて直す
 
+> **2026-09-24 午後：この依頼はオーナーの判断で Claude が引き取り、[PR #1553](https://github.com/simplememofast/simplememo/pull/1553) を出した。Codex 側では着手しないでください。**
+> 直している途中で、日本語 `/captio-alternative/` などが 2026-09-06 の英語版の修正（551358b99）から取り残されていたこと、
+> Captio のリリース年が 2010 年（Engadget 2010-09-30）であることも分かったので、同じ PR に入れた。下の「要確認」2件も PR で片付けた。
+
 ### 一次情報（2026-09-23 に取得して確認）
 
 https://captio.co/ の終了告知（開発者 Ben Lenarts 名義）の要旨:
@@ -222,6 +226,9 @@ main に #1552 と #1551 を重ね、上のテストの時計を直し、**規�
   4. **マージする日の**日次同期（その日の #1551 にあたるもの。`/autopilot/` の点数と実行台帳は日付で古くなる）
   5. 同じコミットで `python3 scripts/generate_sitemap.py`
 - 9/25 以降は、上の表の `Autopilot run ledger` と `Waiting progress` も効いてくるので、4 がその日の分であることが前提になる（`Waiting progress` は日次同期で動くかどうか未確認）。
+- **まとめの PR が入ったあとは、sitemap を触る PR を1本ずつ入れる。**#1547（記事）と #1553（Captio）はどちらも sitemap の lastmod を動かすので、
+  1本入るたびに次の PR で「Update branch」→ `python3 scripts/generate_sitemap.py` を回して足し、検証が通ってから次へ進む（同時に出すと sitemap の同じ行で衝突する）。
+  #1553 は sitemap を入れずに出してあるので、Update branch は衝突しない。
 
 ### 読み直しても戻る恐れ（指紋の揺れ）
 
