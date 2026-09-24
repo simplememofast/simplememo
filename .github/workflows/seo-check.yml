@@ -31,6 +31,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Auto-merge identity guard regression
+        run: node scripts/merge-identity-check.js --selftest
+
       - name: Refactoring regression tests (no network)
         run: node --test scripts/refactor.test.mjs
 
