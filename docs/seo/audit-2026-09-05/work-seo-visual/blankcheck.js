@@ -1,5 +1,5 @@
-const { chromium } = require('/Users/hajimeataka/simplememo/node_modules/playwright');
-const OUT = '/private/tmp/claude-501/-Users-hajimeataka-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual';
+const { chromium } = require('/Users/<user>/simplememo/node_modules/playwright');
+const OUT = '/private/tmp/claude-501/-Users-<user>-simplememo/94e79856-0565-4e19-bb64-c1132a529dfe/scratchpad/work-seo-visual';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   const b = await chromium.launch();
