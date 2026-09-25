@@ -181,7 +181,11 @@ test('the 2026-09-20 shape passes only with a bounded declaration and never take
   assert.equal(undeclared.global,true,'an undeclared distribution edit stays whole-site (the 09-20 rejection is retained)');
   assert.equal(ownershipConflict(aio,undeclared,{now:at}),true);
   const html=changeScope(P,['blog/email-yourself-memo.html','sitemap-ja.xml']);
-  for(const owner of [legacySitemapOwner,boundedOwner])assert.equal(ownershipConflict(owner,html,{now:at}),true,'an undeclared sitemap edit keeps file ownership: '+owner.id);
+  // Frozen owners are treated like running ones: an undeclared edit still meets file ownership.
+  for(const owner of [legacySitemapOwner,boundedOwner,{...legacySitemapOwner,status:'frozen'},{...boundedOwner,status:'frozen'}])
+    assert.equal(ownershipConflict(owner,html,{now:at}),true,'an undeclared sitemap edit keeps file ownership: '+owner.id+'/'+owner.status);
+  assert.equal(ownershipConflict({...legacyStoryOwner,status:'frozen'},changeScope(P,['blog/email-yourself-memo.html','docs/story-seeds.md']),{now:at}),true,
+    'a frozen owner keeps an unlisted file');
   const declared=changeScope(P,paths0920,support0920);
   for(const owner of [aio,legacySitemapOwner,boundedOwner])assert.equal(ownershipConflict(owner,declared,{now:at}),false,'a bounded shared generated edit is not owned per file: '+owner.id);
   for(const owner of [{...legacySitemapOwner,status:'frozen'},{...boundedOwner,status:'frozen'}])assert.equal(ownershipConflict(owner,declared,{now:at}),false,'frozen rows stay protected but not the whole file');
