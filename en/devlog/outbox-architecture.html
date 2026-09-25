@@ -209,7 +209,7 @@
 
   </style>
 <!-- JSON-LD: TechArticle -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/en/devlog/outbox-architecture#article","inLanguage":"en","headline":"Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log","description":"UI clears the instant you tap send, while unsent messages stay on the device and are retried. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.","url":"https://simplememofast.com/en/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/en/devlog/outbox-architecture#article","inLanguage":"en","headline":"Outbox Architecture: Designing Against Message Loss | Simple Memo Dev Log","description":"UI clears the instant you tap send, while unsent messages stay on the device and are retried. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.","url":"https://simplememofast.com/en/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-25","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Outbox Architecture: Designing Against Message Loss","item":"https://simplememofast.com/en/devlog/outbox-architecture"}]}</script>
 <script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
@@ -281,7 +281,7 @@
 <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
 <ol class="flow-list">
 <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br/>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense against message loss.</li>
-<li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br/>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: one-tap (0.25s with animation).</li>
+<li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br/>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: no noticeable wait (0.25s with animation).</li>
 <li><strong>Background Send via Relay API</strong><br/>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
 <li><strong>On Success: Remove from Outbox</strong><br/>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
 <li><strong>On Failure: Automatic Retry with Exponential Backoff</strong><br/>For network or server errors, automatic retry with exponential backoff (1s → 2s → 4s → 8s...) kicks in. BGTaskScheduler lets retries run even when the app is in the background.</li>
@@ -387,7 +387,7 @@
     }
 }</code></pre>
 <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
-<p>Send-to-Reset target: <strong>one-tap</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
+<p>Send-to-Reset target: <strong>no noticeable wait</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
 <!-- FAQ -->
 <h2>FAQ</h2>
 <h3>Q. What happens to memos sent offline?</h3>
@@ -403,7 +403,7 @@
 <div class="related-grid">
 <a class="related-card" href="/en/devlog/day1">
 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-<div class="related-card__desc">Launch in ~1s, send with one tap, and keep unsent notes for retry. It all started here.</div>
+<div class="related-card__desc">Send with one tap and keep unsent notes for retry. It all started here.</div>
 </a>
 <a class="related-card" href="/en/devlog/">
 <div class="related-card__title">Dev Log Index</div>
