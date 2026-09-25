@@ -39,6 +39,7 @@
 
 import { connect, query, listTables } from '../lib/bigquery.mjs';
 import { EXPORT_TABLES, classifyTables, exportHealth } from '../lib/export-health.mjs';
+import { flagReader } from '../lib/cli.mjs';
 
 /* Search Console finalises a day's data two to three days after the fact, and
  * the export then copies it. Four days is therefore still normal; a week means
@@ -47,10 +48,7 @@ const FRESH_DAYS = 4;
 const STALE_DAYS = 7;
 
 const argv = process.argv.slice(2);
-const flag = (n, d = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : d;
-};
+const flag = flagReader(argv);
 const strict = argv.includes('--strict');
 const dataset = flag('dataset', process.env.BQ_DATASET || 'searchconsole');
 const site = flag('site', process.env.GSC_PROPERTY);
