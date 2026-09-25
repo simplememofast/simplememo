@@ -12,7 +12,7 @@ import {companyAio,validateAioBytes} from './company-aio.mjs';
 import {period,gscBaseline,gscEvidence,reviewEvidence,privateEvidenceReference,fingerprint} from './experiment-evidence.mjs';
 import {validate,isOpen,saveLedger} from './ledger.mjs';
 import {ownershipConflict,changeScope} from './experiment-overlap.mjs';
-import {verifySupportingGitDiff,verifySupportingBaseline} from './measurement-support.mjs';
+import {verifySupportingGitDiff,verifySupportingBaseline,verifyInheritedSitemapMerge} from './measurement-support.mjs';
 import {growthFollowups} from './company-growth-followup.mjs';
 import {decisionTrace,decisionCommitment} from './company-decision.mjs';
 import {nativeOrigin} from './company-origin.mjs';
@@ -140,6 +140,23 @@ export function verifyMeasurementInput(receipt,{stateRoot,input=receipt.decision
   assert(Date.parse(p.prepared_at)<=Date.parse(at),'measurement must precede the decision');return p;
 }
 const rowFor=(p,r)=>({...p.experiment,company_measurement:{schema_version:1,plan_sha256:p.sha256,company_run_id:r.id,decision_sha256:r.decision.sha256}});
+export function verifyMeasurementMergeScope(receipt,{stateRoot,head,mergeSha,mergedAt,call}) {
+  const paths=receipt.decision.input.scope.paths;
+  const changed=call('git',['diff','--name-only',head,mergeSha,'--',...paths]).trim();
+  if(!changed){call('git',['diff','--quiet',head,mergeSha,'--',...paths]);return null;}
+  decisionCommitment(receipt);
+  const p=verifyMeasurementInput(receipt,{stateRoot});
+  assert(p?.schema_version>=2,'changed merge scope requires a sealed prospective support plan');
+  assert.equal(receipt.bound_decision_sha256,receipt.decision.sha256,'bound decision changed');
+  const expected=rowFor(p,receipt);
+  for(const ref of [head,mergeSha]) {
+    const rows=JSON.parse(call('git',['show',ref+':'+EXPERIMENTS])).experiments;
+    assert.equal(rows.filter(e=>e.id===p.id).length,1,'unique sealed measurement required');
+    assert.deepEqual(rows.find(e=>e.id===p.id),expected,'registered measurement differs from sealed plan');
+  }
+  return verifyInheritedSitemapMerge(p.experiment,receipt.bound_declaration_sha,head,mergeSha,paths,
+    (...args)=>call('git',args),{now:new Date(mergedAt)});
+}
 export async function registerMeasurement({stateRoot,id,root=ROOT,now=new Date()}) {
   assert(/^[a-f0-9-]{36}$/.test(id??''),'invalid Company run ID');
   const dir=privateState(stateRoot),release=acquireLock(dir);if(!release)return{status:'busy'};
@@ -177,7 +194,9 @@ export function verifyMeasurementDelivery(receipt,{stateRoot,root=ROOT,head,merg
     const actual=call('git',['diff','--name-only',registration,head]).trim().split('\n').filter(Boolean);
     const bookkeeping=new Set(['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md']);
     assert(actual.every(file=>bookkeeping.has(file)||p.experiment.change_paths.includes(file)),'undeclared measurement change path');
-    for(const sha of new Set([head,mergeSha]))verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,sha,(...args)=>call('git',args),{now:at});
+    const inherited=verifyMeasurementMergeScope(r,{stateRoot,head,mergeSha,mergedAt,call});
+    verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,head,(...args)=>call('git',args),{now:at});
+    if(!inherited&&mergeSha!==head)verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,mergeSha,(...args)=>call('git',args),{now:at});
   }
   const changed=call('git',['diff-tree' ,'--no-commit-id','--name-only','-r',registration]).trim().split('\n');
   assert.deepEqual(changed,[EXPERIMENTS],'commit the experiment registry alone before implementation');

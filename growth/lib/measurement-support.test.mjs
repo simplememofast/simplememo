@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {changeScope,ownershipConflict} from './experiment-overlap.mjs';
-import {verifySupportingDiff,verifySupportingBaseline,verifySupportingGitDiff} from './measurement-support.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {verifySupportingDiff,verifySupportingBaseline,verifySupportingGitDiff,verifyInheritedSitemapMerge} from './measurement-support.mjs';
 
 const page='/blog/fixture',url='https://simplememofast.com'+page,now=new Date('2026-09-20T01:00Z');
 const json=v=>JSON.stringify(v,null,2)+'\n';
@@ -92,4 +96,57 @@ test('Git proof rejects symlinks and executes raw before/after blob checks',()=>
   const f=supportFixture();const git=(...a)=>a[0]==='ls-tree'?'100644 blob '+ 'a'.repeat(40)+'\t'+a[3]+'\n':(a[1].startsWith('base:')?f.before:f.after)[a[1].split(':')[1]];
   verifySupportingGitDiff(f.e,'base','head',git,{now});
   assert.throws(()=>verifySupportingGitDiff(f.e,'base','head',(...a)=>a[0]==='ls-tree'?git(...a).replace('100644','120000'):git(...a),{now}),/regular/);
+});
+
+function inheritedFixture(t,{parentEdit=s=>s.replace('2026-09-18','2026-09-19')}={}) {
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'support-merge-'));t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+  const git=(...args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',stdio:['pipe','pipe','pipe']});
+  const g=(...args)=>git(...args).trim(),write=(p,s)=>fs.writeFileSync(path.join(root,p),s);
+  g('init','-q');g('config','user.name','Fixture');g('config','user.email','fixture@example.invalid');
+  const xml='<urlset>\n<url>\n<loc>https://simplememofast.com/target</loc>\n<lastmod>2026-09-17</lastmod>\n</url>\n'+'\n'.repeat(12)+'<url>\n<loc>https://simplememofast.com/other</loc>\n<lastmod>2026-09-18</lastmod>\n</url>\n</urlset>\n';
+  write('sitemap-ja.xml',xml);write('target.html','before\n');write('experiments.json','sealed\n');g('add','.');g('commit','-qm','base');const base=g('rev-parse','HEAD');
+  g('checkout','-qb','treatment');g('commit','--allow-empty','-qm','declaration');const declaration=g('rev-parse','HEAD');
+  write('target.html','after\n');write('sitemap-ja.xml',xml.replace('2026-09-17','2026-09-20'));g('add','.');g('commit','-qm','treatment');const head=g('rev-parse','HEAD');
+  g('checkout','-qb','parallel',base);write('sitemap-ja.xml',parentEdit(xml));write('other.txt','independent main work\n');g('add','.');g('commit','-qm','other main change');const parent=g('rev-parse','HEAD');
+  g('merge','--squash',head);g('commit','-qm','published combination');const merge=g('rev-parse','HEAD');
+  const paths=['target.html','sitemap-ja.xml','experiments.json'];
+  const e={page:'/target',change_paths:paths,supporting_changes:[{path:'sitemap-ja.xml',kind:'sitemap_lastmod'}]};
+  const verify=(over={})=>verifyInheritedSitemapMerge(over.e??e,over.declaration??declaration,head,over.merge??merge,paths,over.git??git,{now});
+  return{root,git,g,write,e,declaration,head,parent,merge,verify};
+}
+test('squash inheritance explains the full published tree without claiming merged-tree CI',t=>{
+  const f=inheritedFixture(t),proof=f.verify();
+  assert.equal(proof.version,'company-merge-scope-v2');assert.equal(proof.parent_sha,f.parent);
+  assert.equal(proof.reconstructed_tree,f.g('rev-parse',f.merge+'^{tree}'));
+  assert.deepEqual(proof.inherited_sitemaps,[{path:'sitemap-ja.xml',locations:['https://simplememofast.com/other']}]);
+  assert.match(proof.ci_scope,/not historical merged-tree CI/);
+  assert.throws(()=>verifySupportingGitDiff(f.e,f.declaration,f.merge,f.git,{now}),/only declared lastmod/,'old failure remains reproducible');
+  assert.equal(f.g('status','--porcelain'),'');
+});
+test('inherited dates require the already sealed sitemap contract and exact ordinary treatment files',t=>{
+  const f=inheritedFixture(t);
+  for(const e of [{...f.e,supporting_changes:undefined},{...f.e,supporting_changes:[{path:'sitemap-ja.xml',kind:'sitemap_index'}]}])assert.throws(()=>f.verify({e}));
+  for(const p of ['target.html','experiments.json','sitemap-ja.xml']){
+    f.g('checkout','--detach',f.merge);f.write(p,'unreviewed change\n');f.g('add',p);
+    const tree=f.g('write-tree'),forged=f.g('commit-tree',tree,'-p',f.parent,'-m','synthetic bad merge');
+    assert.throws(()=>f.verify({merge:forged}));f.g('reset','--hard',f.merge);
+  }
+  const multi=f.g('commit-tree',f.g('rev-parse',f.merge+'^{tree}'),'-p',f.parent,'-p',f.head,'-m','synthetic merge');
+  assert.throws(()=>f.verify({merge:multi}),/one actual squash parent/);
+  assert.throws(()=>f.verify({declaration:f.head}),/parent changed target|only declared/);
+  assert.throws(()=>f.verify({git:(...a)=>a[0]==='merge-tree'?'0'.repeat(40)+'\n':f.git(...a)}),/reconstructed merge/);
+  assert.throws(()=>f.verify({git:(...a)=>a[0]==='merge-tree'?(()=>{throw new Error('conflict');})():f.git(...a)}),/conflict/);
+  assert.throws(()=>f.verify({git:(...a)=>a[0]==='ls-tree'?f.git(...a).replace('100644','120000'):f.git(...a)}),/regular/);
+});
+test('actual main inheritance cannot alter the target or unrelated XML or introduce invalid dates',t=>{
+  const bad=[
+    s=>s.replace('2026-09-18','2026-09-19').replace('2026-09-17','2026-09-20'),
+    s=>s.replace('2026-09-18','2026-09-21'),
+    s=>s.replace('2026-09-18','2026-09-16'),
+    s=>s.replace('2026-09-18','2026-02-30'),
+    s=>s.replace('2026-09-18','2026-09-19').replace('/other</loc>','/renamed</loc>'),
+    s=>s.replace('2026-09-18','2026-09-19').replace('</urlset>','<!-- changed metadata -->\n</urlset>'),
+    s=>s.replace('2026-09-18','2026-09-19').replace('</urlset>','<url><loc>https://simplememofast.com/other</loc><lastmod>2026-09-19</lastmod></url></urlset>'),
+  ];
+  for(const parentEdit of bad){const f=inheritedFixture(t,{parentEdit});assert.throws(()=>f.verify());}
 });

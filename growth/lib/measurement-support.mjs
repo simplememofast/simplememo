@@ -115,3 +115,69 @@ export function verifySupportingGitDiff(experiment,beforeRef,afterRef,git,option
   // canonical JSON are part of the proof.
   verifySupportingDiff(experiment,read(beforeRef),read(afterRef),options);
 }
+
+// This is a provenance proof for already declared sitemap support, not a CI
+// attestation or a path exclusion. All treatment bytes still match the head.
+export function verifyInheritedSitemapMerge(experiment,declaration,head,merge,paths,git,{now=new Date()}={}) {
+  const sha=s=>typeof s==='string'&&/^[a-f0-9]{40}$/.test(s);
+  assert([declaration,head,merge].every(sha),'exact Git commit identities required');
+  const changes=supportingChanges(experiment.page,experiment.change_paths,experiment.supporting_changes);
+  const changed=git('diff','--name-only',head,merge,'--',...paths).trim().split('\n').filter(Boolean);
+  assert(changed.length>0,'inherited support proof requires a real difference');
+  const contracts=changed.map(file=>{
+    const c=changes.find(c=>c.path===file);
+    assert(c?.kind==='sitemap_lastmod','only prospectively declared sitemap lastmod inheritance is supported');return c;
+  });
+  const strict=paths.filter(p=>!changed.includes(p));
+  if(strict.length)git('diff','--quiet',head,merge,'--',...strict);
+  const parents=git('rev-list','--parents','-n','1',merge).trim().split(/\s+/);
+  assert(parents.length===2&&parents[0]===merge&&sha(parents[1]),'one actual squash parent required');
+  const parent=parents[1],base=git('merge-base','--all',parent,head).trim();
+  assert(sha(base),'one common ancestor required');
+  git('merge-base','--is-ancestor',base,declaration);
+  git('merge-base','--is-ancestor',declaration,head);
+  const reconstructed=git('merge-tree','--write-tree',parent,head).trim();
+  assert(sha(reconstructed),'conflict-free full merge reconstruction required');
+  const tree=git('rev-parse',merge+'^{tree}').trim();
+  assert.equal(reconstructed,tree,'published tree differs from reconstructed merge');
+  const read=ref=>file=>{
+    assert(new RegExp('^100644 blob [a-f0-9]{40}\\t'+file.replaceAll('.','\\.')+'\\n?$').test(git('ls-tree',ref,'--',file)),
+      'inherited sitemap must be a regular nonexecutable file');
+    return git('show',ref+':'+file);
+  };
+  const at=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const snapshot=text=>{
+    const entries=new Map();let target;
+    const masked=text.replace(/<url>[\s\S]*?<\/url>/g,block=>{
+      const loc=[...block.matchAll(/<loc>([^<>]+)<\/loc>/g)],mods=[...block.matchAll(/<lastmod>([^<>]+)<\/lastmod>/g)];
+      assert(loc.length===1&&mods.length===1&&date(mods[0][1])&&mods[0][1]<=at,'unambiguous nonfuture sitemap entries required');
+      const url=loc[0][1];assert(!entries.has(url),'duplicate sitemap location');
+      entries.set(url,mods[0][1]);let own=false;try{targetUrl(url,experiment.page);own=true;}catch{}
+      if(own){assert(!target,'ambiguous sitemap target');target={url,block};return block;}
+      return block.replace(mods[0][0],'<lastmod>INHERITED_DATE</lastmod>');
+    });
+    assert(target&&entries.size>0&&entries.size<=10000,'bounded existing sitemap target required');
+    assert.equal([...text.matchAll(/<loc>/g)].length,entries.size,'unparsed sitemap locations');
+    return{masked,entries,target};
+  };
+  verifySupportingGitDiff(experiment,declaration,head,git,{now});
+  const inherited=contracts.map(c=>{
+    const a=snapshot(read(declaration)(c.path)),p=snapshot(read(parent)(c.path));
+    const h=snapshot(read(head)(c.path)),m=snapshot(read(merge)(c.path));
+    assert.equal(p.masked,a.masked,'parent changed target or non-date sitemap bytes');
+    assert.equal(m.target.block,h.target.block,'merged sitemap treatment differs from reviewed head');
+    const locations=[];
+    for(const [url,value] of a.entries){
+      assert(p.entries.get(url)>=value,'inherited sitemap dates cannot move backwards');
+      if(p.entries.get(url)!==value)locations.push(url);
+    }
+    assert(locations.length>0,'sitemap difference lacks inherited date evidence');
+    return{path:c.path,locations};
+  });
+  // The original bounded-edit verifier still checks every support contract.
+  // Only proven inherited sitemap dates use the actual pre-merge main as base.
+  verifySupportingDiff(experiment,file=>read(changed.includes(file)?parent:declaration)(file),read(merge),{now});
+  return{version:'company-merge-scope-v2',head_sha:head,merge_sha:merge,parent_sha:parent,base_sha:base,
+    reconstructed_tree:reconstructed,published_tree:tree,inherited_sitemaps:inherited,
+    ci_scope:'Existing exact-head CI remains required; merge reconstruction is provenance, not historical merged-tree CI.'};
+}
