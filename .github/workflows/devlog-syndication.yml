@@ -26,8 +26,9 @@
 # 【手動実行】workflow_dispatch の既定は dry_run（書いて検査するが投稿しない）。
 # dry_run は門の「間隔」と「24時間に1本」を見ない（停止と読めないときは止める）。いつでも経路全体を試せる。
 #
-# 【時刻】このリポジトリの日次 cron は実際には約2時間50分遅れて配信される（CLAUDE.md・PageSpeed の節）。
-# 12:17 / 20:47 JST は公称で、実際は 15 時台 / 23 時台に動く。遅れても門は公開面の時刻で判断するので壊れない。
+# 【時刻】このリポジトリの日次 cron は数時間遅れて配信される（CLAUDE.md・PageSpeed の節は約2時間50分、
+# この workflow の初回 schedule は 2026-09-25 に公称 12:17 JST → 実際 17:52 JST で5時間35分）。
+# 12:17 / 20:47 JST は公称。遅れても門は公開面の時刻で判断するので、間隔は崩れない。
 
 name: Devlog Syndication
 
@@ -281,3 +282,36 @@ jobs:
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
+
+  # 見張り（読むだけ）。投稿の枠のたびに、公開面の最新投稿からの時間・この経路の最新記事の rel と robots・
+  # dev.to の AI 開示を確かめる。**投稿が止まっている（96時間超）か、dofollow・開示が崩れていれば赤くする。**
+  # 投稿の段が黙って出さなくなった場合（門が誤って閉じ続ける、見送りが続く等）も、ここで拾う。
+  # cron そのものが配信されない場合はこのジョブも走らないので、外の見張り（クラウドの毎日の定期タスク）が拾う。
+  watch:
+    needs: syndicate
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 見張り（公開面の最新投稿・dofollow・AI 開示）
+        run: |
+          set +e
+          node scripts/devlog-syndication.mjs watch --json watch.json > watch.txt 2>&1
+          code=$?
+          cat watch.txt
+          { echo '### 見張り'; echo; sed 's/^/    /' watch.txt; } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$code" -ge 2 ]; then
+            echo "::error title=Devlog syndication watch::投稿が止まっている疑い、または dofollow・AI 開示が崩れている（要約を参照）"
+            exit 1
+          fi
+          if [ "$code" -eq 1 ]; then
+            echo "::warning title=Devlog syndication watch::注意（期限を過ぎた枠が投稿できていない、または公開面を読めない。要約を参照）"
+          fi
