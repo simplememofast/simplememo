@@ -242,35 +242,80 @@ GitHub の再帰防止でワークフローを発火させない。だから **a
 IndexNow 通知まで責任を持つ。**設計どおりである。
 
 **ただし補われているのは IndexNow だけ。**PageSpeed Audit / GSC Crawled URL Checks /
-Autopilot Health の main push 分は走らない。**意図的かどうかは未確認。**
+Autopilot Health の main push 分は走らない。**PageSpeed は下の節で意図的でないと確かめ、
+日次 schedule で戻した（PR #1570）。GSC / Autopilot Health は依然として未確認。**
 
 **run が無いことを故障の証拠にしない。**このファイルが 08-26 / 08-27 / 09-19 と
 繰り返している誤りと同じ形で、あと一歩で4回目だった。
 
 
-### PageSpeed の production browser checks が 2026-09-19 から走っていない
+### PageSpeed の production browser checks — 09-19 に止まり、09-24 に日次で戻した
 
-上の節の「未確認」を1つ潰した。**走っていない。**
+上の節の「未確認」を潰した。**5日間走っていなかった。**
 
 `pagespeed-audit.yml` は `paths` 絞り込み（`index.html` / `en/index.html` /
-`assets/**` / `scripts/perf/**` / 自分自身）で、**`schedule` は無い。**
+`assets/**` / `scripts/perf/**` / 自分自身）で、**当時 `schedule` が無かった。**
 PR でも push でも local と production の両方を Lighthouse で3回ずつ測るが、
 **`PERF_BASE_URL=https://simplememofast.com` を渡す `browser_checks.cjs` だけは
-`push && refs/heads/main` の中でしか走らない**（同ファイル86行）。この環境変数を
+`Measure mobile pages` ステップの中の条件分岐でしか走らない。**この環境変数を
 production へ向ける経路は**リポジトリ内に他に無い**（`grep -rn PERF_BASE_URL`）。
 
 auto-merge の `GITHUB_TOKEN` マージは push run を起こさないので、
-**2026-09-19T02:35Z 以降、production browser checks は1回も走っていない。**
-その間に監査対象パスへ触れて main に入ったコミットは **8件**:
+**2026-09-19T02:35Z 以降 0 回。**その間に監査対象パスへ触れて main に入った
+コミットは **8件**（#1477 #1484 #1491 #1510 #1532 #1555 #1562 #1564）。
+**PR 側の run は代わりにならない** —— PR も production を測るが、それは
+**そのマージが出る前の本番**である。
 
-    #1477 フォント太さ   #1484 #1491 日英分離   #1510 App Store facts
-    #1532 電話番号       #1555 CI修復           #1562 #1564 言い過ぎ修正
+**意図的ではないと台帳で確かめた。**`escalation-rules.json` の
+`post-merge-performance-budget` は who: self_then_owner / within_hours: 24 /
+channel: daily_report で、**2026-09-18 にオーナーが明示承認**している（PR #1449）。
+その規則が拾うはずの監査が**翌日から**止まり、`monitoring-coverage.json` の
+`autopilot_failure_intake` は今もこの種別を `covers_failure_class` に載せていた。
+**規則は生きているのに経路が死んでいて、被覆台帳は見張っていることになっていた。**
 
-**PR 側の run は代わりにならない。**PR でも production を測ってはいるが、
-それは**そのマージが出る前の本番**であって、出した後の本番ではない。
+**直し方（PR #1570）:** `schedule`（cron `30 20 * * *`）を足し、production browser
+checks のガードに `schedule` を含めた。Python は変えていない ——
+`verify_production.cjs` は `event_name != 'push'` で既に走るので schedule でも
+`verified` が立ち、`summarize.py` の `require_production` を push 限定に残したので
+デプロイ反映中に硬直的に落ちない。
 
-**意図的かどうかは未確認。**直すなら `schedule` を足すか、auto-merge が
-IndexNow と同じように production の計測まで引き受けるか。**どちらも未提案。**
+### 初回の scheduled run で確かめた（2026-09-24T23:18Z）
+
+**反証条件（`Production is an unverified baseline observation` が出ること）は
+起きなかった。**
+
+    Enforced groups: local-ja, local-en, production-ja, production-en
+    SUCCESS
+
+広げたガードが効いた直接証拠は、`browser_checks.cjs` の PASS 行が**2本**出ること:
+
+    PASS: 20 ... scenarios at http://127.0.0.1:8765.
+    PASS: 20 ... scenarios at https://simplememofast.com.   ← push / schedule でだけ出る
+
+**日次 cron は毎日必ず配信されるが、約2時間50分遅れる。**Autopilot Act
+（cron `0 0 * * *`）の実配信は 09-19 02:42Z / 09-20 02:54Z / 09-21 02:51Z /
+09-22 02:52Z / 09-23 02:52Z / 09-24 02:42Z で**6日連続で欠けなし**。PageSpeed も
+公称 20:30Z に対し実配信 23:18Z（2時間48分遅れ）。
+**「公称時刻に来ていないから壊れている」と読まない。**
+
+**頻度の違う cron を対照に使わない。**15分間隔の Decision Monitor は1日96回要求に
+対し本日の配信が5回で、これを見て「GitHub が間引いているから日次 cron も不確実だ」と
+結論しかけた。**誤り。**合流されるのは高頻度 cron のほうで、日次は上記のとおり欠けない。
+**対照は同じ頻度のものから取る。**
+
+### 初回が出した数字（判断は保留）
+
+    production-ja  90 / 90 / 92   LCP 3.15 / 3.22 / 3.31 s   予算 ≥90・≤3500ms
+    production-en  97 / 97 / 98   LCP 2.08 / 2.09 / 2.26 s   予算 ≥90・≤3000ms
+
+判定は SUCCESS（0 below / 0 above）だが、**production-ja は予算の下限90に乗っている。**
+同日 09:20Z の PR run では 95 / 97 / 99・LCP 1.91-2.77s・TBT 30-31ms だった
+（23:24Z は TBT 79-82ms）。
+
+**これを「本番が劣化した」と結論しない。**時刻もランナーも違う2サンプルで、
+`MEASUREMENT` の但し書きどおり小標本。**条件差と実態を分けられない。**
+間に #1575 / #1579 / #1582 / #1584 が入っている。
+**分け方: 翌日以降の日次 run が同じ水準を出せば実態、戻れば条件差。**
 
 ## Site Structure
 
