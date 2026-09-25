@@ -1366,13 +1366,13 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | **他社の事実**：Pigeon（オフラインモード追加済み・Pro は買い切り、9/24 の米国 App Store）、iOS ショートカットの「オフラインでは黙って失敗」（サイト自身の手引きは「メールアプリ次第」）、「ほとんどのアプリは SMTP 設定が必要」 | 第3弾 #1575 |
 | **裏付けのない「多くのユーザーが」**：「使い比べるとシンプルメモに統一する方がほとんど」「most users consolidate」など6ページ | 第3弾 #1575 |
 | **Captio の終了理由の推測**：「iOS 16 以降の互換性問題」「ユーザーから『送信ボタンが反応しない』との報告」 | 第3弾 #1575：開発元が告知で挙げた理由に合わせた |
-| **「消えない」「消えません」「nothing is lost」「Never miss」の残り**（hands-free・下書き自動保存・Siri・Obsidian 配下など）、**他言語トップの「0.4秒でメールへ」**（0.4秒はウォーム起動の時間で送信の時間ではない） | 第4弾 [#1591](https://github.com/simplememofast/simplememo/pull/1591)（9/25 作成。日付をまたいだので `dateModified` と sitemap は 9/25 で作り直した）。題を変えた5ページは OG 画像も作り直した |
+| **「消えない」「消えません」「nothing is lost」「Never miss」の残り**（hands-free・下書き自動保存・Siri・Obsidian 配下など）、**他言語トップの「0.4秒でメールへ」**（0.4秒はウォーム起動の時間で送信の時間ではない） | 第4弾 [#1591](https://github.com/simplememofast/simplememo/pull/1591)（9/25 10:37 マージ。日付をまたいだので `dateModified` と sitemap は 9/25 で作り直した）。題を変えた5ページは OG 画像も作り直した |
+| **比較ハブのカードが記事と合っていない**：`/blog/email-yourself-memo` へのカードが「シンプルメモ・Moca・PEN・MeMail を実測検証」と書くが、記事は Gmail・Outlook・Apple Mail の手順の記事で、4アプリは出てこず「実測した比較ではない」と明記。**`en/send-email-to-yourself/` の他社の記述が古い**：Boomerang（今は「Yoyo : Email myself」、アプリ内課金と複数ファイル送信あり）、Email Me（今は「Audio Notes \| Email Me」、購読と買い切り、Watch のオフライン待ち行列あり）、推定の評価「4.7 (est.)」、他社アプリの `aggregateRating`（監査 L8） | 第5弾 [#1596](https://github.com/simplememofast/simplememo/pull/1596)（9/25 作成、9/25 の米国 App Store で確認） |
 | **#1574（Codex）でマージ時の名乗りの検査が入った** | こちらのコミット（作者 SimpleMemo Developer、Co-Authored-By: Claude Opus 5.5）は同じ関数で問題なし |
 
 ### まだ残っているもの
 
-- `en/send-email-to-yourself/` の Boomerang・Email Me の「オフラインなし・暗号化なし」（3月の自社テストの記述。App Store の説明で確かめ直す）。
-- 比較ハブのカード「Moca・PEN・MeMail…を実測検証」の根拠の確認。
+- **新しい種類の対外送信は凍結中**（CLAUDE.md、2026-09-24 18:21 の #1568。オーナー判断 L4-03）。こちらは凍結の後に新しい送信をしていない（iOS Dev Weekly への提案は 17:57 で凍結の前）。新しい媒体への掲載依頼・フォーム送信は、送信者欄を機械で照合する錠前ができるか、オーナーが名指しで例外を出すまで止まる。上の読者からの聞き取りの依頼への返信も、新しい宛先への送信に当たる。
 - 毎晩の確認（send_later、`trig_016LVCiUZGKtHUAQt81Jg877`、9/25 12:00Z）。10/08 まで毎日かけ直す。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
@@ -1603,7 +1603,7 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 29 | ~~開発記事 #1547 が draft に戻っている~~ → **2026-09-24 判断：今日公開する** → フィードと sitemap を入れて Ready → 17:46 マージ（§5.28） | — | — |
 | 30 | ~~公開リポジトリの `docs/` に残るオーナー個人のユーザー名~~ → **2026-09-24 判断：今の版から伏せ字にする** → [#1567](https://github.com/simplememofast/simplememo/pull/1567)（17:54 マージ。31ファイル・40行） | 履歴の書き換えは行わない | — |
 | 31 | ~~宣伝文句（0.4秒・Never lose・Zero Message Loss・永久保存）~~ → **2026-09-24 判断：主要ページに条件を添える／言い換える** → [#1573](https://github.com/simplememofast/simplememo/pull/1573)（18:43 マージ） | — | 届かなかった所は第3弾・第4弾へ（§5.28） |
-| 32 | 言い過ぎの第3弾 → [#1575](https://github.com/simplememofast/simplememo/pull/1575)（9/24 21:19 マージ。43ページ：Captio の書き方・配達の保証・他社の事実・プライバシーの言い切り・裏付けのない「多くのユーザー」）、第4弾 → [#1591](https://github.com/simplememofast/simplememo/pull/1591)（「消えない」などの残り・他言語トップの 0.4秒） | — | 残り：Boomerang・Email Me のセル、比較ハブのカード（§5.28） |
+| 32 | 言い過ぎの第3弾 → [#1575](https://github.com/simplememofast/simplememo/pull/1575)（9/24 21:19 マージ。43ページ：Captio の書き方・配達の保証・他社の事実・プライバシーの言い切り・裏付けのない「多くのユーザー」）、第4弾 → [#1591](https://github.com/simplememofast/simplememo/pull/1591)（9/25 10:37 マージ。「消えない」などの残り・他言語トップの 0.4秒） | — | 第5弾 [#1596](https://github.com/simplememofast/simplememo/pull/1596)（Boomerang・Email Me の古い記述、比較ハブのカード、他社の `aggregateRating`）（§5.28） |
 | 33 | 投稿用の鍵を GitHub Secrets に登録（`DEVTO_API_KEY`・`HATENA_API_KEY`、任意で `IDENTITY_DENYLIST`）（§5.27） | 鍵の値を読む・入力することは行わない | 登録されれば、devlog-syndication の dry_run → 実投稿 → 公開面での rel・robots・AI 開示の確認まで進める |
 | 34 | はてな・dev.to の過去記事にある出典の無い数値（起動187ms・開封率83%・「収益は買い切り」など）を訂正するか（§5.27） | 公開済み記事の書き換えは人の判断 | 訂正するなら、記事ごとに正しい値（`data/benchmark.json`・`data/site-constants.json`）と出典を並べた一覧を作る |
 | 35 | WordPress.com（`simplememofast.wordpress.com`・dofollow・1本）を定期投稿の対象に加えるか（§5.27） | 投稿 API に OAuth アプリの登録が要る（アカウント設定の操作） | 加えるなら、同じ門・検査を使う投稿先として devlog-syndication に足す |
