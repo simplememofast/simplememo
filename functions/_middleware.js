@@ -83,6 +83,7 @@
 // 読める（publication-policy.json の repository_is_public）。ここで止めているのは
 // サイト経由の配信・索引・キャッシュだけ。
 const UNSERVED_DATA = new Set([
+  "actions-recovery-permit.template.json",
   "audit-charter.json",
   "audit-findings.json",
   "autopilot-actions-report.json",

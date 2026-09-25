@@ -34,7 +34,11 @@ its existing ability to trip the stop.
    `Obsidian Autopilot` `GITHUB_RUN_NUMBER` from GitHub's actual workflow run
    history. Copy the template to `data/actions-recovery-permit.json`, set
    `status` to `active`, and fill the chosen JST date, exact run number,
-   review URL and time. Leave enough time for review, CI and merge. If another
+   review URL and time. Classify the new file in
+   `data/publication-policy.json` as not served by the site and regenerate its
+   middleware block with `node scripts/check-publication.mjs --write`; the
+   repository itself is public, so review every field before adding it. Leave
+   enough time for review, CI and merge. If another
    workflow run takes that number first, the permit fails closed; never edit
    the number after a run starts to chase it.
 4. Keep that activation PR draft while reviewing the exact file and original
