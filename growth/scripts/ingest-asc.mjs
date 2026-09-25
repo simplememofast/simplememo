@@ -158,7 +158,8 @@ export function assess(src, opts = {}) {
 }
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
-if (process.argv.includes('--selftest')) {
+// 直接実行されたときだけ。import した側（check-asc-landed）の --selftest を横取りしない。
+if (process.argv.includes('--selftest') && process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const src = (status, reports = []) => ({ present: true, status, reports });
   const STATUS = (over = {}) => ({
     fetched_at: '2026-08-25T11:52:24Z', date: '2026-08-25',
