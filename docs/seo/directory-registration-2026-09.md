@@ -53,7 +53,7 @@
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
 | 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
 | 追加 | SourceForge（Memo Inbox） | SELF_REGISTER | **外部エージェントに依頼中**（2026-09-23、オーナーが GPT に依頼） | — | — | — | https://sourceforge.net/projects/memo-inbox/ （予定。取れなければ `memoinbox` など） | アカウント作成はこちらでは行わない。依頼文は §5.13 の入力値に、名乗り・有料不可・CAPTCHA は人・GitHub 連携（OAuth）は使わない、を加えたもの | 報告を受けたら公開ページの `rel`・`meta robots` を実測（`curl` は 403 になるのでブラウザで見る） |
-| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する **→ 9/24 夜：財経新聞（`zaikei.co.jp/releases/3626774/`）への転載を確認。サイトへの3本と App Store へのリンクはすべて `nofollow ugc noopener`、robots 指定なし。NEWSRELEA.SE（`newsrelea.se/MLOYa6`）の原文転載も同じく全部 nofollow（§5.28）** |
+| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する **→ 9/24 夜：財経新聞（`zaikei.co.jp/releases/3626774/`）への転載を確認。サイトへの3本と App Store へのリンクはすべて `nofollow ugc noopener`、robots 指定なし。NEWSRELEA.SE（`newsrelea.se/MLOYa6`）の原文転載も同じく全部 nofollow（§5.28）。9/25：ASCII STARTUP（`ascii.jp/elem/000/004/436/4436722/`、9/24 09:12:51）も原文転載で、ページは **`noindex`**、サイトへの3本・App Store への4本はすべて `nofollow ugc noopener`（§5.29）** |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
@@ -1392,13 +1392,61 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | **裏付けのない「多くのユーザーが」**：「使い比べるとシンプルメモに統一する方がほとんど」「most users consolidate」など6ページ | 第3弾 #1575 |
 | **Captio の終了理由の推測**：「iOS 16 以降の互換性問題」「ユーザーから『送信ボタンが反応しない』との報告」 | 第3弾 #1575：開発元が告知で挙げた理由に合わせた |
 | **「消えない」「消えません」「nothing is lost」「Never miss」の残り**（hands-free・下書き自動保存・Siri・Obsidian 配下など）、**他言語トップの「0.4秒でメールへ」**（0.4秒はウォーム起動の時間で送信の時間ではない） | 第4弾 [#1591](https://github.com/simplememofast/simplememo/pull/1591)（9/25 10:37 マージ。日付をまたいだので `dateModified` と sitemap は 9/25 で作り直した）。題を変えた5ページは OG 画像も作り直した |
-| **比較ハブのカードが記事と合っていない**：`/blog/email-yourself-memo` へのカードが「シンプルメモ・Moca・PEN・MeMail を実測検証」と書くが、記事は Gmail・Outlook・Apple Mail の手順の記事で、4アプリは出てこず「実測した比較ではない」と明記。**`en/send-email-to-yourself/` の他社の記述が古い**：Boomerang（今は「Yoyo : Email myself」、アプリ内課金と複数ファイル送信あり）、Email Me（今は「Audio Notes \| Email Me」、購読と買い切り、Watch のオフライン待ち行列あり）、推定の評価「4.7 (est.)」、他社アプリの `aggregateRating`（監査 L8） | 第5弾 [#1596](https://github.com/simplememofast/simplememo/pull/1596)（9/25 作成、9/25 の米国 App Store で確認） |
+| **比較ハブのカードが記事と合っていない**：`/blog/email-yourself-memo` へのカードが「シンプルメモ・Moca・PEN・MeMail を実測検証」と書くが、記事は Gmail・Outlook・Apple Mail の手順の記事で、4アプリは出てこず「実測した比較ではない」と明記。**`en/send-email-to-yourself/` の他社の記述が古い**：Boomerang（今は「Yoyo : Email myself」、アプリ内課金と複数ファイル送信あり）、Email Me（今は「Audio Notes \| Email Me」、購読と買い切り、Watch のオフライン待ち行列あり）、推定の評価「4.7 (est.)」、他社アプリの `aggregateRating`（監査 L8） | 第5弾 [#1596](https://github.com/simplememofast/simplememo/pull/1596)（**9/25 10:55 マージ**。9/25 の米国 App Store で確認） |
 | **#1574（Codex）でマージ時の名乗りの検査が入った** | こちらのコミット（作者 SimpleMemo Developer、Co-Authored-By: Claude Opus 5.5）は同じ関数で問題なし |
 
 ### まだ残っているもの
 
 - **新しい種類の対外送信は凍結中**（CLAUDE.md、2026-09-24 18:21 の #1568。オーナー判断 L4-03）。こちらは凍結の後に新しい送信をしていない（iOS Dev Weekly への提案は 17:57 で凍結の前）。新しい媒体への掲載依頼・フォーム送信は、送信者欄を機械で照合する錠前ができるか、オーナーが名指しで例外を出すまで止まる。上の読者からの聞き取りの依頼への返信も、新しい宛先への送信に当たる。
 - 毎晩の確認（send_later、`trig_016LVCiUZGKtHUAQt81Jg877`、9/25 12:00Z）。10/08 まで毎日かけ直す。
+
+## 5.29 2026-09-25 昼〜夜：言い過ぎの第5・第6弾、転載1件（ASCII STARTUP・noindex）、計測の台帳への記録
+
+### main に入ったもの（2026-09-25、JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10:55 | [#1596](https://github.com/simplememofast/simplememo/pull/1596) | 第5弾：比較ハブのカード（記事と合っていなかった）、`en/send-email-to-yourself/` の他社の古い記述（Boomerang＝今の Yoyo、Email Me＝今の Audio Notes）と他社アプリの `aggregateRating` |
+| 10:56 | [#1592](https://github.com/simplememofast/simplememo/pull/1592) | この台帳の §5.28 |
+| 21:40 | [#1607](https://github.com/simplememofast/simplememo/pull/1607) | 第6弾（112ファイル・91コミット）：下の「見つけたこと」 |
+
+### 第6弾で見つけたこと（意外な残タスク）
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **3か月前の一括置換で壊れた文**：#359（2026-06-23）が送信時間「150ms」を本文から外すとき「ワンタップ／one-tap」に機械的に置き換え、「sends in one tap at one-tap」「with one tap with one tap」「ワンタップ以内にメールが届く」「送信速度：ワンタップ ／ 標準」「計測方法：結果 ワンタップ」「約ワンタップで最速でした」「Send-to-Reset の目標：ワンタップ以下」が残っていた | 数字は戻さず（150ms を本文から外したのはオーナーの6月の方針）、文を直した。数字の無い「送信速度」行は行ごと外した |
+| **#460（2026-08-11）が他社の実測値を逆向きに書き換えていた**：`en/send-email-to-yourself/` で Email Me の送信 0.4 秒（同じページの表の値）が本文5か所で「~1s」になり、「Email Me was fastest at ~1s, followed by Simple Memo at 1.0s」になっていた | 表と3月の原稿に合わせて戻した。題の「(Fastest in 0.4s)」はページ自身の結果と合わないので外した |
+| **「AI機能がない」**：AI タグ自動付与（2026年7月提供）の後も `vs/tana`・`blog/ai-vs-simple-memo`・`blog/how-to-choose-memo-app`（日英）が「AI機能がありません」「意図的にAIを搭載しない」「自動分類：なし」のままだった | 端末内のタイトル・タグ・種別の自動付与に合わせて直した |
+| **プライバシーの断定**：「no tracking」（iOS アプリは AppsFlyer SDK を起動する）、「no data retention」「zero-server」「ゼロサーバー保存」「Your notes never leave your iPhone」 | 正本の言い方（メモ本文はサーバーに恒常的に保存しない／タグ付けのためにメモを外部サーバーへ送らない）に揃えた |
+| 消えない系・「最速」の断定の残り、古い数字（「0.4 seconds cold start, 0.15 seconds warm start」「送信0.15秒」「起動 約1秒」）、出典の無い「Standard Notes の有料ユーザー数は前年比40%増」 | 第6弾 |
+| **トップページはフォントのサブセットと字形の一覧で守られている**（`scripts/perf/verify_home.py`）。文言を変えて字形の集合が変わると CI が落ちる | リンク文言を「起動の速いメモアプリを探す」にして字形の集合を変えないようにした |
+| **計測の台帳に記録が無かった**：言い過ぎの修正（第1〜6弾と判断31の実施、#1562〜#1607 の7本）で、実行中の実験の対象ページ（トップ・/ai-tags/・/obsidian/・/siri/・/blog/memo-app-hikaku-matome）の description・本文と、JSON-LD の別名（ブランドの実験）が変わり、全コンテンツページの実験（engage、評価日 9/25）の期間の最後の2日に169ページ（うち題12ページ）の文言が変わった。9/5・9/19 の変更では各実験に note を付けていたが、今回は付いていなかった | この PR で、影響する7つの実験に note、`growth/data/annotations.json` に 2026-09-24 の行を足した（開始日・評価日・判定基準は変えない） |
+
+### PR TIMES（「対話メモ」のリリース）の転載
+
+- **ASCII STARTUP（`ascii.jp/elem/000/004/436/4436722/`、9/24 09:12:51）**：原文転載。ページは **`<meta name="robots" content="noindex">`**。サイトへの3本（`/obsidian/`・`/` ×2）と App Store への4本は**すべて `nofollow ugc noopener`**。SEO 上の被リンクには数えない（露出のみ）。
+- これで転載は財経新聞・NEWSRELEA.SE・ASCII STARTUP の3件（すべて nofollow）。検索は 9/26 の晩まで続ける。
+
+### 告知の結果待ち
+
+- **iOS Dev Weekly**：9/25 21 時台（JST）の時点で最新は Issue 768（9/18）。9/25 号（769）はまだ出ていない。
+- **iOS Feeds**：トップに #1547 の記事は見当たらない。
+
+### 受信箱（support@、読むだけ）
+
+- 媒体からの返信は無し。営業のメール（有料のセミナー・支払い代行など）と通知のみ。
+- 読者（`useTether.io` の創業者）からの聞き取りの依頼は未返信のまま（新しい宛先への送信に当たるので、凍結中はオーナーの判断待ち）。
+
+### 次の弾（未着手）
+
+- 英語ページの「~1-second launch」（#359 の 6 月の値）を正本の「0.4 秒（ウォーム起動）」に揃える。
+- `en/blog/fastest-note-app-iphone-2026`：3月の測定の表（Simple Memo「0.05s」「0.15s total」）が残る。`data/benchmark.json` の `otherPublishedRuns` で唯一 `currentPageUpdatedOn` が無い。姉妹ページ2本（#988・#1000）と同じ形で撤回・正本化する。
+- `en/captio-migration-guide` の競合の起動時間（正本と不一致）、`en/blog/captio-shutdown-alternatives` の比較表の他社の記述。
+- `blog/brain-science-memo`（日英）の「忘却曲線によると20秒後から」「1日後に74%」（エビングハウスの最初の測定は20分後、1日後はおよそ66%）。
+
+### 毎晩の確認
+
+- 9/25 21:00 の回（`trig_016LVCiUZGKtHUAQt81Jg877`）は発火済みで、その確認がこの節。9/26 21:00 を予約した（`trig_01BQm2Zz44nwywtenj7Ww4nm`）。10/08 まで毎日かけ直す。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
