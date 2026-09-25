@@ -98,6 +98,33 @@
       }
     },
     {
+      "id": "act-x-engagement-ratify-20260924",
+      "title": "Xの返信・引用RTの期限つき追認（オーナー判断 2026-09-24・L4-03）を権限表へ記録する",
+      "detail": "オーナーが 2026-09-24 に、Xの返信・引用RTを期限つきで追認した（日本語の自社アカウントだけ・1日2回まで・各回 引用RT 1件・返信 3件まで・2026-10-24T00:00:00+09:00 まで・失効後は人へ戻る）。AIセッションが出した選択式の質問への回答で、前段で「期限つきで追認し台帳に載せる (Recommended)」、続く範囲の質問で「観測どおり1日2回に絞る (Recommended)」を選んだ（原文は権限表の $note と docs/x-engagement-ratification-20260924.md）。権限表「SNS投稿（X・TikTok）」の gate は9月5日の投稿群の委任について『返信・DM・広告はこの委任の対象に含めない』と書いており、この追認の記録は権限表に無かった。\n**権限表の変更は self_repair.must_not（権限表を自分で書き換えない）に当たる**ので、Runbook §7-2 に従い、明示の例外であることをこの台帳と表の $note の両方に書く。**draft PR で出し、Ready にしてマージさせるのは人**（draft の間は auto-merge の対象外）。閉じ条件は権限表に id が入ったことで、main に入るのは人が Ready にした後だけ。これを前例に権限表を自分で書き換えない。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/authority-matrix.json",
+        "docs/x-engagement-ratification-20260924.md"
+      ],
+      "outside_repo": false,
+      "force_owner": "human",
+      "force_owner_why": "権限表を変える must_not の例外で、PR を Ready にしてマージするのは人",
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "data/authority-matrix.json",
+          "needle": "x-engagement-ratify-20260924"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-25",
+      "last_seen_jst": "2026-09-25",
+      "closed_jst": null,
+      "evidence": "未完了：draft PR のレビュー待ち。権限表「SNS投稿（X・TikTok）」に owner_delegation（id: x-engagement-ratify-20260924・effective_until 2026-10-24T00:00:00+09:00・expiry_behavior new_decision_required）・$note・gate の時限の例外1文・ai_may 1件・human_only 2件を足す変更を用意した段階。**転記であって人の承認の証明ではない**（AIとオーナーの操作をGitHub上で識別できるまで「記録」扱い）。reversible・requires_approval と、自動化率・自律スコアの台帳は変えていない。"
+    },
+    {
       "id": "act-egress-policy-confirm",
       "title": "副系CCRの egress 制限が意図どおりか確認する（2026-08-25 実測で更新）",
       "detail": "**【2026-08-25 実測で訂正】以前の記述「simplememofast.com もブロックされている」は現在この環境では成り立たない。**本番 status JSON が curl で 200 で読める。\n\nつまり **Runbook §0 の冪等チェック(b)「本番 status JSON の date_jst」は副系でも実行できる。**以前の記録は「(b) は実行不能なので実質のガードは (c) と当日ブランチの占有だけ」としており、**ガードの強度を実際より低く見積もっていた。**\n\n同一セッション内で curl により実測（2026-08-25）:\n```\n200      https://simplememofast.com/data/autopilot-status.json   ← 以前は「ブロック」と記録\n200      https://simplememofast.com/robots.txt\n200      https://api.github.com/rate_limit\n200      https://raw.githubusercontent.com/…\n200      https://registry.npmjs.org/\n400      https://github.com/            ← curl は 400。WebFetch 経由では到達できる\nblocked  https://obsidian.md/ , https://help.obsidian.md/     ← WebFetch でも EGRESS_BLOCKED\nblocked  https://www.notion.com/ , https://en.wikipedia.org/ , https://www.google.com/\nblocked  https://api.indexnow.org/indexnow   ← indexnow-notify.js がこの環境で落ちる理由\n```\n\n**変わっていない部分:** obsidian.md 系は curl でも WebFetch でも一貫してブロックされる。レーンEで Obsidian 公式サイトを一次情報にする記事は、副系からは書けない（raw.githubusercontent.com 経由の公式レジストリは読めるので、そちらは使える）。\n\n**注意:** 到達性はセッションごと・ツールごとに違う。過去ログには curl・WebFetch ともブロックされたという記録があり、今回と食い違う。**1回の実測を恒久的な仕様として書かない**——次に判断するときは、そのセッションで測り直すこと。\n\nオーナーに確認したいのは「この制限が意図したものか」で、そこは変わらない。",

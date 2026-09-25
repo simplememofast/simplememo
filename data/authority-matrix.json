@@ -336,19 +336,37 @@
       "domain": "SNS投稿（X・TikTok）",
       "reversible": true,
       "ai_may": [
-        "承認済み投稿群のX Web日本語ブランド投稿（AIが最終本文・日時を判断し、照合後に公開・予約・公開確認）"
+        "承認済み投稿群のX Web日本語ブランド投稿（AIが最終本文・日時を判断し、照合後に公開・予約・公開確認）",
+        "日本語の自社アカウントでのXの返信・引用RT（owner_delegation x-engagement-ratify-20260924 の期限つき追認の範囲内。2026-09-24〜2026-10-24 00:00 JST・1日2回まで・各回 引用RT 1件・返信 3件まで。失効後はこの項目を根拠にしない）と、その停止"
       ],
       "requires_approval": false,
       "human_only": [
-        "旧scheduled API経路・英語専用アカウント・TikTokの再開の判断"
+        "旧scheduled API経路・英語専用アカウント・TikTokの再開の判断",
+        "Xの返信・引用RTの再開・延長・範囲拡大の判断（期限つき追認の失効後の継続を含む）",
+        "いいねと、投稿へのブランド（製品説明）の織り込みを範囲に加える判断（2026-09-25 時点では含めない。オーナーの「おまかせ」を受け、AI は広げる方向を選ばなかった）"
       ],
-      "gate": "9月5日に公開を委任された投稿群を対象とするX Web日本語投稿。投稿群の範囲外の任意投稿をこの記録だけで許可しない。対象アカウント、本文、予約日時を照合して保存し、公開URLを読戻す。旧x-post-scheduled.ymlと/admin/api/x-postは停止を維持。返信・DM・広告はこの委任の対象に含めない。",
+      "gate": "9月5日に公開を委任された投稿群を対象とするX Web日本語投稿。投稿群の範囲外の任意投稿をこの記録だけで許可しない。対象アカウント、本文、予約日時を照合して保存し、公開URLを読戻す。旧x-post-scheduled.ymlと/admin/api/x-postは停止を維持。返信・DM・広告はこの委任の対象に含めない。ただし時限の例外として、日本語の自社アカウントでのXの返信・引用RTだけは owner_delegation（id: x-engagement-ratify-20260924）の範囲に限り2026-10-24 00:00 JSTまで扱う（失効後は人へ戻る）。",
       "evidence": [
         "docs/x-japanese-execution-20260909.md",
         "data/x-japanese-execution.json",
-        ".github/workflows/x-post-scheduled.yml"
+        ".github/workflows/x-post-scheduled.yml",
+        "docs/x-engagement-ratification-20260924.md"
       ],
-      "status": "active"
+      "status": "active",
+      "owner_delegation": {
+        "id": "x-engagement-ratify-20260924",
+        "date": "2026-09-24",
+        "kind": "time_limited_ratification",
+        "l4_ref": "L4-03",
+        "scope": "日本語の自社アカウントだけで行うXの返信と引用RT。1日2回まで（オーナーが選んだ上限）、各回 引用RT 1件・返信 3件まで。DM・広告・英語アカウント・TikTokは対象外。いいねと、投稿へのブランド（製品説明）の織り込みは範囲に含めない（2026-09-25、オーナーがこの判断を「おまかせ」とし、AI は広げる方向を選ばなかった。含めるのは人の判断）。",
+        "effective_from": "2026-09-24T00:00:00+09:00",
+        "effective_until": "2026-10-24T00:00:00+09:00",
+        "expiry_behavior": "new_decision_required",
+        "record_kind": "record",
+        "transcribed_by": "ai",
+        "evidence": "docs/x-engagement-ratification-20260924.md"
+      },
+      "$note": "【2026-09-25 追記 — オーナー判断 2026-09-24（L4-03）の転記】owner_delegation（id: x-engagement-ratify-20260924）は、Xの返信・引用RTを期限つきで追認したオーナー判断をAIが転記したもの。**self_repair.must_not は『権限表を自分で書き換えない』と書いており、この追記はその明示の例外。**黙って足さないために経緯を残す —— 2026-09-24、AIセッションが出した選択式の質問に、オーナーはまず「期限つきで追認し台帳に載せる (Recommended)」を選び、続く質問「X の返信・引用リポスト（x-engagement）を、どの範囲で期限つき追認しますか？」に「観測どおり1日2回に絞る (Recommended)」と回答した。その選択肢の説明（原文）は「1日2回、各回は引用RT1件と返信3件まで、2026-10-24 に失効（失効したら人へ戻る）。あなたがスキルに上限と失効日を書き足し、私が権限表の追認を draft PR で出します。」。一次の記録はこの回答で、リポジトリの外にある。ここにあるのはその転記。**この追記は draft PR で出す。Ready にしてマージさせるのは人**（draft の間は auto-merge の対象外）。これを前例に権限表を自分で書き換えない —— 再開・延長・範囲拡大は人が決める（止めるのはAIでもよい）。\n\n**gate の『返信・DM・広告はこの委任の対象に含めない』は9月5日の投稿群の委任についての記述で、そのまま残した。**時限の例外があることだけを gate に1文足した。返信・引用RTは owner_delegation の範囲と期限の中だけで扱い、9月5日の委任を広げたものではない。DM・広告・英語アカウント・TikTokは追認の対象外。いいねと、投稿へのブランド（製品説明）の織り込みは範囲に含めない（2026-09-25、オーナーがこの判断を「おまかせ」とし、AI は広げる方向を選ばなかった。含めるのは人の判断）。\n\n**可逆性の食い違いは解消していない。**data/autonomy-score.json の domain_class はこの領域を R2（外部への送信は不可逆）に分類し、この表の reversible: true と食い違っている。この追認はどちらにも寄せない（L4 の判断に残る）。reversible・requires_approval は変えていない。\n\n**record_kind: record は『記録』の意味。**AIとオーナーの操作をGitHub上で識別できる状態（HG1）になるまで、この欄はオーナーの判断をAIが転記した記録であって、人の承認を機械が確かめたものではない。\n\n失効（2026-10-24T00:00:00+09:00）後は new_decision_required —— 人へ戻る。追認の記録は実行実績ではない。自動化率と自律スコアの台帳（data/automation-coverage.json・data/autonomy-score.json）は変えていない。"
     },
     {
       "domain": "ユーザーデータの削除（アプリ内の自己削除）",
