@@ -29,6 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { selftestTally } from './lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const PIN_PATH = path.join(ROOT, 'data/review-gate-pin.json');
@@ -95,8 +96,7 @@ export function howToFix(actual, pin) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
 
   const files = {
     'a.mjs': "import b from './b.mjs';\nexport * from './lib/c.mjs';\nimport fs from 'node:fs';\n",
@@ -134,9 +134,7 @@ function selftest() {
   t('直し方が両方の台帳を名指しする',
     fix.includes('review-gate-pin.json') && fix.includes('simplememo-ios/data/review-reply-gate.json'));
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

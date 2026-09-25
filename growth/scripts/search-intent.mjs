@@ -33,6 +33,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { listSnapshots, loadSnapshot, curveFor, expectedCtr } from '../lib/gsc.mjs';
+import { selftestTally } from '../../scripts/lib/tally.mjs';
 
 /** 両窓でこの表示回数を超えないと比べない。**1クリックでCTRが跳ねる母数で判定しない。** */
 export const MIN_IMPRESSIONS = 10;
@@ -186,9 +187,7 @@ const Q = (query, position, ctr, impressions = 100) => ({ query, position, ctr, 
 const QP = (query, page, impressions = 100) => ({ query, page, impressions, clicks: 1, position: 1, ctr: 0.1 });
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (name, cond) => { total += 1; if (!cond) failures.push(name);
-    console.log(`  ${cond ? 'ok  ' : 'FAIL'} ${name}`); };
+  const { t, finish } = selftestTally();
 
   const base = (qs, qps) => snap('x', qs, qps);
 
@@ -247,9 +246,7 @@ function selftest() {
     t('**スナップショットが2つ未満**（比較そのものが成立しない）', false);
   }
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

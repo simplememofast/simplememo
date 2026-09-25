@@ -23,6 +23,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { importClosure, sha12, drift } from './check-review-gate-pin.mjs';
+import { selftestTally } from './lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const PIN_PATH = path.join(ROOT, 'data/rollout-gate-pin.json');
@@ -46,8 +47,7 @@ export function howToFix(actual, pin) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
 
   const read = (rel) => { try { return fs.readFileSync(path.join(ROOT, rel), 'utf8'); } catch { return null; } };
   const { files, missing } = importClosure(ENTRY, { read });
@@ -71,9 +71,7 @@ function selftest() {
   t('**留め先が実行側と同じファイル名を指している**（写し違いを固定）',
     pin.mirror === MIRROR && pin.entry === ENTRY);
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { loadLedger, isOpen, measuresPageCtr } from '../lib/ledger.mjs';
 import { latestSnapshot } from '../lib/gsc.mjs';
 import { evaluate, isAutonomous, DEFAULT_RULES } from '../lib/stoploss.mjs';
+import { selftestTally } from '../../scripts/lib/tally.mjs';
 
 /**
  * **「そのページのGSC CTR を測っている実験」だけを対象にする。**
@@ -45,9 +46,7 @@ export function currentFor(pagePath, rows) {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (name, cond) => { total += 1; if (!cond) failures.push(name);
-    console.log(`  ${cond ? 'ok  ' : 'FAIL'} ${name}`); };
+  const { t, finish } = selftestTally();
 
   // 大きく悪化 + 十分な母数 → revert
   const bad = evaluate({ clicks: 100, impressions: 2000 }, { clicks: 20, impressions: 2000 });
@@ -106,9 +105,7 @@ function selftest() {
   t('複数ページ集合を1ページのGSC行と比べない', !picked.includes('multipage'));
   t('GA4起点の実験を対象に取らない', !picked.includes('ga4'));
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
