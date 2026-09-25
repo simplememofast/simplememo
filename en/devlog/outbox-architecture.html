@@ -281,7 +281,7 @@
 <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
 <ol class="flow-list">
 <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br/>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense against message loss.</li>
-<li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br/>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: one-tap (0.25s with animation).</li>
+<li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br/>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: no noticeable wait (0.25s with animation).</li>
 <li><strong>Background Send via Relay API</strong><br/>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
 <li><strong>On Success: Remove from Outbox</strong><br/>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
 <li><strong>On Failure: Automatic Retry with Exponential Backoff</strong><br/>For network or server errors, automatic retry with exponential backoff (1s → 2s → 4s → 8s...) kicks in. BGTaskScheduler lets retries run even when the app is in the background.</li>
@@ -387,7 +387,7 @@
     }
 }</code></pre>
 <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
-<p>Send-to-Reset target: <strong>one-tap</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
+<p>Send-to-Reset target: <strong>no noticeable wait</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
 <!-- FAQ -->
 <h2>FAQ</h2>
 <h3>Q. What happens to memos sent offline?</h3>
