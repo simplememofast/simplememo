@@ -1,6 +1,12 @@
 /**
- * growth/scripts の引数読み取り。6本のスクリプトが同じ4行を別々に持っていた
- * ものを寄せた（2026-09-25・挙動は不変）。
+ * growth/scripts の引数読み取り。5本のスクリプト（ingest-bigquery / ingest-gsc /
+ * analyze / bq-preflight / full-funnel）が同じ4行を別々に持っていたものを
+ * 寄せた（2026-09-25・挙動は不変）。
+ *
+ * **experiments.mjs は同じ定義を自分で持ったままにしてある。**
+ * check-experiment-evidence.mjs が experiments.mjs と依存4本だけを一時
+ * ディレクトリへ写して CLI として走らせる（依存の一覧を固定している）ので、
+ * ここを import させるとその隔離が崩れる。
  *
  *   const flag = flagReader(argv);
  *   flag('top', 20)   // `--top 5` → '5'、無い・値が無い・次が `--…` → 20

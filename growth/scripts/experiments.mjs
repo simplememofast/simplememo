@@ -28,12 +28,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { listSnapshots, loadSnapshot, GSC_DIR } from '../lib/gsc.mjs';
 import { gscEvidence, reviewEvidence, fingerprint, privateEvidenceReference } from '../lib/experiment-evidence.mjs';
-import { flagReader } from '../lib/cli.mjs';
 
 const argv = process.argv.slice(2);
 const cmd = argv[0];
 
-const flag = flagReader(argv);
+function flag(name, fallback = null) {
+  const i = argv.indexOf(`--${name}`);
+  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : fallback;
+}
 function has(name) { return argv.includes(`--${name}`); }
 /** A flag read as a number. Absent stays null; a non-number is a typo, not a zero. */
 function numFlag(name) {
