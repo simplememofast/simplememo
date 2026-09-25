@@ -17,14 +17,11 @@
  * hold が増え続けているなら、それは計測側の問題として別に見える必要がある。
  */
 
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadLedger, isOpen, measuresPageCtr } from '../lib/ledger.mjs';
 import { latestSnapshot } from '../lib/gsc.mjs';
 import { evaluate, isAutonomous, DEFAULT_RULES } from '../lib/stoploss.mjs';
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 /**
  * **「そのページのGSC CTR を測っている実験」だけを対象にする。**

@@ -6,10 +6,9 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { companyAio } from './company-aio.mjs';
-import { opportunities } from './company-loop.mjs';
+import { experimentView, opportunities } from './company-loop.mjs';
 import { ROOT, digest, formalMetrics } from './company-metrics.mjs';
 import { saveReview } from './company-review.mjs';
-import { experimentView } from './company-loop.mjs';
 
 // Reuse the original synthetic Codex events and report builder. Importing the
 // unittest module does not run tests or collect live/model observations.

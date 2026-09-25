@@ -5,12 +5,11 @@ import crypto from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import { execFileSync } from 'node:child_process';
 import { ROOT, formalMetrics, compareMetrics } from './company-metrics.mjs';
-import { atomicJson, privateState, acquireLock } from './company-loop.mjs';
+import { atomicJson, privateState, acquireLock, observe, opportunities } from './company-loop.mjs';
 import { verifyAppsFlyer } from './company-data.mjs';
 import { startOperationalFollowup } from './company-followup.mjs';
 import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
 import {verifyMeasurementInput,verifyMeasurementDelivery,verifyMeasurementMergeScope} from './company-measurement.mjs';
-import {observe,opportunities} from './company-loop.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
 import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
 

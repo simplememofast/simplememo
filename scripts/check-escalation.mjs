@@ -22,7 +22,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLedger, requireShape } from './lib/read-ledger.mjs';
-import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { ledgerScenarios, run } from './lib/selftest.mjs';
 import { CODES } from './autopilot-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -102,7 +102,7 @@ if (isMain) {
     { what: 'data/authority-matrix.json', why: 'policy_only の領域を判定できない' });
   const policyOnly = (authority.domains || []).filter((d) => d.status === 'policy_only').map((d) => d.domain);
 
-  const { problems, byTrigger } = validate(doc, { seenClasses, policyOnlyDomains: policyOnly });
+  const { problems } = validate(doc, { seenClasses, policyOnlyDomains: policyOnly });
 
   console.log(`有人移管の規則 — ${doc.rules.length}件\n`);
   const stop = doc.rules.filter((r) => r.stop_automation);

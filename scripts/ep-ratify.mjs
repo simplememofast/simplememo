@@ -111,7 +111,6 @@ function readJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 
 function selftest() {
   let n = 0, bad = 0;
-  const ok = (name, fn) => { n += 1; try { fn(); } catch (e) { bad += 1; console.error(`  ✗ ${name}\n      ${e.message}`); } };
   const eq = (got, want, msg) => { n += 1; if (JSON.stringify(got) !== JSON.stringify(want)) { bad += 1; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); } };
   const throws = (name, fn, re) => { n += 1; try { fn(); bad += 1; console.error(`  ✗ ${name}: 落ちなかった`); } catch (e) { if (!re.test(e.message)) { bad += 1; console.error(`  ✗ ${name}: 別の理由で落ちた: ${e.message}`); } } };
   const P = { ep: { precision_review: { accepted_modes: ['human'], delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }] } } };

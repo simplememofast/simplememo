@@ -52,7 +52,7 @@ console.log(`  compared to: ${comparison.comparable ? prev.label : `(withheld: $
 
 /* Topic shares describe visible query rows, not all site demand or installs. */
 if (show('clusters')) {
-  const { clusters, sides, site, conversational } = result.clusters;
+  const { clusters, sides, site } = result.clusters;
   console.log(`── Query clusters (${result.clusters.classificationVersion}; mutually exclusive, available queries only)`);
   console.log(`  ${'cluster'.padEnd(20)}${'side'.padEnd(11)}${'queries'.padStart(8)}${'clicks'.padStart(8)}${'imp'.padStart(9)}${'CTR'.padStart(8)}${'pos'.padStart(7)}${'imp%'.padStart(8)}${'clk%'.padStart(8)}`);
   for (const c of clusters) {
