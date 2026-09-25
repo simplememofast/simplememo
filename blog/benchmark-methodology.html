@@ -56,7 +56,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/benchmark-methodology#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png","headline":"計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています","description":"Obsidian連携シンプルメモの「0.4秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。","url":"https://simplememofast.com/blog/benchmark-methodology","datePublished":"2026-03-16","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/benchmark-methodology"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/benchmark-methodology#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png","headline":"計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています","description":"Obsidian連携シンプルメモの「0.4秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。","url":"https://simplememofast.com/blog/benchmark-methodology","datePublished":"2026-03-16","dateModified":"2026-09-25","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/benchmark-methodology"}}</script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"計測方法の透明性","item":"https://simplememofast.com/blog/benchmark-methodology"}]}
   </script>
@@ -274,7 +274,7 @@
     <!-- TL;DR Summary for AI Citation -->
     <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
       <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-      <p lang="ja" style="color:var(--text-secondary);margin:0;">Obsidian連携シンプルメモがタップから入力できるまでの0.4秒は、iPhone 16e (A18)・iOS 26.5.2 で画面収録→フレーム解析により計測（ウォーム起動、5回中央値）。送信速度ワンタップはCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
+      <p lang="ja" style="color:var(--text-secondary);margin:0;">Obsidian連携シンプルメモがタップから入力できるまでの0.4秒は、iPhone 16e (A18)・iOS 26.5.2 で画面収録→フレーム解析により計測（ウォーム起動、5回中央値）。送信リクエストの往復時間はCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
 
     </div>
 
@@ -401,14 +401,14 @@
 
       <div lang="ja">
         <div class="app-card">
-          <div class="app-card__header"><span class="app-card__name">ワンタップの根拠</span><span class="app-card__rank">送信速度</span></div>
+          <div class="app-card__header"><span class="app-card__name">送信リクエストの往復時間</span><span class="app-card__rank">送信速度</span></div>
           <div class="app-card__desc">
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>計測方法:</strong> Charles Proxyによるネットワークタイミング計測</li>
               <li><strong>計測区間:</strong> 送信ボタンのタップからサーバーの確認応答（HTTP 200）まで</li>
               <li><strong>ネットワーク:</strong> Cloudflareエッジまでのレイテンシ15msのWi-Fi環境</li>
               <li><strong>試行回数:</strong> 10回計測し、中央値を採用</li>
-              <li><strong>結果:</strong> ワンタップ（Cloudflare WorkersへのTLSハンドシェイクを含む）</li>
+              <li><strong>結果:</strong> トップページの「送信リクエスト時間（API往復）」に載せている値（Cloudflare WorkersへのTLSハンドシェイクを含む）</li>
             </ul>
             <p style="margin-top:.75rem"><strong>補足:</strong> この数値にはメール受信トレイへの配信時間は含まれていません。メールプロバイダーによりますが、受信トレイに届くまでに追加で1〜5秒かかります。</p>
           </div>
