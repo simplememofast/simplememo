@@ -716,7 +716,7 @@ export function selftest() {
       { area: '① 検査用', task: 'wait1', executor: 'nobody', blocker: 'external_data', unblocked_by: 'u', unlock: 'bq_28d', evidence: [] },
     ] };
     const pl = planTo(doc, 1);
-    if (pl.steps[pl.steps.length - 1]?.id !== 'impl_analog') p.push('defer が最後に来ていない');
+    if (pl.steps[pl.steps.length - 1]?.id !== 'impl_analog') problems.push('defer が最後に来ていない');
   }
 
   // After API306, plans must wait for actual paired observations, without a
