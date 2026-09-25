@@ -30,7 +30,6 @@ Requires Pillow and an ffmpeg binary (npm ffmpeg-static, or FFMPEG env var).
 
 import argparse
 import json
-import math
 import os
 import shutil
 import subprocess

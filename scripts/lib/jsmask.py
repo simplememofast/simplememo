@@ -60,7 +60,6 @@ def mask(src: str) -> str:
         # テンプレート（${} の中はコードなので残す）
         if c == '`':
             j = i + 1
-            depth = 0
             while j < n:
                 if src[j] == '\\':
                     j += 2
