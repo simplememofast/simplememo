@@ -24,6 +24,10 @@
 # はてなは本文末尾に固定の開示文を付ける（どちらもスクリプト側が付けるので、モデルは消せない）。
 #
 # 【手動実行】workflow_dispatch の既定は dry_run（書いて検査するが投稿しない）。
+# dry_run は門の「間隔」と「24時間に1本」を見ない（停止と読めないときは止める）。いつでも経路全体を試せる。
+#
+# 【時刻】このリポジトリの日次 cron は実際には約2時間50分遅れて配信される（CLAUDE.md・PageSpeed の節）。
+# 12:17 / 20:47 JST は公称で、実際は 15 時台 / 23 時台に動く。遅れても門は公開面の時刻で判断するので壊れない。
 
 name: Devlog Syndication
 
@@ -55,7 +59,7 @@ permissions:
 jobs:
   syndicate:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -99,6 +103,7 @@ jobs:
         run: |
           ARGS=(gate --platform "$PLATFORM" --github-output "$GITHUB_OUTPUT")
           if [ "$FORCE" = "true" ]; then ARGS+=(--force); fi
+          if [ "$MODE" != "publish" ]; then ARGS+=(--dry-run); fi
           node scripts/devlog-syndication.mjs "${ARGS[@]}"
 
       - name: 投稿用の鍵があるか（投稿モードだけ）
@@ -137,7 +142,7 @@ jobs:
       - name: 執筆（Claude Code・1本）
         id: write
         if: steps.gate.outputs.due == 'true'
-        timeout-minutes: 25
+        timeout-minutes: 40
         uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -157,6 +162,22 @@ jobs:
             3. 記事を `.syndication/article.json` に書く（手順書 §6 の形）。ほかのファイルは作らない・変えない。
             ネットワークには出ないでください。書けない理由があるときは、手順書 §1-3 のとおり skip を書いて終えてください。
 
+      # claude-code-action は実行記録を毎回同じパスに書くので、手直しのステップが執筆の記録を上書きする
+      # （2026-09-25 の試験実行で、要約の2行が同じ値になった）。書いた直後に数字だけ抜いておく。
+      # 実行記録そのもの（会話の全文）は成果物に入れない。
+      - name: 執筆の記録（ターン数と費用）
+        if: always() && (steps.write.outcome == 'success' || steps.write.outcome == 'failure')
+        env:
+          EXEC_FILE: ${{ steps.write.outputs.execution_file }}
+          LABEL: 執筆
+        run: |
+          mkdir -p .syndication
+          if [ -n "$EXEC_FILE" ] && [ -f "$EXEC_FILE" ]; then
+            node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$EXEC_FILE" "$LABEL" >> .syndication/metrics.txt || true
+          else
+            echo "- $LABEL: 実行記録なし" >> .syndication/metrics.txt
+          fi
+
       # 照合用の名前一覧（任意）。リポジトリの外に置くため Secrets から渡す。無ければ台帳のハッシュだけで照合する。
       - name: 検証
         id: validate
@@ -175,7 +196,7 @@ jobs:
       - name: 手直し（検証で落ちたときだけ・1回）
         id: fix
         if: steps.gate.outputs.due == 'true' && steps.validate.outputs.ok != 'true'
-        timeout-minutes: 15
+        timeout-minutes: 25
         uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -191,6 +212,19 @@ jobs:
             `.syndication/validation.txt` に検査で落ちた理由があります。`docs/syndication/RUNBOOK.md` の §7 に従い、
             `.syndication/article.json` をその場で直してください。出典の見つからない数字は削ってください。
             ほかのファイルは作らない・変えない。ネットワークには出ないでください。
+
+      - name: 手直しの記録（ターン数と費用）
+        if: always() && (steps.fix.outcome == 'success' || steps.fix.outcome == 'failure')
+        env:
+          EXEC_FILE: ${{ steps.fix.outputs.execution_file }}
+          LABEL: 手直し
+        run: |
+          mkdir -p .syndication
+          if [ -n "$EXEC_FILE" ] && [ -f "$EXEC_FILE" ]; then
+            node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+process.argv[2]+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$EXEC_FILE" "$LABEL" >> .syndication/metrics.txt || true
+          else
+            echo "- $LABEL: 実行記録なし" >> .syndication/metrics.txt
+          fi
 
       - name: 再検証
         if: steps.gate.outputs.due == 'true' && steps.validate.outputs.ok != 'true'
@@ -222,16 +256,16 @@ jobs:
 
       - name: 実行の記録（費用とターン数）
         if: always() && steps.gate.outputs.due == 'true'
-        env:
-          WRITE_FILE: ${{ steps.write.outputs.execution_file }}
-          FIX_FILE: ${{ steps.fix.outputs.execution_file }}
         run: |
           {
             echo "### $PLATFORM: 門=${{ steps.gate.outputs.code }} / モード=$MODE"
-            for f in "$WRITE_FILE" "$FIX_FILE"; do
-              [ -n "$f" ] && [ -f "$f" ] || continue
-              node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+require('path').basename(process.argv[1])+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$f" || true
-            done
+            [ -f .syndication/metrics.txt ] && cat .syndication/metrics.txt
+            if [ -f .syndication/article.json ]; then
+              node -e "const a=JSON.parse(require('fs').readFileSync('.syndication/article.json','utf8'));console.log(a.skip?'- 見送り: '+(a.reason||''):'- 題名: '+a.title+'\n- 題材: '+a.basis)" || true
+            fi
+            if [ -f .syndication/published.json ]; then
+              node -e "const p=JSON.parse(require('fs').readFileSync('.syndication/published.json','utf8'));console.log(p.dry_run?'- 試験実行のため投稿していない':'- 公開URL: '+p.url)" || true
+            fi
             [ -f .syndication/validation.txt ] && { echo; echo '検証（1回目）:'; sed 's/^/    /' .syndication/validation.txt; }
             [ -f .syndication/validation-2.txt ] && { echo; echo '検証（2回目）:'; sed 's/^/    /' .syndication/validation-2.txt; }
             true
@@ -243,5 +277,7 @@ jobs:
         with:
           name: devlog-syndication-${{ matrix.platform }}-${{ github.run_id }}
           path: .syndication/
-          if-no-files-found: ignore
+          # .syndication は隠しディレクトリ扱いで、既定では1ファイルも上がらない（2026-09-25 の試験実行で成果物が空だった）
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 30
