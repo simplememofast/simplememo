@@ -89,10 +89,12 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
     for(const e of after.filter(e=>(e.company_measurement||e.supporting_changes!==undefined)&&!before.some(old=>old.id===e.id))) {
       if(e.supporting_changes!==undefined)verifySupportRegistration(e,base,head,files,git);
       const scope=changeScope(e.page,e.change_paths,e.supporting_changes);
+      // Page rows the bounded support edit alters join the same ownership check.
+      const {rows}=verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
+      scope.pages=[...new Set([...scope.pages,...rows])];
       for(const owner of after.filter(o=>o.id!==e.id&&isOpen(o)))assert(!ownershipConflict(owner,scope),'active experiment conflicts at final head: '+owner.id);
       const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/');
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
-      verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
   }
   const forbidden = files.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/'));

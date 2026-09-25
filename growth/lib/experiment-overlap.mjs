@@ -1,6 +1,6 @@
 import { isOpen } from './ledger.mjs';
 import assert from 'node:assert/strict';
-import {nonexclusiveObservation,canonicalPage,changeScope} from './experiment-coexistence.mjs';
+import {nonexclusiveObservation,canonicalPage,changeScope,sharedGeneratedArtifact} from './experiment-coexistence.mjs';
 export {nonexclusiveObservation,changeScope};
 
 // Global and external scopes are explicit: do not silently lose them when
@@ -38,6 +38,10 @@ export function ownershipConflict(exp,target,{now=new Date(),followup=false}={})
   const scope=experimentScope(exp);
   if(nonexclusiveObservation(exp,{now,followup}))return false;
   const affected=exp.change_paths?changeScope(exp.page,exp.change_paths,exp.supporting_changes):scope;
+  // A shared generated file is not owned per file when the new change declares
+  // it as bounded support: its own row is in target.pages and the diff proof
+  // adds any other altered page row. An undeclared edit keeps file ownership.
+  const bounded=p=>target.supporting_paths?.includes(p)&&(sharedGeneratedArtifact(p)||affected.supporting_paths?.includes(p));
   return scope.global||affected.global||target.global||scope.pages.some(p=>target.pages.includes(p))
-    ||affected.pages.some(p=>target.pages.includes(p))||(exp.change_paths??[]).some(p=>target.paths?.includes(p)&&!(affected.supporting_paths?.includes(p)&&target.supporting_paths?.includes(p)));
+    ||affected.pages.some(p=>target.pages.includes(p))||(exp.change_paths??[]).some(p=>target.paths?.includes(p)&&!bounded(p));
 }

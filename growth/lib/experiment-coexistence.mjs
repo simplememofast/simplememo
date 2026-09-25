@@ -29,6 +29,13 @@ export function canonicalPage(p) {
   assert(['https:','http:'].includes(u.protocol)&&u.hostname==='simplememofast.com'&&!u.port&&!u.username&&!u.password&&!u.search&&!u.hash&&!/%|\\/.test(p),'invalid local page scope');
   return u.pathname.replace(/\/index\.html$/,'/').replace(/\.html$/,'').replace(/\/$/,'')||'/';
 }
+// Owner decision 2026-09-24: these whole-site generated files are owned by
+// page rows, not per file. The exemption applies only to a change that
+// declares the file as bounded support; the diff proof then returns every
+// other page row it alters for the same ownership check. Exact paths only:
+// never widen this closed list with a pattern. Anything else keeps file rules.
+export const SHARED_GENERATED_ARTIFACTS=Object.freeze(['sitemap.xml','sitemap-ja.xml','sitemap-en.xml','sitemap-locales.xml','data/distribution-queue.json']);
+export const sharedGeneratedArtifact=p=>SHARED_GENERATED_ARTIFACTS.includes(p);
 // Optional prospective support contracts never reinterpret legacy changes.
 export function supportingChanges(page,paths,changes) {
   if(changes===undefined)return [];

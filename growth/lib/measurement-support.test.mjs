@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {SHARED_GENERATED_ARTIFACTS,sharedGeneratedArtifact} from './experiment-coexistence.mjs';
 import {verifySupportingDiff,verifySupportingBaseline,verifySupportingGitDiff,verifyInheritedSitemapMerge} from './measurement-support.mjs';
 
 const page='/blog/fixture',url='https://simplememofast.com'+page,now=new Date('2026-09-20T01:00Z');
@@ -65,8 +66,10 @@ test('queue proof rejects unrelated edits, extra seeds, hidden fields, URL trick
   const f=supportFixture();f.after['data/distribution-queue.json']=f.after['data/distribution-queue.json'].replace('"items": [','"items": [], "items": [');assert.throws(f.verify,/canonical JSON/);
 });
 test('exact100-item queue retention removes only the oldest item',()=>{
-  const f=supportFixture(),a=JSON.parse(f.before['data/distribution-queue.json']);a.items=Array.from({length:100},(_,i)=>({id:'old-'+i}));
-  f.before['data/distribution-queue.json']=json(a);const b={...a,items:[f.item,...a.items].slice(0,100)};f.after['data/distribution-queue.json']=json(b);f.verify();
+  const f=supportFixture(),a=JSON.parse(f.before['data/distribution-queue.json']);a.items=Array.from({length:100},(_,i)=>({id:'old-'+i,url:'https://simplememofast.com/old-'+i}));
+  f.before['data/distribution-queue.json']=json(a);const b={...a,items:[f.item,...a.items].slice(0,100)};f.after['data/distribution-queue.json']=json(b);
+  assert.deepEqual(f.verify().rows,['/old-99'],'the removed oldest row is returned for ownership');
+  assert.deepEqual(verifySupportingBaseline(f.e,p=>f.before[p],{now}).rows,['/old-99'],'the row that retention will remove is known before implementation');
   b.items[99]=a.items[99];f.after['data/distribution-queue.json']=json(b);assert.throws(f.verify,/retention/);
 });
 test('sitemap proof preserves all non-target XML and rejects rewrites, additions and backdates',()=>{
@@ -149,4 +152,78 @@ test('actual main inheritance cannot alter the target or unrelated XML or introd
     s=>s.replace('2026-09-18','2026-09-19').replace('</urlset>','<url><loc>https://simplememofast.com/other</loc><lastmod>2026-09-19</lastmod></url></urlset>'),
   ];
   for(const parentEdit of bad){const f=inheritedFixture(t,{parentEdit});assert.throws(()=>f.verify());}
+});
+
+// Owner decision 2026-09-24. Shape of the 2026-09-20 candidate: one article
+// plus the mandatory sitemap/distribution files. Owners mirror the ledger then:
+// an exclusive page-list experiment, a legacy owner whose change_paths name the
+// sitemap without support, and a bounded-support owner.
+const P='/blog/email-yourself-memo',U='https://simplememofast.com'+P;
+const aio={id:'aio-page-list',status:'running',page:'/blog/memo-app-security-comparison',pages:['/blog/memo-app-security-comparison','/apple-watch/','/ai-tags/']};
+const legacySitemapOwner={id:'legacy-sitemap-owner',status:'running',page:'/obsidian/legacy/',change_paths:['obsidian/legacy/index.html','sitemap-ja.xml']};
+const boundedOwner={id:'bounded-owner',status:'running',page:'/note-to-email/',change_paths:['note-to-email/index.html','sitemap-ja.xml','data/distribution-queue.json'],
+  supporting_changes:[{path:'sitemap-ja.xml',kind:'sitemap_lastmod'},{path:'data/distribution-queue.json',kind:'distribution_seed',id:'20260923-note-to-email'}]};
+const legacyStoryOwner={id:'legacy-story-owner',status:'running',page:'/obsidian/story/',change_paths:['obsidian/story/index.html','docs/story-seeds.md']};
+const paths0920=['blog/email-yourself-memo.html','sitemap-ja.xml','data/distribution-queue.json'];
+const support0920=[{path:'sitemap-ja.xml',kind:'sitemap_lastmod'},{path:'data/distribution-queue.json',kind:'distribution_seed',id:'20260920-email-yourself-memo'}];
+const at=new Date('2026-09-25T00:00Z');
+
+test('shared generated files are an exact closed list',()=>{
+  assert.deepEqual([...SHARED_GENERATED_ARTIFACTS],['sitemap.xml','sitemap-ja.xml','sitemap-en.xml','sitemap-locales.xml','data/distribution-queue.json']);
+  assert(Object.isFrozen(SHARED_GENERATED_ARTIFACTS));
+  for(const p of SHARED_GENERATED_ARTIFACTS)assert.equal(sharedGeneratedArtifact(p),true,p);
+  for(const p of ['docs/story-seeds.md','llms.txt','sitemap-custom.xml','sitemap-ja.xml.bak','blog/sitemap-ja.xml','sitemap-fr.xml','data/distribution-queue.json.tmp',
+    'data/other-queue.json','growth/content/refresh-queue.json','assets/js/cta.js','feed.xml','SITEMAP-JA.XML'])assert.equal(sharedGeneratedArtifact(p),false,p);
+});
+
+test('the 2026-09-20 shape passes only with a bounded declaration and never takes another page row',()=>{
+  const undeclared=changeScope(P,paths0920);
+  assert.equal(undeclared.global,true,'an undeclared distribution edit stays whole-site (the 09-20 rejection is retained)');
+  assert.equal(ownershipConflict(aio,undeclared,{now:at}),true);
+  const html=changeScope(P,['blog/email-yourself-memo.html','sitemap-ja.xml']);
+  for(const owner of [legacySitemapOwner,boundedOwner])assert.equal(ownershipConflict(owner,html,{now:at}),true,'an undeclared sitemap edit keeps file ownership: '+owner.id);
+  const declared=changeScope(P,paths0920,support0920);
+  for(const owner of [aio,legacySitemapOwner,boundedOwner])assert.equal(ownershipConflict(owner,declared,{now:at}),false,'a bounded shared generated edit is not owned per file: '+owner.id);
+  for(const owner of [{...legacySitemapOwner,status:'frozen'},{...boundedOwner,status:'frozen'}])assert.equal(ownershipConflict(owner,declared,{now:at}),false,'frozen rows stay protected but not the whole file');
+  // Outside the list the old file rule is unchanged.
+  const story=changeScope(P,[...paths0920,'docs/story-seeds.md'],[...support0920,{path:'docs/story-seeds.md',kind:'story_seed',id:'S-20260920-email-yourself-memo'}]);
+  assert.equal(ownershipConflict(legacyStoryOwner,story,{now:at}),true,'a file outside the closed list keeps file ownership');
+  assert.equal(ownershipConflict(aio,changeScope(P,[...paths0920,'llms.txt'],support0920),{now:at}),true,'an unlisted generated file stays whole-site');
+});
+
+test('rows of active experiments, global, frozen, follow-up, same article and shared parts still conflict',()=>{
+  const declared=changeScope(P,paths0920,support0920);
+  const withRows=rows=>({...declared,pages:[...new Set([...declared.pages,...rows])]});
+  for(const row of ['/apple-watch','/ai-tags'])assert.equal(ownershipConflict(aio,withRows([row]),{now:at}),true,'a removed distribution row of an active page is owned: '+row);
+  assert.equal(ownershipConflict(legacySitemapOwner,withRows(['/obsidian/legacy']),{now:at}),true);
+  assert.equal(ownershipConflict({...aio,status:'frozen'},withRows(['/apple-watch']),{now:at}),true);
+  assert.equal(ownershipConflict(aio,withRows(['/elsewhere']),{now:at}),false);
+  for(const page of [P,P+'.html',P+'/','https://simplememofast.com'+P])assert.equal(ownershipConflict({id:'same',status:'running',page},declared,{now:at}),true,'same article: '+page);
+  assert.equal(ownershipConflict({id:'same-frozen',status:'frozen',page:P},declared,{now:at}),true);
+  assert.equal(ownershipConflict({id:'site',status:'running',page:'(サイト全体 + サイト外4面)'},declared,{now:at}),true,'an unmigrated global experiment still owns every page');
+  assert.equal(ownershipConflict({id:'site-frozen',status:'frozen',page:'(215 pages: 全コンテンツページ)'},declared,{now:at}),true);
+  assert.equal(ownershipConflict({id:'parent',status:'evaluated',page:P},declared,{now:at,followup:true}),true,'a running follow-up keeps its parent page');
+  for(const part of ['assets/css/style.css','assets/js/cta.js','assets/templates/shared.zip'])
+    assert.equal(ownershipConflict(aio,changeScope(P,[...paths0920,part],support0920),{now:at}),true,'a shared part stays whole-site: '+part);
+  assert.equal(ownershipConflict({id:'template',status:'running',page:'/other/',change_paths:['other/index.html','blog/template.html']},
+    changeScope(P,[...paths0920,'blog/template.html'],support0920),{now:at}),true,'a shared HTML part keeps page ownership');
+  assert.throws(()=>ownershipConflict({id:'broken',status:'running',page:null},declared),/scope/);
+  assert.throws(()=>ownershipConflict({id:'broken',status:'running',page:'/x',pages:[]},declared),/pages/);
+});
+
+test('unreadable shared rows are rejected, not treated as unowned',()=>{
+  const full=mutate=>{
+    const f=supportFixture(),a=JSON.parse(f.before['data/distribution-queue.json']);
+    a.items=Array.from({length:100},(_,i)=>({id:'old-'+i,url:'https://simplememofast.com/old-'+i}));mutate(a.items[99]);
+    f.before['data/distribution-queue.json']=json(a);f.after['data/distribution-queue.json']=json({...a,items:[f.item,...a.items].slice(0,100)});return f;
+  };
+  for(const mutate of [x=>{delete x.url;},x=>{x.url=42;},x=>{x.url='https://example.invalid/old';},x=>{x.url='https://simplememofast.com/old?x=/protected';},
+    x=>{x.url='https://simplememofast.com/%2e%2e/protected';},x=>{x.url='/relative';},x=>{x.url='http://simplememofast.com/old';}]) {
+    const f=full(mutate);
+    assert.throws(f.verify,/unreadable shared generated row/);
+    assert.throws(()=>verifySupportingBaseline(f.e,p=>f.before[p],{now}),/unreadable shared generated row/);
+  }
+  for(const [variant,expected] of [['https://simplememofast.com/apple-watch/','/apple-watch'],['https://simplememofast.com/apple-watch.html','/apple-watch'],['https://simplememofast.com/apple-watch/index.html','/apple-watch']]) {
+    const f=full(x=>{x.url=variant;});assert.deepEqual(f.verify().rows,[expected],'URL spelling cannot hide an owned row: '+variant);
+  }
 });
