@@ -7,6 +7,7 @@
  *   node scripts/devlog-syndication.mjs validate --platform P --article FILE --context FILE [--report FILE] [--offline]
  *   node scripts/devlog-syndication.mjs publish  --platform P --article FILE --context FILE --out FILE [--dry-run]
  *   node scripts/devlog-syndication.mjs verify   --platform P --published FILE [--summary FILE]
+ *   node scripts/devlog-syndication.mjs watch    [--json FILE] [--warn-hours N] [--alert-hours N] [--since ISO]
  *   node scripts/devlog-syndication.mjs --selftest
  *
  * 【なぜ作るか（2026-09-24）】
@@ -999,6 +1000,136 @@ async function cmdVerify(argv) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// 見張り（毎日の定期タスクが使う。**読むだけで、何も書かない**）
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 見張りの閾値。枠は1日2回（日次 cron の遅れで実際は15時台・23時台 JST）、門は66時間。
+ * 投稿がうまく回っていれば、朝の見張りが見る「最新投稿からの時間」は最大でも60時間前後。
+ * 期限を過ぎた枠を1回落とすと80時間前後、2回以上落とすと96時間を超える。
+ */
+export const WATCH = { warnHours: 80, alertHours: 96, scan: 6, since: '2026-09-25T00:00:00Z' };
+
+/** はてなの公開フィードの entry が、この経路の記事か（本文末尾の開示文か印で見分ける）。 */
+export function isPipelineHatena(entry) {
+  const c = String(entry?.content || '');
+  return c.includes('AIエージェントが自動で執筆・公開しています') || c.includes(`${MARKER}:`);
+}
+
+/** dev.to の記事がこの経路の記事か（本文 Markdown の印で見分ける）。 */
+export function isPipelineDevto(article) {
+  return String(article?.body_markdown || '').includes(`${MARKER}:`);
+}
+
+export function classifyAge(hours, { warnHours = WATCH.warnHours, alertHours = WATCH.alertHours } = {}) {
+  if (hours === null || hours === undefined || !Number.isFinite(hours)) return 'unreadable';
+  if (hours > alertHours) return 'alert';
+  if (hours > warnHours) return 'warn';
+  return 'ok';
+}
+
+const RANK = { ok: 0, warn: 1, unreadable: 1, alert: 2 };
+const worse = (a, b) => (RANK[b] > RANK[a] ? b : a);
+
+async function watchPlatform(platform, now, opts, stop) {
+  const cfg = PLATFORMS[platform];
+  const r = { platform, label: cfg.label, status: 'ok', problems: [], notes: [], latest: null, age_hours: null, pipeline_latest: null, legacy: [] };
+  let posts;
+  try { posts = await publicPosts(platform); } catch (e) {
+    r.status = 'unreadable'; r.problems.push(`公開面を読めない: ${e.message}`); return r;
+  }
+  const sorted = posts.filter((p) => Number.isFinite(new Date(p.published_at).getTime()))
+    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+  const latest = sorted[0] || null;
+  if (latest) {
+    r.latest = { title: latest.title, url: latest.url, published_at: latest.published_at };
+    r.age_hours = Math.round(((now.getTime() - new Date(latest.published_at).getTime()) / 3600000) * 10) / 10;
+  }
+
+  // 直近 scan 本のうち、この経路の最新記事と、since 以降のこの経路以外の記事
+  let pipeline = null;
+  for (const p of sorted.slice(0, opts.scan)) {
+    let isPipe = false, disclosure = null;
+    if (platform === 'devto') {
+      try {
+        const a = await fetchJson(`https://dev.to/api/articles/${p.id}`, { headers: { accept: 'application/vnd.forem.api-v1+json' } });
+        isPipe = isPipelineDevto(a);
+        disclosure = a.ai_disclosure_level ?? null;
+      } catch (e) {
+        r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.id} を読めない: ${e.message}`); continue;
+      }
+    } else {
+      isPipe = isPipelineHatena(p);
+    }
+    if (isPipe && !pipeline) pipeline = { ...p, disclosure };
+    if (!isPipe && new Date(p.published_at).getTime() >= new Date(opts.since).getTime()) {
+      r.legacy.push({ title: p.title, url: p.url, published_at: p.published_at, disclosure });
+    }
+  }
+
+  if (pipeline) {
+    r.pipeline_latest = { title: pipeline.title, url: pipeline.url, published_at: pipeline.published_at, disclosure: pipeline.disclosure };
+    try {
+      const html = await fetchText(pipeline.url, { headers: { accept: 'text/html' } });
+      const ins = inspectPublished(html, platform, { title: pipeline.title });
+      r.pipeline_latest.robots = ins.robots;
+      r.pipeline_latest.site_links = ins.siteLinks;
+      if (!ins.ok) { r.status = 'alert'; for (const x of ins.problems) r.problems.push(`この経路の最新記事: ${x}`); }
+    } catch (e) {
+      r.status = worse(r.status, 'unreadable'); r.problems.push(`この経路の最新記事のページを読めない: ${e.message}`);
+    }
+    if (platform === 'devto' && pipeline.disclosure !== 'fully_autonomous') {
+      r.status = 'alert'; r.problems.push(`この経路の最新記事の AI 開示が「${pipeline.disclosure}」（fully_autonomous でない）`);
+    }
+  } else {
+    r.notes.push(`この経路の記事が直近 ${opts.scan} 本の中にまだ無い`);
+  }
+  if (r.legacy.length) {
+    r.notes.push(`${opts.since.slice(0, 10)} 以降に、この経路以外の投稿が ${r.legacy.length} 本（旧ローカルタスクか、手動の投稿）`);
+  }
+
+  // 投稿の間隔（意図的な停止中は問題に数えない）
+  const age = latest ? classifyAge(r.age_hours, opts) : 'alert';
+  if (stop.stopped) {
+    r.notes.push(`停止中のため、間隔は問題に数えない（${stop.reason}）`);
+  } else if (age === 'alert') {
+    r.status = 'alert'; r.problems.push(`最新投稿から ${r.age_hours ?? '—'} 時間（${opts.alertHours} 時間超）— 投稿が止まっている疑い`);
+  } else if (age === 'warn') {
+    r.status = worse(r.status, 'warn'); r.problems.push(`最新投稿から ${r.age_hours} 時間（${opts.warnHours} 時間超）— 期限を過ぎた枠が投稿できていない`);
+  }
+  return r;
+}
+
+async function cmdWatch(argv) {
+  const now = new Date(argValue(argv, '--now', new Date().toISOString()));
+  const opts = {
+    ...WATCH,
+    warnHours: Number(argValue(argv, '--warn-hours', String(WATCH.warnHours))),
+    alertHours: Number(argValue(argv, '--alert-hours', String(WATCH.alertHours))),
+    since: argValue(argv, '--since', WATCH.since),
+  };
+  const stop = readStop();
+  const out = { checked_at: now.toISOString(), stopped: stop.stopped, stop_reason: stop.reason, platforms: [] };
+  for (const p of Object.keys(PLATFORMS)) out.platforms.push(await watchPlatform(p, now, opts, stop));
+  const overall = out.platforms.reduce((a, r) => worse(a, r.status), 'ok');
+  out.status = overall;
+  const lines = [`見張り ${now.toISOString()}: ${overall === 'ok' ? '異常なし' : overall}${stop.stopped ? `（停止中: ${stop.reason}）` : ''}`];
+  for (const r of out.platforms) {
+    lines.push(`- ${r.label}: ${r.status} / 最新 ${r.age_hours ?? '—'} 時間前${r.latest ? `「${r.latest.title}」` : ''}`);
+    if (r.pipeline_latest) {
+      const rels = (r.pipeline_latest.site_links || []).map((l) => `rel="${l.rel || 'なし'}"`).join(', ');
+      lines.push(`  - この経路の最新: ${r.pipeline_latest.url}（${rels || '自社リンク未確認'}${r.platform === 'devto' ? ` / 開示 ${r.pipeline_latest.disclosure}` : ''}）`);
+    }
+    for (const x of r.problems) lines.push(`  - ⚠ ${x}`);
+    for (const x of r.notes) lines.push(`  - ${x}`);
+  }
+  console.log(lines.join('\n'));
+  const json = argValue(argv, '--json');
+  if (json) fs.writeFileSync(json, JSON.stringify(out, null, 2));
+  process.exitCode = RANK[overall] >= 2 ? 2 : RANK[overall];
+}
+
+// ─────────────────────────────────────────────────────────────
 // 自己テスト（**落ちることを確かめる**）
 // ─────────────────────────────────────────────────────────────
 
@@ -1052,6 +1183,22 @@ export async function selftest() {
     const u = decideGate({ stop: go, latestIso: null, postsLast24h: 0, now, minIntervalHours: 66, dryRun: true, readError: 'HTTP 503' });
     assert(u.due === false, JSON.stringify(u));
     assert(u.code === 'unreadable', JSON.stringify(u));
+  });
+  await t('見張り: 経過時間の区分（80時間で注意・96時間で異常・読めないは別）', () => {
+    assert(classifyAge(57) === 'ok', 'ok');
+    assert(classifyAge(81) === 'warn', 'warn');
+    assert(classifyAge(97) === 'alert', 'alert');
+    assert(classifyAge(null) === 'unreadable', 'null');
+    assert(classifyAge(Number.NaN) === 'unreadable', 'nan');
+  });
+  await t('見張り: この経路の記事を開示文・印で見分ける（それ以外は見分けない）', () => {
+    const body = composeBody({ body_markdown: '本文', basis: 'S-20260903-x' }, 'hatena', { runId: '1', at: '2026-09-25T00:00:00Z' });
+    assert(isPipelineHatena({ content: body }) === true, 'hatena footer');
+    assert(isPipelineHatena({ content: '<p>普通の記事</p>' }) === false, 'hatena plain');
+    const en = composeBody({ body_markdown: 'Body', basis: 'S-20260903-x' }, 'devto', { runId: '1', at: '2026-09-25T00:00:00Z' });
+    assert(isPipelineDevto({ body_markdown: en }) === true, 'devto marker');
+    assert(isPipelineDevto({ body_markdown: 'Body only' }) === false, 'devto plain');
+    assert(isPipelineDevto(null) === false, 'devto null');
   });
   await t('停止台帳にこの経路がある', () => { readStop(); });
 
@@ -1211,11 +1358,11 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   const argv = process.argv.slice(2);
   const cmd = argv[0];
-  const commands = { gate: cmdGate, context: cmdContext, validate: cmdValidate, publish: cmdPublish, verify: cmdVerify };
+  const commands = { gate: cmdGate, context: cmdContext, validate: cmdValidate, publish: cmdPublish, verify: cmdVerify, watch: cmdWatch };
   (async () => {
     if (cmd === '--selftest') { process.exitCode = (await selftest()) ? 1 : 0; return; }
     if (!commands[cmd]) {
-      console.error('使い方: gate | context | validate | publish | verify | --selftest（詳細は冒頭のコメント）');
+      console.error('使い方: gate | context | validate | publish | verify | watch | --selftest（詳細は冒頭のコメント）');
       process.exitCode = 2;
       return;
     }

@@ -1079,6 +1079,12 @@
       "expr": "body",
       "disposition": "向きが逆",
       "note": "2026-09-24: reconcile の `body === null` / `!bodyShape.ok`。**範囲が取れない・本文らしくないときに発火する側**で、戻す（changed）へ倒す判定。消える方向ではない —— 取れなかった範囲を unknown や unchanged にしない（ページ全体が前回と1文字も同じときだけ戻さない）。自己テスト「<main> が消えたのに戻していない」「殻の <main> の指紋を『前回と同じ本文』と読んでいる」で固定し、unknown に変える壊しで6件落ちることを確認した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "hours",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-09-25: 見張り（watch）の経過時間の区分 classifyAge。hours が null・undefined・NaN のときは 'unreadable' を返し、'ok'（異常なし）には倒さない。見張り全体の判定で unreadable は注意と同じ重さに数える。最新投稿そのものが無いときは呼び出し側が classifyAge を呼ばずに 'alert' とする。自己テストで null・NaN が unreadable になることを固定した。"
     }
   ]
 }
