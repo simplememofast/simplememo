@@ -53,7 +53,7 @@
 | 追加 | Indie Hackers Products DB | SELF_REGISTER | ALREADY_EXISTS（2026-09-23 確認） | — | yes | **nofollow**（`rel="nofollow noopener"`）・ページは **`noindex`** | https://www.indiehackers.com/product/simple-memo | `memolife23` では作れないが、**別アカウント `SimpleMemo` 名義のページが既にある**（作成日は未確認） | 参照ドメインには数えない（noindex）。重複ページは作らない。制限解除の問い合わせも不要になった |
 | 追加 | alternative.me（Simple Memo） | SELF_REGISTER | **未登録**（2026-09-23） | — | — | — | https://alternative.me/ | 2026-09-23 にオーナーが「登録済み」と答えたのは **AlternativeTo（alternativeto.net）のことだった**（スクリーンショットで確認）。alternative.me は別サイトで、公開検索（`/api/search?q=simple%20memo`）は0件。同サイトの外部リンクは `rel="nofollow"`（`/captio` で実測）、ソフトの項目は薄く Obsidian も無い | **2026-09-23 オーナー判断：登録する。**アカウント作成と入力は外部の GPT エージェントに依頼（依頼文を渡した：名乗り・有料不可・CAPTCHA は人・代替は Apple Notes と Google Keep だけ・Captio は紐づけない）。公開されたら `rel`・`meta robots` を実測 |
 | 追加 | SourceForge（Memo Inbox） | SELF_REGISTER | **外部エージェントに依頼中**（2026-09-23、オーナーが GPT に依頼） | — | — | — | https://sourceforge.net/projects/memo-inbox/ （予定。取れなければ `memoinbox` など） | アカウント作成はこちらでは行わない。依頼文は §5.13 の入力値に、名乗り・有料不可・CAPTCHA は人・GitHub 連携（OAuth）は使わない、を加えたもの | 報告を受けたら公開ページの `rel`・`meta robots` を実測（`curl` は 403 になるのでブラウザで見る） |
-| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する **→ 9/24 夜：財経新聞（`zaikei.co.jp/releases/3626774/`）への転載を確認。サイトへの3本と App Store へのリンクはすべて `nofollow ugc noopener`、robots 指定なし（§5.28）** |
+| 追加 | PR TIMES（「対話メモ」提供開始のリリース） | PRESS_RELEASE | **PUBLISHED**（所有者の作業） | 2026-09-23 予約 | **2026-09-24 09:12 公開**（ページの表示。予約は 08:30 だった） | あり（**nofollow**）：本文4本（`nofollow ugc noopener`×3・`nofollow noopener noreferrer`×1、`/obsidian/` と `/`）＋会社概要1本（`noopener noreferrer nofollow`）。ページは `index,follow`、X-Robots-Tag なし、canonical は自分自身（2026-09-24 10:30 台に実測） | https://prtimes.jp/main/html/rd/p/000000011.000182412.html | — | 転載先は 10:30 台の時点で未確認（§5.15 追記）。BCN＋R・CLASSY・ウレぴあ総研に載ったら rel を実測する **→ 9/24 夜：財経新聞（`zaikei.co.jp/releases/3626774/`）への転載を確認。サイトへの3本と App Store へのリンクはすべて `nofollow ugc noopener`、robots 指定なし。NEWSRELEA.SE（`newsrelea.se/MLOYa6`）の原文転載も同じく全部 nofollow（§5.28）** |
 | 追加 | Launching Next | SELF_REGISTER | SUBMITTED | 2026-09-19 | no | pending | https://www.launchingnext.com/submit/ （受付番号 152234） | 無料枠は**審査待ち約4か月**と表示される。$99 の Fast-Track 上乗せは購入しない | 2027-01頃に `launchingnext.com` 内で掲載有無を確認 |
 | 追加 | tehtbl/awesome-note-taking | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/tehtbl/awesome-note-taking/pull/144 | レビュー待ち | マージされれば Proprietary 節に掲載される |
 | 追加 | brettkromkamp/awesome-knowledge-management | SUBMISSION | SUBMITTED | 2026-09-19 | no | PR内（`https://simplememofast.com/`） | https://github.com/brettkromkamp/awesome-knowledge-management/pull/83 | レビュー待ち | 845スター・追加頻度が高く、今回で最も期待値が高い |
@@ -1344,7 +1344,16 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 ### PR TIMES（「対話メモ」のリリース）の転載
 
 - **財経新聞（`zaikei.co.jp/releases/3626774/`、9/24 09:12:51 掲載）**を見つけた。サイトへのリンク3本（`/obsidian/`・`/` ×2）と App Store へのリンクは**すべて `nofollow ugc noopener`**。robots の指定なし（index）、canonical は自ページ。
+- **NEWSRELEA.SE（`newsrelea.se/MLOYa6`、9/24 11:05 に掲載通知のメール）**：原文転載。サイトへのリンク3本（`/obsidian/`・`/` ×2）と App Store へのリンク4本は**すべて `nofollow ugc noopener`**。robots・canonical の指定なし。
 - ほかの転載は、検索（`"対話メモ" シンプルメモ 株式会社ユリカ`、リリースの題の完全一致）では見つからなかった。9/26 まで毎晩の確認で探す。
+
+### 媒体・読者からの返信（9/24〜25、support@ の受信箱）
+
+| 差出人 | 中身 | 対応 |
+| --- | --- | --- |
+| エンジニアtype編集部（9/24 13:30） | 9/23 の情報提供へのお礼。**取り上げられるのは有料のタイアップ記事の場合だけ**、とのこと | 有料の記事広告は禁止事項なので進めない。こちらの送信文で「返信は不要」と書いてあったので返信もしない |
+| 読者（`useTether.io` の創業者、9/25 9:19） | dev.to の過去記事（「no list」）を読んだとして、顧客の声をどう製品に反映しているかの30分の聞き取りの依頼（売り込みではないと明記） | 被リンクとは関係しない。受けるかはオーナーの判断（未返信）。記事が開発者本人の体験として読まれている例で、§5.27 の「dev.to の一人称の記事」の問題とつながる |
+| ほか | Google 公式を名乗る市場データの売り込み、DMM のタイアップの営業、日経トレンディの広告枠の案内、自社名を AI に聞く診断の営業 | すべて有料・営業。対応しない |
 
 ### 意外な残タスク（夕方から夜に見つけて直したもの）
 
