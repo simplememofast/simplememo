@@ -2,7 +2,7 @@
 /**
  * 開発記録の外部ブログ配信（dev.to / はてなブログ）— 門・文脈・検証・投稿・公開確認。
  *
- *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena [--force] [--github-output FILE]
+ *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena [--force] [--dry-run] [--github-output FILE]
  *   node scripts/devlog-syndication.mjs context  --platform P --out FILE
  *   node scripts/devlog-syndication.mjs validate --platform P --article FILE --context FILE [--report FILE] [--offline]
  *   node scripts/devlog-syndication.mjs publish  --platform P --article FILE --context FILE --out FILE [--dry-run]
@@ -183,9 +183,12 @@ export function readStop(file = STOP_PATH) {
  *   - 直近24時間に1本でもあれば、force でも走らない（連投の上限）
  *   - 最新投稿から minIntervalHours 未満なら走らない（force で飛ばせるのはここだけ）
  */
-export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHours, force = false, readError = null }) {
+export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHours, force = false, dryRun = false, readError = null }) {
   if (stop?.stopped) return { due: false, code: 'stopped', reason: stop.reason };
   if (readError) return { due: false, code: 'unreadable', reason: `公開面の最新投稿を読めない: ${readError}` };
+  // 試験実行（dry_run）は投稿しないので、間隔と「24時間に1本」では止めない（いつでも経路全体を試せるように）。
+  // 停止と「公開面を読めない」は本番と同じく止める。投稿しないことは publish --dry-run 側で保証する。
+  if (dryRun) return { due: true, code: 'dry_run', reason: '試験実行（投稿しない）: 間隔と24時間の上限は見ない' };
   if (postsLast24h > 0) {
     return { due: false, code: 'daily_cap', reason: `直近24時間に ${postsLast24h} 本ある（1日1本まで。force でも越えない）` };
   }
@@ -255,7 +258,7 @@ async function cmdGate(argv) {
   const latest = times.length ? new Date(Math.max(...times)).toISOString() : null;
   const postsLast24h = times.filter((t) => now.getTime() - t < 24 * 3600000).length;
   const d = decideGate({ stop, latestIso: latest, postsLast24h, now, minIntervalHours: cfg.minIntervalHours,
-    force: argv.includes('--force'), readError });
+    force: argv.includes('--force'), dryRun: argv.includes('--dry-run'), readError });
   console.log(`[${cfg.label}] ${d.due ? '投稿する' : '投稿しない'} — ${d.code}: ${d.reason}（最新: ${latest ?? 'なし'}）`);
   writeOutput(argValue(argv, '--github-output'), { due: d.due, code: d.code, latest: latest ?? '', reason: d.reason });
   // 読めない・停止は「異常」なので目立たせる。間隔待ちは正常。
@@ -1036,6 +1039,19 @@ export async function selftest() {
     const d = decideGate({ stop: go, latestIso: null, postsLast24h: 0, now, minIntervalHours: 66, readError: 'HTTP 503' });
     assert(d.due === false, JSON.stringify(d));
     assert(d.code === 'unreadable', JSON.stringify(d));
+  });
+  await t('門: 試験実行（dry_run）は間隔と24時間の上限を見ない', () => {
+    const d = decideGate({ stop: go, latestIso: hoursAgo(2), postsLast24h: 1, now, minIntervalHours: 66, dryRun: true });
+    assert(d.due === true, JSON.stringify(d));
+    assert(d.code === 'dry_run', JSON.stringify(d));
+  });
+  await t('門: **試験実行でも停止と「読めない」は越えない**', () => {
+    const s = decideGate({ stop: { stopped: true, reason: 'test' }, latestIso: hoursAgo(99), postsLast24h: 0, now, minIntervalHours: 66, dryRun: true });
+    assert(s.due === false, JSON.stringify(s));
+    assert(s.code === 'stopped', JSON.stringify(s));
+    const u = decideGate({ stop: go, latestIso: null, postsLast24h: 0, now, minIntervalHours: 66, dryRun: true, readError: 'HTTP 503' });
+    assert(u.due === false, JSON.stringify(u));
+    assert(u.code === 'unreadable', JSON.stringify(u));
   });
   await t('停止台帳にこの経路がある', () => { readStop(); });
 
