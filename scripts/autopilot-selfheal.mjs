@@ -39,7 +39,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
-import { evaluateActionsRecoveryPermit, verifiedRepairPresent,
+import { evaluateActionsRecoveryPermit, readActionsRecoveryPermit, verifiedRepairPresent,
   testActionsRecoveryPermit } from './actions-recovery-permit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -355,7 +355,7 @@ if (isMain) {
       // manual dispatch, and reruns remain blocked. Non-dry --contain never
       // honors this exception and can still trip the stop switch.
       let permit = null;
-      try { permit = JSON.parse(fs.readFileSync(RECOVERY_PERMIT_PATH, 'utf8')); }
+      try { permit = readActionsRecoveryPermit(RECOVERY_PERMIT_PATH); }
       catch (error) {
         if (error.code !== 'ENOENT') console.error(`復旧券を読めないため停止を維持: ${error.message}`);
       }

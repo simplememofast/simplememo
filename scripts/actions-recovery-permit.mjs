@@ -8,6 +8,7 @@
  * number before the scheduled slot, this exception simply does not activate.
  */
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { isDeepStrictEqual } from 'node:util';
 
@@ -38,6 +39,11 @@ const PERMIT_KEYS = [
   'approval_review_url', 'approved_at', 'date_jst', 'failure_class', 'repair_merge_sha',
   'route', 'schema_version', 'status', 'target_run_id', 'workflow_run_number',
 ];
+
+export function readActionsRecoveryPermit(file) {
+  const permit = JSON.parse(fs.readFileSync(file, 'utf8'));
+  return permit;
+}
 
 export function verifiedRepairPresent(root) {
   const result = spawnSync('git', ['merge-base', '--is-ancestor', REPAIR_MERGE_SHA, 'HEAD'],
