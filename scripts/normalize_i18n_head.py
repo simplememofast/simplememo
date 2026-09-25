@@ -30,7 +30,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from i18n_config import (  # noqa: E402
-    SITE_URL,
     TOP_CLUSTER,
     TOP_CLUSTER_XDEFAULT,
     JA_EN_PAIRS,
@@ -38,7 +37,6 @@ from i18n_config import (  # noqa: E402
     EN_ONLY_PAGES,
     JA_ONLY_CLEANUP,
     LOCALE_LANG,
-    LOCALE_CONTENT_LANG,
     RTL_LOCALES,
     absolute_url,
 )

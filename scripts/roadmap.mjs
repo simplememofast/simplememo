@@ -24,7 +24,6 @@
  * 同じ理由で、**オーナーの手数が要るものを機械の仕事と混ぜない。**
  * 混ぜると「あと15タスクで70%」が「機械だけで届く」に見えてしまう。
  */
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';

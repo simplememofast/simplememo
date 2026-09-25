@@ -86,7 +86,6 @@ export function escalate(doc, kind, attempt) {
 
 export function validate(doc, { budgets = null, workflow = null } = {}) {
   const problems = [];
-  const tiers = doc.tiers || [];
   const tierOf = (m) => doc.models?.[m];
   const cheapest = doc.policy?.cheapest_tier;
 

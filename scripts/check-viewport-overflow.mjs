@@ -51,7 +51,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { run } from './lib/selftest.mjs';
 import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
 import { MARKER, measurementGroup } from './lib/viewport-health.mjs';
 import { hasCurrentInlineSharedCss } from './perf/inline_styles.mjs';

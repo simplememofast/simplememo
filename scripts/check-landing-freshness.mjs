@@ -35,6 +35,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { run } from './lib/selftest.mjs';
+import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONSTANTS_PATH = path.join(ROOT, 'data/site-constants.json');
@@ -171,9 +172,7 @@ export function withinDays(at, today, days) {
  * UTC で読むと日本の午前9時までは前日として判定される
  * （このリポジトリがブランチ名に `TZ=Asia/Tokyo` を使っているのと同じ理由）。
  */
-export function todayJst(now = new Date()) {
-  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-}
+export { todayJst };
 
 export function readLive({ today = todayJst() } = {}) {
   const constants = JSON.parse(fs.readFileSync(CONSTANTS_PATH, 'utf8'));

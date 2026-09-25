@@ -53,6 +53,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const CONFIG_PATH = path.join(ROOT, 'data/pr-release-ledger.json');
@@ -62,9 +63,7 @@ export const EXPERIMENTS_PATH = path.join(ROOT, 'growth/experiments/experiments.
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** JST の今日（台帳の日付は全部 JST 基準）。 */
-export function todayJst(now = new Date()) {
-  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-}
+export { todayJst };
 
 export function daysBetween(fromIso, toIso) {
   const a = Date.parse(`${fromIso}T00:00:00Z`);

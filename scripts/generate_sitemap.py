@@ -438,7 +438,7 @@ def main() -> int:
     print(f"sitemap-ja.xml:      {len(entries['ja'])} URLs")
     print(f"sitemap-en.xml:      {len(entries['en'])} URLs")
     print(f"sitemap-locales.xml: {len(entries['locales'])} URLs")
-    print(f"sitemap.xml:         index of 3 sitemaps")
+    print("sitemap.xml:         index of 3 sitemaps")
     print(f"lastmod: {len(history)} pages traced through content history (no date floor)")
 
     if args.check:

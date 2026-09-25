@@ -244,6 +244,18 @@ def finish_faq(text: str, page_url: str) -> str:
     return text
 
 
+def rewrite_jsonld(text: str, localize) -> str:
+    """Apply `localize` (in-place) to every JSON-LD block; re-serialize only blocks it changed."""
+    def rewrite(match):
+        payload = json.loads(match[1])
+        before = json.dumps(payload, ensure_ascii=False)
+        localize(payload)
+        if json.dumps(payload, ensure_ascii=False) == before:
+            return match[0]
+        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    return JSONLD_RE.sub(rewrite, text)
+
+
 def finish_breadcrumbs(text: str, root: Path) -> str:
     def localize(value, breadcrumb=False):
         if isinstance(value, list):
@@ -268,14 +280,7 @@ def finish_breadcrumbs(text: str, root: Path) -> str:
                 if isinstance(item, (dict, list)):
                     localize(item, value.get("@type") == "BreadcrumbList" and key == "itemListElement")
 
-    def rewrite(match):
-        payload = json.loads(match[1])
-        before = json.dumps(payload, ensure_ascii=False)
-        localize(payload)
-        if json.dumps(payload, ensure_ascii=False) == before:
-            return match[0]
-        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-    return JSONLD_RE.sub(rewrite, text)
+    return rewrite_jsonld(text, localize)
 
 
 def finish_schema_names(text: str, root: Path) -> str:
@@ -307,14 +312,7 @@ def finish_schema_names(text: str, root: Path) -> str:
                 if isinstance(row, (dict, list)):
                     localize(row)
 
-    def rewrite(match):
-        payload = json.loads(match[1])
-        before = json.dumps(payload, ensure_ascii=False)
-        localize(payload)
-        if json.dumps(payload, ensure_ascii=False) == before:
-            return match[0]
-        return match[0].replace(match[1], json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-    return JSONLD_RE.sub(rewrite, text)
+    return rewrite_jsonld(text, localize)
 
 
 def finish_product_schema(text: str, rel: str) -> str:

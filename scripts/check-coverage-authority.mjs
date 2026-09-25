@@ -47,7 +47,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { ledgerScenarios, run } from './lib/selftest.mjs';
 import { BLOCKERS } from './autonomy-gap.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');

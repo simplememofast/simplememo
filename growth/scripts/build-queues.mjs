@@ -35,6 +35,7 @@ import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { latestSnapshot } from '../lib/gsc.mjs';
 import { loadLedger } from '../lib/ledger.mjs';
+import { selftestTally } from '../../scripts/lib/tally.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const QUEUE_PATH = path.join(ROOT, 'growth/content/refresh-queue.json');
@@ -157,8 +158,7 @@ export function runAnalyze() {
 }
 
 function selftest() {
-  let total = 0; const failures = [];
-  const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
+  const { t, finish } = selftestTally();
   const row = (key, kind = 'query', exp = 5) => ({
     kind, key, impressions: 100, position: 6, expected_ctr: 0.05, expected_clicks: exp, ranking_pages: [],
   });
@@ -235,9 +235,7 @@ function selftest() {
   t('abandoned だけを集める', up.has('/a') && !up.has('/b'));
   t('ページ集合は対象にしない（1ページに対応しないため）', up.size === 1);
 
-  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
-  console.log(`\nselftest: 全${total}件 通過`);
-  return 0;
+  return finish();
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

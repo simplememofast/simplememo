@@ -15,12 +15,10 @@
 import {latestSnapshot, loadSnapshot, previousSnapshot, listSnapshots} from '../lib/gsc.mjs';
 import {selectComparison} from '../lib/comparison.mjs';
 import {analyzeSnapshot, UNANSWERED_MIN_EXPECTED_CLICKS, UNANSWERED_MAX_POSITION} from '../lib/analysis.mjs';
+import {flagReader} from '../lib/cli.mjs';
 
 const argv = process.argv.slice(2);
-const flag = (n, d = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : d;
-};
+const flag = flagReader(argv);
 const asJson = argv.includes('--json');
 const top = Number(flag('top', 20));
 const only = flag('only');
@@ -52,7 +50,7 @@ console.log(`  compared to: ${comparison.comparable ? prev.label : `(withheld: $
 
 /* Topic shares describe visible query rows, not all site demand or installs. */
 if (show('clusters')) {
-  const { clusters, sides, site, conversational } = result.clusters;
+  const { clusters, sides, site } = result.clusters;
   console.log(`── Query clusters (${result.clusters.classificationVersion}; mutually exclusive, available queries only)`);
   console.log(`  ${'cluster'.padEnd(20)}${'side'.padEnd(11)}${'queries'.padStart(8)}${'clicks'.padStart(8)}${'imp'.padStart(9)}${'CTR'.padStart(8)}${'pos'.padStart(7)}${'imp%'.padStart(8)}${'clk%'.padStart(8)}`);
   for (const c of clusters) {

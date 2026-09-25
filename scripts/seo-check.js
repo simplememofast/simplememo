@@ -565,7 +565,6 @@ function checkOrphanPages() {
 
   // Check each page for incoming links
   for (const file of files) {
-    const rel = getRelative(file);
     const content = allContent[file];
     if (/content\s*=\s*["'][^"']*noindex/i.test(content)) continue;
 
