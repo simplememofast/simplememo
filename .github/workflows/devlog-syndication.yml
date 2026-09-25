@@ -1,0 +1,247 @@
+# 開発記録の外部ブログ配信（dev.to / はてなブログ）。
+#
+# 【なぜここに置くか — 2026-09-24】
+# 自社サイトへの dofollow リンクが実測で確認できた投稿先は dev.to（simple_memo）と
+# はてなブログ（simplememofast）だけだった（docs/seo/directory-registration-2026-09.md §5.27）。
+# 両方への投稿は Mac 上のローカル定期タスクに載っていて、dev.to は 9/18 から止まり、
+# はてなも間隔が崩れていた。ローカルの設定とログはクラウドのセッションから読めず、
+# 止まった理由を外から確かめる手段が無かった。**Mac が眠っていても、外から結果が読める経路に移す。**
+#
+# 【1回に1媒体1本・状態ファイルを持たない】
+# 門（scripts/devlog-syndication.mjs gate）は**公開面の最新投稿**だけで決める:
+#   - 最新投稿から66時間未満なら何もしない（1日2枠なので、実際の間隔は約3日）
+#   - 直近24時間に1本でもあれば force でも出さない
+#   - data/emergency-stop.json の全体停止・経路 "syndication" の停止で出さない
+# 旧ローカルタスクが同じ媒体へ投稿しても、公開面を見るので二重には出ない。
+# 1枠が落ちても、次の枠（約9〜15時間後）が同じ判定で拾い直す。
+#
+# 【鍵をモデルに渡さない】
+# 執筆ステップ（Claude Code）には投稿用の鍵を渡さない。鍵を読むのは決定的なスクリプトの
+# 「投稿」ステップだけで、しかも matrix の媒体に対応する1本だけを渡す。
+#
+# 【正直さ】DEV は 2026-08-26 から、未開示のAI記事と「合成した内容を本人の体験として出すこと」を
+# アカウント停止の対象にしている。dev.to は ai_disclosure_level=fully_autonomous を API で付け、
+# はてなは本文末尾に固定の開示文を付ける（どちらもスクリプト側が付けるので、モデルは消せない）。
+#
+# 【手動実行】workflow_dispatch の既定は dry_run（書いて検査するが投稿しない）。
+
+name: Devlog Syndication
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # 12:17 JST
+    - cron: '47 11 * * *'  # 20:47 JST
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: '対象の媒体'
+        type: choice
+        options: [all, devto, hatena]
+        default: all
+      mode:
+        description: 'dry_run は書いて検査するが投稿しない'
+        type: choice
+        options: [dry_run, publish]
+        default: dry_run
+      force:
+        description: '66時間の間隔を無視する（停止と1日1本の上限は越えない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  syndicate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        platform: [devto, hatena]
+    concurrency:
+      group: devlog-syndication-${{ matrix.platform }}
+      cancel-in-progress: false
+    env:
+      PLATFORM: ${{ matrix.platform }}
+      INPUT_PLATFORM: ${{ inputs.platform || 'all' }}
+      MODE: ${{ inputs.mode || 'publish' }}
+      FORCE: ${{ inputs.force == true }}
+    steps:
+      - name: 対象の媒体か
+        id: select
+        run: |
+          if [ "$INPUT_PLATFORM" = "all" ] || [ "$INPUT_PLATFORM" = "$PLATFORM" ]; then
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.select.outputs.on == 'true'
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        if: steps.select.outputs.on == 'true'
+        with:
+          node-version: '22'
+
+      - name: 自己テスト（壊れた検査で投稿しない）
+        if: steps.select.outputs.on == 'true'
+        run: node scripts/devlog-syndication.mjs --selftest
+
+      - name: 門（緊急停止・公開面の最新投稿からの間隔）
+        id: gate
+        if: steps.select.outputs.on == 'true'
+        run: |
+          ARGS=(gate --platform "$PLATFORM" --github-output "$GITHUB_OUTPUT")
+          if [ "$FORCE" = "true" ]; then ARGS+=(--force); fi
+          node scripts/devlog-syndication.mjs "${ARGS[@]}"
+
+      - name: 投稿用の鍵があるか（投稿モードだけ）
+        if: steps.gate.outputs.due == 'true' && env.MODE == 'publish'
+        env:
+          HAS_KEY: ${{ (matrix.platform == 'devto' && secrets.DEVTO_API_KEY != '') || (matrix.platform == 'hatena' && secrets.HATENA_API_KEY != '') }}
+        run: |
+          if [ "$HAS_KEY" != "true" ]; then
+            echo "::error title=Devlog syndication::$PLATFORM の投稿用の鍵が GitHub Secrets に無い（DEVTO_API_KEY / HATENA_API_KEY）。黙って休まずに落とす。"
+            exit 1
+          fi
+
+      - name: 文脈（記事ネタ台帳・既存記事・リンク候補）
+        if: steps.gate.outputs.due == 'true'
+        run: |
+          mkdir -p .syndication
+          node scripts/devlog-syndication.mjs context --platform "$PLATFORM" --out .syndication/context.json
+
+      - name: モデルの振り分け
+        id: route
+        if: steps.gate.outputs.due == 'true'
+        run: |
+          MODEL="$(node scripts/check-model-routing.mjs --resolve syndication)"
+          # 手直しは同じモデルで回さない（同じ盲点で同じ失敗をする）。梯子の2段目を使う。
+          FIX_MODEL="$(node scripts/check-model-routing.mjs --escalate syndication --attempt 2)"
+          BUDGET="$(node -e "console.log(JSON.parse(require('fs').readFileSync('data/model-routing.json','utf8')).rules.syndication.max_usd_per_run)")"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "fix_model=$FIX_MODEL" >> "$GITHUB_OUTPUT"
+          echo "budget=$BUDGET" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Model routing::syndication -> $MODEL / fix -> $FIX_MODEL (max \$$BUDGET per run)"
+
+      # claude-code-action は obsidian-autopilot.yml と同じ SHA に固定する（上げるときは両方を同時に）。
+      # schedule 起動の triggering_actor が github-actions になる日があるので allowed_bots は "*"。
+      # このワークフローは schedule と workflow_dispatch でしか起動しないので権限昇格にならない。
+      # **Bash も WebFetch も渡さない。**必要な事実は文脈とリポジトリの中にある。
+      - name: 執筆（Claude Code・1本）
+        id: write
+        if: steps.gate.outputs.due == 'true'
+        timeout-minutes: 25
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
+          claude_args: |
+            --max-turns 60
+            --max-budget-usd ${{ steps.route.outputs.budget }}
+            --model ${{ steps.route.outputs.model }}
+            --allowedTools "Read,Write,Edit,Glob,Grep"
+          prompt: |
+            開発記録の外部ブログ配信の執筆ステップです。媒体は「${{ matrix.platform }}」。
+            カレントディレクトリはリポジトリのルートです。次の順に1本だけ書いてください。
+
+            1. `docs/syndication/RUNBOOK.md` を全文読む。以降はすべてこの手順書に従う（このプロンプトより手順書が優先）。
+            2. `.syndication/context.json` を読む。題材を1つ選び、使うファイル（種のある `docs/story-seeds.md`、題材のページのファイル、`llms.txt` など）を実際に読む。
+            3. 記事を `.syndication/article.json` に書く（手順書 §6 の形）。ほかのファイルは作らない・変えない。
+            ネットワークには出ないでください。書けない理由があるときは、手順書 §1-3 のとおり skip を書いて終えてください。
+
+      # 照合用の名前一覧（任意）。リポジトリの外に置くため Secrets から渡す。無ければ台帳のハッシュだけで照合する。
+      - name: 検証
+        id: validate
+        if: steps.gate.outputs.due == 'true'
+        env:
+          IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
+        run: |
+          if node scripts/devlog-syndication.mjs validate --platform "$PLATFORM" \
+               --article .syndication/article.json --context .syndication/context.json \
+               --report .syndication/validation.txt; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 手直し（検証で落ちたときだけ・1回）
+        id: fix
+        if: steps.gate.outputs.due == 'true' && steps.validate.outputs.ok != 'true'
+        timeout-minutes: 15
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
+          claude_args: |
+            --max-turns 30
+            --max-budget-usd ${{ steps.route.outputs.budget }}
+            --model ${{ steps.route.outputs.fix_model }}
+            --allowedTools "Read,Write,Edit,Glob,Grep"
+          prompt: |
+            開発記録の外部ブログ配信の手直しステップです。媒体は「${{ matrix.platform }}」。
+            `.syndication/validation.txt` に検査で落ちた理由があります。`docs/syndication/RUNBOOK.md` の §7 に従い、
+            `.syndication/article.json` をその場で直してください。出典の見つからない数字は削ってください。
+            ほかのファイルは作らない・変えない。ネットワークには出ないでください。
+
+      - name: 再検証
+        if: steps.gate.outputs.due == 'true' && steps.validate.outputs.ok != 'true'
+        env:
+          IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
+        run: |
+          node scripts/devlog-syndication.mjs validate --platform "$PLATFORM" \
+            --article .syndication/article.json --context .syndication/context.json \
+            --report .syndication/validation-2.txt
+
+      - name: 投稿
+        id: publish
+        if: steps.gate.outputs.due == 'true'
+        env:
+          DEVTO_API_KEY: ${{ matrix.platform == 'devto' && secrets.DEVTO_API_KEY || '' }}
+          HATENA_API_KEY: ${{ matrix.platform == 'hatena' && secrets.HATENA_API_KEY || '' }}
+          IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
+        run: |
+          ARGS=(publish --platform "$PLATFORM" --article .syndication/article.json \
+                --context .syndication/context.json --out .syndication/published.json)
+          if [ "$MODE" != "publish" ]; then ARGS+=(--dry-run); fi
+          node scripts/devlog-syndication.mjs "${ARGS[@]}"
+
+      - name: 公開確認（自社リンクの rel と meta robots）
+        if: steps.gate.outputs.due == 'true' && env.MODE == 'publish'
+        run: |
+          node scripts/devlog-syndication.mjs verify --platform "$PLATFORM" \
+            --published .syndication/published.json --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: 実行の記録（費用とターン数）
+        if: always() && steps.gate.outputs.due == 'true'
+        env:
+          WRITE_FILE: ${{ steps.write.outputs.execution_file }}
+          FIX_FILE: ${{ steps.fix.outputs.execution_file }}
+        run: |
+          {
+            echo "### $PLATFORM: 門=${{ steps.gate.outputs.code }} / モード=$MODE"
+            for f in "$WRITE_FILE" "$FIX_FILE"; do
+              [ -n "$f" ] && [ -f "$f" ] || continue
+              node -e "const d=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));const r=(Array.isArray(d)?d:[d]).filter(x=>x&&x.type==='result').pop()||{};console.log('- '+require('path').basename(process.argv[1])+': turns='+r.num_turns+' cost_usd='+r.total_cost_usd+' is_error='+r.is_error)" "$f" || true
+            done
+            [ -f .syndication/validation.txt ] && { echo; echo '検証（1回目）:'; sed 's/^/    /' .syndication/validation.txt; }
+            [ -f .syndication/validation-2.txt ] && { echo; echo '検証（2回目）:'; sed 's/^/    /' .syndication/validation-2.txt; }
+            true
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 成果物（記事・検証結果・投稿結果）
+        if: always() && steps.gate.outputs.due == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: devlog-syndication-${{ matrix.platform }}-${{ github.run_id }}
+          path: .syndication/
+          if-no-files-found: ignore
+          retention-days: 30
