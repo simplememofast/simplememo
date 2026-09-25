@@ -28,15 +28,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { todayJst } from './lib/jst.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
 export const POLICY_PATH = path.join(ROOT, 'data/autonomy-score.json');
 export const MIN_EVIDENCE_CHARS = 12;
 
-export function todayJst(now = new Date()) {
-  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
-}
+export { todayJst };
 
 /** 委任で数えている判定（accepted_modes に無い mode）か。判定者の記録が無い行は対象外（数えられていない）。 */
 export function isDelegatedReview(review, policy) {
