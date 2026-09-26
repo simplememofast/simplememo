@@ -69,7 +69,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/day1#article","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度\"あの体験\"を作りたくなった","description":"Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。ワンタップ送信と、取りこぼしを防ぐ設計。","url":"https://simplememofast.com/devlog/day1","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-25","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/day1#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/day1#article","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度\"あの体験\"を作りたくなった","description":"Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。ワンタップ送信と、取りこぼしを防ぐ設計。","url":"https://simplememofast.com/devlog/day1","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/day1#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"開発日誌 Day1","item":"https://simplememofast.com/devlog/day1"}]}</script>
@@ -566,10 +566,10 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
             <p>メモアプリにはプライベートな情報が書き込まれる。パスワード、個人的な悩み、ビジネスアイデア——ユーザーが何を書くかは予測できない。だからこそ、プライバシー保護は「十分」ではなく「過剰」なくらいがちょうどいい。</p>
 
             <h3>アプリスイッチャーでのプライバシーオーバーレイ</h3>
-            <p>iOSのアプリスイッチャーでは、アプリの画面がサムネイルとして表示される。メモの内容が第三者に見られるリスクを排除するため、アプリがバックグラウンドに移行する際にプライバシーオーバーレイを表示する。</p>
+            <p>iOSのアプリスイッチャーでは、アプリの画面がサムネイルとして表示される。アプリスイッチャーの画面からメモの内容が見えないように、アプリがバックグラウンドに移行する際にプライバシーオーバーレイを表示する。</p>
 
             <h3>Ephemeral URLSession</h3>
-            <p>通常のURLSessionは、キャッシュ、クッキー、認証情報をディスクに保存する。私たちは`URLSessionConfiguration.ephemeral`を使用することで、これらの情報がディスクに一切残らないようにしている。メモの内容がキャッシュとしてストレージに残るリスクをゼロにする。</p>
+            <p>通常のURLSessionは、キャッシュ、クッキー、認証情報をディスクに保存する。私たちは`URLSessionConfiguration.ephemeral`を使用することで、これらの情報がディスクに一切残らないようにしている。通信のキャッシュとしてメモの内容がストレージに残らないようにするためだ。</p>
 
             <h3>ログの無害化</h3>
             <p>開発中のデバッグログには注意が必要だ。「送信したメモの内容をログに出力する」という一見無害な処理が、セキュリティホールになり得る。私たちのポリシーは明確だ：</p>
@@ -744,7 +744,7 @@ func applyLanguageChange() {
     <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — UIKit Documentation</a> — <span lang="ja">UIKitフレームワークの公式リファレンス。Obsidian連携シンプルメモのUI構築に使用</span></li>
     <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span></li>
     <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span lang="ja">メールリレーAPIのサーバーレス基盤として採用</span></li>
-    <li>Wikipedia — Transactional Outbox Pattern — <span lang="ja">オフラインファーストのメッセージ送信アーキテクチャの設計パターン</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span lang="ja">送るメッセージをまず送信待ちの表（Outbox）に書き、別の処理が送り出す設計パターン。シンプルメモは同じ考え方を端末の中で使っている</span></li>
     <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="ja">メール送信プロトコルの標準仕様</span></li>
   </ul>
 </section>

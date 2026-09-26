@@ -516,7 +516,7 @@ private func activateTextInput() {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. SwiftUIでは500ms以下の起動は無理ですか？</div>
-              <div class="faq-item__answer">不可能ではないが、UIKitのほうが確実にミリ秒単位で速い。<code>@StateObject</code>初期化や<code>body</code>再評価のオーバーヘッドがある。最速を追求するなら、UIKitの決定論的なライフサイクルが有利。</div>
+              <div class="faq-item__answer">不可能ではない。ただ、SwiftUIでは<code>@StateObject</code>の初期化や<code>body</code>の再評価の分だけ処理が加わる。最速を狙うこの開発では、ライフサイクルを細かく制御できるUIKitを選んだ（両者を同じ条件で計測して比べた結果ではない）。</div>
             </div>
 
             <div class="faq-item">
