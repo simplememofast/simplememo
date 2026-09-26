@@ -837,16 +837,36 @@ ${categories.map((c) => `  <category term="${xmlEscape(c)}" />`).join('\n')}
  * AI 開示が**公開面で**付いていることを確かめる。応答に欄が無いのを「付いている」にしない（fail closed）。
  * 付いていなければ1回だけ付け直し、それでも付かなければ投げる（記事は公開のまま残るので人が確認する）。
  */
-async function ensureDevtoDisclosure(id, headers, url) {
-  const read = async () => (await fetchJson(PLATFORMS.devto.articleApi(id), { headers: { accept: headers.accept } })).ai_disclosure_level;
+/**
+ * dev.to の AI 開示（fully_autonomous）を確かめ、付いていなければ付け直す。
+ * **作成直後の公開 API は 404 や古い値を返しうる**（公開面の反映が遅れる）。
+ * そこで (1) 作成・更新の応答に値があればそれで確かめ、(2) 公開 API を読むときは 404 を「まだ」として待って読み直す。
+ * 付け直しても確かめられなければ投げる（記事は公開済みなので、人が確認する）。
+ * 戻り値は確かめた経路（'response' / 'read' / 'put' / 'reread'）。
+ */
+export async function ensureDevtoDisclosure(id, headers, url, { known = undefined, wait = sleep, attempts = 6 } = {}) {
+  if (known === 'fully_autonomous') return 'response';
+  const read = async () => {
+    for (let i = 0; ; i++) {
+      try {
+        return (await fetchJson(PLATFORMS.devto.articleApi(id), { headers: { accept: headers.accept }, retries: 0 })).ai_disclosure_level;
+      } catch (e) {
+        if (e.status !== 404 || i >= attempts - 1) throw e;
+        await wait(10000);
+      }
+    }
+  };
   let level = await read();
-  if (level === 'fully_autonomous') return;
-  await fetchWithRetry(`https://dev.to/api/articles/${id}`, { method: 'PUT', headers,
+  if (level === 'fully_autonomous') return 'read';
+  const res = await fetchWithRetry(`https://dev.to/api/articles/${id}`, { method: 'PUT', headers,
     body: JSON.stringify({ article: { ai_disclosure_level: 'fully_autonomous' } }), okStatuses: [200] });
+  const updated = await res.json().catch(() => ({}));
+  if (updated?.ai_disclosure_level === 'fully_autonomous') return 'put';
   level = await read();
   if (level !== 'fully_autonomous') {
     throw new Error(`AI 開示を確認できない（ai_disclosure_level=${level}）— 記事は公開されているので人が確認する: ${url}`);
   }
+  return 'reread';
 }
 
 async function publishDevto(article, key, body) {
@@ -860,7 +880,7 @@ async function publishDevto(article, key, body) {
     if (same.published !== true) {
       throw new Error(`同じ題名の下書きが dev.to にある（id ${same.id}）。中身が同じか分からないので公開も新規投稿もしない — 人が確認する`);
     }
-    await ensureDevtoDisclosure(same.id, headers, same.url);
+    await ensureDevtoDisclosure(same.id, headers, same.url, { known: same.ai_disclosure_level });
     return { id: same.id, url: same.url, reused: true };
   }
   const payload = { article: {
@@ -871,7 +891,7 @@ async function publishDevto(article, key, body) {
   const res = await fetchWithRetry('https://dev.to/api/articles', { method: 'POST', headers, body: JSON.stringify(payload), okStatuses: [200, 201], retries: 1 });
   const a = await res.json();
   if (!a.url) throw new Error(`dev.to の応答に url が無い: ${JSON.stringify(a).slice(0, 300)}`);
-  await ensureDevtoDisclosure(a.id, headers, a.url);
+  await ensureDevtoDisclosure(a.id, headers, a.url, { known: a.ai_disclosure_level });
   return { id: a.id, url: a.url, reused: false };
 }
 
@@ -1365,6 +1385,30 @@ export async function selftest() {
     assert(e[0].draft === null, '公開フィードに無い下書き欄を「公開済み」と読んだ');
     const ap = parseAtomFeed('<feed><entry xmlns:app="x"><title>T</title><link rel="alternate" type="text/html" href="https://x/1"/><app:control><app:draft>yes</app:draft></app:control></entry></feed>');
     assert(ap.length === 1 && ap[0].draft === true, `AtomPub の下書きを読めない: ${JSON.stringify(ap)}`);
+  });
+  await t('dev.to の AI 開示: 応答の値を使い、作成直後の 404 は待って読み直し、PUT の応答でも確かめる', async () => {
+    const orig = globalThis.fetch;
+    const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
+    const noWait = async () => {};
+    try {
+      globalThis.fetch = async () => { throw new Error('応答に値があるのに読みに行った'); };
+      assert(await ensureDevtoDisclosure(1, { accept: 'a' }, 'u', { known: 'fully_autonomous', wait: noWait }) === 'response', '応答の値を使わない');
+      let n = 0;
+      globalThis.fetch = async () => (++n === 1 ? new Response('not found', { status: 404 }) : json({ ai_disclosure_level: 'fully_autonomous' }));
+      assert(await ensureDevtoDisclosure(2, { accept: 'a' }, 'u', { wait: noWait }) === 'read', '作成直後の 404 を待てない');
+      globalThis.fetch = async (u, o) => (o?.method === 'PUT' ? json({ ai_disclosure_level: 'fully_autonomous' }) : json({ ai_disclosure_level: 'not_disclosed' }));
+      assert(await ensureDevtoDisclosure(3, { accept: 'a' }, 'u', { wait: noWait }) === 'put', 'PUT の応答で確かめない');
+      globalThis.fetch = async () => json({ ai_disclosure_level: 'not_disclosed' });
+      let threw = false;
+      try { await ensureDevtoDisclosure(4, { accept: 'a' }, 'u', { wait: noWait }); } catch { threw = true; }
+      assert(threw, '**付け直しても未開示のまま通した**');
+      globalThis.fetch = async () => new Response('not found', { status: 404 });
+      threw = false;
+      try { await ensureDevtoDisclosure(5, { accept: 'a' }, 'u', { wait: noWait, attempts: 3 }); } catch { threw = true; }
+      assert(threw, '404 が続くのに通した');
+    } finally {
+      globalThis.fetch = orig;
+    }
   });
   await t('公開確認: 本文末尾の印が公開面に残っているかを返す（失敗にはしない）', () => {
     const body = (inner) => `<html><head></head><body><div class="entry-content"><p>本文 <a href="https://simplememofast.com/">ページ</a></p>${inner}</div><div class="entry-footer"></div></body></html>`;
