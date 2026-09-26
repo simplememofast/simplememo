@@ -206,6 +206,10 @@ def benchmark_rows():
     page like any other, so it reads the same file instead of carrying a copy.
     Captions round half-up: the Drafts median is exactly 1.45 and Python's
     %.1f would print 1.4.
+
+    [2026-09-26] A row whose figure is not a median (Drafts: the fastest of five
+    runs, `ready_basis` in the ledger) carries a ※ so the frame can say so. The
+    chart otherwise puts one app's best run beside everyone else's median.
     """
     from decimal import Decimal, ROUND_HALF_UP
     with open(os.path.join(ROOT, 'data/benchmark.json'), encoding='utf-8') as f:
@@ -215,7 +219,8 @@ def benchmark_rows():
     for name in sorted(apps, key=lambda a: apps[a]['ready']):
         v = apps[name]['ready']
         shown = Decimal(str(v)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
-        out.append((label.get(name, name), v, f'{shown}秒'))
+        mark = '※' if apps[name].get('ready_basis') else ''
+        out.append((label.get(name, name), v, f'{shown}秒{mark}'))
     return out
 
 
@@ -240,8 +245,7 @@ def bars_scene(bg, heading, note, rows, progress, highlight=None):
                                 fill=BLUE if is_hi else (58, 70, 112))
         if progress > 0.75:
             # The displayed string is carried per row, not formatted from the
-            # value: the app's own figure is published as 「約1秒」 and a bare
-            # "1秒" would state a precision the measurement does not have.
+            # value, so a row can carry a mark (※) as well as the rounding.
             text(d, (bar_x + full + 16, y + 20), shown,
                  22, is_hi, INK if is_hi else DIM, anchor='lm')
     return im
@@ -290,10 +294,19 @@ def fact_scene(bg, heading, before, after_rows, revealed):
 # them as separate files but compresses them to almost nothing.
 
 def build_launch(bg, icon, c):
-    """Launch-to-send timing, from the measured table in the benchmark post."""
+    """Tap-to-typing timing, from the measured table in the benchmark post.
+
+    [2026-09-26] The title frame used to say 「起動して、書いて、送る。そこまでで
+    約1秒。」 — a whole-capture figure left over from the June "~1s" copy. The
+    record only covers tap → ready to type on a warm launch; writing and sending
+    are not in it. The title now states that figure, read from the same ledger
+    as the bars, and says what it leaves out.
+    """
     frames = []
-    t = title_scene(bg, icon, 'BENCHMARK', ['起動して、書いて、送る。', 'そこまでで約1秒。'],
-                    '起動速度ベンチマーク2026の実測値より。数値はページに掲載の計測表と同じものです。')
+    rows = benchmark_rows()
+    ours = next(shown for name, _, shown in rows if name == 'Obsidian連携シンプルメモ')
+    t = title_scene(bg, icon, 'BENCHMARK', ['起動して、書いて、送る。', f'入力できるまで{ours}。'],
+                    'ベンチマーク2026の実測値（iPhone 16e・ウォーム起動）\n書く時間と送信は含みません。')
     for i in range(int(FPS * 0.6)):
         frames.append((fade(t, i / (FPS * 0.6)), 1 / FPS))
     frames.append((t, 2.6))
@@ -312,13 +325,13 @@ def build_launch(bg, icon, c):
     # Note that the correction cuts against us — Bear is now the nearest rival
     # at roughly 2.3x rather than 3x — and it is rendered anyway. A number that
     # only ever flatters us is the thing this file exists to avoid.
-    rows = benchmark_rows()
+    # 「各5回」 was wrong for two rows (Apple Notes 10 runs, Google Keep 4), and
+    # Drafts' bar is its fastest run, not a median — the note says both.
+    note = '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・ウォーム起動・4〜10回の中央値。※Draftsは5回中の最速値）'
     for p in [0.15, 0.35, 0.6, 0.85, 1.0]:
-        frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                                  '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
+        frames.append((bars_scene(bg, 'タップから入力できるまで（実測）', note,
                                   rows, p, highlight='Obsidian連携シンプルメモ'), 0.55))
-    frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                              '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
+    frames.append((bars_scene(bg, 'タップから入力できるまで（実測）', note,
                               rows, 1.0, highlight='Obsidian連携シンプルメモ'), 2.6))
     frames.append((outro_scene(bg, icon, '思いついた速さのまま、残す。'), 2.4))
     return frames
@@ -426,8 +439,8 @@ def build_ai_tags(bg, icon, c):
 
 
 VIDEOS = {
-    'launch-1s': (build_launch, '起動して書いて送るまで約1秒 — 実測ベンチマーク',
-                  'アプリの起動から送信までの3ステップと、入力を開始できるまでの実測時間を主要メモアプリと比較した図解動画です。数値は当サイトの計測表に基づきます。'),
+    'launch-1s': (build_launch, '起動して、書いて、送る — 入力できるまで0.4秒（実測ベンチマーク）',
+                  'アプリの起動から送信までの3ステップと、アイコンのタップから入力できるまでの実測時間（iPhone 16e・ウォーム起動）を主要メモアプリと比較した図解動画です（2026年9月26日更新）。数値は当サイトの計測表に基づき、書く時間と送信の時間は含みません。'),
     'apple-watch-voice': (build_apple_watch, 'Apple Watchで入力してiPhone経由で送る',
                           'Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。'),
     'siri-airpods': (build_siri_airpods, 'Siriとその場のAirPodsでハンズフリーにメモを残す',
