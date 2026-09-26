@@ -56,7 +56,7 @@
 <link href="/assets/favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
 <link href="/assets/favicon/site.webmanifest" rel="manifest"/>
 <!-- JSON-LD: BlogPosting -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/relay-api-design#article","headline":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","description":"Sending without mailbox OAuth. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.","url":"https://simplememofast.com/en/devlog/relay-api-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-25","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/en/devlog/relay-api-design#article","headline":"Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log","description":"Sending without mailbox OAuth. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.","url":"https://simplememofast.com/en/devlog/relay-api-design","inLanguage":"en","datePublished":"2026-02-13","dateModified":"2026-09-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Simple Memo - for Obsidian","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/devlog/relay-api-design#webpage"}}</script>
 <!-- JSON-LD: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Dev Log","item":"https://simplememofast.com/en/devlog/"},{"@type":"ListItem","position":3,"name":"Relay API Design: Building Email Infrastructure on Cloudflare Workers","item":"https://simplememofast.com/en/devlog/relay-api-design"}]}</script>
 <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -564,7 +564,7 @@
 <div class="info-card">
 <div class="info-card__label">Device Level</div>
 <div class="info-card__title">Per-Device Limiting</div>
-<div class="info-card__desc">Prevents excessive sending from a single device. Limits set at 30 per minute and 200 per day. These thresholds are unreachable during normal memo usage but reliably block automated mass sending.</div>
+<div class="info-card__desc">Prevents excessive sending from a single device. Limits set at 30 per minute and 200 per day. These thresholds are unreachable during normal memo usage but stop automated mass sending.</div>
 </div>
 <div class="info-card">
 <div class="info-card__label">IP Level</div>
@@ -576,7 +576,7 @@
 <div class="info-card__title">Global Limit</div>
 <div class="info-card__desc">Protects the entire infrastructure. A global cap of 300 per day serves as the final line of defense against any attack pattern.</div>
 </div>
-<p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This minimizes latency for legitimate requests while reliably blocking unauthorized access.</p>
+<p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This keeps latency low for legitimate requests while limiting abusive traffic.</p>
 <h2>5. Idempotency: Keeping Memos from Arriving Twice</h2>
 <p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
 <p>Idempotency guarantees solve this problem:</p>
