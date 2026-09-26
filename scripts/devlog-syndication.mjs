@@ -984,7 +984,10 @@ export function inspectPublished(html, platform, { title } = {}) {
     for (const l of siteLinks) if (/nofollow|ugc|sponsored/i.test(l.rel)) problems.push(`自社リンクに rel="${l.rel}"（${l.href}）`);
   }
   if (title && !decodeEntities(html).includes(title)) problems.push('題名がページに無い');
-  return { ok: problems.length === 0, problems, robots, siteLinks };
+  // 本文末尾の印（HTML コメント）が公開面に残るか。はてなは次の回の「使用済みの題材」をこの印から読むので、
+  // 消えていると同じ種を再利用しうる。**公開そのものの失敗ではない**ので problems には入れない。
+  const markerVisible = String(html).includes(`${MARKER}:`);
+  return { ok: problems.length === 0, problems, robots, siteLinks, markerVisible };
 }
 
 async function cmdVerify(argv) {
@@ -1010,6 +1013,11 @@ async function cmdVerify(argv) {
     ...last.siteLinks.map((l) => `- 自社リンク: ${l.href}（rel="${l.rel || 'なし'}"）`),
     ...last.problems.map((p) => `- ⚠ ${p}`),
   ];
+  if (platform === 'hatena' && last.markerVisible === false) {
+    const note = '本文末尾の印（HTML コメント）が公開ページに残っていない — 次の回の「使用済みの題材」に載らず、同じ種を再利用しうる';
+    lines.push(`- 注意: ${note}`);
+    console.log(`::warning title=Devlog syndication marker::${note}`);
+  }
   const summary = argValue(argv, '--summary');
   if (summary) fs.appendFileSync(summary, lines.join('\n') + '\n\n');
   console.log(lines.join('\n'));
@@ -1099,6 +1107,11 @@ async function watchPlatform(platform, now, opts, stop) {
     }
     if (platform === 'devto' && pipeline.disclosure !== 'fully_autonomous') {
       r.status = 'alert'; r.problems.push(`この経路の最新記事の AI 開示が「${pipeline.disclosure}」（fully_autonomous でない）`);
+    }
+    // はてなは「使用済みの題材」を公開フィードの本文にある印から読む。印が消えていると題材の重複防止が効かない。
+    if (platform === 'hatena' && !String(pipeline.content || '').includes(`${MARKER}:`)) {
+      r.status = worse(r.status, 'warn');
+      r.problems.push('この経路の最新記事の印（HTML コメント）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる');
     }
   } else {
     r.notes.push(`この経路の記事が直近 ${opts.scan} 本の中にまだ無い`);
@@ -1352,6 +1365,13 @@ export async function selftest() {
     assert(e[0].draft === null, '公開フィードに無い下書き欄を「公開済み」と読んだ');
     const ap = parseAtomFeed('<feed><entry xmlns:app="x"><title>T</title><link rel="alternate" type="text/html" href="https://x/1"/><app:control><app:draft>yes</app:draft></app:control></entry></feed>');
     assert(ap.length === 1 && ap[0].draft === true, `AtomPub の下書きを読めない: ${JSON.stringify(ap)}`);
+  });
+  await t('公開確認: 本文末尾の印が公開面に残っているかを返す（失敗にはしない）', () => {
+    const body = (inner) => `<html><head></head><body><div class="entry-content"><p>本文 <a href="https://simplememofast.com/">ページ</a></p>${inner}</div><div class="entry-footer"></div></body></html>`;
+    const withMarker = inspectPublished(body('<!-- devlog-syndication: basis=S-A; route=actions -->'), 'hatena');
+    assert(withMarker.markerVisible === true && withMarker.ok === true, JSON.stringify(withMarker));
+    const without = inspectPublished(body(''), 'hatena');
+    assert(without.markerVisible === false && without.ok === true, `印が無いだけで公開の失敗にした: ${JSON.stringify(without)}`);
   });
   await t('はてなの公開フィードの実際の形（rel の無い link）から URL を読む', () => {
     // 2026-09-26 に公開フィードで実測した形。rel も type も無く、画像の enclosure が後ろに並ぶ
