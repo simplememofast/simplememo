@@ -250,7 +250,7 @@
   </style>
 <script async="" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" src="https://analytics.ahrefs.com/analytics.js"></script>
 <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/google-keep/#faq","mainEntity":[{"@type":"Question","name":"How do I quickly email a Google Keep note to myself?","acceptedAnswer":{"@type":"Answer","text":"Google Keep has no direct email send — you need 4 steps via the share menu. Simple Memo sends in one tap. If emailing notes to yourself is a regular workflow, Simple Memo is dramatically more efficient."}},{"@type":"Question","name":"Does Simple Memo have reminders like Google Keep?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo has no built-in reminders, but since memos arrive as emails, you can use your email client's snooze, flag, or reminder features. Combined with Gmail or Outlook reminders, you get equivalent functionality to Google Keep's reminders."}},{"@type":"Question","name":"Can Google Keep auto-send notes to Gmail?","acceptedAnswer":{"@type":"Answer","text":"No — Google Keep has no auto-send-to-email feature. Manual sharing is required each time. Simple Memo auto-sends every memo to your configured email address, creating a \"write it, it's in Gmail\" workflow automatically."}},{"@type":"Question","name":"Is there a note app that doesn't require a Google account?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo requires no Google account and no dedicated account at all. Just enter your email address and start capturing. Ideal for privacy-conscious users who prefer not to store data with Google."}},{"@type":"Question","name":"Can I use Google Keep on Android and Simple Memo on iOS?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo is currently iOS-only. You can use Google Keep on Android and Simple Memo on iPhone — memos from both ultimately converge in your email inbox, which is Simple Memo's key advantage."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/google-keep/#faq","mainEntity":[{"@type":"Question","name":"How do I quickly email a Google Keep note to myself?","acceptedAnswer":{"@type":"Answer","text":"Google Keep has no direct email send — you need 4 steps via the share menu. Simple Memo sends in one tap. If emailing notes to yourself is a regular workflow, Simple Memo is dramatically more efficient."}},{"@type":"Question","name":"Does Simple Memo have reminders like Google Keep?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo has no built-in reminders, but since memos arrive as emails, you can use your email client's snooze, flag, or reminder features. Combined with Gmail or Outlook reminders, you get equivalent functionality to Google Keep's reminders."}},{"@type":"Question","name":"Can Google Keep auto-send notes to Gmail?","acceptedAnswer":{"@type":"Answer","text":"No — Google Keep has no auto-send-to-email feature. Manual sharing is required each time. Simple Memo auto-sends every memo to your configured email address, creating a \"write it, it's in Gmail\" workflow automatically."}},{"@type":"Question","name":"Is there a note app that doesn't require a Google account?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo requires no Google account and no dedicated account at all. Just enter your email address and start capturing. Good for people who prefer not to use a Google account for notes (if your address is Gmail, the memos are stored in Gmail)."}},{"@type":"Question","name":"Can I use Google Keep on Android and Simple Memo on iOS?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo is currently iOS-only. You can use Google Keep on Android and Simple Memo on iPhone — memos from both ultimately converge in your email inbox, which is Simple Memo's key advantage."}}]}</script>
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/en/vs/google-keep/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/google-keep/">
@@ -337,8 +337,8 @@
 <tr><th scope="row">Google Account</th><td class="yes">Not required</td><td class="no">Mandatory</td></tr>
 <tr><th scope="row">Launch Speed</th><td class="yes">0.4s</td><td>2.1s (measured median, incl. the new-note tap)</td></tr>
 <tr><th scope="row">Direct Email Send</th><td class="yes">One tap</td><td class="no">Manual share only</td></tr>
-<tr><th scope="row">Server Storage</th><td class="yes">None (memo content)</td><td class="no">Google servers</td></tr>
-<tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td class="no">Transit only</td></tr>
+<tr><th scope="row">Where memos are kept</th><td class="yes">Your own email inbox (memo bodies are not kept on our servers)</td><td>Google servers</td></tr>
+<tr><th scope="row">Encryption</th><td>AES-GCM for the on-device Outbox and history (not E2E)</td><td>In transit and at rest (not E2E)</td></tr>
 <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="yes">Cache available</td></tr>
 <tr><th scope="row">Labels / Categories</th><td class="no">None (intentional)</td><td class="yes">Yes</td></tr>
 <tr><th scope="row">Reminders</th><td class="no">No</td><td class="yes">Yes</td></tr>
@@ -357,11 +357,11 @@
 </h2>
 <p class="lp-section__lead">
 
-<span>Google has a history of abruptly discontinuing popular services (Google Reader, Inbox by Gmail, Google+, etc.). Google Keep notes are stored in a proprietary format on Google servers, making data migration non-trivial if the service is discontinued. While Google Takeout allows export, the output is bulk HTML or JSON requiring conversion for import into other note apps.</span>
+<span>Google has discontinued popular services before (Google Reader, Inbox by Gmail, Google+, etc.). Google Keep notes are stored in a proprietary format on Google servers, making data migration non-trivial if the service is discontinued. While Google Takeout allows export, the output is bulk HTML or JSON requiring conversion for import into other note apps.</span>
 </p>
 <p class="lp-section__lead">
 
-<span>Simple Memo's approach is fundamentally different. Since memos are sent as email, your data exists in standard email format in your inbox from day one. Searchable, filterable, and forwardable in Gmail, Outlook, Apple Mail — any email service. Even if the app disappears, your memos persist as emails forever. Zero vendor lock-in risk.</span>
+<span>Simple Memo's approach is fundamentally different. Since memos are sent as email, your data exists in standard email format in your inbox from day one. Searchable, filterable, and forwardable in Gmail, Outlook, Apple Mail — any email service. Even if the app stops working, the memos you sent stay in your inbox as ordinary emails (for as long as your mailbox keeps them).</span>
 </p>
 </section>
 <!-- 5 Key Differences -->
@@ -385,7 +385,7 @@
 <li>
 <span class="diff-num">3</span>
 <strong>Google Account Dependency: None vs Mandatory</strong><br/>
-            Google Keep requires a Google account login, and all notes are stored on Google's servers. Simple Memo needs no Google account and no dedicated account at all. Just set your email address and go — no data shared with Google.
+            Google Keep requires a Google account login, and all notes are stored on Google's servers. Simple Memo needs no Google account and no dedicated account at all. Just set your email address and go. (If that address is Gmail, your memos are stored in your Gmail inbox.)
           </li>
 <li>
 <span class="diff-num">4</span>
@@ -405,7 +405,7 @@
 <div class="choose-card">
 <div class="choose-card__title">Choose Simple Memo if you...</div>
 <ul>
-<li>Don't want Google storing your thoughts</li>
+<li>Prefer not to use a Google account for notes</li>
 <li>Want zero sign-up friction</li>
 <li>Need to email ideas instantly</li>
 <li>Put capture speed first</li>
@@ -436,8 +436,8 @@
 <div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I quickly email a Google Keep note to myself?</summary><div class="faq-answer"><p>Google Keep has no direct email send — you need 4 steps via the share menu. Simple Memo sends in one tap. If emailing notes to yourself is a regular workflow, Simple Memo is dramatically more efficient.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have reminders like Google Keep?</summary><div class="faq-answer"><p>Simple Memo has no built-in reminders, but since memos arrive as emails, you can use your email client's snooze, flag, or reminder features. Combined with Gmail or Outlook reminders, you get equivalent functionality to Google Keep's reminders.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can Google Keep auto-send notes to Gmail?</summary><div class="faq-answer"><p>No — Google Keep has no auto-send-to-email feature. Manual sharing is required each time. Simple Memo auto-sends every memo to your configured email address, creating a "write it, it's in Gmail" workflow automatically.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a note app that doesn't require a Google account?</summary><div class="faq-answer"><p>Simple Memo requires no Google account and no dedicated account at all. Just enter your email address and start capturing. Ideal for privacy-conscious users who prefer not to store data with Google.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can Google Keep auto-send notes to Gmail?</summary><div class="faq-answer"><p>No — Google Keep has no auto-send-to-email feature. Manual sharing is required each time. Simple Memo sends each memo to your preset email address when you tap Send, so "write it, send it, it's in Gmail" takes one tap.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a note app that doesn't require a Google account?</summary><div class="faq-answer"><p>Simple Memo requires no Google account and no dedicated account at all. Just enter your email address and start capturing. Good for people who prefer not to use a Google account for notes (if your address is Gmail, the memos are stored in Gmail).</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Google Keep on Android and Simple Memo on iOS?</summary><div class="faq-answer"><p>Yes. Simple Memo is currently iOS-only. You can use Google Keep on Android and Simple Memo on iPhone — memos from both ultimately converge in your email inbox, which is Simple Memo's key advantage.</p></div></details></div>
 </div>
 </section>
@@ -449,7 +449,7 @@
 </div>
 <div class="cta-box__desc">
 
-<span>Even if Keep disappears, your memos survive in email. Try 7 days.</span>
+<span>Even if Keep goes away, the memos you sent stay in your email. Free to download; 3 sends a day on the free plan.</span>
 </div>
 
 <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" aria-label="Download on the App Store" class="app-store-badge" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8">
