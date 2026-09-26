@@ -496,7 +496,7 @@ private func activateTextInput() {
 <h2>Frequently Asked Questions</h2>
 <div class="faq-item">
 <div class="faq-item__question">Q. Can't SwiftUI achieve sub-500ms launch?</div>
-<div class="faq-item__answer">It's not impossible, but UIKit is reliably faster by milliseconds. There's overhead from <code>@StateObject</code> initialization and <code>body</code> re-evaluation. For maximum speed, UIKit's deterministic lifecycle has the advantage.</div>
+<div class="faq-item__answer">It's not impossible. But SwiftUI adds work for <code>@StateObject</code> initialization and <code>body</code> re-evaluation, so this app, which aims for the fastest launch, chose UIKit for its tightly controllable lifecycle (this is not a same-conditions measurement of the two).</div>
 </div>
 <div class="faq-item">
 <div class="faq-item__question">Q. What are the downsides of not using Storyboard?</div>
