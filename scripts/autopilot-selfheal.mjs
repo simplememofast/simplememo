@@ -36,9 +36,12 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { stageProblems, validate as validateLedger } from './autopilot-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -305,6 +308,168 @@ const SCENARIOS = ledgerScenarios(
       }
       assert(ownerRequest({ ...target, escalate: true }, { actions: [{ id: 'act-selfheal-ap-x', state: 'done' }] }) === null,
         '修理上限による新しいエスカレーションを過去の依頼で抑制した');
+    }],
+  );
+}
+
+// ── 封じ込めの不変条件（2026-09-24追加・09-25 に範囲を広げた） ──────────
+// 2026-09-21 に route actions が止まったのは、この判定が 09-20 の拒否（行の自己申告では
+// failure_stage: eligibility / eligibility_verdict: blocked）を4回目の no_artifact と数えたから。
+// **それでもここで固定するのは、いまの fail-closed の挙動のほう。**
+//
+// 固定するもの（判定コードだけを緩める変更を落とす）:
+//   - 行の欄で故障を免除しない。合成行は 09-20・09-15 と修理行の実際の欄をすべて持ち
+//     （pr・lane・action・failure_reason・stage_note・interventions も）、台帳の検査
+//     （autopilot-runs の validate）を通る。実台帳の故障行も、そのまま1行ずつ判定する
+//   - 修理上限は順序に関係なく効く（実台帳と同じ「修理の後に再発」の向きも）
+//   - 上限は種別ごと・権限表の値どおり。故障の outcome は4種すべて
+//   - --contain の実行経路（dry-run は exit 1、本実行は停止を書く）
+// 固定しないもの: 判定とこのテストを同じ PR で一緒に書き換える変更。base と head で
+// --contain --dry-run を比べる検査（ロードマップ T-02 ③／T-05）は未実装で、このファイルは
+// self_repair.may_modify の中にある。09-24・09-25 のレビューで、合成行が実物の欄を
+// 持たないと欄で免除する緩め方がテストを素通りすることを実測した。
+//
+// 判定を緩める変更は、ゲート自身が run_id・gate_code つきで書く拒否の受領ができてからにする。
+// そのときも draft で出し、Ready にするのは人。受領の台帳は self_repair.may_modify の外に置く。
+// 受領と照合できない行は、緩めた後も故障に数える。
+{
+  const MATRIX = { self_repair: { may_modify: ['x'], must_not: ['y'], stop_after_failed_repairs: 3 } };
+  // 実行の段で止まった故障（実台帳の 09-05 以前の actions の行の形）。
+  const fail = (id, cls, extra = {}) => ({ run_id: id, date_jst: '2026-09-01', route: 'actions', attempted: true,
+    outcome: 'no_artifact', lane: 'E', action: 'skip', pr: null, artifact: null,
+    failure_reason: 'selftest: 成果物が無いまま終わった', external_ref: '00000000000', interventions: [],
+    source: 'test', failure_class: cls, failure_stage: 'execution', ...extra });
+  // 修理の行（実台帳の 09-07 #1051・09-11 #1237・09-19 #1470 の形）。
+  let prSeq = 9000;
+  const repair = (id, target, extra = {}) => ({ run_id: id, date_jst: '2026-09-02', route: 'actions', attempted: true,
+    outcome: 'shipped', lane: 'F', action: 'maintenance', pr: (prSeq += 1), artifact: null, failure_reason: null,
+    external_ref: '00000000001', interventions: [], source: 'session', repair_of: [target],
+    repair_note: 'selftest: 修理', ...extra });
+  const repairedThrice = cls => [1, 2, 3].flatMap(i => [fail(`f-${i}`, cls), repair(`r-${i}`, `f-${i}`)]);
+  // 09-20・09-15 の行と同じ形：outcome は故障、行の中では適格性の段で止まったと申告し、
+  // PR 番号・maintenance・lane なし・blocked を含む理由・stage_note も持つ。
+  const codexDecline = (id, gate) => fail(id, 'no_artifact', { lane: null, action: 'maintenance', pr: 1504,
+    failure_stage: 'eligibility', eligibility_verdict: 'blocked', gate_code: gate, source: 'codex-automation',
+    external_ref: 'codex:00000000-0000-7000-8000-000000000000',
+    failure_reason: 'selftest: admitted run; treatment blocked by the measurement gate',
+    stage_note: 'selftest: initial preflight run:true' });
+  // 3回目の修理の対象が 09-15 形の行（実台帳でも3回目の修理 #1470 の対象はこの形）。
+  const repairedThriceMixed = () => [
+    fail('f-1', 'no_artifact'), repair('r-1', 'f-1'),
+    fail('f-2', 'no_artifact'), repair('r-2', 'f-2'),
+    { ...codexDecline('f-3', 'measurement_experiment_overlap'), lane: 'E', action: 'skip', pr: 1386 },
+    repair('r-3', 'f-3'),
+  ];
+  const FAILED_OUTCOMES = ['no_artifact', 'failed', 'cancelled', 'no_run']; // FAILED を参照しない（集合から外す変更を捕まえる）
+
+  SCENARIOS.push(
+    ['合成行は台帳の検査（autopilot-runs の validate と層の検査）を通る形（実際の行の形から外れた合成では、緩め方の検出が効かない）', () => {
+      const shapes = [...repairedThrice('no_artifact'), ...repairedThriceMixed().map(r => ({ ...r, run_id: `m-${r.run_id}`,
+        repair_of: r.repair_of?.map(t => `m-${t}`) })), codexDecline('f-4', 'measurement_scope_conflict')];
+      const problems = [...validateLedger({ runs: shapes }), ...shapes.flatMap((r) => stageProblems(r, r.run_id))];
+      assert(problems.length === 0, `合成行が台帳の形を満たしていない: ${problems[0]}`);
+    }],
+    ['実台帳で故障の outcome を持つ行は、どの欄を持っていても1行だけで故障に数える', () => {
+      // 封じ込めが今出ているかは見ない（人が行を再分類しても、このシナリオは落ちない）。
+      const real = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8')).runs.filter(r => FAILED_OUTCOMES.includes(r.outcome));
+      assert(real.length > 0, '実台帳に故障の行が無い');
+      for (const r of real) {
+        const { repair_of: _ignored, ...row } = r;
+        assert(analyze({ runs: [row] }, MATRIX, []).unrepaired_count === 1,
+          `${r.run_id} が故障から外れた — 行の欄で免除している`);
+      }
+    }],
+    ['同じ種別を3回直した状態で未修理の故障が残れば、前後を問わず上限に達して人へ上がる', () => {
+      // analyze() は日付の順序を見ない。修理より前の日付の故障でも上限に数える（止める方向の意図）。
+      const a = analyze({ runs: [...repairedThrice('no_artifact'), fail('f-4', 'no_artifact')] }, MATRIX, []);
+      assert(a.unrepaired_count === 1 && a.escalate.length === 1
+        && a.escalate[0].run_id === 'f-4' && a.escalate[0].repair_attempts_for_class === 3,
+      '3回直した種別の再発が上限に達しなかった');
+      assert(!a.lane_f_required, '上限に達した故障を、また直させようとした');
+      // 実台帳の向き（修理 09-07・09-11・09-19 → 再発 09-20）。修理より後の日付の再発も上限に数える。
+      for (const date of ['2026-09-03', '2026-09-20']) {
+        const later = analyze({ runs: [...repairedThrice('no_artifact'),
+          codexDecline('f-4', 'measurement_scope_conflict'), ].map(r => r.run_id === 'f-4' ? { ...r, date_jst: date } : r) },
+        MATRIX, []);
+        assert(later.escalate.length === 1 && later.escalate[0].repair_attempts_for_class === 3 && !later.lane_f_required,
+          `修理より後の日付（${date}）の再発が上限に達しなかった`);
+      }
+    }],
+    ['修理を挟まない再発は、何回あっても上限に数えない（数えるのは修理の回数）', () => {
+      const a = analyze({ runs: [1, 2, 3, 4].map(i => fail(`f-${i}`, 'no_artifact')) }, MATRIX, []);
+      assert(a.unrepaired_count === 4 && a.escalate.length === 0 && a.lane_f_required,
+        '修理していない再発で上限に達した');
+    }],
+    ['上限は種別ごと。別の種別を3回直しても、この種別は上限に達しない', () => {
+      const a = analyze({ runs: [...repairedThrice('claim_without_completion'), fail('f-4', 'no_artifact')] }, MATRIX, []);
+      assert(a.escalate.length === 0 && a.targets[0].repair_attempts_for_class === 0, '別の種別の修理を数えた');
+    }],
+    ['上限は権限表の値に従う（stop_after_failed_repairs を 3 以外にしても一致する）', () => {
+      const two = { self_repair: { ...MATRIX.self_repair, stop_after_failed_repairs: 2 } };
+      const twice = [1, 2].flatMap(i => [fail(`f-${i}`, 'no_artifact'), repair(`r-${i}`, `f-${i}`)]);
+      const a = analyze({ runs: [...twice, fail('f-3', 'no_artifact')] }, two, []);
+      assert(a.escalate.length === 1 && a.escalate[0].repair_attempts_for_class === 2 && a.limit === 2,
+        '上限2で、2回直した種別の再発が上がらなかった');
+      const b = analyze({ runs: [...twice.slice(0, 2), fail('f-3', 'no_artifact')] }, two, []);
+      assert(b.escalate.length === 0 && b.lane_f_required, '上限2で、1回しか直していない種別を上げた');
+    }],
+    ['**故障の outcome を持つ行は、行の中の自己申告では免除されない**（段・判定・ゲートコード・source・external_ref・PR・lane・action・理由の文言のどれでも）', () => {
+      const labelled = codexDecline('f-4', 'measurement_scope_conflict');
+      const a = analyze({ runs: [...repairedThriceMixed(), labelled] }, MATRIX, []);
+      assert(a.unrepaired_count === 1 && a.escalate.length === 1 && a.escalate[0].repair_attempts_for_class === 3,
+        '自己申告で故障から外れた、または申告つきの修理対象を修理回数から外した'
+        + ' — 受領と照合できない免除は、封じ込めを行1つで外す経路になる');
+      for (const verdict of ['declined_by_design', 'declined_by_fault', 'declined_unrecorded']) {
+        const b = analyze({ runs: [{ ...labelled, eligibility_verdict: verdict }] }, MATRIX, []);
+        assert(b.unrepaired_count === 1, `eligibility_verdict=${verdict} で故障から外れた`);
+      }
+      for (const [key, value] of [['failure_stage', 'eligibility'], ['eligibility_verdict', 'blocked'],
+        ['gate_code', 'measurement_scope_conflict'], ['source', 'codex-automation'],
+        ['external_ref', 'codex:00000000-0000-7000-8000-000000000000'], ['pr', 1504], ['lane', null],
+        ['action', 'maintenance'], ['failure_reason', 'blocked by the gate'], ['stage_note', 'preflight run:true']]) {
+        const c = analyze({ runs: [fail('f-9', 'no_artifact', { [key]: value })] }, MATRIX, []);
+        assert(c.unrepaired_count === 1, `${key} だけで故障から外れた`);
+      }
+      for (const outcome of FAILED_OUTCOMES) {
+        const row = fail('f-9', 'no_artifact', { outcome });
+        assert(analyze({ runs: [row] }, MATRIX, []).unrepaired_count === 1, `outcome=${outcome} が故障から外れた`);
+        const { failure_class: _cls, ...bare } = row;
+        assert(validate({ runs: [bare] }, MATRIX).length > 0, `outcome=${outcome} で failure_class を要求しなかった`);
+      }
+    }],
+    ['--contain の実行経路も、上限に達した経路を止める（dry-run は書かずに exit 1、本実行は停止を書く）', () => {
+      // 判定（analyze）の外側 — 経路の選び方・applyTrip・exit code — に免除を足す変更を落とす。
+      // ROOT と同じ配置の一時コピーで CLI を実行する。実台帳と実際の停止スイッチには触れない。
+      const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'selfheal-contain-'));
+      try {
+        fs.cpSync(path.join(ROOT, 'scripts'), path.join(tmp, 'scripts'), { recursive: true });
+        fs.mkdirSync(path.join(tmp, 'data'));
+        for (const f of ['authority-matrix.json', 'escalation-rules.json']) {
+          fs.copyFileSync(path.join(ROOT, 'data', f), path.join(tmp, 'data', f));
+        }
+        const stopPath = path.join(tmp, 'data/emergency-stop.json');
+        const stop = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/emergency-stop.json'), 'utf8'));
+        Object.assign(stop, { stopped: false, reason: null, stopped_at: null, stopped_by: null });
+        for (const [k, v] of Object.entries(stop.agents || {})) if (!k.startsWith('$')) Object.assign(v, { stopped: false, reason: null });
+        const stopText = `${JSON.stringify(stop, null, 2)}\n`;
+        const cli = (runs, ...args) => {
+          fs.writeFileSync(path.join(tmp, 'data/autopilot-runs.json'), `${JSON.stringify({ runs }, null, 2)}\n`);
+          fs.writeFileSync(stopPath, stopText);
+          return spawnSync(process.execPath, [path.join(tmp, 'scripts/autopilot-selfheal.mjs'), '--contain', ...args],
+            { encoding: 'utf8', cwd: tmp });
+        };
+        const limited = [...repairedThriceMixed(), codexDecline('f-4', 'measurement_scope_conflict')];
+        const dry = cli(limited, '--dry-run');
+        assert(dry.status === 1 && /止めるべき: actions/.test(dry.stderr), `dry-run が上限の経路を止めると言わなかった（exit ${dry.status}）`);
+        assert(fs.readFileSync(stopPath, 'utf8') === stopText, 'dry-run が停止スイッチを書き換えた');
+        const wet = cli(limited);
+        const after = JSON.parse(fs.readFileSync(stopPath, 'utf8'));
+        assert(wet.status === 1 && after.agents?.actions?.stopped === true, `本実行が actions を止めなかった（exit ${wet.status}）`);
+        const calm = cli(repairedThrice('no_artifact'), '--dry-run');
+        assert(calm.status === 0, `上限に達した故障が無いのに止めた（exit ${calm.status}）`);
+      } finally {
+        fs.rmSync(tmp, { recursive: true, force: true });
+      }
     }],
   );
 }
