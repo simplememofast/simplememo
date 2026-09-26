@@ -216,14 +216,31 @@ async function devtoPublicPosts() {
   }));
 }
 
+/**
+ * entry の公開URL（alternate の link）。**属性の順番と省略に依らない。**
+ * rel を省いた link は Atom の既定で alternate（RFC 4287 §4.2.7.2）。type を省いたものは HTML とみなす。
+ * 2026-09-26: はてなの公開フィードは `<link href="…/entry/…"/>`（rel も type も無い）だった。
+ * `rel="alternate" type="text/html"` の決め打ちでは URL が null になり、見張りが公開ページを取りに行けなかった。
+ * AtomPub の応答は `<link rel="alternate" type="text/html" href="…"/>` で、edit・enclosure の link も並ぶ。
+ */
+export function entryAlternateUrl(xml) {
+  for (const m of String(xml ?? '').matchAll(/<link\b([^>]*?)\/?>/g)) {
+    const attrs = m[1];
+    const rel = (/\brel=["']([^"']*)["']/.exec(attrs) || [])[1] || 'alternate';
+    const type = (/\btype=["']([^"']*)["']/.exec(attrs) || [])[1] || 'text/html';
+    const href = (/\bhref=["']([^"']*)["']/.exec(attrs) || [])[1];
+    if (href && rel === 'alternate' && /html/i.test(type)) return decodeEntities(href);
+  }
+  return null;
+}
+
 /** はてなブログの公開フィード（キー不要・最新30件）。 */
 export function parseAtomFeed(xml) {
   const entries = [];
   for (const m of String(xml).matchAll(/<entry\b[^>]*>([\s\S]*?)<\/entry>/g)) {
     const e = m[1];
     const title = decodeEntities((/<title>([\s\S]*?)<\/title>/.exec(e) || [])[1] || '').trim();
-    const url = (/<link rel="alternate" type="text\/html" href="([^"]+)"/.exec(e)
-      || /<link rel="alternate" href="([^"]+)"/.exec(e) || [])[1] || null;
+    const url = entryAlternateUrl(e);
     const published = (/<published>([^<]+)<\/published>/.exec(e) || /<updated>([^<]+)<\/updated>/.exec(e) || [])[1] || null;
     const content = decodeEntities((/<content[^>]*>([\s\S]*?)<\/content>/.exec(e) || [])[1] || '');
     const summary = decodeEntities((/<summary[^>]*>([\s\S]*?)<\/summary>/.exec(e) || [])[1] || '');
@@ -898,7 +915,7 @@ async function publishHatena(article, key, body) {
   const xml = hatenaEntryXml({ title: article.title, body, categories: article.tags, author: cfg.hatenaId });
   const res = await hatenaRequest(cfg.atomUrl, key, { method: 'POST', headers: { 'content-type': 'application/atom+xml; charset=utf-8' }, body: xml }, [201]);
   const text = await res.text();
-  const url = (/<link rel="alternate" type="text\/html" href="([^"]+)"/.exec(text) || [])[1];
+  const url = entryAlternateUrl(text);
   if (!url) throw new Error(`はてなの応答に公開URLが無い: ${text.slice(0, 300)}`);
   return { url, reused: false, member: res.headers.get('location') };
 }
@@ -1067,7 +1084,9 @@ async function watchPlatform(platform, now, opts, stop) {
     }
   }
 
-  if (pipeline) {
+  if (pipeline && !pipeline.url) {
+    r.status = worse(r.status, 'unreadable'); r.problems.push(`この経路の最新記事の公開URLを読めない（${pipeline.title}）— フィードの形が変わった可能性`);
+  } else if (pipeline) {
     r.pipeline_latest = { title: pipeline.title, url: pipeline.url, published_at: pipeline.published_at, disclosure: pipeline.disclosure };
     try {
       const html = await fetchText(pipeline.url, { headers: { accept: 'text/html' } });
@@ -1333,6 +1352,17 @@ export async function selftest() {
     assert(e[0].draft === null, '公開フィードに無い下書き欄を「公開済み」と読んだ');
     const ap = parseAtomFeed('<feed><entry xmlns:app="x"><title>T</title><link rel="alternate" type="text/html" href="https://x/1"/><app:control><app:draft>yes</app:draft></app:control></entry></feed>');
     assert(ap.length === 1 && ap[0].draft === true, `AtomPub の下書きを読めない: ${JSON.stringify(ap)}`);
+  });
+  await t('はてなの公開フィードの実際の形（rel の無い link）から URL を読む', () => {
+    // 2026-09-26 に公開フィードで実測した形。rel も type も無く、画像の enclosure が後ろに並ぶ
+    const pub = parseAtomFeed('<feed><entry><title>Day21</title><link href="https://simplememofast.hatenablog.com/entry/2026/09/25/213405"/><link rel="enclosure" href="https://ogimage.example/1" type="image/png" length="0" /><published>2026-09-25T21:34:05+09:00</published></entry></feed>');
+    assert(pub[0].url === 'https://simplememofast.hatenablog.com/entry/2026/09/25/213405', `公開フィードの URL を読めない: ${JSON.stringify(pub)}`);
+    // AtomPub の応答：edit の link が先に来ても alternate を選ぶ
+    assert(entryAlternateUrl('<entry><link rel="edit" href="https://blog.hatena.ne.jp/x/atom/entry/1"/><link rel="alternate" type="text/html" href="https://b.example/entry/2"/></entry>') === 'https://b.example/entry/2', 'edit を選んだ');
+    // 属性の順番が違っても読む
+    assert(entryAlternateUrl('<link href="https://c.example/entry/3" type="text/html" rel="alternate" />') === 'https://c.example/entry/3', '属性の順番で読めない');
+    // alternate が無ければ null（**enclosure や edit を公開URLにしない**）
+    assert(entryAlternateUrl('<entry><link rel="edit" href="https://e/1"/><link rel="enclosure" href="https://img/1" type="image/png"/></entry>') === null, 'alternate でない link を選んだ');
   });
 
   await t('リンク候補: sitemap の URL を手元のファイルに引き当てられる（実データ）', () => {
