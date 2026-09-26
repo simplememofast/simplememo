@@ -459,7 +459,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "36078450378（2026-09-25 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "36205849029（2026-09-26 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -473,13 +473,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-25",
-      "last_seen_jst": "2026-09-25",
-      "closed_jst": "2026-09-25",
+      "created_jst": "2026-09-26",
+      "last_seen_jst": "2026-09-26",
+      "closed_jst": "2026-09-26",
       "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-25",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n36078450378 -> ap-20260925-actions: appended ap-20260925-actions (skipped_gate)",
-      "reopened_jst": "2026-09-25"
+      "last_run_jst": "2026-09-26",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n36205849029 -> ap-20260926-actions: appended ap-20260926-actions (skipped_gate)",
+      "reopened_jst": "2026-09-26"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -3161,6 +3161,33 @@
       "last_seen_jst": "2026-09-25",
       "closed_jst": "2026-09-25",
       "evidence": "claude/autopilot-act-20260925 の取り残しは解消（走査に出てこない）"
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260926",
+      "title": "PR #1615 の反映待ち: claude/autopilot-act-20260926",
+      "detail": "開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "claude/autopilot-act-20260926"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-26",
+      "last_seen_jst": "2026-09-26",
+      "closed_jst": null,
+      "evidence": "PR #1615 へ引き継いだhead 5ddf2a9124b612b272f4cb9a123f504843620820 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
+      "pending_pr": {
+        "number": 1615,
+        "branch": "claude/autopilot-act-20260926",
+        "head_sha": "5ddf2a9124b612b272f4cb9a123f504843620820"
+      }
     }
   ],
   "escalation_review_authorization": {

@@ -54,11 +54,23 @@
       "pr": 1572,
       "first_verified_head": "68dc7d2ddeb7b3984b3189499598447e2aa15930",
       "evidence": "PR #1572 へ引き継いだhead 68dc7d2ddeb7b3984b3189499598447e2aa15930 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260926",
+      "title": "PR #1615 の反映待ち: claude/autopilot-act-20260926",
+      "pr": 1615,
+      "first_verified_head": "5ddf2a9124b612b272f4cb9a123f504843620820",
+      "evidence": "PR #1615 へ引き継いだhead 5ddf2a9124b612b272f4cb9a123f504843620820 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
     }
   ],
   "oldest_open_days": 6,
   "acknowledged": 7,
   "closed_today": [
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
+    },
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
@@ -161,5 +173,12 @@
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1"
     }
   ],
-  "executed": []
+  "executed": [
+    {
+      "handler": "reconcile-runs",
+      "ok": true,
+      "changed": 1,
+      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n36205849029 -> ap-20260926-actions: appended ap-20260926-actions (skipped_gate)"
+    }
+  ]
 }
