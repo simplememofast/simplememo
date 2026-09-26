@@ -41,6 +41,7 @@ function getPageTitle(content) {
   if (!match) return 'Simple Memo';
   let title = match[1].trim();
   title = title.replace(/\s*[—|]\s*Captio式シンプルメモ.*$/g, '');
+  title = title.replace(/\s*[—|]\s*Obsidian連携シンプルメモ.*$/g, '');
   title = title.replace(/\s*[—|]\s*Simple Memo.*$/g, '');
   return title || 'Simple Memo';
 }
