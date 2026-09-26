@@ -255,7 +255,7 @@
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/mail-to-self/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/mail-to-self/">
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/mail-to-self/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How is a Mail to Self app different from just emailing myself?","acceptedAnswer":{"@type":"Answer","text":"Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.4 seconds, type, and tap send. No inbox distractions, no wasted steps."}},{"@type":"Question","name":"Can I send memos to myself without SMTP configuration?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required."}},{"@type":"Question","name":"Will I lose a memo if I send it with poor connectivity?","acceptedAnswer":{"@type":"Answer","text":"With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss."}},{"@type":"Question","name":"Is switching from another Mail to Self app to Simple Memo easy?","acceptedAnswer":{"@type":"Answer","text":"Yes. Download from the App Store, set your email address, and you are ready in under a minute. All memos sent by your previous app remain in your email inbox. No data migration needed."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/mail-to-self/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How is a Mail to Self app different from just emailing myself?","acceptedAnswer":{"@type":"Answer","text":"Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.4 seconds, type, and tap send. No inbox distractions, no wasted steps."}},{"@type":"Question","name":"Can I send memos to myself without SMTP configuration?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required."}},{"@type":"Question","name":"Will I lose a memo if I send it with poor connectivity?","acceptedAnswer":{"@type":"Answer","text":"With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns."}},{"@type":"Question","name":"Is switching from another Mail to Self app to Simple Memo easy?","acceptedAnswer":{"@type":"Answer","text":"Yes. Download from the App Store, set your email address, and you are ready in under a minute. All memos sent by your previous app remain in your email inbox. No data migration needed."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
 </head>
@@ -331,14 +331,14 @@
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Typical Mail to Self Apps</th></tr></thead>
 <tbody>
 <tr><th scope="row">Launch Speed</th><td class="yes">0.4s (type immediately)</td><td>0.5–2s (estimate, not measured)</td></tr>
-<tr><th scope="row">SMTP Setup</th><td class="yes">Not required</td><td class="no">Required by most</td></tr>
-<tr><th scope="row">Account Registration</th><td class="yes">Not required (email only)</td><td class="no">Required by most</td></tr>
-<tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="no">Rarely available</td></tr>
-<tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td class="no">Rarely available</td></tr>
-<tr><th scope="row">Password Storage</th><td class="yes">Not needed (relay)</td><td class="no">SMTP password required</td></tr>
-<tr><th scope="row">Free Tier</th><td class="yes">3 sends/day, no feature gates</td><td>Ads / feature-limited</td></tr>
-<tr><th scope="row">Bilingual</th><td class="yes">Japanese / English</td><td>English only (mostly)</td></tr>
-<tr><th scope="row">Captio Replacement</th><td class="yes">Captio-style replacement</td><td class="no">No</td></tr>
+<tr><th scope="row">SMTP Setup</th><td class="yes">Not required</td><td>Varies by app</td></tr>
+<tr><th scope="row">Account Registration</th><td class="yes">Not required (email only)</td><td>Varies by app</td></tr>
+<tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td>Varies by app (not verified)</td></tr>
+<tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td>Varies by app (not verified)</td></tr>
+<tr><th scope="row">Password Storage</th><td class="yes">Not needed (relay)</td><td>Required by apps that send via SMTP</td></tr>
+<tr><th scope="row">Free Tier</th><td class="yes">3 sends/day (Obsidian-only saving is Premium)</td><td>Varies by app</td></tr>
+<tr><th scope="row">Bilingual</th><td class="yes">10 languages, incl. Japanese and English</td><td>Varies by app</td></tr>
+<tr><th scope="row">Captio Replacement</th><td class="yes">Inspired by Captio's workflow</td><td>Varies by app</td></tr>
 </tbody>
 </table>
 </div>
@@ -364,7 +364,7 @@
 <li>
 <span class="diff-num">3</span>
 <strong>Behavior on Send Failure</strong><br/>
-            When using a mail client for self-email, a connectivity error can leave your message stuck in drafts or lost entirely. Simple Memo's Outbox architecture safely stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.
+            When using a mail client for self-email, a connectivity error can leave your message stuck in drafts or lost entirely. Simple Memo's Outbox architecture safely stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns.
           </li>
 </ul>
 </section>
@@ -421,7 +421,7 @@
 <div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is a Mail to Self app different from just emailing myself?</summary><div class="faq-answer"><p>Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.4 seconds, type, and tap send. No inbox distractions, no wasted steps.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I send memos to myself without SMTP configuration?</summary><div class="faq-answer"><p>Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will I lose a memo if I send it with poor connectivity?</summary><div class="faq-answer"><p>With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will I lose a memo if I send it with poor connectivity?</summary><div class="faq-answer"><p>With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is switching from another Mail to Self app to Simple Memo easy?</summary><div class="faq-answer"><p>Yes. Download from the App Store, set your email address, and you are ready in under a minute. All memos sent by your previous app remain in your email inbox. No data migration needed.</p></div></details></div>
 </div>
 </section>

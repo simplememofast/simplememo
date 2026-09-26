@@ -256,7 +256,7 @@
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/ios-shortcuts/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How do I set up an email-to-self shortcut?","acceptedAnswer":{"@type":"Answer","text":"Open Shortcuts app, tap \"+\", add \"Send Email\" action, set recipient to yourself, add \"Ask for Input\" before it, then add to Home Screen. Takes 5-10 minutes. Simple Memo is ready immediately after install — no setup needed."}},{"@type":"Question","name":"My shortcut broke after an iOS update. Is Simple Memo more stable?","acceptedAnswer":{"@type":"Answer","text":"Multiple cases of shortcuts breaking after major iOS updates have been reported. Simple Memo is an independent native app unaffected by Shortcuts framework changes, providing stable operation across iOS versions."}},{"@type":"Question","name":"Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?","acceptedAnswer":{"@type":"Answer","text":"There is no way to prevent the Mail app UI flash when sending email via Shortcuts — it is an iOS limitation. Simple Memo sends with one tap in the background with zero screen transitions, eliminating this problem entirely."}},{"@type":"Question","name":"Is there a reason to use both Shortcuts and Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for \"email memo to self\" specifically, Simple Memo is the superior dedicated tool with offline support, send history, and encryption."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/ios-shortcuts/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How do I set up an email-to-self shortcut?","acceptedAnswer":{"@type":"Answer","text":"Open Shortcuts app, tap \"+\", add \"Send Email\" action, set recipient to yourself, add \"Ask for Input\" before it, then add to Home Screen. Takes 5-10 minutes. With Simple Memo there is no shortcut to build — set and confirm your recipient address and you're ready."}},{"@type":"Question","name":"My shortcut broke after an iOS update. Is Simple Memo more stable?","acceptedAnswer":{"@type":"Answer","text":"After a major iOS update, run a test send to confirm your shortcut still works as expected. Simple Memo doesn't depend on Shortcuts; support for new iOS versions comes through app updates."}},{"@type":"Question","name":"Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?","acceptedAnswer":{"@type":"Answer","text":"Turn off Show Compose Sheet in the Send Email action's options to request sending without the compose preview; permissions, account setup or a locked device can still interrupt the run. Simple Memo sends from its own screen with one tap."}},{"@type":"Question","name":"Is there a reason to use both Shortcuts and Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for \"email memo to self\" specifically, Simple Memo is the superior dedicated tool with offline support, send history, and encryption."}}]}</script>
 </head>
 <body>
 <!-- Global Navigation -->
@@ -315,7 +315,7 @@
 </h2>
 <p class="lp-section__lead">
 
-<span lang="en">iOS Shortcuts (formerly Workflow) is Apple's built-in automation app for iPhone. By creating a shortcut with a "Send Email" action, setting the recipient to your own address, and adding it to your home screen, you can approximate a "one-tap email to self" workflow. However, there are notable limitations: each send briefly opens the Mail app (a UI flash), the shortcut has no retry queue of its own (what happens offline depends on Mail and the account), and it keeps no send history — you check Mail's Sent and Outbox instead. Setting up the shortcut requires technical knowledge — adding actions, configuring variables, and testing the flow. Shortcuts have also been known to break after major iOS updates, requiring users to rebuild their automations. The key advantage is that it is free and uses Apple's native framework, but it remains a DIY workaround with reliability trade-offs.</span>
+<span lang="en">iOS Shortcuts (formerly Workflow) is Apple's built-in automation app for iPhone. By creating a shortcut with a "Send Email" action, setting the recipient to your own address, and adding it to your home screen, you can approximate a "one-tap email to self" workflow. However, there are limitations: with Show Compose Sheet on, a compose screen opens before each send; the shortcut has no retry queue of its own (what happens offline depends on Mail and the account), and it keeps no send history — you check Mail's Sent and Outbox instead. Setting up the shortcut requires technical knowledge — adding actions, configuring variables, and testing the flow. After major iOS updates, it is worth re-checking that the shortcut still works. The key advantage is that it is free and uses Apple's native framework, but it is a DIY setup you build and maintain yourself.</span>
 </p>
 </section>
 <section class="lp-section">
@@ -325,15 +325,15 @@
 </h2>
 <p class="lp-section__lead">
 
-<span lang="en">If you have ever set up a "mail to self" shortcut on iOS, you may have experienced it breaking after a major iOS update. During upgrades from iOS 16 to 17, and iOS 17 to 18, changes to mail action specifications and privacy policies have caused existing shortcuts to stop working. Each time, you must reconfigure actions, redefine variables, and test-send to verify functionality. Multiple cases have been reported across Apple's support forums.</span>
+<span lang="en">If you have ever set up a "mail to self" shortcut on iOS, you may have experienced it breaking after a major iOS update. Major iOS updates can change how actions and permissions behave, so it is worth checking that a home-made shortcut still works as before. If it doesn't, you reconfigure actions, redefine variables, and test-send to verify it.</span>
 </p>
 <p class="lp-section__lead">
 
-<span lang="en">The root cause of this "breaking" problem is that Shortcuts is a DIY solution dependent on Apple's system APIs. Every time Apple changes email sending permissions or background execution rules, users must adapt manually. Simple Memo, as a dedicated app, implements email sending natively -- iOS API changes are handled by the app developer, not the user. You do nothing. Open the app, type, send. This experience remains consistent regardless of iOS version.</span>
+<span lang="en">The root cause of this "breaking" problem is that Shortcuts is a DIY solution dependent on Apple's system APIs. Every time Apple changes email sending permissions or background execution rules, users must adapt manually. Simple Memo, as a dedicated app, implements email sending natively — iOS API changes are handled by the developer through app updates (Simple Memo supports iOS 16 and later).</span>
 </p>
 <p class="lp-section__lead">
 
-<span lang="en">Another overlooked issue is Shortcuts' "send confirmation" problem. When sending email via Shortcuts, the Mail app briefly flashes on screen (UI flash), and the shortcut itself does not show whether the send completed — you check Mail's Sent and Outbox. What happens offline depends on Mail and the account; the shortcut has no retry logic of its own. Simple Memo uses an Outbox architecture that keeps memos on the device offline and sends them automatically when connectivity returns. Pending and failed sends are shown in the app, and arrival is confirmed in your inbox.</span>
+<span lang="en">Another overlooked issue is Shortcuts' "send confirmation" problem. When sending email via Shortcuts, the shortcut itself does not show whether the send completed — you check Mail's Sent and Outbox. What happens offline depends on Mail and the account; the shortcut has no retry logic of its own. Simple Memo uses an Outbox architecture that keeps memos on the device offline and sends them automatically when connectivity returns. Pending and failed sends are shown in the app, and arrival is confirmed in your inbox.</span>
 </p>
 </section>
 <!-- Comparison Table -->
@@ -347,16 +347,16 @@
 <table class="compare-table" lang="en">
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">iOS Shortcuts</th></tr></thead>
 <tbody>
-<tr><th scope="row">Setup</th><td class="yes">Install and use immediately</td><td class="no">Create shortcut, add actions, configure</td></tr>
+<tr><th scope="row">Setup</th><td class="yes">Install, then set and confirm your address</td><td class="no">Create shortcut, add actions, configure</td></tr>
 <tr><th scope="row">Launch Speed</th><td class="yes">0.4s (dedicated UI)</td><td>1-2s via shortcut trigger (estimate, not measured)</td></tr>
-<tr><th scope="row">Send Speed</th><td class="yes">one-tap background send</td><td class="no">Mail app opens briefly (UI flash)</td></tr>
+<tr><th scope="row">Sending</th><td class="yes">One tap in the app</td><td>Compose sheet optional (can be turned off)</td></tr>
 <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend (AES-GCM encrypted)</td><td class="no">No queue of its own; depends on Mail</td></tr>
 <tr><th scope="row">Send History</th><td class="yes">In-app history view</td><td class="no">None (only Mail sent folder)</td></tr>
 <tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device storage)</td><td class="no">No dedicated encrypted queue (Mail handles pending mail)</td></tr>
-<tr><th scope="row">iOS Update Resilience</th><td class="yes">Standalone app, independent</td><td class="no">May break after major iOS updates</td></tr>
+<tr><th scope="row">iOS Updates</th><td>Supported via app updates (iOS 16+)</td><td>Re-check after major updates</td></tr>
 <tr><th scope="row">Dedicated UI</th><td class="yes">Input field + send button</td><td class="no">None (text input dialog only)</td></tr>
 <tr><th scope="row">Customizability</th><td>Focused on email sending</td><td class="yes">Combine with any other actions</td></tr>
-<tr><th scope="row">Price</th><td>Free: 3/day, Premium: 500 yen/mo</td><td class="yes">Completely free (built-in)</td></tr>
+<tr><th scope="row">Price</th><td>Free: 3/day; Premium: $2.99/mo or $29.99/yr (US)</td><td class="yes">Completely free (built-in)</td></tr>
 </tbody>
 </table>
 </div>
@@ -381,8 +381,8 @@
           </li>
 <li>
 <span class="diff-num">3</span>
-<strong>Send Experience: Background one-tap vs Mail App UI Flash</strong><br/>
-            Simple Memo sends with one tap in the background with no screen transitions. Shortcuts triggers the Mail app, which briefly opens and closes — a visible UI flash every time. For frequent memo senders, this interruption is a meaningfully worse experience.
+<strong>Send Experience: One Tap in the App vs the Send Email Action</strong><br/>
+            Simple Memo sends from its own screen with one tap. In Shortcuts, the Send Email action opens a compose screen when Show Compose Sheet is on; turning it off requests sending without it (permissions or a locked device can still interrupt the run).
           </li>
 <li>
 <span class="diff-num">4</span>
@@ -402,10 +402,10 @@
 <div class="choose-card">
 <div class="choose-card__title">Choose Simple Memo if you...</div>
 <ul>
-<li>Want to start immediately without setup</li>
+<li>Want to start without building a shortcut</li>
 <li>Need reliable offline memo capture</li>
 <li>Want in-app send history and status tracking</li>
-<li>Prefer stability that won't break with iOS updates</li>
+<li>Prefer not to rebuild shortcuts yourself</li>
 <li>Value encrypted offline message storage</li>
 <li>Want a dedicated, frictionless UI for email memos</li>
 </ul>
@@ -431,9 +431,9 @@
 </h2>
 
 <div lang="en">
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I set up an email-to-self shortcut?</summary><div class="faq-answer"><p>Open Shortcuts app, tap "+", add "Send Email" action, set recipient to yourself, add "Ask for Input" before it, then add to Home Screen. Takes 5-10 minutes. Simple Memo is ready immediately after install — no setup needed.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">My shortcut broke after an iOS update. Is Simple Memo more stable?</summary><div class="faq-answer"><p>Multiple cases of shortcuts breaking after major iOS updates have been reported. Simple Memo is an independent native app unaffected by Shortcuts framework changes, providing stable operation across iOS versions.</p></div></details></div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?</summary><div class="faq-answer"><p>There is no way to prevent the Mail app UI flash when sending email via Shortcuts — it is an iOS limitation. Simple Memo sends with one tap in the background with zero screen transitions, eliminating this problem entirely.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I set up an email-to-self shortcut?</summary><div class="faq-answer"><p>Open Shortcuts app, tap "+", add "Send Email" action, set recipient to yourself, add "Ask for Input" before it, then add to Home Screen. Takes 5-10 minutes. With Simple Memo there is no shortcut to build — set and confirm your recipient address and you're ready.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">My shortcut broke after an iOS update. Is Simple Memo more stable?</summary><div class="faq-answer"><p>After a major iOS update, run a test send to confirm your shortcut still works as expected. Simple Memo doesn't depend on Shortcuts; support for new iOS versions comes through app updates.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?</summary><div class="faq-answer"><p>Turn off Show Compose Sheet in the Send Email action's options to request sending without the compose preview; permissions, account setup or a locked device can still interrupt the run. Simple Memo sends from its own screen with one tap.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a reason to use both Shortcuts and Simple Memo?</summary><div class="faq-answer"><p>Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for "email memo to self" specifically, Simple Memo is the superior dedicated tool with offline support, send history, and encryption.</p></div></details></div>
 </div>
 </section>
@@ -441,11 +441,11 @@
 <div class="cta-box">
 <div class="cta-box__title">
 
-<span lang="en">More Reliable Than Shortcuts — 0.4 seconds</span>
+<span lang="en">Email-to-Self Without Building a Shortcut</span>
 </div>
 <div class="cta-box__desc">
 
-<span lang="en">No shortcut setup needed. Install and go. Free to download.</span>
+<span lang="en">No shortcut to build — set your address and write. Free to download.</span>
 </div>
 
 <a aria-label="Download on the App Store" class="app-store-badge" data-cta-cluster="vs" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8" lang="en">
