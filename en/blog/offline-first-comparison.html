@@ -298,7 +298,7 @@
           Offline-First Memo Apps 2026
         </p>
         <h1 class="page-content__title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">Offline-First Memo Apps 2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
-        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Last updated: <time datetime="2026-08-12">August 12, 2026</time> · Reading time: ~10 minutes</p>
+        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Last updated: <time datetime="2026-09-26">September 26, 2026</time> · Reading time: ~10 minutes</p>
       </div>
 
       <div class="page-content__body" style="max-width:780px;margin:0 auto;line-height:1.8;">
@@ -307,7 +307,7 @@
              conclusion of the matrix and the verdict section, stated up front. -->
         <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
           <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-          <p style="color:var(--text-secondary);margin:0;">&ldquo;Offline&rdquo; is not one property. <strong>Offline-first</strong> apps treat your device as the source of truth (Obsidian, Standard Notes); <strong>offline-capable</strong> apps let you work offline but treat the cloud as primary (Apple Notes, Bear, Google Keep); and some are effectively online-only (Notion). For capture specifically, the question is not whether you can type without a signal but what happens to what you typed. <strong>Simple Memo - for Obsidian</strong> (SimpleMemoFast, iOS) answers it with an Outbox: the memo is encrypted with AES-GCM on the device, queued, and sent by itself once a network returns &mdash; ready to type 0.4s after launch, free for 3 sends a day, and what you send appends itself to your Obsidian vault.</p>
+          <p style="color:var(--text-secondary);margin:0;">&ldquo;Offline&rdquo; is not one property. <strong>Offline-first</strong> apps treat your device as the source of truth (Obsidian, Standard Notes); <strong>offline-capable</strong> apps let you work offline but sync through the cloud (Apple Notes, Bear, Google Keep&rsquo;s mobile apps); and some work mainly online with limited offline access (Notion, which added an offline mode in 2025). For capture specifically, the question is not whether you can type without a signal but what happens to what you typed. <strong>Simple Memo - for Obsidian</strong> (SimpleMemoFast, iOS) answers it with an Outbox: the memo is encrypted with AES-GCM on the device, queued, and sent by itself once a network returns &mdash; ready to type 0.4s after launch, free for 3 sends a day, and what you send appends itself to your Obsidian vault.</p>
         </div>
 
         <h2>Introduction: Why Offline Matters</h2>
@@ -324,10 +324,10 @@
         <p>Your device is the source of truth. All data starts local. Sync to the cloud is secondary. If the cloud goes down or you lose connection, nothing breaks. You can work indefinitely offline, then sync when reconnected. Example: Obsidian, Joplin.</p>
 
         <h3>Offline-Capable Architecture</h3>
-        <p>Cloud is the primary source of truth, but the app can work without it. You can create notes offline, but syncing is required for full functionality. If offline for too long, sync conflicts may occur. Example: Apple Notes, Bear (iCloud dependent).</p>
+        <p>Cloud is the primary source of truth, but the app can work without it. You can create notes offline, but syncing is required for full functionality. If offline for too long, sync conflicts may occur. Example: Apple Notes, Bear (syncs through iCloud).</p>
 
         <h3>Online-Only Architecture</h3>
-        <p>The app requires network connection to function. You might be able to view cached content offline, but not create or edit. Example: Google Keep, Notion, most web-based note apps.</p>
+        <p>The app requires network connection to function. You might be able to view cached content offline, but not create or edit. Example: most web-based note apps. (Notion added an offline mode in 2025 that covers pages downloaded for offline use.)</p>
 
         <h3>Hybrid/Outbox Architecture</h3>
         <p>A newer pattern: you work offline freely (local is source of truth), but when a specific action is triggered (send, save to cloud), the app queues the operation and retries on reconnect. Example: Simple Memo - for Obsidian's Outbox, email clients with draft folders.</p>
@@ -341,23 +341,23 @@
         <ol>
           <li>User taps compose and creates a note locally</li>
           <li>User types and edits — all changes are local (offline works)</li>
-          <li>User hits "Send" — note is encrypted with AES-GCM</li>
+          <li>User hits "Send" — the memo is saved to the on-device Outbox, encrypted with AES-GCM</li>
           <li>App attempts to send to email</li>
           <li>If connected: send immediately</li>
-          <li>If offline: queue in Outbox (disk-stored), retry every 2 minutes, retry on reconnect, user can force retry</li>
+          <li>If offline: the memo waits in the Outbox (stored on the device) and is retried with exponential backoff and again when the connection returns</li>
           <li>Email is delivered, receipt is logged, Outbox is cleared</li>
         </ol>
 
         <p><strong>Key advantage:</strong> You can create and edit notes completely offline. When you hit "Send," if you're offline, it queues the message. The moment you reconnect (airplane lands, subway emerges, WiFi returns), the app automatically retries and delivers all queued notes to your email inbox.</p>
 
-        <p><strong>Privacy win:</strong> The encryption happens on your device before the message ever attempts to send. Even if it sits in the Outbox for hours, it's already encrypted with AES-GCM. Simple Memo - for Obsidian's servers never see the plaintext.</p>
+        <p><strong>Privacy:</strong> While a memo waits in the Outbox, it is stored on the device encrypted with AES-GCM. When it is sent, the memo body passes through Simple Memo's relay (Cloudflare Workers) and the email delivery service to reach your inbox. They do not keep memo bodies, but this is not end-to-end encryption (see the <a href="/en/privacy">privacy policy</a>).</p>
 
         <h3>Simple Memo - for Obsidian Outbox Strengths</h3>
         <ul>
           <li>True offline creation and editing</li>
           <li>On-device AES-GCM encryption for the local Outbox and send history (delivery itself is not end-to-end encrypted)</li>
           <li>Automatic retry on reconnect (transparent to user)</li>
-          <li>No sync conflicts (email is idempotent)</li>
+          <li>No sync conflicts to resolve (each memo is sent as its own email)</li>
           <li>Works with any email provider</li>
         </ul>
 
@@ -405,7 +405,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">True offline-first</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Manual or plugin</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Depends on sync method</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">File-level</td>
             </tr>
             <tr>
@@ -414,7 +414,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Auto-sync</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Version history</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Conflict copies</td>
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></th>
@@ -426,19 +426,19 @@
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></th>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud-dependent</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud (Bear Pro)</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Last-sync-wins</td>
             </tr>
             <tr>
               <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></th>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Online-only</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">N/A</td>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">N/A</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable (mobile apps)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Not tested</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes (per Keep help)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">When online</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">&ldquo;Conflicting edits&rdquo; notice</td>
             </tr>
           </tbody>
         </table>
@@ -452,21 +452,21 @@
 
         <p><strong>Strengths:</strong> Seamless offline creation, transparent iCloud sync, works across iPhone, iPad, Mac, and web, handwriting and rich media offline.</p>
 
-        <p><strong>Weaknesses:</strong> iCloud required for multi-device sync, sync conflicts can occur if offline for too long, no visibility into sync state, data stored unencrypted on Apple's servers (unless iCloud+ Advanced).</p>
+        <p><strong>Weaknesses:</strong> iCloud required for multi-device sync, sync conflicts can occur if offline for too long, no visibility into sync state, and notes on iCloud are end-to-end encrypted only if you turn on Advanced Data Protection (standard protection encrypts them in transit and at rest, with keys held by Apple).</p>
 
         <h3>Obsidian: True Offline-First, Local Files</h3>
 
         <p>Obsidian stores everything in local markdown files. Your vault is 100% on your device. Sync is optional and via external services (iCloud, Dropbox, or Obsidian Sync). This is the purest offline-first implementation.</p>
 
-        <p><strong>Strengths:</strong> Complete offline independence, you own your files (can access raw .md files), no cloud vendor lock-in, sync is optional and manual.</p>
+        <p><strong>Strengths:</strong> Complete offline independence, you own your files (can access raw .md files), no cloud vendor lock-in, sync is optional.</p>
 
-        <p><strong>Weaknesses:</strong> Sync requires extra setup (Dropbox, iCloud, or paid Obsidian Sync), sync conflicts must be manually resolved, no built-in mobile app (relies on community efforts), file system access on mobile is limited.</p>
+        <p><strong>Weaknesses:</strong> Syncing between devices needs setup (iCloud, a third-party service, or paid Obsidian Sync), and sync conflicts may need manual resolution. The official mobile apps need the vault stored where your sync method works on the phone.</p>
 
         <h3>Joplin: Offline-First with Built-In Sync</h3>
 
-        <p>Joplin is offline-first with batteries included. Create notes locally, they're stored in an encrypted database. Sync to Joplin Cloud, Dropbox, NextCloud, or S3. Automatic conflict resolution via version history.</p>
+        <p>Joplin is offline-first with batteries included. Notes are stored in a local database and can be synced to Joplin Cloud, Dropbox, Nextcloud or S3. End-to-end encryption for sync is optional and turned on manually. When a sync conflict happens, Joplin copies the local note into a Conflicts notebook.</p>
 
-        <p><strong>Strengths:</strong> True offline-first design, multiple sync backends, built-in encryption, version history and conflict resolution, cross-platform (iOS, Android, Mac, Windows, Linux).</p>
+        <p><strong>Strengths:</strong> True offline-first design, multiple sync backends, optional end-to-end encryption for sync, note history, conflict copies instead of silent overwrites, cross-platform (iOS, Android, Mac, Windows, Linux).</p>
 
         <p><strong>Weaknesses:</strong> iOS app is not as polished as native options, sync can be slow with large databases, desktop-focused (mobile is secondary).</p>
 
@@ -476,15 +476,15 @@
 
         <p><strong>Strengths:</strong> End-to-end encryption (Standard Notes can't read your notes), offline create and edit, cross-platform, open-source server option.</p>
 
-        <p><strong>Weaknesses:</strong> Subscription required for advanced features ($1.99/month as of June 2026), smaller community than competitors, less powerful organizing features.</p>
+        <p><strong>Weaknesses:</strong> Subscription required for advanced features (paid plans from $90/year), smaller community than competitors, less powerful organizing features.</p>
 
-        <h3>Bear: Dependent on iCloud Sync</h3>
+        <h3>Bear: Offline Notes, iCloud Sync with Bear Pro</h3>
 
-        <p>Bear uses iCloud for all syncing. While you can create notes offline, full functionality depends on iCloud connection. Offline editing is supported but with caveats: iCloud is mandatory for any multi-device use, offline editing is limited, and privacy is tied to iCloud encryption (not end-to-end by default).</p>
+        <p>You can create and edit notes in Bear offline. Syncing across devices uses iCloud and requires Bear Pro ($2.99/month or $29.99/year). Bear supports Apple&rsquo;s Advanced Data Protection; without it, iCloud data is not end-to-end encrypted.</p>
 
-        <h3>Google Keep: No Offline Support</h3>
+        <h3>Google Keep: Offline Edits on Mobile</h3>
 
-        <p>Google Keep requires internet connection. You cannot create or edit notes offline. Period.</p>
+        <p>Google Keep&rsquo;s help notes that if you edit the same note on different devices while one of them is offline, you may see a &ldquo;Conflicting edits found&rdquo; notification &mdash; edits made offline are kept and synced later. We have not tested creating notes offline in Keep, so check it on your device before relying on it.</p>
 
         <h2>Use Cases: When Offline-First Matters</h2>
 
@@ -508,15 +508,15 @@
 
         <h2>The Verdict: Which Architecture Wins?</h2>
 
-        <p><strong>Simple Memo - for Obsidian's Outbox</strong> pattern is innovative because it bridges two worlds: the speed and privacy of offline-first, with the clarity of email-based sync. You get end-to-end encryption, zero sync conflicts, and automatic retry on reconnect. It's tailored for quick capture.</p>
+        <p><strong>Simple Memo - for Obsidian's Outbox</strong> pattern is innovative because it bridges two worlds: the speed and privacy of offline-first, with the clarity of email-based sync. You get AES-GCM encryption for memos waiting on the device (not end-to-end encryption), no sync conflicts to resolve, and automatic retry on reconnect. It's tailored for quick capture.</p>
 
-        <p><strong>Obsidian</strong> is the most flexible. Your files are yours. Sync is optional. But setup is required, and mobile support lags.</p>
+        <p><strong>Obsidian</strong> is the most flexible. Your files are yours. Sync is optional. But syncing across devices needs setup.</p>
 
         <p><strong>Joplin</strong> is the best all-around offline-first option: mature, cross-platform, built-in sync, version history. It's designed for serious note-taking, not quick capture.</p>
 
         <p><strong>Apple Notes</strong> is best if you're already in the Apple ecosystem. iCloud sync is seamless, offline works well, and it's built-in.</p>
 
-        <p><strong>Google Keep</strong> shouldn't be trusted for anything you care about offline. It's online-only.</p>
+        <p><strong>Google Keep</strong>&rsquo;s mobile apps keep offline edits and sync them later; check for conflicting edits if you use it on several devices.</p>
 
         <h2>Recommendation Matrix</h2>
 
