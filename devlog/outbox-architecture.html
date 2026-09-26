@@ -236,7 +236,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-25","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -315,7 +315,7 @@
             <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標は、待ちを感じない短さ（アニメーション込みで0.25秒）。</li>
             <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
             <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
-            <li><strong>失敗したら指数バックオフで自動リトライ</strong><br>ネットワークエラーやサーバーエラーの場合、指数バックオフ（1秒→2秒→4秒→8秒…）で自動リトライする。BGTaskSchedulerを使い、アプリがバックグラウンドでも確実にリトライを実行する。</li>
+            <li><strong>失敗したら指数バックオフで自動リトライ</strong><br>ネットワークエラーやサーバーエラーの場合、指数バックオフ（1秒→2秒→4秒→8秒…）で自動リトライする。BGTaskSchedulerを使い、アプリがバックグラウンドにあってもリトライできるようにする（実行のタイミングは iOS が決める）。</li>
             <li><strong>オフラインならNWPathMonitorで回線復帰を検知して自動再送</strong><br>送信時点でオフラインの場合、Network.frameworkのNWPathMonitorが回線状態を監視。Wi-Fiやセルラーが復帰した瞬間に自動的にOutbox内の全未送信メッセージを再送する。</li>
           </ol>
 
@@ -342,7 +342,7 @@
     // 送信処理を実行
     performSend(message: message, outboxId: outboxMessage.id, ...)
 }</code></pre>
-          <p>重要なポイントは、<code>OutboxManager.shared.add(body:)</code>が同期的に永続ストレージに書き込むこと。この呼び出しが成功した時点で、メッセージの安全性が保証される。ネットワーク送信がどのような結果になっても、メッセージはOutboxに残り続ける。</p>
+          <p>重要なポイントは、<code>OutboxManager.shared.add(body:)</code>が同期的に永続ストレージに書き込むこと。この呼び出しが成功した時点で、メッセージは端末に安全に保存されている。ネットワーク送信がどのような結果になっても、メッセージはOutboxに残り続ける。</p>
 
           <!-- Section 4 -->
           <h2>AES-GCM暗号化の実装</h2>
