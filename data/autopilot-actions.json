@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-09-27",
+  "last_run_jst": "2026-09-28",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -459,7 +459,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "36283409083（2026-09-27 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "36364161364（2026-09-28 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -473,13 +473,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": "2026-09-28",
       "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-27",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n36283409083 -> ap-20260927-actions: appended ap-20260927-actions (skipped_gate)",
-      "reopened_jst": "2026-09-27"
+      "last_run_jst": "2026-09-28",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n36364161364 -> ap-20260928-actions: appended ap-20260928-actions (skipped_gate)",
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -859,7 +859,7 @@
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -871,16 +871,16 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27",
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -899,7 +899,7 @@
     {
       "id": "act-selfheal-ap-20260831-actions",
       "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -911,16 +911,16 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27",
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -982,7 +982,7 @@
     },
     {
       "id": "act-status-stale",
-      "title": "data/autopilot-status.json が 4日前（2026-09-23）のまま",
+      "title": "data/autopilot-status.json が 5日前（2026-09-23）のまま",
       "detail": "日報の唯一のデータ源。当日分でないと「上流が止まった」と報告される（Runbook §5-2）。",
       "source": "status",
       "domain": null,
@@ -1003,7 +1003,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-25",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1",
       "reopened_jst": "2026-09-25"
@@ -1053,7 +1053,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
       "owner_needed": true,
@@ -1737,7 +1737,7 @@
     {
       "id": "act-selfheal-ap-20260905-actions",
       "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -1749,16 +1749,16 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27",
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28",
       "owner_needed": false,
       "owner_needed_review": {
         "mode": "human",
@@ -2187,7 +2187,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "2026-09-07、依頼内容の「伏字が実際の日次取り込みで効いたか」は別経路で確認済み。simplememo-api Repro Facts の定期実行33961458095（9/5）・34029257450（9/6）はHTTP200と成果物コミット948a0bf・68c6b5bを実ログで照合。修正#244後の両成果物はstate=ok、端末欄2件をotherへ集約し件数を保持、端末/OS/版の許可外キー0件。元の単発Routineの終了状態は未観測のままで、done・自動復旧成功にはしない。同じ観測episodeだけを既知の制約として受容し、新しい状態/実行の異常は既存merge規則で再起票する。詳細: docs/repro-redaction-verification-2026-09-07.md。",
       "owner_needed": false,
@@ -2575,8 +2575,8 @@
     },
     {
       "id": "act-shipping-outage",
-      "title": "どの経路も 4日連続で出荷していない（2026-09-24〜2026-09-27）",
-      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "title": "どの経路も 5日連続で出荷していない（2026-09-24〜2026-09-28）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27 / 2026-09-28）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
       "source": "route",
       "domain": null,
       "touches": [
@@ -2593,7 +2593,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-25",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "2026-09-23 以降どの経路も出荷していない",
       "reopened_jst": "2026-09-25"
@@ -2621,8 +2621,8 @@
     },
     {
       "id": "act-route-silent-actions",
-      "title": "actions が 8日ぶん出荷していない（2026-09-20〜2026-09-27・最後の出荷 2026-09-19）",
-      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
+      "title": "actions が 9日ぶん出荷していない（2026-09-20〜2026-09-28・最後の出荷 2026-09-19）",
+      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27 / 2026-09-28）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
       "source": "route",
       "domain": null,
       "touches": [
@@ -2640,7 +2640,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-22",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "2026-09-19 以降 actions の出荷は台帳に無い",
       "reopened_jst": "2026-09-22"
@@ -2686,11 +2686,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": "2026-09-28",
       "evidence": "ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b より後に ccr-0920 は 1回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27"
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260913",
@@ -2826,13 +2826,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": "2026-09-28",
       "evidence": "観測有効=true、未記帳のCodex結果 0 件、原因分類 0 件",
-      "last_run_jst": "2026-09-27",
+      "last_run_jst": "2026-09-28",
       "last_run_log": "Codex original outcomes appended: 1; causes classified: 0; shipments not inferred",
-      "reopened_jst": "2026-09-27"
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260917",
@@ -2859,7 +2859,7 @@
     {
       "id": "act-selfheal-ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
       "title": "未修理の故障: ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-09-16 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0a6e0-4347-7fa1-86d8-c2d630e94bf6; receipt SHA256 474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-09-16 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0a6e0-4347-7fa1-86d8-c2d630e94bf6; receipt SHA256 474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -2871,21 +2871,21 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27"
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-selfheal-ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1",
       "title": "未修理の故障: ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-09-18 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0b12d-3693-7930-80d4-e5dba3e33048; receipt SHA256 2a289ab982118e0d8b92a1d29b5e5f37d8ebbc34687f1e4ae0a0236fc59a2fbf\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-09-18 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0b12d-3693-7930-80d4-e5dba3e33048; receipt SHA256 2a289ab982118e0d8b92a1d29b5e5f37d8ebbc34687f1e4ae0a0236fc59a2fbf\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -2897,16 +2897,16 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27"
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-health-1463",
@@ -2932,7 +2932,7 @@
     {
       "id": "act-selfheal-ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac",
       "title": "未修理の故障: ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-09-19 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0b653-5a26-7eb3-b906-f316e4d8c8dd; receipt SHA256 3672e19feac4250bcec1013e5a08bd786deba929ebcf07ed479072c52b5a95fd\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac（2026-09-19）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-09-19 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0b653-5a26-7eb3-b906-f316e4d8c8dd; receipt SHA256 3672e19feac4250bcec1013e5a08bd786deba929ebcf07ed479072c52b5a95fd\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -2944,16 +2944,16 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-09-19",
-          "after_run_id": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac"
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-27",
-      "last_seen_jst": "2026-09-27",
-      "closed_jst": "2026-09-27",
-      "evidence": "ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac より後に actions は 2回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-27"
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-28"
     },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260919",
@@ -2997,7 +2997,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-20",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9 は未修理のまま（repair_of で名指しされていない）"
     },
@@ -3039,7 +3039,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-24",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "#1549 がまだ open"
     },
@@ -3136,7 +3136,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-25",
-      "last_seen_jst": "2026-09-27",
+      "last_seen_jst": "2026-09-28",
       "closed_jst": null,
       "evidence": "#1587 がまだ open"
     },
@@ -3183,6 +3183,31 @@
       "last_seen_jst": "2026-09-26",
       "closed_jst": "2026-09-26",
       "evidence": "claude/autopilot-act-20260926 の取り残しは解消（走査に出てこない）"
+    },
+    {
+      "id": "act-selfheal-ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562",
+      "title": "未修理の故障: ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-09-28 / actions / outcome=failed。Structured Codex runtime code usage_limit_exceeded; original turn 01a0e541-4a0f-78b1-ab88-affbfe190e53; receipt SHA256 44d68c91e166ec77408c4e6222c5a284fa49a087307bdb844609c498d288ef7a\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562（2026-09-28）より後に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "auto": null,
+      "close_check": {
+        "kind": "no_failure_since",
+        "params": {
+          "route": "actions",
+          "failure_class": "usage_limit",
+          "since": "2026-09-28",
+          "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-28",
+      "last_seen_jst": "2026-09-28",
+      "closed_jst": null,
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
     }
   ],
   "escalation_review_authorization": {
