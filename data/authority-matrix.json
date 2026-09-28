@@ -199,20 +199,25 @@
     {
       "domain": "価格・プラン・無料枠の変更",
       "reversible": false,
-      "ai_may": [],
+      "ai_may": [
+        "価格の原資料照合・影響分析・変更案の作成",
+        "案件ごとに人が事前承認した価格変更の実設定・本番読戻し"
+      ],
       "requires_approval": true,
       "human_only": [
-        "すべて"
+        "価格・対象SKU・地域・開始日・既存購読者の扱いの事業判断と実適用承認",
+        "プラン構造・無料枠・例外・契約・課金同意の判断"
       ],
-      "gate": "自動化していない。data/site-constants.json の値変更はCIが表示との整合だけ見る",
+      "gate": "2026-09-28の委任は将来の価格変更に限る。自律変更幅は未設定なので実価格の変更は全件、SKU・地域・新旧価格・開始日・既存購読者の扱い・Appleの通知/同意・公開表示を記した案件別の人の事前承認が必要。AIは承認範囲だけ正規経路で実設定し、ASCと本番表示を読戻す。差分・認証・読戻しが不明なら停止して人へ移管する。プラン構造・無料枠は別承認。data/site-constants.json の値はASC実価格の証明ではない",
       "evidence": [
         "data/site-constants.json",
-        "scripts/sync_constants.js"
+        "scripts/sync_constants.js",
+        "docs/price-change-delegation-20260928.md"
       ],
       "status": "active",
       "threshold": {
         "set_by": "unset",
-        "note": "変更幅の上限も承認フローも未設計。現行値は月額500円/年額5,000円/無料枠1日3通で data/site-constants.json が正。**AIは値を提案もしない**（課金は不可逆で、既存契約者への影響が読めないため）。設計するなら autopilot-maturity-backlog.md ⑨ から"
+        "note": "自律変更幅は未設定で、全ての実価格変更は案件別の人の事前承認が必要。価格・地域・日付は現行ASCを実際に読んで確認する。data/site-constants.json は公開表示側の値であり、ASC価格の実証ではない。提案・CI・承認だけで正式実行加点しない"
       }
     },
     {
