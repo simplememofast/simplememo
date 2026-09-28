@@ -14,10 +14,13 @@ undo. For the same reason `url` stays the app's canonical home on every page
 rather than the page doing the emitting — one entity, one URL. The page-level
 identity is already carried by each page's own WebPage/Article node.
 
-Values that drift (rating, prices, version) are NOT written here. They are read
+Values that drift (prices, version) are NOT written here. They are read
 from data/site-constants.json at generation time and then enforced in CI by
 scripts/sync_constants.js, whose `#app` rule matches exactly the node this
 emits. Hardcoding them here would create a second source of truth.
+
+These product pages do not display an aggregate App Store rating. Keep the
+rating on pages that visibly cite the Japan storefront, not in these nodes.
 
 Listed, not discovered: "is this a page about the app" is an editorial call.
 /vs/ comparisons and blog listicles mention the app constantly and must not
@@ -110,13 +113,6 @@ def build_node(lang: str) -> str:
             "@id": f"{SITE_URL}/about/#person",
             "name": "AI ATAKA",
             "url": f"{SITE_URL}/about/",
-        },
-        "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": C["ratingValue"],
-            "ratingCount": C["ratingCount"],
-            "bestRating": "5",
-            "worstRating": "1",
         },
     }
     body = json.dumps(payload, ensure_ascii=False, separators=(",", ":"))

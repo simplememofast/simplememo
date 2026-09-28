@@ -129,37 +129,24 @@ const RULES = [
  * saying nothing. Its own instruction ("Do NOT infer or extrapolate … version
  * numbers beyond these published values") is what gives the wrong number teeth.
  */
-/**
- * 「as of」の日付は、**この行が名乗る事実のうち最も古い確認日**にする。
- *
- * 2026-08-22、5.8.1 の反映でこの穴が実際に出た: version だけを書き換える
- * 規則だったので、リリース当日に llms.txt が
- *   「**Current facts (as of 2026-08-09):** version 5.8.1」
- * になった。**リリースの13日前に 5.8.1 が現行だったと名乗る**形で、
- * この文書の冒頭が警告している「権威ありげな誤情報」そのもの。
- *
- * 今日の日付にはしない。この行はバージョンだけでなく評価・価格も名乗るので、
- * **一番古い事実より新しい鮮度を主張できない。**（評価が10日前なら、
- * バージョンを今日更新しても、この行全体としては10日前が正しい）
- */
-function stampDate(c = C) {
-  const dates = [c.appVersionNote, c.ratingNote, c.priceNote]
-    .map((n) => {
-      const all = [...String(n || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)].map((m) => m[1]).sort();
-      return all.length ? all[all.length - 1] : null;
-    })
-    .filter(Boolean)
-    .sort();
-  return dates.length ? dates[0] : null;
+// Each published fact carries its own verification date. A shared "as of"
+// date can predate a newly released version when the price was checked earlier.
+function latestDate(note) {
+  const dates = [...String(note || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)]
+    .map((m) => m[1]).sort();
+  return dates.at(-1) || null;
 }
 
 const LLMS_RULES = [
-  ['llms.txt Current facts version',
-    /(\*\*Current facts \(as of )(\d{4}-\d{2}-\d{2})(\):\*\* version )([0-9][0-9.]*)/,
-    (m, a, d, b, v) => a + (stampDate() || d) + b + C.appVersion],
-  ['llms.txt rating',
-    /(App Store rating )(\d\.\d)( \()(\d+)( ratings\))/,
-    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c],
+  ['llms.txt public version and verification date',
+    /(Japan App Store version )([0-9][0-9.]*)( \(verified )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, v, b, date, c) => a + C.appVersion + b + (latestDate(C.appVersionNote) || date) + c],
+  ['llms.txt rating and verification date',
+    /(Japan App Store rating )(\d\.\d)( \()(\d+)( ratings; verified )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, rv, b, rc, c, date, d) => a + C.ratingValue + b + C.ratingCount + c + (latestDate(C.ratingNote) || date) + d],
+  ['llms.txt Japan prices and confirmation date',
+    /(Premium ¥)(\d+)(\/mo or ¥)([\d,]+)(\/yr \(owner-confirmed )(\d{4}-\d{2}-\d{2})(\))/,
+    (m, a, monthly, b, yearly, c, date, d) => a + C.priceMonthlyJpy + b + C.priceYearlyJpy + c + (latestDate(C.priceNote) || date) + d],
 ];
 
 const args = new Set(process.argv.slice(2));
@@ -232,19 +219,19 @@ if (SELFTEST) {
   t('見える評価の対（値と件数）を同時に直す',
     pair.includes(String(C.ratingValue)) && pair.includes(`${C.ratingCount}件の評価`));
 
-  // --- 鮮度の日付。**一番古い事実より新しい鮮度を主張しない。** ---
-  // 実際に起きた形: 版だけ新しい日付にしたら「リリースの13日前に 5.8.1 が現行」と名乗った。
-  t('3つの注記のうち一番古い日付を採る',
-    stampDate({ appVersionNote: '2026-09-01', ratingNote: '2026-08-20', priceNote: '2026-08-25' }) === '2026-08-20');
-  t('1つの注記に複数の日付があれば、その中では新しい方を使う',
-    stampDate({ appVersionNote: '2026-08-01 と 2026-09-01', ratingNote: '2026-09-02', priceNote: '2026-09-03' }) === '2026-09-01');
-  t('日付がどこにも無ければ null（今日の日付を捏造しない）',
-    stampDate({ appVersionNote: 'なし', ratingNote: '', priceNote: null }) === null);
+  // --- Date provenance is per field, including owner-confirmed prices. ---
+  t('複数の日付を含む注記は最新の確認日を使う',
+    latestDate('2026-08-01 と 2026-09-01') === '2026-09-01');
+  t('価格の確認日を公開版の確認日へ流用しない',
+    latestDate('version checked 2026-09-28') !== latestDate('price confirmed 2026-09-22'));
+  t('日付が無ければ null（今日の日付を捏造しない）', latestDate('なし') === null);
 
   // --- 実データが通ること（合成検体だけだと本物が形を変えた日に気づかない） ---
   t('台帳の値が揃っている',
     [C.ratingValue, C.ratingCount, C.priceMonthlyJpy, C.appVersion].every((v) => v !== undefined && v !== null && String(v) !== ''));
-  t('実データの stampDate が日付を返す', /^\d{4}-\d{2}-\d{2}$/.test(String(stampDate())));
+  t('実データの版・評価・価格に個別の確認日がある',
+    [C.appVersionNote, C.ratingNote, C.priceNote]
+      .every((note) => /^\d{4}-\d{2}-\d{2}$/.test(String(latestDate(note)))));
 
   // ── ここから下は「規則を単体で当てる」では届かない門 ──────────────
   //
@@ -326,8 +313,9 @@ if (SELFTEST) {
     drift(`<meta property="og:site_name" content="${C.appNameEn}">`).length === 0);
 
   // llms.txt は HTML の走査を通らないので、ここを見ないと丸ごと無検査になる。
-  const llms = `**Current facts (as of ${stampDate()}):** version ${C.appVersion}\n`
-    + `App Store rating ${C.ratingValue} (${C.ratingCount} ratings)\n`;
+  const llms = `Japan App Store version ${C.appVersion} (verified ${latestDate(C.appVersionNote)})\n`
+    + `Japan App Store rating ${C.ratingValue} (${C.ratingCount} ratings; verified ${latestDate(C.ratingNote)})\n`
+    + `Premium ¥${C.priceMonthlyJpy}/mo or ¥${C.priceYearlyJpy}/yr (owner-confirmed ${latestDate(C.priceNote)})\n`;
   t('llms.txt が正準値なら何も言わない', scanLlms(llms).findings.length === 0);
   t('llms.txt の version がずれていれば落ちる',
     scanLlms(llms.replace(`version ${C.appVersion}`, 'version 3.9')).findings.length === 1);
