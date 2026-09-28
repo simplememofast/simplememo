@@ -43,7 +43,7 @@ def normalized_text(value: str) -> str:
 def schema_content(value):
     if isinstance(value, dict):
         return {k: schema_content(v) for k, v in value.items()
-                if k not in {"dateModified", "datePublished", "copyrightYear"}}
+                if k not in {"dateModified", "datePublished", "copyrightYear", "speakable"}}
     if isinstance(value, list):
         return [schema_content(v) for v in value]
     return value

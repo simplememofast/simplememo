@@ -138,6 +138,8 @@ class SplitPageRegressionTests(unittest.TestCase):
         self.assertEqual([x['priceCurrency'] for x in en['offers']], ['USD'] * 3)
         self.assertEqual([x['price'] for x in ja['offers']], ['0', C['priceMonthlyJpy'], C['priceYearlyJpy'].replace(',', '')])
         self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, free forever")
+        self.assertNotIn('aggregateRating', ja)
+        self.assertNotIn('aggregateRating', en)
 
     def test_product_schema_stays_in_place_and_uses_real_head(self):
         from inject_app_schema import build_node, replace_or_insert
