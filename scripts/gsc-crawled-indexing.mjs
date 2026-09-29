@@ -122,11 +122,30 @@ async function sourceAudit() {
         assert(read(c.from.slice(1)).length > 0, `${c.from}: downloadable CSV missing`);
       }
       assert(noindex(configuredRobots(headers, c.from)), `${c.from}: missing noindex response rule`);
+      const response = await middleware({
+        request: new Request(ORIGIN + c.from),
+        next: async () => new Response("asset body", { headers: { "Content-Type": c.kind === "data" ? "application/json" : "text/csv", "Cache-Control": "public, max-age=3600" } }),
+      });
+      assert.equal(response.status, 200, `${c.from}: raw asset response status changed`);
+      assert(noindex(response.headers.get("x-robots-tag")), `${c.from}: middleware lost noindex on a cached asset`);
+      assert.equal(response.headers.get("cache-control"), "public, max-age=3600", `${c.from}: raw asset cache policy changed`);
+      assert.equal(await response.text(), "asset body", `${c.from}: raw asset body changed`);
+      const conditional = await middleware({
+        request: new Request(ORIGIN + c.from, { headers: { "If-None-Match": '"cached-raw"' } }),
+        next: async () => new Response(null, { status: 304, headers: { ETag: '"cached-raw"', "Cache-Control": "public, max-age=3600" } }),
+      });
+      assert.equal(conditional.status, 304, `${c.from}: conditional response status changed`);
+      assert(noindex(conditional.headers.get("x-robots-tag")), `${c.from}: conditional response lost noindex`);
+      assert.equal(conditional.headers.get("etag"), '"cached-raw"', `${c.from}: conditional response ETag changed`);
+      assert.equal(conditional.headers.get("cache-control"), "public, max-age=3600", `${c.from}: conditional response cache policy changed`);
+      assert.equal(conditional.body, null, `${c.from}: conditional response acquired a body`);
       assert(!sitemap.includes(`<loc>${ORIGIN}${c.from}</loc>`), `${c.from}: raw file must not be in sitemap`);
     } else targets.add(c.to);
   }
   for (const target of targets) {
     assert.deepEqual(await edgeResult(middleware, ORIGIN + target, ORIGIN), { kind: "pass" }, `${target}: second redirect`);
+    const response = await middleware({ request: new Request(ORIGIN + target), next: async () => new Response("html body") });
+    assert(!noindex(response.headers.get("x-robots-tag")), `${target}: middleware noindexed HTML`);
     checkHtml(read(htmlFile(target)), target);
     assert(!noindex(configuredRobots(headers, target)), `${target}: noindex response rule covers HTML`);
     assert(sitemap.includes(`<loc>${ORIGIN}${target}</loc>`), `${target}: absent from sitemap`);

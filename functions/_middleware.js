@@ -357,5 +357,21 @@ export const onRequest = async (context) => {
     return Response.redirect(url.toString(), 301);
   }
 
+  // Public raw JSON and CSV remain available to the site's readers and data
+  // consumers. Set noindex on the final response as well as in _headers:
+  // an unchanged CSV can retain a cached asset response with old headers.
+  if (
+    (pathname.startsWith("/data/") && pathname.endsWith(".json")) ||
+    (pathname.startsWith("/assets/downloads/") && pathname.endsWith(".csv"))
+  ) {
+    const asset = await context.next();
+    // A conditional request can return 304 with no body. It still needs the
+    // new directive so an older cached 200 does not hide the indexing policy.
+    if (!asset.ok && asset.status !== 304) return asset;
+    const response = new Response(asset.body, asset);
+    response.headers.set("X-Robots-Tag", "noindex");
+    return response;
+  }
+
   return context.next();
 };
