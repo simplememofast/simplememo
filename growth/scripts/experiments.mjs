@@ -10,12 +10,14 @@
  *        [--metric ctr] [--baseline-clicks N --baseline-impressions N \
  *         --baseline-ctr 0.0x --baseline-position N \
  *         --baseline-window YYYY-MM-DD..YYYY-MM-DD --baseline-source "..."]
- *   node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "..."
+ *   node growth/scripts/experiments.mjs evaluate <id> --decision <decision> --snapshot <label> --note "..."
  *   node growth/scripts/experiments.mjs evaluate <id> --decision <d> --review /private/review.json
  *   node growth/scripts/experiments.mjs reschedule <id> --evaluate 2026-09-06 --note "why"
  *
- * Evidence must match the target metric. GSC admission checks rows and periods;
- * other metrics use an explicit review contract. Neither route proves causality.
+ * Evidence must match the target metric. --snapshot is limited to eligible
+ * single-page or exact query-page GSC CTR/position/impressions; other scopes,
+ * metrics and diagnostics use an explicit --review contract. Neither route
+ * proves causality.
  * --force cannot bypass evidence; diagnostic and administrative closures are
  * recorded separately from measured outcomes. Historical decisions are retained.
  */
