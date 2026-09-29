@@ -94,6 +94,10 @@ export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive', 'measurem
  * どちらも「台帳の行は同じ形をしている」という前提から来ている。
  * **前提のほうを1箇所に閉じ込める。**
  */
+export function hasPrimaryMetricConflict(exp) {
+  return exp?.measurement_issue?.code === 'primary_metric_conflict';
+}
+
 export function measuresPageCtr(exp) {
   if (!exp || exp.target_metric !== 'ctr') return false;
   if (exp.measurement_scope && exp.measurement_scope.kind !== 'page') return false;
@@ -205,6 +209,16 @@ export function validate(ledger) {
     }
     if (e.decision != null && !DECISIONS.includes(e.decision)) {
       problems.push(`${at}: decision ${JSON.stringify(e.decision)} not one of ${DECISIONS.join('/')}`);
+    }
+    if (e.measurement_issue !== undefined) {
+      const issue = e.measurement_issue;
+      if (issue?.code !== 'primary_metric_conflict' || issue.declared_metric !== e.target_metric
+          || !DATE.test(issue.detected_at ?? '') || typeof issue.note !== 'string' || !issue.note.trim()) {
+        problems.push(`${at}: measurement_issue needs a dated primary_metric_conflict matching target_metric`);
+      }
+      if (e.status === 'evaluated' && !['measurement_failed', 'abandoned'].includes(e.decision)) {
+        problems.push(`${at}: unresolved primary metric conflict cannot support an efficacy decision`);
+      }
     }
 
     // [2026-08-25] **基準値の未記録を `inconclusive` に隠さない。**
