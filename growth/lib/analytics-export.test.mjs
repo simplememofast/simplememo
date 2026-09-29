@@ -70,7 +70,7 @@ test('provisional diagnostics allow only seven closed JST dates from the link da
   const midnight = new Date('2026-09-06T15:00:00Z'); // Sep 7 00:00 JST.
   assert.equal(validateOptions({ ...options, end: '2026-09-06' }, midnight).end, '2026-09-06');
   assert.throws(() => validateOptions({ ...options, end: '2026-09-07' }, midnight));
-  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-journey']) {
+  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-landing-diagnostic', 'ga4-journey']) {
     assert.throws(() => validateOptions({ ...options, report, provisional: true }, now));
     assert.throws(() => validateOptions({ report, start: '2026-09-19', end: '2026-09-19' }, now));
   }
@@ -212,14 +212,18 @@ test('provisional dry runs and unavailable estimates never execute a SELECT', as
   }
 });
 test('all mature GA4 reports still require and scan the following day', async () => {
-  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-journey']) {
+  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-landing-diagnostic', 'ga4-journey']) {
     const api = fakeApi();
     const result = await collect({ ...ga4, report }, { api, now });
     assert.equal(result.status, 'complete');
     assert.equal(result.provisional, undefined);
     assert.deepEqual(result.coverage.at(-1), { day: '2026-09-08', present: true });
-    assert.equal(api.calls[0].params.scan_end_date, '2026-09-08');
-    assert.equal(api.calls[0].types.scan_end_date, 'DATE');
+    if (report === 'ga4-landing-diagnostic') {
+      assert.match(api.calls[0].sql, /DATE_ADD\(@end_date, INTERVAL 1 DAY\)/);
+    } else {
+      assert.equal(api.calls[0].params.scan_end_date, '2026-09-08');
+      assert.equal(api.calls[0].types.scan_end_date, 'DATE');
+    }
     const missing = fakeApi({ listTables: async () => [{ id: 'events_20260906' }, { id: 'events_20260907' }] });
     assert.equal((await collect({ ...ga4, report }, { api: missing, now })).status, 'incomplete_daily_tables');
     assert.equal(missing.calls.length, 0);
@@ -262,6 +266,18 @@ test('funnel always includes quality output and keeps the standard event denomin
   assert.ok(api.calls.every(q => q.params.bridge_measurement_version === '2026-09-07'));
   assert.match(result.interpretation, /QA is excluded/);
 });
+test('landing diagnostic is one fixed capped query and explicitly preserves the quality gate', async () => {
+  const api = fakeApi();
+  const result = await collect({ ...ga4, report: 'ga4-landing-diagnostic' }, { api, now });
+  assert.equal(result.status, 'complete');
+  assert.deepEqual(result.queries.map((q) => q.file), ['ga4-landing-diagnostic.sql']);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls.every((q) => q.maximumBytesBilled === QUERY_CAP));
+  assert.match(result.interpretation, /Candidate groups are not observed landings/);
+  assert.match(result.interpretation, /cannot clear the funnel quality gate/);
+  assert.ok(!api.calls[1].sql.includes('user_pseudo_id AS'));
+  assert.deepEqual(unseal(seal(result, pair.publicKey), pair.privateKey), result);
+});
 test('journey uses the same date, following-day, encryption and two-query cost contract', async () => {
   const options = { ...ga4, report: 'ga4-journey' };
   for (const override of [{ start: '2026-09-05' }, { end: '2026-09-16' }]) {
@@ -292,6 +308,7 @@ test('workflow handles secrets only in the reader, uploads ciphertext only, and 
   assert.ok(!text.includes('contents: write')); assert.ok(!text.includes('schedule:'));
   assert.equal((text.match(/secrets\.GCP_SERVICE_ACCOUNT_JSON/g) || []).length, 1);
   assert.ok(text.includes('ga4-journey'));
+  assert.ok(text.includes('ga4-landing-diagnostic'));
   assert.ok(text.includes('ga4-provisional'));
 });
 
