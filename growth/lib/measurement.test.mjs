@@ -51,7 +51,7 @@ test('query shares are mutually exclusive and unknown positions do not become ze
 });
 
 const snapshot = (start, end, extra = {}) => ({ meta: {
-  period_start: start, period_end: end, totals: { source: 'dates' }, ...extra,
+  period_start: start, period_end: end, source: 'bigquery', totals: { source: 'dates' }, ...extra,
 } });
 test('overlap audit resolves legacy page lists and preserves global/external scopes', () => {
   const ledger = { experiments: [
@@ -78,6 +78,12 @@ test('period comparison rejects partial, overlapping, missing and mixed-surface 
     bigquery: { window_days_available: 24, window_days_requested: 28 },
   }), before).comparable, false);
   assert.equal(assessComparison(snapshot('2026-09-07', '2026-10-04', { search_type: 'IMAGE' }), before).comparable, false);
+  assert.deepEqual(assessComparison(snapshot('2026-09-07', '2026-10-04', { source: 'csv-export' }), before), {
+    comparable: false, current_days: 28, previous_days: 28, reason: 'different_or_unknown_source',
+  });
+  assert.equal(assessComparison(snapshot('2026-09-07', '2026-10-04', { source: undefined }), before).reason,
+    'different_or_unknown_source');
+  assert.equal(selectComparison(current, [snapshot('2026-08-10', '2026-09-06', { source: 'csv-export' })]), null);
 });
 
 test('authorized global observation preserves history and releases only future running ownership', async () => {
