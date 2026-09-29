@@ -1,4 +1,4 @@
-/** Compare only complete, equal-length, disjoint search windows. */
+/** Compare only complete, equal-length, disjoint search windows from the same collection source. */
 export function assessComparison(current, previous) {
   const window = (snapshot) => {
     const m = snapshot?.meta;
@@ -14,6 +14,7 @@ export function assessComparison(current, previous) {
     const b = m.bigquery;
     return { start, end, days,
       incomplete: m.complete_window === false || (b && b.window_days_available < b.window_days_requested),
+      source: m.source || 'unknown',
       type: b?.search_type || m.search_type || 'WEB',
       aggregation: m.totals?.source || 'unknown',
     };
@@ -23,6 +24,9 @@ export function assessComparison(current, previous) {
   if (!a || !b) return { ...result, reason: 'missing_or_invalid_period' };
   if (a.incomplete || b.incomplete) return { ...result, reason: 'incomplete_window' };
   if (a.days !== b.days) return { ...result, reason: 'different_window_lengths' };
+  if (a.source !== b.source || a.source === 'unknown') {
+    return { ...result, reason: 'different_or_unknown_source' };
+  }
   if (a.type !== b.type || a.aggregation !== b.aggregation || a.aggregation === 'unknown') {
     return { ...result, reason: 'different_or_unknown_aggregation' };
   }
