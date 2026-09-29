@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Owner's 2026-09-16 GSC sample: serving policy, not Google's indexing verdict.
+// Owner's 2026-09-16 and 2026-09-29 GSC samples: serving policy, not Google's indexing verdict.
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -8,7 +8,17 @@ import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://simplememofast.com";
 const read = (p) => readFileSync(path.join(ROOT, p), "utf8");
-const { cases } = JSON.parse(read("docs/seo/gsc-crawled-cases-2026-09-16.json"));
+const olderCases = JSON.parse(read("docs/seo/gsc-crawled-cases-2026-09-16.json")).cases;
+const latestCases = JSON.parse(read("docs/seo/gsc-crawled-cases-2026-09-29.json")).cases;
+assert.equal(olderCases.length, 60);
+assert.equal(latestCases.length, 50);
+const bySource = new Map(olderCases.map(c => [c.from, c]));
+for (const c of latestCases) {
+  const previous = bySource.get(c.from);
+  if (previous) assert.deepEqual(c, previous, `${c.from}: supplied reports disagree`);
+  bySource.set(c.from, c);
+}
+const cases = [...bySource.values()];
 const clean = (html) => html.replace(/<!--[\s\S]*?-->/g, "")
   .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "");
 const attr = (tag, name) => {
@@ -80,10 +90,12 @@ function selftest() {
   assert.throws(() => checkHtml(`<head><!--${valid}--></head>`, "/press/"));
   assert.throws(() => checkHtml(`<head><script>${valid}</script></head>`, "/press/"));
   assert.throws(() => checkHtml(valid.replace("</head>", `<link rel="canonical" href="${ORIGIN}/press/"></head>`), "/press/"));
-  const config = '/*\n  Cache-Control: public, no-cache\n/data/*.json\n  X-Robots-Tag: noindex\n';
+  const config = '/*\n  Cache-Control: public, no-cache\n/data/*.json\n  X-Robots-Tag: noindex\n/assets/downloads/*.csv\n  X-Robots-Tag: noindex\n';
   assert(noindex(configuredRobots(config, "/data/autopilot-runs.json")));
+  assert(noindex(configuredRobots(config, "/assets/downloads/example.csv")));
   assert(!noindex(configuredRobots(config, "/press/")));
   assert(!noindex(configuredRobots(config, "/data/x.json.html")));
+  assert(!noindex(configuredRobots(config, "/assets/downloads/example.csv.html")));
   assert(!noindex(configuredRobots(config.replace("noindex", "index"), "/data/x.json")));
   assert(robotsAllows("User-agent: *\nAllow: /\nUser-agent: CCBot\nDisallow: /", "/data/x.json"));
   assert(!robotsAllows("User-agent: *\nDisallow: /data/", "/data/x.json"));
@@ -94,18 +106,23 @@ function selftest() {
 async function sourceAudit() {
   const { loadEdgeMiddleware, edgeResult } = await import("./lib/edge-middleware.mjs");
   const middleware = await loadEdgeMiddleware(ROOT);
-  const sitemap = read("sitemap-ja.xml"), headers = read("_headers"), robots = read("robots.txt");
+  const sitemap = read("sitemap-ja.xml") + read("sitemap-en.xml"), headers = read("_headers"), robots = read("robots.txt");
   const policy = JSON.parse(read("data/publication-policy.json"));
   const targets = new Set();
   for (const c of cases) {
     const result = await edgeResult(middleware, ORIGIN + c.from, ORIGIN);
     assert.deepEqual(result, c.kind === "redirect" ? { kind: "redirect", status: 301, to: c.to } : { kind: "pass" }, c.from);
     assert(robotsAllows(robots, c.from), `${c.from}: Google must be able to fetch the redirect/noindex/canonical`);
-    if (c.kind === "data") {
-      assert.equal(policy.files[c.from.slice("/data/".length)]?.served_by_site, true, `${c.from}: preserve publication policy`);
-      JSON.parse(read(c.from.slice(1)));
+    if (c.kind === "data" || c.kind === "asset") {
+      if (c.kind === "data") {
+        assert.equal(policy.files[c.from.slice("/data/".length)]?.served_by_site, true, `${c.from}: preserve publication policy`);
+        JSON.parse(read(c.from.slice(1)));
+      } else {
+        assert(c.from.startsWith("/assets/downloads/") && c.from.endsWith(".csv"));
+        assert(read(c.from.slice(1)).length > 0, `${c.from}: downloadable CSV missing`);
+      }
       assert(noindex(configuredRobots(headers, c.from)), `${c.from}: missing noindex response rule`);
-      assert(!sitemap.includes(`<loc>${ORIGIN}${c.from}</loc>`), `${c.from}: JSON must not be in sitemap`);
+      assert(!sitemap.includes(`<loc>${ORIGIN}${c.from}</loc>`), `${c.from}: raw file must not be in sitemap`);
     } else targets.add(c.to);
   }
   for (const target of targets) {
@@ -142,9 +159,19 @@ async function sourceAudit() {
   console.log(JSON.stringify({ mode: "source", cases: cases.length, kinds: counts(), uniqueHtmlTargets: targets.size, inbound: Object.fromEntries([...inbound].map(([p, v]) => [p, v.size])) }, null, 2));
 }
 
-const counts = () => Object.fromEntries(["redirect", "html", "data"].map(kind => [kind, cases.filter(c => c.kind === kind).length]));
+const counts = () => Object.fromEntries(["redirect", "html", "data", "asset"].map(kind => [kind, cases.filter(c => c.kind === kind).length]));
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function get(urlPath, method = "GET") {
-  return fetch(ORIGIN + urlPath, { method, redirect: "manual", signal: AbortSignal.timeout(15000), headers: { "User-Agent": "SimpleMemo-GSC-Regression/1.0", "Cache-Control": "no-cache" } });
+  // A full audit fetches over 100 distinct URLs. Pace requests and retry an
+  // explicit 429; it is a rate limit, not evidence that a URL is unavailable.
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await pause(250);
+    const response = await fetch(ORIGIN + urlPath, { method, redirect: "manual", signal: AbortSignal.timeout(15000), headers: { "User-Agent": "SimpleMemo-GSC-Regression/1.0", "Cache-Control": "no-cache" } });
+    if (response.status !== 429 || attempt === 4) return response;
+    const retryAfter = Number(response.headers.get("retry-after"));
+    await response.body?.cancel();
+    await pause(Number.isFinite(retryAfter) && retryAfter > 0 ? Math.min(retryAfter * 1000, 30000) : Math.min(5000 * 2 ** attempt, 30000));
+  }
 }
 
 async function liveAudit(strict) {
@@ -154,13 +181,14 @@ async function liveAudit(strict) {
     let ready = false;
     for (let attempt = 0; attempt < 18; attempt++) {
       try {
-        const probes = await Promise.all(cases.filter(c => c.kind === "data").map(c => get(c.from, "HEAD")));
+        const probes = [];
+        for (const p of ["/data/eligibility-policy.json", "/assets/downloads/autopilot-runs-2026-09-02.csv"]) probes.push(await get(p, "HEAD"));
         ready = probes.every(r => r.status === 200 && noindex(r.headers.get("x-robots-tag")));
       } catch { ready = false; }
       if (ready) break;
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await pause(5000);
     }
-    assert(ready, "Production did not expose the new JSON noindex policy within the bounded propagation check");
+    assert(ready, "Production did not expose the new raw-file noindex policy within the bounded propagation check");
   }
   const cache = new Map();
   async function snapshot(p) {
@@ -171,10 +199,11 @@ async function liveAudit(strict) {
     return cache.get(p);
   }
   const report = { mode: strict ? "production-verification" : "production-baseline", observedAt: new Date().toISOString(), sourceCommit: process.env.GITHUB_SHA || null, note: "HTTP serving checks, not a Google URL Inspection result or exact production-revision attestation", kinds: counts(), cases: [] };
-  const robotsResponse = await snapshot("/robots.txt"), sitemapResponse = await snapshot("/sitemap-ja.xml");
+  const robotsResponse = await snapshot("/robots.txt"), sitemapJaResponse = await snapshot("/sitemap-ja.xml"), sitemapEnResponse = await snapshot("/sitemap-en.xml");
   assert.equal(robotsResponse.status, 200, "Live robots.txt must return 200");
-  assert.equal(sitemapResponse.status, 200, "Live sitemap must return 200");
-  const robots = robotsResponse.body, sitemap = sitemapResponse.body;
+  assert.equal(sitemapJaResponse.status, 200, "Live Japanese sitemap must return 200");
+  assert.equal(sitemapEnResponse.status, 200, "Live English sitemap must return 200");
+  const robots = robotsResponse.body, sitemap = sitemapJaResponse.body + sitemapEnResponse.body;
   for (const c of cases) {
     const row = { ...c };
     try {
@@ -190,9 +219,14 @@ async function liveAudit(strict) {
       assert(robotsAllows(robots, c.from) && robotsAllows(robots, c.to), `${c.from}: robots.txt prevents Google's verification`);
       row.finalStatus = final.status;
       row.xRobotsTag = final.robots;
-      if (c.kind === "data") {
-        assert(/application\/json/i.test(final.contentType || ""), `${c.to}: not a JSON response`);
-        JSON.parse(final.body);
+      if (c.kind === "data" || c.kind === "asset") {
+        if (c.kind === "data") {
+          assert(/application\/json/i.test(final.contentType || ""), `${c.to}: not a JSON response`);
+          JSON.parse(final.body);
+        } else {
+          assert(/text\/csv/i.test(final.contentType || ""), `${c.to}: not a CSV response`);
+          assert(final.body.length > 0, `${c.to}: empty CSV response`);
+        }
         row.noindexObserved = noindex(final.robots);
         if (strict) assert(row.noindexObserved, `${c.to}: missing live noindex header`);
       } else {
@@ -211,9 +245,9 @@ async function liveAudit(strict) {
   assert.equal(report.failed, 0, `GSC HTTP checks failed: ${report.failed}/${cases.length}`);
 }
 
-assert.equal(cases.length, 60, "The complete supplied sample must remain covered");
-assert.equal(new Set(cases.map(c => c.from)).size, 60, "Duplicate fixture URL");
-assert.deepEqual(counts(), { redirect: 51, html: 7, data: 2 });
+assert.equal(cases.length, 85, "Both complete supplied samples must remain covered");
+assert.equal(new Set(cases.map(c => c.from)).size, 85, "Duplicate fixture URL");
+assert.deepEqual(counts(), { redirect: 56, html: 15, data: 13, asset: 1 });
 for (const c of cases) assert(c.from.startsWith("/") && c.to.startsWith("/") && !c.to.includes("?"));
 if (process.argv.includes("--selftest")) selftest();
 else if (process.argv.includes("--live")) await liveAudit(true);
