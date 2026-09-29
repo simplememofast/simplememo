@@ -65,6 +65,11 @@
   "repository_is_public": true,
   "$repository_is_public": "2026-08-26 に api.github.com/repos/simplememofast/simplememo を叩いて確かめた（private: false）。**この欄が true である限り、served_by_site: false は『非公開』を意味しない。**CI は seo-check.yml が REPO_PRIVATE として github.event.repository.private の生の値を渡し、ここと食い違ったら落ちる（リポジトリを非公開にしたときも、公開に戻したときも気づける）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを『一致』と書かない。",
   "files": {
+    "actions-recovery-permit.template.json": {
+      "served_by_site": false,
+      "why": "停止中の actions 経路を1回だけ再検証するための未有効テンプレート。サイトには配信しない。",
+      "ok_in_public_repo": "ok"
+    },
     "ai-visibility-probe.json": {
       "served_by_site": true,
       "why": "公開質問への独立AI回答・モデル名・検索呼び出し検証・自社言及率。利用者情報や資格情報を含めない。従来の手動3社観測とは別系列。",

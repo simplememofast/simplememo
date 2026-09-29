@@ -39,10 +39,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { evaluateActionsRecoveryPermit, readActionsRecoveryPermit, verifiedRepairPresent,
+  testActionsRecoveryPermit } from './actions-recovery-permit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
+const RECOVERY_PERMIT_PATH = path.join(ROOT, 'data/actions-recovery-permit.json');
 
 const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
 const preflightFault = r => r.outcome === 'skipped_gate' && r.eligibility_verdict === 'declined_by_fault'
@@ -311,7 +314,11 @@ const SCENARIOS = ledgerScenarios(
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
-  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
+  if (process.argv.includes('--selftest')) {
+    const result = run(SCENARIOS);
+    console.log(`actions recovery permit: ${testActionsRecoveryPermit()} cases passed`);
+    process.exit(result === 0 ? 0 : 1);
+  }
   const runsDoc = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8'));
   const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
   const problems = validate(runsDoc, matrix);
@@ -342,6 +349,27 @@ if (isMain) {
     const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [];
     if (!a.escalate.length) { console.log('上限に達した故障は無い — 止めない。'); process.exit(0); }
     if (dry) {
+      // A dormant code path alone never resumes a stopped route. Only a
+      // separately reviewed permit for one scheduled run number may admit it.
+      // Explicit emergency stops, other escalations, changed ledger evidence,
+      // manual dispatch, and reruns remain blocked. Non-dry --contain never
+      // honors this exception and can still trip the stop switch.
+      let permit = null;
+      try { permit = readActionsRecoveryPermit(RECOVERY_PERMIT_PATH); }
+      catch (error) {
+        if (error.code !== 'ENOENT') console.error(`復旧券を読めないため停止を維持: ${error.message}`);
+      }
+      if (permit?.status === 'active') {
+        const decision = evaluateActionsRecoveryPermit({ permit, analysis: a,
+          runsDoc, ledgerProblems: problems, stopDoc, env: process.env, now: new Date(),
+          repairPresent: verifiedRepairPresent(ROOT) });
+        if (decision.allowed) {
+          console.log(`登録済み復旧券の単一定期実行だけ封じ込めを通過: ${JSON.stringify(decision.audit)}`);
+          console.log('元の失敗・修復回数・緊急停止・予算・共有claim・実験判定は変更しない。');
+          process.exit(0);
+        }
+        console.error(`復旧券は不適格なため停止を維持: ${decision.reason}`);
+      }
       for (const t of a.escalate) {
         const route = t.route && stopDoc.agents?.[t.route] ? t.route : 'all';
         console.error(`止めるべき: ${route} — ${t.failure_class} を ${t.repair_attempts_for_class} 回直して再発（上限 ${a.limit}）`);
@@ -414,5 +442,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n自己修復の境界に問題なし。');
+  if (process.argv.includes('--check')) {
+    console.log(`actions recovery permit: ${testActionsRecoveryPermit()} cases passed`);
+    console.log('\n自己修復の境界に問題なし。');
+  }
 }
