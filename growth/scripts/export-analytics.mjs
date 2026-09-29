@@ -23,6 +23,8 @@ const FILES = {
   'ga4-quality': ['ga4-quality.sql'],
   // Always attach quality results to the funnel; never silently discard QA.
   'ga4-funnel': ['ga4-quality.sql', 'ga4-funnel.sql'],
+  // Separate diagnostic; never substitutes a session_start URL for the funnel landing.
+  'ga4-landing-diagnostic': ['ga4-landing-diagnostic.sql'],
   'ga4-journey': ['ga4-quality.sql', 'ga4-journey.sql'],
 };
 const DAY = 86_400_000;
@@ -171,6 +173,9 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       }
       if (opts.report === 'ga4-journey') {
         out.interpretation = 'Existing card events and referrer-bearing arrivals, not proven click paths or causal effects. Event-day counts and 24-hour session-start cohorts are separate. Route session counts are not additive across routes or quality groups. Inspect both quality and context rows before evaluation; no inferred CTR or drop-off rate.';
+      }
+      if (opts.report === 'ga4-landing-diagnostic') {
+        out.interpretation = 'Fixed categories of session-start URL paths for sessions without a page_view in the post-start 24-hour window, plus agreement with first page_view where available. Out-of-window page views may exist. Individual paths are not exported. Candidate groups are not observed landings, do not repair missing page views, and cannot clear the funnel quality gate or prove SEO attribution to installs.';
       }
     }
   } catch (e) { out.status = 'error'; out.error = errorDetails(e); }
