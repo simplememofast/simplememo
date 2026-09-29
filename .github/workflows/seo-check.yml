@@ -635,6 +635,8 @@ jobs:
         run: |
           node scripts/check-release-gate.mjs --selftest
           node scripts/check-release-gate.mjs --check
+          # Read-only evidence classifier; this never authorizes publication.
+          node scripts/assess-release-health-evidence.mjs --selftest
 
       # 【出荷の門が変わったことを、変えたPRの中で気づかせる】
       # 判断は公開側（ここ）、実行は非公開側（simplememo-ios の release.yml。
