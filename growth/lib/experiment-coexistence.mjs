@@ -23,6 +23,12 @@ export function nonexclusiveObservation(e,{now=new Date(),followup=false}={}) {
   validateCoexistence(e);
   return !followup&&e.status==='running'&&!!e.coexistence&&+new Date(now)>=Date.parse(e.coexistence.effective_at);
 }
+/** Due observations still need review, but their approved coexistence does not freeze pages. */
+export function classifyDueOwnership(due,{now=new Date()}={}) {
+  const blocking=[],observations=[];
+  for(const e of due)(nonexclusiveObservation(e,{now})?observations:blocking).push(e);
+  return {blocking,observations};
+}
 export function canonicalPage(p) {
   assert(typeof p==='string'&&p===p.trim()&&/^(\/|https?:\/\/)/.test(p),'invalid page scope');
   const u=new URL(p,'https://simplememofast.com');

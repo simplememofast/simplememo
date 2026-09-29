@@ -23,6 +23,7 @@ import {
   expectedCtr, positionOpportunity, businessRelevance, curveFor, segmentOfPath,
 } from '../lib/gsc.mjs';
 import { loadLedger, summarize, daysOverdue, today } from '../lib/ledger.mjs';
+import { classifyDueOwnership } from '../lib/experiment-coexistence.mjs';
 import { assessComparison, selectComparison } from '../lib/comparison.mjs';
 import { auditOverlaps } from '../lib/experiment-overlap.mjs';
 
@@ -41,6 +42,8 @@ const comparison = assessComparison(snap, previousCandidate);
 const prev = comparison.comparable ? previousCandidate : null;
 const ledger = loadLedger();
 const { due, overdue, byStatus, total } = summarize(ledger, asOf);
+const { blocking: blockingDue, observations: observationDue } = classifyDueOwnership(due);
+const observationIds = new Set(observationDue.map((e) => e.id));
 
 p(`# Weekly Growth Report — ${asOf}`);
 p();
@@ -51,8 +54,8 @@ if (snap) p(`Current period: ${snap.meta.period_start ?? '?'}..${snap.meta.perio
 p();
 
 /* ── Decisions owed ─────────────────────────────────────────────────────
- * First, always. An overdue decision blocks the pages it covers from any
- * further change, so it silently caps how much else can be done this week. */
+ * First, always. Keep overdue observations visible without undoing their
+ * owner-approved nonexclusive page ownership. */
 p('## Decisions owed');
 p();
 if (!due.length) {
@@ -60,20 +63,21 @@ if (!due.length) {
 } else {
   p(`**${due.length} experiment(s)** past their evaluation date` +
     (overdue.length ? ` — the oldest by ${Math.max(...overdue.map((e) => daysOverdue(e, asOf)))} days` : '') + '.');
+  p(`${blockingDue.length} exclusive scope; ${observationDue.length} approved nonexclusive observation(s).`);
   p();
-  p('| Days late | Experiment | Page | Type |');
-  p('|---:|---|---|---|');
-  for (const e of due.sort((a, b) => daysOverdue(b, asOf) - daysOverdue(a, asOf))) {
-    p(`| ${daysOverdue(e, asOf)} | \`${e.id}\` | \`${e.page}\` | ${e.type} |`);
+  p('| Days late | Experiment | Page | Type | Ownership |');
+  p('|---:|---|---|---|---|');
+  for (const e of [...due].sort((a, b) => daysOverdue(b, asOf) - daysOverdue(a, asOf))) {
+    p(`| ${daysOverdue(e, asOf)} | \`${e.id}\` | \`${e.page}\` | ${e.type} | ${observationIds.has(e.id) ? 'nonexclusive observation' : 'exclusive'} |`);
   }
   p();
-  p('These pages stay frozen until a decision is recorded — do not stack a new change on top.');
+  if (blockingDue.length) p('Exclusive scopes stay frozen until their evidence-based decision is recorded.');
+  if (observationDue.length) p('Approved nonexclusive observations remain due for review but do not freeze other page work. Check the registered metric, baseline, minimum sample and confounders; insufficient evidence is not a win or a reason to rewrite the original result.');
   p();
   p('```sh');
   p('node growth/scripts/experiments.mjs due');
-  p('node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"');
   p('```');
-  p('Other metrics and measurement diagnostics use `--review`; see [evidence requirements](../EXPERIMENT_EVIDENCE.md).');
+  p('Evaluate only with evidence for the registered target metric. Eligible single-page or exact query-page GSC CTR/position/impressions use an explicit comparable `--snapshot`; other scopes, metrics and diagnostics use `--review`. See [evidence requirements](../EXPERIMENT_EVIDENCE.md).');
 }
 p();
 
@@ -284,9 +288,8 @@ p();
 p('## Next actions');
 p();
 const actions = [];
-if (due.length) {
-  actions.push(`**P0** — record decisions for ${due.length} overdue experiment(s). Blocks all further work on those pages. Human time: ~15 min with a GSC snapshot loaded.`);
-}
+if (blockingDue.length) actions.push(`**P0** — review ${blockingDue.length} overdue exclusive experiment(s) against their registered metrics before changing those scopes.`);
+if (observationDue.length) actions.push(`**P1** — review ${observationDue.length} overdue nonexclusive observation(s) against their registered metrics and minimum samples. Other admitted page work may proceed; do not infer an isolated causal effect.`);
 if (!snap) {
   actions.push('**P0** — ingest a GSC snapshot (`growth/GSC_OWNER_ACTION.md`). Every SEO section above is blank until this happens. Human time: ~5 min.');
 }
