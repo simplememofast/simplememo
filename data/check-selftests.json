@@ -208,6 +208,12 @@
       "broke": "壊し1通りで4件落ちることを観測。**`asc_state !== 'APPROVED'` の判定を殺す**と、未提出の CPP を配線しても素通りする。これは実際に踏んだ罠で、Apple は未承認 CPP へのリンクを既定商品ページへ倒すのに、台帳と --check だけが「配線済み」と言う（free-memo-generic が同じ状態で審査待ちのまま止まっていた）。自己テストは8件で、UUID の形・ppid が null の行を黙らせること・実データが通ることも見る。"
     },
     {
+      "script": "scripts/assess-release-health-evidence.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-29",
+      "broke": "独立した一時変異で、未受領の同週App Crashesをevidence_readyへ誤分類すると自己テスト2件がexit 1、低母数判定を無効化すると自己テスト1件がexit 1。元ファイルへ復元後8件成功。クラッシュ欠測と実ゼロ、低母数と元100件を混同しない。"
+    },
+    {
       "script": "scripts/automation-rate.mjs",
       "state": "demonstrated",
       "at": "2026-08-27",
