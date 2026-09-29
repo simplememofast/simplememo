@@ -1643,7 +1643,9 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 9/26 20:40 | [#1637](https://github.com/simplememofast/simplememo/pull/1637) | 第22弾（22ページ）：Apple Notes・Simplenote・OneNote・Roam ほか、無料プランの「機能制限なし」「no feature gates」（「Obsidianのみに保存」は Premium） |
 | 9/29 20:46 | [#1665](https://github.com/simplememofast/simplememo/pull/1665) | 第23弾（39ページ）：/vs/ の一覧表と比較ページの計測していない起動時間、他社の暗号化・オフラインのセル、シンプルメモ自身の AI・タグ・音声入力・Apple Watch を「なし」としていたセル |
 | 9/29 21:14 | [#1669](https://github.com/simplememofast/simplememo/pull/1669) | 第24弾（9ページ）：Captio のページ群（終了理由の作り話・出典の無い引用）、/en/send-email-to-yourself・/en/captio-migration-guide・/en/blog/best-note-to-self-apps-2026 の他社とシンプルメモの誤り、/vs/ の導入文と /en/blog/how-to-email-yourself-note-iphone の「1秒以内に送信」「タグなし」 |
-| — | この PR | 計測の台帳の note（第17弾と第20〜第24弾、#1618・#1629・#1631・#1633 の付け忘れを含む）、`growth/data/annotations.json` の6行、この §5.33、オーナー判断 #37・#42 の更新 |
+| 9/29 21:40 | [#1671](https://github.com/simplememofast/simplememo/pull/1671) | 計測の台帳の note（第17弾と第20〜第24弾、#1618・#1629・#1631・#1633 の付け忘れを含む）、`growth/data/annotations.json` の6行、この §5.33、オーナー判断 #37・#42 の更新 |
+| 9/29 22:00 | [#1675](https://github.com/simplememofast/simplememo/pull/1675) | 第25弾（11ページ）：Captio との関係の言い過ぎ（英語のページの「The Captio Replacement」「the most direct Captio replacement … is it」「The Closest Match」「CLOSEST TO CAPTIO」「the three most popular Captio replacements」「the ideal destination」、日本語の比較記事の「最も近い」）を「Captio alternative」「同じ open-type-send の流れ」に。/en/vs/drafts の FAQ の「type and auto-send」も |
+| — | この PR | 第25弾の計測の台帳の note（engage-2026-08-11-next-step・brand-2026-08-11-entity-merge）と annotations の行、§5.33 の追記、オーナー判断 #41 の追記 |
 
 ### 中断（9/26 21:07〜9/29 20:07）
 
@@ -1664,6 +1666,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | **シンプルメモの宛先は1つ**（アプリの設定の宛先は1件、変更は設定で）なのに、/en/blog/best-note-to-self-apps-2026 の表は「Multiple」 | 第24弾 |
 | **オーナー判断 #37（ホーム画面ウィジェット）**：iOS のソースに「声でメモ」ウィジェット（ホーム画面の小・ロック画面の丸。タップでアプリを開いて音声入力を始める）と、iOS 18 以降のコントロールセンター／ロック画面のコントロールがある | 事実として確認できたので #37 を閉じる。サイトの「ホーム画面にウィジェットを追加」「ロック画面ウィジェット」は正しい |
 | **オーナー判断 #42（版と評価）**：9/28 の #1651 で、公開ページは 5.9.9・評価 4.1（27件、日本）に更新済み | #42 を閉じる |
+| **Captio との関係の言い過ぎが英語のページに残っていた**：「Download Simple Memo -- The Captio Replacement」（定冠詞つきで、公式の後継と読める）、「the most direct Captio replacement, Simple Memo is it」、「The Closest Match」「CLOSEST TO CAPTIO」、「the three most popular Captio replacements」。「開く→書く→送る」の流れは Note To Self Mail などほかのアプリにもあり、「いちばん近い」は確かめられない | 第25弾で「Captio alternative」「同じ流れ」に直した（オーナーの決まり：Captio については「Captio alternative」「Captio のワークフローに着想を得た」だけを使う）。`meta keywords` の検索語と /en/captio-alternative の題「Best Captio Alternative in 2026」は残した |
 | **計測の台帳の付け忘れ**：第17弾（#1631）の note と annotations の行、#1618 の aio-2026-08-12-entity-attribution、#1629・#1631・#1633 の aio-2026-08-11-answer-blocks（どちらも /blog/business-memo-apps-2026 が対象） | この PR で補記した |
 | **定期の確認のうち「被リンク掲載確認」「SaaSHub の承認確認」（どちらも毎週月曜）が 9/28 に失敗** | 利用上限の期間中の実行で、中身の問題ではない見込み。次回（10/5）の結果を見る |
 
@@ -1683,7 +1686,8 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 
 ### 次にやること
 
-- `en/blog/fastest-note-app-iphone-2026` の扱い、`blog/brain-science-memo` の忘却曲線の数字、`fastest-voice-memo` の「約1秒」を読む。
+- 9/26 の毎晩の確認の依頼にあった次の弾（英語の「~1-second launch」、`en/blog/fastest-note-app-iphone-2026` の撤回と書き直し、`en/captio-migration-guide` の競合値、`blog/brain-science-memo` の忘却曲線）は、読んで確かめたところ対応済みだった：英語の「~1-second launch」と fastest-note-app-iphone-2026（訂正の告知つきで計測の記録に合わせて書き直し）は 9/26 の #1618（第7弾）、captio-migration-guide の競合値は第24弾、忘却曲線も #1618（エビングハウスの記録の値と条件、Murre & Dros 2015 の再現。英語版の参考文献は #1624 で点検）。
+- `fastest-voice-memo`（日英）の「実測で約5秒」「タップ位置と所要時間は実測値」には、計測の記録がリポジトリに無い（アプリの画面の文言も「最短5秒」）。オーナー判断 #41 に追記した。
 - 毎晩の確認は 9/30 20:40 JST に予約した（Chrome を使う他の定期作業と重ならないよう 21:00 から動かした）。10/08 まで毎日かけ直す。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
@@ -1923,5 +1927,5 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 38 | 比較ページの「向いている人」の欄の「確実に」（「オフラインでもメモを確実に送りたい」など、日英あわせて約12ページ）を残すか（§5.31） | 読者の希望の書き方だが、アプリが確実に送れると読める。どちらに寄せるかは表現の方針の判断 | 言い換えるなら「オフラインで書いたメモを送信待ちに残したい」などに揃える |
 | 39 | アプリ内ガイド（5枚目）の文言「nothing is lost offline」を変えるか（§5.31） | アプリの画面の文言はサイトからは変えられない。`/en/siri` の画像の alt はこの画面を書き写している | 変えるなら、新しい画面に合わせて画像と alt を差し替える |
 | 40 | 「ずっと無料」「free forever」「恒久的に」（日英あわせて約70ページ、特定商取引法に基づく表記の「Free：原則 1日3通まで（初日から適用・ずっと無料）」とJSON-LD の offer の説明にも）を残すか（§5.32） | 無料プランを将来も続ける約束として読める。利用規約 §9 は「事前通知なく、本サービスの内容変更、追加、停止または終了を行うことがあります」 | 言い換えるなら「無料プランに利用期間の制限はありません」「no time limit」に揃える（第14弾の Tana のページはこの書き方にした） |
-| 41 | 計測の無い所要時間（「5秒で完了」「片手3秒でメモ→送信」「10秒以内に記録」「30秒で設定」「under 10 seconds」など、use-cases・methods・用語集を中心に日英あわせて約60ページ）を残すか（§5.32） | 0.4秒と違って計測の記録が無く、読者の操作の速さにもよる。#31 は 0.4秒への条件の付け方だけを決めたので、表現の方針の判断が要る | 外すなら「数秒で」「すぐに」などに言い換え、計測した0.4秒だけを数字で残す。残すなら「目安」と添える |
+| 41 | 計測の無い所要時間（「5秒で完了」「片手3秒でメモ→送信」「10秒以内に記録」「30秒で設定」「under 10 seconds」など、use-cases・methods・用語集を中心に日英あわせて約60ページ）を残すか（§5.32）。9/29 追記：`/fastest-voice-memo`（日英）の「実測で約5秒」「所要時間は実測値」も計測の記録が無い（§5.33） | 0.4秒と違って計測の記録が無く、読者の操作の速さにもよる。#31 は 0.4秒への条件の付け方だけを決めたので、表現の方針の判断が要る | 外すなら「数秒で」「すぐに」などに言い換え、計測した0.4秒だけを数字で残す。残すなら「目安」と添える |
 | 42 | ~~公開ページの版と評価の件数（5.8.66・26件。App Store の実物は 9/26 に 5.9.9・27件）を更新するか（§5.32）~~ → **9/28 の #1651 で 5.9.9・4.1（27件）に更新済み**（§5.33） | Codex の #1576（ストア検査の修正、draft）が「公開ページの訂正と、元のリリースの門（original release gates）が整うまで draft」としている。約40ファイルに及び、門の中身はこちらで確かめられない | 更新するなら #1576 を先に入れ、`sync_constants.js --write` でそろえる PR を作る |
