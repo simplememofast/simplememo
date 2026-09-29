@@ -119,9 +119,11 @@ def csv_text(headers, records):
     return out.getvalue()
 
 
+# Quoting one header field leaves the parsed CSV identical while changing its
+# ETag. That refreshes an old immutable response with the new noindex header.
 put("assets/downloads/autopilot-runs-2026-09-02.csv", csv_text(
     ["run_id", "date_jst", "route", "attempted", "outcome", "pr", "intervention_kinds"],
-    [[r["run_id"], r["date_jst"], r["route"], str(r["attempted"]).lower(), r["outcome"], r["pr"] or "", "|".join(r["intervention_kinds"])] for r in rows]))
+    [[r["run_id"], r["date_jst"], r["route"], str(r["attempted"]).lower(), r["outcome"], r["pr"] or "", "|".join(r["intervention_kinds"])] for r in rows]).replace("intervention_kinds\n", '"intervention_kinds"\n', 1))
 
 
 def chart(path, title, series, denominator, note):
