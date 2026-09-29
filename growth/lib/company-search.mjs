@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
-import {ROOT, latestSnapshot, listSnapshots, loadSnapshot, toPath} from './gsc.mjs';
+import {ROOT, latestSnapshot, listSnapshots, loadSnapshot, toPath, businessRelevance} from './gsc.mjs';
 import {buildMeta, emptyBuckets} from './snapshot.mjs';
 import {analyzeSnapshot} from './analysis.mjs';
 import {selectComparison} from './comparison.mjs';
@@ -177,18 +177,29 @@ export function searchCandidates(growth, defaults) {
   for (const row of analysis.ctr_gap ?? []) {
     if (row.kind !== 'page' || row.impressions * row.expected_ctr < 3 || seen.has(row.key)) continue;
     const page = toPath(row.key); seen.add(page);
+    const upside = Number(row.upside_clicks);
+    if (!Number.isFinite(upside) || upside <= 0) continue;
+    // CTR headroom is search traffic, not installs or revenue. Use the
+    // existing URL-intent heuristic only to order which page deserves review;
+    // damp large impression pools so they do not dominate on volume alone.
+    const relevance = businessRelevance(page);
+    const weightedUpside = upside * relevance;
+    const growthImpact = Math.min(100, Math.round(40 + 8 * Math.log2(1 + weightedUpside)));
     const overlaps = experiments.filter(e => matches(e.scope, page));
     const followups = reviews.filter(r => matches(r.scope, page));
     result.push({id: 'search:ctr:' + page, kind: 'review_existing_search_page', title: 'Review the measured CTR gap on ' + page,
       permission: 'AUTO', executable: ownershipKnown && overlaps.length === 0 && followups.length === 0, owner: 'existing Obsidian Autopilot selector',
       lane: 'A', target_page: page, evidence: [evidence, {detector: 'ctr_gap', ...row}],
+      planning_estimate: {business_relevance: relevance, relevance_weighted_click_opportunity: weightedUpside,
+        meaning: 'review priority only; not measured installs, LTV or expected uplift'},
       blocking_experiments: overlaps.map(e => e.id),
       blocking_followups: followups.map(r => r.id), ownership_state: ownershipKnown ? 'read' : 'unavailable',
       unenumerated_experiment_scopes: experiments.filter(e => e.scope.unenumerated).map(e => e.id),
       unenumerated_followup_scopes: reviews.filter(r => r.scope.unenumerated).map(r => r.id),
-      action_scope: 'Inspect the existing page and current SERP; declare a prospective metric-specific experiment through existing gates before a single eligible edit. Preserve active experiments, canonical URLs and internal links. An expected CTR gap is not proven cause or uplift.',
+      action_scope: 'Inspect the existing page, current SERP, visible query coverage and downstream Store-transition evidence; declare a prospective metric-specific experiment through existing gates before a single eligible edit. Preserve active experiments, canonical URLs and internal links. A CTR gap or URL-intent heuristic is not proven buyer intent, uplift or ROI.',
       followup: 'Existing experiment ledger and daily follow-up; retain baseline and 28-day maturity, not a short-term WIN.',
-      factors: {...defaults, frequency: 50, human_time_saved: 70, manual_touches: 70, business_impact: 70, growth_impact: 80, reliability: 60, ease: 60}});
+      factors: {...defaults, frequency: 50, human_time_saved: 70, manual_touches: 70,
+        business_impact: Math.round(relevance * 100), growth_impact: growthImpact, reliability: 60, ease: 60}});
   }
   return result;
 }

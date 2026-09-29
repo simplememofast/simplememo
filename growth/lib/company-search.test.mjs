@@ -95,6 +95,30 @@ test('candidate bridge retains exact detector evidence, blocks active experiment
   growth.search_input.actionable=false;assert.deepEqual(searchCandidates(growth,defaults),[]);
 });
 
+test('CTR review priority accounts for product fit and click headroom without claiming installs', () => {
+  const defaults={frequency:60,human_time_saved:60,manual_touches:60,reversibility:60,
+    safety:60,ease:60,reliability:60,business_impact:60,growth_impact:60,
+    reuse:60,affordability:60,permission_readiness:60};
+  const row=(key,impressions)=>({kind:'page',key,impressions,expected_ctr:.04,ctr:.01,
+    position:6,upside_clicks:impressions*.03});
+  const candidates=searchCandidates({search_input:{actionable:true},content_gaps:{ctr_gap:[
+    row('/blog/line-keep-alternative',3000),
+    row('/en/blog/ios26-speechanalyzer-live-mic',300),
+    row('/obsidian/getting-started/',400),
+    row('/obsidian/what-is-vault/',200),
+  ]},experiments:[],followups:{reviews:[]}},defaults);
+  const scored=new Map(prioritize(candidates).map(c=>[c.target_page,c]));
+  const direct=scored.get('/obsidian/getting-started/');
+  assert(direct.priority>scored.get('/blog/line-keep-alternative').priority,
+    'a large information-only CTR pool must not outrank a direct product need by volume alone');
+  assert(direct.priority>scored.get('/obsidian/what-is-vault/').priority,
+    'equal-fit pages should retain the larger click opportunity first');
+  assert(direct.priority>scored.get('/en/blog/ios26-speechanalyzer-live-mic').priority);
+  assert.equal(direct.planning_estimate.business_relevance,1);
+  assert.match(direct.planning_estimate.meaning,/not measured installs, LTV or expected uplift/);
+  assert.match(direct.action_scope,/visible query coverage and downstream Store-transition evidence/);
+});
+
 test('overlapping windows cannot turn the shared detectors into a growth win', () => {
   const {payload,receipt}=fixture(),s=snapshotFromExport(payload,receipt,{now});
   const previous={...s,label:'previous',meta:{...s.meta,period_start:'2026-08-12',period_end:'2026-09-08'}};
