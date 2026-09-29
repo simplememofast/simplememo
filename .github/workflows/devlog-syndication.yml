@@ -14,6 +14,9 @@
 #   - data/emergency-stop.json の全体停止・経路 "syndication" の停止で出さない
 # 旧ローカルタスクが同じ媒体へ投稿しても、公開面を見るので二重には出ない。
 # 1枠が落ちても、次の枠（約9〜15時間後）が同じ判定で拾い直す。
+# **公開面はキャッシュを通さずに読む**（2026-09-29、dev.to の公開一覧が25.7時間前のキャッシュを返し、
+# 投稿の10分後も新しい記事が無かった）。古い応答は「読めない」として投稿しない。投稿の直前には、
+# キャッシュの無い認証済みの一覧（dev.to は me/all、はてなは AtomPub）で間隔と上限をもう一度確かめる。
 #
 # 【鍵をモデルに渡さない】
 # 執筆ステップ（Claude Code）には投稿用の鍵を渡さない。鍵を読むのは決定的なスクリプトの
@@ -140,17 +143,21 @@ jobs:
       # schedule 起動の triggering_actor が github-actions になる日があるので allowed_bots は "*"。
       # このワークフローは schedule と workflow_dispatch でしか起動しないので権限昇格にならない。
       # **Bash も WebFetch も渡さない。**必要な事実は文脈とリポジトリの中にある。
+      # 2026-09-29 の初回の本番で、はてなの執筆が61ターンで上限（60）に達して落ちた（記事ファイルは残っていて題名と題材が
+      # 要約に出たが、検証に回らなかった。dev.to は35ターン）。上限を100に上げ、上限に達しても書けた記事は検証に回す（**検証が本当の関門**。
+      # 記事が無ければ次の「検証」が落とす）。費用は --max-budget-usd が別に止める。
       - name: 執筆（Claude Code・1本）
         id: write
         if: steps.gate.outputs.due == 'true'
         timeout-minutes: 40
+        continue-on-error: true
         uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
           claude_args: |
-            --max-turns 60
+            --max-turns 100
             --max-budget-usd ${{ steps.route.outputs.budget }}
             --model ${{ steps.route.outputs.model }}
             --allowedTools "Read,Write,Edit,Glob,Grep"
@@ -185,7 +192,15 @@ jobs:
         if: steps.gate.outputs.due == 'true'
         env:
           IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
+          WRITE_OUTCOME: ${{ steps.write.outcome }}
         run: |
+          if [ ! -s .syndication/article.json ]; then
+            echo "::error title=Devlog syndication::執筆が記事（.syndication/article.json）を残していない（執筆の結果: $WRITE_OUTCOME）"
+            exit 1
+          fi
+          if [ "$WRITE_OUTCOME" != "success" ]; then
+            echo "::warning title=Devlog syndication::執筆が上限などで途中で止まった（$WRITE_OUTCOME）。書けていた記事を検証に回す"
+          fi
           if node scripts/devlog-syndication.mjs validate --platform "$PLATFORM" \
                --article .syndication/article.json --context .syndication/context.json \
                --report .syndication/validation.txt; then
@@ -247,6 +262,8 @@ jobs:
           ARGS=(publish --platform "$PLATFORM" --article .syndication/article.json \
                 --context .syndication/context.json --out .syndication/published.json)
           if [ "$MODE" != "publish" ]; then ARGS+=(--dry-run); fi
+          # 投稿の直前に認証済みの一覧で門を確かめ直す。force は間隔だけを越える（24時間の上限は越えない）
+          if [ "$FORCE" = "true" ]; then ARGS+=(--force); fi
           node scripts/devlog-syndication.mjs "${ARGS[@]}"
 
       - name: 公開確認（自社リンクの rel と meta robots）
@@ -301,10 +318,21 @@ jobs:
         with:
           node-version: '22'
 
+      # この run の投稿の結果（published.json）。2026-09-29 の初回の本番 run 36561085228 で、見張りが古いキャッシュの
+      # 公開一覧を読み、投稿に成功した直後に「最新は122時間前」として run を赤くした。投稿の結果はこの run 自身の事実なので、
+      # 一覧の新しさに頼らずに数える。投稿しなかった run には成果物が無く、0件のまま進む
+      # （download-artifact は pattern に何も当たらなくても落ちない）。
+      - name: この run の投稿の結果
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: devlog-syndication-*-${{ github.run_id }}
+          path: .syndication-run
+
       - name: 見張り（公開面の最新投稿・dofollow・AI 開示）
         run: |
           set +e
-          node scripts/devlog-syndication.mjs watch --json watch.json > watch.txt 2>&1
+          node scripts/devlog-syndication.mjs watch --json watch.json --published-dir .syndication-run > watch.txt 2>&1
           code=$?
           cat watch.txt
           { echo '### 見張り'; echo; sed 's/^/    /' watch.txt; } >> "$GITHUB_STEP_SUMMARY"

@@ -741,6 +741,30 @@
       "expr": "sum.pending_pr?.length",
       "disposition": "報告のみ",
       "note": "2026-09-13: 未処理なしの表示は、要対応・PR待ち・期日待ちがすべて空の場合に限る。任意の旧PR欄の欠落は空扱いだが、期日待ちを消したり行を閉じたりしない。未来行は別枠で表示し、期日当日に担当へ戻る自己検査を確認。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "age",
+      "disposition": "別に検出",
+      "note": "2026-09-29: assertFresh の `age !== null && Number.isFinite(age) && age > maxAge`。**Age ヘッダが無い応答は古さを判定しない（通す）。**これは3段の2段目で、1段目は読み方そのもの（dev.to は Origin を毎回変え、はてなはクエリを毎回変えて、キャッシュに当たらない要求にする。実測で age 0）。3段目は投稿の直前の publishGuard で、キャッシュの無い認証済みの一覧（dev.to の me/all・はてなの AtomPub）で24時間の上限と間隔を確かめ直す。**Age の無い古い一覧を門が通しても、二重投稿は投稿の段で止まる**（その run は赤くなる）。2026-09-29 の実測では Fastly（dev.to）も CloudFront（はてな）も MISS に `age: 0` を付けていた。自己テストで age 92695・6206 を落とし、age の無い応答を通すことを固定した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "hours",
+      "disposition": "対象が無いときは判定しない",
+      "note": "2026-09-29: publishGuard の `hours !== null && hours < minIntervalHours && !force`。hours が null になるのは**公開済みの記事が1本も無い**ときだけで、門の first_post と同じ意味（間隔の規則は相手が無いので判定しない）。24時間の上限はこの前に独立に判定する。**一覧が空・読めないときはここに来ない** —— publishDevto は me/all が空か配列でなければ、publishHatena は AtomPub の entry が0件なら、投稿せずに投げる（空を「投稿が無い」と読まない）。自己テストで空の一覧・30時間前（間隔不足）・force・2時間前（上限）を固定した"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "p.id",
+      "disposition": "重複しても害が無い",
+      "note": "2026-09-29: mergeJustPublished の `(p.id != null && q.id === p.id) || q.url === p.url`。id が無いときは URL で照合する。両方で外れると、一覧にある記事をこの run の結果からもう1本足す —— 見張りの経過時間が数秒ずれるだけで、投稿も門も変えない（見張りは読むだけ）。はてなの結果には id が無く（null）、URL で照合する"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "a.origin",
+      "disposition": "向きが逆",
+      "note": "2026-09-29: 自己テストの assert。Origin が無いと assert が落ちる側（**規則を消す向きではなく、発火させる向き**）"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -1085,6 +1109,12 @@
       "expr": "hours",
       "disposition": "安全側へ倒れる",
       "note": "2026-09-25: 見張り（watch）の経過時間の区分 classifyAge。hours が null・undefined・NaN のときは 'unreadable' を返し、'ok'（異常なし）には倒さない。見張り全体の判定で unreadable は注意と同じ重さに数える。最新投稿そのものが無いときは呼び出し側が classifyAge を呼ばずに 'alert' とする。自己テストで null・NaN が unreadable になることを固定した。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
+      "expr": "age",
+      "disposition": "別に検出",
+      "note": "2026-09-29: 2か所。(1) assertFresh の `age !== null && …`（仮引数ではなくローカルだが、同じファイルの自己テストに仮引数 age があるので当たる）。読みは known 側の age と同じ —— Age の無い応答は通し、キャッシュに当たらない読み方と、投稿の直前の認証済みの一覧での確かめ直しが別に止める。(2) 自己テストの応答を作る補助 `reply(age, body)` の `age !== null` は検体の生成（Age ヘッダを付けない応答を作るため）"
     }
   ]
 }

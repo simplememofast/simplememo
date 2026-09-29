@@ -109,9 +109,13 @@ function platformOf(argv) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** 取得は必ず理由つきで失敗させる。**読めなかったを「無かった」にしない。** */
+/**
+ * 取得は必ず理由つきで失敗させる。**読めなかったを「無かった」にしない。**
+ * idempotent=false（記事の作成）は、429 のときだけ待って送り直す。5xx と通信の失敗は**作成済みかもしれない**ので
+ * 送り直さずに投げる（送り直すと二重投稿になりうる）。落ちた枠は次の枠が公開面を見て拾い直す。
+ */
 export async function fetchWithRetry(url, { method = 'GET', headers = {}, body, retries = 2, timeoutMs = 30000,
-  okStatuses = null, redirect = 'follow' } = {}) {
+  okStatuses = null, redirect = 'follow', idempotent = true, wait = sleep } = {}) {
   let lastErr;
   for (let attempt = 0; attempt <= retries; attempt++) {
     const ctrl = new AbortController();
@@ -121,8 +125,11 @@ export async function fetchWithRetry(url, { method = 'GET', headers = {}, body, 
       clearTimeout(timer);
       if (res.status === 429 || res.status >= 500) {
         lastErr = new Error(`${method} ${url} → HTTP ${res.status}`);
-        const wait = Number(res.headers.get('retry-after')) || (5 * (attempt + 1));
-        if (attempt < retries) { await sleep(Math.min(wait, 60) * 1000); continue; }
+        if (!idempotent && res.status !== 429) {
+          throw Object.assign(new Error(`${method} ${url} → HTTP ${res.status}（作成済みかもしれないので送り直さない）`), { status: res.status });
+        }
+        const seconds = Number(res.headers.get('retry-after')) || (5 * (attempt + 1));
+        if (attempt < retries) { await wait(Math.min(seconds, 60) * 1000); continue; }
         throw lastErr;
       }
       if (okStatuses && !okStatuses.includes(res.status)) {
@@ -134,7 +141,8 @@ export async function fetchWithRetry(url, { method = 'GET', headers = {}, body, 
       clearTimeout(timer);
       lastErr = e;
       if (e.status) throw e; // 4xx は再試行しても変わらない
-      if (attempt < retries) { await sleep(3000 * (attempt + 1)); continue; }
+      if (!idempotent) throw e; // 通信の失敗は、作成されたかどうか分からない
+      if (attempt < retries) { await wait(3000 * (attempt + 1)); continue; }
     }
   }
   throw lastErr;
@@ -206,9 +214,38 @@ export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHour
     reason: `最新投稿から ${hours.toFixed(1)} 時間` };
 }
 
+/**
+ * 公開面は**キャッシュを通さずに**読み、古い応答は「読めない」にする。**古い一覧で「空いている」と読むと二重に出る。**
+ *
+ * 2026-09-29 の実測（初回の本番投稿 11:26:13Z の直後）:
+ * - dev.to の公開一覧（Fastly）は Accept-Encoding ごとに別のキャッシュを持つ（Vary: Accept-Encoding, Origin, X-Loggedin）。
+ *   Node の fetch が受ける gzip 側は **age 92,695 秒（25.7時間）**で、投稿の10分後も新しい記事が無かった。
+ *   Accept-Encoding の無い curl は MISS で新しい内容を受けた。**どちらも一度取られると長く残る**（Forem の既定は1日）。
+ * - クエリを足しても dev.to ではキャッシュのキーに入らず、古いまま。Cache-Control: no-cache も効かない。
+ *   Vary に Origin があるので、**Origin を毎回変えると MISS になる**（age 0 を2回実測）。
+ * - はてなの公開フィードは age 6,206 秒の応答を返し、クエリを足すと age 0 になった。
+ * 門・文脈・見張りの全部がここを通る。
+ */
+export const FRESH_MAX_AGE_SECONDS = 600;
+
+export function assertFresh(res, label, maxAge = FRESH_MAX_AGE_SECONDS) {
+  const raw = res.headers.get('age');
+  const age = raw === null ? null : Number(raw);
+  if (age !== null && Number.isFinite(age) && age > maxAge) {
+    throw new Error(`${label}の応答が古い（キャッシュの age ${age} 秒 > ${maxAge} 秒）— 古い一覧で間隔を判断しない`);
+  }
+  return age;
+}
+
+const freshOrigin = () => `https://fresh-${crypto.randomBytes(6).toString('hex')}.invalid`;
+const freshQuery = () => `fresh=${Date.now().toString(36)}${crypto.randomBytes(3).toString('hex')}`;
+
 /** dev.to の公開一覧（キー不要）。 */
 async function devtoPublicPosts() {
-  const list = await fetchJson(PLATFORMS.devto.listUrl, { headers: { accept: 'application/vnd.forem.api-v1+json' } });
+  const res = await fetchWithRetry(PLATFORMS.devto.listUrl, {
+    headers: { accept: 'application/vnd.forem.api-v1+json', origin: freshOrigin() }, okStatuses: [200] });
+  assertFresh(res, 'dev.to の公開一覧');
+  const list = await res.json();
   if (!Array.isArray(list)) throw new Error('dev.to の一覧が配列でない');
   return list.map((a) => ({
     id: a.id, title: a.title, url: a.url, published_at: a.published_timestamp || a.published_at,
@@ -253,8 +290,9 @@ export function parseAtomFeed(xml) {
 }
 
 async function hatenaPublicPosts() {
-  const xml = await fetchText(PLATFORMS.hatena.feedUrl);
-  const entries = parseAtomFeed(xml);
+  const res = await fetchWithRetry(`${PLATFORMS.hatena.feedUrl}?${freshQuery()}`, { okStatuses: [200] });
+  assertFresh(res, 'はてなの公開フィード');
+  const entries = parseAtomFeed(await res.text());
   if (!entries.length) throw new Error('はてなのフィードに entry が無い（読み方が壊れている可能性）');
   return entries;
 }
@@ -869,10 +907,30 @@ export async function ensureDevtoDisclosure(id, headers, url, { known = undefine
   return 'reread';
 }
 
-async function publishDevto(article, key, body) {
+/**
+ * 投稿の直前に、**キャッシュの無い認証済みの一覧**（dev.to は me/all、はてなは AtomPub）で門をもう一度確かめる。
+ * 門が読む公開面は CDN のキャッシュを通る（2026-09-29、dev.to の公開一覧が25.7時間前の内容を返していた）。
+ * 門が直前の投稿を見落とすと、同じ媒体へ続けて出る。ここでは「直近24時間に1本まで」（force でも越えない）と
+ * 「最新から minIntervalHours」（force で越えられる）を見る。同題の採用（応答が失われた前回の投稿）はこれより先に判定する。
+ */
+export function publishGuard(items, now, { minIntervalHours, force = false }) {
+  const times = items.filter((a) => a.published === true).map((a) => new Date(a.published_at).getTime()).filter(Number.isFinite);
+  const last24 = times.filter((t) => now.getTime() - t < 24 * 3600000);
+  if (last24.length) return { ok: false, reason: `直近24時間に ${last24.length} 本ある（1日1本まで。force でも越えない）` };
+  const latest = times.length ? Math.max(...times) : null;
+  const hours = latest === null ? null : (now.getTime() - latest) / 3600000;
+  if (hours !== null && hours < minIntervalHours && !force) {
+    return { ok: false, reason: `最新から ${hours.toFixed(1)} 時間（${minIntervalHours} 時間未満）` };
+  }
+  return { ok: true, hours };
+}
+
+export async function publishDevto(article, key, body, { now = new Date(), wait = sleep, force = false } = {}) {
   const headers = { 'api-key': key, accept: 'application/vnd.forem.api-v1+json', 'content-type': 'application/json' };
   // 冪等: 同じ題名が直近にあれば作らない（応答が失われた前回の投稿を二重に出さない）
-  const mine = await fetchJson('https://dev.to/api/articles/me/all?per_page=30', { headers });
+  const mine = await fetchJson('https://dev.to/api/articles/me/all?per_page=30', { headers, wait });
+  // 空の一覧は「投稿が無い」ではなく「読めていない」と扱う（35本ある口座で空は異常。空を通すと同題の採用も門も素通りする）
+  if (!Array.isArray(mine) || !mine.length) throw new Error('dev.to の自分の記事一覧が空か配列でない（二重投稿を避けて止める）');
   const same = mine.find((a) => a.title === article.title);
   if (same) {
     // 公開済みの同題 = 応答が失われた前回の投稿。作り直さずに採用する。
@@ -880,18 +938,21 @@ async function publishDevto(article, key, body) {
     if (same.published !== true) {
       throw new Error(`同じ題名の下書きが dev.to にある（id ${same.id}）。中身が同じか分からないので公開も新規投稿もしない — 人が確認する`);
     }
-    await ensureDevtoDisclosure(same.id, headers, same.url, { known: same.ai_disclosure_level });
+    await ensureDevtoDisclosure(same.id, headers, same.url, { known: same.ai_disclosure_level, wait });
     return { id: same.id, url: same.url, reused: true };
   }
+  const guard = publishGuard(mine, now, { minIntervalHours: PLATFORMS.devto.minIntervalHours, force });
+  if (!guard.ok) throw new Error(`投稿の直前の確認（認証済みの一覧）で止めた: ${guard.reason} — 門が読んだ公開一覧が古かった可能性。続けて出さない`);
   const payload = { article: {
     title: article.title, body_markdown: body, published: true, tags: article.tags,
     description: article.description || undefined, series: article.series || undefined,
     ai_disclosure_level: 'fully_autonomous',
   } };
-  const res = await fetchWithRetry('https://dev.to/api/articles', { method: 'POST', headers, body: JSON.stringify(payload), okStatuses: [200, 201], retries: 1 });
+  const res = await fetchWithRetry('https://dev.to/api/articles', { method: 'POST', headers, body: JSON.stringify(payload),
+    okStatuses: [200, 201], retries: 1, idempotent: false, wait });
   const a = await res.json();
   if (!a.url) throw new Error(`dev.to の応答に url が無い: ${JSON.stringify(a).slice(0, 300)}`);
-  await ensureDevtoDisclosure(a.id, headers, a.url, { known: a.ai_disclosure_level });
+  await ensureDevtoDisclosure(a.id, headers, a.url, { known: a.ai_disclosure_level, wait });
   return { id: a.id, url: a.url, reused: false };
 }
 
@@ -910,9 +971,11 @@ export function hatenaAuthHeaders(id, key, mode = 'basic', { nonce = crypto.rand
 
 async function hatenaRequest(url, key, opts, okStatuses) {
   const cfg = PLATFORMS.hatena;
+  // 記事の作成（POST）は 5xx・通信の失敗で送り直さない（作成済みかもしれない）。401 は作成されていないので WSSE で送り直す
+  const idempotent = (opts.method || 'GET') !== 'POST';
   for (const mode of ['basic', 'wsse']) {
     try {
-      return await fetchWithRetry(url, { ...opts, headers: { ...(opts.headers || {}), ...hatenaAuthHeaders(cfg.hatenaId, key, mode) }, okStatuses, retries: 1 });
+      return await fetchWithRetry(url, { ...opts, headers: { ...(opts.headers || {}), ...hatenaAuthHeaders(cfg.hatenaId, key, mode) }, okStatuses, retries: 1, idempotent });
     } catch (e) {
       if (e.status === 401 && mode === 'basic') continue;
       throw e;
@@ -921,17 +984,23 @@ async function hatenaRequest(url, key, opts, okStatuses) {
   throw new Error('はてなの認証が Basic でも WSSE でも通らない');
 }
 
-async function publishHatena(article, key, body) {
+export async function publishHatena(article, key, body, { now = new Date(), force = false } = {}) {
   const cfg = PLATFORMS.hatena;
-  // 冪等: 直近7件に同じ題名があれば作らない
+  // 冪等: 直近の一覧（AtomPub・認証済み）に同じ題名があれば作らない
   const listXml = await (await hatenaRequest(cfg.atomUrl, key, { method: 'GET' }, [200])).text();
-  for (const e of parseAtomFeed(listXml)) {
+  const entries = parseAtomFeed(listXml);
+  // 空の一覧は「投稿が無い」ではなく「読み方が壊れている」と扱う（空を通すと同題の採用も門も素通りする）
+  if (!entries.length) throw new Error('はてなの AtomPub の一覧に entry が無い（読み方が壊れている可能性）— 二重投稿を避けて止める');
+  for (const e of entries) {
     if (e.title !== article.title) continue;
     // 公開済みの同題 = 応答が失われた前回の投稿。下書きの同題は中身が同じ保証が無いので止める。
     if (e.draft !== false) throw new Error(`同じ題名の下書き（または状態を読めない記事）がはてなにある: ${e.title} — 人が確認する`);
     if (!e.url) throw new Error(`同じ題名の記事があるが公開URLを読めない（二重投稿を避けて止める）: ${e.title}`);
     return { url: e.url, reused: true };
   }
+  const guard = publishGuard(entries.map((e) => ({ ...e, published: e.draft === false })), now,
+    { minIntervalHours: PLATFORMS.hatena.minIntervalHours, force });
+  if (!guard.ok) throw new Error(`投稿の直前の確認（AtomPub の一覧）で止めた: ${guard.reason} — 門が読んだ公開フィードが古かった可能性。続けて出さない`);
   const xml = hatenaEntryXml({ title: article.title, body, categories: article.tags, author: cfg.hatenaId });
   const res = await hatenaRequest(cfg.atomUrl, key, { method: 'POST', headers: { 'content-type': 'application/atom+xml; charset=utf-8' }, body: xml }, [201]);
   const text = await res.text();
@@ -960,7 +1029,8 @@ async function cmdPublish(argv) {
   }
   const key = process.env[cfg.secretEnv];
   if (!key) throw new Error(`${cfg.secretEnv} が無い — GitHub の Secrets に登録が要る（鍵の値はこのスクリプトしか読まない）`);
-  const res = platform === 'devto' ? await publishDevto(article, key, body) : await publishHatena(article, key, body);
+  const force = argv.includes('--force');
+  const res = platform === 'devto' ? await publishDevto(article, key, body, { force }) : await publishHatena(article, key, body, { force });
   // 対外送信の記録（時刻・経路・表示名・本文のハッシュ）。本文そのものは成果物の article.json に残る。
   const result = { platform, title: article.title, url: res.url, id: res.id ?? null, reused: res.reused, basis: article.basis,
     published_at: new Date().toISOString(), route: 'actions:devlog-syndication', run_id: process.env.GITHUB_RUN_ID || 'local',
@@ -1076,13 +1146,62 @@ export function classifyAge(hours, { warnHours = WATCH.warnHours, alertHours = W
 const RANK = { ok: 0, warn: 1, unreadable: 1, alert: 2 };
 const worse = (a, b) => (RANK[b] > RANK[a] ? b : a);
 
-async function watchPlatform(platform, now, opts, stop) {
+/**
+ * この run で投稿した記事を、公開一覧に合流させる。
+ * 2026-09-29 の初回の本番 run（36561085228）で、同じ run の見張りが公開一覧（25.7時間前のキャッシュ）を読み、
+ * 投稿に成功した直後に「最新は122時間前」として run を赤くした。一覧はキャッシュを通さずに読むよう直したが、
+ * 投稿の結果はこの run 自身が持っている事実なので、一覧の新しさに頼らずに数える。
+ * 一覧にまだ無い記事（id か URL で照合）だけを、投稿の結果（published.json）から足す。試験実行の結果は足さない。
+ */
+export function mergeJustPublished(posts, justPublished, platform) {
+  const out = [...posts];
+  for (const p of justPublished || []) {
+    if (!p || p.platform !== platform || p.dry_run || !p.url || !Number.isFinite(new Date(p.published_at).getTime())) continue;
+    if (out.some((q) => (p.id != null && q.id === p.id) || q.url === p.url)) continue;
+    out.push({ id: p.id ?? null, title: p.title, url: p.url, published_at: p.published_at, fromRun: true });
+  }
+  return out;
+}
+
+/** この run の成果物にある投稿の結果（published.json）を読む。無い・壊れているものは使わない（見張りは公開一覧だけでも回る）。 */
+export function readJustPublished(dir) {
+  const found = [];
+  if (!dir || !fs.existsSync(dir)) return found;
+  const walk = (d, depth) => {
+    for (const ent of fs.readdirSync(d, { withFileTypes: true })) {
+      const f = path.join(d, ent.name);
+      if (ent.isDirectory() && depth < 2) walk(f, depth + 1);
+      else if (ent.isFile() && ent.name === 'published.json') {
+        try { found.push(JSON.parse(fs.readFileSync(f, 'utf8'))); } catch { /* 壊れた成果物は足さない（一覧だけで見る） */ }
+      }
+    }
+  };
+  walk(dir, 0);
+  return found;
+}
+
+/** dev.to の記事を公開 API で読む。作成直後は 404 を返しうるので、attempts 回まで10秒おきに読み直す。 */
+async function readDevtoArticle(id, { attempts = 1, wait = sleep } = {}) {
+  for (let i = 0; ; i++) {
+    try {
+      return await fetchJson(PLATFORMS.devto.articleApi(id), { headers: { accept: 'application/vnd.forem.api-v1+json' }, wait });
+    } catch (e) {
+      if (e.status !== 404 || i >= attempts - 1) throw e;
+      await wait(10000);
+    }
+  }
+}
+
+export async function watchPlatform(platform, now, opts, stop) {
   const cfg = PLATFORMS[platform];
   const r = { platform, label: cfg.label, status: 'ok', problems: [], notes: [], latest: null, age_hours: null, pipeline_latest: null, legacy: [] };
   let posts;
   try { posts = await publicPosts(platform); } catch (e) {
     r.status = 'unreadable'; r.problems.push(`公開面を読めない: ${e.message}`); return r;
   }
+  posts = mergeJustPublished(posts, opts.justPublished, platform);
+  const fromRun = posts.filter((p) => p.fromRun).length;
+  if (fromRun) r.notes.push(`公開一覧にまだ出ていない、この run の投稿 ${fromRun} 本を投稿の結果から足して見た`);
   const sorted = posts.filter((p) => Number.isFinite(new Date(p.published_at).getTime()))
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
   const latest = sorted[0] || null;
@@ -1097,14 +1216,15 @@ async function watchPlatform(platform, now, opts, stop) {
     let isPipe = false, disclosure = null;
     if (platform === 'devto') {
       try {
-        const a = await fetchJson(`https://dev.to/api/articles/${p.id}`, { headers: { accept: 'application/vnd.forem.api-v1+json' } });
-        isPipe = isPipelineDevto(a);
+        if (p.id == null) throw new Error('id が無い');
+        const a = await readDevtoArticle(p.id, { attempts: p.fromRun ? 6 : 1, wait: opts.wait });
+        isPipe = p.fromRun === true || isPipelineDevto(a);
         disclosure = a.ai_disclosure_level ?? null;
       } catch (e) {
-        r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.id} を読めない: ${e.message}`); continue;
+        r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.id ?? p.url} を読めない: ${e.message}`); continue;
       }
     } else {
-      isPipe = isPipelineHatena(p);
+      isPipe = p.fromRun === true || isPipelineHatena(p);
     }
     if (isPipe && !pipeline) pipeline = { ...p, disclosure };
     if (!isPipe && new Date(p.published_at).getTime() >= new Date(opts.since).getTime()) {
@@ -1115,9 +1235,10 @@ async function watchPlatform(platform, now, opts, stop) {
   if (pipeline && !pipeline.url) {
     r.status = worse(r.status, 'unreadable'); r.problems.push(`この経路の最新記事の公開URLを読めない（${pipeline.title}）— フィードの形が変わった可能性`);
   } else if (pipeline) {
-    r.pipeline_latest = { title: pipeline.title, url: pipeline.url, published_at: pipeline.published_at, disclosure: pipeline.disclosure };
+    r.pipeline_latest = { title: pipeline.title, url: pipeline.url, published_at: pipeline.published_at, disclosure: pipeline.disclosure,
+      from_run: pipeline.fromRun === true };
     try {
-      const html = await fetchText(pipeline.url, { headers: { accept: 'text/html' } });
+      const html = await fetchText(pipeline.url, { headers: { accept: 'text/html' }, wait: opts.wait });
       const ins = inspectPublished(html, platform, { title: pipeline.title });
       r.pipeline_latest.robots = ins.robots;
       r.pipeline_latest.site_links = ins.siteLinks;
@@ -1129,7 +1250,10 @@ async function watchPlatform(platform, now, opts, stop) {
       r.status = 'alert'; r.problems.push(`この経路の最新記事の AI 開示が「${pipeline.disclosure}」（fully_autonomous でない）`);
     }
     // はてなは「使用済みの題材」を公開フィードの本文にある印から読む。印が消えていると題材の重複防止が効かない。
-    if (platform === 'hatena' && !String(pipeline.content || '').includes(`${MARKER}:`)) {
+    // この run の投稿はまだフィードに無い（本文を読めない）ので、次の見張りで確かめる。
+    if (platform === 'hatena' && pipeline.fromRun) {
+      r.notes.push('この run の投稿はまだ公開フィードに出ていないので、印（HTML コメント）の確認は次の見張りで行う');
+    } else if (platform === 'hatena' && !String(pipeline.content || '').includes(`${MARKER}:`)) {
       r.status = worse(r.status, 'warn');
       r.problems.push('この経路の最新記事の印（HTML コメント）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる');
     }
@@ -1159,6 +1283,8 @@ async function cmdWatch(argv) {
     warnHours: Number(argValue(argv, '--warn-hours', String(WATCH.warnHours))),
     alertHours: Number(argValue(argv, '--alert-hours', String(WATCH.alertHours))),
     since: argValue(argv, '--since', WATCH.since),
+    // 同じ run の投稿の結果（ワークフローの watch ジョブが成果物から渡す）
+    justPublished: readJustPublished(argValue(argv, '--published-dir')),
   };
   const stop = readStop();
   const out = { checked_at: now.toISOString(), stopped: stop.stopped, stop_reason: stop.reason, platforms: [] };
@@ -1427,6 +1553,138 @@ export async function selftest() {
     assert(entryAlternateUrl('<link href="https://c.example/entry/3" type="text/html" rel="alternate" />') === 'https://c.example/entry/3', '属性の順番で読めない');
     // alternate が無ければ null（**enclosure や edit を公開URLにしない**）
     assert(entryAlternateUrl('<entry><link rel="edit" href="https://e/1"/><link rel="enclosure" href="https://img/1" type="image/png"/></entry>') === null, 'alternate でない link を選んだ');
+  });
+
+  await t('見張り: この run の投稿を公開一覧に合流させる（試験実行・他媒体・重複は足さない）', () => {
+    const list = [{ id: 1, title: '旧', url: 'https://dev.to/simple_memo/old-1', published_at: hoursAgo(122) }];
+    const just = [
+      { platform: 'devto', id: 9, title: '新', url: 'https://dev.to/simple_memo/new-9', published_at: hoursAgo(0.02) },
+      { platform: 'devto', dry_run: true, title: '試験' },
+      { platform: 'hatena', title: 'は', url: 'https://h/1', published_at: hoursAgo(0.02) },
+      { platform: 'devto', id: 1, title: '旧', url: 'https://dev.to/simple_memo/old-1', published_at: hoursAgo(0.01) },
+    ];
+    const m = mergeJustPublished(list, just, 'devto');
+    assert(m.length === 2 && m[1].id === 9 && m[1].fromRun === true, `合流の形: ${JSON.stringify(m)}`);
+    assert(m[0].published_at === list[0].published_at, '一覧にある記事を投稿の結果で上書きした');
+    assert(mergeJustPublished(list, null, 'devto').length === 1, '結果が無いときに一覧を変えた');
+  });
+  await t('見張り: **投稿の直後（公開一覧が古い）でも、この run の投稿で数えて赤くしない**', async () => {
+    const orig = globalThis.fetch;
+    const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
+    const page = '<html><head><meta name="robots" content="max-snippet:-1"></head><body><h1>新しい記事</h1><div id="article-body"><p><a href="https://simplememofast.com/en/" rel="noopener noreferrer">x</a></p></div></article></body></html>';
+    let articleReads = 0;
+    const just = [{ platform: 'devto', id: 9, title: '新しい記事', url: 'https://dev.to/simple_memo/new-9', published_at: hoursAgo(0.02) }];
+    const opts = { ...WATCH, wait: async () => {} };
+    try {
+      globalThis.fetch = async (u) => {
+        u = String(u);
+        if (u.includes('/api/articles?username=')) return json([{ id: 1, title: '旧', url: 'https://dev.to/simple_memo/old-1', published_at: hoursAgo(122) }]);
+        if (u.endsWith('/api/articles/9')) return ++articleReads === 1 ? new Response('not found', { status: 404 }) : json({ body_markdown: `x <!-- ${MARKER}: basis=S-A -->`, ai_disclosure_level: 'fully_autonomous' });
+        if (u.endsWith('/api/articles/1')) return json({ body_markdown: '旧', ai_disclosure_level: 'not_disclosed' });
+        if (u === 'https://dev.to/simple_memo/new-9') return new Response(page, { status: 200 });
+        throw new Error(`想定外の取得: ${u}`);
+      };
+      const before = await watchPlatform('devto', now, { ...opts }, go);
+      assert(before.status === 'alert', `この run の投稿を渡さないと古い一覧で異常になる、という前提が崩れた: ${before.status}`);
+      articleReads = 0;
+      const after = await watchPlatform('devto', now, { ...opts, justPublished: just }, go);
+      assert(after.status === 'ok', `この run の投稿を渡しても赤い: ${after.status} ${JSON.stringify(after.problems)}`);
+      assert(after.age_hours < 1 && after.pipeline_latest?.url === just[0].url && after.pipeline_latest.from_run === true, JSON.stringify(after));
+      assert(articleReads === 2, `作成直後の 404 を待って読み直していない（読んだ回数 ${articleReads}）`);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+  await t('投稿: **直前に認証済みの一覧で門を確かめ直し（24時間の上限・間隔）、作成は 5xx で送り直さない**', async () => {
+    const orig = globalThis.fetch;
+    const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json' } });
+    const noWait = async () => {};
+    const art = { title: '今回の記事', tags: ['a'] };
+    let posts = 0;
+    const devto = (mine, postReplies) => async (u, o) => {
+      if (String(u).includes('/api/articles/me/all')) return json(mine);
+      if (o?.method === 'POST') { const r = postReplies[posts++]; return typeof r === 'number' ? new Response('x', { status: r }) : json(r, 201); }
+      throw new Error(`想定外の取得: ${u}`);
+    };
+    const threw = async (fn) => { try { await fn(); return null; } catch (e) { return e.message; } };
+    try {
+      posts = 0;
+      globalThis.fetch = devto([{ title: '別の記事', published: true, published_at: hoursAgo(2), url: 'https://dev.to/x' }], []);
+      const cap = await threw(() => publishDevto(art, 'k', 'b', { now, wait: noWait }));
+      assert(cap && cap.includes('24時間') && posts === 0, `**公開一覧が古いときに連投した**（${cap} / POST ${posts} 回）`);
+      posts = 0;
+      globalThis.fetch = devto([{ id: 5, title: '今回の記事', published: true, published_at: hoursAgo(2), url: 'https://dev.to/same', ai_disclosure_level: 'fully_autonomous' }], []);
+      const same = await publishDevto(art, 'k', 'b', { now, wait: noWait });
+      assert(same.reused === true && posts === 0, `同題の採用が上限より先に効かない: ${JSON.stringify(same)}`);
+      posts = 0;
+      posts = 0;
+      globalThis.fetch = devto([{ title: '30時間前', published: true, published_at: hoursAgo(30), url: 'https://dev.to/y' }], [{ id: 8, url: 'https://dev.to/new-8', ai_disclosure_level: 'fully_autonomous' }]);
+      const gap = await threw(() => publishDevto(art, 'k', 'b', { now, wait: noWait }));
+      assert(gap && gap.includes('66 時間未満') && posts === 0, `**間隔の足りない投稿を出した**（${gap} / POST ${posts} 回）`);
+      const forced = await publishDevto(art, 'k', 'b', { now, wait: noWait, force: true });
+      assert(forced.id === 8 && posts === 1, `force で間隔を越えられない: ${JSON.stringify(forced)}`);
+      posts = 0;
+      globalThis.fetch = devto([{ title: '古い記事', published: true, published_at: hoursAgo(70) }, { title: '下書き', published: false, published_at: null }], [502]);
+      const e5 = await threw(() => publishDevto(art, 'k', 'b', { now, wait: noWait }));
+      assert(e5 && posts === 1, `**作成の 5xx を送り直した**（POST ${posts} 回 / ${e5}）`);
+      posts = 0;
+      globalThis.fetch = devto([{ title: '古い記事', published: true, published_at: hoursAgo(70) }], [429, { id: 7, url: 'https://dev.to/new-7', ai_disclosure_level: 'fully_autonomous' }]);
+      const ok = await publishDevto(art, 'k', 'b', { now, wait: noWait });
+      assert(ok.id === 7 && ok.reused === false && posts === 2, `429 は待って送り直す: ${JSON.stringify(ok)} / POST ${posts} 回`);
+      posts = 0;
+      globalThis.fetch = devto([], [{ id: 9, url: 'https://dev.to/new-9', ai_disclosure_level: 'fully_autonomous' }]);
+      const empty = await threw(() => publishDevto(art, 'k', 'b', { now, wait: noWait }));
+      assert(empty && posts === 0, `**空の一覧を「投稿が無い」と読んで出した**（POST ${posts} 回）`);
+
+      const feed = (published, draft = 'no') => `<feed><entry><title>前の記事</title><link rel="alternate" type="text/html" href="https://simplememofast.hatenablog.com/entry/1"/><published>${published}</published><app:control><app:draft>${draft}</app:draft></app:control></entry></feed>`;
+      let hPosts = 0;
+      const hatena = (xml, postStatus) => async (u, o) => {
+        if (o?.method === 'POST') { hPosts++; return new Response('x', { status: postStatus }); }
+        return new Response(xml, { status: 200 });
+      };
+      globalThis.fetch = hatena(feed(hoursAgo(3)), 201);
+      const hcap = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      assert(hcap && hcap.includes('24時間') && hPosts === 0, `**はてなで公開フィードが古いときに連投した**（${hcap} / POST ${hPosts} 回）`);
+      hPosts = 0;
+      globalThis.fetch = hatena('<feed></feed>', 201);
+      const hEmpty = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      assert(hEmpty && hPosts === 0, `**はてなの空の一覧を「投稿が無い」と読んで出した**（POST ${hPosts} 回）`);
+      hPosts = 0;
+      globalThis.fetch = hatena(feed(hoursAgo(3), 'yes'), 500);
+      const h5 = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      assert(h5 && hPosts === 1, `下書きを上限に数えた、または作成の 5xx を送り直した（${h5} / POST ${hPosts} 回）`);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  await t('公開面: **キャッシュを通さずに読み、古い応答（age が上限超）は読めないにする**', async () => {
+    const orig = globalThis.fetch;
+    const seen = [];
+    const reply = (age, body) => { const h = { 'content-type': 'application/json' }; if (age !== null) h.age = String(age); return new Response(body, { status: 200, headers: h }); };
+    const devList = JSON.stringify([{ id: 1, title: 't', url: 'https://dev.to/u/1', published_at: '2026-09-29T11:26:13Z' }]);
+    const feed = '<feed><entry><title>t</title><link href="https://simplememofast.hatenablog.com/entry/1"/><published>2026-09-29T20:00:00+09:00</published></entry></feed>';
+    let age = 0;
+    try {
+      globalThis.fetch = async (u, o) => { seen.push({ u: String(u), origin: o?.headers?.origin }); return reply(age, String(u).includes('dev.to') ? devList : feed); };
+      await publicPosts('devto'); await publicPosts('devto');
+      const [a, b] = seen.slice(-2);
+      assert(a.origin && b.origin && a.origin !== b.origin && /^https:\/\/fresh-[0-9a-f]{12}\.invalid$/.test(a.origin), `dev.to の読み取りが毎回別の Origin でない: ${JSON.stringify([a, b])}`);
+      await publicPosts('hatena'); await publicPosts('hatena');
+      const [c, d] = seen.slice(-2);
+      assert(c.u.startsWith(`${PLATFORMS.hatena.feedUrl}?fresh=`) && c.u !== d.u, `はてなの読み取りが毎回別のクエリでない: ${JSON.stringify([c, d])}`);
+      age = 92695;
+      let msg = null;
+      try { await publicPosts('devto'); } catch (e) { msg = e.message; }
+      assert(msg && msg.includes('古い'), `**25.7時間前のキャッシュを受け入れた**: ${msg}`);
+      age = 6206; msg = null;
+      try { await publicPosts('hatena'); } catch (e) { msg = e.message; }
+      assert(msg && msg.includes('古い'), `はてなの古いキャッシュを受け入れた: ${msg}`);
+      age = null;
+      assert((await publicPosts('devto')).length === 1, 'age の無い応答を読めない');
+    } finally {
+      globalThis.fetch = orig;
+    }
   });
 
   await t('リンク候補: sitemap の URL を手元のファイルに引き当てられる（実データ）', () => {
