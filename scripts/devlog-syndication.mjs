@@ -394,14 +394,43 @@ export function allowedLinks(platform) {
   return out;
 }
 
-/** 本文に埋めた印（`<!-- devlog-syndication: basis=...; ... -->`）を読む。 */
+/**
+ * はてなの本文末尾に付ける「見える記録」の見出し語。
+ * **はてなは本文の HTML コメントを公開面（ページ・フィード）から消す**（2026-09-29 の初回の投稿で実測）。
+ * コメントの印だけだと、はてなの「使用済みの題材」が常に空になり、同じ種を使い回す。
+ * そこで開示文の後ろに題材の記録（種の ID か page:<ファイル>）を見える形で付ける。読者には出典の手がかりにもなる。
+ */
+export const VISIBLE_BASIS_LABEL = '題材の記録';
+const VISIBLE_BASIS_RE = new RegExp(`${VISIBLE_BASIS_LABEL}[:：]\\s*((?:S-\\d{8}-[A-Za-z0-9_-]+)|(?:page:[A-Za-z0-9._/-]+))`, 'g');
+
+/**
+ * 本文に埋めた印を読む。HTML コメントの印（`<!-- devlog-syndication: basis=...; ... -->`）と、
+ * はてなの見える記録（`題材の記録: S-…`）の両方。同じ題材が2回出ることがある（呼び出し側は集合で扱う）。
+ */
 export function readMarkers(text) {
   const out = [];
   for (const m of String(text ?? '').matchAll(/<!--\s*devlog-syndication:([^>]*?)-->/g)) {
     const fields = Object.fromEntries(m[1].split(';').map((kv) => kv.trim().split('=').map((s) => s.trim())).filter((kv) => kv.length === 2 && kv[0]));
     out.push(fields);
   }
+  for (const m of String(text ?? '').matchAll(VISIBLE_BASIS_RE)) out.push({ basis: m[1], visible: 'yes' });
   return out;
+}
+
+/**
+ * 見える記録を付ける前に出た、この経路のはてなの記事の題材（HTML コメントの印が公開面で消えたもの）。
+ * 題材は run 36566063885 の要約と成果物の published.json から引いた。**この表は増やさない**（以後の記事は見える記録を持つ）。
+ */
+export const LEGACY_HATENA_BASES = {
+  'https://simplememofast.hatenablog.com/entry/2026/09/29/211832': 'S-20260907-fixed-but-unconfirmed',
+};
+
+/** はてなの公開フィードの entry から、使った題材を読む（印・見える記録・見える記録より前の記事の表）。 */
+export function hatenaBases(entry) {
+  const out = new Set(readMarkers(entry?.content).map((m) => m.basis).filter(Boolean));
+  const legacy = LEGACY_HATENA_BASES[entry?.url];
+  if (legacy) out.add(legacy);
+  return [...out];
 }
 
 async function existingPosts(platform) {
@@ -422,7 +451,7 @@ async function existingPosts(platform) {
     }
   } else {
     for (const p of posts) {
-      for (const mk of readMarkers(p.content)) if (mk.basis) bases.add(mk.basis);
+      for (const b of hatenaBases(p)) bases.add(b);
       detailed.push({ title: p.title, url: p.url, published_at: p.published_at,
         opening: String(p.summary || p.content.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').slice(0, 300) });
     }
@@ -721,6 +750,7 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
   }
   const body = String(article.body_markdown);
   if (/devlog-syndication:/.test(body)) P('本文に印（devlog-syndication:）が入っている — 印と開示文は投稿時に付ける');
+  if (new RegExp(`${VISIBLE_BASIS_LABEL}[:：]`).test(body)) P(`本文に「${VISIBLE_BASIS_LABEL}:」が入っている — 題材の記録は投稿時に付ける`);
   if (/^---\s*\n[\s\S]*?\n---/.test(body)) P('本文の先頭に front matter がある — 題名・タグは JSON の欄に入れる');
   const headings = (body.match(/^##\s+\S/gm) || []).length;
   if (headings < 3) P(`見出し（##）が ${headings} 個 — 3個以上`);
@@ -854,7 +884,9 @@ async function cmdValidate(argv) {
 export function composeBody(article, platform, { runId = 'local', at = new Date().toISOString() } = {}) {
   const cfg = PLATFORMS[platform];
   const marker = `<!-- ${MARKER}: basis=${article.basis}; route=actions; run=${runId}; at=${at} -->`;
-  return `${String(article.body_markdown).trim()}${cfg.footer}\n${marker}\n`;
+  // はてなは HTML コメントを公開面から消すので、題材の記録を見える形でも付ける（VISIBLE_BASIS_LABEL の説明）
+  const visible = platform === 'hatena' ? `\n*${VISIBLE_BASIS_LABEL}: ${article.basis}*\n` : '';
+  return `${String(article.body_markdown).trim()}${cfg.footer}${visible}\n${marker}\n`;
 }
 
 const xmlEscape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -1076,7 +1108,7 @@ export function inspectPublished(html, platform, { title } = {}) {
   if (title && !decodeEntities(html).includes(title)) problems.push('題名がページに無い');
   // 本文末尾の印（HTML コメント）が公開面に残るか。はてなは次の回の「使用済みの題材」をこの印から読むので、
   // 消えていると同じ種を再利用しうる。**公開そのものの失敗ではない**ので problems には入れない。
-  const markerVisible = String(html).includes(`${MARKER}:`);
+  const markerVisible = String(html).includes(`${MARKER}:`) || readMarkers(html).some((m) => m.basis);
   return { ok: problems.length === 0, problems, robots, siteLinks, markerVisible };
 }
 
@@ -1104,7 +1136,7 @@ async function cmdVerify(argv) {
     ...last.problems.map((p) => `- ⚠ ${p}`),
   ];
   if (platform === 'hatena' && last.markerVisible === false) {
-    const note = '本文末尾の印（HTML コメント）が公開ページに残っていない — 次の回の「使用済みの題材」に載らず、同じ種を再利用しうる';
+    const note = `本文末尾の題材の記録（「${VISIBLE_BASIS_LABEL}」か印）が公開ページに無い — 次の回の「使用済みの題材」に載らず、同じ種を再利用しうる`;
     lines.push(`- 注意: ${note}`);
     console.log(`::warning title=Devlog syndication marker::${note}`);
   }
@@ -1253,9 +1285,9 @@ export async function watchPlatform(platform, now, opts, stop) {
     // この run の投稿はまだフィードに無い（本文を読めない）ので、次の見張りで確かめる。
     if (platform === 'hatena' && pipeline.fromRun) {
       r.notes.push('この run の投稿はまだ公開フィードに出ていないので、印（HTML コメント）の確認は次の見張りで行う');
-    } else if (platform === 'hatena' && !String(pipeline.content || '').includes(`${MARKER}:`)) {
+    } else if (platform === 'hatena' && !hatenaBases(pipeline).length) {
       r.status = worse(r.status, 'warn');
-      r.problems.push('この経路の最新記事の印（HTML コメント）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる');
+      r.problems.push(`この経路の最新記事の題材（「${VISIBLE_BASIS_LABEL}」か印）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる`);
     }
   } else {
     r.notes.push(`この経路の記事が直近 ${opts.scan} 本の中にまだ無い`);
@@ -1468,6 +1500,7 @@ export async function selftest() {
       ['旧アプリ名', (a) => { a.body_markdown += '\n\nCaptio式シンプルメモ is the app.'; }, /旧アプリ名|事実検査/],
       ['見出し不足', (a) => { a.body_markdown = a.body_markdown.replace(/^## .*$/gm, ''); }, /見出し/],
       ['App Store 直リンク', (a) => { a.body_markdown += ' [app](https://apps.apple.com/app/id6758438948)'; }, /使わないリンク先/],
+      ['題材の記録を本文に書いた', (a) => { a.body_markdown += '\n\n題材の記録: S-20260903-report-said-zero'; }, /題材の記録は投稿時に付ける/],
     ];
     for (const [name, mutate, expect] of breakages) {
       const copy = JSON.parse(JSON.stringify(good)); mutate(copy);
@@ -1685,6 +1718,22 @@ export async function selftest() {
     } finally {
       globalThis.fetch = orig;
     }
+  });
+
+  await t('はてな: **HTML コメントが消えても、見える記録から題材を読む**（2026-09-29 の実測の形）', () => {
+    const body = composeBody({ body_markdown: '本文', basis: 'S-20260907-fixed-but-unconfirmed' }, 'hatena', { runId: '1', at: 'T' });
+    assert(body.includes(`*${VISIBLE_BASIS_LABEL}: S-20260907-fixed-but-unconfirmed*`), `見える記録が付かない: ${body}`);
+    // はてなの描画を模す: HTML コメントを消し、*…* を <em> にする（実際の公開フィードの末尾は <p><em>…</em></p>）
+    const rendered = body.replace(/<!--[\s\S]*?-->/g, '').replace(/\*([^*\n]+)\*/g, '<p><em>$1</em></p>');
+    assert(!rendered.includes(`${MARKER}:`), '模した描画に印が残っている（検査の前提が崩れた）');
+    assert(hatenaBases({ url: 'https://x/entry/new', content: rendered }).join() === 'S-20260907-fixed-but-unconfirmed', `コメントが消えた本文から題材を読めない: ${rendered}`);
+    const page = `<html><head></head><body><div class="entry-content">${rendered}<a href="https://simplememofast.com/">x</a></div><div class="entry-footer"></div></body></html>`;
+    assert(inspectPublished(page, 'hatena').markerVisible === true, '見える記録を「印が無い」と読んだ');
+    assert(hatenaBases({ url: 'https://simplememofast.hatenablog.com/entry/2026/09/29/211832', content: '<p>印の無い本文</p>' }).join() === 'S-20260907-fixed-but-unconfirmed', '見える記録より前の記事の題材を引き当てられない');
+    assert(hatenaBases({ url: 'https://x/entry/other', content: '<p>印の無い本文</p>' }).length === 0, '印の無い記事に題材を作った');
+    assert(hatenaBases({ url: 'https://x/entry/p', content: `<p><em>${VISIBLE_BASIS_LABEL}: page:en/autopilot/index.html</em></p>` }).join() === 'page:en/autopilot/index.html', 'page: の題材を読めない');
+    const en = composeBody({ body_markdown: 'Body', basis: 'S-X' }, 'devto', { runId: '1', at: 'T' });
+    assert(!en.includes(VISIBLE_BASIS_LABEL), 'dev.to に見える記録を付けた（dev.to は API の本文で印を読める）');
   });
 
   await t('リンク候補: sitemap の URL を手元のファイルに引き当てられる（実データ）', () => {
