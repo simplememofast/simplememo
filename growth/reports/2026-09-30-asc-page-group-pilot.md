@@ -6,7 +6,7 @@
 
 サイト内の自社App Storeボタンのうち、進行中の実験で計測維持が必要な6ページを除き、**押されたCTAを掲載するページ**のURLパスに`obsidian`を含む群（`web_obsidian_v1`）とそれ以外（`web_other_v1`）の2キャンペーンに集約する。言語、CTA配置、商品ページの違いは各群内で合算する。2026年9月30日のコード上では前者48ページ・144ボタン、後者373ページ・1,140ボタン。入口ページから別ページへ移動してCTAを押す場合もあるため、この群は検索着地ページ、検索語、自然検索流入、購入意図、同一利用者の属性を表さない。QR画像、外部記事、アプリ内リンクは対象外。
 
-除外ページは`/obsidian/getting-started/`、`/note-to-email/`、`/blog/free-memo-apps-ranking`、`/en/blog/free-memo-apps-ranking`、`/blog/line-keep-alternative`、`/en/blog/line-keep-alternative`。初めの2ページは10月23日、残り4ページは10月3日に進行中の実験を評価する。評価後もv1の母集団を途中で広げず、追加する場合は別バージョンの計測契約を作る。群判定は正準URLのパスから言語接頭辞を除き、`obsidian`が`/`または`-`で区切られた語として入るかで決める。
+除外ページは`/obsidian/getting-started/`、`/note-to-email/`、`/blog/free-memo-apps-ranking`、`/en/blog/free-memo-apps-ranking`、`/blog/line-keep-alternative`、`/en/blog/line-keep-alternative`。初めの2ページは10月23日、残り4ページは10月3日に進行中の実験を評価する。評価後も**この6ページ**をv1に追加せず、追加する場合は別バージョンの計測契約を作る。群判定は正準URLのパスから言語接頭辞を除き、`obsidian`が`/`または`-`で区切られた語として入るかで決める。新規公開ページはこの固定ルールでv1へ入るため、公開日・URL・群を記録し、ページ集合が違う期間を同一コホートとして比較しない。
 
 従来の`jp/en × 配置`8トークンは履歴として残し、新トークンへ過去分を付け替えない。`pt`、`ppid`、App StoreアプリID、ボタンの表示文、`data-cta-placement`・`data-cta-cluster`・`data-cta-variant`は維持する。GA4にはページパスと配置を引き続き記録するが、`ct`による前後の同一系列比較はしない。AppleのStandardレポートでWeb参照元が見えても、DetailedのCampaign行が秘匿されることがある。空欄をサイト経由初回DLの0件と扱わない。
 
