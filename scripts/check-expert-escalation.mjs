@@ -37,6 +37,27 @@ const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json');
 
 const DAY = 86_400_000;
 
+function invalidLimit(as) {
+  for (const k of ['daily_cap', 'max_open_asks']) {
+    if (!Number.isSafeInteger(as[k]) || as[k] <= 0) return k;
+  }
+  if (!Number.isFinite(as.min_days_between_asks) || as.min_days_between_asks <= 0) {
+    return 'min_days_between_asks';
+  }
+  return null;
+}
+
+function timestamp(value) {
+  if (typeof value !== 'string'
+      || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,3})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(value)) return NaN;
+  const at = Date.parse(value);
+  const date = Date.parse(`${value.slice(0, 10)}T00:00:00Z`);
+  // Date.parse は 2 月 30 日を翌月へ丸める。履歴の誤記を有効な日時へ直さない。
+  if (!Number.isFinite(at) || !Number.isFinite(date)
+      || new Date(date).toISOString().slice(0, 10) !== value.slice(0, 10)) return NaN;
+  return at;
+}
+
 /**
  * 外部へ出す本文に入れてはいけないもの。**当たったら人へ。**
  * 士業への質問は事実の確認なので、これらが要ることは無い。
@@ -72,10 +93,20 @@ export function evaluateAsk({
 
   const policy = doc?.policy;
   if (!policy) return hold('材料が無い: policy');
-  if (policy.kill_switch) return hold('kill_switch が立っている');
+  if (policy.kill_switch !== false) return hold(policy.kill_switch === true
+    ? 'kill_switch が立っている' : 'kill_switch の状態を判定できない');
   const as = policy.auto_send;
   if (!as) return hold('材料が無い: policy.auto_send');
-  if (!as.enabled) return hold('自動送信が有効になっていない（enabled を立てるのはオーナー）');
+  if (as.enabled !== true) return hold('自動送信が有効になっていない（enabled を立てるのはオーナー）');
+  const badLimit = invalidLimit(as);
+  if (badLimit) return hold(`auto_send.${badLimit} が有効な有限の上限でない`);
+  for (const [key, value] of Object.entries({ sentToday, openAsks })) {
+    if (!Number.isSafeInteger(value) || value < 0) return hold(`${key} が非負の安全な整数でない`);
+  }
+  if (!Number.isFinite(now) || !Number.isFinite(new Date(now).getTime())) return hold('現在時刻を判定できない');
+  if (!lastSentAtByField || typeof lastSentAtByField !== 'object' || Array.isArray(lastSentAtByField)) {
+    return hold('直前送信日時の記録を判定できない');
+  }
 
   if (!ask || typeof ask !== 'object') return hold('材料が無い: ask');
   if (ask.status !== SENDABLE_STATUS) return hold(`status が ${ask.status ?? '無し'}（送るのは ${SENDABLE_STATUS} だけ）`);
@@ -83,7 +114,7 @@ export function evaluateAsk({
   // --- 向き先が実在するか。**居ない相手に送らない** ---------------------
   const expert = (doc.experts ?? []).find((e) => e.field === ask.field);
   if (!expert) return hold(`向き先「${ask.field}」が experts に無い`);
-  if (!expert.engaged) {
+  if (expert.engaged !== true) {
     return hold(`「${ask.field}」の専門家は依頼していない（${expert.why_not ?? '理由なし'}）`
       + ' — **居ない相手を向き先にしない**');
   }
@@ -104,18 +135,40 @@ export function evaluateAsk({
   }
 
   // --- 溜め込みと間隔 ---------------------------------------------------
-  if (openAsks > as.max_open_asks) {
-    return hold(`返事待ちが ${openAsks} 件で上限 ${as.max_open_asks} を超えている`
+  if (!Array.isArray(doc.sent)) return hold('送信履歴を判定できない');
+  const sentRecords = [];
+  for (const sent of doc.sent) {
+    const at = timestamp(sent?.at);
+    if (!sent?.field || !Number.isFinite(at) || at > now) return hold('送信履歴の日時が不正または未来');
+    if (sent.answered_at != null) {
+      const answeredAt = timestamp(sent.answered_at);
+      if (!Number.isFinite(answeredAt) || answeredAt < at || answeredAt > now) return hold('返信履歴の日時が不正または未来');
+    }
+    sentRecords.push({ sent, at });
+  }
+  const effectiveOpenAsks = Math.max(openAsks, sentRecords.filter(({ sent }) => !sent.answered_at).length);
+  if (effectiveOpenAsks > as.max_open_asks) {
+    return hold(`返事待ちが ${effectiveOpenAsks} 件で上限 ${as.max_open_asks} を超えている`
       + ' — **返事が来ていないのは相手の手が空いていないということ**');
   }
-  const last = lastSentAtByField[ask.field];
-  if (last) {
-    const days = (now - Date.parse(last)) / DAY;
-    if (Number.isFinite(days) && days < as.min_days_between_asks) {
+  const fieldSentRecords = sentRecords.filter(({ sent }) => sent.field === ask.field);
+  const hasLast = Object.hasOwn(lastSentAtByField, ask.field);
+  if (fieldSentRecords.length && !hasLast) return hold('送信履歴があるのに直前送信日時が無い');
+  let latestRecorded = -Infinity;
+  for (const { at } of fieldSentRecords) latestRecorded = Math.max(latestRecorded, at);
+  if (hasLast) {
+    const last = timestamp(lastSentAtByField[ask.field]);
+    if (!Number.isFinite(last) || last > now) return hold('直前送信日時が不正または未来');
+    if (last < latestRecorded) return hold('直前送信日時が送信履歴より古い');
+    const days = (now - last) / DAY;
+    if (days < as.min_days_between_asks) {
       return hold(`同じ相手へ ${days.toFixed(1)} 日前に送っている（間隔 ${as.min_days_between_asks} 日）`);
     }
   }
-  if (sentToday >= as.daily_cap) return hold(`本日の送信が上限 ${as.daily_cap} 件に達している`);
+  // 呼出側の既定 0 で、実履歴にある UTC 当日の送信を消さない。
+  const todayStart = Math.floor(now / DAY) * DAY;
+  const effectiveSentToday = Math.max(sentToday, sentRecords.filter(({ at }) => at >= todayStart).length);
+  if (effectiveSentToday >= as.daily_cap) return hold(`本日の送信が上限 ${as.daily_cap} 件に達している`);
 
   if (as.dry_run !== false) return { decision: 'would_send', why: 'dry_run（通っているが送らない）' };
   return { decision: 'send', why: 'ゲートを通過', to: expert.address_source, question: q };
@@ -129,10 +182,13 @@ export function validate(doc, { obligations = null } = {}) {
   if (typeof doc.policy.kill_switch !== 'boolean') problems.push('kill_switch が真偽値でない');
   if (typeof as.enabled !== 'boolean') problems.push('auto_send.enabled が真偽値でない');
   if (typeof as.dry_run !== 'boolean') problems.push('auto_send.dry_run が真偽値でない');
-  for (const k of ['daily_cap', 'min_days_between_asks', 'max_open_asks']) {
-    if (typeof as[k] !== 'number' || !(as[k] > 0)) {
-      problems.push(`auto_send.${k} が正の数でない — **上限の無いゲートは使えない**`);
+  for (const k of ['daily_cap', 'max_open_asks']) {
+    if (!Number.isSafeInteger(as[k]) || as[k] <= 0) {
+      problems.push(`auto_send.${k} が正の安全な整数でない — **上限の無いゲートは使えない**`);
     }
+  }
+  if (!Number.isFinite(as.min_days_between_asks) || as.min_days_between_asks <= 0) {
+    problems.push('auto_send.min_days_between_asks が有限の正数でない — **間隔を判定できないゲートは使えない**');
   }
 
   if (!Array.isArray(doc.experts)) problems.push('experts が配列でない');
@@ -201,16 +257,31 @@ export function validate(doc, { obligations = null } = {}) {
 /** 実行側（simplememo-api）へ渡す形。**止めたものと理由も返す。** */
 export function planAll(doc, obligations, { now = Date.now(), sentToday = 0 } = {}) {
   const sent = Array.isArray(doc.sent) ? doc.sent : [];
-  const openAsks = sent.filter((s) => !s.answered_at).length;
-  const lastSentAtByField = {};
+  const openAsks = sent.filter((s) => !s?.answered_at).length;
+  const lastSentAtByField = Object.create(null);
   for (const s of sent) {
-    if (!s?.field || !s?.at) continue;
-    if (!lastSentAtByField[s.field] || s.at > lastSentAtByField[s.field]) lastSentAtByField[s.field] = s.at;
+    const at = timestamp(s?.at);
+    if (!s?.field || !Number.isFinite(at)) continue; // 不正履歴は evaluateAsk が hold にする。
+    if (!Object.hasOwn(lastSentAtByField, s.field) || at > timestamp(lastSentAtByField[s.field])) {
+      lastSentAtByField[s.field] = s.at;
+    }
   }
-  const plans = (doc.asks ?? []).map((ask) => ({
-    id: ask.id, field: ask.field,
-    ...evaluateAsk({ ask, doc, obligations, sentToday, openAsks, lastSentAtByField, now }),
-  }));
+  const todayStart = Math.floor(now / DAY) * DAY;
+  let reservedSentToday = Number.isSafeInteger(sentToday) && sentToday >= 0
+    ? Math.max(sentToday, sent.filter((s) => timestamp(s?.at) >= todayStart && timestamp(s?.at) <= now).length)
+    : sentToday;
+  let reservedOpenAsks = openAsks;
+  const plans = (doc.asks ?? []).map((ask) => {
+    const result = evaluateAsk({ ask, doc, obligations, sentToday: reservedSentToday,
+      openAsks: reservedOpenAsks, lastSentAtByField, now });
+    // 実行側へ渡す同じ batch 内で、通った分の上限と間隔を予約する。履歴は書き換えない。
+    if (result.decision === 'send' || result.decision === 'would_send') {
+      reservedSentToday += 1;
+      reservedOpenAsks += 1;
+      lastSentAtByField[ask.field] = new Date(now).toISOString();
+    }
+    return { id: ask.id, field: ask.field, ...result };
+  });
   return {
     generated_by: 'scripts/check-expert-escalation.mjs --plan',
     generated_at: new Date(now).toISOString(),
@@ -295,6 +366,12 @@ function selftest() {
     Object.assign(d.policy.auto_send, over);
     return d;
   };
+  const addOtherFieldAsk = (d) => {
+    const field = '検体-別分野';
+    d.experts.push({ ...d.experts.find((e) => e.field === d.asks[0].field), field });
+    d.asks.push({ ...d.asks[0], field });
+    return d;
+  };
   const ev = (doc, ask, extra = {}) =>
     evaluateAsk({ ask: ask ?? doc.asks[0], doc, obligations, now: NOW, ...extra });
   const held = (r, needle) => {
@@ -345,6 +422,21 @@ function selftest() {
     ['dry_run のときは送らない', () => {
       const r = ev(on({ dry_run: true }));
       assert(r.decision === 'would_send', JSON.stringify(r));
+    }],
+    ['承認の boolean が欠落・非 boolean なら送らない', () => {
+      for (const value of [undefined, null, 'false', 'true', 0, 1]) {
+        const kill = on(); kill.policy.kill_switch = value;
+        held(ev(kill), 'kill_switch');
+        const enabled = on({ enabled: value });
+        held(ev(enabled), '自動送信');
+        const engaged = on(); engaged.experts.find((e) => e.field === engaged.asks[0].field).engaged = value;
+        held(ev(engaged), '依頼していない');
+      }
+    }],
+    ['dry_run は false だけ実送信で、未設定や誤型は従来どおり送らない', () => {
+      for (const dry_run of [undefined, null, 'false', 0]) {
+        assert(ev(on({ dry_run })).decision === 'would_send', 'dry_run の false 以外で送った');
+      }
     }],
 
     // --- 向き先 ----------------------------------------------------------
@@ -422,6 +514,119 @@ function selftest() {
     ['日次上限に達していたら送らない', () => {
       held(ev(on(), null, { sentToday: 1 }), '上限 1 件');
     }],
+    ['不正な件数で日次上限・返事待ち上限を通過しない', () => {
+      for (const key of ['sentToday', 'openAsks']) {
+        for (const value of [-1, NaN, Infinity, 0.5, Number.MAX_SAFE_INTEGER + 1, '0', null]) {
+          held(ev(on(), null, { [key]: value }), key);
+        }
+      }
+    }],
+    ['不正な現在時刻で送信間隔を通過しない', () => {
+      for (const now of [NaN, Infinity, '2026-08-28', 8.64e16]) {
+        held(ev(on(), null, { now }), '現在時刻');
+      }
+    }],
+    ['直前送信日時の不正・未来・暦日の丸めを送信なしと扱わない', () => {
+      for (const last of ['unknown', '', null, 0, '2026-02-30T00:00:00Z',
+        '2026-08-29T00:00:00Z', '2026-08-01T00:00:00']) {
+        held(ev(on(), null, { lastSentAtByField: { 税務: last } }), '直前送信日時');
+      }
+      for (const lastSentAtByField of [null, [], 'unknown']) {
+        held(ev(on(), null, { lastSentAtByField }), '直前送信日時');
+      }
+    }],
+    ['同じ分野の送信履歴があるのに直前日時が無ければ送らない', () => {
+      const d = on(); d.sent = [{ field: '税務', at: '2026-08-01T00:00:00Z' }];
+      held(ev(d), '送信履歴があるのに');
+    }],
+    ['有効な日時で同じ分野の不正履歴を隠さない', () => {
+      for (const at of ['unknown', undefined, '2026-08-29T00:00:00Z']) {
+        const d = on(); d.sent = [{ field: '税務', at }, { field: '税務', at: '2026-08-01T00:00:00Z' }];
+        const plan = planAll(d, obligations, { now: NOW });
+        assert(plan.send.length === 0, '不正履歴があるのに send が出た');
+        held(plan.plans[0], '送信履歴');
+      }
+    }],
+    ['不正な他分野の履歴・返信日時を既知の件数へ丸めない', () => {
+      for (const record of [{ field: '別分野', at: 'unknown' },
+        { field: '別分野', at: '2026-08-01T00:00:00Z', answered_at: 'unknown' }]) {
+        const d = on(); d.sent = [record];
+        const plan = planAll(d, obligations, { now: NOW });
+        assert(plan.send.length === 0, '不正履歴があるのに send が出た');
+        assert(plan.plans[0].decision === 'hold', '不正履歴を hold にしなかった');
+      }
+    }],
+    ['null の送信履歴で例外を投げず、理由付きで保留する', () => {
+      const d = on(); d.sent = [null];
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 0, 'null の履歴があるのに send が出た');
+      assert(plan.plans.length === d.asks.length, '不正履歴で評価結果を失った');
+      held(plan.plans[0], '送信履歴');
+    }],
+    ['送信履歴より古い直前日時へ戻して間隔を通過しない', () => {
+      const d = on(); d.sent = [{ field: '税務', at: '2026-08-26T00:00:00Z' }];
+      held(ev(d, null, { lastSentAtByField: { 税務: '2026-08-01T00:00:00Z' } }), '送信履歴より古い');
+    }],
+    ['UTC 当日の実履歴を既定の sentToday=0 で消さない', () => {
+      const d = on(); d.sent = [{ field: '別分野', at: '2026-08-28T09:00:00+09:00', answered_at: '2026-08-28T00:00:00Z' }];
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 0, '当日の上限に達しているのに send が出た');
+      held(plan.plans[0], '上限 1 件');
+    }],
+    ['異なる offset 表記でも最も新しい実時刻で間隔を判定する', () => {
+      const d = on(); d.sent = [
+        { field: '税務', at: '2026-08-21T00:30:00Z' },
+        { field: '税務', at: '2026-08-21T09:00:00+09:00' },
+      ];
+      held(planAll(d, obligations, { now: NOW }).plans[0], '間隔 7 日');
+    }],
+    ['有効な過去履歴と間隔境界・返事待ち境界は従来どおり通す', () => {
+      const d = on(); d.sent = [{ field: '税務', at: '2026-08-21T09:00:00+09:00' }];
+      assert(planAll(d, obligations, { now: NOW }).plans[0].decision === 'send', 'ちょうど 7 日前の履歴を拒否した');
+      assert(ev(on(), null, { openAsks: 2 }).decision === 'send', '返事待ち上限ちょうどの従来境界を変えた');
+    }],
+    ['同じ batch の日次上限を send と would_send の両方で予約する', () => {
+      for (const dry_run of [false, true]) {
+        const d = addOtherFieldAsk(on({ dry_run }));
+        const plan = planAll(d, obligations, { now: NOW });
+        assert(plan.plans[0].decision === (dry_run ? 'would_send' : 'send'), '最初の有効な質問を止めた');
+        held(plan.plans[1], '上限 1 件');
+      }
+    }],
+    ['日次上限を広げても同じ batch の同分野の間隔を予約する', () => {
+      const d = on({ daily_cap: 2 }); d.asks.push({ ...d.asks[0] });
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 1, '同じ相手へ batch 内で繰り返し送る');
+      held(plan.plans[1], '間隔 7 日');
+    }],
+    ['__proto__ の分野名でも同じ batch の送信間隔を予約する', () => {
+      const d = on({ daily_cap: 2 });
+      d.experts.find((e) => e.field === d.asks[0].field).field = '__proto__';
+      d.asks[0].field = '__proto__';
+      d.asks.push({ ...d.asks[0] });
+      assert(validate(d, { obligations }).length === 0, '有効な分野名の検体でない');
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 1, '特殊な分野名で batch の予約を迂回した');
+      held(plan.plans[1], '間隔 7 日');
+    }],
+    ['実履歴の当日件数と batch の予約件数を合わせて上限を守る', () => {
+      const d = addOtherFieldAsk(on({ daily_cap: 2 }));
+      d.sent = [{ field: '別分野', at: '2026-08-28T00:00:00Z', answered_at: '2026-08-28T00:00:00Z' }];
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 1, '実履歴と予約を合わせた上限を超えた');
+      held(plan.plans[1], '上限 2 件');
+    }],
+    ['返事待ちの実履歴と batch の予約件数を合わせて上限を守る', () => {
+      const d = addOtherFieldAsk(on({ daily_cap: 2 }));
+      d.sent = [{ field: '別分野1', at: '2026-08-01T00:00:00Z' }, { field: '別分野2', at: '2026-08-01T00:00:00Z' }];
+      const plan = planAll(d, obligations, { now: NOW });
+      assert(plan.send.length === 1, '返事待ちの予約件数を無視した');
+      held(plan.plans[1], '返事待ちが 3 件');
+    }],
+    ['異なる分野で全上限内なら同じ batch の両方を通す', () => {
+      const d = addOtherFieldAsk(on({ daily_cap: 2 }));
+      assert(planAll(d, obligations, { now: NOW }).send.length === 2, '有効な batch を拒否した');
+    }],
     ['kill_switch を立てると止まる', () => {
       const d = on(); d.policy.kill_switch = true;
       held(ev(d), 'kill_switch');
@@ -480,13 +685,27 @@ function selftest() {
       const p = validate(broken(real, (d) => { withAsks(d); d.policy.auto_send.daily_cap = 0; }), { obligations });
       assert(p.some((x) => x.includes('daily_cap')), p.join(' / '));
     }],
+    ['件数上限は正の安全な整数・間隔は有限の正数でなければ落とす', () => {
+      for (const key of ['daily_cap', 'max_open_asks', 'min_days_between_asks']) {
+        const invalid = [NaN, Infinity, -1, 0, '1', null];
+        if (key !== 'min_days_between_asks') invalid.push(0.5, Number.MAX_SAFE_INTEGER + 1);
+        for (const value of invalid) {
+          const d = on({ [key]: value });
+          assert(validate(d, { obligations }).some((x) => x.includes(key)), `${key}=${value} が検査を通った`);
+          held(ev(d), key);
+        }
+      }
+      const d = on({ min_days_between_asks: 0.5 });
+      assert(validate(d, { obligations }).length === 0, '有限の正の間隔を拒否した');
+      assert(ev(d).decision === 'send', '有効な小数の間隔を拒否した');
+    }],
     ['set_by が無ければ落とす', () => {
       const p = validate(broken(real, (d) => { withAsks(d); delete d.experts[0].set_by; }), { obligations });
       assert(p.some((x) => x.includes('set_by が無い')), p.join(' / '));
     }],
 
     // --- plan -------------------------------------------------------------
-    ['**実データでは1件も送らない**（enabled:false）', () => {
+    ['**実データでは1件も送らない**', () => {
       const plan = planAll(real, obligations, { now: NOW });
       assert(plan.send.length === 0, JSON.stringify(plan.send));
       assert(plan.plans.length === real.asks.length, '止めたものも返す');
