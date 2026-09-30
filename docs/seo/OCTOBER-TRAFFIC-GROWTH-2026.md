@@ -73,7 +73,7 @@ C13 Templaterは、9月30日の隔離Linux Obsidian 1.13.7 / Templater 2.25.1で
 
 C14 QuickAddは、9月30日の別の隔離Linux Obsidian 1.13.7 / QuickAdd 2.29.0で、既存Inbox.mdへの2回の末尾追記、元本文と作業中Working.mdの保持、Cancel後の不変、Create file OFFで不存在保存先への実行中止を実GUIで確認した。原画像3枚・原Markdown4件と[確認範囲](../obsidian/evidence/quickadd-20260930.md)を同梱し、share-sheet比較とiPhoneメモ記事から文脈リンクを追加。役割図のiPhone側は既存ガイド案内であり、配送試験ではない。品質判定は92/100。iOS・同期・URI/CLI・新規ファイル作成成功・SimpleMemo実機動作は未検証。PR [#1761](https://github.com/simplememofast/simplememo/pull/1761)の最終head `aae9ed8279baea23ba505caefd31404dacb6fa60`はSEO Validation run `36712308579`で成功し、12:16:38 UTCにmain `c7648cde2d6d921eb550426152e4cf7b77a8753e`へmergeされた。Cloudflare check `109881567606`も成功し、[対応Pages配備](https://9e1329b3.simplememo-596.pages.dev)を確認した。本番HTTP比較はC13/C14のHTML2件とPNG/Markdown4件に限定して追加するもので、Googleの登録状態、CTA動作、全サイトのバイト一致を証明しない。通常の手動公開として既存非排他観測への交絡を記録し、scheduled/Company成果や検索・引用増へ付け替えない。
 
-このC14 merge APIは実際のmerge後にHTTP 502を返し、Auto-merge run `36713723127`はfailureとなった。後続GSC run `36713793929`は上流success条件でskipしたため、このrunから新しい6対象の配信成功は確認できない。マージ前のGSC run `36712308394`は元85件の本番baselineに成功したが、未公開候補6件は取得していない。既存GSC workflowの読取専用ジョブを、上流successまたはfailureの完了後にtrusted mainを検査する条件へ修理する。イベント・権限・checkout・元85ケース・計測収集器は保持し、失敗した上流やIndexNow通知を成功へ付け替えない。以後の証拠はGSC自身のsourceCommit・観測時刻・HTML2件と原本4件の結果を参照する。
+このC14 merge APIは実際のmerge後にHTTP 502を返し、Auto-merge run `36713723127`はfailureとなった。後続GSC run `36713793929`は上流success条件でskipしたため、このrunから新しい6対象の配信成功は確認できない。マージ前のGSC run `36712308394`は元85件の本番baselineに成功したが、未公開候補6件は取得していない。[PR #1764](https://github.com/simplememofast/simplememo/pull/1764)は既存GSC workflowの読取専用ジョブを、上流successまたはfailureの完了後にtrusted mainを検査する条件へ修理し、9月30日21:45:31 JSTにmain `df94d9b0cbccca370f28fd8bdff5f31c2ba570e8`へmergeされた。イベント・権限・checkout・元85ケース・計測収集器は保持し、失敗した上流やIndexNow通知を成功へ付け替えない。以後の証拠はGSC自身のsourceCommit・観測時刻・HTML2件と原本4件の結果を参照する。 同mainのCloudflare check `109891946106`は成功。[既存GSC run #36716874612](https://github.com/simplememofast/simplememo/actions/runs/36716874612)は同じsourceCommitで21:46:01.909 JSTに元85件と追加6件すべて成功（失敗0・skip 0）した。HTMLの指定属性と原本4件のSHA256を照合した結果である。この自然起動は上流successであり、修理したfailure分岐の実運転を証明するものではない。
 
 9月24日のMention Watchは検索要約の `verified:false`。本文確認なしに自社不掲載、独立推薦、獲得済みリンクを断定しない。既存の週次probeと元のownerを再利用し、弱い結果を理由に追加の有料probeを起動しない。
 
@@ -116,6 +116,20 @@ consumer修正は手動Goalからの独立した計測コード修理。新し�
 本番HTTP検証はGoogle URL Inspectionでも、正確な本番revision・配信バイトの証明でもない。主要導線のブラウザ操作も、このHTTP検証には含まれない。ローカルの20ホームケース・69追加ケース、mainに結び付いたPages配備記録、本番85 URLのHTTP結果を、それぞれの確認範囲で扱う。
 
 この環境は本番ホストへの直接HTTP許可と計測の私有受領書がない。9月基準値、主要導線の本番ブラウザ操作、全サイトの配信バイト・revisionの厳密な照合は未検証として残す。新しいHTML2件の指定属性と原本4件だけの照合を、その代用にしない。別のネットワーク経路や新collectorを作って補わない。配送・配信検証の成功は、月間セッション増やAI引用増の証拠にはならない。
+
+## 未実施のカバレッジ作業
+
+C13/C14公開後のキューには21件が残っていた（pending 19件、blocked 2件）。これは全件がデータ待ちという意味ではない。C17・C20・C22・C24・C26・C27・C32は、既存Linux Obsidian環境で必要な実証に着手できる。品質80点・固有価値・検証範囲・全変更面の所有・最終CIが公開条件であり、未実証の状態を公開可能とは扱わない。
+
+| 残件 | 次の作業・条件 |
+| --- | --- |
+| C17 Zettelkasten | 独立した著者作成Vaultでリンク・バックリンク・グラフの段階変化を実GUIで確認し、保存Markdownと原画像を添えたObsidian実装ガイドを作る。既存メールメモ概念ページと主題を分ける |
+| C20・C22・C24・C26・C27・C32 | 順に競合復元、URI実行、Markdown描画、グラフ操作、Canvas保存、バックアップ復元を隔離サンプルで検証し、実結果から記事化 |
+| C18・C21・C25・C28〜C31・C33〜C36 | 各候補の一次資料・実行例・比較条件・独自の役割を揃える。証拠が未作成という理由だけで全件をアクセス待ちとしない |
+| C23 URIジェネレーター | 既存`/resources/obsidian-uri/`が同じ主題を持つ。重複URLを作らず既存面優先のRefreshへ戻し、現行需要と元のゲート・所有を確認 |
+| C08・C19（blocked） | C08は既存Notion比較と同主題。C19は既存iPhone記事との役割判断とiOS実機検証が必要。Linux確認をiOS証拠へ読み替えない |
+
+この手動GoalからC17の実証と公開候補実装を再開する。9月30日の隔離Linux Obsidian 1.13.7で、3ノート・接続0本、理由つきリンク追加後の3ノート・1本、索引追加後の4ノート・3本という段階を実際のGraphと保存Markdownで確認した。記事の主題はリンクを用意する実装例であり、著者作成のサンプルから知識・学習・生産性の向上は認定しない。公開候補には原画像・Markdown・[検証範囲](../obsidian/evidence/zettelkasten-20260930.md)と、methods/Zettelkasten・Obsidian/Second Brainから各1文の案内を含める。追加の本番比較対象はC17 HTMLと原PNG・索引Markdownの3件で、元85ケース・C13/C14の6件は保持する。公開成功の証拠は最終headのCI、対応するmerge/Pagesと既存HTTP reportから別々に確認する。キューの先頭から適格性を確認し、公開完了ごとに元のキューで状態を更新する。新規Lane Eには既存URLの期待クリック3件条件を適用しない。同主題のRefreshへ切り替えた候補には元の条件を適用する。
 
 ## 残る依存関係
 
