@@ -1828,7 +1828,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 9/30 15:36 | [#1729](https://github.com/simplememofast/simplememo/pull/1729) | 第39弾（4ページ）：`/faq`・`/en/faq` の送信の上限の表（古い仕様書の値）、「サーバーに残りますか？」の答え（プライバシーポリシーと食い違っていた）、差出人名（日本語のアプリでは「シンプルメモ」）。`/devlog/relay-api-design`（日英）に上限の追記 |
 | 9/30 15:43 | [#1730](https://github.com/simplememofast/simplememo/pull/1730) | 第40弾（5ページ）：日本語の設定ガイドのボタン名「確認する」→「認証」、「コードを再送する」→「コードを再送信」、認証メールの件名（「認証コード」を含む）と差出人名 |
 | 9/30 15:48 | [#1731](https://github.com/simplememofast/simplememo/pull/1731) | 第41弾（3ページ）：設定の名前「利用解析」→「利用状況の分析」（`/privacy-architecture/`・`/blog/memo-app-privacy`）、「音声自動入力」→「起動時に音声入力を自動オン」（`/blog/obsidian-voice-input`） |
-| — | この PR | 第34〜第41弾の計測の台帳の note と annotations の行、この §5.36、オーナー判断 #46 の解決・#47・#48 の追加 |
+| 9/30 16:06 | [#1732](https://github.com/simplememofast/simplememo/pull/1732) | 第34〜第41弾の計測の台帳の note と annotations の行、この §5.36、オーナー判断 #46 の解決・#47・#48 の追加 |
 
 ### 見つけたこと
 
@@ -1853,6 +1853,48 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - `/voices/`（日英）の利用者の声と「今後の対応」（送信ボタンの位置の検討。当時の記録）。
 - 手順の言葉とアプリの画面の名前の細かなずれ（「宛先」「テスト送信」など。設定画面の画像は確認済みの状態しか写っておらず、入力の流れは確かめられない）。
 - 利用規約の「サーバ側レート制限（例：端末あたりの1日上限等）」（契約の本文。変えるなら改定の手続き）、開発日誌 day1 の設計時の上限のコード（その日の記録）。
+
+## 5.37 2026-09-30 夕方：実装と違う説明（第42〜第47弾）、記録の無い数値（第48弾）、AIタグ自動追加と自動録音の条件（第49〜第51弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 9/30 16:34 | [#1734](https://github.com/simplememofast/simplememo/pull/1734) | 第42弾（5ページ）：`/about/`（日英）の「Outbox は CoreData」→ AES-GCM で暗号化した端末内のファイル、「設計レベルで排除」の言い過ぎ、`/blog/memo-app-service-shutdown-risk` の AES-GCM の説明（端末内の暗号化で、通信は TLS）、`/devlog/day1`（日英）に言語と送信の上限の「2026-09 追記」 |
+| 9/30 16:43 | [#1735](https://github.com/simplememofast/simplememo/pull/1735) | 第43弾（3ページ）：用語集「Outboxアーキテクチャ」（日英）の接続の監視・送信の表示・「配信された」・「完全削除」を実装どおりに、英語の E2E 用語集の「サーバーに何も保存しない」 |
+| 9/30 16:56 | [#1736](https://github.com/simplememofast/simplememo/pull/1736) | 第44弾（7ページ＋`llms.txt`）：Apple Watch で自動で開くのは標準の入力画面、送信はペアリング中の iPhone が行う |
+| 9/30 16:59 | [#1737](https://github.com/simplememofast/simplememo/pull/1737) | 第45弾（`/hands-free/` 日英）：「圏外でも3重に残す」→ 下書きは送信と同時に消える、自動音声入力の条件、プライバシー欄 |
+| 9/30 17:07 | [#1738](https://github.com/simplememofast/simplememo/pull/1738) | 第46弾（`faq.html`・`llms.txt`）：「外部分析 SDK は使用していません」→ AppsFlyer SDK も組み込んでいる。`llms.txt` の宛先ハッシュ・鍵の保管 |
+| 9/30 17:16 | [#1740](https://github.com/simplememofast/simplememo/pull/1740) | 第47弾（8ページ）：FAQ（日英）のプライバシーオーバーレイ（いまは有効でない）、Day1 の追記、関連リンクの紹介文、英語 FAQ の後回しの2問（Apple Watch・SDK） |
+| 9/30 17:27 | [#1742](https://github.com/simplememofast/simplememo/pull/1742) | 第48弾：日本語トップの「150ms 送信リクエスト時間（API往復）」を外した（計測の記録が無い）、計測方法の記事（日英）に理由。フォントの部分集合の作り直し |
+| 9/30 17:51 | [#1744](https://github.com/simplememofast/simplememo/pull/1744) | 第49弾（7ファイル）：AIタグ自動追加は Obsidian 連携と設定のオン（既定オフ）が条件（`/ai-tags/` 日英・FAQ の件名の決まり・`llms.txt`）、`/hands-free/` の自動音声入力の条件の残り |
+| 9/30 19:22 | [#1749](https://github.com/simplememofast/simplememo/pull/1749) | 第50弾（トップ10言語）：AIタグ自動追加の条件、メールに入るのは件名の短いタイトルだけ（タグ・種別は Obsidian のノート）。英語トップの meta description・og/twitter の説明も。フォントの部分集合の作り直し |
+| 9/30 19:28 | [#1752](https://github.com/simplememofast/simplememo/pull/1752) | 第51弾（30ページ＋`llms.txt`）：比較表・FAQ・本文の自動録音と AIタグ自動追加の言い切りに条件 |
+| — | この PR | 第42〜第51弾の計測の台帳の note と annotations の行、この §5.37、オーナー判断 #49〜#51 の追加、§5.36 の「この PR」の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **AIタグ自動追加は既定オフのオプトイン**：`simplememo-ios` の `SettingsManager.aiFormatEnabled` は既定 false、`MemoFormatPipeline.isActive` は機能フラグ・Obsidian 連携オン・ユーザーの明示オンの3つがそろったときだけ。サイトは「新しい操作はゼロ」「タグはAIが自動で付けます」「you never tag anything by hand」と、全員に自動で付くように書いていた | 第49〜第51弾で直した。アプリの既定や案内をどうするかはオーナー判断 #49。Premium を条件にするフラグ（`ai_requires_pro`）は既定オフで、API の配信値も false（いまは無料で使える、という書き方はそのまま） |
+| **メールに入るのはタイトルだけ**：`SendManager.swift` は `MemoFormatPipeline` を件名（短いタイトル）にだけ使い、本文にタグは入らない。タグ・種別付きの追記は Obsidian のノート（`ObsidianManager.appendWithFormatting`）。トップのバナーは「整えてから、メールと Obsidian へ届けます」だった | 第50弾で書き分けた |
+| **起動時の自動録音も既定オフ**：`voiceAutoStartEnabled` は既定 false、効くのは iOS 26 以降の音声入力対応端末だけ（非対応ではトグルが出ない） | 第45・第49・第51弾で条件を書いた |
+| **アプリの表示言語の食い違い**：`LocalizationManager` の言語の一覧に ru・zh-Hant が無く、it・ko は翻訳が無い（端末の言語が ru なら英語、zh-Hant なら簡体字になる。pt-BR は pt.lproj に読み替えていて問題なし） | オーナー判断 #51。サイトの「10言語」は App Store の表記どおりなので、判断が出るまで変えない |
+| **ほかの言語のアプリの表示名**：「AIタグ自動追加」の表示文字列は日本語と英語（"AI Auto-Tagging"）だけで、ほかの言語は `LocalizationManager` の英語のフォールバックで "AI Auto-Tagging" と出る | 第50弾の8言語のトップは設定の名前を英語の表示名で書いた |
+| **記録の無い「150ms」**：トップの数字の帯の「送信リクエスト時間（API往復）」は `data/benchmark.json` にも CSV にも記録が無い。`150<span>ms</span>` と分かれていて、これまでの文字列の検索に掛からなかった | 第48弾で外した（オーナー判断 #41 のとおり） |
+| **プライバシーオーバーレイは有効でない**：FAQ は「見えません。自動で被せられます」と答えていた | 第47弾で直した。アプリで有効にするかはオーナー判断 #50 |
+| **Outbox は Core Data ではない**：`OutboxManager.swift` は AES-GCM で暗号化した1つのファイル（`outbox.enc`）。リポジトリに Core Data は無い | 第42弾で直した |
+| **同じ直しの重なり**：`/hands-free/` の og:description・twitter:description の条件は、別の作業の #1748（9/30 18:50）が先に入れた | 第51弾から外した（同じ文言なので衝突を避けた） |
+| **Codex の下書き #1733**（`en/faq.html` の Apple Watch の問い）：同じ文を第47弾 #1740 に取り込んだため、`en/faq.html` で衝突する状態 | #1733 は開いたまま。閉じるかどうかは Codex の担当か、オーナー |
+| **awesome 系リスト**：§6.5 の7件はすべて open のまま、コメントなし（9/30 16:05 に確認） | 台帳の状態（提出済み・レビュー待ち）は変えない |
+
+### 残したもの
+
+- 「摩擦ゼロ」「zero friction」などの慣用の言い方（数値や機能の断定ではない）。
+- `/about/` の「すべて一人で担当」（開発者本人の紹介）。
+- 英語トップの題「AI Auto-Tagging Notes to Email & Obsidian」（実験の台帳で英語トップは対象外・英語への投資は凍結中とされており、題の変更はこの修正の範囲外）。
+- 処理の場所（端末内・外部送信なし）だけを述べる文、「AI は端末内のタイトル・タグ付けにとどめている」という機能の範囲の説明、「AIタグが欲しい人に向く」「乗り換える理由」のような機能の有無の比較（`/vs/email-me-app/` など）。
+- 「Lock Screen widget」の記述（英語の記事の一部）：iPhone のウィジェットはホーム画面（小）とロック画面（円形）に対応しており（`SimpleMemoWidget.swift` の supportedFamilies）、記述どおり。コントロールセンターの操作（iOS 18 以降）と Apple Watch の文字盤・スマートスタックも、ソースにある。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -2099,3 +2141,6 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 46 | ~~`/faq`・`/en/faq` の「レート制限」の表（1分あたり2通・1日あたり20通（端末）、1時間あたり10通（IP）、1日あたり90通（全体））と、Premium の「送信無制限」の関係（§5.35）~~ → **9/30 送信用のサーバーのソースで確認：端末ごとの上限と全体の1日の上限は2026年6月に撤去済みで、いまは IP アドレスごとの1時間あたりの上限だけ → 第39弾 [#1729](https://github.com/simplememofast/simplememo/pull/1729) で FAQ を直した**（§5.36）。利用規約の「例：端末あたりの1日上限等」は契約の本文なので残した | 表のとおりなら、Premium でも端末ごとに1日20通、サービス全体で1日90通が上限になり、「送信無制限」と食い違う。表が古いのか、上限が今もこの値なのかは、送信用のサーバー（このリポジトリには無い）の設定を見ないと分からない | 現在の上限を教えてもらえれば、表を直すか、Premium の説明に「不正利用を防ぐための上限あり」と書き添えるかを、その値に合わせて PR にする |
 | 47 | App Store のアプリ名（米国「Simple Memo - Obsidian Voice」、日本「シンプルメモ - Obsidian連携・高速音声入力」。9/30 の iTunes Lookup。英国・カナダ・オーストラリア・インドは米国と同じ、ドイツ・フランスは日本の名前）と、サイトのアプリ名（「Simple Memo - for Obsidian」「Obsidian連携シンプルメモ」。`data/site-constants.json` の appNameEn・appNameJa、JSON-LD の name、`llms.txt` の推奨名）が違う。どちらにそろえるか（§5.36） | 名前は実行中の brand-2026-08-11-entity-merge（サイト全体）の対象で、変えると実験の交絡になる。ストアの名前は App Store Connect で決まり、サイトからは変えられない | ① サイトをストアに合わせる（JSON-LD の name は残して alternateName に足す、など段階を選べる）、② ストアをサイトに合わせる（App Store Connect の変更はオーナー）、③ このまま（ストアは検索向けの名前、サイトはブランド名として扱う）。①なら一括の PR を作る |
 | 48 | App Store のスクリーンショット（2枚目「思いついたら、もうメモに。」）の「0.3秒起動」。サイトは計測した 0.4 秒（iPhone 16e・ウォーム起動・5回の中央値）だけを使っている（§5.36） | ストアの画像はサイトからは変えられない。0.3 秒の計測の記録（端末・条件）はこのリポジトリに見当たらない（`data/benchmark.json` には、以前「0.3s」を「~1s」へ一括で置き換えた経緯（PR #359）の記録があるだけ） | 0.3 秒の計測の記録があれば、その条件を `data/benchmark.json` に足す。無ければ、次にスクリーンショットを差し替えるときに 0.4 秒か数字の無い言い方に |
+| 49 | **AIタグ自動追加（アプリの「AIタグ自動追加」）は既定オフ**で、Obsidian 連携を設定した人だけがオンにできる。サイトは第49〜第51弾でこの条件を書いた。アプリの既定や案内をどうするか（§5.37） | `simplememo-ios` の `SettingsManager.aiFormatEnabled` は既定 false（明示オプトイン）。`OnboardingViewController.swift` のコメントは「既定 OFF のため、Obsidian を設定しても存在に気づかず、タイトル・タグ・プロパティが付かないユーザーが多い。設定で勝手に ON にはせず、ここで明示的に選ばせる」 | ① このまま（サイトは条件つきで説明）、② 案内（オンボーディング・設定画面）で選ばせる形を強める、③ 既定をオンにする（体験とプライバシーの判断）。②③はアプリの変更で、サイトは結果に合わせて直す |
+| 50 | **アプリスイッチャーでメモを隠す保護（プライバシーオーバーレイ）が有効になっていない**。サイトは第47弾で「有効ではない」に直した（`/devlog/privacy-first-design` はそれ以前から訂正済み）。アプリで有効にするか（§5.37） | 表示の処理はソースに残っているが呼ばれていない（`SceneDelegate.swift`）。表示中のメモがアプリスイッチャーの画像に残りうる | ① 有効にする（アプリの変更と審査。サイトは有効になった版から説明を戻す）、② このまま |
+| 51 | **アプリの表示言語が、App Store の表記（10言語）と実際の切り替えで食い違う**：アプリ内の言語の一覧（`LocalizationManager.swift` の `SupportedLanguage`）は ja・en・es・fr・de・it・pt-BR・ko・zh-Hans・ar。一方、同梱の翻訳（`*.lproj`）は ar・de・en・es・fr・ja・pt・ru・zh-Hans・zh-Hant。このため、ロシア語の端末は英語、繁体字中国語の端末は簡体字で表示され、一覧にあるイタリア語・韓国語は翻訳が無く英語になる（§5.37） | App Store の言語の表記は同梱の翻訳から決まる（10言語）。サイトは「10言語に対応」（`/vs/email-me-app/`・`llms.txt` など）と App Store の表記どおりに書いている | ① アプリを直す（一覧に ru・zh-Hant を足し、it・ko を外すか翻訳を足す。サイトはそのまま）、② サイトを実際に合わせる（「10言語」を、アプリ内で選べる言語に言い換える）、③ 両方 |
