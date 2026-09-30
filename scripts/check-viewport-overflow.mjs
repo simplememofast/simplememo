@@ -48,6 +48,7 @@
  */
 
 import fs from 'node:fs';
+import { collectHtmlFiles } from './lib/site-files.js';
 import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
@@ -157,21 +158,12 @@ export function unboundedKeepAll(html) {
  * 面のほうも同じだった。
  */
 export function allPages(root = ROOT) {
-  const out = [];
-  const walk = (d) => {
-    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      // `fixtures/` は**検査のための見本**で、公開する面ではない。
-      // 中身はわざと壊してあるので、走査に混ぜると検査が自分の見本で落ちる。
-      if (e.name === 'node_modules' || e.name === '.git' || e.name === 'fixtures') continue;
-      const abs = path.join(d, e.name);
-      if (e.isDirectory()) walk(abs);
-      else if (e.name.endsWith('.html')) {
-        out.push('/' + path.relative(root, abs).split(path.sep).join('/').replace(/index\.html$/, ''));
-      }
-    }
-  };
-  walk(root);
-  return out.sort();
+  // `fixtures/` contains deliberately broken rendering samples, not public pages.
+  return collectHtmlFiles(root, {
+    skipDirs: ['node_modules', '.git', 'fixtures'],
+    skipHidden: false,
+    tolerateReadErrors: false,
+  }).map((abs) => '/' + path.relative(root, abs).split(path.sep).join('/').replace(/index\.html$/, '')).sort();
 }
 
 /**

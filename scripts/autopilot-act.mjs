@@ -567,11 +567,29 @@ export function classify(action, matrix) {
 // 台帳の同じ行が育つ。**日付入りにすると毎日新しい行が生えて、
 // 「12件のうち6件が解消済み」と同じ状態に戻る。
 
+/** Keep rule order and one shared result array: action order is observable. */
 export function derive(ctx) {
   const out = [];
   out.push(...deriveViewportActions(ctx));
   const runs = ctx.runsDoc?.runs ?? [];
+  appendHealthIssueActions(ctx, out);
+  appendRepairActions(ctx, runs, out);
+  appendCodexIntakeAction(ctx, out);
+  appendWorkflowIntakeAction(ctx, runs, out);
+  appendOrphanActions(ctx, out);
+  appendCostIntakeAction(ctx, runs, out);
+  appendCredentialFailureActions(runs, out);
+  appendShippingActions(runs, out);
+  appendStatusFreshnessAction(ctx, out);
+  // 実行の異常・未確定をセッションの調査キューへ運ぶ。制御操作はしない。
+  out.push(...deriveRoutineActions(ctx.routineDoc, { now: ctx.now }));
+  appendRoutineFreshnessAction(ctx, out);
+  appendBudgetReviewActions(ctx, out);
+  appendRatificationAction(ctx, out);
+  return out;
+}
 
+function appendHealthIssueActions(ctx, out) {
   // 主系モデルが動けない日も、独立したActが実際の監視Issueを台帳に運ぶ。
   if (ctx.issues instanceof Map) {
     for (const issue of ctx.issues.values()) {
@@ -579,7 +597,9 @@ export function derive(ctx) {
       if (action) out.push(action);
     }
   }
+}
 
+function appendRepairActions(ctx, runs, out) {
   // --- D1/D2: 未修理の故障（レーンF） ---
   for (const t of ctx.selfheal?.targets ?? []) {
     if (t.escalate) {
@@ -663,14 +683,18 @@ export function derive(ctx) {
       });
     }
   }
+}
 
+function appendCodexIntakeAction(ctx, out) {
   const codexIntake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
   if (codexIntake.rows.length + codexIntake.triage.length) out.push({ id: 'act-codex-ledger-sync', source: 'ledger',
     title: `Codex実行の未記帳 ${codexIntake.rows.length} 件・原因分類 ${codexIntake.triage.length} 件を同期する`,
     detail: '予約と元の終了証跡・判定レシートを照合する。正常終了を出荷とは数えない。',
     auto: 'reconcile-codex-runs', touches: ['data/autopilot-runs.json', 'data/autopilot-status.json'],
     close_check: { kind: 'codex_ledger_covers_runs', params: {} } });
+}
 
+function appendWorkflowIntakeAction(ctx, runs, out) {
   // --- D3: 運転台帳の取りこぼし ---
   //
   // **この運用でいちばん効く1件。** 落ちた回は台帳を書く主体がいないので、
@@ -698,7 +722,9 @@ export function derive(ctx) {
       });
     }
   }
+}
 
+function appendOrphanActions(ctx, out) {
   // --- D3b: マージ後に取り残されたコミット ---
   //
   // **中身を見ずに cherry-pick はしない。**取り残しの中身は台帳のこともあれば
@@ -792,7 +818,9 @@ export function derive(ctx) {
       close_check: { kind: 'branch_caught_up', params: { branch: o.branch } },
     });
   }
+}
 
+function appendCostIntakeAction(ctx, runs, out) {
   // --- D4: 実費台帳の取りこぼし ---
   //
   // Runbook §5-3 は「翌日のセッションが台帳へ入れる」と書いている。
@@ -831,7 +859,9 @@ export function derive(ctx) {
       });
     }
   }
+}
 
+function appendCredentialFailureActions(runs, out) {
   // --- D5: 作業に入る前の連続失敗 ＝ 主系が2日以上止まっている ---
   //
   // 単発の flake と**決定論的な故障**は形が違う。後者は「作業に入る前に、
@@ -903,7 +933,9 @@ export function derive(ctx) {
       });
     }
   }
+}
 
+function appendShippingActions(runs, out) {
   // --- D5b: 経路が黙って出荷していない / どの経路も出荷していない ---
   //
   // **失敗は拾えていた。拾えていなかったのは「緑のまま何もしない」ほう。**
@@ -994,7 +1026,9 @@ export function derive(ctx) {
       });
     }
   }
+}
 
+function appendStatusFreshnessAction(ctx, out) {
   // --- D6: status JSON の鮮度 ---
   //
   // 2026-08-23 の主系初出荷が §5-2 必須の status JSON 更新を含んでおらず、
@@ -1014,10 +1048,9 @@ export function derive(ctx) {
       });
     }
   }
+}
 
-  // 実行の異常・未確定をセッションの調査キューへ運ぶ。制御操作はしない。
-  out.push(...deriveRoutineActions(ctx.routineDoc, { now: ctx.now }));
-
+function appendRoutineFreshnessAction(ctx, out) {
   // --- D6b: 副系の写しの鮮度 ---
   //
   // **CIが赤くなる前に、task として出す。**
@@ -1061,7 +1094,9 @@ export function derive(ctx) {
       }
     }
   }
+}
 
+function appendBudgetReviewActions(ctx, out) {
   // --- D7: 1回上限の未レビュー超過（主系のその種別を止めている） ---
   //
   // 2026-08-25 に実際に起きた形: レーンFの修理 run が repair の1回上限 $3.00 に
@@ -1107,8 +1142,9 @@ export function derive(ctx) {
       },
     });
   }
+}
 
-
+function appendRatificationAction(ctx, out) {
   // --- D8: EP 委任判定の月次追認（2026-09-05・オーナー判断） ---
   //
   // EP 精度の判定（owner_needed）はオーナーが AI へ全面委任した（#906）。点は入るが、
@@ -1163,8 +1199,6 @@ export function derive(ctx) {
       });
     }
   }
-
-  return out;
 }
 
 /**
@@ -2048,152 +2082,7 @@ export function interpretRun(run) {
       gate_code: code ?? null };
   }
   if (claude.conclusion === 'failure') {
-    // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
-    //
-    // 経緯: ここは元々、即死を所要時間だけで `auth_or_credential` と断定していた。
-    // 08-25 にその断定を外して「上流の版」へ倒したが、**08-26 の対照実験で
-    // それも誤りと分かった**（2.1.241 は有効なトークンで正常に完走する。
-    // run 32919495397）。**当初の「認証系」が結論としては正しく、根拠が無かった。**
-    //
-    // 2度とも同じ形の誤り —— **他の変数が同時に動いているのに断定した。**
-    // だから所要時間からも、SHAの差からも原因を書かない。**書いてよいのは
-    // 実験が答えを出したときだけ**で、それをワークフロー側に置いた
-    // （「即死が資格情報かを切り分ける」ステップ）。下でその結論を読む。
-    //
-    // 即死する原因は少なくとも3つあり、所要時間では区別できない:
-    //   - 資格情報の失効（401が即返る）
-    //   - **上流の action / CLI の版が壊れている**（初回のモデル呼び出しで死ぬ）
-    //   - --model や入力ファイルの指定ミス（起動時に弾かれる）
-    // どれも 500ms 前後・num_turns=1・cost=$0 になる。
-    //
-    // **決定論的であることは、認証の証拠ではない。**「2日とも1バイトも
-    // 違わないから flake ではない＝認証系」という推論が実際に外れた回が
-    // これで、同一シグネチャが本当に示していたのは「同じ壊れた版を2回引いた」
-    // だった。種別を決められないときに決めない——これは autopilot-runs.mjs が
-    // `--failure-class` を渡されたときだけ書く理由と同じ規則で、ここだけが
-    // 破っていた。推測を種別に書くと selfheal の「同一 failure_class を3回
-    // 直したら人へ」が別種別として数えられ、歯止めが効かなくなる。
-    const ms = claude.started_at && claude.completed_at
-      ? new Date(claude.completed_at) - new Date(claude.started_at) : null;
-    const immediate = ms != null && ms <= 5000;
-
-    // **実験が答えを出しているなら、推測しない。**
-    // ワークフローが失敗した回だけ、同じトークンで1ターンだけ走らせている
-    // （--model も MCP も渡さないので、残る変数はトークンが通るかどうかだけ）。
-    // failure_class は観測された形（immediate_failure）のまま据え置く——
-    // 種別を変えると D5 の連続判定と close_check の再発判定が別種別として
-    // 数え直され、歯止めが効かなくなる。結論は failure_reason と
-    // needs_triage で伝える。
-    const probe = step('資格情報かを切り分ける');
-    const budgetLimit = step('実行中の支出閾値で停止');
-    const turnsLimit = step('ターン上限で停止');
-    if (budgetLimit?.conclusion === 'failure' || turnsLimit?.conclusion === 'failure') {
-      const budget = budgetLimit?.conclusion === 'failure';
-      return { outcome: 'failed', attempted: true, failure_class: null, needs_triage: true,
-        failure_reason: budget
-          ? 'SDKが実行中の支出閾値への到達を確認し、次のモデル呼出を停止した。進行中の応答分は閾値を超え得る。実費・未完の作業・超過レビューを確認し、予算の引上げや停止解除は自動で行わない。'
-          : 'SDKのターン上限への到達を確認した。未完の作業と繰り返しの原因を確認する。上限の増加や同じ処理の再実行を自動的な解決策にしない。' };
-    }
-
-    // 【2026-09-01】**「単独実行も落ちた」と「鍵が悪い」は別。**
-    //
-    // 上のコメントは「推測をやめて実験に聞く」ことで08-24〜08-25の誤りを閉じた、
-    // と書いている。閉じ切れていなかった —— **その実験が2値しか返さないので、
-    // 3つ目の原因は必ず2択のどちらかに化ける。**
-    //
-    // 08-30・08-31 の即死がそれで、中身は使用量上限（HTTP 429）だった。
-    // 台帳には「資格情報が通っていない。setup-token を再実行せよ」と
-    // needs_triage: false で入るので、**無事な鍵を捨てる指示が、
-    // 誰も見直さない形で残る。**答えは応答の中にあった:
-    //
-    //   {"api_error_status":429,"result":"You've hit your weekly limit · resets Aug 31, 11pm (UTC)"}
-    //
-    // ワークフロー側でこれを別ステップに割った（読めるのはステップ名と
-    // conclusion だけで、ログ本文は読めないため）。このステップが無い
-    // 過去の run は undefined になり、従来どおりの判定に落ちる。
-    const usageLimit = step('使用量上限');
-    if (usageLimit?.conclusion === 'failure') {
-      return {
-        outcome: 'failed', attempted: true,
-        // **ここだけ「形」ではなく「原因」を種別に書く。**
-        // 上の切り分け（資格情報かどうか）は種別を immediate_failure のまま
-        // 据え置く —— あちらは原因を1つに絞れておらず、絞れないものを種別に
-        // 書くと再発の数え方が壊れるから。**429 は絞れている。**
-        // かつ形では書けない: Claude Code の導入だけで10秒使うので、429で
-        // 弾かれても5秒規則には引っかからず `null` になる。**failed なのに
-        // failure_class が無い行は autopilot-selfheal が落とす**（再発を
-        // 数えられないため）ので、形に寄せる選択肢がそもそも無い。
-        // 種別を足すと data/escalation-rules.json に移管規則が要る
-        // （check-escalation.mjs が実績のある種別を全部要求する）。
-        failure_class: 'usage_limit',
-        // 上限は時間で戻る。**セッションが調べ直すことは何も無く、
-        // オーナーが replace すべきものも無い。**
-        needs_triage: false,
-        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
-          + `同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した`
-          + `（ワークフローの切り分けステップ）。**資格情報は失効していない —— `
-          + `トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**`
-          + `上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので`
-          + `**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。`
-          + `恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）`,
-      };
-    }
-
-    if (step('資格情報の診断は判定不能')?.conclusion === 'failure') {
-      return {
-        outcome: 'failed', attempted: true,
-        failure_class: immediate ? 'immediate_failure' : null,
-        needs_triage: true,
-        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗。`
-          + '単独実行から資格情報の可否を判定できなかった。通信・サービス・CLIを含めて原因を確認する。'
-          + '資格情報の交換が必要とは断定できない（診断は判定不能）。',
-      };
-    }
-
-    if (probe?.conclusion === 'failure') {
-      return {
-        outcome: 'failed', attempted: true,
-        failure_class: immediate ? 'immediate_failure' : null,
-        // **セッションが調べ直す必要が無い。**答えは出ていて、残りはオーナー作業。
-        needs_triage: false,
-        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
-          + `**同じトークンでの単独実行（1ターン）も落ちた**（ワークフローの切り分けステップ）。`
-          + `--model も MCP も渡さない実行で落ちているので、**資格情報が通っていない。**`
-          + `オーナーがローカルで \`claude setup-token\` を再実行し repo secret `
-          + `CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある（自動判定・実験済み）`,
-      };
-    }
-    if (probe?.conclusion === 'success') {
-      return {
-        outcome: 'failed', attempted: true,
-        failure_class: immediate ? 'immediate_failure' : null,
-        needs_triage: true,
-        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗した一方、`
-          + `**同じトークンでの単独実行（1ターン）は完走している**（ワークフローの切り分けステップ）。`
-          + `**資格情報は通っているので、そこを疑わない。**残る候補は --model の指定`
-          + `（data/model-routing.json の解決結果が実在するモデルか）・MCP・プロンプト・上流の版（自動判定）`,
-      };
-    }
-    // 切り分けステップが無い / skipped ＝ **判定不能。**CLIが入る前に落ちた回
-    // （08-21 の actor 拒否のような形）や、この装置より前の run がここに来る。
-    // **判定不能は「資格情報は無事」ではない**ので、従来どおりセッションへ回す。
-    return {
-      outcome: 'failed', attempted: true,
-      // 即死は「実作業に入る前に落ちた」という**観測された形**までを書く。
-      // 原因はここでは名指ししない（needs_triage でセッションへ回す）。
-      failure_class: immediate ? 'immediate_failure' : null,
-      needs_triage: true,
-      failure_reason: immediate
-        ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前（初回のモデル呼び出し相当）で落ちている。`
-          + `**原因は所要時間からは決まらない**（資格情報の失効／上流 action・CLI の版の破損／--model等の指定ミスは、どれも同じ形になる）。`
-          + `【2026-08-26 実測】08-24〜08-25 の同型の失敗は **資格情報が原因だった**。`
-          + `疑われた版（Claude Code 2.1.241）を有効なトークンで直接走らせたところ is_error=false / result=PROBE_OK で通っている（run 32919495397・実費 $0.04）。`
-          + `**SHAが違うことは版が原因である証拠にならない** —— @v1 のようなフローティングタグでは日をまたげばほぼ必ず違う値になるので、この対照は当たり前に「違い」を見つけてしまう。`
-          + `いまは版がSHAでpinしてあるので、**直近の成功runとSHAが同じなら版は機械的に外れる**。そのときは資格情報を先に疑ってよい。`
-          + `切り分けが要るなら費用$0.04で再現できる: ubuntu ランナーで \`curl -fsSL https://claude.ai/install.sh | bash -s -- <版>\` の後 `
-          + `\`claude -p '...' --max-turns 1 --output-format json\` を CLAUDE_CODE_OAUTH_TOKEN 付きで走らせ、is_error を見る（自動判定）`
-        : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
-    };
+    return interpretFailedRun(claude, step);
   }
   const outputCheck = step('成果物の実行IDを照合');
   if (outputCheck && outputCheck.conclusion !== 'skipped') {
@@ -2214,6 +2103,155 @@ export function interpretRun(run) {
   }
   return { outcome: 'shipped', attempted: true, failure_class: null, failure_reason: null,
     needs_pr: true };
+}
+
+function interpretFailedRun(claude, step) {
+  // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
+  //
+  // 経緯: ここは元々、即死を所要時間だけで `auth_or_credential` と断定していた。
+  // 08-25 にその断定を外して「上流の版」へ倒したが、**08-26 の対照実験で
+  // それも誤りと分かった**（2.1.241 は有効なトークンで正常に完走する。
+  // run 32919495397）。**当初の「認証系」が結論としては正しく、根拠が無かった。**
+  //
+  // 2度とも同じ形の誤り —— **他の変数が同時に動いているのに断定した。**
+  // だから所要時間からも、SHAの差からも原因を書かない。**書いてよいのは
+  // 実験が答えを出したときだけ**で、それをワークフロー側に置いた
+  // （「即死が資格情報かを切り分ける」ステップ）。下でその結論を読む。
+  //
+  // 即死する原因は少なくとも3つあり、所要時間では区別できない:
+  //   - 資格情報の失効（401が即返る）
+  //   - **上流の action / CLI の版が壊れている**（初回のモデル呼び出しで死ぬ）
+  //   - --model や入力ファイルの指定ミス（起動時に弾かれる）
+  // どれも 500ms 前後・num_turns=1・cost=$0 になる。
+  //
+  // **決定論的であることは、認証の証拠ではない。**「2日とも1バイトも
+  // 違わないから flake ではない＝認証系」という推論が実際に外れた回が
+  // これで、同一シグネチャが本当に示していたのは「同じ壊れた版を2回引いた」
+  // だった。種別を決められないときに決めない——これは autopilot-runs.mjs が
+  // `--failure-class` を渡されたときだけ書く理由と同じ規則で、ここだけが
+  // 破っていた。推測を種別に書くと selfheal の「同一 failure_class を3回
+  // 直したら人へ」が別種別として数えられ、歯止めが効かなくなる。
+  const ms = claude.started_at && claude.completed_at
+    ? new Date(claude.completed_at) - new Date(claude.started_at) : null;
+  const immediate = ms != null && ms <= 5000;
+
+  // **実験が答えを出しているなら、推測しない。**
+  // ワークフローが失敗した回だけ、同じトークンで1ターンだけ走らせている
+  // （--model も MCP も渡さないので、残る変数はトークンが通るかどうかだけ）。
+  // failure_class は観測された形（immediate_failure）のまま据え置く——
+  // 種別を変えると D5 の連続判定と close_check の再発判定が別種別として
+  // 数え直され、歯止めが効かなくなる。結論は failure_reason と
+  // needs_triage で伝える。
+  const probe = step('資格情報かを切り分ける');
+  const budgetLimit = step('実行中の支出閾値で停止');
+  const turnsLimit = step('ターン上限で停止');
+  if (budgetLimit?.conclusion === 'failure' || turnsLimit?.conclusion === 'failure') {
+    const budget = budgetLimit?.conclusion === 'failure';
+    return { outcome: 'failed', attempted: true, failure_class: null, needs_triage: true,
+      failure_reason: budget
+        ? 'SDKが実行中の支出閾値への到達を確認し、次のモデル呼出を停止した。進行中の応答分は閾値を超え得る。実費・未完の作業・超過レビューを確認し、予算の引上げや停止解除は自動で行わない。'
+        : 'SDKのターン上限への到達を確認した。未完の作業と繰り返しの原因を確認する。上限の増加や同じ処理の再実行を自動的な解決策にしない。' };
+  }
+
+  // 【2026-09-01】**「単独実行も落ちた」と「鍵が悪い」は別。**
+  //
+  // 上のコメントは「推測をやめて実験に聞く」ことで08-24〜08-25の誤りを閉じた、
+  // と書いている。閉じ切れていなかった —— **その実験が2値しか返さないので、
+  // 3つ目の原因は必ず2択のどちらかに化ける。**
+  //
+  // 08-30・08-31 の即死がそれで、中身は使用量上限（HTTP 429）だった。
+  // 台帳には「資格情報が通っていない。setup-token を再実行せよ」と
+  // needs_triage: false で入るので、**無事な鍵を捨てる指示が、
+  // 誰も見直さない形で残る。**答えは応答の中にあった:
+  //
+  //   {"api_error_status":429,"result":"You've hit your weekly limit · resets Aug 31, 11pm (UTC)"}
+  //
+  // ワークフロー側でこれを別ステップに割った（読めるのはステップ名と
+  // conclusion だけで、ログ本文は読めないため）。このステップが無い
+  // 過去の run は undefined になり、従来どおりの判定に落ちる。
+  const usageLimit = step('使用量上限');
+  if (usageLimit?.conclusion === 'failure') {
+    return {
+      outcome: 'failed', attempted: true,
+      // **ここだけ「形」ではなく「原因」を種別に書く。**
+      // 上の切り分け（資格情報かどうか）は種別を immediate_failure のまま
+      // 据え置く —— あちらは原因を1つに絞れておらず、絞れないものを種別に
+      // 書くと再発の数え方が壊れるから。**429 は絞れている。**
+      // かつ形では書けない: Claude Code の導入だけで10秒使うので、429で
+      // 弾かれても5秒規則には引っかからず `null` になる。**failed なのに
+      // failure_class が無い行は autopilot-selfheal が落とす**（再発を
+      // 数えられないため）ので、形に寄せる選択肢がそもそも無い。
+      // 種別を足すと data/escalation-rules.json に移管規則が要る
+      // （check-escalation.mjs が実績のある種別を全部要求する）。
+      failure_class: 'usage_limit',
+      // 上限は時間で戻る。**セッションが調べ直すことは何も無く、
+      // オーナーが replace すべきものも無い。**
+      needs_triage: false,
+      failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
+        + `同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した`
+        + `（ワークフローの切り分けステップ）。**資格情報は失効していない —— `
+        + `トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**`
+        + `上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので`
+        + `**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。`
+        + `恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）`,
+    };
+  }
+
+  if (step('資格情報の診断は判定不能')?.conclusion === 'failure') {
+    return {
+      outcome: 'failed', attempted: true,
+      failure_class: immediate ? 'immediate_failure' : null,
+      needs_triage: true,
+      failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗。`
+        + '単独実行から資格情報の可否を判定できなかった。通信・サービス・CLIを含めて原因を確認する。'
+        + '資格情報の交換が必要とは断定できない（診断は判定不能）。',
+    };
+  }
+
+  if (probe?.conclusion === 'failure') {
+    return {
+      outcome: 'failed', attempted: true,
+      failure_class: immediate ? 'immediate_failure' : null,
+      // **セッションが調べ直す必要が無い。**答えは出ていて、残りはオーナー作業。
+      needs_triage: false,
+      failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
+        + `**同じトークンでの単独実行（1ターン）も落ちた**（ワークフローの切り分けステップ）。`
+        + `--model も MCP も渡さない実行で落ちているので、**資格情報が通っていない。**`
+        + `オーナーがローカルで \`claude setup-token\` を再実行し repo secret `
+        + `CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある（自動判定・実験済み）`,
+    };
+  }
+  if (probe?.conclusion === 'success') {
+    return {
+      outcome: 'failed', attempted: true,
+      failure_class: immediate ? 'immediate_failure' : null,
+      needs_triage: true,
+      failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗した一方、`
+        + `**同じトークンでの単独実行（1ターン）は完走している**（ワークフローの切り分けステップ）。`
+        + `**資格情報は通っているので、そこを疑わない。**残る候補は --model の指定`
+        + `（data/model-routing.json の解決結果が実在するモデルか）・MCP・プロンプト・上流の版（自動判定）`,
+    };
+  }
+  // 切り分けステップが無い / skipped ＝ **判定不能。**CLIが入る前に落ちた回
+  // （08-21 の actor 拒否のような形）や、この装置より前の run がここに来る。
+  // **判定不能は「資格情報は無事」ではない**ので、従来どおりセッションへ回す。
+  return {
+    outcome: 'failed', attempted: true,
+    // 即死は「実作業に入る前に落ちた」という**観測された形**までを書く。
+    // 原因はここでは名指ししない（needs_triage でセッションへ回す）。
+    failure_class: immediate ? 'immediate_failure' : null,
+    needs_triage: true,
+    failure_reason: immediate
+      ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前（初回のモデル呼び出し相当）で落ちている。`
+        + `**原因は所要時間からは決まらない**（資格情報の失効／上流 action・CLI の版の破損／--model等の指定ミスは、どれも同じ形になる）。`
+        + `【2026-08-26 実測】08-24〜08-25 の同型の失敗は **資格情報が原因だった**。`
+        + `疑われた版（Claude Code 2.1.241）を有効なトークンで直接走らせたところ is_error=false / result=PROBE_OK で通っている（run 32919495397・実費 $0.04）。`
+        + `**SHAが違うことは版が原因である証拠にならない** —— @v1 のようなフローティングタグでは日をまたげばほぼ必ず違う値になるので、この対照は当たり前に「違い」を見つけてしまう。`
+        + `いまは版がSHAでpinしてあるので、**直近の成功runとSHAが同じなら版は機械的に外れる**。そのときは資格情報を先に疑ってよい。`
+        + `切り分けが要るなら費用$0.04で再現できる: ubuntu ランナーで \`curl -fsSL https://claude.ai/install.sh | bash -s -- <版>\` の後 `
+        + `\`claude -p '...' --max-turns 1 --output-format json\` を CLAUDE_CODE_OAUTH_TOKEN 付きで走らせ、is_error を見る（自動判定）`
+      : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
+  };
 }
 
 // ============================================================

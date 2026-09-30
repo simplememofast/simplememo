@@ -53,6 +53,13 @@ CI全体の成功を意味しない。対象の一覧は `--list`、
   data/check-blindspots.json / guard-shapes.json が言及）
   と preflight-runner.mjs（一時コピー作成・検査実行・後片付け）
 
+`seo-check.js` は CLI とレポートの集約を持ち、ページ本文の検査は
+`lib/seo-page.js`、サイト全体の検査は `lib/seo-site.js` に分けている。
+`lib/site-files.js` の `collectHtmlFiles` は配列、`walkHtmlFiles` は遅延列挙を返す。
+隠しファイル・除外名・読み取りエラーの扱いは呼び出し側の既存方針に合わせる。
+これらと運用アクションの振る舞いは `lib/refactor-behavior.test.mjs` で検査し、
+既存の `refactor.test.mjs` から実行する。
+
 ## 4. 手動ツールと完了済み一回限り
 
 - 手動: `preflight.mjs`、`dashboard.mjs`、`generate-og-*.js`、`generate-pr-hero.mjs`、
