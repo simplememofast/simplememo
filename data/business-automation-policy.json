@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "policy_owner": "human",
+  "scope": "YURIKA + SimpleMemo registered business operations",
+  "scope_completeness": "not_attested",
+  "inventory": "data/automation-coverage.json",
+  "preserve_legacy_items": true,
+  "denominator": "all registered tasks except explicitly intentional_no",
+  "weighting": "one task one vote; not revenue, hours or enterprise completeness",
+  "window_days": 28,
+  "history_from": "2026-03-02",
+  "timezone": "Asia/Tokyo",
+  "target": {"metric": "verified_full_automation_rate", "strictly_greater_than": 0.9, "sustained_weeks": 4},
+  "ranker_reward": false,
+  "missing_evidence": "unknown",
+  "existing_owner": "obsidian",
+  "new_business_candidates": [
+    {"id": "company-non-app-operations", "task": "アプリ以外の受託・ライセンス等の事業の受注から納品・検収まで", "state": "scope_review_required", "overlap_review": ["営業", "契約・請求・納品・支払いの照合"], "admission": "実際の事業有無・既存行との境界・責任者・完了条件を確認してから追加"},
+    {"id": "company-recurring-contracts", "task": "AI事業者以外も含む定期契約の更新・解約期限と実際の処理", "state": "scope_review_required", "overlap_review": ["AI事業者のDPA・データ利用・SLA・撤退計画の審査", "仕訳・請求・領収書・月次締めの統合"], "admission": "対象契約と既存業務に含まれない処理を確認してから追加"},
+    {"id": "company-business-profitability", "task": "法人全事業の事業別損益の照合と、事業継続・資金配分の判断", "state": "scope_review_required", "overlap_review": ["資金繰りシナリオ", "AI費用に対する粗利", "CAC・LTV・回収期間・粗利の統合"], "admission": "会計・アプリ指標の既存行との重複を除き、法人全体の対象を確定してから追加"}
+  ]
+}

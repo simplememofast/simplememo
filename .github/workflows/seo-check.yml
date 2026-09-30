@@ -540,6 +540,10 @@ jobs:
         run: |
           node scripts/autonomy-score.mjs --selftest
           node scripts/autonomy-score.mjs --check
+          node scripts/autonomy-outcome-score.mjs --selftest
+          node scripts/autonomy-outcome-score.mjs --check
+          node scripts/business-automation.mjs --selftest
+          node scripts/business-automation.mjs --check
           # EP の委任判定を人が追認・反転する道具。人の判定に判定者・日付・根拠が揃うことを固定する
           node scripts/ep-ratify.mjs --selftest
 

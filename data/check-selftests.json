@@ -232,6 +232,12 @@
       "broke": "check() の判定を無効化すると自己テストが7件の名指しで落ちることを観測。**それまでこの自己テストは check() を一度も呼んでいなかった** —— 見ていたのは analyse() の算数（上限・分母・譲渡）だけで、台帳を見る側（blocker が登録簿にあるか／unblocked_by が書いてあるか／率が automation-rate.mjs と一致するか）は素通りしていた。実測すると check() の problems.push を10個すべて潰しても緑のままだった。落とすべき7通りと、落としてはいけない1通り、実データの3方向を足した [2026-09-06] AI実行率計画: 切り上げだけに変えて厳密な超過判定を外した変異が、90%ちょうどの検体でAssertionError / exit 1。実装復元後は17件移管、未着手24件開始時の分母199・必要移管15件、境界の除外、58%の小数境界、不正入力も自己検査で成功。"
     },
     {
+      "script": "scripts/autonomy-outcome-score.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-30",
+      "broke": "18 negative/boundary tests observed: missing reviews stay in denominator; safety violation prevents score; human origins get no autonomy credit; future/retrospective/duplicate/private-exposed inputs rejected. Disabling the safety-violation gate in a disposable public-source module caused exit 1 with one failing test; original files were unchanged. Pending review cannot hide a reported safety violation; a parent-directory symlink into Git rejects a synthetic0600 input."
+    },
+    {
       "script": "scripts/autonomy-score.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",
@@ -302,6 +308,12 @@
       "state": "demonstrated",
       "at": "2026-09-05",
       "broke": "出力比較の条件を常にFalseへ置換したメモリ上の実スクリプトで --selftest を実行し、missing outputs must fail のAssertionErrorを観測。元の検査では欠落・本文の分母変更・CSVの件数変更を拒否し、一致したファイルのみ通る。比較を無効化した検体は保存・コミットしていない。"
+    },
+    {
+      "script": "scripts/business-automation.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-30",
+      "broke": "23 negative/boundary tests observed: human touches/manual starts prevent full credit; missing/not-due stay unknown; stale/self-review/duplicate/retired rows rejected; 90% exactly, missing weeks and changed scope cannot satisfy sustained target; historical runtime backfill rejected. Disposable public-source mutations that ignore human touches or accept 90% exactly each caused the test runner to exit 1 with one failing test; original files were unchanged. Adversarial regressions preserve measured192-task cohort after same-week ledger expands to193 and break the public-to-private scope transition. Recursive export whitelist discards a synthetic nested private reference and rejects free-form date annotations."
     },
     {
       "script": "scripts/check-audit-independence.mjs",

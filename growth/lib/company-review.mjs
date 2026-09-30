@@ -9,6 +9,8 @@ import {compactMentions} from './company-mentions.mjs';
 import {compactCtaMeasurement} from './company-cta-measurement.mjs';
 import {bingReport} from './company-bing.mjs';
 import {reportFailure,failureReportingSummary} from './company-automation-health.mjs';
+import {businessStatus,recordBusinessWeek} from './business-automation.mjs';
+import {privateWeeklyChart} from '../../scripts/business-automation.mjs';
 
 const percent = v => Number.isFinite(v) ? (100 * v).toFixed(2) + '%' : 'unknown';
 const value = (m, v) => m.id === 'autonomy_score' && Number.isFinite(v) ? v.toFixed(3) + '/100' : percent(v);
@@ -68,10 +70,20 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     native_resource_usage:nativeResourceStatus({stateRoot,now}),
     failures: o.automation.failures.map(reportFailure), failure_summary:failureReportingSummary(o.automation.failures),
     discovery_gaps: o.automation.discovery_gaps, next: opportunities(o)[0] ?? null };
+  payload.business_automation=businessStatus({stateRoot,now});
+  if(cadence==='weekly') {
+    try {
+      payload.business_weekly=recordBusinessWeek({stateRoot,now});
+      const history=JSON.parse(fs.readFileSync(path.join(stateRoot,'business-automation/weekly.json')));
+      fs.writeFileSync(path.join(stateRoot,'business-automation/weekly.svg'),privateWeeklyChart(history),{mode:0o600});
+    } catch {payload.business_weekly={state:'UNAVAILABLE',sustained_above_target:false};}
+  }
   // Timestamps do not make unchanged evidence a new notification.
   const aio = structuredClone(payload.growth.aio);
   if (aio?.decision_input) delete aio.decision_input.checked_at;
   const material = { metrics: comparison.metrics, failure_ids: payload.failures.map(j => [j.id,j.health.state]),
+    business_automation:{inventory:payload.business_automation.inventory,actual:payload.business_automation.actual},
+    business_target_sustained:payload.business_weekly?.sustained_above_target??false,
     native_resource_health:payload.native_resource_usage.status,
     diagnosis_dispositions:payload.failures.map(j=>[j.id,j.current_assessment?.state,j.current_assessment?.needs_diagnosis,j.current_assessment?.decision_id]),
     diagnostic_causes:payload.failures.map(j=>[j.id,cronDiagnosticMaterial(j.diagnostic_input)]),
@@ -90,6 +102,13 @@ export function saveReview(o, { stateRoot, cadence = 'daily', now = new Date() }
     'Private operating report. Source periods and populations remain separate.', '',
     '| Metric | Baseline | Current | Delta |', '|---|---:|---:|---:|'];
   for (const m of comparison.metrics) lines.push(`| ${m.id} | ${value(m,m.previous)} | ${value(m,m.current)} | ${m.comparable ? value(m,m.delta) : 'not comparable'} |`);
+  const business=payload.business_automation, current=business.inventory.overall, actual=business.actual;
+  lines.push('', '## YURIKA + SimpleMemo business automation', '',
+    `Registered inventory: AI execution ${percent(current.declared_execution_rate)}; AI utilization ${percent(current.declared_ai_utilization_rate)}. These are classifications, not runtime proof. Inventory measured_at: ${business.inventory.inventory_measured_at}.`,
+    `Actual 28-day observations: full automation ${percent(actual.verified_full_automation_rate)}; AI utilization ${percent(actual.verified_ai_utilization_rate)}; observed work saved ${percent(actual.observed_work_saved_rate)}. State: ${actual.state}; unmeasured tasks: ${actual.unknown_tasks}/${actual.defined_tasks}.`,
+    `Corporate scope: ${actual.scope_completeness}. Sustained strictly >90% over four consecutive same-scope weekly windows: ${payload.business_weekly?.sustained_above_target===true?'verified from reviewed observations':'unverified'}. Windows overlap; this is persistence, not four independent trials.`,
+    `Weekly graph status: ${payload.business_weekly?.state ?? (cadence==='weekly'?'recorded':'not_requested')}.`,
+    'Do not raise rates by deleting human work, reclassifying readiness as runtime completion or bypassing approvals. Select the next actual human-work transfer by existing business-value and permission gates. Retain the weekly graph in business-automation/weekly.svg; never publish raw private observations.');
   lines.push('', 'Human work transferred on the fixed baseline cohort: ' + comparison.existing_human_tasks_transferred.length,
     'Recorded manual starts: ' + o.human_touches.manual_starts + '; unobserved historical handoffs remain unknown.', '',
     '## Growth inputs', '', ...Object.entries(payload.growth.connections).map(([k,v]) => `- ${k}: ${v.status}; ${v.window ? v.window.start + '..' + v.window.end : 'see source period'}; ${v.reason ?? v.evidence ?? 'unknown evidence'}`), '',

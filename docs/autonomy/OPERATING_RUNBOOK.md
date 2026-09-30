@@ -4,6 +4,8 @@ The native Codex automation `obsidian` is the daily master owner at 06:00 Asia/T
 
 ## Canonical sources
 
+Business automation definitions and the weekly graph: [BUSINESS_AUTOMATION.md](BUSINESS_AUTOMATION.md). Preserve all existing task rows and legacy metrics. The primary owner goal is actual YURIKA + SimpleMemo full automation strictly above 90%, sustained over four consecutive same-scope weekly 28-day windows. Corporate scope and human-activity coverage require explicit evidence; inventory classification is a separate reference. Missing observations never satisfy this goal. The existing weekly review writes private `business-automation/weekly.json` and `weekly.svg`; no new owner, timer, collector or reward is introduced. Select actual human-work transfers through existing business-value and permission gates. Draft-only changes do not establish natural scheduler activation or target achievement.
+
 | Responsibility | Existing authority / integration |
 |---|---|
 | Selection, permission, one action, prospective contract, CI, ship | Existing Obsidian Runbook, `value-contracts.mjs`, `autopilot-runs.mjs` |

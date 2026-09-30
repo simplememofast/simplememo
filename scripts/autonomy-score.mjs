@@ -582,7 +582,7 @@ export function loadContext({ today = todayJst() } = {}) {
 export function rankerBlindness(policy, { read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8') } = {}) {
   const g = policy.anti_gaming?.hidden_from_ranker;
   if (!g?.enabled) return [];
-  const needles = ['autonomy-score', 'autonomy_score', '自律スコア'];
+  const needles = ['autonomy-score', 'autonomy_score', 'autonomy-outcome-score', 'autonomy_outcome_score', '自律スコア'];
   const problems = [];
   for (const f of g.must_not_read || []) {
     let text;
@@ -606,7 +606,7 @@ export function rankerBlindness(policy, { read = (p) => fs.readFileSync(path.joi
  * 散文で「書き換えない」と書くだけにしない。実際に一覧を読んで確かめる。
  */
 export const OWNER_ONLY_FILES = ['data/autonomy-score.json', 'data/eligibility-policy.json',
-  'data/value-metrics.json', 'data/contract-coverage.json'];
+  'data/value-metrics.json', 'data/contract-coverage.json', 'data/autonomy-outcome-score.json', 'data/business-automation-policy.json'];
 export function policyOwnership(authority, { files = OWNER_ONLY_FILES } = {}) {
   const may = authority?.self_repair?.may_modify;
   if (!Array.isArray(may)) {
@@ -674,6 +674,12 @@ export function validateMetrics(doc, policy) {
   if (policy?.anti_gaming?.hidden_from_ranker?.enabled && tierOf('autonomy_score') !== 'C') {
     problems.push('自律スコアを ranker に見せない設定なのに、価値契約の指標として tier C になっていない'
       + ' — **契約の指標にした時点で ranker に見せている**');
+  }
+  if (policy?.anti_gaming?.hidden_from_ranker?.enabled && tierOf('autonomy_outcome_score') !== 'C') {
+    problems.push('Outcome autonomy instrument must remain tier C; it is not a ranking or value-contract reward');
+  }
+  if (policy?.anti_gaming?.hidden_from_ranker?.enabled && tierOf('verified_full_automation_rate') !== 'C') {
+    problems.push('Business automation is a reporting instrument and must remain tier C');
   }
   return problems;
 }

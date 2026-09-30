@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_STATE, observe, auditObservation, persistRun } from '../growth/lib/company-loop.mjs';
 import { compareMetrics } from '../growth/lib/company-metrics.mjs';
+import { outcomeStatus } from './autonomy-outcome-score.mjs';
+import { businessStatus } from '../growth/lib/business-automation.mjs';
 import { collectData } from '../growth/lib/company-data.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
@@ -96,6 +98,8 @@ if(command==='record-apple-ads-observation') {
   if (command === 'autonomy-status') {
     const baseline = path.join(stateRoot, 'metrics-baseline.json');
     result = { metrics: o.formal_metrics?.metrics,
+      outcome_autonomy: outcomeStatus({file:path.join(stateRoot,'data/autonomy-outcome-evaluations.json')}),
+      business_automation: businessStatus({stateRoot}),
       comparison: fs.existsSync(baseline) && o.formal_metrics ? compareMetrics(JSON.parse(fs.readFileSync(baseline)), o.formal_metrics) : null,
       human_touches: o.human_touches, active_failures: o.automation.failures.map(reportFailure),
       active_failures_scope:'Legacy field retains all observed failure states, including disabled and event/manual history. Use reporting_context and failure_summary for current diagnosis; no rows are hidden.',
