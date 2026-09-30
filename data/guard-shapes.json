@@ -807,6 +807,12 @@
       "expr": "c.detect.rate",
       "disposition": "前提",
       "note": "2026-09-30: check の partialRa 例外中2条件。Number.isFinite(c.detect?.rate) が欠落/null/不正型を先に拒否し、0<=rate<=1を求める。さらに検知hit/nとの厳密一致、policy既存半配点とmaxの一致、points=max*rate、RA点=検知点を必要とする。率が欠落すると例外は成立せずmeasurable=falseの加点を拒否する。復旧率はnull/復旧点0のまま、検知の証拠だけを保持する限定例外。hit=0/rate=0なのに検知10点を残す偽装と未知復旧の偽加点が自己検査で拒否される。"
+    },
+    {
+      "file": "scripts/check-definitions.mjs",
+      "expr": "d.history",
+      "disposition": "前提",
+      "note": "2026-09-30: bump の既存履歴型検査。history が明示された場合は配列以外を拒否し、version/checksum/history を変える前に停止する。省略は従来の新しい履歴を開始するだけで、過去の変更がゼロだったという証明には使わない。source_file と明示した source_dependencies の正本読取り・checksum照合は currentSources が別に必須とし、履歴の省略・空配列・既存配列のどれでも依存欠落/読取失敗を拒否する。独立15ケースで不正履歴6型のNOWRITE、許容3型のv+1/旧prefix保持、各許容型と欠落/読取失敗の組合せを確認。既存19定義・原履歴・期間/配点/分母を削除して検査を通す例外ではない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

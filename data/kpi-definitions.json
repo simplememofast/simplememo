@@ -44,9 +44,9 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 20,
-      "checksum": "45f7de803acd00cb",
-      "changed_at": "2026-09-13",
+      "version": 21,
+      "checksum": "32c41a26bc54c604",
+      "changed_at": "2026-09-30",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
         {
@@ -143,8 +143,16 @@
           "version": 20,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 21,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。本番へ出荷できた実行÷着手した実行、出荷条件と分母は不変。同じ計算元の介入記帳が未指定null・明示[]の記録上ゼロ・既知positiveを区別するようになったためchecksumを更新。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "usd_per_shipped",
@@ -245,9 +253,9 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 55,
-      "checksum": "2f1533f90d9f2d4b",
-      "changed_at": "2026-09-19",
+      "version": 56,
+      "checksum": "4f90d8a823dbde97",
+      "changed_at": "2026-09-30",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
         {
@@ -519,6 +527,11 @@
           "version": 55,
           "at": "2026-09-19",
           "why": "定義は変えていない。ノイズフロア（期待クリック3未満・レーンA/Bのみ）の規定は無変更。レーンEの走査停止条件を「同じ不足条件か」から「リポジトリ内で確定するか／外部の未知を新たに調べる必要があるか」へ訂正し、走査記録をリポジトリ側（status JSON の reason と LOG）へ残す規定を足したため、同じファイルの checksum が動いた（ap-20260915 の no_artifact の修理）"
+        },
+        {
+          "version": 56,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。期待クリック3件未満を根拠にしない条件は不変。Runbookの介入記帳手順に未指定null、明示[]は記録上ゼロのみ、欠測混合率は未観測、過去原記録を補完しない条件を追記したため、Runbook全体のchecksumを更新。"
         }
       ]
     },
@@ -667,9 +680,9 @@
       "name": "連続稼働日数",
       "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 12,
-      "checksum": "45f7de803acd00cb",
-      "changed_at": "2026-09-13",
+      "version": 13,
+      "checksum": "32c41a26bc54c604",
+      "changed_at": "2026-09-30",
       "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
       "history": [
         {
@@ -726,17 +739,25 @@
           "version": 12,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 13,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。no_runを停止、その他の行がある日を稼働とする条件、行の無い日による断絶、current/longestの窓は不変。同じ計算元の介入欠測処理と自己テスト追加でchecksumが変わった。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "shipping_day_streak",
       "name": "連続出荷日数",
       "formula": "出荷（outcome = shipped）の行がある日だけが続く。停止（no_run）・失敗・Gateスキップ・行の無い日はすべて連続を切る。同じ日にどれか1経路でも出荷していればその日は出荷日。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 11,
-      "checksum": "45f7de803acd00cb",
-      "changed_at": "2026-09-13",
+      "version": 12,
+      "checksum": "32c41a26bc54c604",
+      "changed_at": "2026-09-30",
       "why_it_matters": "**連続稼働は、失敗し続けても伸びる。**主系が落ちて行が立った日は「記録がある日」なので稼働に数えるのが正しく、そこは変えていない。だが実際に 2026-09-02 時点の連続稼働 16 日は、**08-29〜08-31 の出荷ゼロ3日を丸ごとまたいでいる**（08-29 は副系が claim だけ取って死に、08-30・08-31 は主系・副系とも週次上限の 429）。稼働だけを公開面に出すと、その3日は読めない。切れる指標を隣に置く",
       "history": [
         {
@@ -788,16 +809,24 @@
           "version": 11,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 12,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。outcome=shippedの日単位判定、停止・未出荷・行無しの断絶とcurrent/longestは不変。同じ計算元の介入欠測処理と自己テスト追加でchecksumが変わった。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "publishing_day_streak",
       "name": "連続公開日数",
       "formula": "公開レーン（A=SEO / B=AIO / C=Evidence Asset / D=Paid relevance例外 / E=Coverage）の outcome=shipped の行がある日だけが続く。**レーンF（自己修復）と lane の無い日（保守のみ）は切る。**停止・失敗・Gateスキップ・行の無い日も切る。同じ日にどれか1経路でも公開レーンで出荷していればその日は公開日",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 9,
-      "changed_at": "2026-09-13",
+      "version": 10,
+      "changed_at": "2026-09-30",
       "why_it_matters": "連続出荷は自己修復も出荷として数えるので、**自分を直し続けても伸びる。**2026-09-03 の実物: 連続出荷 3日のうち 2日がレーンF で、公開面に出たのは1日だけ。新規カバレッジ（レーンE）は 08-28 が最後で6日空いていた。連続稼働に対して連続出荷を足したときと同じ形の穴が、一段内側に残っていた。**どちらが正しい優先順位かはこの指標では決めない**（故障が続けばレーンFが勝つのが正しい日もある）。決められるように、まず分けて数える",
       "history": [
         {
@@ -844,18 +873,26 @@
           "version": 9,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 10,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。公開レーンA〜Eのshipped、F/レーン無しの除外、日単位の断絶条件は不変。同じ計算元の介入欠測処理と自己テスト追加でchecksumが変わった。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
       ],
-      "checksum": "45f7de803acd00cb"
+      "checksum": "32c41a26bc54c604",
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "hands_off_shipping_streak",
       "name": "無介入出荷の連続日数",
-      "formula": "出荷の行があり、かつその日のどの行にも介入（interventions）が無い日だけが続く。出荷した経路が無介入でも、同じ日に別の行へ介入があれば切れる（日単位）。停止・失敗・行の無い日も切る",
+      "formula": "出荷の行があり、その日の全行のinterventionsが明示[]（recorded_zero）である日だけが続く、記録上無介入出荷の連続。どの経路にも既知の介入があれば切れる。停止・未出荷・行の無い日も切る。既知介入の無い出荷日に未指定/null/不正記録が混ざると無介入の成否はunknownとなり、最長とactive_daysはnull、currentは末日で既知の断絶が確定する0以外はnullとし、確定記録だけの下限はrecorded_lower_boundに別表示する。明示[]は完全な人介入観測や実際のzero-touch完遂を証明しない",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 11,
-      "checksum": "45f7de803acd00cb",
-      "changed_at": "2026-09-13",
+      "version": 12,
+      "checksum": "32c41a26bc54c604",
+      "changed_at": "2026-09-30",
       "why_it_matters": "率には天井がある —— 総合自動化率の到達可能上限は 82.9%（scripts/autonomy-gap.mjs）で、そこから先は物理・対人・観測不能で動かない。**時間には天井が無い。**「オーナーが何日触らずに済んだか」は伸ばし続けられる指標で、率が頭打ちになった後も自律性の前進を測れる。\n\n**出荷があることを条件に入れてある。**入れないと、壊れたまま誰も直しに行かない日が無介入として積み上がる（08-30・08-31 がその形）。触っていないのは自律していたからではないので、放置で伸びる自律指標にはしない",
       "history": [
         {
@@ -907,17 +944,25 @@
           "version": 11,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 12,
+          "at": "2026-09-30",
+          "why": "観測欠測の意味を変更した。未指定/null/不正なinterventionsを無介入ゼロへ補完せず、当日全行の明示[]だけを記録上無介入とする。成否未確定の出荷日はunknown、総連続はnull（末日の既知断絶0は維持）、確定記録の下限を別表示。既知positiveは失わない。実際のzero-touchや全人活動の観測を証明せず、元の日単位・出荷条件・窓・原台帳を保つ。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "autonomy_score",
       "name": "自律スコア（100点）",
-      "formula": "5成分の加重和。VDC 30（出荷のうち決済済みの価値契約を伴う割合）＋ UMR 25（人が一切触れずに本番到達した変更の割合を可逆性クラス R0=1/R1=3/R2=10 で重み付け・R0 の寄与は窓の総重みの60%まで）＋ RA 20（故障のうち機械が自分で検知した割合 10 と人手なしで復旧した割合 10）＋ EP 15（規則の within_hours を超えた検知の率から出す見逃し 7.5 と owner_needed による精度 7.5）＋ TUC 10（週あたり出荷数 / 目標7・上限1）。窓は28日（台帳が足りなければ全期間）。**検査被覆率が前回スナップショットより下がった窓では、素点が上がっていてもスコアを据え置く。**変更失敗率は入れない",
+      "formula": "5成分の加重和。VDC 30（出荷のうち決済済みの価値契約を伴う割合）＋ UMR 25（記録上無介入で本番到達した変更の割合を可逆性クラス R0=1/R1=3/R2=10 で重み付け・R0 の寄与は窓の総重みの60%まで）＋ RA 20（故障のうち機械が自分で検知した割合 10 と記録上無介入で復旧した割合 10）＋ EP 15（規則の within_hours を超えた検知の率から出す見逃し 7.5 と owner_needed による精度 7.5）＋ TUC 10（週あたり出荷数 / 目標7・上限1）。窓は28日（台帳が足りなければ全期間）。**検査被覆率が前回スナップショットより下がった窓では、素点が上がっていてもスコアを据え置く。**変更失敗率は入れない。記録上無介入はinterventionsの明示[]に限り、未指定/null/不正をゼロへ補完しない。UMRは未知を元分母に保持してrate=null・0点、RAは未知の復旧rateと総rate=null・復旧0点とし、既知の機械検知点を保持する。未観測carryにも加点しない。明示[]は完全な人介入観測や実際のzero-touchを証明しない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 15,
-      "checksum": "dd783b1f89638e74",
-      "changed_at": "2026-09-05",
+      "version": 16,
+      "checksum": "f5f6680c707c372e",
+      "changed_at": "2026-09-30",
       "why_it_matters": "**総合自動化率（タスク被覆率）は「何を自動化できたか」しか言わない。**検証されていない決定を100%自動化すれば被覆率は100%になる。こちらは反証器の有無で数える —— L0 実装だけに反証器があり L1〜L3 に無い現状が、VDC 0/30 として数字に出る。**乗り換えではなく併設**で、片方が伸びてもう片方が伸びないことに意味がある。配点は data/autonomy-score.json（L4＝人間所有）に置き、AIは書き換えない",
       "history": [
         {
@@ -989,17 +1034,25 @@
           "version": 15,
           "at": "2026-09-05",
           "why": "定時起動をGitHubとlaunchdで補完するため、RAの起動元判定を共有関数へ移した。OSのlive PID・実行コマンド・interval理由を確認したnative receiptだけ追加で認識し、手動・欠測・改変receiptには無人加点しない。総点の配点と成果要件は同じ。"
+        },
+        {
+          "version": 16,
+          "at": "2026-09-30",
+          "why": "観測欠測の意味を変更した。UMRの未知を元分母に残してrate=null・0点、RAの未知復旧とcarryを0点・rate=nullに保ち、独立に確認した検知点だけを保持する。明示[]は記録上ゼロのみで、完全な人介入観測や実際のzero-touch証明ではない。5成分・配点・可逆性重み・R0上限・28日窓・被覆非退行・元台帳は変更しない。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "unreviewed_merge_rate",
       "name": "無検査マージ率（UMR・可逆性で重み付け）",
-      "formula": "Σ(可逆性重み × 人の介入がゼロの出荷) / Σ(可逆性重み × 全出荷)。可逆性クラスは data/autonomy-score.json の lane_action_class（action=new は R1、refresh は R0、レーンF は常に R0）。重みは R0=1 / R1=3 / R2=10。R0 の分子寄与は窓の総重みの60%を超えない",
+      "formula": "Σ(可逆性重み × interventionsが明示[]である記録上無介入の出荷) / Σ(可逆性重み × 全出荷)。可逆性クラスは data/autonomy-score.json の lane_action_class（action=new は R1、refresh は R0、レーンF は常に R0）。重みは R0=1 / R1=3 / R2=10。R0 の分子寄与は窓の総重みの60%を超えない。介入記録の未指定/null/不正が混ざっても全出荷とその重みを分母に残し、UMRのrateはnull・点数0とする。既知の介入と記録上ゼロの内訳は保持するが、明示[]を完全な人介入観測や実際のzero-touch証明にはしない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 15,
-      "checksum": "dd783b1f89638e74",
-      "changed_at": "2026-09-05",
+      "version": 16,
+      "checksum": "f5f6680c707c372e",
+      "changed_at": "2026-09-30",
       "why_it_matters": "**可逆な変更ばかり通して自律したつもりになるのを防ぐ。**既存の人間介入率（23.3%）は run 単位の二値で、可逆性を見ていない —— YAML を1行直した日と、索引される新しい公開URLを無検査で出した日が同じ重さで数えられる。重み付けすると「無検査で通してよい重さ」が測れる",
       "history": [
         {
@@ -1071,17 +1124,25 @@
           "version": 15,
           "at": "2026-09-05",
           "why": "同じsource file内でRAのnative定時起動証跡の読取を追加した。UMRの定義・配点・マージ対象と期間の判定は変更していない。"
+        },
+        {
+          "version": 16,
+          "at": "2026-09-30",
+          "why": "観測欠測の意味を変更した。全出荷と可逆性重みを分母に保持し、明示[]だけを記録上無介入の分子候補にする。未指定/null/不正が混ざるUMRはrate=null・0点で未知から加点しない。既知positiveを保持し、R0=1/R1=3/R2=10と60%上限・元窓・原台帳は不変。明示[]を実際のzero-touch証明にしない。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "recovery_autonomy",
       "name": "復旧自律性（RA）",
-      "formula": "故障（failure_stage が execution / cost / absent の行）を分母に、(a) source が data/autonomy-score.json の machine_detection_sources に含まれる割合＝機械の自己検知、(b) repair_of で修理された行があり、かつ故障行と修理行のどちらにも介入が無い割合＝人手なしの復旧。それぞれ満点10。自動 revert 回数（auto_revert_of を持つ行）は別に数え、点数に入れない",
+      "formula": "故障（failure_stage が execution / cost / absent の行）を分母に、(a) source が data/autonomy-score.json の machine_detection_sources に含まれる割合＝機械の自己検知、(b) repair_of で修理された行があり、かつ故障runと出荷済み修理runの双方のinterventionsが明示[]である割合＝記録上無介入の復旧。それぞれ満点10。自動 revert 回数（auto_revert_of を持つ行）は別に数え、点数に入れない。元の本番復旧台帳・成果要件・全故障分母も維持する。故障runまたは対応する出荷済み修理runの介入記録が未指定/null/不正なら、復旧rateとRA総rateはnull、復旧点は0とし、独立に確認できた機械検知点だけを保持する。carryの標本が未観測でも復旧点へ変換しない。明示[]は実際のzero-touchを証明しない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 15,
-      "checksum": "dd783b1f89638e74",
-      "changed_at": "2026-09-05",
+      "version": 16,
+      "checksum": "f5f6680c707c372e",
+      "changed_at": "2026-09-30",
       "why_it_matters": "**出荷後の指標劣化を検知して自動で revert できない限り、マージ権限をより危険なクラスへ広げることは原理的にできない。**設計ノートの定義（検知して人手なしで巻き戻した割合）をそのまま使うと自動 revert 0 回の現状で恒久的に 0 になり、実際に動いている自己修復が見えなくなるので検知と復旧に割った。**Phase 6 のハードゲートは点ではなく auto_revert_count >= 1 に紐づける**（点で代替すると、検知だけで満点に近づいて「巻き戻せる」ことになる）",
       "history": [
         {
@@ -1153,17 +1214,25 @@
           "version": 15,
           "at": "2026-09-05",
           "why": "従来のschedule/workflow_runに加え、OSのlive PID・実行コマンド・interval理由を実行時に確認したlaunchd receiptを自律起動元として認識する。RAの配点・障害/復旧の成果要件は同じ。手動起動・欠測/改変receipt・過去の人手介入は無人に変換しない。"
+        },
+        {
+          "version": 16,
+          "at": "2026-09-30",
+          "why": "観測欠測の意味を変更した。故障runか出荷済み修理runの介入記録が未指定/null/不正なら元の全故障分母を残し、復旧rateとRA総rateはnull・復旧点0。独立した既知の機械検知点は保持し、未観測carryにも復旧加点しない。明示[]は記録上ゼロのみ。本番復旧の原成果要件、半分ずつの配点、auto-revertの別計数、窓と原台帳は不変。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "failure_stage_attribution",
       "name": "失敗の層別帰属率",
       "formula": "出荷しなかった run のうち failure_stage（eligibility / execution / cost / absent）を持つ割合。scripts/autopilot-runs.mjs の validate() が 100% を強制する（欠けた行があれば --check が落ちる）",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 8,
-      "checksum": "45f7de803acd00cb",
-      "changed_at": "2026-09-13",
+      "version": 9,
+      "checksum": "32c41a26bc54c604",
+      "changed_at": "2026-09-30",
       "why_it_matters": "**『死んだ run は選択ミスか実行ミスか』は、調べれば分かる問いではなく、記録が同じ列に入っているせいで原理的に答えられない問いだった。**2026-09-04 に層を足して数えたら、出荷しなかった 23 行は適格性 12 / 実行 6 / コスト 3 / 経路不在 2 に分かれた。**適格性が最大の層**で、そこには 2026-09-04 まで「秘密鍵が在るか」以外の判定が無かった",
       "history": [
         {
@@ -1200,8 +1269,16 @@
           "version": 8,
           "at": "2026-09-13",
           "why": "定義・数式・分母は変更していない。Codex原実行の構造化利用枠エラーによる原因分類CLIを追加し、既存の失敗・検知元・介入履歴を保持する。ゲートコード定数は共通モジュールへ移した。"
+        },
+        {
+          "version": 9,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。未出荷runのfailure_stage帰属率、4分類とvalidateが欠落を拒否する条件・分母は不変。同じ計算元の介入欠測処理と自己テスト追加でchecksumが変わった。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
         }
-      ]
+      ],
+      "source_dependencies": {
+        "scripts/lib/intervention-observation.mjs": "8243cbb4cc44c5e1"
+      }
     },
     {
       "id": "l1_eligibility_verdicts",
