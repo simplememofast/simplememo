@@ -368,7 +368,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span>Memos written offline are encrypted and held in a local Outbox, then automatically sent when connectivity returns. The "I thought I sent it but it never arrived" experience is eliminated at the architecture level.</span>
+<span>Memos written offline are encrypted and held in a local Outbox, then automatically sent when connectivity returns. The design goal is that a memo written without a connection is not dropped.</span>
 </div>
 </div>
 <div class="reason-card">
@@ -405,7 +405,7 @@
 <dt>Backend</dt><dd>Cloudflare Workers (TypeScript)</dd>
 <dt>Email Delivery</dt><dd>Resend API (DKIM signed, SPF/DMARC configured)</dd>
 <dt>Security</dt><dd>AES-GCM (on-device encryption), HTTPS (TLS 1.3)</dd>
-<dt>Offline</dt><dd>Outbox architecture (CoreData + encryption + auto-resend)</dd>
+<dt>Offline</dt><dd>Outbox architecture (an AES-GCM-encrypted file on the device + auto-resend)</dd>
 <dt>Minimum iOS</dt><dd>iOS 16.0+</dd>
 </dl>
 <!-- Dev Log Links -->
