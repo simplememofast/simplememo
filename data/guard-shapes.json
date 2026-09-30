@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/execution-priorities.mjs",
+      "expr": "unmet",
+      "disposition": "前提",
+      "note": "2026-09-30: 検査済みblocked_onのうち未充足の条件が存在する場合だけ、到達可能で延期中ではない候補をwaitへ戻す前提。条件が全て揃っている通常業務にはこの待ちを要求しない。非配列blocked_onは直前で例外として拒否し、材料だけの条件は別のscope判定がactをinspectへ戻す。execution-priorities.test.mjsの29件で非配列拒否、条件不足wait、完全条件act、28日材料だけのinspect、期限切れwait・deferと人の境界保持を確認。述語や走査規則を削除して通す変更ではない。"
+    },
+    {
       "file": "scripts/check-expert-escalation.mjs",
       "expr": "fieldSentRecords",
       "disposition": "前提",
