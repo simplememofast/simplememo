@@ -495,6 +495,7 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
 <p>Private information gets written into memo apps. Passwords, personal concerns, business ideas -- we can't predict what users will write. That's exactly why privacy protection should be not just "adequate" but "excessive" -- that level is just right.</p>
 <h3>Privacy Overlay in App Switcher</h3>
 <p>iOS's app switcher shows app screens as thumbnails. So that memo content is not visible in the app switcher, we display a privacy overlay when the app transitions to the background.</p>
+<p><strong>Update, 2026-09:</strong> This protection is not enabled in the current app (the overlay code remains in the source but is not called). Memo text that is on screen may remain in the app-switcher snapshot. See the Privacy-First Design dev log for details.</p>
 <h3>Ephemeral URLSession</h3>
 <p>A standard URLSession saves cache, cookies, and authentication data to disk. We use `URLSessionConfiguration.ephemeral` to ensure none of this information persists on disk. This keeps memo content from being left in storage as URLSession cache data.</p>
 <h3>Sanitized Logging</h3>
@@ -615,7 +616,7 @@ func applyLanguageChange() {
 </div>
 <div class="related-card__desc">
 
-<span lang="en">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</span>
+<span lang="en">Ephemeral URLSession, log handling, and the current app-switcher behavior (automatic hiding is not enabled).</span>
 </div>
 </a>
 <a class="related-card" href="/en/captio-alternative/">
