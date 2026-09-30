@@ -1116,7 +1116,9 @@ jobs:
       # 直すには --bump <id> --why "..." が要る（履歴が残る）。
       # **黙って定義を変えて数字を良くする経路をつぶすための検査。**
       - name: KPI definitions vs source
-        run: node scripts/check-definitions.mjs --check
+        run: |
+          node scripts/check-definitions.mjs --selftest
+          node scripts/check-definitions.mjs --check
 
       # 【コード著者率】原稿の「変更行の98.8%」は**再現できなかった。**
       #
