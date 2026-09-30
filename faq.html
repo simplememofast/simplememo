@@ -301,7 +301,7 @@
       "name": "メモはどこに送られますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は Simple Memo &lt;noreply@mail.simplememofast.com&gt; です。"
+        "text": "設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は noreply@mail.simplememofast.com で、差出人名は「シンプルメモ」です（アプリの言語が日本語以外のときは「Simple Memo」）。"
       }
     },
     {
@@ -621,7 +621,7 @@
       "name": "認証コードが届きません。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "以下をご確認ください：\n\n \n メールアドレスにタイプミスがないか\n 迷惑メール（スパム）フォルダに振り分けられていないか\n 送信元は Simple Memo &lt;noreply@mail.simplememofast.com&gt; です\n 認証コードの有効期限は10分間です。期限切れの場合は再送信してください\n 認証コードの入力は最大5回までです。5回失敗した場合は、新しいコードを再送信してください"
+        "text": "以下をご確認ください：\n\n \n メールアドレスにタイプミスがないか\n 迷惑メール（スパム）フォルダに振り分けられていないか\n 送信元は noreply@mail.simplememofast.com（差出人名は「シンプルメモ」）です\n 認証コードの有効期限は10分間です。期限切れの場合は再送信してください\n 認証コードの入力は最大5回までです。5回失敗した場合は、新しいコードを再送信してください"
       }
     },
     {
@@ -645,7 +645,7 @@
       "name": "「レート制限中」と表示されます。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "短時間に多くのメモを送信した場合に表示されます。以下の制限が適用されます：\n\n \n 制限の種類上限\n \n 1分あたり（デバイス）2通\n 1日あたり（デバイス）20通\n 1時間あたり（IP）10通\n 1日あたり（全体）90通\n \n \n 制限に達した場合は、しばらく待ってから再度お試しください。Outboxに保存されたメッセージは、制限が解除された後に自動的に再送信されます。"
+        "text": "短時間に多くのメモを送信した場合に表示されます。送信サーバーは、不正利用を防ぐため、同じIPアドレスからの1時間あたりの送信数に上限を設けています（無料プランの1日3通とは別の上限で、Premium でも同じです）。\n上限に達した場合は、しばらく待ってから再度お試しください。Outboxに保存されたメッセージは、制限が解除された後に自動的に再送信されます。1日に数通〜10通程度の通常の使い方では、この上限に届きません。"
       }
     },
     {
@@ -935,7 +935,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">メモはどこに送られますか？</summary>
                 <div class="faq-answer">
-                  <p>設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は <code>Simple Memo &lt;noreply@mail.simplememofast.com&gt;</code> です。</p>
+                  <p>設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は <code>noreply@mail.simplememofast.com</code> で、差出人名は「シンプルメモ」です（アプリの言語が日本語以外のときは「Simple Memo」）。</p>
                 </div>
               </details>
             </div>
@@ -1115,12 +1115,13 @@
               <details class="faq-details">
                 <summary class="faq-summary">メール本文・認証コード・メールアドレスはサーバーに残りますか？</summary>
                 <div class="faq-answer">
-                  <p>残りません。Relay APIはメール送信のためにResendへ本文を中継するだけで、送信完了後にサーバー上にメッセージ本文は保持されません。また、Key-Valueストレージ（Cloudflare KV）に一時的に保存される以下のデータも、すべてハッシュ化・匿名化されています：</p>
+                  <p>メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。認証コードは、有効期限の10分が過ぎると自動で消えます。</p>
+                  <p>メールアドレスについては、当社のサーバーに記録が残ります。たとえば次のものです（ほかは<a href="/privacy">プライバシーポリシー</a>をご覧ください）：</p>
                   <ul>
-                    <li>メールアドレスは <strong>128bit ハッシュ</strong> として保存（レート制限用）</li>
-                    <li>認証コードは <strong>定数時間比較</strong>で検証され、有効期限10分後に自動削除</li>
-                    <li>デバイストークンもハッシュ化されレート制限計測にのみ利用</li>
+                    <li>送信IDと、宛先メールアドレスのハッシュ（SHA-256から生成）の対応（Cloudflare D1）</li>
+                    <li>宛先を認証したことの記録。アプリが端末ごとに作るランダムな識別子と、宛先メールアドレスのハッシュの組で、1年で自動削除（Cloudflare KV）</li>
                   </ul>
+                  <p>これらのハッシュや識別子は、完全に匿名の情報としては扱いません。</p>
                   <p>端末内のOutbox・履歴データはAES-GCM暗号化、暗号化キーはKeychainに保管されています。</p>
                 </div>
               </details>
@@ -1425,7 +1426,7 @@
                   <ul>
                     <li>メールアドレスにタイプミスがないか</li>
                     <li>迷惑メール（スパム）フォルダに振り分けられていないか</li>
-                    <li>送信元は <code>Simple Memo &lt;noreply@mail.simplememofast.com&gt;</code> です</li>
+                    <li>送信元は <code>noreply@mail.simplememofast.com</code>（差出人名は「シンプルメモ」）です</li>
                     <li>認証コードの有効期限は<strong>10分間</strong>です。期限切れの場合は再送信してください</li>
                     <li>認証コードの入力は<strong>最大5回</strong>までです。5回失敗した場合は、新しいコードを再送信してください</li>
                   </ul>
@@ -1455,19 +1456,8 @@
               <details class="faq-details">
                 <summary class="faq-summary">「レート制限中」と表示されます。</summary>
                 <div class="faq-answer">
-                  <p>短時間に多くのメモを送信した場合に表示されます。以下の制限が適用されます：</p>
-                  <div style="overflow-x:auto">
-                    <table class="faq-table">
-                    <thead><tr><th scope="col">制限の種類</th><th scope="col">上限</th></tr></thead>
-                    <tbody>
-                      <tr><th scope="row">1分あたり（デバイス）</th><td>2通</td></tr>
-                      <tr><th scope="row">1日あたり（デバイス）</th><td>20通</td></tr>
-                      <tr><th scope="row">1時間あたり（IP）</th><td>10通</td></tr>
-                      <tr><th scope="row">1日あたり（全体）</th><td>90通</td></tr>
-                    </tbody>
-                  </table>
-                  </div>
-                  <p>制限に達した場合は、しばらく待ってから再度お試しください。Outboxに保存されたメッセージは、制限が解除された後に自動的に再送信されます。なお通常の使い方（1日数通〜10通程度）であれば、この制限に達することはありません。</p>
+                  <p>短時間に多くのメモを送信した場合に表示されます。送信サーバーは、不正利用を防ぐため、同じIPアドレスからの1時間あたりの送信数に上限を設けています（無料プランの1日3通とは別の上限で、Premium でも同じです）。</p>
+                  <p>上限に達した場合は、しばらく待ってから再度お試しください。Outboxに保存されたメッセージは、制限が解除された後に自動的に再送信されます。1日に数通〜10通程度の通常の使い方では、この上限に届きません。</p>
                 </div>
               </details>
             </div>
