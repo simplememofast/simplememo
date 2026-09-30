@@ -31,6 +31,9 @@ const publicationPaths = [
   { kind: "html", url: "/obsidian/zettelkasten/" },
   { kind: "asset", url: "/assets/downloads/obsidian-zettelkasten/final-note.md" },
   { kind: "asset", url: "/assets/img/obsidian-zettelkasten/graph-final.png" },
+  { kind: "html", url: "/obsidian/troubleshooting/sync-conflict/" },
+  { kind: "asset", url: "/assets/downloads/obsidian-sync-conflict/resolved-note.md" },
+  { kind: "asset", url: "/assets/img/obsidian-sync-conflict/resolved-reopened.png" },
 ];
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const clean = (html) => html.replace(/<!--[\s\S]*?-->/g, "")
@@ -173,7 +176,7 @@ async function selftest() {
       : target.url.endsWith(".png") ? Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe, 0x00, 0x80]) : Buffer.from("Synthetic 日本語\nsecond capture\n")]));
   const readBytes = file => { assert(fixtureBytes.has(file), `Unexpected synthetic source: ${file}`); return fixtureBytes.get(file); };
   const publication = publicationTargets(readBytes), htmlTarget = publication[0], pngTarget = publication.find(target => target.url.endsWith(".png"));
-  assert.equal(publication.length, 9);
+  assert.equal(publication.length, 12);
   assert.throws(() => publicationTargets(() => { throw new Error("Missing publication source"); }), /Missing publication source/);
   const html = fixtureHtml(htmlTarget.url, htmlTarget.expectedTitle);
   assert.equal(headTitle(html.replace("<body>", "<body><title>Wrong body title</title>"), htmlTarget.url), htmlTarget.expectedTitle);
@@ -249,14 +252,14 @@ async function selftest() {
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
   assert.equal(baselineReport.passed, 85);
-  assert.equal(baselineReport.publication.skipped, 9);
+  assert.equal(baselineReport.publication.skipped, 12);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
   for (const target of publication) assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
   assert.equal(deployedReport.passed, 85);
-  assert.equal(deployedReport.publication.passed, 9);
+  assert.equal(deployedReport.publication.passed, 12);
   assert.equal(deployedReport.publication.failed, 0);
   assert(deployedReport.ok);
   assert.equal(deployedReport.costUsd, null);
@@ -270,7 +273,7 @@ async function selftest() {
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
-  assert.equal(sourceFailureReports[0].publication.skipped, 9);
+  assert.equal(sourceFailureReports[0].publication.skipped, 12);
   assert(!sourceFailureReports[0].ok, "An incomplete strict run cannot pass");
   const controlReports = [], controlFailure = makeRequest();
   await assert.rejects(liveAudit(false, { request: async (url, method) => url === "/robots.txt" ? new Response("Missing", { status: 503 }) : controlFailure.request(url, method), saveReport: report => controlReports.push(report), logReport: () => {} }), /robots.txt must return 200/);
@@ -362,7 +365,7 @@ async function sourceAudit() {
   }
   walk(ROOT);
   for (const [target, sources] of inbound) assert(sources.size > 0, `${target}: no direct public internal link`);
-  console.log(JSON.stringify({ mode: "source", cases: cases.length, kinds: counts(), publication: { html: 3, assets: 6, cases: publication }, uniqueHtmlTargets: targets.size, inbound: Object.fromEntries([...inbound].map(([p, v]) => [p, v.size])) }, null, 2));
+  console.log(JSON.stringify({ mode: "source", cases: cases.length, kinds: counts(), publication: { html: publicationPaths.filter(target => target.kind === "html").length, assets: publicationPaths.filter(target => target.kind === "asset").length, cases: publication }, uniqueHtmlTargets: targets.size, inbound: Object.fromEntries([...inbound].map(([p, v]) => [p, v.size])) }, null, 2));
 }
 
 const counts = () => Object.fromEntries(["redirect", "html", "data", "asset"].map(kind => [kind, cases.filter(c => c.kind === kind).length]));
@@ -468,7 +471,7 @@ async function liveAudit(strict, { request = get, readBytes, wait = pause, now =
     note: "HTTP serving checks; publication hashes attest only the listed asset bytes, not a whole-site revision, Google indexing or traffic impact",
     costUsd: null, costNote: "Ordinary CI and public HTTP verification; billed cost is not observed",
     expectedCases: cases.length, kinds: counts(), cases: [],
-    publication: { required: strict, phase: strict ? "not-started" : "skipped-before-merge", expectedCases: publicationPaths.length, html: 3, assets: 6, cases: [] },
+    publication: { required: strict, phase: strict ? "not-started" : "skipped-before-merge", expectedCases: publicationPaths.length, html: publicationPaths.filter(target => target.kind === "html").length, assets: publicationPaths.filter(target => target.kind === "asset").length, cases: [] },
   };
   try {
     // Candidate-only URLs are neither fetched nor required by the PR baseline.

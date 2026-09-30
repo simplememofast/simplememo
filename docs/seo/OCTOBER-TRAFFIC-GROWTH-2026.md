@@ -146,6 +146,12 @@ C13/C14公開後のキューには21件が残っていた（pending 19件、bloc
 
 この実配送確認で元のqueue C17をdoneとし、残件は20件（pending 18、blocked 2）。初期の配備・HTTP・PageSpeed失敗、GUI実証18assertionと品質92/100、graphのNot verified/verified:null、既存owner/停止/評価日は保持する。この台帳更新の最終CI・merge・対応Pagesは、記事本体の配送証拠と別に確認する。9月月間sessions基準値の欠落と10月倍増の未測定・未判定、Company加点なしを維持する。
 
+### C20のGit本文競合復元候補（2026-10-01 JST）
+
+9月30日の隔離Linux Obsidian 1.13.7と一つのオフラインGitで、両原文の手動保全・比較・明示した内容選択・実エディタ保存・Gitのmerge完了・再表示を限定確認した。原本22assertions/20fileと原3PNG・保存Markdown4件を保持し、private Chromiumの4幅・実download4件・FAQ/schema4組・原文code2件・OGを確認、候補品質92/100。C05の方式選択/競合生成と復元の実操作を分ける。自動conflicted copy生成・provider同期・remote/複数端末・iOS/SimpleMemo・長期成果は未検証。
+
+[確認範囲](../obsidian/evidence/sync-conflict-20260930.md)とofficial-sync FAQのリンク化・icloud Git参考文献の1文、article/raw/OG/全metadata/GSC3対象を申告する。元85件・C13/C14六件・C17三件と既存GSC strict条件を保持する。原7件のsource一致と本番比較3件の確認範囲を分け、全サイトbytes・Google登録・CTA・流入増を認定しない。C20はpendingのままで、最終exact-head通常CI・main merge・対応Pages成功・実本番readbackまで完了としない。現在の残件数を減らさず、既存owner/停止/窓/契約を保持。Company prospective計測のglobal衝突を解除せず、明示された手動公開として全範囲と公開時刻を別に記録し、自然schedule復旧・Company加点に付け替えない。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
