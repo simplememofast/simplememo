@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/check-expert-escalation.mjs",
+      "expr": "fieldSentRecords",
+      "disposition": "前提",
+      "note": "2026-09-30: 当該分野の検証済み送信履歴が存在する場合だけ、直前送信日時の記録を必須にする。履歴が無い初回送信に直前日時を要求しないのが正しい。sent非配列・null行・不正または未来の送信/返信日時は先行ガードがholdし、履歴ありの直前日時欠落・不正・未来・実履歴より古い値もholdする。これらの欠測保護と有効な過去履歴・7日境界を専門家ゲートの51件の自己検査で確認。存在条件を消して検査を通す変更ではない。"
+    },
+    {
       "file": "scripts/autopilot-selfheal.mjs",
       "expr": "problems",
       "disposition": "前提",

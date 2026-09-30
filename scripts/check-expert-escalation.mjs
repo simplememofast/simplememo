@@ -151,11 +151,11 @@ export function evaluateAsk({
     return hold(`返事待ちが ${effectiveOpenAsks} 件で上限 ${as.max_open_asks} を超えている`
       + ' — **返事が来ていないのは相手の手が空いていないということ**');
   }
-  const history = sentRecords.filter(({ sent }) => sent.field === ask.field);
+  const fieldSentRecords = sentRecords.filter(({ sent }) => sent.field === ask.field);
   const hasLast = Object.hasOwn(lastSentAtByField, ask.field);
-  if (history.length && !hasLast) return hold('送信履歴があるのに直前送信日時が無い');
+  if (fieldSentRecords.length && !hasLast) return hold('送信履歴があるのに直前送信日時が無い');
   let latestRecorded = -Infinity;
-  for (const { at } of history) latestRecorded = Math.max(latestRecorded, at);
+  for (const { at } of fieldSentRecords) latestRecorded = Math.max(latestRecorded, at);
   if (hasLast) {
     const last = timestamp(lastSentAtByField[ask.field]);
     if (!Number.isFinite(last) || last > now) return hold('直前送信日時が不正または未来');
