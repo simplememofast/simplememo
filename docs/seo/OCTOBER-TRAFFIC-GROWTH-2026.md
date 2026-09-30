@@ -69,6 +69,8 @@ SEOと識別可能な外部AI参照セッションは内訳として追跡する
 
 9月24日のMention Watchは検索要約の `verified:false`。本文確認なしに自社不掲載、独立推薦、獲得済みリンクを断定しない。既存の週次probeと元のownerを再利用し、弱い結果を理由に追加の有料probeを起動しない。
 
+ソース上のrobotsはChatGPT-User、OAI-SearchBot、PerplexityBot、Perplexity-User、Bingbotに公開領域を許可する。middlewareにUA別の拒否はなく、記事への一律noindex/nosnippetもない。公開JSON/CSVのnoindexは取得拒否とは異なる。Cloudflareの実際のWAF・Bot Management・challengeや各ベンダーのIPからの到達性は、このソース監査では未確認。robotsでの許可を引用・流入の実績として扱わない。
+
 施策候補は、読者の問いへの直接的な答え、公式根拠、実際の仕様、手順・例・制約、本文とschemaの一致、更新日の正確さ。AIに向けた誇張、未実測速度、未出荷機能、未確認の競合仕様は加えない。商品説明は[Capture OSのビジョン](https://github.com/simplememofast/simplememo-ios/blob/main/docs/VISION.md)に従い、Obsidian等を保存先として説明する。
 
 ## 実行と配送
@@ -77,9 +79,10 @@ SEOと識別可能な外部AI参照セッションは内訳として追跡する
 - [x] GA4/BQ/GSC/AIOの期間・単位・欠測・取得経路を確認。
 - [x] 技術SEO、本文・検索意図、既存キュー、実験所有、予算と停止条件を監査。
 - [x] 獲得面consumerの比較不具合を修正し、適格・不適格な比較を検証。
-- [ ] 最終差分の既存preflightとSEO Validationを通過。
-- [ ] 通常PRを作成し、最終head一致のauto-mergeとCloudflare Pages配送を確認。
-- [ ] 公開状態と主要導線を検証し、配送証拠をこの記録へ追記。
+- [x] 既存preflightの失敗グループを再検証し、最終headのSEO Validationを通過。
+- [x] 通常PRを作成し、最終head一致のauto-mergeとCloudflare Pages配送を確認。
+- [x] 既存の本番85 URL HTTP検証を確認し、配送証拠をこの記録へ追記。
+- [ ] 主要導線の本番ブラウザ操作を検証。現在はローカルでの機能確認のみ。
 - [ ] 9月全月の確定値と条件を保存。
 - [ ] 10月3日・12日・23日の既存実験を元のownerと観測窓で評価。
 - [ ] 成熟した10月全月値で倍増の成否を判定し、必要な次の改善を選ぶ。
@@ -88,14 +91,28 @@ consumer修正は手動Goalからの独立した計測コード修理。新し�
 
 9月21日と29日のGSC窓は21日重複する。旧consumerはページ集計の日次クリック35.7143→37.4643を「+4.9%」と表示していた。修正後は元の日次値・表示・構成比を保持し、全群と合計の伸び率・順位を`null`、理由を`overlapping_or_reversed_windows`として返す。混合出典の8月9日→9月21日を「+22.1%」とする比較も保留する。これらの日次ページ集計はサイト全体の月間セッション数ではない。
 
-自己テスト34件と独立レビューが通過。既存preflightは217チェック中215が通過し、残る2グループはクラウドの`umask 0077`がテストfixtureの公開権限を狭めたことで失敗した。コードや判定を変えず、コマンド内だけCI相当の`umask 0022`にして再検証し、refactor 61/61、Company関連208/208が通過した。217チェック全体を再実行したという意味ではなく、失敗した2グループを検証し直した結果である。最終PRのSEO Validationと本番確認は引き続き別の完了条件。
+自己テスト34件と独立レビューが通過。既存preflightは217チェック中215が通過し、残る2グループはクラウドの`umask 0077`がテストfixtureの公開権限を狭めたことで失敗した。コードや判定を変えず、コマンド内だけCI相当の`umask 0022`にして再検証し、refactor 61/61、Company関連208/208が通過した。217チェック全体をローカルで再実行したという意味ではなく、失敗した2グループを検証し直した結果である。最終PRのSEO Validationは下記のとおり成功した。
 
-branchは `claude/october-seo-aio-20260930`。mainへの直書きは行わず、既存PRのSEO Validation成功と検証済みheadの一致を経てauto-mergeし、Cloudflare Pagesへ配備する。現在の環境は本番ホストへのHTTP許可と計測の私有受領書がないため、配信バイトの新規確認と9月基準値の確定は未検証として残す。別のネットワーク経路や新collectorを作って補わない。
+### 9月30日の配送証拠
+
+[PR #1739](https://github.com/simplememofast/simplememo/pull/1739)はbranch `claude/october-seo-aio-20260930`のhead `2bf618c6a0ddb83b17e5b46e15d26ad3c9828ce5`を検証後、9月30日17:14:34 JSTに自動マージされた。mainへの直書きは行っていない。
+
+| 証拠 | 結果と範囲 |
+| --- | --- |
+| [SEO Validation #36686912989](https://github.com/simplememofast/simplememo/actions/runs/36686912989) | pull_requestイベント、上記最終head、success。seo-checkジョブの必須検査が通過 |
+| mainコミット | `e89dd930616a0cf938226792abbb6ea2734327a7`。変更2ファイルが検証済みheadと一致することをローカルgitで照合 |
+| Cloudflare Pages | main上記コミットのチェック`109800038611`がsuccess。配備URLは[対応するPages配備](https://e46bc116.simplememo-596.pages.dev) |
+| [既存GSC Crawled URL Checks #36688515412](https://github.com/simplememofast/simplememo/actions/runs/36688515412) | 同mainをsourceCommitとする既存workflow_run。ジョブ`109799905386`がsuccess。新たな計測照会・collectorは追加していない |
+| 本番HTTP検証 | 観測開始`2026-09-30T08:15:03.611Z`。85件成功・0件失敗（redirect 56、HTML 15、data 13、asset 1）。HTTP状態・redirect後の到達・意図したnoindex等の配信検査 |
+
+本番HTTP検証はGoogle URL Inspectionでも、正確な本番revision・配信バイトの証明でもない。主要導線のブラウザ操作も、このHTTP検証には含まれない。ローカルの20ホームケース・69追加ケース、mainに結び付いたPages配備記録、本番85 URLのHTTP結果を、それぞれの確認範囲で扱う。
+
+この環境は本番ホストへの直接HTTP許可と計測の私有受領書がない。9月基準値、主要導線の本番ブラウザ操作、配信バイトの厳密な照合は未検証として残す。別のネットワーク経路や新collectorを作って補わない。配送・配信検証の成功は、月間セッション増やAI引用増の証拠にはならない。
 
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
-2. 本番の配信バイト・主要導線を確認する既存実行経路。この環境のネットワーク制限を回避しない。
+2. 主要導線の本番ブラウザ操作・配信バイトを確認する既存実行経路。既存85 URLのHTTP検証は完了したが、これらの代用にはしない。この環境のネットワーク制限を回避しない。
 3. 実験のpost窓と評価日。未来の測定が必要で、経過時間だけを実行証拠にしない。
 4. 既存日次`actions` ownerの導出停止と、9月30日承認の次回自然起動限定の復旧許可。手動Goalから再開・再分類・成功認定しない。
 
