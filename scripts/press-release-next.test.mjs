@@ -1,6 +1,33 @@
-import test from 'node:test';
+import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
-import { capture, captureCommitted, digest, render, markdown, validate, evaluateDispatch, exceedsOwnerTarget } from './press-release-next.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { readCompanyBudget, sha256 } from './lib/company-monthly-budget.mjs';
+import { capture, captureCommitted, digest, render, markdown, validate, evaluateDispatch as evaluateCanonicalDispatch, exceedsOwnerTarget } from './press-release-next.mjs';
+
+// The campaign's original September window is a production gate. Preserve its
+// synthetic release cases with the actual September policy in an isolated
+// project; never replace the current canonical policy or inject a gate bypass.
+const projectRoot = fileURLToPath(new URL('../', import.meta.url));
+const historyPolicyRaw = fs.readFileSync(new URL('../docs/history/company-monthly-budget-20260913.json', import.meta.url));
+const historyRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'press-september-budget-'));
+after(() => fs.rmSync(historyRoot, { recursive: true, force: true }));
+const productionFiles = ['scripts/press-release-next.mjs', 'scripts/automation-rate.mjs',
+  'scripts/lib/company-monthly-budget.mjs', 'scripts/lib/selftest.mjs', 'growth/scripts/d-score.mjs'];
+try {
+  for (const rel of productionFiles) {
+    fs.mkdirSync(path.dirname(path.join(historyRoot, rel)), { recursive: true });
+    fs.copyFileSync(path.join(projectRoot, rel), path.join(historyRoot, rel));
+  }
+  fs.mkdirSync(path.join(historyRoot, 'data'), { recursive: true });
+  fs.writeFileSync(path.join(historyRoot, 'data/company-monthly-budget.json'), historyPolicyRaw);
+} catch (error) {
+  fs.rmSync(historyRoot, { recursive: true, force: true });
+  throw error;
+}
+const { evaluateDispatch } = await import(pathToFileURL(path.join(historyRoot, 'scripts/press-release-next.mjs')).href);
 
 const now = '2026-09-17T00:30:00Z';
 test('snapshot source must contain the observed ledger', () => {
@@ -190,4 +217,36 @@ test('the Japanese press date uses JST and evidence stays bound to the snapshot 
   assert.ok(parts.body.includes(`https://github.com/simplememofast/simplememo/blob/${f.manifest.snapshot.source_commit}/data/automation-coverage.json`));
   assert.doesNotMatch(parts.body, /未完了の業務を分母から取り除かず/);
   assert.doesNotMatch(parts.title, /AI/);
+});
+
+test('historical campaign fixture copies the actual September policy and unchanged production gates', () => {
+  assert.equal(sha256(historyPolicyRaw), 'aee2d9eb2ecf765d5b0d3b958346c2fc5c07911b529aa1a3a8c3c9999dc4e575');
+  assert.deepEqual(fs.readFileSync(path.join(historyRoot, 'data/company-monthly-budget.json')), historyPolicyRaw);
+  for (const rel of productionFiles) assert.deepEqual(fs.readFileSync(path.join(historyRoot, rel)), fs.readFileSync(path.join(projectRoot, rel)));
+});
+test('real canonical budget is evaluated independently of the September campaign fixture', () => {
+  const { policy: current, sha256: policyHash } = readCompanyBudget();
+  const f = paidFixture();
+  const result = evaluateCanonicalDispatch(f.manifest, f.coverage, f.draft, f.ui, current.effective_from);
+  assert.equal(result.company_budget.decision_id, current.decision_id);
+  assert.equal(result.company_budget.policy_sha256, policyHash);
+  assert.equal(result.company_budget.allowed_by_budget, false);
+  assert.match(result.company_budget.reasons.join('\n'), /additional discretionary commitment exceeds 0 JPY/);
+  assert.equal(result.allowed, false);
+});
+test('a new canonical monthly budget never extends the original September campaign window', () => {
+  const { policy: current, sha256: policyHash } = readCompanyBudget();
+  const at = new Date(Math.max(Date.parse(current.effective_from), Date.parse('2026-09-21T00:00:00+09:00')) + 1).toISOString();
+  const f = fixture();
+  f.manifest.snapshot = capture(f.coverage, 'a'.repeat(40), at);
+  const parts = render(f.manifest);
+  f.draft = markdown(parts);
+  f.manifest.draft.sha256 = digest(f.draft);
+  f.manifest.quality_review.draft_sha256 = digest(f.draft);
+  Object.assign(f.ui, parts, { observed_at: at });
+  const result = evaluateCanonicalDispatch(f.manifest, f.coverage, f.draft, f.ui, at);
+  assert.equal(result.company_budget.decision_id, current.decision_id);
+  assert.equal(result.company_budget.policy_sha256, policyHash);
+  assert.equal(result.allowed, false);
+  assert.match(result.reasons.join('\n'), /Invalid\/out-of-window publication time/);
 });
