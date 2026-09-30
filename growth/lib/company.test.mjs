@@ -238,9 +238,35 @@ test('denominator pruning never appears as an operating improvement', () => {
 test('human starts count distinct runs and unobserved handoffs stay unknown', () => {
   const value = humanTouchMetrics({ runs: [{ attempted: true, outcome: 'shipped', interventions: [{ kind: 'bootstrap' }, { kind: 'request' }] },
     { attempted: true, outcome: 'shipped' }] });
-  assert.equal(value.manual_starts, 1); assert.equal(value.unknown_successes, 1);
+  assert.equal(value.manual_starts, null); assert.equal(value.recorded_manual_starts, 1);
+  assert.equal(value.unknown_successes, 1);
   assert.equal(value.recorded_zero_touch_completion_rate, null);
   assert.equal(value.human_blocked_runs, null);
+});
+
+test('recorded intervention observations preserve mixed positive evidence and unknown totals', () => {
+  const zero = { attempted: true, outcome: 'shipped', interventions: [] };
+  const positive = { attempted: true, outcome: 'shipped', interventions: [{ kind: 'request', note: 'observed' }] };
+  assert.equal(humanTouchMetrics({ runs: [zero, positive] }).recorded_zero_touch_completion_rate, 0.5);
+  for (const interventions of [undefined, null, false, 0, '', {}, [null], [{ kind: 'unknown' }]]) {
+    const source = { runs: [zero, positive, { attempted: true, outcome: 'shipped', interventions }] };
+    const before = JSON.stringify(source), value = humanTouchMetrics(source);
+    assert.equal(value.recorded_zero_touch_completion_rate, null);
+    assert.equal(value.recorded_touches_per_successful_output, null);
+    assert.equal(value.manual_starts, null);
+    assert.equal(value.recorded_manual_starts, 1);
+    assert.equal(value.unknown_successes, 1);
+    assert.equal(value.successful_outputs, 3);
+    assert.equal(value.intervention_observation.shipped.recorded_zero_runs, 1);
+    assert.equal(value.intervention_observation.shipped.actual_zero_touch_proven, null);
+    assert.equal(JSON.stringify(source), before);
+  }
+  const partial = humanTouchMetrics({ runs: [{ attempted: true, outcome: 'shipped', interventions: [{ kind: 'request' }, null] }] });
+  assert.equal(partial.recorded_manual_starts, 1);
+  assert.equal(partial.manual_starts, null);
+  assert.equal(partial.intervention_observation.shipped.recorded_event_count, 1);
+  assert.throws(() => humanTouchMetrics(null), /unreadable or malformed/);
+  assert.throws(() => humanTouchMetrics({}), /unreadable or malformed/);
 });
 
 test('permission gates outrank high scores; legacy keep is not invented WIN', () => {

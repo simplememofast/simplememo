@@ -7,6 +7,7 @@ import { summarize as coverageSummary } from '../../scripts/automation-rate.mjs'
 import { analyse as gapSummary, BLOCKERS } from '../../scripts/autonomy-gap.mjs';
 import { summarize as runSummary } from '../../scripts/autopilot-runs.mjs';
 import { score, loadContext } from '../../scripts/autonomy-score.mjs';
+import { interventionObservation, interventionSummary } from '../../scripts/lib/intervention-observation.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const digest = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
@@ -94,25 +95,33 @@ export function compareMetrics(before, after) {
 }
 
 export function humanTouchMetrics(runsDoc) {
+  if (!Array.isArray(runsDoc?.runs)) throw new Error('Human touch source runs are unreadable or malformed');
   const attempted = runsDoc.runs.filter(r => r.attempted);
   const shipped = attempted.filter(r => r.outcome === 'shipped');
-  const observed = shipped.filter(r => Array.isArray(r.interventions));
-  const touches = observed.flatMap(r => r.interventions);
-  const unknown = shipped.length - observed.length;
-  const kinds = kind => attempted.filter(r => r.interventions?.some(i => i.kind === kind)).length;
+  const shipObservation = interventionSummary(shipped), attemptObservation = interventionSummary(attempted);
+  const observed = shipped.filter(r => interventionObservation(r).state !== 'unknown');
+  const touches = shipped.flatMap(r => interventionObservation(r).events);
+  const unknown = shipObservation.unknown_runs;
+  const kinds = kind => attempted.filter(r => interventionObservation(r).events.some(i => i.kind === kind)).length;
+  const recordedStarts = attempted.filter(r => interventionObservation(r).events.some(i => ['bootstrap', 'request'].includes(i.kind))).length;
   return {
     version: 'recorded-human-touch-v1', source: 'data/autopilot-runs.json',
     successful_outputs: shipped.length, intervention_field_observed: observed.length, unknown_successes: unknown,
     recorded_touches_per_successful_output: unknown || !shipped.length ? null : touches.length / shipped.length,
-    recorded_zero_touch_completion_rate: unknown || !shipped.length ? null : observed.filter(r => !r.interventions.length).length / shipped.length,
-    manual_starts: attempted.filter(r => r.interventions?.some(i => ['bootstrap', 'request'].includes(i.kind))).length,
-    manual_starts_by_kind: { bootstrap: kinds('bootstrap'), request: kinds('request') },
-    manual_starts_note: 'Distinct runs with a recorded bootstrap/request; historical unrecorded starts remain unknown.',
+    recorded_zero_touch_completion_rate: unknown || !shipped.length ? null
+      : observed.filter(r => interventionObservation(r).state === 'recorded_zero').length / shipped.length,
+    intervention_observation: { attempted: attemptObservation, shipped: shipObservation },
+    manual_starts: attemptObservation.unknown_runs ? null : recordedStarts,
+    recorded_manual_starts: recordedStarts,
+    manual_starts_by_kind: { bootstrap: attemptObservation.unknown_runs ? null : kinds('bootstrap'),
+      request: attemptObservation.unknown_runs ? null : kinds('request') },
+    recorded_manual_starts_by_kind: { bootstrap: kinds('bootstrap'), request: kinds('request') },
+    manual_starts_note: 'Recorded bootstrap/request events only. A total is unknown when attempted runs lack valid intervention fields.',
     human_blocked_runs: null,
     recorded_owner_required_failures: attempted.filter(r => r.failure_class === 'owner_required').length,
     manual_decisions: null, manual_verification: null, manual_reporting: null,
     missing_dimensions: ['historical manual decision/verification/reporting events not separately instrumented'],
-    warning: 'No recorded intervention is not proof of native scheduled origin. Bootstrap and manual runs remain labeled.',
+    warning: 'An explicit [] is recorded zero only, not complete human-activity or native scheduled zero-touch proof. Bootstrap and manual runs remain labeled.',
   };
 }
 

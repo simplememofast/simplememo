@@ -789,6 +789,24 @@
       "expr": "a.origin",
       "disposition": "向きが逆",
       "note": "2026-09-29: 自己テストの assert。Origin が無いと assert が落ちる側（**規則を消す向きではなく、発火させる向き**）"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "w.from",
+      "disposition": "前提",
+      "note": "2026-09-30: inWindow の窓下限比較。score は直前に windowOf(all, policy.window_days, today) を呼んで生成した窓だけを渡す。windowOf は日付行なしでも from=to=today を返し、日付行がある場合も from/to を両方返す。介入観測helperによる汚染伝播で既存式が新たに走査対象になった。欠落下限を無介入ゼロや短い窓へ補完する分岐ではなく、式・元の日数/台帳/配点は変更していない。今回の窓内欠測・窓外carry欠測の回帰は元の全行を残したまま率null/未知分を無加点とする。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.n",
+      "disposition": "前提",
+      "note": "2026-09-30: check の partialRa 例外は Number.isInteger(c.n) と c.n>0 を両方必要とする。欠落・null・文字列・0は例外に入れず、measurable=falseの加点拒否を維持する。復旧率null/復旧点0/復旧介入unknown>0だけでなく、既知検知のhit整数と0<=hit<=n、hit/n=rate、policy半配点=max、points=max*rate、RA点=検知点を全て一致させる。未知復旧への偽加点と検知分子/率/点の不一致を負例で検証。配点と政策は変えない。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.detect.rate",
+      "disposition": "前提",
+      "note": "2026-09-30: check の partialRa 例外中2条件。Number.isFinite(c.detect?.rate) が欠落/null/不正型を先に拒否し、0<=rate<=1を求める。さらに検知hit/nとの厳密一致、policy既存半配点とmaxの一致、points=max*rate、RA点=検知点を必要とする。率が欠落すると例外は成立せずmeasurable=falseの加点を拒否する。復旧率はnull/復旧点0のまま、検知の証拠だけを保持する限定例外。hit=0/rate=0なのに検知10点を残す偽装と未知復旧の偽加点が自己検査で拒否される。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
