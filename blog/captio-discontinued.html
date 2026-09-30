@@ -335,7 +335,7 @@
           <div class="app-card__desc">
             <p>シンプルメモは、Captioの終了を受けて開発されたiOSアプリです。Captioの「ワンタップでメモをメールに送る」ワークフローに着想を得て、現代の技術で改善を加えています。</p>
             <p style="margin-top:.75rem"><strong>同じ哲学:</strong> シンプルメモもCaptioと同様に「書いて、送る」だけに特化しています。アプリを開くと即座にカーソルが入力位置にフォーカスし、メモを書いて送信ボタンをタップするだけ。フォルダ分けは不要で、タグは端末内AIが自動で付けます。Captioユーザーなら違和感なく使い始められます。</p>
-            <p style="margin-top:.75rem"><strong>主な特徴:</strong> (1) <strong>AES-GCM暗号化</strong> -- 端末内に保存されるキューデータを暗号化して保護。(2) <strong>Outboxアーキテクチャ</strong> -- 圏外でもメモを書いてキューに入れ、通信回復後に自動送信。(3) <strong>メモ本文をサーバーに残さない設計</strong> -- 送信時に Cloudflare Workers と Resend を通過するだけで、恒常的な保存もログへの記録もしません。</p>
+            <p style="margin-top:.75rem"><strong>主な特徴:</strong> (1) <strong>AES-GCM暗号化</strong> -- 端末内に保存されるキューデータを暗号化して保護。(2) <strong>Outboxアーキテクチャ</strong> -- 圏外でもメモを書いてキューに入れ、通信回復後に自動送信。(3) <strong>メモ本文をシンプルメモのサーバーに残さない設計</strong> -- 送信時に Cloudflare Workers と Resend を通過するだけで、恒常的な保存もログへの記録もしません。</p>
             <p style="margin-top:.75rem"><strong>0.4秒の起動速度:</strong> シンプルメモはタップから0.4秒で入力できる状態になります（開発者の計測・iPhone 16e・ウォーム起動）。「思いついた瞬間に書き始められる」ことを大切にしています。</p>
             <p style="margin-top:.75rem"><strong>開発の原点:</strong> シンプルメモの開発者であるAI ATAKAは、自身もCaptioの長年のユーザーでした。Captio終了の知らせを聞いたとき、「同じ体験を提供するアプリが他にない」という実感から開発を決意しました。詳しい開発ストーリーは<a href="/about/" style="color:var(--accent)">開発者ページ</a>をご覧ください。</p>
           </div>
@@ -411,7 +411,7 @@
         <div class="app-card" style="margin-top:1rem;">
           <div class="app-card__desc">
             <p><strong>同じ点:</strong> 「書いて送るだけ」のコンセプト、ワンタップ送信、即座の起動、ミニマルUI、オフラインキュー。Captioでよく使われた流れは、シンプルメモでも同じように使えます。</p>
-            <p style="margin-top:.75rem"><strong>シンプルメモの特徴:</strong> 端末内暗号化（送信待ちと送信履歴をAES-GCMで暗号化）、メモ本文をサーバーに残さない設計、つながったら自動で再送するOutbox、アプリ内の送信履歴。</p>
+            <p style="margin-top:.75rem"><strong>シンプルメモの特徴:</strong> 端末内暗号化（送信待ちと送信履歴をAES-GCMで暗号化）、メモ本文をシンプルメモのサーバーに残さない設計、つながったら自動で再送するOutbox、アプリ内の送信履歴。</p>
             <p style="margin-top:.75rem"><strong>異なる点:</strong> 料金モデルが買い切りからサブスクリプション（月額¥500）に変更。ただし無料プランでも1日3通まで送信可能（利用期間の制限なし）。</p>
           </div>
         </div>
@@ -650,7 +650,7 @@
             <p><strong>暗号化が追加された安心感:</strong> シンプルメモはAES-GCM暗号化を実装しています。オフラインキューに保存されるメモデータは暗号化されるため、万が一端末を紛失したときにも、送信待ちのメモを第三者に読まれにくくなります。特に業務メモを扱うビジネスユーザーにとって、この安心感は大きいでしょう。</p>
             <p style="margin-top:.75rem"><strong>送信待ちと履歴が見える:</strong> Captioにも、圏外で書いたメモを端末に一時保存する仕組みがありました。シンプルメモのOutboxは、通信が不安定なときも自動で再送を試み、履歴の画面で「送信済み・未送信・失敗」を確かめられます。</p>
             <p style="margin-top:.75rem"><strong>今のiOSに合わせたデザイン:</strong> シンプルメモは今のiOSに合わせたデザインで、iOSの設定に合わせてダークモードにも切り替わります。機能は同じく「ミニマル」に絞っています。</p>
-            <p style="margin-top:.75rem"><strong>メモ本文をサーバーに残さない設計:</strong> シンプルメモのメモ本文は、送信時に当社の中継（Cloudflare Workers）と配信サービス（Resend）を通過しますが、恒常的な保存は行わず、ログにも記録しません（<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計</a>）。通常のメールはエンドツーエンド暗号化ではありません。</p>
+            <p style="margin-top:.75rem"><strong>メモ本文をシンプルメモのサーバーに残さない設計:</strong> シンプルメモのメモ本文は、送信時に当社の中継（Cloudflare Workers）と配信サービス（Resend）を通過しますが、恒常的な保存は行わず、ログにも記録しません（<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計</a>）。通常のメールはエンドツーエンド暗号化ではありません。</p>
           </div>
         </div>
 
