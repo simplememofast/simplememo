@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { executionPlan, BLOCKERS, UNLOCKS, blockedOnSatisfied } from './autonomy-gap.mjs';
+import { executionPlan, BLOCKERS, UNLOCKS, stillBlocked } from './autonomy-gap.mjs';
 
 import { OWNER_TARGET_AI_EXECUTION_RATE, exceedsOwnerTarget } from './press-release-next.mjs';
 
@@ -53,8 +53,12 @@ export function prioritize(coverage, assessments, now = new Date()) {
     let state = UNLOCKS[t.unlock]?.defer ? 'defer' : constrained ? 'boundary' : waiting ? 'wait' : 'inspect';
     // Assessments can defer work, but cannot override an authority/physical boundary.
     if ((fresh || heldAssessment) && !constrained && state !== 'defer') state = a.state;
-    const unmet = (t.blocked_on ?? []).filter(p => !blockedOnSatisfied(p));
+    if (t.blocked_on != null && !Array.isArray(t.blocked_on)) throw new Error('Invalid inventory prerequisites');
+    const prerequisites = stillBlocked(t);
+    const unmet = (prerequisites.results ?? []).filter(result => !result.ok).map(result => result.pred);
     if (unmet.length && !constrained && state !== 'defer') state = 'wait';
+    const inspectMaterials = state === 'act' && prerequisites.scope !== 'complete';
+    if (inspectMaterials) state = 'inspect';
     const starts = t.executor === 'nobody' ? 1 : 0;
     const numerator = current.ai_executes + 1, denominator = current.doing + starts;
     const delta = numerator / denominator - current.ai_execution_rate;
@@ -62,10 +66,14 @@ export function prioritize(coverage, assessments, now = new Date()) {
     return [{ task_index: index, area: t.area, task: t.task, executor: t.executor,
       blocker: t.blocker, state, estimated_minutes: minutes, assessment_stale: !!a?.stale,
       last_assessed_at: a?.observed_at ?? null,
+      prerequisite_scope: prerequisites.scope,
+      materials_satisfied: prerequisites.materials_satisfied ?? null,
       unmet_prerequisites: unmet,
+      remaining_verification: prerequisites.scope === 'materials_only' ? UNLOCKS[t.unlock].needs : null,
       potential: { numerator, denominator, ai_execution_rate: numerator / denominator, delta_pp: delta * 100 },
       estimated_delta_pp_per_hour: state === 'act' && minutes ? delta * 100 * 60 / minutes : null,
-      next_step: fresh || heldAssessment ? a.next_step : '現在の解除条件と実行証拠を確認してから作業量を見積もる。',
+      next_step: inspectMaterials ? '観測材料の条件だけでは業務を解除できない。' + (UNLOCKS[t.unlock]?.needs ?? '解除条件を確認する。')
+        : fresh || heldAssessment ? a.next_step : '現在の解除条件と実行証拠を確認してから作業量を見積もる。',
       evidence: fresh || heldAssessment ? a.evidence : [],
     }];
   });
@@ -101,6 +109,7 @@ export function prioritize(coverage, assessments, now = new Date()) {
       '各行の差分は現在値から独立に計算する。未着手を始めると分母も増えるため、単純加算しない。',
       '所要時間は実行証拠が揃うまでの作業見積もり。待機時間や外部審査の短縮を保証しない。',
       'actは現行の権限・品質ゲートを通して進める候補。古いactはinspectへ戻し、未知を簡単とみなさない。',
+      'materials_onlyは観測材料の条件。充足しても業務全体の解除・完遂を意味せず、残る検証をinspectで確認する。',
       'wait・deferの期限切れは解除の証拠ではない。以前の理由と証拠を保持し、外部状態の変化を確認してから新しい評価で再開する。',
       '時間あたりの加点見積もりはactだけに表示する。待機や閲覧を直接加点できる作業とみなさない。'] };
 }

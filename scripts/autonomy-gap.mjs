@@ -170,6 +170,7 @@ export const UNLOCKS = {
                             + '共通期間・比較対象・同時施策を記録する。未観測を0にしない。'
                             + '実験評価の数値は非公開simplememo-ios側に保持する。' },
   revenue_28d:       { kind: 'implement', label: '売上の欠測と費用・継続データを判断に接続する',
+                       prerequisite_scope: 'materials_only',
                        needs: '日次v2は現在28日窓の確定観測日数で、時間経過だけでは全日が揃わない。'
                             + '欠測を0にせず、期間比較には非公開simplememo-iosのApple暦週・暦月系列を使う。'
                             + 'AI原価回収は同期間の費用と配賦、LTVは獲得分母と継続・課金の結合、'
@@ -940,6 +941,51 @@ export function selftest() {
     }
   }
 
+  // A 28-day observation window is only a material prerequisite for finance.
+  // Keep the original threshold without inventing private completion predicates.
+  {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'autonomy-materials-'));
+    const file = path.join(root, 'series.json');
+    const pred = { ...UNLOCKS.revenue_28d.satisfied_when[0], file: path.relative(ROOT, file) };
+    const revenue = { ...UNLOCKS.revenue_28d, satisfied_when: [pred] };
+    const doc = covDoc({ unlock: 'revenue_28d', blocked_on: [pred] });
+    try {
+      for (const covered_days of [20, 27, 28]) {
+        fs.writeFileSync(file, JSON.stringify({ covered_days,
+          ai_cost_allocation: 'unknown', acquisition_denominator: 'unknown', cohort_history_complete: false }));
+        const st = stillBlocked(doc.tasks[0], { unlocks: { revenue_28d: revenue } });
+        if (st.scope !== 'materials_only' || st.materials_satisfied !== (covered_days >= 28) || st.satisfied) {
+          problems.push(`材料だけの${covered_days}日観測を業務全体の解除に読み替えた`);
+        }
+        if (check(doc, { unlocks: { revenue_28d: revenue } }).length) {
+          problems.push(`材料だけの${covered_days}日観測から台帳の解除を要求した`);
+        }
+      }
+      const complete = { ...revenue };
+      delete complete.prerequisite_scope;
+      const completeDoc = covDoc({ unlock: 'company_facts', blocked_on: [pred] });
+      const completeUnlocks = { company_facts: complete };
+      const ps = check(completeDoc, { unlocks: completeUnlocks });
+      if (!stillBlocked(completeDoc.tasks[0], { unlocks: completeUnlocks }).satisfied
+          || !hit(ps, '待っていた材料がもう在る') || !hit(ps, 'もう開いている')) {
+        problems.push('非対象の完全な条件が揃っても既存の解除警告が出ない');
+      }
+      for (const scope of [null, '', 'material_only', false]) {
+        const unlocks = { revenue_28d: { ...revenue, prerequisite_scope: scope } };
+        if (!hit(check(doc, { unlocks }), '未知の prerequisite_scope')
+            || stillBlocked(doc.tasks[0], { unlocks }).satisfied) {
+          problems.push(`未知の prerequisite_scope を拒否しない: ${JSON.stringify(scope)}`);
+        }
+      }
+      const phantom = { ...revenue, satisfied_when: [{ ...pred, path: 'nonexistent_field' }] };
+      if (!hit(check(doc, { unlocks: { revenue_28d: phantom } }), '満たされようがない')) {
+        problems.push('材料だけの条件でも存在しないフィールドを検査しない');
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  }
+
   // ラチェット
   const many = { blocked_on_missing_budget: 0, tasks: [
     { area: 'A', task: 'T1', executor: 'nobody', blocker: 'external_data',
@@ -1091,12 +1137,20 @@ export function predicateUnreachable(pred, { root = ROOT } = {}) {
       + '無いということは、誰も書かない ―― この述語は満たされようがない）';
 }
 
-/** その行がまだ待っているか。述語が1つも無ければ「確かめていない」。 */
-export function stillBlocked(task, opts = {}) {
+// An omitted scope preserves complete prerequisites for existing unlocks.
+// Materials-only predicates cannot prove the business operation is unblocked.
+const prerequisiteScope = (unlock) => unlock?.prerequisite_scope === undefined
+  ? 'complete' : unlock.prerequisite_scope;
+
+/** その行の条件が揃ったか。材料だけの充足と業務全体の解除は分ける。 */
+export function stillBlocked(task, { unlocks = UNLOCKS, ...opts } = {}) {
+  const scope = prerequisiteScope(unlocks[task.unlock]);
   const preds = task.blocked_on;
-  if (!Array.isArray(preds) || preds.length === 0) return { checkable: false };
+  if (!Array.isArray(preds) || preds.length === 0) return { checkable: false, scope };
   const results = preds.map((pr) => ({ pred: pr, ok: blockedOnSatisfied(pr, opts) }));
-  return { checkable: true, results, satisfied: results.every((r) => r.ok) };
+  const materials_satisfied = results.every((r) => r.ok);
+  return { checkable: true, scope, results, materials_satisfied,
+    satisfied: scope === 'complete' && materials_satisfied };
 }
 
 /** 「何かを待っている」種別。**着手していないだけ、は待っていない。** */
@@ -1138,7 +1192,7 @@ export function check(doc, { unlocks = UNLOCKS } = {}) {
   // **材料が在るのが前提**なので、揃っていても矛盾ではない。
   for (const t of doc.tasks) {
     if (!t.blocked_on || !WAITING_BLOCKERS.has(t.blocker)) continue;
-    const st = stillBlocked(t);
+    const st = stillBlocked(t, { unlocks });
     if (st.satisfied) {
       problems.push(`待っていた材料がもう在る: ${t.area} / ${t.task}`
         + ` — ${t.blocked_on.map((x) => x.path ? `${x.file}:${x.path}` : (x.dir ?? x.file)).join(', ')}`
@@ -1157,6 +1211,9 @@ export function check(doc, { unlocks = UNLOCKS } = {}) {
   // これは上の「もう開いている」と**反対向きの誤り**で、同じ `false` に化ける。
   // 片方だけ見ていると、永久に開かない入口が「まだです」の顔で残る。
   for (const [id, u] of Object.entries(unlocks)) {
+    if (!['complete', 'materials_only'].includes(prerequisiteScope(u))) {
+      problems.push(`未知の prerequisite_scope: ${id}`);
+    }
     for (const pr of u.satisfied_when || []) {
       const why = predicateUnreachable(pr);
       if (why) {
@@ -1168,6 +1225,7 @@ export function check(doc, { unlocks = UNLOCKS } = {}) {
   }
 
   for (const [id, u] of Object.entries(unlocks)) {
+    if (prerequisiteScope(u) !== 'complete') continue;
     if (!Array.isArray(u.satisfied_when) || !u.satisfied_when.length) continue;
     if (!u.satisfied_when.every((pr) => blockedOnSatisfied(pr))) continue;
     const still = doc.tasks.filter((t) => t.unlock === id && WAITING_BLOCKERS.has(t.blocker));
