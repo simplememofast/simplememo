@@ -780,6 +780,12 @@
     },
     {
       "file": "scripts/devlog-syndication.mjs",
+      "expr": "p.fromRun",
+      "disposition": "別に検出",
+      "note": "2026-09-30: watchPlatform の本文欠測保護2か所（dev.to の `!p.fromRun && (typeof a.body_markdown !== 'string' || !a.body_markdown.trim())` と、はてなの `!p.fromRun && !String(p.content || '').trim()`）。通常の公開一覧には fromRun 欄が無いので、この条件は真となり、本文が欠測なら別経路と決めず unreadable にする。確認済み候補より新しい記事の経路が不明なときは、自経路の間隔も理由付き unknown・pipeline_age_hours=null とし、古い記事だけで停滞を断定しない。例外の fromRun=true は mergeJustPublished が同runの公開結果（試験実行・他媒体・URL欠測・解釈不能の日時を除外）にだけ付け、経路の出力証拠として使う。公開一覧に合流した記事も dev.to は公開API、両媒体は公開URLで別に読み直し品質を検査する。公開結果や本文の印から自然scheduleや人介入ゼロを推定しない。devlog-syndication --selftest 全32件を確認し、新しいDEV/はてな回帰ではアカウント最新20h＋自経路14日をalert、新しい本文の欠測をunknown、80/96h境界・停止免除・走査上限を固定。既存回帰で投稿直後の公開結果による合流・作成直後404の再読取りも保持。"
+    },
+    {
+      "file": "scripts/devlog-syndication.mjs",
       "expr": "a.origin",
       "disposition": "向きが逆",
       "note": "2026-09-29: 自己テストの assert。Origin が無いと assert が落ちる側（**規則を消す向きではなく、発火させる向き**）"
