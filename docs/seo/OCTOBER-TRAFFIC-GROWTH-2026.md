@@ -119,22 +119,37 @@ consumer修正は手動Goalからの独立した計測コード修理。新し�
 
 ## 未実施のカバレッジ作業
 
-C13/C14公開後のキューには21件が残っていた（pending 19件、blocked 2件）。これは全件がデータ待ちという意味ではない。C17・C20・C22・C24・C26・C27・C32は、既存Linux Obsidian環境で必要な実証に着手できる。品質80点・固有価値・検証範囲・全変更面の所有・最終CIが公開条件であり、未実証の状態を公開可能とは扱わない。
+C13/C14公開後のキューには21件が残っていた（pending 19件、blocked 2件）。C17の最終CI・merge・後続Pages・本番readback確認後は20件（pending 18件、blocked 2件）。これは全件がデータ待ちという意味ではない。C20・C22・C24・C26・C27・C32は、既存Linux Obsidian環境で必要な実証に着手できる。品質80点・固有価値・検証範囲・全変更面の所有・最終CIが公開条件であり、未実証の状態を公開可能とは扱わない。
 
 | 残件 | 次の作業・条件 |
 | --- | --- |
-| C17 Zettelkasten | 独立した著者作成Vaultでリンク・バックリンク・グラフの段階変化を実GUIで確認し、保存Markdownと原画像を添えたObsidian実装ガイドを作る。既存メールメモ概念ページと主題を分ける |
 | C20・C22・C24・C26・C27・C32 | 順に競合復元、URI実行、Markdown描画、グラフ操作、Canvas保存、バックアップ復元を隔離サンプルで検証し、実結果から記事化 |
 | C18・C21・C25・C28〜C31・C33〜C36 | 各候補の一次資料・実行例・比較条件・独自の役割を揃える。証拠が未作成という理由だけで全件をアクセス待ちとしない |
 | C23 URIジェネレーター | 既存`/resources/obsidian-uri/`が同じ主題を持つ。重複URLを作らず既存面優先のRefreshへ戻し、現行需要と元のゲート・所有を確認 |
 | C08・C19（blocked） | C08は既存Notion比較と同主題。C19は既存iPhone記事との役割判断とiOS実機検証が必要。Linux確認をiOS証拠へ読み替えない |
 
-この手動GoalからC17の実証と公開候補実装を再開する。9月30日の隔離Linux Obsidian 1.13.7で、3ノート・接続0本、理由つきリンク追加後の3ノート・1本、索引追加後の4ノート・3本という段階を実際のGraphと保存Markdownで確認した。記事の主題はリンクを用意する実装例であり、著者作成のサンプルから知識・学習・生産性の向上は認定しない。公開候補には原画像・Markdown・[検証範囲](../obsidian/evidence/zettelkasten-20260930.md)と、methods/Zettelkasten・Obsidian/Second Brainから各1文の案内を含める。追加の本番比較対象はC17 HTMLと原PNG・索引Markdownの3件で、元85ケース・C13/C14の6件は保持する。公開成功の証拠は最終headのCI、対応するmerge/Pagesと既存HTTP reportから別々に確認する。キューの先頭から適格性を確認し、公開完了ごとに元のキューで状態を更新する。新規Lane Eには既存URLの期待クリック3件条件を適用しない。同主題のRefreshへ切り替えた候補には元の条件を適用する。
+この手動GoalからC17の実証と公開候補実装を再開した。9月30日の隔離Linux Obsidian 1.13.7で、3ノート・接続0本、理由つきリンク追加後の3ノート・1本、索引追加後の4ノート・3本という段階を実際のGraphと保存Markdownで確認した。記事の主題はリンクを用意する実装例であり、著者作成のサンプルから知識・学習・生産性の向上は認定しない。公開記事には原画像・Markdown・[検証範囲](../obsidian/evidence/zettelkasten-20260930.md)と、methods/Zettelkasten・Obsidian/Second Brainから各1文の案内を含む。追加の本番比較対象はC17 HTMLと原PNG・索引Markdownの3件で、元85ケース・C13/C14の6件は保持する。公開成功の証拠は以下の最終head CI、対応mergeと後続Pages、既存HTTP reportから別々に確認した。キューの先頭から適格性を確認し、公開完了ごとに元のキューで状態を更新する。新規Lane Eには既存URLの期待クリック3件条件を適用しない。同主題のRefreshへ切り替えた候補には元の条件を適用する。
+
+### C17の初回配送失敗と後続配送確認（2026-10-01 JST）
+
+[PR #1775](https://github.com/simplememofast/simplememo/pull/1775)の最終head `73272d0231c9273601ffb14407df3961019b1044` はSEO Validation run `36731180959`（147 steps、failed 0）に成功し、2026-09-30T14:58:22Zにmain `d41860d8d5771b60f168146af138470374c19881`へ通常mergeされた。local preflightは218/218、変更24ファイルはレビュー済みbytesを保持した。
+
+同mainの本番Pages deployment `24f1b939-dd89-491b-84f3-8dcb199bd295` はcheck `109952972502`でbuild失敗（15:09:57Z）。プレビューdeployment `a88b2ffc-07fe-4f18-b3b9-24c54e36f722`もcheck `109942851022`で失敗した。既存Cloudflare project `simplememo`内の両deploymentの失敗stage/build-log本文が不足している。現在のGitHub読取経路には状態とdashboardリンクだけがあり、Cloudflareログの既存認可経路はこの環境で利用できない。原本不足や記事の不備、一時的な基盤障害のいずれとも断定しない。
+
+[初回の本番HTTP run `36733191095`](https://github.com/simplememofast/simplememo/actions/runs/36733191095)（sourceCommitは同main、観測開始14:58:49.683Z）は配備中にC17のHTML・原PNG・索引Markdownが404となりfailure。C13/C14の6対象はpass、元85件はskip 85で、このrunから85件の成功を主張しない。failure artifact `11105324398`を保持する。別のPageSpeed run `36731180957`は既存本番JAホームの中央値89<90で失敗し、artifact `11104633609`を保存した。C17はhome・共通CSS/font・性能基準を変更しておらず、C17による性能回帰の因果は未確定。既存failure ownerを保持する。
+
+初回配送失敗時点ではC17のpendingと21件（pending 19、blocked 2）を保持していた。この失敗は後続成功へ付け替えず、[限定した実証と配送記録](../obsidian/evidence/zettelkasten-20260930.md)に残す。既存のactions停止・次回自然起動限定の許可、GSCの85+6+3ケースと既存条件を変更せず、新しい復旧実行・collector・probe・課金・送信者identityを追加しない。10月流入倍増とCompany無人率は未認定のまま保持する。
+
+後続の別deployment `1ddcd405-8cab-4d10-85a3-60613d69ec38` は同exact main `d41860d8d5771b60f168146af138470374c19881`でCloudflare check `109960971844`が2026-09-30T15:27:56Zに成功し、[対応Pages配備](https://1ddcd405.simplememo-596.pages.dev)を確認した。起点と原因は未確認で、このタスクからCF rerun/dispatchは行っていない。自然schedule復旧・Company成果として認定しない。
+
+[既存strict本番GSC run `36737882225`](https://github.com/simplememofast/simplememo/actions/runs/36737882225)（job `109964254546`、sourceCommitはexact同main、観測`2026-09-30T15:35:42.425Z`）は元85件と追加9件が全pass、failure/skip各0。C17 HTMLは15:35:47.259Zに200でtitle/canonical/robots/sitemapを確認し、索引Markdownは15:35:47.632Zに324bytes・SHA256 `425e7d6493f6926f3f3250a95c5d648cc1f64ab2fef1d6f536de609a3d72a264`、最終Graph PNGは15:35:48.085Zに45648bytes・SHA256 `9162bb00d4d7ea9e3a8e872ddeb4baaf4e5d6495c7142a5ded551b780913c989`が一致した。success artifact `11109420177`のarchive SHA256は`e25d0eada2677ad596d595107f2fd588dfd57b3879f7dee6fe8a1395580006fe`。原10件のsource一致と本番raw2件のbytes一致を分け、HTML全文・全サイト・他assetのbytes、Google登録・CTA・iOS/SimpleMemo・流入改善を認定しない。
+
+この実配送確認で元のqueue C17をdoneとし、残件は20件（pending 18、blocked 2）。初期の配備・HTTP・PageSpeed失敗、GUI実証18assertionと品質92/100、graphのNot verified/verified:null、既存owner/停止/評価日は保持する。この台帳更新の最終CI・merge・対応Pagesは、記事本体の配送証拠と別に確認する。9月月間sessions基準値の欠落と10月倍増の未測定・未判定、Company加点なしを維持する。
 
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
-2. 主要導線の本番ブラウザ操作・全サイトの配信バイトを確認する既存実行経路。元85 URLと追加6対象のHTTP結果は、それぞれの検査範囲を超えた証明の代用にしない。この環境のネットワーク制限を回避しない。
+2. 主要導線の本番ブラウザ操作・全サイトの配信バイトを確認する既存実行経路。元85 URLと追加9対象のHTTP結果は、それぞれの検査範囲を超えた証明の代用にしない。この環境のネットワーク制限を回避しない。
 3. 実験のpost窓と評価日。未来の測定が必要で、経過時間だけを実行証拠にしない。
 4. 既存日次`actions` ownerの導出停止と、9月30日承認の次回自然起動限定の復旧許可。手動Goalから再開・再分類・成功認定しない。
 
