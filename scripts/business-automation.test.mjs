@@ -114,3 +114,9 @@ test('nested private metadata is never copied and free-form date annotations are
   const h=publicHistory(d);mutate(h);assert.throws(()=>exportWeeklyAggregates(h,d));
  }
 });
+test('older valid observations cannot replace a newer published measurement',()=>{
+ const d=base(),h=publicHistory(d),previous=exportWeeklyAggregates(h,d);
+ h.points[0].observed_at=new Date(Date.parse(d.generated_at)-60000).toISOString();
+ h.points[0].actual.verified_full_tasks=165;h.points[0].actual.verified_full_automation_rate=165/192;
+ assert.deepEqual(exportWeeklyAggregates(h,d,previous).points.at(-1).actual,previous.points.at(-1).actual);
+});
