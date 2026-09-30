@@ -6,7 +6,7 @@ import {digest,ROOT} from './company-metrics.mjs';
 import {privateState,atomicJson,acquireLock,observe,opportunities} from './company-loop.mjs';
 import {safePath,intentPath} from '../../scripts/value-contracts.mjs';
 import {boundRun,verifyDecision} from '../../scripts/decision-ci.mjs';
-import {verifyMeasurementInput,verifyMeasurementOwnership,verifyMeasurementMergeScope,EXPERIMENTS} from './company-measurement.mjs';
+import {verifyMeasurementInput,verifyMeasurementOwnership,verifyMeasurementMergeScope,measurementBaselineRows,EXPERIMENTS} from './company-measurement.mjs';
 
 const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
 const uuid=s=>/^[a-f0-9-]{36}$/.test(s??'');
@@ -63,7 +63,7 @@ export function prepareCompanyDecision({stateRoot,id,evidenceFile,now=new Date()
     assert(Array.isArray(input.alternatives) && input.alternatives.length>0 && input.alternatives.length<=10 && input.alternatives.every(a=>a.id!==candidate.id && receipt.candidates.some(c=>c.id===a.id) && text(a.reason)),'compare at least one other observed candidate');
     validateScope(candidate,input.scope);
     const measurement=verifyMeasurementInput(receipt,{stateRoot:dir,input,at:now.toISOString()});
-    if(measurement)verifyMeasurementOwnership(measurement,{stateRoot:dir,root,now});
+    if(measurement)verifyMeasurementOwnership(measurement,{stateRoot:dir,root,now,rows:measurementBaselineRows(measurement,{root,now})});
     if(candidate.experiment_id||input.parent_experiment||input.parent_result) {
       assert(candidate.experiment_id,'only an observed measured-result candidate can bind a parent');
       assert.equal(input.parent_experiment,candidate.experiment_id,'retain the measured parent behind this next action');

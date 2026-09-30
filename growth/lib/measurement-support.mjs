@@ -10,6 +10,11 @@ function targetUrl(value,page) {
   assert(typeof value==='string'&&value.startsWith(ORIGIN+'/')&&new URL(value).origin===ORIGIN,'support URL must use the canonical HTTPS origin');
   assert.equal(canonicalPage(value),canonicalPage(page),'support URL differs from target page');
 }
+// A row that cannot be read as one canonical page is never treated as unowned.
+function rowPage(item) {
+  assert(item&&typeof item==='object'&&typeof item.url==='string'&&item.url.startsWith(ORIGIN+'/'),'unreadable shared generated row');
+  try {return canonicalPage(item.url);}catch{assert.fail('unreadable shared generated row');}
+}
 function queue(text) {
   const d=JSON.parse(text);
   assert(d&&Array.isArray(d.items)&&d.items.length<=100,'bounded distribution queue required');
@@ -30,6 +35,7 @@ function distribution(before,after,contract,page) {
   for(const k of [...strings.filter(k=>k!=='en_answer_1line'),...arrays])assert(Object.hasOwn(item,k),'missing distribution field: '+k);
   assert.deepEqual(b,{...a,items:[item,...a.items].slice(0,100)},'only one new seed and the documented100-item retention are allowed');
   assert.equal(after,JSON.stringify(b,null,2)+'\n','distribution output must be canonical JSON without duplicate keys');
+  return [item,...a.items].slice(100).map(rowPage);
 }
 function sitemapMask(text,kind,locations,at) {
   const tag=kind==='sitemap_index'?'sitemap':'url',seen=new Map(),values=new Map();
@@ -83,28 +89,37 @@ function story(before,after,contract,page) {
   const targets=[...appended.matchAll(/^- \*\*対象URL\*\*: (\S+)\s*$/gm)];
   assert.equal(targets.length,1,'one explicit story target URL required');targetUrl(targets[0][1],page);
 }
+// Both proofs return {rows}: page rows other than the declared target that the
+// edit alters in a shared generated file. Callers add them to the target scope
+// so the same ownership judgement protects active experiment rows.
 export function verifySupportingBaseline(experiment,read,{now=new Date()}={}) {
   const changes=supportingChanges(experiment.page,experiment.change_paths,experiment.supporting_changes);
   const at=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const rows=[];
   for(const c of changes) {
     const text=read(c.path);assert(typeof text==='string','existing readable support file required');
-    if(c.kind==='distribution_seed')assert(!queue(text).items.some(x=>x.id===c.id),'distribution ID already exists');
-    else if(c.kind==='story_seed') {
+    if(c.kind==='distribution_seed') {
+      const d=queue(text);assert(!d.items.some(x=>x.id===c.id),'distribution ID already exists');
+      rows.push(...d.items.slice(99).map(rowPage));
+    } else if(c.kind==='story_seed') {
       const ids=storyIds(text);
       assert(!ids.includes(c.id)&&ids.length<100,'story ID exists or append-only story capacity is exhausted');
     } else sitemap(text,text,c,experiment.page,changes,at);
   }
+  return {rows:[...new Set(rows)]};
 }
 export function verifySupportingDiff(experiment,before,after,{now=new Date()}={}) {
   const changes=supportingChanges(experiment.page,experiment.change_paths,experiment.supporting_changes);
   const at=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+  const rows=[];
   for(const c of changes) {
     const a=before(c.path),b=after(c.path);
     assert(typeof a==='string'&&typeof b==='string','existing readable support files required');
-    if(c.kind==='distribution_seed')distribution(a,b,c,experiment.page);
+    if(c.kind==='distribution_seed')rows.push(...distribution(a,b,c,experiment.page));
     else if(c.kind==='story_seed')story(a,b,c,experiment.page);
     else sitemap(a,b,c,experiment.page,changes,at);
   }
+  return {rows:[...new Set(rows)]};
 }
 export function verifySupportingGitDiff(experiment,beforeRef,afterRef,git,options) {
   const read=ref=>file=>{
@@ -113,7 +128,7 @@ export function verifySupportingGitDiff(experiment,beforeRef,afterRef,git,option
   };
   // Callers must return raw blob bytes, not trim(), because story prefixes and
   // canonical JSON are part of the proof.
-  verifySupportingDiff(experiment,read(beforeRef),read(afterRef),options);
+  return verifySupportingDiff(experiment,read(beforeRef),read(afterRef),options);
 }
 
 // This is a provenance proof for already declared sitemap support, not a CI

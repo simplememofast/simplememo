@@ -37,17 +37,24 @@ function owned(file,dir) {
   assert(real.startsWith(fs.realpathSync(dir)+path.sep)&&st.isFile()&&st.uid===process.getuid()&&!(st.mode&0o077),'owned private measurement input required');
   return real;
 }
-function available(page,experiments,followups=[],except=null,{now=new Date(),paths,supportingChanges}={}) {
+function available(page,experiments,followups=[],except=null,{now=new Date(),paths,supportingChanges,rows=[]}={}) {
   const target=paths?changeScope(page,paths,supportingChanges):{pages:[normalized(page)],global:false};
+  // Other page rows altered in a shared generated file join the same scope.
+  target.pages=[...new Set([...target.pages,...rows])];
   for(const entry of [...experiments.filter(isOpen).map(e=>({e,followup:false})),...followups.filter(r=>r.status==='RUNNING').map(r=>({e:{...r.parent,id:r.id,coexistence:undefined},followup:true}))]) {
     if(entry.e.id===except)continue;
     assert(!ownershipConflict(entry.e,target,{now,followup:entry.followup}),'target is owned by an active experiment/follow-up: '+entry.e.id);
   }
 }
-export function verifyMeasurementOwnership(plan,{stateRoot,root=ROOT,now=new Date(),experiments=ledger(root).experiments,except=null}={}) {
+export function verifyMeasurementOwnership(plan,{stateRoot,root=ROOT,now=new Date(),experiments=ledger(root).experiments,except=null,rows=[]}={}) {
   if(plan.schema_version<2)return;
   validLedger({experiments});
-  available(plan.experiment.page,experiments,growthFollowups({stateRoot,now}).reviews,except,{now,paths:plan.experiment.change_paths,supportingChanges:plan.experiment.supporting_changes});
+  available(plan.experiment.page,experiments,growthFollowups({stateRoot,now}).reviews,except,{now,paths:plan.experiment.change_paths,supportingChanges:plan.experiment.supporting_changes,rows});
+}
+// Rows a declared shared generated edit will alter, read from the unimplemented
+// checkout, so the decision applies the same row ownership as registration.
+export function measurementBaselineRows(plan,{root=ROOT,now=new Date()}={}) {
+  return plan.schema_version<2?[]:supportBaseline(plan.experiment,root,now).rows;
 }
 
 function stash(dir,value) {
@@ -79,8 +86,8 @@ export function prepareMeasurement({stateRoot,evidenceFile,root=ROOT,now=new Dat
     const original=ledger(root);validLedger(original);
     assert(!original.experiments.some(e=>e.id===input.id),'experiment ID already exists; never retrofit a plan');
     changeScope(input.page,input.change_paths,input.supporting_changes);
-    supportBaseline(input,root,now);
-    available(input.page,original.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:input.change_paths,supportingChanges:input.supporting_changes});
+    const {rows}=supportBaseline(input,root,now);
+    available(input.page,original.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:input.change_paths,supportingChanges:input.supporting_changes,rows});
     let snapshot,baseline,contract,source,metric=input.target_metric;
     if(input.source==='gsc') {
       assert(['ctr','position','impressions'].includes(metric),'exact GSC page metric required');
@@ -172,8 +179,8 @@ export async function registerMeasurement({stateRoot,id,root=ROOT,now=new Date()
     const old=l.experiments.find(x=>x.id===e.id);if(old){assert.deepEqual(old,e,'registered experiment changed');return{status:'already_registered',id:e.id};}
     assert.equal(git(root,['status','--porcelain']),'','registration must precede implementation from a clean declaration');
     assert.equal(git(root,['rev-parse','HEAD']),r.bound_declaration_sha,'register on the exact bound declaration');
-    supportBaseline(e,root,now);
-    available(e.page,l.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:e.change_paths,supportingChanges:e.supporting_changes});
+    const {rows}=supportBaseline(e,root,now);
+    available(e.page,l.experiments,growthFollowups({stateRoot:dir,now}).reviews,null,{now,paths:e.change_paths,supportingChanges:e.supporting_changes,rows});
     l.experiments.push(e);validLedger(l);saveLedger(l,path.join(root,EXPERIMENTS));
     return{status:'registered',id:e.id,path:EXPERIMENTS,next:'Commit only the experiment registry before changing the declared page. Normal original contract/CI/claim gates still apply.'};
   } finally {release();}
@@ -189,14 +196,17 @@ export function verifyMeasurementDelivery(receipt,{stateRoot,root=ROOT,head,merg
   assert.deepEqual(show(head).find(e=>e.id===p.id),expected,'measurement contract changed after registration');
   assert.deepEqual(show(mergeSha).find(e=>e.id===p.id),expected,'merged measurement differs from the validated head');
   if(p.schema_version>=2) {
-    const at=new Date(mergedAt);
-    for(const sha of [head,mergeSha])verifyMeasurementOwnership(p,{stateRoot,root,now:at,experiments:show(sha),except:p.id});
+    const at=new Date(mergedAt),git=(...args)=>call('git',args);
+    const inherited=verifyMeasurementMergeScope(r,{stateRoot,head,mergeSha,mergedAt,call});
+    // Rows that retention removes depend only on the declaration. A merge that
+    // inherited sitemap dates was reproven against that same declaration by
+    // verifyMeasurementMergeScope, so it carries the head rows.
+    const rows=new Map([[head,verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,head,git,{now:at}).rows]]);
+    if(!rows.has(mergeSha))rows.set(mergeSha,inherited?rows.get(head):verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,mergeSha,git,{now:at}).rows);
+    for(const [sha,altered] of rows)verifyMeasurementOwnership(p,{stateRoot,root,now:at,experiments:show(sha),except:p.id,rows:altered});
     const actual=call('git',['diff','--name-only',registration,head]).trim().split('\n').filter(Boolean);
     const bookkeeping=new Set(['data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md']);
     assert(actual.every(file=>bookkeeping.has(file)||p.experiment.change_paths.includes(file)),'undeclared measurement change path');
-    const inherited=verifyMeasurementMergeScope(r,{stateRoot,head,mergeSha,mergedAt,call});
-    verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,head,(...args)=>call('git',args),{now:at});
-    if(!inherited&&mergeSha!==head)verifySupportingGitDiff(p.experiment,r.bound_declaration_sha,mergeSha,(...args)=>call('git',args),{now:at});
   }
   const changed=call('git',['diff-tree' ,'--no-commit-id','--name-only','-r',registration]).trim().split('\n');
   assert.deepEqual(changed,[EXPERIMENTS],'commit the experiment registry alone before implementation');

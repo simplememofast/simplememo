@@ -58,22 +58,24 @@ function fixture(t,{source='ai_citations',threshold=4,route='owner-session'}={})
   const prepare=()=>prepareMeasurement({stateRoot,evidenceFile:inputFile,root,now,search});
   const receiptFile=path.join(stateRoot,'runs',id+'.json');
   const candidate={id:'content:fixture',kind:'existing_content_queue',permission:'AUTO',executable:true,priority:1,evidence:['synthetic']};
-  const bind=()=>{
+  // Hooks let a test change the checkout exactly between the pipeline stages.
+  const bind=({beforeDecision=()=>{},beforeDeclaration=()=>{}}={})=>{
     const prepared=prepare(),decisionInput={schema_version:1,candidate_id:candidate.id,contract_id:'fixture-contract',run_id:'fixture-run',rationale:'The observed fixed cohort supports investigating this concrete page.',
       source_to_action:'The fixture evidence is preserved to test prospective binding only.',alternatives:[{id:'other',reason:'Another candidate has lower estimated business relevance in this fixture.'}],
       measurement:prepared.measurement,scope:{artifact:page,paths:[...input.change_paths]}};
     const r={schema_version:3,id,source_commit:sourceCommit,observation_fingerprint:'a'.repeat(64),candidates:[candidate,{id:'other'}],observed_at:now.toISOString(),started_at:now.toISOString(),status:'observed_decision_requires_execution',
       execution_boundary:{stopped:false},route,stages:{}};
     write(receiptFile,r);const df=path.join(stateRoot,'decision.json');write(df,decisionInput);
-    prepareCompanyDecision({stateRoot,id,evidenceFile:df,now,currentCandidates:r.candidates,root});
+    beforeDecision();prepareCompanyDecision({stateRoot,id,evidenceFile:df,now,currentCandidates:r.candidates,root});
     write(path.join(root,'data/decision-intents/fixture-contract.json'),{id:'fixture-contract',run_id:'fixture-run',candidates:[{id:'fixture-contract',company_decision:decisionCommitment(read(receiptFile))}]});
+    beforeDeclaration();
     // Declaration transport/selection has independent real-git tests in
     // company-decision.test. This fixture tests the subsequent registry order.
     git('add','.');git('commit','-qm','fixture declaration');
     const saved=read(receiptFile);Object.assign(saved,{bound_decision_sha256:saved.decision.sha256,bound_declaration_sha:git('rev-parse','HEAD'),bound_autopilot_run_id:'fixture-run'});write(receiptFile,saved);
     return saved;
   };
-  const register=async()=>{const r=bind();await registerMeasurement({stateRoot,id,root,now});git('add',EXPERIMENTS);git('commit','-qm','fixture registry');return r;};
+  const register=async hooks=>{const r=bind(hooks);await registerMeasurement({stateRoot,id,root,now});git('add',EXPERIMENTS);git('commit','-qm','fixture registry');return r;};
   const deliver=async()=>{const r=await register();fs.writeFileSync(path.join(root,target),'after\n');
     write(path.join(root,'data/autopilot-runs.json'),{runs:[{run_id:'fixture-run',outcome:'shipped',attempted:true,route,pr:1,artifact:page}]});
     git('add',target,'data/autopilot-runs.json');git('commit','-qm','fixture treatment');
@@ -366,4 +368,115 @@ test('prospective page support reaches registration, real-Git CI and delivery wi
   f.git('checkout',goodHead,'--',q);f.git('add',q);f.git('commit','-qm','fixture restore exact queue');
   const l=f.read(path.join(f.root,EXPERIMENTS)),old=l.experiments.find(e=>e.id==='protected-owner');old.change_paths.push(q);old.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-protected'}];f.write(path.join(f.root,EXPERIMENTS),l);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture reinterpret previous owner');
   await assert.rejects(()=>verifyDecision(options()),/cannot reinterpret existing support ownership/);
+});
+
+// Owner decision 2026-09-24: shared generated files are owned by page rows.
+test('shared generated rows join preparation, real-Git CI and delivery ownership',async t=>{
+  const {verifyDecision}=await import('../../scripts/decision-ci.mjs');
+  const f=fixture(t,{source:'gsc'}),q='data/distribution-queue.json',sm='sitemap-ja.xml',origin='https://simplememofast.com';
+  f.input.change_paths.push(q,sm);f.input.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-fixture'},{path:sm,kind:'sitemap_lastmod'}];f.write(f.inputFile,f.input);
+  // The retention rule will remove the oldest row, which points at /late.
+  const items=Array.from({length:100},(_,i)=>({id:'old-'+i,url:origin+(i===99?'/late':'/old-'+i)}));
+  f.write(path.join(f.root,q),{items:items.map((x,i)=>i===99?{id:x.id}:x)});
+  const siteMap='<urlset><url><loc>'+origin+f.page+'</loc><lastmod>2026-09-10</lastmod></url><url><loc>'+origin+'/protected</loc><lastmod>2026-09-01</lastmod></url></urlset>\n';
+  fs.writeFileSync(path.join(f.root,sm),siteMap);
+  f.write(path.join(f.root,'data/value-metrics.json'),{metrics:[]});
+  assert.throws(f.prepare,/unreadable shared generated row/,'a row that cannot be read is not treated as unowned');
+  f.write(path.join(f.root,q),{items});
+  const first=f.prepare(),base=loadMeasurement({stateRoot:f.stateRoot,...first.measurement}).experiment;
+  fs.rmSync(path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'));
+  const owner=(id,page,paths)=>{const e={...base,id,page,change_paths:paths};delete e.supporting_changes;return e;};
+  // A legacy owner named the whole sitemap in change_paths without support.
+  const legacy=owner('legacy-sitemap-owner','/protected',['protected/index.html',sm]),late=owner('late-owner','/late',['late/index.html']);
+  f.write(path.join(f.root,EXPERIMENTS),{experiments:[legacy,late]});
+  assert.throws(f.prepare,/owned by an active experiment\/follow-up: late-owner/,'the row retention will remove is checked before any plan exists');
+  f.write(path.join(f.root,EXPERIMENTS),{experiments:[legacy]});f.git('add','.');f.git('commit','-qm','fixture shared generated files and legacy owner');
+  const baseRef=f.git('rev-parse','HEAD'),r=await f.register();
+  const item={...supportFixture().item,id:'20260915-fixture',date_jst:'2026-09-15',url:origin+f.page};
+  f.write(path.join(f.root,q),{items:[item,...items].slice(0,100)});
+  fs.writeFileSync(path.join(f.root,sm),siteMap.replace('2026-09-10','2026-09-15'));fs.writeFileSync(path.join(f.root,f.target),'after\n');
+  f.git('add','.');f.git('commit','-qm','fixture bounded shared generated edit');
+  const options=()=>({branch:'Codex/fixture',head:f.git('rev-parse','HEAD'),baseRef,cwd:f.root});
+  const delivery=()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:f.git('rev-parse','HEAD'),mergedAt:'2026-09-15T12:00:00Z',call:f.call});
+  assert.equal((await verifyDecision(options())).state,'not_required','the legacy owner does not own the whole sitemap');
+  assert.equal(delivery().state,'registered_waiting_for_mature_evidence');
+  const goodHead=f.git('rev-parse','HEAD');
+  // An owner of the removed row appears after selection: CI and delivery reject.
+  const l=f.read(path.join(f.root,EXPERIMENTS));l.experiments.push(late);f.write(path.join(f.root,EXPERIMENTS),l);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture later row owner');
+  await assert.rejects(()=>verifyDecision(options()),/active experiment conflicts at final head: late-owner/);
+  assert.throws(delivery,/owned by an active experiment\/follow-up: late-owner/);
+  // The merge can carry an owner the validated head did not: check the merge side.
+  const lateHead=f.git('rev-parse','HEAD');
+  assert.throws(()=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head:goodHead,mergeSha:lateHead,mergedAt:'2026-09-15T12:00:00Z',call:f.call}),/owned by an active experiment\/follow-up: late-owner/);
+  // A frozen owner of the removed row still owns it at every entry.
+  const frozen=f.read(path.join(f.root,EXPERIMENTS));frozen.experiments.find(e=>e.id==='late-owner').status='frozen';
+  f.write(path.join(f.root,EXPERIMENTS),frozen);f.git('add',EXPERIMENTS);f.git('commit','-qm','fixture frozen row owner');
+  await assert.rejects(()=>verifyDecision(options()),/active experiment conflicts at final head: late-owner/);
+  assert.throws(delivery,/owned by an active experiment\/follow-up: late-owner/);
+  // Without a bounded declaration the legacy owner keeps the whole sitemap.
+  f.git('checkout','-q','--detach',goodHead);
+  const undeclared={...f.input,id:'fixture-undeclared',page:'/obsidian/other/',change_paths:['obsidian/other/index.html',sm]};delete undeclared.supporting_changes;
+  f.write(path.join(f.root,EXPERIMENTS),{experiments:[legacy]});
+  f.write(f.inputFile,undeclared);assert.throws(f.prepare,/owned by an active experiment\/follow-up: legacy-sitemap-owner/);
+});
+
+// A squash that inherits sitemap dates from main skips the merge-side diff
+// proof; the row retention removes must still meet the merged ledger.
+test('a merge that inherits sitemap dates still checks the removed row against the merged ledger',async t=>{
+  const f=fixture(t,{source:'gsc'}),q='data/distribution-queue.json',sm='sitemap-ja.xml',origin='https://simplememofast.com';
+  f.input.change_paths.push(q,sm);f.input.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-fixture'},{path:sm,kind:'sitemap_lastmod'}];f.write(f.inputFile,f.input);
+  const items=Array.from({length:100},(_,i)=>({id:'old-'+i,url:origin+(i===99?'/late':'/old-'+i)}));f.write(path.join(f.root,q),{items});
+  const siteMap='<urlset>\n<url><loc>'+origin+f.page+'</loc><lastmod>2026-09-10</lastmod></url>'+'\n'.repeat(12)+
+    '<url><loc>'+origin+'/protected</loc><lastmod>2026-09-01</lastmod></url>\n</urlset>\n';
+  fs.writeFileSync(path.join(f.root,sm),siteMap);
+  const first=f.prepare(),base=loadMeasurement({stateRoot:f.stateRoot,...first.measurement}).experiment;
+  fs.rmSync(path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'));
+  const owner=(id,page)=>{const e={...base,id,page,change_paths:[page.slice(1)+'/index.html']};delete e.supporting_changes;return e;};
+  // An unrelated owner keeps the two ledger edits in separate merge hunks.
+  const filler=owner('filler-owner','/elsewhere');f.write(path.join(f.root,EXPERIMENTS),{version:1,experiments:[filler]});
+  f.git('add','.');f.git('commit','-qm','fixture shared generated files');
+  const r=await f.register();
+  const item={...supportFixture().item,id:'20260915-fixture',date_jst:'2026-09-15',url:origin+f.page};
+  f.write(path.join(f.root,q),{items:[item,...items].slice(0,100)});
+  fs.writeFileSync(path.join(f.root,sm),siteMap.replace('2026-09-10','2026-09-15'));fs.writeFileSync(path.join(f.root,f.target),'after\n');
+  f.git('add','.');f.git('commit','-qm','fixture bounded shared generated edit');const head=f.git('rev-parse','HEAD');
+  const publish=(branch,experiments)=>{
+    f.git('checkout','-qb',branch,r.bound_declaration_sha);fs.writeFileSync(path.join(f.root,sm),siteMap.replace('2026-09-01','2026-09-14'));
+    f.write(path.join(f.root,EXPERIMENTS),{version:1,experiments});f.git('add','.');f.git('commit','-qm','fixture concurrent main');
+    f.git('merge','--squash',head);f.git('commit','-qm','fixture published squash');return f.git('rev-parse','HEAD');
+  };
+  const delivery=mergeSha=>verifyMeasurementDelivery(r,{stateRoot:f.stateRoot,root:f.root,head,mergeSha,mergedAt:'2026-09-15T12:00:00Z',call:f.call});
+  // Control: the inherited-date proof is taken and the delivery passes.
+  const clean=publish('parallel-clean',[filler]);
+  assert.equal(verifyMeasurementMergeScope(r,{stateRoot:f.stateRoot,head,mergeSha:clean,mergedAt:'2026-09-15T12:00:00Z',call:f.call}).version,'company-merge-scope-v2');
+  assert.equal(delivery(clean).state,'registered_waiting_for_mature_evidence');
+  // Main registered an owner of the removed row while the PR was open.
+  const owned=publish('parallel-owner',[owner('late-owner','/late'),filler]);
+  assert.throws(()=>delivery(owned),/owned by an active experiment\/follow-up: late-owner/);
+});
+
+// Each stage reads the retention row itself: an owner that appears after one
+// stage is still rejected by the next, so no single stage is a bypass.
+test('decision and registration each check the row retention will remove',async t=>{
+  const q='data/distribution-queue.json',origin='https://simplememofast.com';
+  const setup=()=>{
+    const f=fixture(t,{source:'gsc'});
+    f.input.change_paths.push(q);f.input.supporting_changes=[{path:q,kind:'distribution_seed',id:'20260915-fixture'}];f.write(f.inputFile,f.input);
+    f.write(path.join(f.root,q),{items:Array.from({length:100},(_,i)=>({id:'old-'+i,url:origin+(i===99?'/late':'/old-'+i)}))});
+    const first=f.prepare(),base=loadMeasurement({stateRoot:f.stateRoot,...first.measurement}).experiment;
+    fs.rmSync(path.join(f.stateRoot,'measurement-plan-'+f.input.id+'.json'));
+    f.git('add','.');f.git('commit','-qm','fixture full distribution queue');
+    const owner=page=>{const e={...base,id:'late-owner',page,change_paths:[page.slice(1)+'/index.html']};delete e.supporting_changes;return e;};
+    const appear=page=>()=>f.write(path.join(f.root,EXPERIMENTS),{experiments:[owner(page)]});
+    return {f,appear};
+  };
+  const a=setup();
+  assert.throws(()=>a.f.bind({beforeDecision:a.appear('/late')}),/owned by an active experiment\/follow-up: late-owner/,'decision reads the removed row');
+  const b=setup();
+  await assert.rejects(()=>b.f.register({beforeDeclaration:b.appear('/late')}),/owned by an active experiment\/follow-up: late-owner/,'registration reads the removed row');
+  assert.equal(b.f.read(path.join(b.f.root,EXPERIMENTS)).experiments.some(e=>e.id===b.f.input.id),false,'a rejected registration writes nothing');
+  // Control: the same late owner on an unrelated page does not block either stage.
+  const c=setup();
+  await c.f.register({beforeDecision:c.appear('/elsewhere'),beforeDeclaration:c.appear('/elsewhere')});
+  assert(c.f.read(path.join(c.f.root,EXPERIMENTS)).experiments.some(e=>e.id===c.f.input.id));
 });
