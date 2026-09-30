@@ -68,10 +68,16 @@ jobs:
       - name: Verify production after deployment propagation
         if: github.event_name == 'workflow_run' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: node scripts/gsc-crawled-indexing.mjs --live
+      - name: Verify every pinned public raw asset independently of representative checks
+        if: always() && (github.event_name == 'workflow_run' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+        run: node scripts/full-public-assets-readback.mjs --live
       - name: Retain public HTTP evidence, including failures
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gsc-indexing-http-${{ github.run_id }}
-          path: gsc-indexing-http-report.json
+          path: |
+            gsc-indexing-http-report.json
+            full-public-assets-http/
+            full-public-assets-http-startup-failure.json
           if-no-files-found: warn

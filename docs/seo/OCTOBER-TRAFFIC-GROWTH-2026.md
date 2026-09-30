@@ -261,6 +261,12 @@ C32three-methodLinux boundedauthor original26/28+supplement30/46 andsource30/29n
 
 [原本と全scope](../obsidian/evidence/slow-startup-20260930.md)。new9＋C14実enable文脈1＋support9=19、raw6は4PNG/CSV/MD、OG別。固定9試行/各n3/原23assert82files・receipt含83/品質92既存privateQAを保持。入力MDはbootstrapでapp保存証拠ではなく、knowntext確認とCDP準備を別扱い。元unique/pending/失敗履歴不変、プラグイン数因果・warmcache/coldstartup混同なし。GSC元85と実committedcandidate27にC21HTML/原CSV/原trial03PNG独自3をsource候補30へ追加し、source27だけでC33配信や候補30本番成功を認定しない。最終normalCI/merge/Pages/publicreadback・source最終review未完、元候補root独立品質90済。
 
+### C24+C22 固定Markdown記法と標準URIの共有支援候補（2026-10-01 JST）
+
+2026-10-01：manual Goal NEW C24+C22 combinedsource204（103+90new/2contextinbound/9sharedsupport）。C24固定11source/114inventory/59overlap→74finite、G11negative/PDF237/G13actualPlayとg5copyreopen/29callout14alias/customdark/全旧failcaps保持。C22 38input/58observations/24finiteeffect14gaps、CLI0とOS/callback未達・初回未作成と別保存分離、原OG1720x1000保持。両highは既存businessRelevance1準拠、verifiednull/Notverified/SM未検証別scope。全旧JSONownerstopbudgetwindowsとC33/C21rows保持、closeout0。local6bdsource30≠production、GSC原85/30order+own6候補36のみ。manualpolicy42/Companyglobal13非免除、自然schedule無人率加点0、同定義成熟10月2x待ち/欠測非0。
+
+C24は標準/拡張記法の全捕捉family114/59を74有限例へ、C22は38入力を58原観測・24効果/14不足へ対応。異なるarticleintentとjournalingmanualpaste/generatorstandardURI文脈の各1paragraphを保持。共通support9を1回に合成しfull204。原C24independent88/author90とC22author89/independent229consistency/savedQAを区別し、新currentreaderはrootapply後必要。[C24原本](../evidence/obsidian-markdown-catalogue-20261001.md)・[C22原本](../obsidian/evidence/uri-scheme-20260930.md)。local6bdsource30とmainb975/source27を分離し、own6候補36は全193newcontent配信証明ではない。workflow/strict/gate改変0、queuecloseout0、audit3future合成含まず。通常finalCI/実対応mergePages/alloriginalpublicreadbackまでpending。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
