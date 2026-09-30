@@ -152,6 +152,14 @@ C13/C14公開後のキューには21件が残っていた（pending 19件、bloc
 
 [確認範囲](../obsidian/evidence/sync-conflict-20260930.md)とofficial-sync FAQのリンク化・icloud Git参考文献の1文、article/raw/OG/全metadata/GSC3対象を申告する。元85件・C13/C14六件・C17三件と既存GSC strict条件を保持する。原7件のsource一致と本番比較3件の確認範囲を分け、全サイトbytes・Google登録・CTA・流入増を認定しない。C20はpendingのままで、最終exact-head通常CI・main merge・対応Pages成功・実本番readbackまで完了としない。現在の残件数を減らさず、既存owner/停止/窓/契約を保持。Company prospective計測のglobal衝突を解除せず、明示された手動公開として全範囲と公開時刻を別に記録し、自然schedule復旧・Company加点に付け替えない。
 
+### C20の配備後readbackと元キュー完了（2026-10-01 JST）
+
+PR1783 finalhead935ac0960605dc91de1727b25c7fe5ab5a8fce3cの通常SEO36751347416/job110010481154は147steps（146success/0failure/IndexNow main-only skip）で成功。main57f8440d292d506707688d373c2c94d50beb0f5cへ2026-09-30T17:37:26Z通常merge。初回production GSC36752740802/job110015199923（source同57、観測17:37:54.849Z）はC20三404・先行九pass・元85skip85でfailure、artifact11115173232/ZIP SHAcab993cc0ae06c338636ed3efd953598a3c747e49a51d88da24cdda21c9aeb2eを保持。対応Pages33c63cf6/check110018671517は17:46:11Zに同57で独立success。前のin_progress照会や別4d51c27dの履歴を上書きせず、起動者・stage logs不明、rootからdispatchなしを区別する。
+
+通常の上流PR1784のmainf38bf04d57107fac003dde6b5114ddc63e78f4adではC20記事/raw/OG九file不変。後続strict GSC36754462880/job110021050459（source同f38、観測17:52:16.161Z）は元85+追加12全pass、0fail/0skip。C20 HTML200（17:52:22.079Z）、resolved MD251bytes/SHA69d3ace2d907d3d548a1fe592e3f64e82fbd0a2c09bab5533cf61251b485f1a5（17:52:22.529Z）、reopened PNG43494bytes/SHA328b600802b5641ffd3642e5e885c31bff9bdfaabbbbdd1d819b90d6d911f6a9（17:52:23.024Z）一致。success artifact11115568270/ZIP SHAee3d795029530656e8b2dc289d2cd9099bbf2cecd26530a134da220be06b1b32。上流PR1781/1782/1784の独立した保護ページ・他URL/日付更新を保持し、C20による変更へ帰属しない。
+
+この原記事の実配送確認でC20の元title/unique_value/evidenceを保持しdone記録を準備、残19（pending17/blocked2）。このqueue/evidence/audit三filecloseoutの最終CI・対応main merge/Pagesは記事本体と別に確認する。原7source一致・本番raw2bytesとHTML条件を分け、全サイト/全文/全assets・Google登録・CTA・iOS/SimpleMemo・同期/生産性・流入改善は認定しない。既存owner/停止/評価/契約を維持し、Company無人率・自然schedule復旧へ加点しない。詳しくは[元実証と配備経過](../obsidian/evidence/sync-conflict-20260930.md)。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
