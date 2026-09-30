@@ -56,7 +56,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/glossary/outbox-architecture/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/glossary-outbox-architecture.png","headline":"Outboxアーキテクチャとは — Obsidian連携シンプルメモ用語集","description":"Outboxアーキテクチャ（Outboxパターン）は、メッセージをローカルにキューイングしネットワーク接続時に送信する設計パターンです。Obsidian連携シンプルメモのオフラインメモ機能を支えるコア技術。","url":"https://simplememofast.com/glossary/outbox-architecture/","datePublished":"2026-03-06","dateModified":"2026-09-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/glossary/outbox-architecture/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/glossary/outbox-architecture/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/glossary-outbox-architecture.png","headline":"Outboxアーキテクチャとは — Obsidian連携シンプルメモ用語集","description":"Outboxアーキテクチャ（Outboxパターン）は、メッセージをローカルにキューイングしネットワーク接続時に送信する設計パターンです。Obsidian連携シンプルメモのオフラインメモ機能を支えるコア技術。","url":"https://simplememofast.com/glossary/outbox-architecture/","datePublished":"2026-03-06","dateModified":"2026-09-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/glossary/outbox-architecture/"}}</script>
 
   <script type="application/ld+json">
   {
@@ -255,7 +255,7 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/outbox-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Outboxアーキテクチャとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。"}},{"@type":"Question","name":"シンプルメモのOutboxはどう動きますか？","acceptedAnswer":{"@type":"Answer","text":"メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続回復を自動検出し、Cloudflare Workers経由でResend APIに送信。送信完了後にOutboxデータを削除します。"}},{"@type":"Question","name":"Outboxのメモは安全ですか？","acceptedAnswer":{"@type":"Answer","text":"端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。バックアップと鍵管理の詳細も確認してください。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/outbox-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Outboxアーキテクチャとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。"}},{"@type":"Question","name":"シンプルメモのOutboxはどう動きますか？","acceptedAnswer":{"@type":"Answer","text":"メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続が戻ると、アプリが動いていればすぐに、閉じていればiOSのバックグラウンド更新か次にアプリを開いたときに、Cloudflare Workers経由でResend APIに送信。送信が済んだらOutboxから消します。"}},{"@type":"Question","name":"Outboxのメモは安全ですか？","acceptedAnswer":{"@type":"Answer","text":"端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。バックアップと鍵管理の詳細も確認してください。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -310,15 +310,15 @@
         <h2 class="lp-section__title"><span lang="ja">Outboxパターンの3つの要素</span></h2>
         <div class="reason-cards">
           <div class="reason-card"><div class="reason-card__title"><span lang="ja">ローカル永続化</span></div><div class="reason-card__desc"><span lang="ja">メモはまずデバイス上のストレージに保存されます。ネットワークの状態に関係なく、ユーザーの操作は即座に完了します。シンプルメモではAES-256-GCMで暗号化して保存します。</span></div></div>
-          <div class="reason-card"><div class="reason-card__title"><span lang="ja">バックグラウンド監視</span></div><div class="reason-card__desc"><span lang="ja">iOSのバックグラウンドタスクとNWPathMonitor（ネットワーク状態監視API）を使用して、接続回復を自動検出します。ユーザーがアプリを閉じていても、OSレベルで監視が続きます。</span></div></div>
-          <div class="reason-card"><div class="reason-card__title"><span lang="ja">確認付き削除</span></div><div class="reason-card__desc"><span lang="ja">Cloudflare Workers + Resend APIからの送信成功レスポンスを確認した後にのみ、OutboxからメモデータをDelete します。APIエラー時はリトライし、メモが消失することはありません。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span lang="ja">接続が戻ったら再送</span></div><div class="reason-card__desc"><span lang="ja">アプリが動いているあいだは、NWPathMonitor（ネットワーク状態監視API）で接続の回復を検出して再送します。アプリを閉じているあいだは、iOSのバックグラウンド更新（実行のタイミングはiOSが決めます）か、次にアプリを開いたときに再送を試みます。</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span lang="ja">確認付き削除</span></div><div class="reason-card__desc"><span lang="ja">当社のRelay API（Cloudflare Workers）から送信成功の応答を受けた後にだけ、Outboxからそのメモを消します。エラーのときは自動で再送します（1件につき最大5回。止まったメモは履歴画面から手動で再送信できます）。</span></div></div>
         </div>
       </section>
 
       <section class="lp-section">
         <h2 class="lp-section__title"><span lang="ja">シンプルメモのOutbox実装</span></h2>
         <p class="lp-section__lead">
-          <span lang="ja">Obsidian連携シンプルメモのOutboxは、単なるオフラインキューではなく、セキュリティとUXを両立させた設計です。メモの保存時にAES-256-GCMで暗号化し、送信時にのみ復号。送信完了後はOutboxデータを即座に完全削除します。ユーザーにはOutboxの存在すら意識させません。送信ボタンを押した瞬間に「送信完了」UIを表示し、実際の送信はバックグラウンドで非同期に行います。</span>
+          <span lang="ja">Obsidian連携シンプルメモのOutboxは、単なるオフラインキューではなく、セキュリティとUXを両立させた設計です。メモの保存時にAES-256-GCMで暗号化し、送信時にのみ復号。送信が済んだメモはOutboxから消します。オフラインで送信ボタンを押したときは「オフライン - 接続時に送信します」と表示して、メモをOutboxに残します。</span>
 
         </p>
       </section>
@@ -328,12 +328,12 @@
         <div lang="ja" class="definition-block">
           <div class="definition-block__label">シナリオ</div>
           <p><strong>1.</strong> 地下鉄の車内でアイデアをメモに入力し、送信ボタンをタップ</p>
-          <p><strong>2.</strong> アプリは「送信完了」を表示（ユーザー体験としては即完了）</p>
+          <p><strong>2.</strong> アプリは「オフライン - 接続時に送信します」と表示（メモは送信待ちとして端末に残る）</p>
           <p><strong>3.</strong> 裏側ではメモをAES-256-GCMで暗号化してOutboxに保存</p>
-          <p><strong>4.</strong> 地上に出てLTE/Wi-Fiに接続 → NWPathMonitorが接続を検出</p>
+          <p><strong>4.</strong> 地上に出てLTE/Wi-Fiに接続 → アプリが動いていれば、NWPathMonitorが接続を検出（閉じていれば、iOSのバックグラウンド更新か次にアプリを開いたとき）</p>
           <p><strong>5.</strong> Outboxからメモを取り出し、復号してCloudflare Workers APIに送信</p>
-          <p><strong>6.</strong> Resend APIが受信者メールアドレスへ配信 → 成功レスポンスを確認</p>
-          <p><strong>7.</strong> Outboxの暗号化データを完全削除</p>
+          <p><strong>6.</strong> Resend APIが配信を受け付け、Relay APIが成功の応答を返す（受信箱に届いたことの確認ではない）</p>
+          <p><strong>7.</strong> そのメモをOutboxから消す</p>
         </div>
 
       </section>
@@ -342,7 +342,7 @@
         <h2 class="lp-section__title"><span lang="ja">よくある質問（Outboxアーキテクチャ）</span></h2>
         <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxアーキテクチャとは何ですか？</summary><div class="faq-answer"><p>メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのOutboxはどう動きますか？</summary><div class="faq-answer"><p>メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続回復を自動検出し、Cloudflare Workers経由でResend APIに送信。送信完了後にOutboxデータを削除します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのOutboxはどう動きますか？</summary><div class="faq-answer"><p>メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続が戻ると、アプリが動いていればすぐに、閉じていればiOSのバックグラウンド更新か次にアプリを開いたときに、Cloudflare Workers経由でResend APIに送信。送信が済んだらOutboxから消します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxのメモは安全ですか？</summary><div class="faq-answer"><p>端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。<a href="/privacy">バックアップと鍵管理の詳細</a>も確認してください。</p></div></details></div>
         </div>
 
