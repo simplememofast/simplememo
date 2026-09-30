@@ -131,6 +131,16 @@ C13/C14公開後のキューには21件が残っていた（pending 19件、bloc
 
 この手動GoalからC17の実証と公開候補実装を再開する。9月30日の隔離Linux Obsidian 1.13.7で、3ノート・接続0本、理由つきリンク追加後の3ノート・1本、索引追加後の4ノート・3本という段階を実際のGraphと保存Markdownで確認した。記事の主題はリンクを用意する実装例であり、著者作成のサンプルから知識・学習・生産性の向上は認定しない。公開候補には原画像・Markdown・[検証範囲](../obsidian/evidence/zettelkasten-20260930.md)と、methods/Zettelkasten・Obsidian/Second Brainから各1文の案内を含める。追加の本番比較対象はC17 HTMLと原PNG・索引Markdownの3件で、元85ケース・C13/C14の6件は保持する。公開成功の証拠は最終headのCI、対応するmerge/Pagesと既存HTTP reportから別々に確認する。キューの先頭から適格性を確認し、公開完了ごとに元のキューで状態を更新する。新規Lane Eには既存URLの期待クリック3件条件を適用しない。同主題のRefreshへ切り替えた候補には元の条件を適用する。
 
+### C17の配送未完記録（2026-10-01 JST）
+
+[PR #1775](https://github.com/simplememofast/simplememo/pull/1775)の最終head `73272d0231c9273601ffb14407df3961019b1044` はSEO Validation run `36731180959`（147 steps、failed 0）に成功し、2026-09-30T14:58:22Zにmain `d41860d8d5771b60f168146af138470374c19881`へ通常mergeされた。local preflightは218/218、変更24ファイルはレビュー済みbytesを保持した。
+
+同mainの本番Pages deployment `24f1b939-dd89-491b-84f3-8dcb199bd295` はcheck `109952972502`でbuild失敗（15:09:57Z）。プレビューdeployment `a88b2ffc-07fe-4f18-b3b9-24c54e36f722`もcheck `109942851022`で失敗した。既存Cloudflare project `simplememo`内の両deploymentの失敗stage/build-log本文が不足している。現在のGitHub読取経路には状態とdashboardリンクだけがあり、Cloudflareログの既存認可経路はこの環境で利用できない。原本不足や記事の不備、一時的な基盤障害のいずれとも断定しない。
+
+[初回の本番HTTP run `36733191095`](https://github.com/simplememofast/simplememo/actions/runs/36733191095)（sourceCommitは同main、観測開始14:58:49.683Z）は配備中にC17のHTML・原PNG・索引Markdownが404となりfailure。C13/C14の6対象はpass、元85件はskip 85で、このrunから85件の成功を主張しない。failure artifact `11105324398`を保持する。別のPageSpeed run `36731180957`は既存本番JAホームの中央値89<90で失敗し、artifact `11104633609`を保存した。C17はhome・共通CSS/font・性能基準を変更しておらず、C17による性能回帰の因果は未確定。既存failure ownerを保持する。
+
+C17は実公開未確認のためpendingを維持し、残件は21件（pending 19、blocked 2）。[限定した実証と配送記録](../obsidian/evidence/zettelkasten-20260930.md)を参照。成功した対応Pagesと以後の本番readbackが揃うまでdoneにしない。既存のactions停止・次回自然起動限定の許可、GSCの85+6+3ケースと既存条件を変更せず、新しい復旧実行・collector・probe・課金・送信者identityを追加しない。10月流入倍増とCompany無人率は未認定のまま保持する。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
