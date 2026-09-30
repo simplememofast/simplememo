@@ -65,3 +65,17 @@ GSCの元85ケースとC13/C14/C17/C20/C26/C27の既存18比較を保持し、C1
 ## C27一次配信closeoutを合わせた全15変更 — 2026-10-01 JST
 
 C18の上記14ファイルはそのままのcomponentです。追加1ファイルはC27 evidenceで、既存coverage/auditは共有します。C27の実一次配信だけを根拠として元pending→done/done_noteを記録し、C18はpendingを保持。この15ファイルのcombined closeout/source準備自身は通常CI・main・対応Pages・85+21本番readbackまで未完です。C18の原article/export/OG/QuickAdd1文/全metadataとGSC85+18→21、C27原本と全既存JSON/owner/stop/budget/window/契約を保全し、Company global13衝突を免除しません。
+
+
+## Primary article delivery and combined C32 source closeout — 2026-10-01 JST
+
+C18の一次記事はPR1795 final head `a2f8b205e17f9ba7f58c03f365aae73a2a64a3d7`、main `c1159d578d886752de5b2b0ac8be667ddba1adb0`（merge `2026-09-30T20:25:06Z`）、通常SEO run `36771143039`/job `110077553321` 146 success/1 main-only skip/0 failureで確認しました。対応main Pages `f95071e3-a282-4fd7-ad17-b6fd924b710a`/check `110082245647` success `2026-09-30T20:25:33Z`、ordinary strict run `36772504472`/job `110082152854`、source `c1159d578d886752de5b2b0ac8be667ddba1adb0`、元85＋順序付きpublication21は全pass/failed0/skipped0です。
+
+report開始 `2026-09-30T20:25:33.928Z` と各HTTP観測を区別します。parsed report SHA256 `d4a42737b8a957532b05560e284d853154014fe15ba348f0077498373fc15b61`、artifact `11123728476`/ZIP digest `sha256:315267dbf062bd5e1f0a248b834bad1dfa4be7eb844bb15e08cdf45ac61dca2d`。
+- `/obsidian/ai-plugins/` HTTP200 `2026-09-30T20:25:42.630Z`
+- `/assets/downloads/obsidian-ai-plugins/source-quotes-20260930.json` HTTP200 `2026-09-30T20:25:43.023Z` / 44287 B / SHA256 `cb8faf1dde375bd5a4c7091a0a25d291a67d254f23d3b0b07a9561b0fe50c6fa`
+- `/assets/img/og/obsidian-ai-plugins.png` HTTP200 `2026-09-30T20:25:43.530Z` / 71985 B / SHA256 `8b804039331978203be33553a521da463c3cc0da87b9963dae5a872bbe414b63`
+
+固定24引用/14file/579line、ソース準備15path、private品質90、2page×4幅/FAQ5/9引用controls/JSON実download/Nextを保全。初回preflight未登録clusterと原文末尾空白checkを履歴として保持します。資料/コードのstatic reviewとplugin/provider runtimeを区別し、送信先・鍵保存・clipboardの実通信/暗号化認証、mobile/SimpleMemo/同期/速度/生産性/流入は未検証です。
+
+今回の30pathはC32 component29＋既存C18 evidence1（coverage/audit共有）。C18の実一次配信に基づく元pending→done記録とC32のpendingソース準備を合わせ、今回自身の最終CI/main/Pages/85+24実readbackは別に残します。全owner/stop/budget/windows/契約、Company global13衝突、manualpolicy42を保ち、Company無人率・自然schedule復旧へ加点しません。新支出・秘密・送信者identityなし、実費unknown、10月倍増は同定義成熟計測待ちです。
