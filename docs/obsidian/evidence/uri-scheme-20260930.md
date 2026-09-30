@@ -97,3 +97,8 @@ Root recorded actualPR1801 merge2026-09-30T22:15:16Z/main 38ddc4ebd6790e858ec4d1
 公開原素材の固定目録は [full-public-assets-manifest.json](https://simplememofast.com/data/full-public-assets-manifest.json)。C17原8＋後続2、C21原6＋OG1、C24原98＋ZIP2＋OG1、C22原コピー85＋CSS/結果索引2の205assetを固定bytes/hashで照合し、C22補助結果HTML1はtitle・selfcanonical・noindex,followを有限確認する。専用206対象は193新記事ファイルと同じ母数ではない。既存GSC85/順序30を保全し、2記事の代表6を追加した36比較と専用素材照合は別証拠。GitHubに置く2evidence文書は最終mainの実bytesを別に照合する。
 
 統合源は既存component204＋通常main照合script/目録/workflow3＋既存のguard記録・公開分類2＝209paths。C22 main/resultsへ既存safety-net CSSを各1参照追加し、検索除外の結果一覧を内部graphへ登録する。原code/PNG/Markdown/OGは無加工、全旧JSONのowner・stop・budget・窓・queue状態は保全。最初の通常218検査では5失敗を実観測し、未登録・依存・分類・guard読記録を補った。これらの源準備や私有206 loopback成功は本番公開・通常finalheadCI・merge/Pages・全原素材origin取得の証明ではない。Company無人率・自然schedule・10月同定義倍増への成功加点もしない。
+
+
+## PR1804 初回の通常CI失敗と追加メタ情報
+
+初回の通常SEO run36788306624/job110134905095は、URI main/resultsのSmart App Banner未記載により実exit1となった。既存app-id6758438948と各selfcanonicalをheadに各1つ補い、補助HTMLの固定source bytes/hashのみ追従させた。記事本文・原code・205原素材・OG・noindex,followは同一。以前のローカル218件は実際に成功したが、banner検査は実rootのgit ls-filesを対象にしており、その時点で未追跡の新HTMLを網羅していなかった。追跡済み209パスを含む追加ローカル検査と修正後の通常final-head CI、実merge/Pages、専用206件のorigin照合はこの記録時点では未完。初回失敗を保存し、検査や所有・停止・予算・queue条件を弱めない。
