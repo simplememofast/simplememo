@@ -276,7 +276,7 @@ export async function selftest() {
     const frozenNow = Date.parse('2026-09-04T00:00:00Z');
     class Clock extends Date { constructor(value = frozenNow) { super(value); } static now() { return frozenNow; } }
     async function workflowCase(options, { open = true, pullRequest = false, incomplete = false,
-      silent = false, unavailableLiveness = false, eventName = 'workflow_dispatch' } = {}) {
+      silent = false, silentWorkflow = null, unavailableLiveness = false, eventName = 'workflow_dispatch' } = {}) {
       const f = fixture(options); const writes = [];
       Object.assign(f.github.rest.issues, {
         listForRepo: async () => ({ data: open ? [{ ...f.args.issue, state: 'open', ...(pullRequest ? { pull_request: {} } : {}) }] : [] }),
@@ -286,12 +286,19 @@ export async function selftest() {
         create: async p => { writes.push({ kind: 'create', ...p }); return { data: { number: 2 } }; },
       });
       const readRuns = f.github.rest.actions.listWorkflowRuns;
-      f.github.rest.actions.getWorkflow = async p => ({ data: { id: p.workflow_id === 'decision-monitor.yml' ? 30 : p.workflow_id,
-        name: 'Decision Monitor', path: '.github/workflows/decision-monitor.yml', state: 'active', created_at: '2026-08-01T00:00:00Z' } });
+      f.github.rest.repos = { get: async () => ({ data: { default_branch: 'main' } }) };
+      const livenessWorkflows = [
+        { id: 30, name: 'Decision Monitor', path: '.github/workflows/decision-monitor.yml' },
+        { id: 31, name: 'Main Daily Validation', path: '.github/workflows/main-daily-validation.yml' },
+      ];
+      f.github.rest.actions.getWorkflow = async p => ({ data: { ...(livenessWorkflows.find(w => w.id === p.workflow_id
+        || w.path.split('/').at(-1) === p.workflow_id) ?? { ...livenessWorkflows[0], id: p.workflow_id }),
+        state: 'active', created_at: '2026-08-01T00:00:00Z' } });
       f.github.rest.actions.listWorkflowRuns = async p => {
-        if (p.workflow_id !== 30) return readRuns(p);
+        if (!livenessWorkflows.some(w => w.id === p.workflow_id)) return readRuns(p);
         if (unavailableLiveness) throw new Error('403');
-        const rows = silent ? [] : [run(301, 1, { workflow_id: 30, created_at: '2026-09-03T23:59:00Z', conclusion: 'success' })];
+        const rows = silent || silentWorkflow === p.workflow_id ? [] : [run(p.workflow_id * 10 + 1, 1, { workflow_id: p.workflow_id, head_branch: 'main',
+          created_at: '2026-09-03T23:59:00Z', conclusion: 'success' })];
         return { data: { total_count: rows.length, workflow_runs: rows } };
       };
       f.github.rest.actions.listWorkflowRunsForRepo = async () => ({ data: { workflow_runs: incomplete ? Array(100).fill(failed) : [] } });
@@ -321,6 +328,10 @@ export async function selftest() {
     const missing = await workflowCase({}, { open: false, silent: true });
     check(!missing.error && missing.writes.some(w => w.kind === 'create' && w.body.includes('<!-- cron-silence ')
       && w.body.includes('workflow_dispatch')), '実workflowが定期起動欠落のIssueと観測経路を保存しない');
+    const missingDaily = await workflowCase({}, { open: false, silentWorkflow: 31 });
+    check(!missingDaily.error && missingDaily.writes.some(w => w.kind === 'create'
+      && w.body.includes('main-daily-validation.yml') && w.body.includes('"workflow_id":31')
+      && !w.body.includes('"workflow_id":30')), '失敗履歴が無い日次起動欠落を実workflowが追跡しない');
     const stillMissing = await workflowCase({}, { silent: true });
     check(!stillMissing.error && !stillMissing.writes.some(w => w.state === 'closed')
       && stillMissing.writes.some(w => w.body?.includes('<!-- cron-silence ')), '既存故障の成功で現在の起動欠落を閉じた');

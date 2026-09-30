@@ -8,6 +8,8 @@ name: Cron Health
 #
 # - 集計対象: 過去24hの event=schedule かつ conclusion=failure の run
 # - Decision Monitorは登録から3時間の猶予後、直近3時間に定期起動が無い場合も追跡する
+# - Main Daily Validationは登録から28時間の猶予後、直近28時間に定期起動が無い場合も追跡する
+#   日次24時間周期に遅延猶予4時間を加える。既定ブランチのscheduleだけを起動の証拠にする
 #   手動・マージ後の実行を定期起動の証拠にしない。新規検知は毎朝1回のまま
 # - 「回復」の判定: Issueに記録した全workflowの最新 scheduled run が成功したこと
 #   24hは新規検知の窓。古い故障はIssue本文・追記から追跡を継続する。
