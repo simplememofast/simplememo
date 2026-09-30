@@ -319,7 +319,7 @@
 <tr><th scope="row">AI summary</th><td class="highlight">Yes</td><td>No (use email client AI instead)</td></tr>
 <tr><th scope="row">Auto-categorize</th><td class="highlight">Yes</td><td>On-device titles, tags and type (opt-in, with Obsidian)</td></tr>
 <tr><th scope="row">Privacy</th><td>Content sent to AI servers</td><td class="highlight">Email only, AES-GCM encryption</td></tr>
-<tr><th scope="row">Offline</th><td>AI features don't work offline</td><td class="highlight">Offline Outbox supported</td></tr>
+<tr><th scope="row">Offline</th><td>Cloud AI features don't work offline</td><td class="highlight">Offline Outbox supported</td></tr>
 <tr><th scope="row">Price</th><td>$5-15/month</td><td class="highlight">Free (3/day) / Premium available</td></tr>
 <tr><th scope="row">Learning curve</th><td>Medium-High</td><td class="highlight">Near zero</td></tr>
 <tr><th scope="row">Account</th><td>Required</td><td class="highlight">Not required</td></tr>
@@ -394,7 +394,7 @@
 <p style="margin-top:.75rem"><strong>Simple Memo's privacy design:</strong></p>
 <ul style="margin-top:.5rem;padding-left:1.2rem">
 <li>Memos are <strong>only sent as email</strong> via Cloudflare Workers + Resend API</li>
-<li>Content is <strong>not stored on servers</strong> (send and done)</li>
+<li>Memo text is <strong>not kept on Simple Memo's servers</strong> (send and done)</li>
 <li>Offline Outbox uses <strong>AES-GCM encryption</strong> on device</li>
 <li>Titles and tags are generated on the device, so <strong>memos are not sent to an external server for AI processing</strong></li>
 </ul>
@@ -419,7 +419,7 @@
 <div lang="en">
 <div class="compare-card">
 <div class="compare-card__desc">
-<p>AI memo app marketing emphasizes benefits, but in practice, AI features can <strong>actually reduce user productivity</strong>. Here are the most commonly reported "backfire patterns."</p>
+<p>AI memo app marketing emphasizes benefits, but in practice, AI features can <strong>actually reduce user productivity</strong>. Here are some "backfire patterns" to watch for.</p>
 <p style="margin-top:.75rem"><strong>1. Auto-categorization errors create search hell</strong></p>
 <p style="margin-top:.25rem">AI auto-tagging sounds convenient, but accuracy is not 100%. A "lunch meeting memo" might land in the "Food" category, or "Project A budget" gets filed under "Project B." These misclassifications -- which would not occur with manual tagging -- make finding notes harder, not easier.</p>
 <p style="margin-top:.75rem"><strong>2. AI summaries strip nuance from originals</strong></p>
@@ -429,7 +429,7 @@
 <p style="margin-top:.75rem"><strong>4. AI dependency degrades note-taking habits</strong></p>
 <p style="margin-top:.25rem">Thinking "AI will organize later" encourages sloppy note-taking, reducing note quality over time. Depending on AI's organizational abilities weakens your own ability to extract key points -- essentially outsourcing your thinking. The act of note-taking itself is a form of thought processing, and delegating this to AI means delegating cognition.</p>
 <p style="margin-top:.75rem"><strong>5. Complete feature loss when offline</strong></p>
-<p style="margin-top:.25rem">On airplanes, subways, or in buildings with poor reception, AI features require network connectivity and become entirely unavailable. Non-AI apps maintain the same experience online and offline. Simple Memo's offline Outbox lets you capture notes without connectivity and auto-sends when reconnected.</p>
+<p style="margin-top:.25rem">On airplanes, subways, or in buildings with poor reception, cloud-based AI features need a network connection and stop working. Features that run on the device work the same online and offline. Simple Memo's offline Outbox lets you capture notes without connectivity and auto-sends when reconnected.</p>
 </div>
 </div>
 <div class="compare-card">
