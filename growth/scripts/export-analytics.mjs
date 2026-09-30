@@ -8,6 +8,7 @@ import * as bq from '../lib/bigquery.mjs';
 import { collectBackupInventory } from '../lib/backup-inventory.mjs';
 import { collectGcpSchedules } from '../lib/gcp-schedule-inventory.mjs';
 import { recipientKey, seal } from '../lib/analytics-envelope.mjs';
+import { ctaPageManifest } from '../lib/cta-page-manifest.mjs';
 
 export const PROJECT = 'yurika-simplememo';
 export const LOCATION = 'asia-northeast1';
@@ -23,6 +24,8 @@ const FILES = {
   'ga4-quality': ['ga4-quality.sql'],
   // Always attach quality results to the funnel; never silently discard QA.
   'ga4-funnel': ['ga4-quality.sql', 'ga4-funnel.sql'],
+  // Explicit-only prospective diagnosis; never changes the automatic funnel owner.
+  'ga4-cta-pages': ['ga4-quality.sql', 'ga4-funnel.sql', 'ga4-cta-pages.sql'],
   // Separate diagnostic; never substitutes a session_start URL for the funnel landing.
   'ga4-landing-diagnostic': ['ga4-landing-diagnostic.sql'],
   'ga4-journey': ['ga4-quality.sql', 'ga4-journey.sql'],
@@ -65,6 +68,7 @@ export function validateOptions({ report = 'preflight', start = '', end = '', ex
   if (z > today - lag * DAY) throw new Error(`The window must end at least ${lag} local calendar days ago`);
   if (provisional && start < '2026-09-05') throw new Error('Provisional diagnostics start on the GA4 link day');
   if (isGa4 && !provisional && start < '2026-09-06') throw new Error('GA4 cohort must start after the measurement release and link day');
+  if (report === 'ga4-cta-pages' && start < '2026-10-01') throw new Error('CTA-page diagnosis starts on the first complete JST day after the v1 campaign release');
   if (!isGa4 && start < '2026-08-10') throw new Error('GSC export history starts on 2026-08-10');
   return { report, execution, start, end };
 }
@@ -107,6 +111,7 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       partial_link_day_included: opts.start === '2026-09-05',
       interpretation: 'Provisional collection diagnostics from existing daily tables only. Table presence does not prove a complete day; the link day is partial and late events can change counts. Event rows are not GA4 UI sessions, a 24-hour funnel, installations, revenue, or LTV. Host scope does not exclude internal use. No outcome scoring or comparison with mature cohorts.',
     } : {}),
+    ...(opts.report === 'ga4-cta-pages' ? { eligible_for_outcome_evaluation: false } : {}),
   };
   try {
     if (opts.report === 'scheduler-inventory') {
@@ -115,6 +120,7 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       out.total_bytes_billed = 0;
       return out;
     }
+    if (opts.report === 'ga4-cta-pages') out.cta_page_manifest = ctaPageManifest();
     const client = await api.connect({ projectId: PROJECT, location: LOCATION });
     out.credential_type = client.credentialType;
     if (opts.report === 'backup-inventory') {
@@ -141,6 +147,7 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
         ...(file === 'ga4-quality.sql' ? { scan_end_date: provisional ? opts.end : daysBetween(opts.end, opts.end, 1).at(-1) } : {}),
         ...(opts.report.startsWith('ga4-') ? { measurement_version: '2026-09-05' } : {}),
         ...(['ga4-quality.sql', 'ga4-funnel.sql'].includes(file) ? { bridge_measurement_version: '2026-09-07' } : {}),
+        ...(file === 'ga4-cta-pages.sql' ? { cta_page_manifest_json: JSON.stringify(out.cta_page_manifest.pages) } : {}),
       };
       const input = { sql, params, types: { start_date: 'DATE', end_date: 'DATE',
         ...(file === 'ga4-quality.sql' ? { scan_end_date: 'DATE' } : {}),
@@ -176,6 +183,9 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       }
       if (opts.report === 'ga4-landing-diagnostic') {
         out.interpretation = 'Fixed categories of session-start URL paths for sessions without a page_view in the post-start 24-hour window, plus agreement with first page_view where available. Out-of-window page views may exist. Individual paths are not exported. Candidate groups are not observed landings, do not repair missing page views, and cannot clear the funnel quality gate or prove SEO attribution to installs.';
+      }
+      if (opts.report === 'ga4-cta-pages') {
+        out.interpretation = 'Descriptive prospective click-page diagnosis only. Read the attached unchanged quality and funnel outputs first; this report cannot clear their quality gate or enter outcome scoring. Exact click page_path must agree with production page_location and the checkout canonical inventory; aliases, unknowns, frozen pages and campaign mismatches remain separate. Page rows overlap across pages/statuses; only session_group rows are disjoint and both-group sessions are explicit. No landing/cluster/token substitution, inferred CTR/CVR, download attribution, revenue or LTV. Checkout inventory is not historical deployment or captured-event coverage proof. Prepared SQL has not been live-validated.';
       }
     }
   } catch (e) { out.status = 'error'; out.error = errorDetails(e); }

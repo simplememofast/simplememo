@@ -24,6 +24,7 @@
 const fs = require('fs');
 const path = require('path');
 const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
+const { CAMPAIGN_OBSIDIAN, CAMPAIGN_OTHER, FROZEN_EXPERIMENT_PATHS, campaignTokenOf } = require('./lib/cta-page-groups');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'admin', 'tools', 'growth'];
@@ -32,31 +33,12 @@ const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'ad
 // https://developer.apple.com/help/app-store-connect-analytics/acquisition/campaign-links
 const CT_MAX = 30;
 
-const CAMPAIGN_OBSIDIAN = 'web_obsidian_v1';
-const CAMPAIGN_OTHER = 'web_other_v1';
-
 // Exclude these pages from the entire v1 pilot to preserve the registered
 // CTA/campaign state and keep the v1 cohort definition fixed. The four blog
 // paths are evaluated on 2026-10-03; the two guides on 2026-10-23. Bringing
 // them in later requires a separately versioned campaign, never a silent v1
 // cohort expansion.
-const FROZEN_EXPERIMENT_PATHS = new Set([
-  '/obsidian/getting-started/',
-  '/note-to-email/',
-  '/blog/free-memo-apps-ranking',
-  '/en/blog/free-memo-apps-ranking',
-  '/blog/line-keep-alternative',
-  '/en/blog/line-keep-alternative',
-]);
-
-// Path text is a prospective CTA-page grouping, not proof of the query,
-// channel, store download, or product fit. Keep it stable for both locales.
-function campaignTokenOf(urlPath) {
-  if (FROZEN_EXPERIMENT_PATHS.has(urlPath)) return null;
-  const pathWithoutLocale = urlPath.replace(/^\/(en|es|ko|zh|zh-Hant|ar|id|pt-BR|tr)\//, '/');
-  return /(?:^|[/-])obsidian(?:[/-]|$)/i.test(pathWithoutLocale)
-    ? CAMPAIGN_OBSIDIAN : CAMPAIGN_OTHER;
-}
+// The shared rule keeps the classifier and prospective diagnostics identical.
 
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
@@ -319,7 +301,7 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
     if (!a.placement) continue;
     let tag = a.tag;
 
-    // Campaign identity is pooled by landing-page path; GA4 keeps placement.
+    // Campaign identity is pooled by the clicked link's page; GA4 keeps placement.
     tag = tag.replace(/((?:[?&]|&amp;)ct=)([^"&]*)/, (match, pre) => {
       const next = campaignTokenOf(urlPath);
       if (next === null) return match;
