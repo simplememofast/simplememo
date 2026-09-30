@@ -47,7 +47,9 @@ concurrency:
 
 jobs:
   verify:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    # A merge API 5xx may arrive after main was updated. Check trusted main
+    # after success or failure; this does not declare the merger successful.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
