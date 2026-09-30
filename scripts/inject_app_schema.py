@@ -85,8 +85,8 @@ def build_node(lang: str) -> str:
                 "name": "Free",
                 "price": "0",
                 "priceCurrency": currency,
-                "description": (f"1日{C['freeSendsPerDay']}通まで（ずっと無料）" if lang == "ja"
-                                else f"Up to {C['freeSendsPerDay']} sends a day, free forever"),
+                "description": (f"1日{C['freeSendsPerDay']}通まで（利用期間の制限なし）" if lang == "ja"
+                                else f"Up to {C['freeSendsPerDay']} sends a day, with no time limit"),
                 "availability": "https://schema.org/InStock",
             },
             {

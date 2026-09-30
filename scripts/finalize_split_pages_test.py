@@ -137,7 +137,7 @@ class SplitPageRegressionTests(unittest.TestCase):
         self.assertEqual([x['price'] for x in en['offers']], ['0', C['priceMonthlyUsd'], C['priceYearlyUsd']])
         self.assertEqual([x['priceCurrency'] for x in en['offers']], ['USD'] * 3)
         self.assertEqual([x['price'] for x in ja['offers']], ['0', C['priceMonthlyJpy'], C['priceYearlyJpy'].replace(',', '')])
-        self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, free forever")
+        self.assertEqual(en['offers'][0]['description'], f"Up to {C['freeSendsPerDay']} sends a day, with no time limit")
         self.assertNotIn('aggregateRating', ja)
         self.assertNotIn('aggregateRating', en)
 
