@@ -350,6 +350,66 @@
     {
       "date": "2026-09-30",
       "type": "feature",
+      "label": "誤りの修正 第42弾（Outbox の保存方式ほか）: #1734（9/30 16:34）",
+      "note": "5ページ。/about/ 日英の「Outboxアーキテクチャ（CoreData + 暗号化 + 自動再送）」を、AES-GCM で暗号化した端末内のファイル（iOS アプリの OutboxManager の outbox.enc。リポジトリに Core Data は無い）に。「送ったはずなのに届いていなかった体験を設計レベルで排除」の言い過ぎ、/blog/memo-app-service-shutdown-risk の「AES-GCM で通信経路上のデータ保護」（端末内の暗号化で、通信は TLS）、/devlog/day1 日英に言語（App Store の10言語）と送信の上限（6月に撤去）の「2026-09 追記」。影響する実行中の実験（engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第43弾（用語集 Outbox）: #1735（9/30 16:43）",
+      "note": "3ページ。用語集「Outboxアーキテクチャ」日英の「アプリを閉じていても OS レベルで接続を監視」（監視はアプリが動いているあいだだけ、閉じているあいだは iOS のバックグラウンド更新か次の起動）、オフライン時の表示（「オフライン - 接続時に送信します」）、「受信者に配信された」（Relay API の成功の応答で、受信箱への到着の確認ではない）、「完全削除」「消失しない」を実装どおりに。英語の E2E 用語集の「サーバーに何も保存しない」を日本語版と同じ言い方に。影響する実行中の実験（engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第44弾（Apple Watch の入力と送信の経路）: #1736（9/30 16:56）",
+      "note": "7ページ＋llms.txt。Watch アプリを開いて自動で出るのは標準の入力画面（音声入力とは限らない）、送信はペアリング中の iPhone が行う（Watch 単体の通信だけでは完結しない）。/apple-watch/ の 9/9 の説明とアプリのソースにそろえた。影響する実行中の実験（engage-2026-08-11-next-step・brand-2026-08-11-entity-merge）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第45弾（/hands-free/ の「3重に残す」）: #1737（9/30 16:59）",
+      "note": "2ページ。送信した瞬間に下書き・Outbox・Obsidian の3か所に残る、を、下書きは送信と同時に消える（DraftManager の設計）に。要約の自動音声入力に設定（起動時に音声入力を自動オン）と iOS 26 以降の条件、プライバシー欄を文字起こしに限った言い方に。影響する実行中の実験（engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第46弾（FAQ の外部 SDK）: #1738（9/30 17:07）",
+      "note": "faq.html と llms.txt。「外部分析 SDK は使用していません」を、AppsFlyer SDK も組み込んでいる（扱いはアプリの版と解析の選択で異なる。プライバシーポリシー・/privacy-architecture/ と同じ）に。llms.txt の宛先ハッシュと鍵の保管の行も。影響する実行中の実験（engage-2026-08-11-next-step・brand-2026-08-11-entity-merge）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第47弾（プライバシーオーバーレイ）: #1740（9/30 17:16）",
+      "note": "8ページ。FAQ 日英の「アプリスイッチャーでプライバシーオーバーレイが自動で被さる」を、いまのアプリでは有効でない（表示の処理はソースにあるが呼ばれていない）に。Captio との違いの一覧から同じ行を外し、/devlog/day1 日英に追記、開発日誌3本の関連リンクの紹介文を記事の中身に。英語 FAQ の後回しの2問（Apple Watch・SDK）も。影響する実行中の実験（engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第48弾（記録の無い 150ms）: #1742（9/30 17:27）",
+      "note": "日本語トップの数字の帯の「150ms 送信リクエスト時間（API往復）」を外した（計測の記録が data/ に無い。オーナー判断 #41）。/blog/benchmark-methodology 日英に理由。日本語トップのフォントの部分集合を作り直した。影響する実行中の実験（title-2026-08-20-home-grammar・video-2026-08-11-five-clips・engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第49弾（AIタグ自動追加の条件）: #1744（9/30 17:51）",
+      "note": "7ファイル。AIタグ自動追加は既定オフで、Obsidian 連携を設定してから設定でオンにしたときだけ動く。/ai-tags/ 日英の「新しい操作はゼロ」「最新版にするだけ」「Obsidian を使っていなくても件名に使われる」、FAQ 日英の件名の決まりに1項目、llms.txt の3か所。/hands-free/ 日英の自動音声入力の条件の残り。影響する実行中の実験（engage-2026-08-11-next-step・aio-2026-08-11-answer-blocks・video-2026-08-11-five-clips・brand-2026-08-11-entity-merge）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第50弾（トップの AIタグ自動追加）: #1749（9/30 19:22）",
+      "note": "トップ10言語。AIタグ自動追加の条件（Obsidian 連携と設定のオン、既定オフ）を書き足し、「メールと Obsidian に届く前にタイトル・タグ・種別を付ける」を、タグ・種別は Obsidian のノート、メールには件名の短いタイトルだけ、と書き分けた（SendManager は件名にだけ使う）。日本語トップの title・meta description は変えていない。英語トップの meta description・og/twitter の説明は直した。日本語トップのフォントの部分集合を作り直した。影響する実行中の実験（title-2026-08-20-home-grammar・video-2026-08-11-five-clips・engage-2026-08-11-next-step）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
+      "label": "誤りの修正 第51弾（比較・記事ページの自動録音と AIタグの条件）: #1752（9/30 19:28）",
+      "note": "30ページ＋llms.txt。起動時の自動録音（既定オフ、iOS 26 以降の対応端末）と AIタグ自動追加（既定オフ、Obsidian 連携が必要）を条件なしに言い切っていた比較表・FAQ・本文に条件を足した（/vs/ の各比較、/blog/ai-vs-simple-memo、/blog/captio-discontinued、/guides/、/hands-free/ の og/twitter の説明ほか）。影響する実行中の実験（engage-2026-08-11-next-step・brand-2026-08-11-entity-merge・link-2026-08-28-feed-strongest-page・internal-link-2026-09-02-003）に note を付けた。新規の介入実験ではない。"
+    },
+    {
+      "date": "2026-09-30",
+      "type": "feature",
       "label": "解析の版条件と同意目的を公開説明へ反映",
       "note": "日英 /blog/memo-app-privacy と /privacy-architecture/ を公開ポリシー1(E)/12と照合し、利用解析選択画面のある版と旧版、自社利用イベント・端末由来購読分析への同意とAppsFlyer獲得計測を区別。旧版自社分析の新規保存停止と旧AppsFlyer継続可能性、選択画面のある版のAppsFlyer停止を明記。各社資料は9/9、自社解析条件は9/30確認と分離。アプリ/API/SDK/同意の動作は変更せず実機配布版も未検証。CTA12本の宛先/配置/属性、FAQ、title/description、canonical/hreflangは保持。新規実験や流入・DL率・純LTV・Company成果ではなく既存215ページ導線観測の交絡として記録。元の評価日/主指標/閾値/状態は変更しない。"
     },
