@@ -1175,7 +1175,20 @@ export function classifyAge(hours, { warnHours = WATCH.warnHours, alertHours = W
   return 'ok';
 }
 
-const RANK = { ok: 0, warn: 1, unreadable: 1, alert: 2 };
+/** 見張りの公開日時だけを読む。Date の型変換・暦日補正を、公開時刻の証拠にしない。 */
+function watchPublishedTime(publishedIso) {
+  if (typeof publishedIso !== 'string') return null;
+  const parts = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.exec(publishedIso);
+  if (!parts) return null;
+  const [year, month, day, hour, minute, second] = parts.slice(1, 7).map(Number);
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1] || hour > 23 || minute > 59 || second > 59) return null;
+  const timestamp = Date.parse(publishedIso);
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+const RANK = { ok: 0, warn: 1, unknown: 1, unreadable: 1, alert: 2 };
 const worse = (a, b) => (RANK[b] > RANK[a] ? b : a);
 
 /**
@@ -1226,23 +1239,28 @@ async function readDevtoArticle(id, { attempts = 1, wait = sleep } = {}) {
 
 export async function watchPlatform(platform, now, opts, stop) {
   const cfg = PLATFORMS[platform];
-  const r = { platform, label: cfg.label, status: 'ok', problems: [], notes: [], latest: null, age_hours: null, pipeline_latest: null, legacy: [] };
+  const r = { platform, label: cfg.label, status: 'ok', problems: [], notes: [], latest: null, age_hours: null,
+    pipeline_latest: null, pipeline_age_hours: null, pipeline_age_status: 'unknown', pipeline_age_reason: null, legacy: [] };
   let posts;
   try { posts = await publicPosts(platform); } catch (e) {
-    r.status = 'unreadable'; r.problems.push(`公開面を読めない: ${e.message}`); return r;
+    r.status = 'unreadable'; r.pipeline_age_reason = `公開面を読めない: ${e.message}`;
+    r.problems.push(r.pipeline_age_reason); return r;
   }
   posts = mergeJustPublished(posts, opts.justPublished, platform);
   const fromRun = posts.filter((p) => p.fromRun).length;
   if (fromRun) r.notes.push(`公開一覧にまだ出ていない、この run の投稿 ${fromRun} 本を投稿の結果から足して見た`);
-  const sorted = posts.filter((p) => Number.isFinite(new Date(p.published_at).getTime()))
-    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+  const sorted = posts.filter((p) => watchPublishedTime(p.published_at) !== null)
+    .sort((a, b) => watchPublishedTime(b.published_at) - watchPublishedTime(a.published_at));
   const latest = sorted[0] || null;
   if (latest) {
     r.latest = { title: latest.title, url: latest.url, published_at: latest.published_at };
     r.age_hours = Math.round(((now.getTime() - new Date(latest.published_at).getTime()) / 3600000) * 10) / 10;
   }
 
-  // 直近 scan 本のうち、この経路の最新記事と、since 以降のこの経路以外の記事
+  // 直近 scan 本のうち、この経路の最新記事と、since 以降のこの経路以外の記事。
+  // 印・この run の公開結果は経路の出力証拠だけであり、自然 schedule や人介入ゼロの証明ではない。
+  const pipelineUnknownReasons = posts.some((p) => watchPublishedTime(p.published_at) === null)
+    ? ['公開一覧に公開日時を読めない記事があるため、この経路の最新を断定できない'] : [];
   let pipeline = null;
   for (const p of sorted.slice(0, opts.scan)) {
     let isPipe = false, disclosure = null;
@@ -1250,12 +1268,20 @@ export async function watchPlatform(platform, now, opts, stop) {
       try {
         if (p.id == null) throw new Error('id が無い');
         const a = await readDevtoArticle(p.id, { attempts: p.fromRun ? 6 : 1, wait: opts.wait });
+        if (!p.fromRun && (typeof a.body_markdown !== 'string' || !a.body_markdown.trim())) {
+          throw new Error('記事本文を読めない（経路を判定できない）');
+        }
         isPipe = p.fromRun === true || isPipelineDevto(a);
         disclosure = a.ai_disclosure_level ?? null;
       } catch (e) {
+        if (!pipeline) pipelineUnknownReasons.push(`より新しい記事 ${p.id ?? p.url} の経路を確認できない`);
         r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.id ?? p.url} を読めない: ${e.message}`); continue;
       }
     } else {
+      if (!p.fromRun && !String(p.content || '').trim()) {
+        if (!pipeline) pipelineUnknownReasons.push(`より新しい記事 ${p.url} の経路を確認できない`);
+        r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.url} の本文を読めない（経路を判定できない）`); continue;
+      }
       isPipe = p.fromRun === true || isPipelineHatena(p);
     }
     if (isPipe && !pipeline) pipeline = { ...p, disclosure };
@@ -1265,6 +1291,7 @@ export async function watchPlatform(platform, now, opts, stop) {
   }
 
   if (pipeline && !pipeline.url) {
+    pipelineUnknownReasons.push('この経路の記事の公開URLを確認できない');
     r.status = worse(r.status, 'unreadable'); r.problems.push(`この経路の最新記事の公開URLを読めない（${pipeline.title}）— フィードの形が変わった可能性`);
   } else if (pipeline) {
     r.pipeline_latest = { title: pipeline.title, url: pipeline.url, published_at: pipeline.published_at, disclosure: pipeline.disclosure,
@@ -1290,10 +1317,24 @@ export async function watchPlatform(platform, now, opts, stop) {
       r.problems.push(`この経路の最新記事の題材（「${VISIBLE_BASIS_LABEL}」か印）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる`);
     }
   } else {
-    r.notes.push(`この経路の記事が直近 ${opts.scan} 本の中にまだ無い`);
+    pipelineUnknownReasons.push(`直近 ${opts.scan} 本の走査ではこの経路の公開証拠を確認できない（公開一覧 ${posts.length} 本）— 全履歴の未投稿とは判定しない`);
   }
   if (r.legacy.length) {
     r.notes.push(`${opts.since.slice(0, 10)} 以降に、この経路以外の投稿が ${r.legacy.length} 本（旧ローカルタスクか、手動の投稿）`);
+  }
+
+  // アカウントの最新投稿と、この経路の確認済み最新投稿は別々に見る。
+  // 他経路の新しい投稿だけで、この経路の長い停滞を「異常なし」にしない。
+  if (pipeline && new Date(pipeline.published_at).getTime() > now.getTime()) {
+    pipelineUnknownReasons.push('この経路の記事の公開日時が未来のため、経過時間を確認できない');
+  }
+  if (pipeline && !pipelineUnknownReasons.length) {
+    const pipelineHours = (now.getTime() - new Date(pipeline.published_at).getTime()) / 3600000;
+    r.pipeline_age_hours = Math.round(pipelineHours * 10) / 10;
+    r.pipeline_age_status = stop.stopped ? 'stopped' : classifyAge(pipelineHours, opts);
+  } else {
+    r.pipeline_age_reason = pipelineUnknownReasons.join(' / ');
+    r.notes.push(`この経路の間隔は unknown: ${r.pipeline_age_reason}`);
   }
 
   // 投稿の間隔（意図的な停止中は問題に数えない）
@@ -1304,6 +1345,13 @@ export async function watchPlatform(platform, now, opts, stop) {
     r.status = 'alert'; r.problems.push(`最新投稿から ${r.age_hours ?? '—'} 時間（${opts.alertHours} 時間超）— 投稿が止まっている疑い`);
   } else if (age === 'warn') {
     r.status = worse(r.status, 'warn'); r.problems.push(`最新投稿から ${r.age_hours} 時間（${opts.warnHours} 時間超）— 期限を過ぎた枠が投稿できていない`);
+  }
+  if (!stop.stopped) {
+    r.status = worse(r.status, r.pipeline_age_status);
+    if (r.pipeline_age_status === 'alert' || r.pipeline_age_status === 'warn') {
+      const limit = r.pipeline_age_status === 'alert' ? opts.alertHours : opts.warnHours;
+      r.problems.push(`この経路の最新投稿から ${r.pipeline_age_hours} 時間（${limit} 時間超）— 他経路の投稿とは別に、配信が停滞している疑い`);
+    }
   }
   return r;
 }
@@ -1328,7 +1376,7 @@ async function cmdWatch(argv) {
     lines.push(`- ${r.label}: ${r.status} / 最新 ${r.age_hours ?? '—'} 時間前${r.latest ? `「${r.latest.title}」` : ''}`);
     if (r.pipeline_latest) {
       const rels = (r.pipeline_latest.site_links || []).map((l) => `rel="${l.rel || 'なし'}"`).join(', ');
-      lines.push(`  - この経路の最新: ${r.pipeline_latest.url}（${rels || '自社リンク未確認'}${r.platform === 'devto' ? ` / 開示 ${r.pipeline_latest.disclosure}` : ''}）`);
+      lines.push(`  - この経路の最新: ${r.pipeline_latest.url}（${r.pipeline_age_hours ?? '—'} 時間前 / 間隔 ${r.pipeline_age_status} / ${rels || '自社リンク未確認'}${r.platform === 'devto' ? ` / 開示 ${r.pipeline_latest.disclosure}` : ''}）`);
     }
     for (const x of r.problems) lines.push(`  - ⚠ ${x}`);
     for (const x of r.notes) lines.push(`  - ${x}`);
@@ -1624,6 +1672,100 @@ export async function selftest() {
       assert(after.status === 'ok', `この run の投稿を渡しても赤い: ${after.status} ${JSON.stringify(after.problems)}`);
       assert(after.age_hours < 1 && after.pipeline_latest?.url === just[0].url && after.pipeline_latest.from_run === true, JSON.stringify(after));
       assert(articleReads === 2, `作成直後の 404 を待って読み直していない（読んだ回数 ${articleReads}）`);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+  await t('見張り: dev.to の他経路の新しい投稿で、自経路の停滞・欠測を隠さない（停止・80/96h境界も保持）', async () => {
+    const orig = globalThis.fetch;
+    const json = (o) => new Response(JSON.stringify(o), { status: 200, headers: { 'content-type': 'application/json', age: '0' } });
+    const post = (id, hours, own = false) => ({ id, title: `記事 ${id}`, url: `https://dev.to/simple_memo/post-${id}`,
+      published_at: hoursAgo(hours), own });
+    let lookedUp = [];
+    const observe = async (posts, { stopped = false, scan = WATCH.scan, unreadableIds = [], missingBodyIds = [] } = {}) => {
+      lookedUp = [];
+      globalThis.fetch = async (u, o) => {
+        assert(!o?.method || o.method === 'GET', '見張りが外部を書き換えた');
+        u = String(u);
+        if (u.includes('/api/articles?username=')) return json(posts);
+        const item = posts.find((p) => u.endsWith(`/api/articles/${p.id}`));
+        if (item) {
+          lookedUp.push(item.id);
+          if (unreadableIds.includes(item.id)) return new Response('not found', { status: 404 });
+          if (missingBodyIds.includes(item.id)) return json({ ai_disclosure_level: 'fully_autonomous' });
+          return json({ body_markdown: item.own ? `<!-- ${MARKER}: basis=S-A; route=actions; run=manual-fixture -->` : '別経路',
+            ai_disclosure_level: 'fully_autonomous' });
+        }
+        const page = posts.find((p) => p.url === u);
+        if (page) return new Response(`<html><head></head><body><h1>${page.title}</h1><div id="article-body"><a href="https://simplememofast.com/">x</a></div></article></body></html>`);
+        throw new Error(`想定外の取得: ${u}`);
+      };
+      return watchPlatform('devto', now, { ...WATCH, scan, wait: async () => {} }, { stopped, reason: stopped ? 'test stop' : null });
+    };
+    try {
+      const stale = await observe([post(1, 20), post(2, 14 * 24, true)]);
+      assert(stale.status === 'alert' && stale.age_hours === 20 && stale.pipeline_age_hours === 336 && stale.pipeline_age_status === 'alert', JSON.stringify(stale));
+      assert(stale.problems.some((p) => p.includes('この経路の最新投稿から')), '自経路の停滞の理由が無い');
+      // 印は公開出力の証拠だけ。手動 run の印でも、自然 schedule / 人介入ゼロを推定しない。
+      assert(!('event' in stale.pipeline_latest) && !('human_interventions' in stale.pipeline_latest), '公開の印から実行方式を推定した');
+      for (const [hours, expected] of [[70, 'ok'], [80, 'ok'], [80.1, 'warn'], [96, 'warn'], [96.1, 'alert']]) {
+        const r = await observe([post(1, 20), post(2, hours, true)]);
+        assert(r.status === expected && r.pipeline_age_status === expected && r.pipeline_age_hours === hours, `境界 ${hours}: ${JSON.stringify(r)}`);
+      }
+      const stopped = await observe([post(1, 20), post(2, 336, true)], { stopped: true });
+      assert(stopped.status === 'ok' && stopped.pipeline_age_hours === 336 && stopped.pipeline_age_status === 'stopped' && !stopped.problems.length, JSON.stringify(stopped));
+      const bounded = await observe([post(1, 20), post(2, 30), post(3, 336, true)], { scan: 2 });
+      assert(bounded.status === 'unknown' && bounded.pipeline_age_hours === null && bounded.pipeline_age_reason.includes('全履歴の未投稿とは判定しない'), JSON.stringify(bounded));
+      assert(!lookedUp.includes(3), '走査上限外の履歴を確認済みにした');
+      const newerUnknown = await observe([post(1, 20), post(2, 336, true)], { unreadableIds: [1] });
+      assert(newerUnknown.status === 'unreadable' && newerUnknown.pipeline_age_status === 'unknown' && newerUnknown.pipeline_age_hours === null && newerUnknown.pipeline_age_reason.includes('より新しい記事'), JSON.stringify(newerUnknown));
+      assert(!newerUnknown.problems.some((p) => p.includes('配信が停滞')), 'より新しい経路が不明なのに、古い確認済み記事で停滞を断定した');
+      const missingBody = await observe([post(1, 20), post(2, 336, true)], { missingBodyIds: [1] });
+      assert(missingBody.pipeline_age_status === 'unknown' && missingBody.pipeline_age_hours === null && missingBody.problems.some((p) => p.includes('記事本文を読めない')), '本文の欠測を別経路の記事として数えた');
+      const olderUnknown = await observe([post(1, 20, true), post(2, 336)], { unreadableIds: [2] });
+      assert(olderUnknown.pipeline_age_status === 'ok' && olderUnknown.pipeline_age_hours === 20, '古い記事の欠測で確認済みの自経路最新を失った');
+      const undated = await observe([post(1, 20), { ...post(2, 336, true), published_at: null }]);
+      assert(undated.pipeline_age_status === 'unknown' && undated.pipeline_age_hours === null && undated.pipeline_age_reason.includes('公開日時'), JSON.stringify(undated));
+      for (const published_at of [true, 123, '2026-02-31T00:00:00Z', '', '2026-09-23T16:00:00', '2026-09-23T16:00:00+24:00']) {
+        const invalid = await observe([post(1, 20), { ...post(2, 336, true), published_at }]);
+        assert(invalid.status === 'unknown' && invalid.age_hours === 20 && invalid.pipeline_latest === null && invalid.pipeline_age_hours === null && invalid.pipeline_age_reason.includes('公開日時'), `無効日時 ${String(published_at)}: ${JSON.stringify(invalid)}`);
+        assert(!lookedUp.includes(2), '無効な日時の記事を並べて、自経路の最新として確認した');
+      }
+      const offset = await observe([{ ...post(1, 24, true), published_at: '2026-09-23T21:00:00+09:00' }]);
+      assert(offset.status === 'ok' && offset.age_hours === 24 && offset.pipeline_age_hours === 24, 'timezone付きの実在する日時を落とした');
+      const future = await observe([post(1, -1, true)]);
+      assert(future.status === 'unknown' && future.pipeline_age_hours === null && future.pipeline_age_reason.includes('未来'), JSON.stringify(future));
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+  await t('見張り: はてなもアカウントと自経路を分け、確認範囲に無い経路は unknown（停止免除）', async () => {
+    const orig = globalThis.fetch;
+    let current = [];
+    const post = (id, hours, own = false) => ({ id, title: `記事 ${id}`, url: `https://simplememofast.hatenablog.com/entry/${id}`,
+      published_at: hoursAgo(hours), own });
+    try {
+      globalThis.fetch = async (u, o) => {
+        assert(!o?.method || o.method === 'GET', '見張りが外部を書き換えた');
+        if (String(u).includes('/feed?')) return new Response(`<feed>${current.map((p) => `<entry><title>${p.title}</title><link href="${p.url}"/><published>${p.published_at}</published><content type="html">${p.missingBody ? '' : p.own ? '&lt;!-- devlog-syndication: basis=S-A; route=actions --&gt;' : '別経路'}</content></entry>`).join('')}</feed>`, { headers: { age: '0' } });
+        const p = current.find((p) => p.url === String(u));
+        if (p) return new Response(`<html><body><h1>${p.title}</h1><div class="entry-content"><a href="https://simplememofast.com/">x</a></div><div class="entry-footer"></div></body></html>`);
+        throw new Error(`想定外の取得: ${u}`);
+      };
+      const opts = { ...WATCH, wait: async () => {} };
+      current = [post(1, 20), post(2, 336, true)];
+      const stale = await watchPlatform('hatena', now, opts, go);
+      assert(stale.status === 'alert' && stale.age_hours === 20 && stale.pipeline_age_hours === 336, JSON.stringify(stale));
+      const stopped = await watchPlatform('hatena', now, opts, { stopped: true, reason: 'test stop' });
+      assert(stopped.status === 'ok' && stopped.pipeline_age_status === 'stopped', JSON.stringify(stopped));
+      current = [post(1, 20, true)];
+      assert((await watchPlatform('hatena', now, opts, go)).status === 'ok', '新しい自経路を異常にした');
+      current = [post(1, 20)];
+      const missing = await watchPlatform('hatena', now, opts, go);
+      assert(missing.status === 'unknown' && missing.pipeline_age_hours === null && missing.pipeline_age_reason.includes('公開証拠を確認できない'), JSON.stringify(missing));
+      current = [{ ...post(1, 20), missingBody: true }, post(2, 336, true)];
+      const missingBody = await watchPlatform('hatena', now, opts, go);
+      assert(missingBody.status === 'unreadable' && missingBody.pipeline_age_status === 'unknown' && missingBody.pipeline_age_hours === null, 'はてな本文の欠測を別経路の記事として数えた');
     } finally {
       globalThis.fetch = orig;
     }
