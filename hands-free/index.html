@@ -349,7 +349,7 @@
       <section class="lp-section" style="padding-top:0;">
         <div class="tip-box" style="font-size:.95rem;">
           <div class="tip-box__title"><span lang="ja">ひとことで言うと</span></div>
-          <p lang="ja">アプリを<strong>開いた瞬間に音声入力が自動で始まる</strong>ので、画面を見ず・触らず、声だけでメモできます。話した内容は<strong>下書きとして端末内に自動保存</strong>され、<strong>Obsidianにはローカルファイルとして保存</strong>。メールはオフラインキューに貯まり、オンライン復帰時に自動送信。だから<strong>電波がない移動中でも、メモは端末に残ります</strong>。</p>
+          <p lang="ja">設定の「起動時に音声入力を自動オン」をオンにすると、アプリを<strong>開いた瞬間に音声入力が自動で始まる</strong>ので、画面を見ず・触らず、声だけでメモできます（iOS 26以降の対応端末）。話した内容は<strong>下書きとして端末内に自動保存</strong>され、<strong>Obsidianにはローカルファイルとして保存</strong>。メールはオフラインキューに貯まり、オンライン復帰時に自動送信。だから<strong>電波がない移動中でも、メモは端末に残ります</strong>。</p>
 
         </div>
       </section>
@@ -383,27 +383,27 @@
       <!-- Offline triple-save flow -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja">圏外でも“3重”に残す</span>
+          <span lang="ja">圏外でも端末に残す</span>
 
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja">トンネル・山道・地下など電波のない場所でも、送信した瞬間にメモは3か所に残ります。後でオンラインに戻れば、メールは自動送信され、Obsidianの内容もiCloudで同期されます。</span>
+          <span lang="ja">トンネル・山道・地下など電波のない場所でも、書きかけは下書きとして端末内に残り、送信するとメモはOutboxに入ります（Obsidian連携をフォルダ直書きにしていれば、その場でローカルのノートにも追記）。下書きは送信と同時に消えます。後でオンラインに戻れば、メールは自動送信され、Obsidianの内容もiCloudで同期されます。</span>
 
         </p>
         <div class="flow-card">
           <div class="flow-row">
             <span class="flow-chip">🗣️ <span lang="ja">話す（圏外）</span></span>
             <span class="flow-arrow">→</span>
-            <span class="flow-chip">💾 <span lang="ja">下書き保存（端末内）</span></span>
-            <span class="flow-arrow">＋</span>
-            <span class="flow-chip">📤 <span lang="ja">Outboxにキュー</span></span>
+            <span class="flow-chip">💾 <span lang="ja">下書き（送信までは端末内）</span></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip">📤 <span lang="ja">送信でOutboxにキュー</span></span>
             <span class="flow-arrow">＋</span>
             <span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">🟣 <span lang="ja">Obsidianローカル追記</span></span>
           </div>
         </div>
         <div class="tip-box">
           <div class="tip-box__title"><span lang="ja">プライバシー</span></div>
-          <p lang="ja" style="margin:0;">音声の文字起こしは端末内で完結し、音声もテキストも外部に送りません。下書き・オフラインキュー・送信履歴は端末内でAES-GCM暗号化。メール本文は送信時の通過のみで、当社サーバに恒常保存しません。</p>
+          <p lang="ja" style="margin:0;">音声の文字起こしは端末内で完結し、文字起こしのために音声やテキストを外部へ送ることはありません。下書き・オフラインキュー・送信履歴は端末内でAES-GCM暗号化。メール本文は送信時の通過のみで、当社サーバに恒常保存しません。</p>
 
         </div>
       </section>
@@ -425,7 +425,7 @@
           <li><strong>Obsidianフォルダを選ぶ</strong><br>詳細設定でObsidian連携をオンにし、iCloud Drive内の保管庫フォルダを選択。ファイル直書きなので圏外でもローカルに保存されます。</li>
           <li><strong>音声モデルを準備（初回のみ）</strong><br>一度オンラインでマイクをタップして言語モデルを取得。以降は音声認識もオフラインで動きます。</li>
           <li><strong>ホーム画面/ウィジェットに配置</strong><br>押しやすい位置やウィジェットに置き、最短で起動できるように。</li>
-          <li><strong>開く → 話す → 送信</strong><br>安全な状況で、開いて話すだけ。送信で下書き・Outbox・Obsidianローカルに同時に残ります。</li>
+          <li><strong>開く → 話す → 送信</strong><br>安全な状況で、開いて話すだけ。送信するとメモはOutboxに入り（Obsidian連携をオンにしていれば、ローカルのノートにも追記）、下書きは消えます。</li>
         </ol>
 
       </section>
