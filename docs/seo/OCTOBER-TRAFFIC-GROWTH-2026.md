@@ -191,6 +191,33 @@ Linux著者作成例の6/3→7/4、有限global/local表示操作、補助API/ov
 
 <!-- C26 primary delivery / C27 combined source closeout END -->
 
+### C18のAIプラグイン経路表候補（2026-10-01 JST）
+
+公式固定Copilot4.0.12/Smart Connections4.7.2/Text Generator0.8.7の24ranges/14files/579linesをhash/bytes/原引用で照合し、staticprivacy経路表と派生24引用JSON/編集OGを準備。private品質90/100、4幅/FAQ5/9引用controls/実download/1NextStepを保持。静的分岐・提供元説明・runtime未確認を分け、SecretStoragegetterから実暗号化、local説明からzero-network、clipboardflagから実payloadを主張しない。plugin/providerGUIや有料呼び出しは静的表の要件としない。
+
+[根拠と全範囲](../obsidian/evidence/ai-plugins-sources-20260930.md)、QuickAddの既存AI未検証context後1文、全14filesを申告。元85ケース/既存18比較/dynamic2集計/strictgate/workflow修復を保持し、C18HTML/派生引用JSON/編集OG3対象だけを追加。元キューtitle/unique/pendingと全owner/stop/budget/window/contractを保持し、policy42manual公開をCompany global衝突解除・無人率・自然schedule復旧へ読み替えない。通常最終HEADCI/mainmerge/対応Pages/本番readbackまで完了としない。AI-tags自社機能/QuickAdd実Captureと意図を分離し、保護hub/ownedpages不変。実通信/backend/全依存/他端末/速度・生産性/流入は未検証、10月倍増は同定義の成熟計測待ち。
+
+### C27の一次配信とC18の同時ソース準備（2026-10-01 JST）
+
+C27原キューを、実際に確認した一次記事配信に基づいてdoneにします。元title/unique_value/publication_noteとowner/停止/窓/予算/契約は保持します。C18はpendingで、この同時台帳closeout/source準備自身の通常最終HEAD CI・main merge・対応Pages・strict85+21readbackは別工程で未完です。
+
+[PR #1794](https://github.com/simplememofast/simplememo/pull/1794) final head `73658fa98f59797efdb5b5a8a8eb05a1a50b4825` の通常SEO run36765929655/job110059964479 は146success/1main-only IndexNow skip/0failure。実normal squash main `05ecaa962890d39188e10da99aaca5bbd28f38cc`、UTC 2026-09-30T19:43:52Z と実first-parent/source22/21nonJA、割当JA3行・他のfresh upstream行の保全を確認しました。remote headのmain祖先を要求せず、実PR REST/GitData/public author/treeとcommitted source同一性を区別します。
+
+対応main Pages deployment 65de4b0d-9a2f-46f8-8e79-4de8c441bf22/check110066089512 はUTC 2026-09-30T19:44:24Z にsuccess。実strict production run36767719921/job110065983501、source `05ecaa962890d39188e10da99aaca5bbd28f38cc`、UTC 2026-09-30T19:44:21.762Z は元85と既存18比較すべてpass、0failure/0skipです。C27 HTML200（UTC 2026-09-30T19:44:29.604Z）、原Canvas612B/SHA256 `9b5a184035c68dd36440e332450ffa98ba805c44a0fb5a865e3a347de31fe807`（UTC 2026-09-30T19:44:30.043Z）、原reopened PNG71395B/SHA256 `e49b9c964380ceb952de4b2df79866974c34e053cc02ff0539da93290c518c2b`（UTC 2026-09-30T19:44:30.529Z）を実読取しました。branch previewを本番へ読み替えません。
+
+reportのobservedAtはレポート開始時刻で、Pages完了時刻や各HTTP観測時刻とは別です。C27 HTML・Canvas・PNGの実observedAtはすべて対応Pages success後であり、元reportのtimestampは書き換えません。
+
+artifact11121557273 archive digest `sha256:5dcc8e813e74d47b41170fae1413ad92ef3cc4bddbf4efc2e3d0f6c5f4bb6791`、実parsed report SHA256 `e9b4e7e1529290ad9ce29505120746d874b71793f38ad3f8334e0638f9b0dde5`、原GUI receipt52bd5756は別の証拠です。source原6assetsとZIP2memberの保全、本番比較のCanvas/PNG2原assetsのbytesを区別し、HTML全文・全assets・ZIP読者import・全site配送やGoogle登録/AIO引用/速度/生産性/流入は認定しません。
+
+原Linux著者fixtureの九つの有限GUIケース、32assertions/70原本＋receiptの71manifest、品質93、local reader12/download3/FAQ4/full612B/実inbound2/Next1/正常218を保持します。bootstrap/readonly補助と実GUI、resize Undo・カード内scroll・同一process再表示とapp再起動未検証を区別します。C26の元done rowと同時closeout evidence/sourceを、PR1794の実source配信gatesで再照合しました。過去観測を後続successで上書きせず、prior_failures 0件を保持します。
+
+
+全15変更はpolicy42明示manual公開として申告し、Company global13衝突と全既存owner/stop/budget/window/契約を免除・変更しません。Company無人率・自然schedule復旧はfalse、Codex実費不明を0とせず、新支出・秘密値・provider/依存・送信者identityを追加しません。10月流入倍増は同定義の成熟した月次計測待ちです。
+
+この同時ソース準備での残キューは17（pending 15、blocked 2）。C18はpendingで、今回のcombined closeout自身の実配信確認も別に残します。
+
+<!-- C27 primary delivery / C18 combined source closeout END -->
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
