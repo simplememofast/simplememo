@@ -1174,6 +1174,12 @@
       "expr": "age",
       "disposition": "別に検出",
       "note": "2026-09-29: 2か所。(1) assertFresh の `age !== null && …`（仮引数ではなくローカルだが、同じファイルの自己テストに仮引数 age があるので当たる）。読みは known 側の age と同じ —— Age の無い応答は通し、キャッシュに当たらない読み方と、投稿の直前の認証済みの一覧での確かめ直しが別に止める。(2) 自己テストの応答を作る補助 `reply(age, body)` の `age !== null` は検体の生成（Age ヘッダを付けない応答を作るため）"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "d",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: plain(d) は null・非object・配列をfalseにし、parseManifestが最上位/collection/rawentry/secondaryHTMLで無条件assertする。値が無い場合に検査を消す規則ではなくHTTP前に拒否する型ゲート。実root readonlyで正しい205raw+1HTMLを許容し、canonical JSON null/array/bool/number/stringの最上位5型とcollection/entry/secondary各5型、計20負例を拒否（HTTP0/source変更0）。原17suiteのhash/timeout/budget失敗証拠と206loopback別範囲を保持。既存guardrows・no_ledger_binding・計測metadataや検査コードは変更しない。"
     }
   ]
 }
