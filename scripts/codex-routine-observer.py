@@ -262,6 +262,21 @@ def record_preflight(codex_dir, file, now=None, invoke=None):
     runner = invoke or (lambda args: subprocess.run(args, capture_output=True, text=True, timeout=30))
     result = runner(['node', str(script), '--input', str(file)])
     decision = json.loads(result.stdout) if result.returncode == 0 else {'run': False, 'code': 'preflight_error'}
+    # The native permit is never inferred from a snapshot or a later user turn.
+    # Validate the original snapshot first; then reuse the same gate with only
+    # its derived repair-limit state adjusted by the sealed one-turn permission.
+    if route == 'actions' and result.returncode == 0:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('native_recovery', ROOT / 'scripts/codex-recovery-permit.py')
+        recovery_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(recovery_module)
+        recovery = recovery_module.recovery_status(codex_dir=codex_dir, native=state)
+        if recovery['installed'] and recovery.get('required', True):
+            effective = recovery_module.recovery_snapshot(snapshot, recovery)
+            with tempfile.NamedTemporaryFile('w', suffix='.json') as stream:
+                json.dump(effective, stream); stream.flush()
+                checked = runner(['node', str(script), '--input', stream.name])
+            decision = json.loads(checked.stdout) if checked.returncode == 0 else {'run': False, 'code': 'preflight_error'}
     require(type(decision.get('run')) is bool and isinstance(decision.get('code'), str)
             and re.fullmatch('[a-z][a-z0-9_]{0,79}', decision['code']), 'Preflight decision missing')
     # Once admitted, a later check cannot turn an attempted run into a skip.

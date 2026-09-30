@@ -38,6 +38,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -341,6 +342,20 @@ if (isMain) {
     const stopDoc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
     const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [];
     if (!a.escalate.length) { console.log('上限に達した故障は無い — 止めない。'); process.exit(0); }
+    // The owner explicitly authorized one future Mac primary original turn.
+    // Only the verified private permit can defer this derived containment;
+    // explicit stops and every other escalated target still take precedence.
+    if (!problems.length && a.escalate.length === 1 && a.escalate[0].route === 'actions') {
+      const checked = spawnSync('python3', [path.join(ROOT, 'scripts/codex-recovery-permit.py')],
+        { encoding: 'utf8', timeout: 60000 });
+      let recovery = null;
+      try { if (checked.status === 0 && !checked.error) recovery = JSON.parse(checked.stdout); } catch { /* fail closed */ }
+      if (recovery?.allowed === true) {
+        console.log(`所有者承認の主系1回限り: ${recovery.thread_id} (permit ${recovery.permit_sha256})`);
+        console.log('元の故障・修理回数・明示停止は保持。予算・共有claim・通常preflightの確認が必要。');
+        process.exit(0);
+      }
+    }
     if (dry) {
       for (const t of a.escalate) {
         const route = t.route && stopDoc.agents?.[t.route] ? t.route : 'all';
@@ -414,5 +429,10 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n自己修復の境界に問題なし。');
+  if (process.argv.includes('--check')) {
+    const tests = spawnSync('python3', [path.join(ROOT, 'scripts/codex-recovery-permit.py'), '--selftest'],
+      { stdio: 'inherit', timeout: 90000 });
+    if (tests.error || tests.status !== 0) process.exit(1);
+    console.log('\n自己修復の境界に問題なし。');
+  }
 }
