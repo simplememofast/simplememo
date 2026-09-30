@@ -24,18 +24,18 @@
     })();
   </script>
   <title>AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る | Obsidian連携シンプルメモ</title>
-  <meta name="description" content="AirPodsに話しかけるだけで、メモがメールとObsidianに届きます。合言葉は「Hey Siri、シンプルメモで残す」。スマホはポケットに入れたまま、アプリも開かず、画面も見ずに声だけで完結。設定手順・使えるフレーズ・うまくいかないときの対処まで実機検証に基づいて解説します。">
+  <meta name="description" content="AirPodsからSiriにメモを渡す設定と条件。送信先の認証、保管庫フォルダ、ロック中の実行を確認し、メール受信・Obsidian保存・他端末同期を別々に確かめます。アプリを開く音声ショートカットとの違い、オフライン待機の条件も説明します。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
   <meta property="og:title" content="AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る | Obsidian連携シンプルメモ">
-  <meta property="og:description" content="AirPodsに話しかけるだけでメモがメールとObsidianに届く。合言葉は「Hey Siri、シンプルメモで残す」。スマホはポケットのまま、画面も見ずに声だけで完結。">
+  <meta property="og:description" content="AirPodsからSiriにメモを渡す設定と条件。送信先の認証、保管庫フォルダ、ロック中の実行を確認し、メール受信・Obsidian保存・他端末同期を別々に確かめます。アプリを開く音声ショートカットとの違い、オフライン待機の条件も説明します。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-08-05T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/siri/">
-  <meta property="og:image" content="https://simplememofast.com/assets/img/og/siri-20260928.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <meta property="og:image:width" content="256">
+  <meta property="og:image:height" content="256">
   <meta property="og:site_name" content="Obsidian連携シンプルメモ">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:locale:alternate" content="en_US">
@@ -44,8 +44,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る | Obsidian連携シンプルメモ">
-  <meta name="twitter:description" content="AirPodsに話しかけるだけでメモがメールとObsidianに届く。合言葉は「Hey Siri、シンプルメモで残す」。スマホはポケットのまま、画面も見ずに声だけで完結。">
-  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/siri-20260928.jpg">
+  <meta name="twitter:description" content="AirPodsからSiriにメモを渡す設定と条件。送信先の認証、保管庫フォルダ、ロック中の実行を確認し、メール受信・Obsidian保存・他端末同期を別々に確かめます。アプリを開く音声ショートカットとの違い、オフライン待機の条件も説明します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/siri/">
@@ -60,27 +60,16 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BreadcrumbList -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
-      {"@type": "ListItem", "position": 2, "name": "Siriで音声メモ", "item": "https://simplememofast.com/siri/"}
-    ]
-  }
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Siriで音声メモ","item":"https://simplememofast.com/siri/"}]}</script>
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/siri/#article","inLanguage":"ja","headline":"AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る","description":"AirPodsに話しかけるだけで、メモがメールとObsidianに届きます。合言葉は「Hey Siri、シンプルメモで残す」。スマホはポケットに入れたまま、アプリも開かず、画面も見ずに声だけで完結。設定手順・使えるフレーズ・うまくいかないときの対処まで実機検証に基づいて解説解説。","url":"https://simplememofast.com/siri/","datePublished":"2026-08-05","dateModified":"2026-09-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/siri-20260928.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/siri/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/siri/#article","inLanguage":"ja","headline":"AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る","description":"AirPodsからSiriにメモを渡す設定と条件。送信先の認証、保管庫フォルダ、ロック中の実行を確認し、メール受信・Obsidian保存・他端末同期を別々に確かめます。アプリを開く音声ショートカットとの違い、オフライン待機の条件も説明します。","url":"https://simplememofast.com/siri/","datePublished":"2026-08-05","dateModified":"2026-09-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/app-icon-256.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/siri/"}}</script>
 
   <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/siri/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"AirPodsのステムを長押ししてもSiriが出ません","acceptedAnswer":{"@type":"Answer","text":"AirPods Pro（第1・第2世代）とAirPods 4（ノイズキャンセリング搭載）は、ステム長押しの初期設定が「ノイズコントロールの切り替え」で、Siriは起動しません。長押しすると音は鳴るため、失敗したことに気づきにくいのが厄介な点です。設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri に変更してください（左右それぞれに設定があります）。設定を変えずに使いたい場合は「Hey Siri、シンプルメモで残す」と話しかければ、どの機種でも同じように動きます。"}},{"@type":"Question","name":"Siriが反応しません／「そのためのアプリが見当たりません」と言われます","acceptedAnswer":{"@type":"Answer","text":"ショートカットAppを開き、「シンプルメモ」のショートカット設定でSiriがオンになっているか確認してください（オフだと全フレーズが認識されません）。オンにしたら「Hey Siri、シンプルメモで残す」と話しかけてください。言い回しは「〜で残す」が最も確実です。インストール直後は登録に数分かかることがあるため、アプリを一度起動して少し待ってから試してください。"}},{"@type":"Question","name":"「シンプルメモにメモ」と言ったら違う動きをしました","acceptedAnswer":{"@type":"Answer","text":"「〜にメモ」という言い回しはiPhone標準のメモ機能への指示としてSiriに解釈されやすく、シンプルメモには届かないことがあります。実機検証の結果、確実に通る合言葉は「Hey Siri、シンプルメモで残す」です。「シンプルメモに送信」はメッセージAppとの二択が出ることがありますが、一度「シンプルメモ」を選ぶと以降は通りやすくなります。アプリ名だけを言うとアプリが開くだけです。"}},{"@type":"Question","name":"アプリを開かずに、どうやって送信されるのですか？","acceptedAnswer":{"@type":"Answer","text":"AppleのApp Intents（App Shortcuts）という仕組みで、Siriがバックグラウンドのままアプリの送信処理を直接呼び出します。画面は開かず、話した本文がそのままいつものメール送信とObsidian連携に合流します。事前にアプリ内で初期設定（送信先メールの認証）を済ませておくことが前提です。"}},{"@type":"Question","name":"オフライン（圏外）でSiriに話したらどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"送信キュー（Outbox）に暗号化して保存され、オンラインに戻りしだい自動送信されます。その場合Siriは「オンラインに戻りしだい送信します」と答えます。"}},{"@type":"Question","name":"AirPodsだけで完結しますか？画面を見る必要は？","acceptedAnswer":{"@type":"Answer","text":"iPhoneがロックされたままポケットにあっても、AirPodsで「Hey Siri、シンプルメモで残す」→ Siriが「何をメモしますか？」と読み上げ → 本文を話す → 送信完了の読み上げ、まで画面に一切触れず・見ずに完結します（実機検証済み）。画面が点いた状態でiPhone本体に話しかけた場合は、Siriの仕様で応答が画面表示になることがあります。"}},{"@type":"Question","name":"「高音質録音」とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"アプリ内の音声入力でAirPodsのマイクを使って録音する設定です（iOS 26以降・H2チップ搭載AirPods）。音質と距離の自由度が上がる一方、認識開始が約0.7秒遅くなるため、速さを優先して既定ではオフにしています。設定 → 詳細設定 → 高音質録音で切り替えられます。なおSiri経由の送信は、この設定に関係なくAirPodsのマイクで話せます。"}},{"@type":"Question","name":"Siri送信は無料プランでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"使えます。Siri経由の送信もアプリ内からの送信と同じ扱いで、無料プランの1日の送信枠を共有します。枠を使い切った場合はSiriが音声でその旨を伝えます。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/siri/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"AirPodsのステムを長押ししてもSiriが出ません","acceptedAnswer":{"@type":"Answer","text":"AirPods Pro（第1・第2世代）とAirPods 4（ノイズキャンセリング搭載）は、ステム長押しの初期設定が 「ノイズコントロールの切り替え」 で、Siriは起動しません。長押しすると音は鳴るため、失敗したことに気づきにくいのが厄介な点です。 設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri に変更してください（左右それぞれに設定があります）。設定を変えずに使いたい場合は「Hey Siri、シンプルメモで残す」と話しかけ、お使いの端末で本文の入力まで進むか確かめてください。"}},{"@type":"Question","name":"Siriが反応しません／「そのためのアプリが見当たりません」と言われます","acceptedAnswer":{"@type":"Answer","text":"ショートカットAppを開き、「シンプルメモ」のショートカット設定で Siriがオン になっているか確認してください（オフだと全フレーズが認識されません）。オンにしたら「Hey Siri、シンプルメモで残す」と話しかけてください。言い回しは 「〜で残す」 から試してください。インストール直後は登録に数分かかることがあるため、アプリを一度起動して少し待ってから試してください。"}},{"@type":"Question","name":"「シンプルメモにメモ」と言ったら違う動きをしました","acceptedAnswer":{"@type":"Answer","text":"「シンプルメモで残す」を試し、Siriが本文を聞く送信操作へ進むか確認してください。別のアプリや操作が選ばれたら、Siriの言語設定とショートカットの登録を確認します。アプリ名だけの発話も、アプリ起動になるか登録された送信操作になるかはSiriの案内を確かめてください。現行版のすべての端末で同じ解釈になるとは限りません。"}},{"@type":"Question","name":"アプリを開かずに、どうやって送信されるのですか？","acceptedAnswer":{"@type":"Answer","text":"Siriの「で残す」はアプリの送信処理へ本文を渡す入口です。送信先メールの認証など初期設定が必要です。通常モードのメール送信とObsidianへの追記は別の経路で、Siriの「送信しました」だけでは保管庫保存を確認できません。選んだフォルダへの直接書き込みが成功することと、別端末へ同期することも分けて確認してください。「声でメモ」はアプリを開く別の入口です。"}},{"@type":"Question","name":"オフライン（圏外）でSiriに話したらどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"Siriから本文がアプリへ渡され、通常モードのメールが待機になった場合は、暗号化したOutboxへ保存して通信復帰後に再送を試みます。Siriの呼び出しや音声認識自体が圏外でも使えるとは限りません。保管庫への直接書き込みには、端末にある対象フォルダと書き込み権限が必要です。メール待機・保管庫保存・他端末同期を別に確認してください。"}},{"@type":"Question","name":"AirPodsだけで完結しますか？画面を見る必要は？","acceptedAnswer":{"@type":"Answer","text":"必要な設定が整った環境では、Siriとの音声のやり取りからメモを渡せます。ロック中のSiri利用設定、選んだショートカット、端末の状態によって、解除や画面操作が必要になる場合があります。アプリを開く「声でメモ」と、本文を送信処理へ渡す「で残す」は別の入口です。すべての端末状態で操作不要と保証せず、最初のメモで受信箱と保管庫の本文を確認してください。"}},{"@type":"Question","name":"「高音質録音」とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"「高音質録音」はアプリ内の音声入力でAirPodsのマイクを使うための設定です。対応するiOS・AirPodsが必要で、設定 → 詳細設定で切り替えます。Siriから本文を渡す送信ショートカットとは別の機能です。ここではマイク切替による開始時間の差を実測していません。"}},{"@type":"Question","name":"Siri送信は無料プランでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"使えます。Siri経由の送信もアプリ内からの送信と同じ扱いで、無料プランの1日の送信枠を共有します。枠を使い切った場合はSiriが上限到達を案内します。音声か画面かは端末の状態によります。"}}]}</script>
 
   <!-- JSON-LD: WebPage with Speakable -->
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/siri/#webpage","inLanguage":"ja","name":"AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る | Obsidian連携シンプルメモ","url":"https://simplememofast.com/siri/","isPartOf":{"@id":"https://simplememofast.com/#website"}}
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/siri/#webpage","inLanguage":"ja","name":"AirPodsで音声メモ — スマホを触らずSiriでObsidianへ送る | Obsidian連携シンプルメモ","url":"https://simplememofast.com/siri/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
@@ -360,7 +349,7 @@
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja">AirPods × Siri（スマホを触らない音声メモ）</span>
+          <span lang="ja">AirPods × Siri（設定と送信結果を確認）</span>
 
         </div>
         <h1 class="lp-hero__title">
@@ -368,16 +357,11 @@
 
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja">AirPodsに「<strong>Hey Siri、シンプルメモで残す</strong>」と言うだけ。話した内容が、いつものメールと<a href="/obsidian/" style="color:var(--accent);">Obsidian</a>に届きます。<strong>iPhoneはポケットに入れたまま</strong>——取り出さない、ロックを解除しない、アプリも開かない。画面を見ずに、声のやり取りだけで完結します。歩きながら、家事をしながら、思いつきを逃しません。</span>
-
-        </p>
-        <!-- LCP画像。実ユーザーには webp(74KB) を出し、png(342KB) は OGP クローラと
-             webp 非対応向けのフォールバックとして残す。両者は同一の絵。 -->
+<span lang="ja">AirPodsから「<strong>Hey Siri、シンプルメモで残す</strong>」でメモを渡せます。初回設定とSiriの利用条件を整え、現在の送信先を確認して使います。通常モードのメール送信と<a href="/obsidian/" style="color:var(--accent);">Obsidian</a>への追記は別の経路です。<strong>完了案内の後も、受信箱と指定ノートをそれぞれ確認</strong>してください。ロック解除を求められる場合もあります。</span>
+</p>
+        <!-- Existing app icon; guide conditions are described in the text. -->
         <figure style="margin:0 auto 2rem;max-width:720px;">
-          <picture>
-            <source type="image/webp" srcset="/assets/img/siri-banner-ja.webp 1200w, /assets/img/siri-banner-ja@2x.webp 1691w" sizes="(max-width: 760px) 100vw, 720px">
-            <img src="/assets/img/og/siri.png?v=20260805c" width="1200" height="630" alt="シンプルメモ（iPhoneアプリ） — AirPodsからObsidianへメモ。スマホを触らず、声で残す。話すだけで自動文字起こし、メールとObsidianのデイリーノートへ届く（圏外でもキュー保存）" style="width:100%;height:auto;border-radius:16px;border:1px solid var(--border);" loading="eager" fetchpriority="high">
-          </picture>
+          <img src="/assets/img/app-icon-256.png" width="256" height="256" alt="Obsidian連携シンプルメモのアプリアイコン" style="display:block;width:160px;height:160px;margin:0 auto;border-radius:28px;" loading="eager" fetchpriority="high">
         </figure>
         <div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
           <a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="hero" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
@@ -396,7 +380,7 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
 
-        </p>
+        <span lang="ja"> · 条件確認: 2026年9月30日</span></p>
       </div>
 
       <!-- Answer-first -->
@@ -410,17 +394,14 @@
           <source src="/assets/video/siri-airpods.mp4" type="video/mp4">
           <span lang="ja">お使いのブラウザは動画の再生に対応していません。</span>
         </video>
-        <figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;">
-          <span lang="ja">アプリ内ガイドの実機スクリーンショット5枚で、合言葉ひとつでAirPodsから音声メモを残す流れを紹介します。</span>
-
-        </figcaption>
+        <figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;"><span lang="ja">既存のアプリ内ガイド画像を使った説明用スライドショーです。保存・メール受信の実機計測や、2つの宛先への同時到着を示す映像ではありません。現在の条件は本文で確認してください。 ポスターや動画内の「ロックされたまま」「ポケットの中」といった従来の表現も、現在の無条件の動作保証ではありません。権限・認証・端末状態により解除や画面操作が必要です。</span></figcaption>
       </figure>
-      <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoObject","@id":"https://simplememofast.com/siri/#video","name":"Siriとその場のAirPodsでハンズフリーにメモを残す","description":"アプリ内ガイドの実機スクリーンショットを使って、合言葉ひとつでAirPodsから音声メモを残す流れを紹介するスライドショー動画です。","thumbnailUrl":["https://simplememofast.com/assets/video/siri-airpods-poster.jpg"],"uploadDate":"2026-08-11T13:42:48+09:00","duration":"PT21S","contentUrl":"https://simplememofast.com/assets/video/siri-airpods.mp4","encodingFormat":"video/mp4","inLanguage":"ja","isFamilyFriendly":true,"publisher":{"@id":"https://simplememofast.com/#organization"},"mainEntityOfPage":{"@id":"https://simplememofast.com/siri/#webpage"}}</script>
+      <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoObject","@id":"https://simplememofast.com/siri/#video","name":"Siriとその場のAirPodsでハンズフリーにメモを残す","description":"既存のアプリ内ガイド画像を使った説明用スライドショーです。保存・メール受信の実機計測や、2つの宛先への同時到着を示す映像ではありません。現在の条件は本文で確認してください。 ポスターや動画内の「ロックされたまま」「ポケットの中」といった従来の表現も、現在の無条件の動作保証ではありません。権限・認証・端末状態により解除や画面操作が必要です。","thumbnailUrl":["https://simplememofast.com/assets/video/siri-airpods-poster.jpg"],"uploadDate":"2026-08-11T13:42:48+09:00","duration":"PT21S","contentUrl":"https://simplememofast.com/assets/video/siri-airpods.mp4","encodingFormat":"video/mp4","inLanguage":"ja","isFamilyFriendly":true,"publisher":{"@id":"https://simplememofast.com/#organization"},"mainEntityOfPage":{"@id":"https://simplememofast.com/siri/#webpage"}}</script>
 
       <section class="lp-section" style="padding-top:0;">
         <div class="tip-box" style="font-size:.95rem;">
           <div class="tip-box__title"><span lang="ja">ひとことで言うと</span></div>
-          <p lang="ja">AirPodsで「<strong>シンプルメモで残す</strong>」と言うと、Siriが「<strong>何をメモしますか？</strong>」と読み上げるので、本文を話すだけ。<strong>スマホは触りません</strong>——アプリも開かず、バックグラウンドでそのまま送信され、いつものメールと<strong>Obsidianのノート</strong>に届きます。圏外なら送信キューに貯まって、復帰後に自動送信します。</p>
+          <p lang="ja"><span lang="ja">「<strong>シンプルメモで残す</strong>」は、Siriが本文を聞き取り、アプリの送信処理に渡す入口です。通常モードではメール送信の結果とObsidianへの追記を別に扱います。<strong>Siriの「送信しました」だけでは、保管庫への保存や別端末への同期は確認できません。</strong>保管庫フォルダと連携設定を確かめ、指定ノートの本文を確認します。「Obsidianのみに保存」が有効な間はメモのメール送信を行いません。</span></p>
 
         </div>
       </section>
@@ -428,11 +409,11 @@
       <!-- The flow -->
       <section class="lp-section" style="padding-top:0;">
         <h2 class="lp-section__title">
-          <span lang="ja">やり取りは2ターン、これだけ</span>
+          <span lang="ja">Siriとの2ターンのやり取り例</span>
 
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja">Siriの仕様上、合言葉に本文を続けて一気に言うことはできません。かわりに<strong>Siriが聞き返してくれる</strong>ので、呼びかけ→本文の2ターンで完了します。実機で確認済みの流れはこちら。</span>
+          <span lang="ja">呼びかけの後に、Siriの質問へ本文を答える使い方の例です。応答・認証の要求は端末の状態や設定で変わります。以下は操作の案内で、現行配布版の新しい実機テストではありません。</span>
 
         </p>
         <div class="flow-card">
@@ -445,7 +426,7 @@
 
         </div>
         <p style="font-size:.9rem;color:var(--text-muted);line-height:1.85;max-width:44rem;">
-          <span lang="ja">※ ロック中のiPhone＋AirPodsなら、Siriの応答はすべて音声で読み上げられます。画面が点いた状態でiPhone本体に話しかけると、Siriの仕様で応答が画面表示になることがあります。</span>
+          <span lang="ja">Siriの応答が音声か画面かは利用状況によります。<a href="https://support.apple.com/guide/shortcuts/run-shortcuts-with-siri-apd07c25bb38/ios" target="_blank" rel="noopener" style="color:var(--accent);">Appleの案内</a>では、ロック中にアプリを開くショートカットを実行すると解除を求められます。「声でメモ」はアプリを開く入口で、「で残す」の送信とは異なります。</span>
 
         </p>
       </section>
@@ -453,20 +434,20 @@
       <!-- In-app guide screenshots -->
       <section class="lp-section" style="padding-top:0;">
         <h2 class="lp-section__title">
-          <span lang="ja">実機の画面で見る</span>
+          <span lang="ja">アプリ内の案内画面例</span>
 
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja">アプリ内の「AirPodsでハンズフリー」ガイドそのままの6画面。Siriの呼び方・合言葉・2ターンの会話・届き先・事前チェックまで、この順に案内されます（横にスクロール）。</span>
+          <span lang="ja">既存のアプリ内ガイド6画面による操作の説明例です。画像内には「同時に届く」「どのAirPodsでも同じ」「iPhoneはポケットのまま」などの従来の表現があります。現在の動作保証ではなく、権限・認証・音声認識と各保存先の結果を別に確認するための説明例です。受信・端末内保存・他端末同期は別々に確認してください。</span>
 
         </p>
         <div class="shot-strip">
-          <img src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640" height="1385" loading="lazy" alt="アプリ内ガイド1: AirPodsから、Obsidianへ。— Obsidian・話す・メールの流れ図。iPhoneはポケットのまま、合言葉ひとつで届く">
-          <img src="/assets/img/siri/onboarding-2.png?v=750f4525e5" width="640" height="1385" loading="lazy" alt="アプリ内ガイド2: まず、Siriを呼ぶ — 確実なのは「Hey Siri」。AirPods Pro・AirPods 4 はステム長押しの初期設定がノイズコントロールなので、設定から変える">
-          <img src="/assets/img/siri/onboarding-3.png?v=7eb70fae13" width="640" height="1385" loading="lazy" alt="アプリ内ガイド3: 合言葉は「シンプルメモで残す」— ○「シンプルメモで残す」／×「シンプルメモにメモ」。Siriが応えたら、そのまま言うだけ">
-          <img src="/assets/img/siri/onboarding-4.png?v=3d1e3ec928" width="640" height="1385" loading="lazy" alt="アプリ内ガイド4: 「何をメモしますか？」に答えるだけ — Siriとの2ターンの会話例。話した内容がそのまま本文になり、アプリは開かない">
-          <img src="/assets/img/siri/onboarding-5.png?v=096968ffa9" width="640" height="1385" loading="lazy" alt="アプリ内ガイド5: メールとObsidianに、同時に届く — いつもの受信箱へ・デイリーノートに自動追記・圏外でも消えない">
-          <img src="/assets/img/siri/onboarding-6.png?v=6ef777e921" width="640" height="1385" loading="lazy" alt="アプリ内ガイド6: 3つだけ、確認しておく — 送信先メールの認証・Obsidian連携・ショートカットAppでSiriをオン">
+          <img src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 1。実際の受信・保存・同期は本文の条件で確認。">
+          <img src="/assets/img/siri/onboarding-2.png?v=750f4525e5" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 2。実際の受信・保存・同期は本文の条件で確認。">
+          <img src="/assets/img/siri/onboarding-3.png?v=7eb70fae13" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 3。実際の受信・保存・同期は本文の条件で確認。">
+          <img src="/assets/img/siri/onboarding-4.png?v=3d1e3ec928" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 4。実際の受信・保存・同期は本文の条件で確認。">
+          <img src="/assets/img/siri/onboarding-5.png?v=096968ffa9" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 5。実際の受信・保存・同期は本文の条件で確認。">
+          <img src="/assets/img/siri/onboarding-6.png?v=6ef777e921" width="640" height="1385" loading="lazy" alt="既存のSiri操作ガイド画面例 6。実際の受信・保存・同期は本文の条件で確認。">
         </div>
 
       </section>
@@ -474,25 +455,25 @@
       <!-- Why it matters -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja">「触らない」から、できること</span>
+          <span lang="ja">Siri送信で確認すること</span>
 
         </h2>
         <div class="reason-cards">
           <div class="reason-card">
-            <div class="reason-card__title">👖 <span lang="ja">iPhoneはポケットのまま</span></div>
-            <div class="reason-card__desc"><span lang="ja">AirPodsで呼びかければ、取り出す・ロック解除する・アプリを探す、が全部不要。両手がふさがっていても声だけで残せます。</span></div>
+            <div class="reason-card__title">👖 <span lang="ja">ロック中の実行条件を確認</span></div>
+            <div class="reason-card__desc"><span lang="ja">Siriの呼び出しやロック中の使用が許可され、実行に必要な設定が整った場合の入口です。解除や画面操作を求められたら端末の案内に従います。</span></div>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title">📬 <span lang="ja">届き先はいつもと同じ</span></div>
-            <div class="reason-card__desc"><span lang="ja">Siri経由でも、送信の仕組みはアプリ内とまったく同じ。<a href="/note-to-email/" style="color:var(--accent);">メール</a>と<a href="/obsidian/" style="color:var(--accent);">Obsidianのノート</a>に、いつもどおり届きます。</span></div>
+            <div class="reason-card__title">📬 <span lang="ja">現在の保存先を確認</span></div>
+            <div class="reason-card__desc"><span lang="ja">通常モードの<a href="/note-to-email/" style="color:var(--accent);">メール送信</a>と<a href="/obsidian/" style="color:var(--accent);">保管庫への追記</a>は別の結果です。「Obsidianのみ」が有効ならメールは送りません。送信前に現在のモードと保存先を確認します。</span></div>
           </div>
           <div class="reason-card">
-            <div class="reason-card__title">📵 <span lang="ja">圏外なら送信キューへ</span></div>
-            <div class="reason-card__desc"><span lang="ja">オフラインなら送信キュー（Outbox）に暗号化して保存し、復帰後に自動送信。Siriが「オンラインに戻りしだい送信します」と教えてくれます。</span></div>
+            <div class="reason-card__title">📵 <span lang="ja">メールが待機になった場合</span></div>
+            <div class="reason-card__desc"><span lang="ja">アプリが本文を受け付け、通常モードのメールが待機になった場合はOutboxへ保存し、通信の復帰後に再送を試みます。Siriの音声認識自体が圏外で使えることや、保管庫保存の成功を保証する案内ではありません。</span></div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">🔒 <span lang="ja">失敗しても黙らない</span></div>
-            <div class="reason-card__desc"><span lang="ja">未設定・上限・一時的な失敗も、すべてSiriが音声で状況を伝えます。「送ったつもりが消えていた」を作りません。</span></div>
+            <div class="reason-card__desc"><span lang="ja">未設定・上限・待機・エラーなど、返ってきたSiriの案内を確認します。この応答だけで、すべての保存先への到着を確認できるわけではありません。</span></div>
           </div>
         </div>
       </section>
@@ -500,11 +481,11 @@
       <!-- Phrases -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja">使えるフレーズ（実機検証済み）</span>
+          <span lang="ja">Siriに渡すフレーズと操作の確認</span>
 
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja">Siriへの言い回しは、iPhone標準機能と競合しないものを選ぶのがコツです。実機で検証した結果がこちら。迷ったら<strong>「で残す」</strong>を使ってください。</span>
+          <span lang="ja">Siriへの言い回しは、iPhone標準機能と競合しないものを選ぶのがコツです。まず<strong>「で残す」</strong>を試し、端末に表示・読み上げられる操作を確認してください。</span>
 
         </p>
         <div lang="ja">
@@ -512,10 +493,10 @@
             <table class="phrase-table">
             <thead><tr><th scope="col">発話</th><th scope="col">結果</th></tr></thead>
             <tbody>
-              <tr><th scope="row"><span class="phrase-mark phrase-mark--best">◎</span> 「シンプルメモ<strong>で残す</strong>」</th><td data-label="結果"><strong>推奨。</strong>競合なしでそのまま「何をメモしますか？」に進みます。</td></tr>
-              <tr><th scope="row"><span class="phrase-mark phrase-mark--ok">△</span> 「シンプルメモ<strong>に送信</strong>」</th><td data-label="結果">メッセージAppとの二択が出ることがあります。一度「シンプルメモ」を選ぶと以降は通りやすくなります。</td></tr>
+              <tr><th scope="row"><span class="phrase-mark phrase-mark--best">◎</span> 「シンプルメモ<strong>で残す</strong>」</th><td data-label="結果"><strong>推奨。</strong>本文を聞く送信操作かどうかを確認します。</td></tr>
+              <tr><th scope="row"><span class="phrase-mark phrase-mark--ok">△</span> 「シンプルメモ<strong>に送信</strong>」</th><td data-label="結果">メッセージAppとの二択が出ることがあります。実行する操作を選び、Siriの応答を確認してください。</td></tr>
               <tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> 「シンプルメモ<strong>にメモ</strong>」</th><td data-label="結果">iPhone標準のメモ機能への指示と解釈されやすく、届かないことがあります。</td></tr>
-              <tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> 「シンプルメモ」（名前だけ）</th><td data-label="結果">アプリが開くだけです（開きたいときはこれでOK）。</td></tr>
+              <tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> 「シンプルメモ」（名前だけ）</th><td data-label="結果">アプリ起動か登録された送信操作か、Siriの案内を確認します。</td></tr>
             </tbody>
           </table>
           </div>
@@ -532,18 +513,18 @@
         <ul lang="ja" class="prereq-list">
           <li>iPhone（iOS 16.4以降。コントロールセンターの1タップ音声メモはiOS 18以降）</li>
           <li>シンプルメモの初期設定（送信先メールの認証）が済んでいること</li>
-          <li>AirPodsがあれば完全ハンズフリー（なくてもiPhone本体のSiriで使えます）</li>
+          <li>AirPodsでSiriを使う場合は、利用許可と端末の実行条件を確認（なくてもiPhone本体のSiriで使えます）</li>
         </ul>
 
         <ol lang="ja" class="steps-list">
-          <li><strong>アプリの初期設定を済ませる</strong><br>送信先メールを認証し、一度ふつうに送信できる状態にします。<a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>を設定していれば、Siri経由のメモもノートに追記されます。</li>
+          <li><strong>アプリの初期設定を済ませる</strong><br>送信先メールを認証し、一度ふつうに送信できる状態にします。<a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>を使う場合は、端末内の保管庫フォルダと書き込み権限を設定し、最初のメモが指定ノートに保存されたか確認してください。</li>
           <li><strong>ショートカットAppで「Siri」がオンか確認する</strong><br>ショートカットAppを開き、「シンプルメモ」の設定でSiriトグルがオンになっていることを確認します。ここがオフだと、どのフレーズにも反応しません（うまくいかないときの最重要チェックポイントです）。</li>
-          <li><strong>「Hey Siri、シンプルメモで残す」と話しかける</strong><br>「何をメモしますか？」と聞かれたら本文を話すだけ。ロック中＋AirPodsなら、応答もすべて音声で返ります。</li>
+          <li><strong>「Hey Siri、シンプルメモで残す」と話しかける</strong><br>「何をメモしますか？」に本文を答え、返ってきた送信・保存・待機・初期設定などの案内を確認します。Siriの完了案内とは別に、受信箱と指定ノートの本文を確認してください。</li>
         </ol>
 
         <div class="tip-box">
           <div class="tip-box__title"><span lang="ja">高音質録音（オプション・iOS 26以降）</span></div>
-          <p lang="ja" style="margin:0;">アプリ内の音声入力でAirPodsのマイクを使う「<strong>高音質録音</strong>」設定を追加しました（H2チップ搭載AirPods）。音質と距離の自由度が上がる一方、認識開始が約0.7秒遅くなるため<strong>既定はオフ</strong>（速さ優先）です。設定 → 詳細設定から切り替えられます。なお<strong>Siri経由の送信は、この設定に関係なくAirPodsのマイクで話せます</strong>。</p>
+          <p lang="ja" style="margin:0;">「高音質録音」はアプリ内の音声入力でAirPodsのマイクを使うための設定です。対応するiOS・AirPodsが必要で、設定 → 詳細設定で切り替えます。Siriから本文を渡す送信ショートカットとは別の機能です。ここではマイク切替による開始時間の差を実測していません。</p>
 
         </div>
       </section>
@@ -556,14 +537,14 @@
         </h2>
         <div class="tip-box">
           <div class="tip-box__title"><span lang="ja">まず確認：AirPods Pro・AirPods 4 のステム長押しは、初期設定ではSiriではありません</span></div>
-          <p lang="ja" style="margin:0;">AirPods Pro（第1・第2世代）と AirPods 4（ノイズキャンセリング搭載）は、ステムを長押ししたときの動作が初期設定で<strong>「ノイズコントロールの切り替え」</strong>になっています。長押しすると音は鳴りますが、Siriは起動しません。<br>直すには <strong>設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri</strong>。左右それぞれに設定があるので、両方をSiriにしておくと確実です。<br>設定を変えたくない場合は<strong>「Hey Siri」</strong>で呼べます（どの機種でも同じ動きです）。</p>
+          <p lang="ja" style="margin:0;">AirPods Pro（第1・第2世代）と AirPods 4（ノイズキャンセリング搭載）は、ステムを長押ししたときの動作が初期設定で<strong>「ノイズコントロールの切り替え」</strong>になっています。長押しすると音は鳴りますが、Siriは起動しません。<br>直すには <strong>設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri</strong>。左右それぞれに設定があるので、両方をSiriにしておくと確実です。<br>設定を変えたくない場合は<strong>「Hey Siri」</strong>で呼べます（機種のSiri設定も確認してください）。</p>
 
         </div>
         <ol lang="ja" class="steps-list">
           <li><strong>「Hey Siri」で呼べるか試す</strong><br>設定 → Siri で「&quot;Hey Siri&quot; を聞き取る」がオンか、ロック中の使用が許可されているかを確認します。ステムの設定に関係なく呼べるので、切り分けが早いです。</li>
           <li><strong>ショートカットAppで「シンプルメモ」のSiriがオンか</strong><br>ここがオフだと、どのフレーズにも反応しません。インストール直後は登録に数分かかることがあるので、アプリを一度起動してから試してください。</li>
           <li><strong>Siriの言語が日本語か</strong><br>設定 → Siri → 言語。英語のSiriに日本語の合言葉は通りません。</li>
-          <li><strong>合言葉が「シンプルメモで残す」か</strong><br>「〜にメモ」はiPhone標準のメモAppへの指示として取られます。確実なのは「〜で残す」です。</li>
+          <li><strong>合言葉が「シンプルメモで残す」か</strong><br>「〜にメモ」はiPhone標準のメモAppへの指示として取られます。「〜で残す」を試し、実行する操作を確認してください。</li>
           <li><strong>送信先メールの認証が済んでいるか</strong><br>Siriが応えても、宛先が未設定だとメモは届きません。アプリを開いて初期設定を終えてください。</li>
         </ol>
 
@@ -578,15 +559,15 @@
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title"><span lang="ja">散歩・ランニング中に</span></div>
-            <div class="reason-card__desc"><span lang="ja">歩きながら浮かんだアイデアを、立ち止まらず・取り出さず。AirPodsに一言で受信箱へ。</span></div>
+            <div class="reason-card__desc"><span lang="ja">出発前にSiriの利用設定と保存先を確認します。浮かんだアイデアを渡した後、安全に確認できる場面で実際の到着を確かめてください。</span></div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title"><span lang="ja">家事・料理をしながら</span></div>
-            <div class="reason-card__desc"><span lang="ja">濡れた手・粉だらけの手でも大丈夫。「牛乳買う」も「企画のひらめき」も声だけで。</span></div>
+            <div class="reason-card__desc"><span lang="ja">設定済みのSiriから短い思いつきを渡す使い方です。認証を求められたら端末の案内に従い、保存先の結果も確認します。</span></div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title"><span lang="ja">寝る前・起き抜けに</span></div>
-            <div class="reason-card__desc"><span lang="ja">布団から出ずに、明日の自分へ。画面の光を見ずに済むのもうれしいところ。</span></div>
+            <div class="reason-card__desc"><span lang="ja">端末が実行を許可する条件で、思いつきをSiriへ渡します。応答を確かめ、実際の保存も後から確認してください。</span></div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title"><span lang="ja">移動中はハンズフリーで</span></div>
@@ -602,14 +583,14 @@
 
         </h2>
         <div lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AirPodsのステムを長押ししてもSiriが出ません</summary><div class="faq-answer"><p>AirPods Pro（第1・第2世代）とAirPods 4（ノイズキャンセリング搭載）は、ステム長押しの初期設定が<strong>「ノイズコントロールの切り替え」</strong>で、Siriは起動しません。長押しすると音は鳴るため、失敗したことに気づきにくいのが厄介な点です。<strong>設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri</strong> に変更してください（左右それぞれに設定があります）。設定を変えずに使いたい場合は「Hey Siri、シンプルメモで残す」と話しかければ、どの機種でも同じように動きます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siriが反応しません／「そのためのアプリが見当たりません」と言われます</summary><div class="faq-answer"><p>ショートカットAppを開き、「シンプルメモ」のショートカット設定で<strong>Siriがオン</strong>になっているか確認してください（オフだと全フレーズが認識されません）。オンにしたら「Hey Siri、シンプルメモで残す」と話しかけてください。言い回しは<strong>「〜で残す」</strong>が最も確実です。インストール直後は登録に数分かかることがあるため、アプリを一度起動して少し待ってから試してください。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">「シンプルメモにメモ」と言ったら違う動きをしました</summary><div class="faq-answer"><p>「〜にメモ」という言い回しはiPhone標準のメモ機能への指示としてSiriに解釈されやすく、シンプルメモには届かないことがあります。実機検証の結果、確実に通る合言葉は<strong>「Hey Siri、シンプルメモで残す」</strong>です。「シンプルメモに送信」はメッセージAppとの二択が出ることがありますが、一度「シンプルメモ」を選ぶと以降は通りやすくなります。アプリ名だけを言うとアプリが開くだけです。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">アプリを開かずに、どうやって送信されるのですか？</summary><div class="faq-answer"><p>AppleのApp Intents（App Shortcuts）という仕組みで、Siriがバックグラウンドのままアプリの送信処理を直接呼び出します。画面は開かず、話した本文がそのままいつもの<a href="/note-to-email/" style="color:var(--accent);">メール送信</a>と<a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>に合流します。事前にアプリ内で初期設定（送信先メールの認証）を済ませておくことが前提です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフライン（圏外）でSiriに話したらどうなりますか？</summary><div class="faq-answer"><p>送信キュー（Outbox）に暗号化して保存され、オンラインに戻りしだい自動送信されます。その場合Siriは「オンラインに戻りしだい送信します」と答えます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AirPodsだけで完結しますか？画面を見る必要は？</summary><div class="faq-answer"><p>iPhoneがロックされたままポケットにあっても、AirPodsで「Hey Siri、シンプルメモで残す」→ Siriが「何をメモしますか？」と読み上げ → 本文を話す → 送信完了の読み上げ、まで<strong>画面に一切触れず・見ずに</strong>完結します（実機検証済み）。画面が点いた状態でiPhone本体に話しかけた場合は、Siriの仕様で応答が画面表示になることがあります。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">「高音質録音」とは何ですか？</summary><div class="faq-answer"><p>アプリ内の音声入力でAirPodsのマイクを使って録音する設定です（iOS 26以降・H2チップ搭載AirPods）。音質と距離の自由度が上がる一方、認識開始が約0.7秒遅くなるため、速さを優先して<strong>既定ではオフ</strong>にしています。設定 → 詳細設定 → 高音質録音で切り替えられます。なおSiri経由の送信は、この設定に関係なくAirPodsのマイクで話せます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri送信は無料プランでも使えますか？</summary><div class="faq-answer"><p>使えます。Siri経由の送信もアプリ内からの送信と同じ扱いで、無料プランの1日の送信枠を共有します。枠を使い切った場合はSiriが音声でその旨を伝えます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AirPodsのステムを長押ししてもSiriが出ません</summary><div class="faq-answer"><p>AirPods Pro（第1・第2世代）とAirPods 4（ノイズキャンセリング搭載）は、ステム長押しの初期設定が<strong>「ノイズコントロールの切り替え」</strong>で、Siriは起動しません。長押しすると音は鳴るため、失敗したことに気づきにくいのが厄介な点です。<strong>設定 → Bluetooth → お使いのAirPodsの ⓘ →「長押ししたときの操作」→ Siri</strong> に変更してください（左右それぞれに設定があります）。設定を変えずに使いたい場合は「Hey Siri、シンプルメモで残す」と話しかけ、お使いの端末で本文の入力まで進むか確かめてください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siriが反応しません／「そのためのアプリが見当たりません」と言われます</summary><div class="faq-answer"><p>ショートカットAppを開き、「シンプルメモ」のショートカット設定で<strong>Siriがオン</strong>になっているか確認してください（オフだと全フレーズが認識されません）。オンにしたら「Hey Siri、シンプルメモで残す」と話しかけてください。言い回しは<strong>「〜で残す」</strong>から試してください。インストール直後は登録に数分かかることがあるため、アプリを一度起動して少し待ってから試してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">「シンプルメモにメモ」と言ったら違う動きをしました</summary><div class="faq-answer"><p>「シンプルメモで残す」を試し、Siriが本文を聞く送信操作へ進むか確認してください。別のアプリや操作が選ばれたら、Siriの言語設定とショートカットの登録を確認します。アプリ名だけの発話も、アプリ起動になるか登録された送信操作になるかはSiriの案内を確かめてください。現行版のすべての端末で同じ解釈になるとは限りません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">アプリを開かずに、どうやって送信されるのですか？</summary><div class="faq-answer"><p>Siriの「で残す」はアプリの送信処理へ本文を渡す入口です。送信先メールの認証など初期設定が必要です。通常モードのメール送信とObsidianへの追記は別の経路で、Siriの「送信しました」だけでは保管庫保存を確認できません。選んだフォルダへの直接書き込みが成功することと、別端末へ同期することも分けて確認してください。「声でメモ」はアプリを開く別の入口です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフライン（圏外）でSiriに話したらどうなりますか？</summary><div class="faq-answer"><p>Siriから本文がアプリへ渡され、通常モードのメールが待機になった場合は、暗号化したOutboxへ保存して通信復帰後に再送を試みます。Siriの呼び出しや音声認識自体が圏外でも使えるとは限りません。保管庫への直接書き込みには、端末にある対象フォルダと書き込み権限が必要です。メール待機・保管庫保存・他端末同期を別に確認してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AirPodsだけで完結しますか？画面を見る必要は？</summary><div class="faq-answer"><p>必要な設定が整った環境では、Siriとの音声のやり取りからメモを渡せます。ロック中のSiri利用設定、選んだショートカット、端末の状態によって、解除や画面操作が必要になる場合があります。アプリを開く「声でメモ」と、本文を送信処理へ渡す「で残す」は別の入口です。すべての端末状態で操作不要と保証せず、最初のメモで受信箱と保管庫の本文を確認してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">「高音質録音」とは何ですか？</summary><div class="faq-answer"><p>「高音質録音」はアプリ内の音声入力でAirPodsのマイクを使うための設定です。対応するiOS・AirPodsが必要で、設定 → 詳細設定で切り替えます。Siriから本文を渡す送信ショートカットとは別の機能です。ここではマイク切替による開始時間の差を実測していません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri送信は無料プランでも使えますか？</summary><div class="faq-answer"><p>使えます。Siri経由の送信もアプリ内からの送信と同じ扱いで、無料プランの1日の送信枠を共有します。枠を使い切った場合はSiriが上限到達を案内します。音声か画面かは端末の状態によります。</p></div></details></div>
         </div>
 
       </section>
@@ -617,7 +598,7 @@
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja">ポケットの中のまま、思いつきを受信箱へ</span>
+          <span lang="ja">思いつきを渡し、保存先の到着を確認</span>
 
         </div>
         <div class="cta-box__desc">
