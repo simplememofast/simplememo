@@ -227,8 +227,8 @@
               <tr><th scope="row">得意な起点</th><td class="yes">他アプリからの「共有」（URL・選択テキスト）</td><td>オートメーション・定型処理</td><td>Obsidianを開いて使う作業中</td><td class="yes">「思いついた瞬間」のゼロからの入力</td></tr>
               <tr><th scope="row">思いつきメモの速さ</th><td>共有元アプリを開いてから共有シートを辿る</td><td>ショートカット起動＋入力プロンプト</td><td>Obsidianの起動を待つ（Vault規模で変動）</td><td class="yes">起動0.4秒（実測・ウォーム）→ 即入力</td></tr>
               <tr><th scope="row">Apple Watchからの入力</th><td class="no">不可（watchOSアプリなし）</td><td class="no">Vault不在のため実質不可</td><td class="no">不可</td><td class="yes">手首で音声入力。送信・Vault追記はペアのiPhone経由</td></tr>
-              <tr><th scope="row">音声入力</th><td>iOSキーボード音声入力に依存</td><td>Siri経由で一部可</td><td>iOSキーボード音声入力に依存</td><td class="yes">開いたら自動録音・オンデバイス変換</td></tr>
-              <tr><th scope="row">タグ・タイトル付与</th><td>テンプレートで一部自動（ページタイトル・URL・日付など）</td><td class="no">手動（テンプレで一部自動）</td><td class="yes">テンプレートで強力に制御</td><td class="yes">オンデバイスAIが自動付与（タグ付けのための外部送信なし）</td></tr>
+              <tr><th scope="row">音声入力</th><td>iOSキーボード音声入力に依存</td><td>Siri経由で一部可</td><td>iOSキーボード音声入力に依存</td><td class="yes">開いたら自動録音（設定でオン・iOS 26以降）・オンデバイス変換</td></tr>
+              <tr><th scope="row">タグ・タイトル付与</th><td>テンプレートで一部自動（ページタイトル・URL・日付など）</td><td class="no">手動（テンプレで一部自動）</td><td class="yes">テンプレートで強力に制御</td><td class="yes">オンデバイスAIが自動付与（「AIタグ自動追加」をオンにしたとき。タグ付けのための外部送信なし）</td></tr>
               <tr><th scope="row">オフライン時</th><td class="yes">ローカル保存で動作</td><td>アクションによる</td><td class="yes">ローカル保存で動作</td><td class="yes">Outboxに暗号化保存→自動再送</td></tr>
               <tr><th scope="row">Vault以外への控え</th><td class="no">なし</td><td class="no">なし（組めば可）</td><td class="no">なし</td><td class="yes">メール受信箱にも同時に残る（二重化）</td></tr>
               <tr><th scope="row">失敗モード</th><td>共有先ノートの選び間違い</td><td class="no">URLスキーム経由は本文切れ・二重作成・別Vault書込みが起きやすい</td><td>プラグイン更新で壊れることがある</td><td>メール経由が不要な人には過剰</td></tr>
@@ -274,7 +274,7 @@
           <li>
             <span class="diff-num">3</span>
             <strong>音声とAIタグの自動化 — 「開く→話す→終わり」</strong><br>
-            開いたら自動で録音が始まり、オンデバイスで文字起こし。さらにオンデバイスAI（Apple Foundation Models）が20文字以内のタイトル・1〜3個のタグ・種別（todo/idea/log）を自動付与します。タグ付けのためにメモ本文が外部サーバーへ送られることはありません。タグ付きのままVaultに追記されるので、後の整理が要りません。
+            設定の「起動時に音声入力を自動オン」をオンにすれば、開いたら自動で録音が始まり、オンデバイスで文字起こし（iOS 26以降の対応端末）。さらに設定の「AIタグ自動追加」をオンにすれば、オンデバイスAI（Apple Foundation Models）が20文字以内のタイトル・1〜3個のタグ・種別（todo/idea/log）を自動付与します。タグ付けのためにメモ本文が外部サーバーへ送られることはありません。タグ付きのままVaultに追記されるので、後の整理が要りません。
           </li>
           <li>
             <span class="diff-num">4</span>
