@@ -160,6 +160,12 @@ PR1783 finalhead935ac0960605dc91de1727b25c7fe5ab5a8fce3cの通常SEO36751347416/
 
 この原記事の実配送確認でC20の元title/unique_value/evidenceを保持しdone記録を準備、残19（pending17/blocked2）。このqueue/evidence/audit三filecloseoutの最終CI・対応main merge/Pagesは記事本体と別に確認する。原7source一致・本番raw2bytesとHTML条件を分け、全サイト/全文/全assets・Google登録・CTA・iOS/SimpleMemo・同期/生産性・流入改善は認定しない。既存owner/停止/評価/契約を維持し、Company無人率・自然schedule復旧へ加点しない。詳しくは[元実証と配備経過](../obsidian/evidence/sync-conflict-20260930.md)。
 
+### C26のグラフ表示操作候補（2026-10-01 JST）
+
+原キューのノート増加による時系列を、別fixtureの6/3→7/4として実GUI保存と元Markdownで確認。C17の理由つきリンク・索引とはglobal/local表示条件のhow-toを分け、path/tag/Orphans/Groups/native色/Depth1・2を九つの固定ケースで確認した。42assertions/87原本file、原7PNG/7MD相対パス・派生ZIP・OGと有限私的品質93/100、4幅・実download8件・FAQ4・原文code1・Next stepを保持する。API補助値・設定overlay・初回readout訂正を明示し、全graph条件・大Vault・Sync/SimpleMemo・速度/生産性/流入の検証へ広げない。
+
+[確認範囲](../obsidian/evidence/graph-view-20260930.md)とZettelkasten/second-brain各1文、article/raw/ZIP/OG/evidence/全metadata/GSC3対象を申告。元85ケースとC13/C14/C17/C20の12比較を保持し、C26のHTML・追加メモ92B・local-depth-2 PNGだけを追加する。先行GSC修復・workflowを重複導入しない。C26のtitle/unique/status:pendingと全既存owner/停止/評価/契約を維持し、最終HEAD通常CI・対応main merge/Pages・実本番readbackまで完了としない。Company prospective global衝突は免除せず、policy42の明示された手動公開として全範囲と実公開時刻を別に記録する。流入倍増は同定義の成熟計測待ちで、Company無人率・自然schedule復旧へ加点しない。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
