@@ -1559,7 +1559,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 時刻 | PR | 中身 |
 | --- | --- | --- |
 | 13:19 | [#1618](https://github.com/simplememofast/simplememo/pull/1618) | 第7弾（第8弾を合流。124ファイル・78コミット）：下の「見つけたこと」 |
-| — | この PR | 影響する4つの実験（title-2026-08-20-home-grammar・video-2026-08-11-five-clips・aio-2026-08-11-answer-blocks・engage-2026-08-11-next-step）に同日の note、`growth/data/annotations.json` に 2026-09-26 の行、この §5.30 |
+| 9/26 13:39 | [#1619](https://github.com/simplememofast/simplememo/pull/1619) | 影響する4つの実験（title-2026-08-20-home-grammar・video-2026-08-11-five-clips・aio-2026-08-11-answer-blocks・engage-2026-08-11-next-step）に同日の note、`growth/data/annotations.json` に 2026-09-26 の行、この §5.30 |
 
 ### 第7弾で見つけたこと（意外な残タスク）
 
@@ -1597,7 +1597,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 15:47 | [#1624](https://github.com/simplememofast/simplememo/pull/1624) | 第11弾（94ファイル・92ページ）：参考文献の点検、第10弾のあとに残っていた言い過ぎ |
 | 16:11 | [#1625](https://github.com/simplememofast/simplememo/pull/1625) | 第12弾（28ファイル・25ページ）：子育てページの題の「忘れない」（OG 画像）、#1618 の改題に追従していなかった関連リンク、朝のメモの記事の「3つの科学的理由」、「最大の原因」 |
 | 16:36 | [#1626](https://github.com/simplememofast/simplememo/pull/1626) | 第13弾（21ファイル・19ページ）：集計していない利用データ（速度ベンチマークの記事）、心理学の用語の取り違え、「いかなる攻撃パターンにも」ほか |
-| — | この PR | 影響する実験（aio-2026-08-11-answer-blocks・aio-2026-08-12-entity-attribution・engage-2026-08-11-wait-test・engage-2026-08-11-next-step・title-2026-08-20-home-grammar・video-2026-08-11-five-clips）に同日の note、`growth/data/annotations.json` に弾ごとの行、この §5.31、オーナー判断の表に #38・#39 |
+| 9/26 17:08 | [#1627](https://github.com/simplememofast/simplememo/pull/1627) | 影響する実験（aio-2026-08-11-answer-blocks・aio-2026-08-12-entity-attribution・engage-2026-08-11-wait-test・engage-2026-08-11-next-step・title-2026-08-20-home-grammar・video-2026-08-11-five-clips）に同日の note、`growth/data/annotations.json` に弾ごとの行、この §5.31、オーナー判断の表に #38・#39 |
 
 ### 見つけたこと（意外な残タスク）
 
@@ -1642,7 +1642,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 18:03 | [#1631](https://github.com/simplememofast/simplememo/pull/1631) | 第17弾（14ページ）：記事の上に表示している「最終更新」「Last updated」の日付を dateModified に揃えた（本文は不変） |
 | 18:14 | [#1632](https://github.com/simplememofast/simplememo/pull/1632) | 第18弾（5ページ）：Google Keep の比較（Keep は保存時も暗号化、Gmail も Google、7日間の試用は無い、「永久に残る」） |
 | 18:53 | [#1633](https://github.com/simplememofast/simplememo/pull/1633) | 第19弾（19ページ）：比較表の他社のオフライン・暗号化のセル、Tana（公式アプリがある）と Goodnotes（計測していない秒数・「100%」）の比較ページ、第15弾の Evernote「Personal 月額1,700円」の訂正 |
-| — | この PR | 影響する実験（aio-2026-08-12-entity-attribution・engage-2026-08-11-next-step）に同日の note、`growth/data/annotations.json` に弾ごとの行、この §5.32、オーナー判断の表に #40〜#42 |
+| 9/26 19:21 | [#1634](https://github.com/simplememofast/simplememo/pull/1634) | 影響する実験（aio-2026-08-12-entity-attribution・engage-2026-08-11-next-step）に同日の note、`growth/data/annotations.json` に弾ごとの行、この §5.32、オーナー判断の表に #40〜#42 |
 
 ### 見つけたこと（意外な残タスク）
 
@@ -1943,7 +1943,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 9/30 21:50 | [#1765](https://github.com/simplememofast/simplememo/pull/1765) | 第56弾：`/hands-free/` 日英の「画面を見ず・触らず、声だけで」（開くときと送るときは画面の操作が要る。運転中の安全の欄と FAQ も）、「話しただけで Obsidian とメールに」（送信したとき）、「開いた瞬間に」。`/ai-tags/` 日英の音声の手順カードに自動オンの条件と iOS 26 以降 |
 | 9/30 21:56 | [#1766](https://github.com/simplememofast/simplememo/pull/1766) | 第57弾：`/en/use-cases/freelancers` の「次のメモでクライアントを Cc に」（Cc の機能は無い）→ 受け取ったメールの転送。students・managers の崩れた文「arrives withwith one tap」 |
 | 9/30 22:07 | [#1767](https://github.com/simplememofast/simplememo/pull/1767) | 第58弾：`/en/blog/` の記事一覧のカードと `llms.txt` の「~0.3–0.5s (real) latency」（記事が計測ではないと書いて外した数字）。`llms.txt` の `/hands-free/` の行を「送信で Obsidian に追記」に |
-| — | この PR | 第54〜第58弾の計測の台帳の note と annotations の行、この §5.39、オーナー判断 #53・#54 の追加、§5.38 の「この PR」の行 |
+| 9/30 22:26 | [#1768](https://github.com/simplememofast/simplememo/pull/1768) | 第54〜第58弾の計測の台帳の note と annotations の行、この §5.39、オーナー判断 #53・#54 の追加、§5.38 の「この PR」の行 |
 
 ### 見つけたこと
 
@@ -1962,6 +1962,46 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 
 - 毎晩の確認は 10/1 20:40 JST に予約済み。10/08 まで毎日かけ直す。
 - オーナー判断待ち：#43〜#45、#47〜#54。公開の台帳に書かない確認事項が1件（オーナーに直接）。
+
+## 5.40 2026-09-30 深夜〜10/1 未明：メールと保管庫の「同時に」（第59弾）、英語の音声入力ガイド（第60弾）、0.4秒の意味と出典の無い数字（第61弾）、手書きの記事の写真の案内とAI比較の記事（第62弾）、送信・テンプレートの説明（第63弾）、検証の止まりと日付をまたいだ sitemap
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 9/30 22:42 | [#1769](https://github.com/simplememofast/simplememo/pull/1769) | 第59弾（9ページ＋サイトマップ、11か所）：「自分宛メールに届くと同時に保管庫へ追記」などを別の経路として書き直し（`/obsidian/daily-note/`、`/obsidian/shortcuts-not-working/` 日英、`/obsidian/apple-watch-not-working/` 日英、`/blog/fleeting-notes`、`/vs/obsidian-share-sheet/` 日英）。`/glossary/second-brain/` の「すべてのインスピレーションを逃さず」 |
+| 9/30 22:53 | [#1771](https://github.com/simplememofast/simplememo/pull/1771) | 第60弾（2ページ、22か所）：`/en/blog/obsidian-voice-input` を直してある日本語版にそろえた（公式 Capture アクション、音声入力の条件、メールと保管庫は別の経路、0.4秒の範囲、Free は1日3通、表と FAQ）。日本語版は「Obsidianだけに保存するモード（Premium）」 |
+| 9/30 23:23 | [#1772](https://github.com/simplememofast/simplememo/pull/1772) | 第61弾（36ページ＋サイトマップ2つ、72か所）：0.4秒をキャプチャ・保存・送信の時間として書いていた所を「タップから0.4秒で書き始められる」に。出典の無い数字（95%・毎日平均20分）、記録の無い体験談（会議40分→25分）、見つからない文献（Kinds & Meier 2021）を外し、手書きの記事を2021年の再現研究にそろえた |
+| 9/30 23:49 | [#1773](https://github.com/simplememofast/simplememo/pull/1773) | 第62弾（4ページ、34か所）：`/blog/digital-vs-handwritten-notes` 日英の「手書きメモの写真をシンプルメモで送る」（テキスト専用で送れない）と「手書きは記憶に有利」の言い切り（回答ブロック・説明文・表・コツ）、英語の「zero idea loss」。`/blog/ai-vs-simple-memo` の日本語 FAQ「AI非搭載」、英語の「not stored on servers」、「AI機能はオフライン不可」 |
+| 10/1 01:43 | [#1779](https://github.com/simplememofast/simplememo/pull/1779) | CI：`.github/workflows/seo-check.yml` の WebKit の導入手順に `timeout-minutes: 10`。apt が失敗せずに止まったとき、検証がジョブ既定の360分まで終わらずマージが止まるのを防ぐ（下の「見つけたこと」） |
+| 10/1 01:47 | [#1774](https://github.com/simplememofast/simplememo/pull/1774) | 第63弾（4ページ＋サイトマップ3つ、7か所）：`/vs/drafts/` の FAQ「入力→自動送信」（送信はタップ）。`/en/blog/offline-first-comparison` の「Email is delivered, receipt is logged」「The moment you reconnect … delivers all queued notes」（アプリが記録するのは送信の受け付けで、再送は次にアプリを開いたときかバックグラウンド）。`/blog/morning-memo-routine` 日英の「メモアプリの定型文・プリセット」（本文の定型文の機能は無く、テンプレートは貼り付け）。最初の検証が止まっているうちに日付をまたいだので、sitemap の lastmod をマージ参照の上で作り直して足した（下の「見つけたこと」） |
+| — | この PR | 第59〜第63弾の計測の台帳の note と annotations の行、この §5.40（#1779 と、日付をまたいだ sitemap の記録を含む）、オーナー判断 #55 の追加、§5.30〜§5.32・§5.39 の「この PR」の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **メールと保管庫を「同時に」と書いたページが9つ残っていた**：`/siri/`（#1727）と第54〜第56弾で直した「別の経路」の説明が、Obsidian 配下と比較ページに届いていなかった | 第59弾で直した |
+| **片方の言語だけが古いまま残っていた**：`/en/blog/obsidian-voice-input` は日本語版（9/5 と第41・第51弾）の修正が入っておらず、「audio never leaves the device」「simultaneously」「0.4s…effectively zero」「fastest」「Offline: Yes」が残っていた。`/en/blog/ai-vs-simple-memo` の「not stored on servers」（日本語版は第34弾で直した）。逆に `/blog/digital-vs-handwritten-notes` は英語版の本文だけが再現研究を反映し、`/blog/ai-vs-simple-memo` は英語版の FAQ だけが「端末内の AI」に直っていた | 第60〜第62弾で直した。日本語版だけが直った最近の PR（#1722・#1731・#1738・#1748・#1752）と所要時間の言い換え（#1703・#1709・#1716）を日英の組で見直し、残っていたのはこの4組 |
+| **アプリに無い機能の案内**：`/blog/digital-vs-handwritten-notes` 日英が「手書きメモの写真をシンプルメモで自分のメールに送る」バックアップを勧めていた。シンプルメモはテキスト専用で写真は送れない（サイト自身の比較表どおり）。ほかのページに写真・画像をシンプルメモで送るという案内は無かった | 第62弾で直した |
+| **「AI非搭載」の残り**：`/blog/ai-vs-simple-memo` の日本語 FAQ が、7月の AIタグ自動追加より前の「AIは非搭載」のままだった | 第62弾で直した |
+| **送信と記録の説明の残り**：「入力→自動送信」（`/vs/drafts/`）、「Email is delivered, receipt is logged」「The moment you reconnect … delivers all queued notes」（`/en/blog/offline-first-comparison`。aio-2026-08-12-entity-attribution の対象記事）、「メモアプリの定型文・プリセットに登録」（`/blog/morning-memo-routine` 日英） | 第63弾で直した。シンプルメモが自動で送る・写真を送る・本文のテンプレートを持つ、という案内はほかに見つからなかった |
+| **0.4秒の意味の取り違え**：計測はタップから入力できるまでなのに、「0.4秒でキャプチャ」「0.4秒で保存」「0.4秒でメモ→メール送信」「Capture in 0.4s」と、書く・送る・保存する時間のように書いた所が約50か所 | 第61弾で直した。「起動0.4秒」と起動の時間として書いている所は、オーナー判断 #31 のとおり変えていない |
+| **出典の無い数字と、見つからない文献**：「『後でメモしよう』は95%の確率で忘れます」（日英）、「毎日平均20分を浪費」（日英）、記録の無い体験談「会議時間が平均40分から25分に短縮」、「Kinds & Meier（2021）」（ページの参考文献にも、9/9 の文献の照合にも無く、検索でも見つからない） | 第61弾で外した。ほかの著者名つきの引用（約60件）は 9/9 の照合（`docs/seo/reference-identity-corrections-2026-09-09.json`）か既知の文献で、`Perlow, Hadley & Eun (2017)`（HBR）も実在 |
+| **Obsidian 1.14（早期アクセス）の iOS 26 向け Quick Capture**：ロック画面・コントロールセンター・ショートカットから、保管庫の読み込みを待たずにメモを残せる（9/2 の 1.14.0 の変更履歴。9/29 の 1.14.3 もまだ早期アクセス）。公開版になると、「Obsidian を開いて保管庫の読み込みを待つ」前提の比較の書き方が古くなる | いまは公開版 1.13 の説明が正しい（`/vs/obsidian-share-sheet/` などは早期アクセスとして書いている）。1.14 が公開版になったら比較ページを見直す（次にやること） |
+| **回答ブロックの研究の言い切り**：aio-2026-08-11-answer-blocks の対象の `/blog/digital-vs-handwritten-notes` の回答ブロックが「記憶への定着と理解の深さでは手書きが有利」「併用が最も多く…定着」と言い切っていた（同じページの本文と FAQ、`/blog/brain-science-memo` は2021年の再現研究を載せている） | 第62弾で、第49弾（#1744）と同じ扱いで直し、実験に note を付けた |
+| **PR の本文の実験の書き漏れ**：第61弾（#1772）の本文に、対象ページ `/blog/digital-vs-handwritten-notes` を持つ aio-2026-08-11-answer-blocks が抜けていた（ページの一覧を部分一致で照合したため） | 9/30 に PR の本文を訂正し、この PR で実験に note を付けた。以後は実験の `page`・`pages` の URL と完全一致で照合している |
+| **検証が止まったまま終わらない**：#1774 の検証（SEO Validation #4014 の1回目）が、WebKit の導入手順で `sudo apt-get update -qq` のあと何も出さずに1時間22分止まった（9/30 23:42〜10/1 01:05 に取り消し）。この手順の `continue-on-error` は失敗にしか効かず、止まりには手順にもジョブにも上限が無かった（既定の360分まで待つ）。流し直しでは同じ手順が27秒で通り、同じ時間帯の #1775・#1777・#1770 の検証も通っている。一方、同じ夜の #1774 の次の検証（#4024）では、同じ手順が11分12秒かかって通った（遅いが止まってはいない） | 取り消して流し直し、#1779 で10分の上限を付けた（`obsidian-autopilot.yml` の日本語フォントの手順と同じ形）。上限が10分だと、#4024 のような遅い回は WebKit の計測が「測れなかった」になる（横スクロールの確認は報告のみで、マージは止めない）。延ばすかどうかは、次に同じことが起きたときの記録で決める。止まった原因は、出力が無いのでログからは分からない。タイムアウトした手順が先へ進むことは、まだ実際には起きていない |
+| **日付をまたいだマージで sitemap の lastmod がずれる形**：`scripts/sitemap_lastmod.py` は、ページを変えた first-parent のコミットの JST 日付を lastmod にする。#1774 は 9/30 に作った sitemap（9/30）のまま 10/1 に squash されると main の内容履歴（10/1）とずれ、そのあとに開く PR の検証が `WRONG LASTMOD`（5件）で落ちる形だった（squash 後と同じ形を手元で作って確認） | CLAUDE.md の手順どおり、マージ参照の上で `generate_sitemap.py` を回した出力を #1774 に足した（10/1 01:22）。0時をまたいで持ち越す PR は、マージの前に作り直す |
+| **題と CTA の見出しの誇張**：「ひらめきを逃さない」（題）、「完璧」「最高の」「Perfect」「ideal」「Lightning Speed」「究極」 | オーナー判断 #55 |
+| **確かめて問題が無かったもの**：8言語のトップの 0.4 秒（どれもウォーム起動・iPhone 16e の条件つき）、`/en/blog/revenue-report-2025` の書きかけ（noindex・サイトマップ外・どこからもリンクされていない。7/2 の監査どおり）、新しい `/obsidian/plugins/quickadd/`・`/obsidian/plugins/templater/`（シンプルメモについて確かめていない範囲を明記している） | 直していない |
+
+### 次にやること
+
+- 毎晩の確認は 10/1 20:40 JST に予約済み。10/08 まで毎日かけ直す。
+- 0時をまたいで持ち越した PR は、マージ参照の上で sitemap を作り直してからマージに回す（第63弾で実施）。
+- Obsidian 1.14 が公開版になったら（obsidian.md/changelog の「Mobile (Public)」）、Quick Capture を踏まえて比較ページの「保管庫の読み込み」の書き方を見直す。
+- オーナー判断待ち：#43〜#45、#47〜#55。公開の台帳に書かない確認事項は、オーナーに直接伝える。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -2214,3 +2254,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 52 | **ページの題（title）に、条件なしの言い切りが残る**：`/hands-free/` の「ハンズフリー音声メモ — 移動中も開くだけで自動録音・圏外でも端末に残る」（og:title・twitter:title も同じ趣旨）、英語トップの「AI Auto-Tagging Notes to Email & Obsidian」。本文・説明文・構造化データは第49〜第53弾と #1748 で条件つきに直したが、題は変えていない（§5.38） | 題は検索結果の見出しで、順位や実行中の実験の読み（`/` の title-2026-08-20-home-grammar。英語トップは対象外とされている）に響くので、変える前に判断を取る | ① 題にも条件を入れる（例：「設定すれば開くだけで自動録音」）、② 題は機能の名前の言い方に変える（例：「自動録音にも対応」）、③ このまま（本文と説明文で条件を示す） |
 | 53 | **Siri・AirPods の題とリンクの言い切り**：`/obsidian/airpods/` の題・見出し「AirPodsに話すだけでObsidianへ残す」、`/siri/` の題「スマホを触らずSiriでObsidianへ送る」、それを写したリンクの文言（トップ・`/hands-free/` の「AirPodsから、スマホを触らず送る」、`/apple-watch/`・`/autopilot/` の「AirPodsに話すだけでObsidianへ」）、トップの Siri のバナー画像（画像の中の文言と代替テキスト）。本文・説明文・構造化データは #1727 と第54〜第56弾で条件つきに直したが、題とリンクと画像は変えていない（§5.39） | 題は検索結果の見出しで、順位と実行中の実験の読み（`/` の title-2026-08-20-home-grammar、`/siri/` を含む video-2026-08-11-five-clips）に響く。画像は作り直しが要る | ① 題にも条件を入れる（例：「AirPodsからSiriでObsidianへ送る」）、② 機能の名前の言い方に変える（例：「AirPodsとSiriで音声メモ」）、③ このまま（本文で条件を示す） |
 | 54 | **英語の社名の書き方がそろっていない**：英語ページのフッター（約210ページ。`data/site-constants.json` の `copyrightLineEn`）は「Yurika Inc.」、App Store の販売元（iTunes の `sellerName`）・`/en/about/` の本文・`/en/terms`・`/en/privacy`・`site-constants.json` の `publisher`・この台帳の会社欄は「YURIKA, K.K.」 | 同じ会社が英語で2つの名前になっていて、AI の検索や読む人が同じ会社だと結び付けにくい（aio-2026-08-12-entity-attribution・brand-2026-08-11-entity-merge の読みにも響く）。英語の全ページのフッターが変わるので判断を取る | ① 「YURIKA, K.K.」にそろえる（App Store・規約と同じ）、② 「Yurika Inc.」のまま（英語の通称として台帳に書く）、③ フッターだけ併記 |
+| 55 | **題と CTA の見出しに残る誇張**：`/use-cases/ideas/` の題「アイデアメモアプリ — ひらめきを逃さない」と JSON-LD の headline、CTA の見出し・説明文の「GTDのキャプチャを完璧にする」（`/glossary/gtd/`・`/methods/gtd/`）「Inbox Zeroを実践する最高のキャプチャツール」「最適なメモキャプチャ」（`/glossary/inbox-zero/`）「究極のシンプルメモを体験」、英語の「Perfect Your GTD Capture」「The Perfect Capture Tool for Inbox Zero」「the ideal capture tool」「… at Lightning Speed」（`/en/glossary/markdown/`・`/en/glossary/spaced-repetition/`・`/en/use-cases/writers/`）「Experience ultimate simplicity」など約18か所（§5.40） | 計測や機能の誤りではないが、第34弾・第59弾で直した「逃さない」「すべてを」と同じ種類の言い切り。題は検索結果の見出しで、CTA の見出しは計測中の CTA の読みにも響くので、まとめて判断を取る | ① 条件のない言い切りをやめる（例：「GTDのキャプチャを手早く」「Capture Markdown Notes Quickly」）、② 題だけ残して CTA を直す、③ このまま |
