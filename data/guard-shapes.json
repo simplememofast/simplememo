@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "problems",
+      "disposition": "前提",
+      "note": "2026-09-30: 自己修復の検査が問題なしで、actionsの上限到達対象が1件だけの場合に限り、所有者承認の私的な1回限り復旧許可を照合する成功条件。問題があれば許可の照合へ進まず従来のcontainへ落ちる。許可欠落・不正・別タスク・Run now・期限切れもPython側が拒否し、明示停止は解除しない。規則の欠測で違反を消す条件ではない。実タスクと初回turnの照合、期限、停止と予算の拒否を8件の検査で確認。"
+    },
+    {
       "file": "scripts/decision-ci.mjs",
       "expr": "declared.id",
       "disposition": "別に検出",
