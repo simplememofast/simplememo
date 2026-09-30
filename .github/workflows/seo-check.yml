@@ -1342,7 +1342,7 @@ jobs:
         run: python3 growth/queries/gsc-intent.test.py
 
       - name: Private analytics API retrieval
-        run: node --test growth/lib/analytics-export.test.mjs growth/lib/backup-inventory.test.mjs growth/lib/gcp-schedule-inventory.test.mjs
+        run: node --test growth/lib/analytics-export.test.mjs growth/lib/cta-page-manifest.test.mjs growth/lib/backup-inventory.test.mjs growth/lib/gcp-schedule-inventory.test.mjs
 
       - name: GA4 tag queue ordering
         run: node --test scripts/ga4-tag-order.test.mjs
@@ -1357,6 +1357,7 @@ jobs:
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check -r growth/tests/requirements-sql.txt
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-funnel-sql.test.py
           "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-journey-sql.test.py
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-cta-pages-sql.test.py
 
       # 一括エクスポートの「届いているように見えて欠けている」判定。
       # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。

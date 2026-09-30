@@ -266,6 +266,46 @@ test('funnel always includes quality output and keeps the standard event denomin
   assert.ok(api.calls.every(q => q.params.bridge_measurement_version === '2026-09-07'));
   assert.match(result.interpretation, /QA is excluded/);
 });
+test('CTA-page diagnosis is prospective, explicit-only and retains unchanged quality/funnel queries', async () => {
+  const options = { report: 'ga4-cta-pages', execution: 'export', start: '2026-10-01', end: '2026-10-07' };
+  const mature = new Date('2026-10-12T01:30:00Z');
+  for (const change of [{ start: '2026-09-30' }, { end: '2026-10-08' }]) {
+    assert.throws(() => validateOptions({ ...options, ...change }, mature));
+  }
+  assert.throws(() => validateOptions(options, new Date('2026-10-11T01:30:00Z')));
+  const tables = Array.from({ length: 8 }, (_, i) => ({ id: `events_2026100${i + 1}` }));
+  const incomplete = fakeApi({ listTables: async () => tables.slice(0, -1) });
+  assert.equal((await collect(options, { api: incomplete, now: mature })).status, 'incomplete_daily_tables');
+  assert.equal(incomplete.calls.length, 0);
+  const api = fakeApi({ listTables: async () => tables });
+  const result = await collect(options, { api, now: mature });
+  assert.equal(result.status, 'complete');
+  assert.equal(result.eligible_for_outcome_evaluation, false);
+  assert.equal(result.total_bytes_billed, 30_000_000);
+  assert.equal(api.calls.length, 6);
+  assert.deepEqual(result.queries.map((q) => q.file), ['ga4-quality.sql', 'ga4-funnel.sql', 'ga4-cta-pages.sql']);
+  assert.equal(result.queries[0].sql_sha256, '8aa794cefda068076a099f6e6e6d1be7a85cbf96201066dcdf8220c447a49763');
+  assert.equal(result.queries[1].sql_sha256, 'e2f9e89b268e00cb2371bf9f57b8f3e9f11b55e1139c8edadacfa8a7b5f1277f');
+  const manifest = JSON.parse(api.calls.at(-1).params.cta_page_manifest_json);
+  assert.deepEqual(manifest, result.cta_page_manifest.pages);
+  assert.equal(api.calls[0].params.scan_end_date, '2026-10-08');
+  assert.match(result.interpretation, /cannot clear their quality gate/);
+  assert.match(result.interpretation, /only session_group rows are disjoint/);
+  assert.deepEqual(unseal(seal(result, pair.publicKey), pair.privateKey), result);
+  const dryApi = fakeApi({ listTables: async () => tables });
+  assert.equal((await collect({ ...options, execution: 'dry-run' }, { api: dryApi, now: mature })).status, 'dry_run_complete');
+  assert.equal(dryApi.calls.length, 3);
+  assert.ok(dryApi.calls.every((q) => q.dryRun && q.maximumBytesBilled === QUERY_CAP));
+  const exhausted = fakeApi({ listTables: async () => tables,
+    query: async (_, q) => { exhausted.calls.push(q); return q.dryRun
+      ? { totalBytesProcessed: QUERY_CAP }
+      : { statementType: 'SELECT', totalBytesBilled: QUERY_CAP, rows: [] }; } });
+  const partial = await collect(options, { api: exhausted, now: mature });
+  assert.equal(partial.status, 'error');
+  assert.equal(partial.eligible_for_outcome_evaluation, false);
+  assert.equal(partial.queries.length, 2);
+  assert.equal(exhausted.calls.length, 4); // No third query after the shared budget is exhausted.
+});
 test('landing diagnostic is one fixed capped query and explicitly preserves the quality gate', async () => {
   const api = fakeApi();
   const result = await collect({ ...ga4, report: 'ga4-landing-diagnostic' }, { api, now });
@@ -308,6 +348,7 @@ test('workflow handles secrets only in the reader, uploads ciphertext only, and 
   assert.ok(!text.includes('contents: write')); assert.ok(!text.includes('schedule:'));
   assert.equal((text.match(/secrets\.GCP_SERVICE_ACCOUNT_JSON/g) || []).length, 1);
   assert.ok(text.includes('ga4-journey'));
+  assert.ok(text.includes('ga4-cta-pages'));
   assert.ok(text.includes('ga4-landing-diagnostic'));
   assert.ok(text.includes('ga4-provisional'));
 });
