@@ -239,6 +239,22 @@ report開始 `2026-09-30T20:25:33.928Z` と各HTTP観測を区別します。par
 
 <!-- C18 actual primary / C32 combined source END -->
 
+### C33コアTemplates10種の保存結果候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C33 source preparation。Linux1.13.7 CoreTemplates全10著者作成例の実挿入/タイトル日時置換/保存/同process再表示、原receipt25/136・raw33/ZIP20・編集OGを保全。C13記法対比paragraph後1文とcomponent47（actualC32closeout後48）を申告。汎用/templates/意図と別、owner/stop/budget/windows/全旧JSON/契約を保持。既存nonexclusive観測への交絡記録でCompany登録/衝突免除/無人率/自然schedule回復なし。iOS/SM/同期/速度/生産性/流入未検証、missingbaseline非0、10月倍増は同定義成熟計測待ち。
+
+[証拠と全scope](../obsidian/evidence/templates-20261001.md)。37new＋C13inbound1＋support9=47、actualC32proof後evidence1=48。元title/unique/pending、raw33/ZIP20/quality90、旧49/f1all214を保全。実core native10/clock rule/save/reopenとdynamicTemplater/GenericSimpleMemo意図を分ける。GSC元85/順序付き24/dynamic2/strict/actualworkflow保持、C33HTML＋実保存MD＋rawPNG3source候補だけ追加し、future27部署の証明にしない。最終normalCI/main/Pages/originreadback未完。
+
+### C32一次配信とC33同時ソース準備（2026-10-01 JST）
+
+C32 actual primary PR1796 finalhead `7041807216822141b4930469ba4ac626553248a5` main `d7512f44942a219f4b5e944aad95ce59e64cc843` merged `2026-09-30T21:02:31Z`; ordinarySEO run36775519564/job110092314805146/1main-onlyskip/0fail. CorrespondingPages `564354c2-eb56-4b86-887b-72f5cc4f8cd7`/check110096799521 source `d7512f44942a219f4b5e944aad95ce59e64cc843` success `2026-09-30T21:03:02Z`. Ordinarystrict run36776810695/job110096680508, source `d7512f44942a219f4b5e944aad95ce59e64cc843`, original85+ordered24 all0fail/0skip. Reportstart `2026-09-30T21:02:55.434Z` distinctfromHTTP observations. ParsedreportSHA `a93ed12f793818ca7e63ab6536dda2655f30bda3c52ac4e035a218446b5ed453`, artifact11125459443/ZIPdigest `sha256:aa504addb8abc9cbbd9f914ff2ccb492ce19de021e4ac4d1bb2a13bca6779cbf`.
+- `/obsidian/backup/` HTTP200 `2026-09-30T21:03:04.546Z`
+- `/assets/downloads/obsidian-backup/observation-note.md` HTTP200 `2026-09-30T21:03:04.940Z` / 192B /SHA256 `60ea12a324c56973452e4c97447f440e750bd729127e5c37a15bb1ca0eba0d2a`
+- `/assets/img/obsidian-backup/file-recovery-restored-reopened.png` HTTP200 `2026-09-30T21:03:05.389Z` / 31904B /SHA256 `ec03d0ae0b987dcf80190e32ce1162bdffe1cc70d85b5a5160e0c5b3d609899e`
+
+C32three-methodLinux boundedauthor original26/28+supplement30/46 andsource30/29nonJA+JA2rows exact. Same-filesystem3MDcopy/Gitlocal1file/actualcoreFileRecoverytimers/restoration only; noindependentphysical/cloud/wholeVault/retention/disaster/mobile/SM/sync/productivity/traffic. Originalfirstreaderexit2 lazyawait and authorizedboundedfollowup actualexit0/2page4width/8DL/raw16HTTP/FAQ/fullcodes/inbound/Next19view/source30unchanged/quality92 preserved. Combined48=C33component47+existingC32evidence1 withC32actualprimarypending→done andC33stayspending. Its ownfinalCI/main/Pages/85+27originreadback remainsseparate. Owner/stop/budget/windows/contracts/global13/notwaived/Companynaturalfalse retained, October2x same-definition maturemeasurementpending, accountsecretspendidentity0/actualcostunknown.
+
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
