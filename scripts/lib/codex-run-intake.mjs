@@ -191,7 +191,7 @@ export async function codexIntakeSelftest() {
   failureProof.sha256 = digest(failureProof); quota.codex_observation.runs[0].runtime_failure = failureProof;
   assert.equal(intake(quota).rows[0].failure_class, 'usage_limit');
   assert.equal(intake(quota).rows[0].needs_triage, false);
-  const old = { ...failed, interventions: [{ kind: 'infrastructure', note: 'existing history' }] };
+  const old = { ...failed, interventions: [{ kind: 'infra', note: 'existing history' }] };
   const before = structuredClone(old);
   const classified = applyCodexTriage(quota, { runs: [old] }, { now });
   assert.equal(classified.changed, 1);

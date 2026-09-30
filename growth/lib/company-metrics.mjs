@@ -13,6 +13,16 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const digest = value => createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 const read = file => JSON.parse(fs.readFileSync(path.join(ROOT, file), 'utf8'));
 export const taskKey = task => digest([task.area, task.task]);
+const INTERVENTION_SOURCE = 'scripts/lib/intervention-observation.mjs';
+const INTERVENTION_DEPENDENTS = new Set(['scripts/autopilot-runs.mjs', 'scripts/autonomy-score.mjs']);
+const validDependencyEvidence = (metric, sources) => {
+  const dependencies = metric?.source_dependencies;
+  return dependencies !== null && typeof dependencies === 'object' && !Array.isArray(dependencies)
+    && Object.keys(dependencies).length === 1
+    && /^[a-f0-9]{64}$/.test(dependencies[INTERVENTION_SOURCE] ?? '')
+    && dependencies[INTERVENTION_SOURCE] === sources?.[INTERVENTION_SOURCE]
+    && metric.source_dependency_fingerprint === digest(dependencies);
+};
 
 export function formalMetrics({ coverage = read('data/automation-coverage.json'),
   runs = read('data/autopilot-runs.json'), costs = read('data/autopilot-cost.json'),
@@ -22,13 +32,17 @@ export function formalMetrics({ coverage = read('data/automation-coverage.json')
   const r = runSummary(runs, { costDoc: costs });
   const sources = Object.fromEntries([
     'scripts/automation-rate.mjs', 'scripts/autonomy-gap.mjs', 'scripts/autopilot-runs.mjs',
-    'scripts/autonomy-score.mjs', 'data/automation-coverage.json', 'data/autonomy-score.json',
+    'scripts/autonomy-score.mjs', INTERVENTION_SOURCE, 'data/automation-coverage.json', 'data/autonomy-score.json',
     'data/autopilot-runs.json', 'data/autopilot-cost.json',
   ].map(file => [file, digest(fs.readFileSync(path.join(ROOT, file), 'utf8'))]));
-  const definition = (id, formula, numerator, denominator, value, source, exclusions, version) => ({
-    id, formula, numerator, denominator, value, source, source_sha256: sources[source],
-    exclusions, version, last_calculated: now.toISOString(),
-  });
+  const definition = (id, formula, numerator, denominator, value, source, exclusions, version) => {
+    const dependencies = INTERVENTION_DEPENDENTS.has(source) ? { [INTERVENTION_SOURCE]: sources[INTERVENTION_SOURCE] } : null;
+    return {
+      id, formula, numerator, denominator, value, source, source_sha256: sources[source],
+      ...(dependencies ? { source_dependencies: dependencies, source_dependency_fingerprint: digest(dependencies) } : {}),
+      exclusions, version, last_calculated: now.toISOString(),
+    };
+  };
   return {
     schema_version: 1, calculated_at: now.toISOString(), sources,
     scope_fingerprint: digest(coverage.tasks.map(t => [taskKey(t), t.executor === 'intentional_no'])),
@@ -83,7 +97,11 @@ export function compareMetrics(before, after) {
     },
     metrics: after.metrics.map(m => {
       const b = old.get(m.id);
-      const formulaComparable = b?.version === m.version && b?.formula === m.formula && b?.source_sha256 === m.source_sha256;
+      const dependencyComparable = !INTERVENTION_DEPENDENTS.has(m.source)
+        || (validDependencyEvidence(b, before.sources) && validDependencyEvidence(m, after.sources)
+          && b.source_dependency_fingerprint === m.source_dependency_fingerprint);
+      const formulaComparable = b?.version === m.version && b?.formula === m.formula
+        && b?.source_sha256 === m.source_sha256 && dependencyComparable;
       const policyComparable = m.id !== 'autonomy_score' || before.policy_fingerprint === after.policy_fingerprint;
       const scopeComparable = ['ai_completion_rate', 'autonomy_score'].includes(m.id) || sameScope;
       const comparable = formulaComparable && policyComparable && scopeComparable;

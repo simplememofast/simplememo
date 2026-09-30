@@ -17,7 +17,7 @@ const REPO = 'simplememofast/simplememo';
 export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.json', 'data/eligibility-policy.json', 'data/authority-matrix.json',
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
-  'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/decision-monitor-local.py',
+  'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'scripts/decision-monitor-local.py',
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
   'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
@@ -204,6 +204,8 @@ async function selftest() {
     save('data/value-metrics.json', m); save('data/autopilot-runs.json', { runs: before });
     save('data/decision-review.json', { selections: [] }); save('data/value-contracts.json', { contracts: [] });
     fs.mkdirSync(path.join(dir, 'scripts'));
+    fs.mkdirSync(path.join(dir, 'scripts/lib'));
+    fs.copyFileSync(path.join(ROOT, 'scripts/lib/intervention-observation.mjs'), path.join(dir, 'scripts/lib/intervention-observation.mjs'));
     fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), 'export const SELECTION_FEEDBACK_VERSION = 1;\n');
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'fixture base');
     const baseRef = g('rev-parse', 'HEAD');
@@ -269,12 +271,14 @@ async function selftest() {
     for (const x of legacy.candidates) delete x.calibration;
     save(`data/decision-intents/${c.id}.json`, legacy); g('add', '.'); g('commit', '-m', 'legacy declaration');
     assert.equal((await verifyDecision({ ...options, baseRef: legacyBase, head: g('rev-parse', 'HEAD') })).state, 'declared');
-    g('checkout', '--detach', baseRef);
-    fs.mkdirSync(path.join(dir, 'scripts/lib'), {recursive:true});
-    fs.writeFileSync(path.join(dir, 'scripts/lib/decision-publication-retry.mjs'), '// candidate attempts to replace retry gates\n');
-    g('add', '.'); g('commit', '-m', 'attempt to change publication retry policy');
-    await assert.rejects(verifyDecision({...options,head:g('rev-parse','HEAD')}),
-      /cannot change its gate or policy: scripts\/lib\/decision-publication-retry\.mjs/);
+    for (const gate of ['scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs']) {
+      g('checkout', '--detach', baseRef);
+      fs.mkdirSync(path.join(dir, 'scripts/lib'), { recursive: true });
+      fs.writeFileSync(path.join(dir, gate), '// candidate attempts to replace a gate or its classifier\n');
+      g('add', '.'); g('commit', '-m', 'attempt to change protected dependency');
+      await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }),
+        error => error.message === `autonomous decision cannot change its gate or policy: ${gate}`);
+    }
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-ci: real Git declaration-to-run binding and PR-only autonomous merge checks passed');
 }
