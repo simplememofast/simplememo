@@ -445,7 +445,7 @@
 
             </div>
             <div class="reason-card__desc">
-              <span>オフライン時のメモは端末内Outboxに暗号化保存され、オンライン復帰時に自動再送されます。「送ったはずなのに届いていなかった」という体験を設計レベルで排除しました。</span>
+              <span>オフライン時のメモは端末内Outboxに暗号化保存され、オンライン復帰時に自動再送されます。電波のないところで書いたメモを、取りこぼさないための設計です。</span>
 
             </div>
           </div>
@@ -484,7 +484,7 @@
           <dt>バックエンド</dt><dd>Cloudflare Workers（TypeScript）</dd>
           <dt>メール配信</dt><dd>Resend API（DKIM署名済み、SPF/DMARC設定済み）</dd>
           <dt>セキュリティ</dt><dd>AES-GCM（端末内暗号化）、HTTPS（TLS 1.3）</dd>
-          <dt>オフライン</dt><dd>Outboxアーキテクチャ（CoreData + 暗号化 + 自動再送）</dd>
+          <dt>オフライン</dt><dd>Outboxアーキテクチャ（AES-GCMで暗号化した端末内のファイル + 自動再送）</dd>
           <dt>最低対応iOS</dt><dd>iOS 16.0以降</dd>
         </dl>
 
