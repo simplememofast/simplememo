@@ -166,6 +166,31 @@ PR1783 finalhead935ac0960605dc91de1727b25c7fe5ab5a8fce3cの通常SEO36751347416/
 
 [確認範囲](../obsidian/evidence/graph-view-20260930.md)とZettelkasten/second-brain各1文、article/raw/ZIP/OG/evidence/全metadata/GSC3対象を申告。元85ケースとC13/C14/C17/C20の12比較を保持し、C26のHTML・追加メモ92B・local-depth-2 PNGだけを追加する。先行GSC修復・workflowを重複導入しない。C26のtitle/unique/status:pendingと全既存owner/停止/評価/契約を維持し、最終HEAD通常CI・対応main merge/Pages・実本番readbackまで完了としない。Company prospective global衝突は免除せず、policy42の明示された手動公開として全範囲と実公開時刻を別に記録する。流入倍増は同定義の成熟計測待ちで、Company無人率・自然schedule復旧へ加点しない。
 
+### C27のCanvas操作候補（2026-10-01 JST）
+
+Linux1.13.7・著者作成の隔離Vaultで、空Canvasから短文2/参照Markdown1カード・接続1件/ラベル・移動/resize Undo・保存/同一process再表示を九つの固定GUIケースで確認。原32assertions/70file・原4PNG/612B Canvas全文/214B MDと相対パスを保持し、派生2member ZIPは原本の代替としない。品質93/100は有限私的評価で、実4幅/download3件/FAQ4/full612Bcode/Next stepを確認。C17理由つきリンク/C26表示条件とはカード操作で意図を分け、Canvas接続を内部リンク・知識・生産性へ読み替えない。
+
+[確認範囲](../obsidian/evidence/canvas-20260930.md)、C17/C26各1文、article/raw/ZIP/OG/evidence/全metadata/GSC3対象を全申告。元85ケースと既存15比較、dynamic集計2箇所/strict伝播/workflowの先行修復を維持し、Canvas HTML/元Canvas/reopened PNGだけを追加。元キューtitle/unique/status:pendingと全owner/停止/予算/評価/契約を保持し、通常CI・対応main merge/Pages・実HTTP readbackまで完了としない。C26doneは元依存条件ではなくinbound実sourceのみ必要で、Next stepは公開済みC17。policy42の明示された手動公開として全範囲・実公開時刻を記録し、Company global衝突を解除せず無人率・自然schedule復旧へ加点しない。全機能/大Vault/アプリ再起動/Sync/他端末/SimpleMemo/速度/生産性/流入は未検証で、倍増は同定義の成熟計測待ち。
+
+### C26の一次配信とC27の同時ソース準備（2026-10-01 JST）
+
+C26の原キューを、実際に確認した一次記事配信に基づいてdoneにします。元title・unique_value・publication_noteとowner/停止/窓/予算/契約は保持します。C27はpendingで、この同時台帳closeout/記事準備の最終CI・main merge・対応Pages・本番readbackは別工程として未完です。
+
+[PR #1790](https://github.com/simplememofast/simplememo/pull/1790) final head `3901319551fcef5568b7b346d044306d62056717` の通常SEO run36760940643/job110043007417 は146success/1main-only IndexNow skip/0failureです。通常mergeはmain `afdae7d0603acc964b372f1a46c56dfec6742c6d`、UTC 2026-09-30T19:00:04Z。その対応Pages deployment 4254da31-f309-411b-ad8e-2c3fbdf8915d/check110048767006 はUTC 2026-09-30T19:00:33Z にsuccessです。branch previewを本番配信証拠へ読み替えません。
+
+実strict production run36763192137/job110050684023、source `207cb6fbb56a1bb18cdf5af99e3f71f0ddadc48b`、UTC 2026-09-30T19:06:07.005Z は元85ケースと既存15比較すべてpass、0failure/0skipです。C26 HTML200（観測UTC 2026-09-30T19:06:13.380Z）、元追加メモ92bytes/SHA256 `353b4739dbd144b7ed9ad5b1046e8f58ec3b805ae540412b1d8a1d56ae7ae39c`（観測UTC 2026-09-30T19:06:13.686Z）、元local-depth-2 PNG 44197bytes/SHA256 `d1dab655467e20e8e6538084fc75da8a154b374231ebc76e2393e7cc4b050663`（観測UTC 2026-09-30T19:06:14.019Z）を確認しました。
+
+artifact11118549990 archive digest `sha256:968c39d3511701b612799e32668f5bfc76d6388cf2c6b9f49057df87aa9250cd` と、実parsed report SHA256 `57a1939785b6ea311ceca0161c50d7dba67c0fbb1ee90cfe762a8484e707d8f6` を区別します。原GUI receipt/evidenceのSHAも別の証拠です。C26の全14原assetsはsource同一性を確認し、実HTTP bytesの確認はこの2原assetsに限ります。HTML全文・全assets・ZIPの読者import・全siteの配送、Google登録、AIO引用、CTA、速度/生産性/流入は認定しません。
+
+初期ローカルpreflightの4環境失敗と通常環境218/218成功、actual reader12/download8を私的履歴で保持しました。元証拠文書の全本文と、この一次配信proofのprior_failures 0件を削除せず、後続successで置き換えません。
+
+
+Linux著者作成例の6/3→7/4、有限global/local表示操作、補助API/overlay/訂正sidecarと実GUIを区別します。有限品質93は検証範囲を広げず、Not verified/verified:null/testedSimpleMemoVersion:nullを維持します。C27カード操作とは意図を分け、全graph条件/大Vault/別OS/端末/Sync/SimpleMemoは未検証です。policy42の明示manual公開で全22変更を申告し、13Company global衝突、既存owner/停止/窓/予算/評価/契約を免除しません。Company無人率・自然schedule復旧はfalse、10月流入倍増は同定義の成熟計測待ちです。
+
+この同時ソース準備でのqueue残数は18（pending 16、blocked 2）です。C27はpendingで、このcloseout/記事準備自身の実配信確認は別に残します。
+
+<!-- C26 primary delivery / C27 combined source closeout END -->
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
