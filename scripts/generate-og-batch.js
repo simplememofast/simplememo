@@ -38,6 +38,7 @@ const IMAGES = [
   { file: 'obsidian-plugins.png', title: 'プラグイン6,812個から\n実測トップ10', icon: '🔌' },
   { file: 'obsidian-plugins-dataview.png', title: 'Dataviewの使い方\nクエリ入門', icon: '🔍' },
   { file: 'obsidian-plugins-templater.png', title: 'Templaterの使い方\nデイリーノートの設定', icon: '📄' },
+  { file: 'obsidian-plugins-quickadd.png', title: 'QuickAddの使い方\nInboxへ追記する設定', icon: '📝' },
   { file: 'obsidian-pricing.png', title: 'Obsidianの料金\n無料でどこまで使える？', icon: '💰' },
   { file: 'obsidian-sync.png', title: 'Obsidianの同期方法\niCloud/Sync/Git/Syncthing', icon: '🔄' },
   { file: 'obsidian-sync-icloud.png', title: 'ObsidianをiCloudで同期\n設定手順とつまずきどころ', icon: '☁️' },

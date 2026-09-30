@@ -59,7 +59,7 @@ SEOと識別可能な外部AI参照セッションは内訳として追跡する
 | P2 | iPhone標準メモ活用1,240/15/8.75、PKM547/10/6.08 | #1679/#1695の既存改稿後の窓を観測 | S、旧窓から追加改稿を正当化しない | 改稿前後の期間を分ける |
 | P2 | 英語SpeechAnalyzer: 1,084表示/0クリック/6.97 | query×pageの不足と表示意図を診断。既存完成サンプルを重複制作しない | M、原因未確定 | 可視検索語はわずか。匿名行をゼロにしない |
 | P2 | `/resources/obsidian-uri/`はリンク元1ページ、`/ai-tags/`等は3ページ | 検索需要と所有を照合し、必要なら関連本文から案内 | S、回遊・発見性の仮説 | 孤立修理とは扱わない。全変更元ページも申告 |
-| P3 | 新規C13 Templater/C14 QuickAdd | 元キュー・品質80・Runbook §28検証・固有価値を満たす場合に検討 | M、10月の検索効果は未確定 | 事前根拠を保持。新規URLの欠測baselineを0にしない |
+| P3 | 新規C13 Templater/C14 QuickAdd | C13は最終CI・merge・Pages成功を確認。C14は限定実GUI証拠と品質92の記事を準備し、最終CI・配送確認待ち | M、10月の検索効果は未確定 | 事前根拠を保持。新規URLの欠測baselineを0にしない |
 
 大きな可視CTR機会は既存実験のページに集中している。主要LPは9月後半に既に改稿されており、最新窓の終端9月26日はその改稿前または直後。今の28日窓だけで連続改稿の効果や10月倍増を予測できない。
 
@@ -69,7 +69,9 @@ SEOと識別可能な外部AI参照セッションは内訳として追跡する
 
 公開された固定Codex系列は9月30日18:56:08 JSTの既存観測へ更新された。5問完了、非指名Q1〜Q4の4問では言及0/4・自サイト引用0/4。ブランド名を与えるQ5だけ言及・引用ありで、非指名率へ合算しない。最新JSONとretained JSONは同じrunの写しであり、別標本として数えない。要求モデル・固定質問・protocolは同じだが、9月19日からCLI版が変わっている。この小標本を全AI掲載率やトラフィック増へ読み替えない。費用USDは未観測のまま保持し、今回のGoalから新probeは起動していない。
 
-C13 Templaterは、9月30日の隔離Linux Obsidian 1.13.7 / Templater 2.25.1で、手動挿入、新規Daily notesのTrigger OFF/ON（matching None）、既存ノートの通常再openと明示置換を実証して記事化した。原画像・Markdownと[限定した確認範囲](../obsidian/evidence/templater-20260930.md)を同梱。通常の手動カバレッジ公開として扱い、先行scheduled/Companyの停止・未完了記録は保持する。公開完了はこの変更の最終CI、merge、対応Pages deploymentで確認する。記事の作成は検索・引用増の証明ではない。
+C13 Templaterは、9月30日の隔離Linux Obsidian 1.13.7 / Templater 2.25.1で、手動挿入、新規Daily notesのTrigger OFF/ON（matching None）、既存ノートの通常再openと明示置換を実証して記事化した。原画像・Markdownと[限定した確認範囲](../obsidian/evidence/templater-20260930.md)を同梱。通常の手動カバレッジ公開として扱い、先行scheduled/Companyの停止・未完了記録は保持する。PR [#1758](https://github.com/simplememofast/simplememo/pull/1758)の最終head `8d7e5f812585bb134d553919d44cf50cce88c122`はSEO Validation run `36707612473`で成功し、11:32:02 UTCにmain `eb1d8ba08daa04ffd58a2e015005739edc9f0e84`へmergeされた。Cloudflare check `109866583332`は11:32:33 UTCに成功し、[対応Pages配備](https://75fd7e42.simplememo-596.pages.dev)を確認した。既存85件の本番HTTP検査（観測11:32:29.547 UTC）はC13の新規URLを含んでいない。記事の作成は検索・引用増の証明ではない。
+
+C14 QuickAddは、9月30日の別の隔離Linux Obsidian 1.13.7 / QuickAdd 2.29.0で、既存Inbox.mdへの2回の末尾追記、元本文と作業中Working.mdの保持、Cancel後の不変、Create file OFFで不存在保存先への実行中止を実GUIで確認した。原画像3枚・原Markdown4件と[確認範囲](../obsidian/evidence/quickadd-20260930.md)を同梱し、share-sheet比較とiPhoneメモ記事から文脈リンクを追加。役割図のiPhone側は既存ガイド案内であり、配送試験ではない。品質判定は92/100。iOS・同期・URI/CLI・新規ファイル作成成功・SimpleMemo実機動作は未検証。最終headの通常CI、merge、Pages配送は確認待ち。本番HTTP比較はC13/C14のHTML2件とPNG/Markdown4件に限定して追加するもので、Googleの登録状態、CTA動作、全サイトのバイト一致を証明しない。通常の手動公開として既存非排他観測への交絡を記録し、scheduled/Company成果や検索・引用増へ付け替えない。
 
 9月24日のMention Watchは検索要約の `verified:false`。本文確認なしに自社不掲載、独立推薦、獲得済みリンクを断定しない。既存の週次probeと元のownerを再利用し、弱い結果を理由に追加の有料probeを起動しない。
 
