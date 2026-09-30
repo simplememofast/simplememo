@@ -31,7 +31,12 @@ current bounded-support regression tests. Explicit global or `actions` stops
 remain blocking.
 
 Only after these checks does an exclusive private `consumed-<permit hash>.json`
-bind the permission to the actual task and original turn. The same live original
+bind the permission to the actual task and original turn. The original submission
+is retained in a private `origin-<permit hash>.json` before consumption because
+runtime logs may be pruned while the turn is active. The consumption binds its
+hash. Only an already-consumed same task and turn may reuse that raw evidence;
+an unconsumed cache never replaces a missing live log for first admission.
+The same live original
 turn may recheck before claiming; another task or turn, a partial record or
 changed binding fails closed. A failed attempt consumes the permission. Do not
 delete the consumed record or change the fixed day to create a retry.

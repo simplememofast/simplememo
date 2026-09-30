@@ -67,7 +67,7 @@ def observer():
     return module
 
 
-def native_origin(codex_dir, native):
+def native_origin(codex_dir, native, with_records=False):
     """Read the app-server submission, never infer origin from clock or prompt.
 
     The desktop sends automation_cron_scheduled or automation_cron_run_now in
@@ -85,6 +85,12 @@ def native_origin(codex_dir, native):
             (tid, 'codex_core::session::handlers', '%Submission sub=Submission { id: "' + turn + '", op: TurnInput {%')).fetchall()
     finally:
         connection.close()
+    origin = submission_origin(native, records)
+    return (origin, records) if with_records else origin
+
+
+def submission_origin(native, records):
+    tid, turn = native['thread_id'], native['original_turn_id']
     require(0 < len(records) <= 100)
     prefix = 'session_loop{thread_id=' + tid + '}: Submission sub=Submission { id: "' + turn + '", op: TurnInput { '
     evidence = []
@@ -100,6 +106,26 @@ def native_origin(codex_dir, native):
         require(matches == ['automation_cron_scheduled'])
         evidence.append({'log_id': ident, 'sha256': hashlib.sha256(body.encode()).hexdigest()})
     return {'thread_id': tid, 'turn_id': turn, 'trigger': 'automation_cron_scheduled', 'records': evidence}
+
+
+def origin_for_attempt(folder, permit, native, codex_dir):
+    """A consumed original turn may reuse the sealed private raw submission.
+
+    Runtime logs are pruned while a run is still active. An unconsumed cache is
+    never an admission source: the first admission still needs the live log.
+    """
+    sealed = digest(permit)
+    consumed = folder / ('consumed-' + sealed + '.json')
+    if consumed.exists() or consumed.is_symlink():
+        binding = json.loads(private_read(consumed))
+        retained = json.loads(private_read(folder / ('origin-' + sealed + '.json')))
+        require(retained['thread_id'] == native['thread_id'] and retained['turn_id'] == native['original_turn_id'])
+        origin = submission_origin(native, retained['records'])
+        require(binding['native_origin_sha256'] == digest(origin)
+                and binding['thread_id'] == native['thread_id'] and binding['turn_id'] == native['original_turn_id'])
+        return origin, None
+    origin, records = native_origin(codex_dir, native, with_records=True)
+    return origin, {'thread_id': native['thread_id'], 'turn_id': native['original_turn_id'], 'records': records}
 
 
 def evaluate(permit, authorization, native, scheduler, analysis, rows, stop, now, repair_ok):
@@ -154,19 +180,23 @@ def evaluate(permit, authorization, native, scheduler, analysis, rows, stop, now
             'target_run_id': TARGET, 'native_origin_sha256': digest(origin)}
 
 
-def reserve(folder, binding):
-    """The first admitted owner wins. A partial or changed record fails closed."""
-    file = folder / ('consumed-' + binding['permit_sha256'] + '.json')
-    content = (json.dumps(binding, sort_keys=True) + '\n').encode()
+def write_once(file, value):
+    content = (json.dumps(value, sort_keys=True, ensure_ascii=False) + '\n').encode()
+    require(len(content) < 65536)
     try:
         fd = os.open(file, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     except FileExistsError:
-        require(json.loads(private_read(file)) == binding)
+        require(json.loads(private_read(file)) == json.loads(content))
         return
     with os.fdopen(fd, 'wb') as stream:
         stream.write(content)
         stream.flush()
         os.fsync(stream.fileno())
+
+
+def reserve(folder, binding):
+    """The first admitted owner wins. A partial or changed record fails closed."""
+    write_once(folder / ('consumed-' + binding['permit_sha256'] + '.json'), binding)
 
 
 def recovery_snapshot(snapshot, recovery):
@@ -235,9 +265,11 @@ def recovery_status(root=ROOT, home=None, codex_dir=None, native=None, clock=Non
             scheduler['first_slot_thread'] = first['thread_id'] if first else None
         finally:
             connection.close()
-        scheduler['native_origin'] = native_origin(codex_dir, native)
+        scheduler['native_origin'], retained = origin_for_attempt(folder, permit, native, codex_dir)
         binding = evaluate(permit, authorization, native, scheduler, analysis, rows, stop, clock(),
                            regression.returncode == 0)
+        if retained is not None:
+            write_once(folder / ('origin-' + binding['permit_sha256'] + '.json'), retained)
         reserve(folder, binding)
         require(stamp(permit['scheduled_slot']) <= clock() < stamp(permit['scheduled_slot']) + dt.timedelta(minutes=90))
         return {'installed': True, 'allowed': True, 'required': True, 'reason': 'owner_one_native_run', **binding}
@@ -247,6 +279,17 @@ def recovery_status(root=ROOT, home=None, codex_dir=None, native=None, clock=Non
 
 
 class RecoveryTests(unittest.TestCase):
+    def regression_already_verified(self):
+        # The first live-storage integration runs the real repository regression.
+        # Retention/expiry variants exercise their own boundary, without repeating
+        # that unchanged suite for each simulated clock or corrupt private file.
+        real_run = subprocess.run
+        def checks(args, **kwargs):
+            if args == ['node', '--test', 'growth/lib/measurement-support.test.mjs']:
+                return subprocess.CompletedProcess(args, 0, stdout=b'', stderr=b'')
+            return real_run(args, **kwargs)
+        return patch(__name__ + '.subprocess.run', side_effect=checks)
+
     def fixture(self):
         now = stamp('2026-09-30T21:01:00Z')
         slot = '2026-10-01T06:00:00+09:00'
@@ -362,16 +405,30 @@ class RecoveryTests(unittest.TestCase):
                 result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
             self.assertTrue(result['allowed'], result)
             self.assertEqual(len(list(folder.glob('consumed-*.json'))), 1)
+            # Production runtime prunes the initial log during long turns.
+            # Only an already-consumed attempt can reuse its retained original.
+            db = sqlite3.connect(codex / 'logs_2.sqlite'); db.execute('DELETE FROM logs'); db.commit(); db.close()
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
+                obs.return_value.thread_state.return_value = value['native']
+                result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
+            self.assertTrue(result['allowed'], result)
             native = {**value['native'], 'gate_receipt': {'admitted': False}}
-            with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs:
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                 obs.return_value.thread_state.return_value = native
                 result = recovery_status(home=home, codex_dir=codex, native=native, clock=lambda: value['now'])
             self.assertFalse(result['allowed'])
             self.assertEqual(len(list(folder.glob('consumed-*.json'))), 1)
+            retained = next(folder.glob('origin-*.json'))
+            cached = json.loads(retained.read_text()); cached['records'][0][1] = cached['records'][0][1].replace('合成ログ', '改変ログ')
+            retained.write_text(json.dumps(cached))
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
+                obs.return_value.thread_state.return_value = value['native']
+                result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
+            self.assertFalse(result['allowed'])
 
     def write_origin(self, codex, native, trigger='automation_cron_scheduled', quoted=False):
         body = ('session_loop{thread_id=' + native['thread_id'] + '}: Submission sub=Submission { id: "'
-            + native['original_turn_id'] + '", op: TurnInput { request: TurnInputRequest { input: [], '
+            + native['original_turn_id'] + '", op: TurnInput { request: TurnInputRequest { input: [Text { text: "合成ログ" }], '
             'start: TurnStartOptions { turn_trigger: Some("' + trigger + '"), final_output_json_schema: None, '
             'service_tier: None, parent_turn_id: None, root_turn_id: None, cyber_access_program: None }, '
             'additional_context: {}, responsesapi_client_metadata: Some({"source": "automation"}), trace: None }, '
@@ -399,6 +456,24 @@ class RecoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaises(sqlite3.OperationalError): native_origin(Path(tmp), native)
 
+    def test_unconsumed_retained_origin_cannot_admit_or_change_owner(self):
+        value = self.fixture(); native = value['native']
+        with tempfile.TemporaryDirectory() as tmp:
+            codex = Path(tmp) / 'codex'; codex.mkdir()
+            folder = Path(tmp) / 'private'; folder.mkdir()
+            self.write_origin(codex, native)
+            origin, retained = origin_for_attempt(folder, value['permit'], native, codex)
+            binding = evaluate(**{**value, 'scheduler': {**value['scheduler'], 'native_origin': origin}})
+            write_once(folder / ('origin-' + binding['permit_sha256'] + '.json'), retained)
+            write_once(folder / ('origin-' + binding['permit_sha256'] + '.json'), retained)
+            db = sqlite3.connect(codex / 'logs_2.sqlite'); db.execute('DELETE FROM logs'); db.commit(); db.close()
+            with self.assertRaises(ValueError): origin_for_attempt(folder, value['permit'], native, codex)
+            reserve(folder, binding)
+            self.assertEqual(origin_for_attempt(folder, value['permit'], native, codex)[0], origin)
+            for key in ['thread_id', 'original_turn_id']:
+                changed = {**native, key: '00000000-0000-0000-0000-000000000009'}
+                with self.assertRaises(ValueError): origin_for_attempt(folder, value['permit'], changed, codex)
+
     def test_expiry_after_regression_or_reservation_is_denied(self):
         value = self.fixture()
         for times, consumed in [([stamp('2026-09-30T22:30:00Z')], False),
@@ -419,7 +494,7 @@ class RecoveryTests(unittest.TestCase):
                 (folder / 'permit.json').write_text(json.dumps(value['permit']))
                 (folder / 'owner-authorization.json').write_bytes(value['authorization'])
                 for file in folder.iterdir(): file.chmod(0o600)
-                with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs:
+                with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                     obs.return_value.thread_state.return_value = value['native']
                     result = recovery_status(home=home, codex_dir=codex, native=value['native'],
                                              clock=iter(times).__next__)
