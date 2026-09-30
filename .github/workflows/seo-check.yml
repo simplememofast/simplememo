@@ -899,8 +899,15 @@ jobs:
       # ここも同じ扱いにする。**ただし黙らせない** —— 失敗すると手順が赤い警告で残り、
       # 検査本体も `WebKit — **測れなかった**` と理由つきで出す。
       # `|| true` にしないのはそのため（それだと成功と見分けがつかない）。
+      #
+      # `timeout-minutes` は**失敗しないまま止まる**ときのため。2026-10-01、PR #1774 の検証
+      # （SEO Validation #4014）がこの手順の `apt-get update` で1時間20分以上止まり、取り消して
+      # 流し直すまでマージされなかった（同じ時間帯の #1775・#1777 の検証は通っている）。
+      # 上限が無いとジョブの既定の360分まで待つので、「apt の不調で本番デプロイを止めない」が
+      # 止まりのときには成り立たない。ふだんは約30秒なので10分で切り、失敗と同じ扱いで先へ進める。
       - name: Install WebKit (WebKitGTK + WebDriver)
         continue-on-error: true
+        timeout-minutes: 10
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
