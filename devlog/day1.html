@@ -563,6 +563,8 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
             <h3>アプリスイッチャーでのプライバシーオーバーレイ</h3>
             <p>iOSのアプリスイッチャーでは、アプリの画面がサムネイルとして表示される。アプリスイッチャーの画面からメモの内容が見えないように、アプリがバックグラウンドに移行する際にプライバシーオーバーレイを表示する。</p>
 
+            <p><strong>2026-09 追記：</strong>いまのアプリでは、この保護は有効になっていません（表示用の処理はソースに残っていますが、呼び出されていません）。表示中のメモがアプリスイッチャーの画像に残ることがあります。詳しくは「プライバシー設計」の記事をご覧ください。</p>
+
             <h3>Ephemeral URLSession</h3>
             <p>通常のURLSessionは、キャッシュ、クッキー、認証情報をディスクに保存する。私たちは`URLSessionConfiguration.ephemeral`を使用することで、これらの情報がディスクに一切残らないようにしている。通信のキャッシュとしてメモの内容がストレージに残らないようにするためだ。</p>
 
@@ -703,7 +705,7 @@ func applyLanguageChange() {
 
             </div>
             <div class="related-card__desc">
-              <span lang="ja">ephemeral URLSession、プライバシーオーバーレイ、ログ無害化。メモアプリだからこそ過剰なくらいがちょうどいい。</span>
+              <span lang="ja">ephemeral URLSession、ログの扱い、アプリスイッチャーの現行仕様（メモを自動で隠す機能は有効ではない）。</span>
 
             </div>
           </a>
