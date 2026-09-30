@@ -54,6 +54,12 @@ gateの旧引継ぎメッセージにある`GITHUB_RUN_ID`は、この実タス�
 
 ## 着手前の確認
 
+2026-09-30に所有者が承認した主系の次回自然起動1回だけの復旧例外は、
+[`docs/obsidian/NATIVE_RECOVERY_ONE_USE.md`](obsidian/NATIVE_RECOVERY_ONE_USE.md)に従う。
+私的な許可・予約実行・初回ターンの照合が通った場合だけ、既存の `--contain` と
+observer preflight が導出された `repair_limit` を延期する。明示停止・予算・共有claim・
+初回判定レシートと過去の故障は保持する。通常の停止解除権限を追加するものではない。
+
 1. latest mainを専用worktreeへ取得し、`CLAUDE.md`、
    `docs/obsidian/AUTOPILOT_RUNBOOK.md`、本書、`docs/cost-delegation.md`を全文読む。
    ユーザーのcheckoutを変更しない。Codexではこのリポジトリ内の手順を正本とし、

@@ -21,7 +21,8 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
   'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
-  'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
+  'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs',
+  'scripts/codex-recovery-permit.py'];
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
   const bookkeeping = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');
