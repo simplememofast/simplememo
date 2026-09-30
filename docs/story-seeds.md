@@ -202,3 +202,17 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: 自分にメールでメモを送ったら、まず受信箱で到着を確認。届くことと、用事が終わることは別です。見返す時間と、実行するタスクの置き場所を決めて使います。
 - **英語圏向け**: Confirm that a self-email arrived, then track the task separately. A delivered note is a record, not a completed task.
 - **使わない表現**: 必ず気づく／確認忘れゼロ／管理コストゼロ／記録すれば完了／速度や検索効果の未検証の向上。
+
+
+## S-20261001-voice-input-conditions
+
+- **対象URL**: https://simplememofast.com/voice-input/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: 検索結果の見出しにも利用条件を出し、本文で初めて制限を知る負担を減らす。
+- **引用できる数字**:
+  - 2026-10-01・voice-input/index.html：既存案内の対象はiOS 26以降の対応機種・言語。
+- **note向け**: 音声メモの紹介では、機能の魅力と同じ場所に対応条件も書く。見出しの改善だけで検索成果が出たとは言わない。
+- **X向け**: 音声メモを使おうとしてから条件に気づくのは避けたい。シンプルメモの音声入力ページは、検索結果の見出しにもiPhoneとiOS 26の条件を明示。本文で初回準備と保存先の違いを確認できます。
+- **英語圏向け**: Put device requirements next to the feature promise; a clearer title is a hypothesis, not evidence of search growth.
+- **使わない表現**: 全機種対応、通信が一切不要、検索流入が改善した、売上が増えた、今回の実機検証で確認済み。
