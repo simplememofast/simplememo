@@ -405,7 +405,7 @@
       "name": "メモの内容はどこかのサーバーに保存されますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay APIを経由してメールとして送信されますが、送信完了後にサーバー上にデータは残りません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
+        "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されますが、Simple Memoのサーバーにメモ本文を保存し続けることはありません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
       }
     },
     {
@@ -541,7 +541,7 @@
       "name": "Captioと何が違いますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memoは旧Captioのコア体験を再現しつつ、以下の点で改善・拡張しています：\n\n \n Outbox（未送信キュー）：オフライン時はメモを端末に残し、自動で再送する機能\n AES-GCM暗号化：端末内のデータをすべて暗号化\n プライバシーオーバーレイ：アプリスイッチャーでメモ内容を隠す機能\n 10言語対応：日本語、英語をはじめとした10言語対応（RTL含む）\n メールアドレス認証：悪用防止のための6桁コード認証\n 送信アニメーション：ページめくり風の3Dアニメーション + ハプティクス"
+        "text": "Simple Memoは旧Captioのコア体験を再現しつつ、以下の点で改善・拡張しています：\n\n \n Outbox（未送信キュー）：オフライン時はメモを端末に残し、自動で再送する機能\n AES-GCM暗号化：端末内の送信待ち（Outbox）と送信履歴を暗号化\n プライバシーオーバーレイ：アプリスイッチャーでメモ内容を隠す機能\n 10言語対応：日本語、英語をはじめとした10言語対応（RTL含む）\n メールアドレス認証：悪用防止のための6桁コード認証\n 送信アニメーション：ページめくり風の3Dアニメーション + ハプティクス"
       }
     },
     {
@@ -565,7 +565,7 @@
       "name": "対応デバイス・動作環境を教えてください。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "iPhone（iOS 16.0以降）\n iPad（iPadOS 16.0以降）"
+        "text": "iPhone（iOS 16.0以降）\n Apple Watch（watchOS 9.0以降）"
       }
     },
     {
@@ -812,7 +812,7 @@
 
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最終更新：<time datetime="2026-09-06">2026年9月6日</time></p>
+        <p class="page-content__date">最終更新：<time datetime="2026-09-30">2026年9月30日</time></p>
         <div class="page-content__body faq-body">
 
           <!-- 料金・プラン -->
@@ -1076,7 +1076,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">メモの内容はどこかのサーバーに保存されますか？</summary>
                 <div class="faq-answer">
-                  <p>いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay APIを経由してメールとして送信されますが、送信完了後にサーバー上にデータは残りません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。</p>
+                  <p>いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay API（Cloudflare Workers）と配信サービス（Resend）を経由してメールとして送信されますが、Simple Memoのサーバーにメモ本文を保存し続けることはありません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。</p>
                 </div>
               </details>
             </div>
@@ -1313,7 +1313,7 @@
                   <p>Simple Memoは旧Captioのコア体験を再現しつつ、以下の点で改善・拡張しています：</p>
                   <ul>
                     <li><strong>Outbox（未送信キュー）</strong>：オフライン時はメモを端末に残し、自動で再送する機能</li>
-                    <li><strong>AES-GCM暗号化</strong>：端末内のデータをすべて暗号化</li>
+                    <li><strong>AES-GCM暗号化</strong>：端末内の送信待ち（Outbox）と送信履歴を暗号化</li>
                     <li><strong>プライバシーオーバーレイ</strong>：アプリスイッチャーでメモ内容を隠す機能</li>
                     <li><strong>10言語対応</strong>：日本語、英語をはじめとした10言語対応（RTL含む）</li>
                     <li><strong>メールアドレス認証</strong>：悪用防止のための6桁コード認証</li>
@@ -1352,7 +1352,7 @@
                 <div class="faq-answer">
                   <ul>
                     <li>iPhone（iOS 16.0以降）</li>
-                    <li>iPad（iPadOS 16.0以降）</li>
+                    <li>Apple Watch（watchOS 9.0以降）</li>
                   </ul>
                 </div>
               </details>
