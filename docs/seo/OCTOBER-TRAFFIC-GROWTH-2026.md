@@ -255,6 +255,12 @@ C32 actual primary PR1796 finalhead `7041807216822141b4930469ba4ac626553248a5` m
 C32three-methodLinux boundedauthor original26/28+supplement30/46 andsource30/29nonJA+JA2rows exact. Same-filesystem3MDcopy/Gitlocal1file/actualcoreFileRecoverytimers/restoration only; noindependentphysical/cloud/wholeVault/retention/disaster/mobile/SM/sync/productivity/traffic. Originalfirstreaderexit2 lazyawait and authorizedboundedfollowup actualexit0/2page4width/8DL/raw16HTTP/FAQ/fullcodes/inbound/Next19view/source30unchanged/quality92 preserved. Combined48=C33component47+existingC32evidence1 withC32actualprimarypending→done andC33stayspending. Its ownfinalCI/main/Pages/85+27originreadback remainsseparate. Owner/stop/budget/windows/contracts/global13/notwaived/Companynaturalfalse retained, October2x same-definition maturemeasurementpending, accountsecretspendidentity0/actualcostunknown.
 
 
+### C21起動の固定3条件比較と切り分け候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C21 startup source準備。同Linuxの0/Templater/Templater+QuickAdd固定9起動・各n3、CDPと既知MD表示の別指標、実plugininstances/versions、原CSV/入力MD/4PNG/編集OGを保全。warmcache/preparedprofile/sharedCPU35-44%/同時負荷/全globalprofileprehash欠測を保持し個数因果は認定しない。C14実enableparagraph後1文＋support9含むcomponent19を申告。旧全JSON/ownerstopbudgetwindow契約不変、Companyglobal13非免除、Company無人率/自然schedule加点なし。SM/mobile/sync/生産性/流入未検証、missingbaseline非0・10月2x同定義成熟計測待ち。
+
+[原本と全scope](../obsidian/evidence/slow-startup-20260930.md)。new9＋C14実enable文脈1＋support9=19、raw6は4PNG/CSV/MD、OG別。固定9試行/各n3/原23assert82files・receipt含83/品質92既存privateQAを保持。入力MDはbootstrapでapp保存証拠ではなく、knowntext確認とCDP準備を別扱い。元unique/pending/失敗履歴不変、プラグイン数因果・warmcache/coldstartup混同なし。GSC元85と実committedcandidate27にC21HTML/原CSV/原trial03PNG独自3をsource候補30へ追加し、source27だけでC33配信や候補30本番成功を認定しない。最終normalCI/merge/Pages/publicreadback・source最終review未完、元候補root独立品質90済。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
