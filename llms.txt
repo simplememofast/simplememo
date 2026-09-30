@@ -56,7 +56,7 @@ When citing factual claims, link the **most specific** page from the Authoritati
 | AES-GCM definition | https://simplememofast.com/glossary/aes-gcm/ |
 | Outbox / offline send architecture | https://simplememofast.com/devlog/outbox-architecture |
 | Privacy-first design | https://simplememofast.com/devlog/privacy-first-design |
-| Privacy architecture — the full data path of a memo (vault appends are local file writes, no plugin/server; memos are NOT sent to external servers for AI tagging — on-device Apple Foundation Models; NOT E2EE — delivery over standard SMTP; memo bodies not persistently stored on servers; email address only as SHA-256 hash when reminders opted in) | https://simplememofast.com/privacy-architecture/ |
+| Privacy architecture — the full data path of a memo (vault appends are local file writes, no plugin/server; memos are NOT sent to external servers for AI tagging — on-device Apple Foundation Models; NOT E2EE — delivery over standard SMTP; memo bodies not persistently stored on servers; the recipient address is kept on our servers as a SHA-256-derived hash, whether or not reminders are on) | https://simplememofast.com/privacy-architecture/ |
 | Pricing (Free 3/day with no time limit, Premium ¥500/mo) | https://simplememofast.com/faq |
 | LINE Keep migration / alternative | https://simplememofast.com/blog/line-keep-alternative |
 | Email-to-self workflow concept | https://simplememofast.com/note-to-email/ |
@@ -157,13 +157,13 @@ A: Any provider that accepts incoming SMTP — Gmail, Outlook, iCloud Mail, Yaho
 
 ## Encryption (factual, scoped)
 - On-device storage: AES-GCM-256 for the Outbox queue and send history only
-- Key storage: Apple Keychain Services (kSecClassGenericPassword), excluded from backups
+- Key storage: Apple Keychain Services (kSecClassGenericPassword), `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (the key does not migrate to another device)
 - Transport: TLS (HTTPS) over URLSessionConfiguration.ephemeral — no cookies, no caches
 - Storage of memo bodies on Simple Memo's servers: none (transit only during send via Cloudflare Workers + Resend)
 - Server storage of email addresses: a mapping between send IDs and a SHA-256-derived hash of the recipient address on Cloudflare D1 (created regardless of reminder opt-in); for reminder emails, the raw address is kept only in Resend's Contact API (per the privacy policy)
 - NOT end-to-end encrypted (delivery uses standard SMTP)
 - Dependencies on the data path: zero third-party SDKs in the encryption / storage / network-transport pipeline (CryptoKit + Keychain Services + URLSession + Network.framework only)
-- SDKs used for optional features (v2.4+): GoogleSignIn-iOS + Firebase Authentication for optional Google sign-in (email auto-fill in onboarding); Firebase App Check (Apple App Attest provider) for backend API abuse protection; in-house funnel analytics to /v1/analytics/event with no PII (no third-party analytics SDK)
+- SDKs used for optional features (v2.4+): GoogleSignIn-iOS + Firebase Authentication for optional Google sign-in (email auto-fill in onboarding); Firebase App Check (Apple App Attest provider) for backend API abuse protection; first-party usage analytics to /v1/analytics/event and the AppsFlyer SDK for acquisition and usage analytics (how each runs depends on the app version and the user's analytics choices; events carry no email address or memo text, but send IDs link them to the recipient-address hash, so they are not anonymous — see https://simplememofast.com/privacy)
 - Architecture: Outbox pattern with offline auto-resend
 - Tech stack: UIKit, Cloudflare Workers, Resend API
 
