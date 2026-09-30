@@ -64,6 +64,18 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/gsc-crawled-indexing.mjs",
+      "expr": "target.search",
+      "disposition": "前提",
+      "note": "2026-09-30: 公開HTMLの内部リンクを数える際、同一origin・queryなし・別ページへの直接リンクだけをcanonical URLのinboundへ加える選別条件。new URLのsearchが空文字なら!target.searchは真で、照合元の欠落を理由に違反判定を消す向きではない。query付き・外部・自己リンクはこの直接リンクの証拠に数えず、適格リンクが0件なら後段のsources.size > 0のassertが必ず拒否する。HTTPのPR baseline除外とは別のsource auditで、C13/C14の適格inbound各2件を確認。実際の選別行と必須assertを読み出した単発検査でもquery付き・外部・自己リンクだけの3ケースは拒否し、queryなしの直接リンクは採用した。専用自己テストは追加していない。述語・走査規則・既存85件の範囲を変更して通す登録ではない。"
+    },
+    {
+      "file": "scripts/gsc-crawled-indexing.mjs",
+      "expr": "report.error",
+      "disposition": "前提",
+      "note": "2026-09-30: catchで記録した実行エラーが無いことを要求する全体の成功条件。エラーがあればreport.okは偽になり、finallyで証拠を保存した後のassertが拒否する。エラー欄が無い正常時も、既存85件のfailed=0・skipped=0と、strictでは公開6件のfailed=0・skipped=0を独立して要求するため、欄の欠落で未検証や失敗を成功にしない。既存のsynthetic selftestで伝播未完了404、公開元ファイル欠落、robots.txt 503の拒否とreport保存、正常strict全件完了、PR baselineで候補元ファイルを読まず新URLを取得しないことを確認。baselineの公開候補6件のskipは明示したmerge前の範囲で、strictの未完了には適用しない。判定・scannerの弱化ではない。"
+    },
+    {
       "file": "scripts/execution-priorities.mjs",
       "expr": "unmet",
       "disposition": "前提",
