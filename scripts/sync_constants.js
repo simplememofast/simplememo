@@ -17,6 +17,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { walkHtmlFiles } = require('./lib/site-files');
 
 const ROOT = path.resolve(__dirname, '..');
 const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json'), 'utf8'));
@@ -158,12 +159,7 @@ if (!WRITE && !args.has('--check') && !SELFTEST) {
 }
 
 function* htmlFiles(dir) {
-  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
-    const p = path.join(dir, e.name);
-    if (e.isDirectory()) yield* htmlFiles(p);
-    else if (e.name.endsWith('.html')) yield p;
-  }
+  yield* walkHtmlFiles(dir, { skipDirs: ['node_modules'], tolerateReadErrors: false });
 }
 
 /**

@@ -23,6 +23,13 @@ Node・Python・複数ファイルの `node --test` 実行行を導出する。
 CI全体の成功を意味しない。対象の一覧は `--list`、
 絞り込みは `--only <文字列>`。不明な書式・不正な引数・0件の選択は失敗する。
 
+隣接する `simplememo-api` / `simplememo-ios` がある場合、検査はその作業ツリーを
+参照する。古い checkout は根拠ファイルの欠落や収益データの旧形式を持つため、
+先に検証用の3リポジトリを最新の main に揃える。作業中の変更がある場合は、
+別の親ディレクトリに各リポジトリ名で worktree を作って検証する。
+収益の写しが古ければ、最新の実測を参照する `growth/scripts/revenue-series.mjs --write`
+で再生成し、生成物も同じ変更に含める。保護条件や根拠の台帳を削って通さない。
+
 生成器の検査は隣接リポジトリを参照できる一時コピーで実行する。
 コピー作成失敗・シンボリックリンク・Gitの作業先を上書きする環境変数がある場合は
 生成器を実行しない。元の作業ツリーへフォールバックしない。
@@ -52,6 +59,13 @@ CI全体の成功を意味しない。対象の一覧は `--list`、
   read-json.mjs、site-files.js、edge-middleware.mjs、blindspot-*（監査手法として
   data/check-blindspots.json / guard-shapes.json が言及）
   と preflight-runner.mjs（一時コピー作成・検査実行・後片付け）
+
+`seo-check.js` は CLI とレポートの集約を持ち、ページ本文の検査は
+`lib/seo-page.js`、サイト全体の検査は `lib/seo-site.js` に分けている。
+`lib/site-files.js` の `collectHtmlFiles` は配列、`walkHtmlFiles` は遅延列挙を返す。
+隠しファイル・除外名・読み取りエラーの扱いは呼び出し側の既存方針に合わせる。
+これらと運用アクションの振る舞いは `lib/refactor-behavior.test.mjs` で検査し、
+既存の `refactor.test.mjs` から実行する。
 
 ## 4. 手動ツールと完了済み一回限り
 
