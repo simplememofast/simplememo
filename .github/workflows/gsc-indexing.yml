@@ -17,6 +17,8 @@ on:
       - 'sitemap*.xml'
       - '**/*.html'
       - 'scripts/gsc-crawled-indexing.mjs'
+      - 'scripts/full-public-assets-readback.mjs'
+      - 'scripts/full-public-assets-rate-limit.test.mjs'
       - 'scripts/lib/edge-middleware.mjs'
       - 'data/publication-policy.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
@@ -32,6 +34,8 @@ on:
       - 'sitemap*.xml'
       - '**/*.html'
       - 'scripts/gsc-crawled-indexing.mjs'
+      - 'scripts/full-public-assets-readback.mjs'
+      - 'scripts/full-public-assets-rate-limit.test.mjs'
       - 'scripts/lib/edge-middleware.mjs'
       - 'data/publication-policy.json'
       - 'docs/seo/gsc-crawled-cases-2026-09-16.json'
@@ -60,6 +64,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Public asset rate-limit regressions (controlled requests, no HTTP)
+        run: node --test scripts/full-public-assets-rate-limit.test.mjs
       - name: Both GSC samples (85 unique URLs), metadata, crawl permission and inbound links
         run: node scripts/gsc-crawled-indexing.mjs
       - name: Record production baseline without claiming candidate deployment
