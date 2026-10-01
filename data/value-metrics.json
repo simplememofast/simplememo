@@ -198,11 +198,27 @@
       "approved_by": null, "approved_at": null
     },
     {
+      "id": "autonomy_outcome_score",
+      "name": "目的・方法・成果と省力化による自律スコア",
+      "tier": "C",
+      "source": "scripts/autonomy-outcome-score.mjs",
+      "why_excluded": "人間向けの並行評価計器。仕事の選択報酬・価値契約の成果指標に使わず、旧履歴を書き換えない。",
+      "approved_by": null, "approved_at": null
+    },
+    {
       "id": "overall_automation_rate",
       "name": "総合自動化率（タスク被覆率）",
       "tier": "C",
       "source": "data/automation-coverage.json",
       "why_excluded": "**分母が棚卸しで動く。**2026-08-25 に13件足したとき 61.3% → 58.6% に下がっている。契約の指標にすると『棚卸しをしない』が最適戦略になり、台帳の正確さと利益相反する",
+      "approved_by": null, "approved_at": null
+    },
+    {
+      "id": "verified_full_automation_rate",
+      "name": "実運用のAI完全自動化率",
+      "tier": "C",
+      "source": "growth/lib/business-automation.mjs",
+      "why_excluded": "全業務の運転状況を報告する計器。分母や測定器を操作する誘因を避け、作業選択・価値契約の報酬にしない。人の手間と事業価値に基づく実際の業務移管を選ぶ。",
       "approved_by": null, "approved_at": null
     }
   ]

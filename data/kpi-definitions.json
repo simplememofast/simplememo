@@ -960,8 +960,8 @@
       "name": "自律スコア（100点）",
       "formula": "5成分の加重和。VDC 30（出荷のうち決済済みの価値契約を伴う割合）＋ UMR 25（記録上無介入で本番到達した変更の割合を可逆性クラス R0=1/R1=3/R2=10 で重み付け・R0 の寄与は窓の総重みの60%まで）＋ RA 20（故障のうち機械が自分で検知した割合 10 と記録上無介入で復旧した割合 10）＋ EP 15（規則の within_hours を超えた検知の率から出す見逃し 7.5 と owner_needed による精度 7.5）＋ TUC 10（週あたり出荷数 / 目標7・上限1）。窓は28日（台帳が足りなければ全期間）。**検査被覆率が前回スナップショットより下がった窓では、素点が上がっていてもスコアを据え置く。**変更失敗率は入れない。記録上無介入はinterventionsの明示[]に限り、未指定/null/不正をゼロへ補完しない。UMRは未知を元分母に保持してrate=null・0点、RAは未知の復旧rateと総rate=null・復旧0点とし、既知の機械検知点を保持する。未観測carryにも加点しない。明示[]は完全な人介入観測や実際のzero-touchを証明しない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 16,
-      "checksum": "f5f6680c707c372e",
+      "version": 17,
+      "checksum": "f3ffc0c4b4683db8",
       "changed_at": "2026-09-30",
       "why_it_matters": "**総合自動化率（タスク被覆率）は「何を自動化できたか」しか言わない。**検証されていない決定を100%自動化すれば被覆率は100%になる。こちらは反証器の有無で数える —— L0 実装だけに反証器があり L1〜L3 に無い現状が、VDC 0/30 として数字に出る。**乗り換えではなく併設**で、片方が伸びてもう片方が伸びないことに意味がある。配点は data/autonomy-score.json（L4＝人間所有）に置き、AIは書き換えない",
       "history": [
@@ -1039,6 +1039,11 @@
           "version": 16,
           "at": "2026-09-30",
           "why": "観測欠測の意味を変更した。UMRの未知を元分母に残してrate=null・0点、RAの未知復旧とcarryを0点・rate=nullに保ち、独立に確認した検知点だけを保持する。明示[]は記録上ゼロのみで、完全な人介入観測や実際のzero-touch証明ではない。5成分・配点・可逆性重み・R0上限・28日窓・被覆非退行・元台帳は変更しない。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
+        },
+        {
+          "version": 17,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。旧5成分の式・配点・窓・分母・介入欠測の扱いは維持。新しい事業割合と補助品質評価をranker報酬から除外し、所有者定義の変更境界へ追加したため、共有計算元のchecksumと履歴を更新する。"
         }
       ],
       "source_dependencies": {
@@ -1050,8 +1055,8 @@
       "name": "無検査マージ率（UMR・可逆性で重み付け）",
       "formula": "Σ(可逆性重み × interventionsが明示[]である記録上無介入の出荷) / Σ(可逆性重み × 全出荷)。可逆性クラスは data/autonomy-score.json の lane_action_class（action=new は R1、refresh は R0、レーンF は常に R0）。重みは R0=1 / R1=3 / R2=10。R0 の分子寄与は窓の総重みの60%を超えない。介入記録の未指定/null/不正が混ざっても全出荷とその重みを分母に残し、UMRのrateはnull・点数0とする。既知の介入と記録上ゼロの内訳は保持するが、明示[]を完全な人介入観測や実際のzero-touch証明にはしない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 16,
-      "checksum": "f5f6680c707c372e",
+      "version": 17,
+      "checksum": "f3ffc0c4b4683db8",
       "changed_at": "2026-09-30",
       "why_it_matters": "**可逆な変更ばかり通して自律したつもりになるのを防ぐ。**既存の人間介入率（23.3%）は run 単位の二値で、可逆性を見ていない —— YAML を1行直した日と、索引される新しい公開URLを無検査で出した日が同じ重さで数えられる。重み付けすると「無検査で通してよい重さ」が測れる",
       "history": [
@@ -1129,6 +1134,11 @@
           "version": 16,
           "at": "2026-09-30",
           "why": "観測欠測の意味を変更した。全出荷と可逆性重みを分母に保持し、明示[]だけを記録上無介入の分子候補にする。未指定/null/不正が混ざるUMRはrate=null・0点で未知から加点しない。既知positiveを保持し、R0=1/R1=3/R2=10と60%上限・元窓・原台帳は不変。明示[]を実際のzero-touch証明にしない。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
+        },
+        {
+          "version": 17,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。旧5成分の式・配点・窓・分母・介入欠測の扱いは維持。新しい事業割合と補助品質評価をranker報酬から除外し、所有者定義の変更境界へ追加したため、共有計算元のchecksumと履歴を更新する。"
         }
       ],
       "source_dependencies": {
@@ -1140,8 +1150,8 @@
       "name": "復旧自律性（RA）",
       "formula": "故障（failure_stage が execution / cost / absent の行）を分母に、(a) source が data/autonomy-score.json の machine_detection_sources に含まれる割合＝機械の自己検知、(b) repair_of で修理された行があり、かつ故障runと出荷済み修理runの双方のinterventionsが明示[]である割合＝記録上無介入の復旧。それぞれ満点10。自動 revert 回数（auto_revert_of を持つ行）は別に数え、点数に入れない。元の本番復旧台帳・成果要件・全故障分母も維持する。故障runまたは対応する出荷済み修理runの介入記録が未指定/null/不正なら、復旧rateとRA総rateはnull、復旧点は0とし、独立に確認できた機械検知点だけを保持する。carryの標本が未観測でも復旧点へ変換しない。明示[]は実際のzero-touchを証明しない",
       "source_file": "scripts/autonomy-score.mjs",
-      "version": 16,
-      "checksum": "f5f6680c707c372e",
+      "version": 17,
+      "checksum": "f3ffc0c4b4683db8",
       "changed_at": "2026-09-30",
       "why_it_matters": "**出荷後の指標劣化を検知して自動で revert できない限り、マージ権限をより危険なクラスへ広げることは原理的にできない。**設計ノートの定義（検知して人手なしで巻き戻した割合）をそのまま使うと自動 revert 0 回の現状で恒久的に 0 になり、実際に動いている自己修復が見えなくなるので検知と復旧に割った。**Phase 6 のハードゲートは点ではなく auto_revert_count >= 1 に紐づける**（点で代替すると、検知だけで満点に近づいて「巻き戻せる」ことになる）",
       "history": [
@@ -1219,6 +1229,11 @@
           "version": 16,
           "at": "2026-09-30",
           "why": "観測欠測の意味を変更した。故障runか出荷済み修理runの介入記録が未指定/null/不正なら元の全故障分母を残し、復旧rateとRA総rateはnull・復旧点0。独立した既知の機械検知点は保持し、未観測carryにも復旧加点しない。明示[]は記録上ゼロのみ。本番復旧の原成果要件、半分ずつの配点、auto-revertの別計数、窓と原台帳は不変。共有ヘルパーintervention-observation.mjsを明示的なsource_dependenciesへ登録し、主ファイル単独checksumの意味を維持して依存だけの変更も検査する。"
+        },
+        {
+          "version": 17,
+          "at": "2026-09-30",
+          "why": "定義は変えていない。旧5成分の式・配点・窓・分母・介入欠測の扱いは維持。新しい事業割合と補助品質評価をranker報酬から除外し、所有者定義の変更境界へ追加したため、共有計算元のchecksumと履歴を更新する。"
         }
       ],
       "source_dependencies": {
@@ -1321,6 +1336,82 @@
           "why": "予算ゲートの欠損処理を修正。欠落・非数・負値の上限と、不正な予測をpassではなくunknownにする。設定済みの上限・配点・分母・執行権限は変更しない。"
         }
       ]
+    },
+    {
+      "id": "verified_full_automation_rate",
+      "name": "実運用のAI完全自動化率",
+      "formula": "直近28日に全発生・全6工程・起動元・人の活動観測を確認し、手動起動・個別承認・有人判断/検証/修正なしで安全に完走した業務数 / 全対象業務数。未実装・有人・未発生・未知も分母に保持する。欠測があれば点推定はnull。90%超維持は法人対象の網羅確認と同じ対象の4週連続測定が必要。",
+      "source_file": "growth/lib/business-automation.mjs",
+      "source_dependencies": {
+        "data/business-automation-policy.json": "aa2b65dcde586077",
+        "scripts/autonomy-outcome-score.mjs": "0e0cadc08c5e16cd"
+      },
+      "version": 2,
+      "checksum": "720a3cc26d57a18b",
+      "changed_at": "2026-10-01",
+      "why_it_matters": "法人とアプリの全事業を100%として実運用を追う。既存203項目と旧4指標は保持し、台帳分類・準備完了を実際の無人完走と混同しない。観測網羅性と人のレビューは独立原本確認が必要。",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-10-01",
+          "why": "算式・全対象の分母・旧履歴は変更していない。元の実運用観測日時と固定参照を審査日時から分離し、再審査を新測定にしない。未来・異なる分母の4週維持を拒否し、失敗・未知工程・介入・実時間の増減・排他的費用の小計を併記。準備の加点はしない。"
+        }
+      ]
+    },
+    {
+      "id": "business_ai_utilization_rate",
+      "name": "実運用のAI活用率",
+      "formula": "直近28日に実際のAI提案・下書き・判断・実行利用を観測した業務数 / 完全自動化率と同じ全対象業務数。有人工程や個別承認も活用には含める。台帳の実装分類を利用実績へ変換せず、欠測があれば点推定はnull。",
+      "source_file": "growth/lib/business-automation.mjs",
+      "source_dependencies": {
+        "data/business-automation-policy.json": "aa2b65dcde586077",
+        "scripts/autonomy-outcome-score.mjs": "0e0cadc08c5e16cd"
+      },
+      "version": 2,
+      "checksum": "720a3cc26d57a18b",
+      "changed_at": "2026-10-01",
+      "why_it_matters": "法人とアプリの全事業を100%として実運用を追う。既存203項目と旧4指標は保持し、台帳分類・準備完了を実際の無人完走と混同しない。観測網羅性と人のレビューは独立原本確認が必要。",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-10-01",
+          "why": "算式・全対象の分母・旧履歴は変更していない。元の実運用観測日時と固定参照を審査日時から分離し、再審査を新測定にしない。未来・異なる分母の4週維持を拒否し、失敗・未知工程・介入・実時間の増減・排他的費用の小計を併記。準備の加点はしない。"
+        }
+      ]
+    },
+    {
+      "id": "business_labor_savings_rate",
+      "name": "事業運営の実測省力化率",
+      "formula": "max(0,min(1,1 - 全業務の合計実測作業分数 / 全業務の合計基準作業分数))。基準は着手前の比較可能な実測で固定し、承認・確認・やり直しを含む。全対象の比較が揃わなければnull。",
+      "source_file": "growth/lib/business-automation.mjs",
+      "source_dependencies": {
+        "data/business-automation-policy.json": "aa2b65dcde586077",
+        "scripts/autonomy-outcome-score.mjs": "0e0cadc08c5e16cd"
+      },
+      "version": 2,
+      "checksum": "720a3cc26d57a18b",
+      "changed_at": "2026-10-01",
+      "why_it_matters": "法人とアプリの全事業を100%として実運用を追う。既存203項目と旧4指標は保持し、台帳分類・準備完了を実際の無人完走と混同しない。観測網羅性と人のレビューは独立原本確認が必要。",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-10-01",
+          "why": "算式・全対象の分母・旧履歴は変更していない。元の実運用観測日時と固定参照を審査日時から分離し、再審査を新測定にしない。未来・異なる分母の4週維持を拒否し、失敗・未知工程・介入・実時間の増減・排他的費用の小計を併記。準備の加点はしない。"
+        }
+      ]
+    },
+    {
+      "id": "autonomy_outcome_score",
+      "name": "目的・経路・成果・人の負担の補助自律評価",
+      "formula": "目的判断30 + 経路判断30 + 事前固定した成果検証25 + 実測人手削減15。直近28日、事前登録目標と人のレビュー、最低5件。安全違反は加重相殺しない。未知を0や満点へ補完せず、既知成分を100点へ再配分しない。事業全体の完全自動化率とは別の並行試行。",
+      "source_file": "scripts/autonomy-outcome-score.mjs",
+      "source_dependencies": {
+        "data/autonomy-outcome-score.json": "fd7fcaf67b4bfb31"
+      },
+      "version": 1,
+      "checksum": "0e0cadc08c5e16cd",
+      "changed_at": "2026-10-01",
+      "why_it_matters": "コード完成や実装分類と、目的・方法の判断品質を分ける。所有者指定の補助計器で、rankerや価値契約の報酬にはしない。"
     }
   ]
 }
