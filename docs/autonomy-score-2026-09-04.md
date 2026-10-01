@@ -1,5 +1,7 @@
 # 自律スコア — 「自動化できた量」ではなく「検証された決定の量」で数え直した
 
+2026-09-30追記: [目的・方法・成果と省力化による新定義](autonomy/OUTCOME_AUTONOMY_SCORE.md)を別計器で並行試行する。この文書の旧配点・履歴は保持し、新旧の点差を運用改善として扱わない。
+
 <!-- fact-check: internal -->
 
 > **正は `scripts/autonomy-score.mjs` と `scripts/autonomy-eligibility.mjs`。**
