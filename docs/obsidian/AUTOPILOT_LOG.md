@@ -4124,3 +4124,13 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 - No repair-attempt reset, emergency-stop mutation or consumed-permit renewal. Repair attempts increase; another no_artifact recurrence still escalates at the unchanged limit. Derived containment ends only because both outstanding recurrences have verified repairs. Future natural business delivery remains unproven.
 - Seven usage-limit requests close through the unchanged same-route attempted-run recovery condition, with no repair_of for quota failures. Review3bf435d is commit-specific: recover only the missing explanation and retain the later AppsFlyer MSA/source-history repair.
 - Cron issue1587 remains open until its existing all-workflow recovery verifier confirms the actual executions. No duplicate schedule, model probe or external notification is added. Human intervention and unknown Codex monetary actual remain explicit.
+
+
+## 2026-10-02 — Codex主系06:00 / レーンA・音声入力の利用条件
+
+- 実タスク: 01a0f946-1d12-7883-aa89-0718772a5b85、automation obsidian、route actions。予約記録とDAILY06:00規則を照合。初回preflight許可、共有claim取得。消費済み例外の再利用・停止や予算の解除なし。
+- 候補比較: VFUは既存の失敗IDのまま、現行reason=nullを復旧としない。GA4の34着地不明セッションも欠測として保持。Growthではvoice-inputのタイトルに本文のiPhone/iOS26条件がない点を選び、second-brainの広い定義変更より範囲を限定。事前契約voice-input-title-20261002とCompany bind後に測定登録のみを先行コミット。
+- GSC 09/01〜09/28: 対象185表示・0クリック、平均順位8.135。可視の検索語結合は10表示だけなので記事追加や統合の根拠にしない。CTAの対象1/1は小標本かつ品質ブロックで成果根拠にしない。
+- PR1853: title/description/SNS/Article/WebPageと既存アイコン、対象sitemap・配信/記事ネタの種を同期。本文・CTA・計測を保持。0 SEO errors/54既存warnings、Chrome4幅で横漏れ0・画像読込み確認。出荷は最終SHA CI・マージ・本番一致後に成立。
+- 観測: GSC/BingAPI/AppsFlyer検証、ASC既存出力再利用、同一UUIDのGA4再開。BingW40と当週固定AI観測は再利用。service_notice_monitor直近48時間48行はinactiveで最新鮮度と数値0を確認。過去の観測空白は消さない。
+- 実験: GSC新規28日窓10/02〜10/29・11/01評価。10/03・10/23の既存実験を維持。AppsFlyer自然日5/7はINCONCLUSIVE。Codex実費USDは未取得null、Claude実費台帳への追記なし。
