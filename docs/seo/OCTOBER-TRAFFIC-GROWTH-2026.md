@@ -323,3 +323,30 @@ PR [#1807](https://github.com/simplememofast/simplememo/pull/1807) の最終head
 Primary HTMLは実HTTPのtitle/canonical/robots/sitemapの有限policy、rawはsourceと実entity bodyのbytes/SHA256、C22secondary HTMLはnoindex,followの有限policyとして区別する。記事・文脈案内・根拠文書31ファイルの実repository readbackを別に保全し、primary HTML全文一致・全サイト版・Google登録・AIO引用・流入効果を認定しない。最初のPR原本照合で生じたC25日本語URL表記の失敗、旧head SEO cancelled、元206件81PASS/125HTTP429と全著者・readerの限界を保持する。元Markdown/PNG/OG/ZIP/APIを置換せず、元queue metadata/order/title/unique/evidence/publication_noteとowner/stop/budget/windowの逆変換は全bytes一致。変更元はcoverage queueのstatus11件/done_note11件と本節の追記だけ。
 
 台帳はdone33/pending1/blocked2。C08の既存Notion担当、C19の実機iOS担当、C29のCraft現行エクスポート一次資料不足は継続する。既存実験の観測期限・最小標本・10月3日/12日/23日/11月11日の窓、既存Company13の衝突と自然schedule承認条件を保全する。Company無人率・自然schedule復旧へ加点せず、実費unknownを0へ読み替えない。10月倍増は同じ計測元/property/stream/host/timezone/filter/session/dedupでの成熟した月間比較待ち。9月全月baselineの不足は未観測であり、GSC/AIO指標・部分月・記事公開を倍増達成の代用にしない。
+### 10月1日05:46 UTC再確認とA7の本文定義同期
+
+同じ既存branch/worktreeの旧成果を保全し、fresh main `c0ffe783ce6aa128b1675f4ef016d2d27cb33057` へ未変更のbranchを合わせた。以前の129ファイルや完了したGSC修復を再導入しない。今回の事実訂正は既存 `/glossary/pkm/` の説明5箇所と更新日、JA sitemapの当該lastmod、公開照合1件の追加、本文書、annotation1件、既存非排他brand/engage notes各1の6ファイル。タイトル/H1は既に検索意図を含み、本文の定義をそのまま使う。原GUI/Markdown/PNG、本文導線、EN、他担当の最新rate-limit/WebKit修復は保全する。
+
+GSC 2026-09-29 snapshotの2026-08-30..2026-09-26 WEBで、query `pkmとは` は69表示・0click・平均順位4.0144927536231885、既存分析の期待CTR 0.051623878584917286から理論期待click約3.562（queue丸め3.6）。ページ全体は547表示・10clickであり、queryの0をページ全体へ拡大しない。これは既存A7候補の診断に限り、流入sessionや因果効果を表さない。変更5説明は本文にある「情報を集め、自分の理解や出典を添え、後の仕事・学習で使えるようにする実践」の第一文へ合わせる。新しい実験・title変更・原実験契約や評価窓の変更は含めない。
+
+通常GSC照合の元85 source/baselineと元比較60（HTML20・素材40）の内容・順序を保持し、A7 HTML1を最後に追加する。公開ではtitle/canonicalだけで旧cacheを成功としない。A7のmeta/OG/Twitter/Article/DefinedTermの5説明を各1件・非空で取得し、actual/expectedを記録する。追加1件はC17固有3件、C13/C14の6件、後続60件と区別する。通常最終head CI・実merge・対応main Pages・originでの変更5説明の一致をそれぞれ確認するまで、A7はqueuedとして保持する。primary HTML全文、Google登録、順位/CTR改善を認定しない。
+
+現状の依存関係には訂正がある。既存Obsidian ownerの直近起動は2026-09-30T21:00:57.062Z、次回予定は2026-10-01T21:01:42Z。過去のMac 264時間offlineは歴史値で、現在の一律停止を示さない。run36777157622/job110097841056は9月20–26日のGA4 funnel/exportを完了し、10月1日のSEO Daily run36796020954も成功した。暗号化artifactはmetadataだけを確認し、復号・鍵取得・新collector・手動復旧を行っていない。この観測からCompany無人率・自然schedule復旧・事業成果を推論しない。
+
+BigQueryの一般的な利用不可という旧表現も現在の成功経路とは区別する。既存固定cohortは9月6日からなので9月1–5日を含む同一定義の全月baselineには不足する。元私有受領書の一経路はEACCES13であり、存在しないとは扱わない。property/stream/host/timezone/filter/session/dedupの全条件と成熟待ちは未解決。Metricool設定のwebsite指標はGA4同条件のsessionを証明しない。GSC、部分月、欠測0、encrypted artifact metadataを主指標の代用にしない。
+
+残キュー33done/1pending/2blockedはC29のCraft現行一次資料、C08の既存ページ優先と最新queryの期待click約1.044・順位約16.915というadmission不足、C19のR4役割/guide全範囲に対応する原実機証拠の不足として扱う。C08の現在の専任ownerを新たに推定しない。C19には過去のiOS 6/6やTestFlight5.9.9(1803) DailyNoteの実機受領書が存在するが、その有限範囲を今回の全guideへ拡大しない。旧段落の一律owner/実機不足表現はこの現在の区別で更新する。
+
+手動Goalの既存ユーザー権限と measurement-coexistence-policy.md の事実訂正経路を適用し、全scopeのCompany13競合・既存owner/stop/budget/windowを保持する。予算の既存チェックは成功したが実費はunknown、paid probe/account/secret/sender identity追加0。新ownerの登録や競合解除を行わない。10月倍増は未達成・未判定、9月30日の5日lagは10月5日JST、10月全月は11月5日JST以後の同定義成熟receiptを必要とする。
+
+### A7とEN A1の最終変更を同じPRで確認する（2026-10-01 UTC）
+
+EN A1は `source_key: page:/en/blog/ios26-speechanalyzer-live-mic` の既存pageであり、同じA1 IDを持つinstall/download/書き留めるquery行を変更しない。GSC2026-09-29 snapshotのAug30–Sep26 WEBで1084表示・0click・平均順位6.970479704797048、理論期待click約6.549を候補診断として確認した。別queryやGA4流入の値へ転用しない。公開canonicalは末尾slashなし、sourceは `en/blog/ios26-speechanalyzer-live-mic.html`、既存loader/redirect/middlewareを変更しない。
+
+本文とhead title/metaは既に「Setup, Results, and Troubleshooting」とmodel/PCM/final results/vocabulary/検証限界の説明だったが、TechArticleのheadline/descriptionとdateModifiedだけがJune16のままだった。前2項目は現行title/metaへ、dateModifiedは既存可視更新日の2026-09-09へ合わせる。本文全文・可視Sept9の日付・original four converter tests/Simulator build/helper typecheck日とphysical-device未再検証の但し書きは不変。EN sitemap当該lastmodのOct1はmetadataのcontent-signatureを訂正した実日付で、Sept9の検証を再実施した日付ではない。
+
+A7の公開前の最初のhead `0ef6d92a97edecdbb91a6d92853ce61a3e83c0f9`、PR #1834 GSC run36823209568/job110243072679のsource85+61とproduction baseline85成功、candidate61 skipを保全する。この時点のSEOは進行中で、merge/main Pages/origin候補公開の証拠ではない。両候補を同じ既存PRの最終headへまとめ、最終通常CI・actual merge・対応main Pages・公開85+62/fullraw299の別証拠で照合する。先行headのsource/PR基準検査を最終head成功へ転用しない。以前の「A7公開確認後にA1適用」という手順はrootの準備順序であり、ユーザー・実験owner・技能の許可条件ではない。公開後の完了判定gateは両方とも維持する。
+
+全変更元は `/glossary/pkm/` HTML、EN SpeechAnalyzer HTML、JA/EN各sitemapの該当lastmod、GSC検査script、本文書、annotations、既存brand/engage観測notesの8ファイル。最小EN差分はそのうち6ファイル。元85と元比較60（20HTML/40素材）の順序・Unicode・原本・通信/予算規約、A7の独立ordinal61・5説明検査を保全し、EN A1だけをordinal62へ加える。A1は3metaとunique TechArticle headline/description/dateModifiedのactual/expectedを保持し、同じtitleの古いschemaを検出する。通常比較62はHTML22/素材40で、primary全文一致やGoogle登録を保証しない。
+
+全scope Company13競合・original owner/stop/budget/windowsと非排他brand/engage契約を保持する。新しいtitle実験、owner解除、支出/鍵/送信identity、GUI/実機/サンプル再生成は含まない。9月全月の同一条件GA4 baselineと10月成熟比較は未確定、GSC採択診断やデプロイ・掲載完了から倍増/Company無人率/自然schedule復旧を認定しない。A7 queuedとEN A1 staleは最終公開照合後、source_keyを指定した別の台帳差分で記録する。
