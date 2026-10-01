@@ -323,3 +323,18 @@ PR [#1807](https://github.com/simplememofast/simplememo/pull/1807) の最終head
 Primary HTMLは実HTTPのtitle/canonical/robots/sitemapの有限policy、rawはsourceと実entity bodyのbytes/SHA256、C22secondary HTMLはnoindex,followの有限policyとして区別する。記事・文脈案内・根拠文書31ファイルの実repository readbackを別に保全し、primary HTML全文一致・全サイト版・Google登録・AIO引用・流入効果を認定しない。最初のPR原本照合で生じたC25日本語URL表記の失敗、旧head SEO cancelled、元206件81PASS/125HTTP429と全著者・readerの限界を保持する。元Markdown/PNG/OG/ZIP/APIを置換せず、元queue metadata/order/title/unique/evidence/publication_noteとowner/stop/budget/windowの逆変換は全bytes一致。変更元はcoverage queueのstatus11件/done_note11件と本節の追記だけ。
 
 台帳はdone33/pending1/blocked2。C08の既存Notion担当、C19の実機iOS担当、C29のCraft現行エクスポート一次資料不足は継続する。既存実験の観測期限・最小標本・10月3日/12日/23日/11月11日の窓、既存Company13の衝突と自然schedule承認条件を保全する。Company無人率・自然schedule復旧へ加点せず、実費unknownを0へ読み替えない。10月倍増は同じ計測元/property/stream/host/timezone/filter/session/dedupでの成熟した月間比較待ち。9月全月baselineの不足は未観測であり、GSC/AIO指標・部分月・記事公開を倍増達成の代用にしない。
+### 10月1日05:46 UTC再確認とA7の本文定義同期
+
+同じ既存branch/worktreeの旧成果を保全し、fresh main `c0ffe783ce6aa128b1675f4ef016d2d27cb33057` へ未変更のbranchを合わせた。以前の129ファイルや完了したGSC修復を再導入しない。今回の事実訂正は既存 `/glossary/pkm/` の説明5箇所と更新日、JA sitemapの当該lastmod、公開照合1件の追加、本文書、annotation1件、既存非排他brand/engage notes各1の6ファイル。タイトル/H1は既に検索意図を含み、本文の定義をそのまま使う。原GUI/Markdown/PNG、本文導線、EN、他担当の最新rate-limit/WebKit修復は保全する。
+
+GSC 2026-09-29 snapshotの2026-08-30..2026-09-26 WEBで、query `pkmとは` は69表示・0click・平均順位4.0144927536231885、既存分析の期待CTR 0.051623878584917286から理論期待click約3.562（queue丸め3.6）。ページ全体は547表示・10clickであり、queryの0をページ全体へ拡大しない。これは既存A7候補の診断に限り、流入sessionや因果効果を表さない。変更5説明は本文にある「情報を集め、自分の理解や出典を添え、後の仕事・学習で使えるようにする実践」の第一文へ合わせる。新しい実験・title変更・原実験契約や評価窓の変更は含めない。
+
+通常GSC照合の元85 source/baselineと元比較60（HTML20・素材40）の内容・順序を保持し、A7 HTML1を最後に追加する。公開ではtitle/canonicalだけで旧cacheを成功としない。A7のmeta/OG/Twitter/Article/DefinedTermの5説明を各1件・非空で取得し、actual/expectedを記録する。追加1件はC17固有3件、C13/C14の6件、後続60件と区別する。通常最終head CI・実merge・対応main Pages・originでの変更5説明の一致をそれぞれ確認するまで、A7はqueuedとして保持する。primary HTML全文、Google登録、順位/CTR改善を認定しない。
+
+現状の依存関係には訂正がある。既存Obsidian ownerの直近起動は2026-09-30T21:00:57.062Z、次回予定は2026-10-01T21:01:42Z。過去のMac 264時間offlineは歴史値で、現在の一律停止を示さない。run36777157622/job110097841056は9月20–26日のGA4 funnel/exportを完了し、10月1日のSEO Daily run36796020954も成功した。暗号化artifactはmetadataだけを確認し、復号・鍵取得・新collector・手動復旧を行っていない。この観測からCompany無人率・自然schedule復旧・事業成果を推論しない。
+
+BigQueryの一般的な利用不可という旧表現も現在の成功経路とは区別する。既存固定cohortは9月6日からなので9月1–5日を含む同一定義の全月baselineには不足する。元私有受領書の一経路はEACCES13であり、存在しないとは扱わない。property/stream/host/timezone/filter/session/dedupの全条件と成熟待ちは未解決。Metricool設定のwebsite指標はGA4同条件のsessionを証明しない。GSC、部分月、欠測0、encrypted artifact metadataを主指標の代用にしない。
+
+残キュー33done/1pending/2blockedはC29のCraft現行一次資料、C08の既存ページ優先と最新queryの期待click約1.044・順位約16.915というadmission不足、C19のR4役割/guide全範囲に対応する原実機証拠の不足として扱う。C08の現在の専任ownerを新たに推定しない。C19には過去のiOS 6/6やTestFlight5.9.9(1803) DailyNoteの実機受領書が存在するが、その有限範囲を今回の全guideへ拡大しない。旧段落の一律owner/実機不足表現はこの現在の区別で更新する。
+
+手動Goalの既存ユーザー権限と measurement-coexistence-policy.md の事実訂正経路を適用し、全scopeのCompany13競合・既存owner/stop/budget/windowを保持する。予算の既存チェックは成功したが実費はunknown、paid probe/account/secret/sender identity追加0。新ownerの登録や競合解除を行わない。10月倍増は未達成・未判定、9月30日の5日lagは10月5日JST、10月全月は11月5日JST以後の同定義成熟receiptを必要とする。
