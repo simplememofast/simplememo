@@ -18,7 +18,7 @@ const { chromium } = require('playwright');
 const OUTPUT_DIR = path.resolve(__dirname, '..', 'assets', 'img', 'og');
 
 const IMAGES = [
-  { file: 'send-email-to-yourself.png', title: '8 Best Apps to Email Yourself (2026)', icon: '📧' },
+  { file: 'send-email-to-yourself.png', title: 'How to Email Yourself on iPhone:\n8 Ways Compared (2026)', icon: '📧' },
   { file: 'blog-captio-shutdown-alternatives.png', title: 'Captio Shut Down? Best Alternatives', icon: '🔄' },
   { file: 'blog-how-to-email-yourself-note-iphone.png', title: 'How to Email Yourself a Note on iPhone', icon: '📱' },
   { file: 'blog-fastest-note-app-iphone-2026.png', title: 'Fastest Note Apps for iPhone 2026', icon: '⚡' },
