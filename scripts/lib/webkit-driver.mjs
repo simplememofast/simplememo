@@ -215,6 +215,24 @@ export async function stopDrivers(drivers, disp, { deadlineMs = 2_000 } = {}) {
   if (errors.length) throw new AggregateError(errors, 'Owned WebKit process cleanup failed');
 }
 
+export async function initializeDriverSessions(drivers, port) {
+  // Independent drivers can initialize together, but cleanup must wait for
+  // every setup chain. A fail-fast Promise.all would race a slow sibling.
+  const settled = await Promise.allSettled(drivers.map(async d => {
+    const s = await d.call('POST', '/session', { capabilities: { alwaysMatch: { browserName: 'MiniBrowser' } } });
+    d.session = s.sessionId;
+    await d.call('POST', `/session/${d.session}/timeouts`, { script: 60000 });
+    // 土台は同一オリジンの軽いファイル（iframe の中身とオリジンを揃えるため）
+    await d.call('POST', `/session/${d.session}/url`, { url: `http://127.0.0.1:${port}/robots.txt` });
+  }));
+  const failures = settled.filter(s => s.status === 'rejected');
+  if (failures.length) {
+    const error = failures[0].reason;
+    error.diagnostics = [...(error.diagnostics ?? []), ...failures.map(s => errorDetail(s.reason))];
+    throw error;
+  }
+}
+
 /**
  * `pages × widths` を WebKit で測る。戻りの形は Chromium 側の `measure()` に揃えてある。
  *
@@ -249,13 +267,7 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
       drivers.push(d);
     }
     await new Promise((r) => setTimeout(r, 2000));
-    for (const d of drivers) {
-      const s = await d.call('POST', '/session', { capabilities: { alwaysMatch: { browserName: 'MiniBrowser' } } });
-      d.session = s.sessionId;
-      await d.call('POST', `/session/${d.session}/timeouts`, { script: 60000 });
-      // 土台は同一オリジンの軽いファイル（iframe の中身とオリジンを揃えるため）
-      await d.call('POST', `/session/${d.session}/url`, { url: `http://127.0.0.1:${port}/robots.txt` });
-    }
+    await initializeDriverSessions(drivers, port);
     let next = 0;
     await Promise.all(drivers.map(async (d) => {
       for (let i = next++; i < jobs.length; i = next++) {
@@ -274,7 +286,7 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
   } catch (error) {
     measurementError = error;
     // Capture state before cleanup sends its own termination signals.
-    error.diagnostics = drivers.map(driverDiagnostic);
+    error.diagnostics = [...(error.diagnostics ?? []), ...drivers.map(driverDiagnostic)];
     if (disp.proc) error.diagnostics.push(displayDiagnostic(disp));
     throw error;
   } finally {
