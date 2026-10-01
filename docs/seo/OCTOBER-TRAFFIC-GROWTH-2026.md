@@ -350,3 +350,17 @@ A7の公開前の最初のhead `0ef6d92a97edecdbb91a6d92853ce61a3e83c0f9`、PR #
 全変更元は `/glossary/pkm/` HTML、EN SpeechAnalyzer HTML、JA/EN各sitemapの該当lastmod、GSC検査script、本文書、annotations、既存brand/engage観測notesの8ファイル。最小EN差分はそのうち6ファイル。元85と元比較60（20HTML/40素材）の順序・Unicode・原本・通信/予算規約、A7の独立ordinal61・5説明検査を保全し、EN A1だけをordinal62へ加える。A1は3metaとunique TechArticle headline/description/dateModifiedのactual/expectedを保持し、同じtitleの古いschemaを検出する。通常比較62はHTML22/素材40で、primary全文一致やGoogle登録を保証しない。
 
 全scope Company13競合・original owner/stop/budget/windowsと非排他brand/engage契約を保持する。新しいtitle実験、owner解除、支出/鍵/送信identity、GUI/実機/サンプル再生成は含まない。9月全月の同一条件GA4 baselineと10月成熟比較は未確定、GSC採択診断やデプロイ・掲載完了から倍増/Company無人率/自然schedule復旧を認定しない。A7 queuedとEN A1 staleは最終公開照合後、source_keyを指定した別の台帳差分で記録する。
+
+### A7・EN A1 実公開確認と2行のrefresh台帳完了（2026-10-01 UTC）
+
+PR [#1834](https://github.com/simplememofast/simplememo/pull/1834)の最終head `dccd108934288834a7e4e3c7fc4ae32f6af1b401` は通常SEO run36824990389/job110248573689で146成功・main専用1skip・error0。06:44:07Zに実merge `69edaac81b386ed8c4b0f94b3699aadf6498d851`、tree `5c3cb4a8b5bcd1bdb6b4796d0898cc6d3bd401af`、firstparent `c0ffe783ce6aa128b1675f4ef016d2d27cb33057`。8変更元と他担当2,489パスの実原本保全をroot/独立レビューで確認した。対応するmain Cloudflare Pagesはcheck110253004015・deployment `dc5efa4f-76f0-47fb-b491-f1d9f859c1ba`・06:44:46Z success。以前のin-progress check110252834400とPRの仮merge SHAは公開完了の証拠へ転用していない。
+
+通常main GSC [run36826380648](https://github.com/simplememofast/simplememo/actions/runs/36826380648)/job110252886543はworkflow_run/main/attempt1で06:51:46Z success。最初のartifact11145512342は06:51:44Z作成、ZIP10,952,717 bytes、SHA256 `db3e6fd3827b8d90fab796cdeadb0838610270fb8332cc1d9e12021a9ccf5443`。実マージ・通常CI・Pages check・公開artifactはそれぞれ別証拠。ZIPは601 regular members/CRC全成功、rootの独立readback実exit0と別担当の準備済み62検証器1回実exit0で、元GSC85/旧ordered60/A7 ordinal61/EN A1 ordinal62/全299を照合した。
+
+比較62はHTML22/素材40。A7の5説明は06:45:07.172Z、ENの3meta＋unique TechArticle headline/description/dateModifiedは06:45:07.568Zに実ソースの期待値と一致。EN dateModifiedは既存の2026-09-09で、実機再検証日には変更していない。全62と全299の実観測は今回の対応Pages完了以後だった。これは測った時刻の結果であり、常に全比較を最新Pages後に強制する新gateではない。primary HTMLの全entity本文は通常artifactに保存されていないため、保存されたactual/expected metadataと固定producer/source/runへの結び付けが検証範囲である。
+
+全299は298原本のwhole entity bytes/hash/source一致とC22 secondary HTML1件の有限noindex/follow/metadata/MIME規約を区別する。manifest SHA256 `1bca45dbda9f113052414f4d6812aa60171f19e5859ae77cc3ee9559ddb77f06` は不変。実cooldown60,053.865660ms、最小global start gap1,001.163407ms、最大同時1、attempt各1/retry0、経過359,377.049087ms。原C17のPNG6＋saved Markdown/public aliases4＝10ファイル、3段階GUI PNG、旧failed206や旧GUI/assertion/QAの境界も保全。掲載から同期・iOS・SimpleMemo・生産性や集客効果は推定しない。
+
+今回の台帳差分は `growth/content/refresh-queue.json` のunique source_key `query:pkmとは` と `page:/en/blog/ios26-speechanalyzer-live-mic` のstatus done＋resolution各1だけ。ID A1をまとめて変更せず、残る13行・observed/ranking_pages・全metadata/`$machine`/順序は不変。追加sourceはこの2行と本文書のappendのみで、公開HTML・sitemap・検査script・annotations/experimentsとowner/stop/budget/windowsは前の公開ソースを保つ。coverage queueは別台帳の33done/1pending(C29)/2blocked(C08,C19)をそのまま保つ。この台帳差分自体の最終通常CI・actual merge・対応Pages・公開readbackはこれからの独立gateであり、先のPR1834証拠を新head成功へ転用しない。
+
+A5/A6等は元ownerの評価窓とminimum sample待ち、C08は現診断の採択条件不達、C19は全guide範囲の現行実機原本不足、C29は現行Craft export原本/fixture不足。既存GA4の9月20〜26日取得成功やactive ownerを過去のBQ障害/長時間offline記録と区別し、9月全月の同一条件baseline（9月1〜5日等）と10月成熟比較は未確定のまま。10月全月成熟は早くても11月5日JST＋実受領証拠待ち。欠測を0にせず、GSC採択診断・CI/配信・台帳完了へ10月2倍、Company無人率、自然schedule復旧を加点しない。新支出・秘密値・送信者identity・実験解除は追加していない。
