@@ -13,6 +13,7 @@ import {verifyMeasurementInput,verifyMeasurementDelivery,verifyMeasurementMergeS
 import {intentPath} from '../../scripts/value-contracts.mjs';
 import {parentReportedInterventions} from './company-observability.mjs';
 import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
+import {finishExperimentEvaluation} from './company-evaluation.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -142,6 +143,7 @@ export async function verifyActionDelivery(artifact,merge,call=run,fetchImpl=fet
 }
 
 export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=ROOT,fetchImpl=fetch,now=new Date()}) {
+  if(read(evidenceFile).kind==='experiment_evaluation')return finishExperimentEvaluation({stateRoot,id,evidenceFile,call,root:cwd,fetchImpl,now});
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('Invalid Company run ID');
   const dir=privateState(stateRoot), release=acquireLock(dir);
   if (!release) return {status:'busy'};

@@ -8,6 +8,7 @@ import './company-automation-health.test.mjs';
 import './company-aio.test.mjs';
 import './company-cta-measurement.test.mjs';
 import './company-decision.test.mjs';
+import './company-evaluation.test.mjs';
 import './company-measurement.test.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

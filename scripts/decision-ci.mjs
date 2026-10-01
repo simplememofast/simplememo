@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {ownershipConflict,changeScope} from '../growth/lib/experiment-overlap.mjs';
 import {verifySupportingGitDiff} from '../growth/lib/measurement-support.mjs';
 import {isOpen,validate as validateExperiments} from '../growth/lib/ledger.mjs';
+import {verifyEvaluationDecision} from '../growth/lib/company-evaluation.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
@@ -18,7 +19,7 @@ export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.j
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
   'scripts/lib/decision-origin.mjs', 'scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'scripts/decision-monitor-local.py',
-  'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs',
+  'growth/lib/company-decision.mjs', 'growth/lib/company-proof.mjs', 'growth/lib/company-evaluation.mjs',
   'growth/lib/company-measurement.mjs', 'growth/lib/measurement-support.mjs', 'growth/lib/experiment-coexistence.mjs', 'growth/lib/experiment-overlap.mjs',
   'growth/lib/company-search.mjs', 'growth/lib/ledger.mjs',
   'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs',
@@ -101,6 +102,14 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
   }
   const forbidden = files.filter(p => protectedPaths.includes(p) || p.startsWith('.github/workflows/'));
   if (forbidden.length) throw new Error(`autonomous decision cannot change its gate or policy: ${forbidden.join(', ')}`);
+  const evaluations = files.filter(p => p.startsWith('docs/autonomy/company-evaluation-intents/'));
+  if (evaluations.length) {
+    assert(!requireContract, 'a typed experiment evaluation cannot replace a shipped value contract');
+    // This separate business-action contract can change only its declaration
+    // and one original experiment outcome. The original shipment verifier below
+    // still requires its directional value contract and canonical shipped row.
+    return verifyEvaluationDecision({branch,head,baseRef,pr,cwd});
+  }
   if (!requireContract && !required(branch, files, metrics)) return { state: 'not_required' };
   const intents = files.filter(p => /^data\/decision-intents\/[a-z0-9-]+\.json$/.test(p));
   if (intents.length !== 1) throw new Error('exactly one prospective decision contract is required');
@@ -274,9 +283,9 @@ async function selftest() {
     for (const x of legacy.candidates) delete x.calibration;
     save(`data/decision-intents/${c.id}.json`, legacy); g('add', '.'); g('commit', '-m', 'legacy declaration');
     assert.equal((await verifyDecision({ ...options, baseRef: legacyBase, head: g('rev-parse', 'HEAD') })).state, 'declared');
-    for (const gate of ['scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs']) {
+    for (const gate of ['scripts/lib/decision-publication-retry.mjs', 'scripts/lib/intervention-observation.mjs', 'growth/lib/company-evaluation.mjs']) {
       g('checkout', '--detach', baseRef);
-      fs.mkdirSync(path.join(dir, 'scripts/lib'), { recursive: true });
+      fs.mkdirSync(path.dirname(path.join(dir, gate)), { recursive: true });
       fs.writeFileSync(path.join(dir, gate), '// candidate attempts to replace a gate or its classifier\n');
       g('add', '.'); g('commit', '-m', 'attempt to change protected dependency');
       await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }),
@@ -350,11 +359,16 @@ async function main() {
   const event = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
   const pr = event.pull_request;
   const branch = pr?.head.ref ?? process.env.GITHUB_REF_NAME;
-  if (!/^claude\/obsidian-auto-/.test(branch ?? '')) { console.log('decision-ci: not an autonomous picker branch'); return; }
-  gitAt(ROOT)('fetch', 'origin', 'main');
-  const result = await verifyDecision({ branch, head: pr?.head.sha ?? process.env.GITHUB_SHA,
-    baseRef: pr?.base.sha ?? 'origin/main', pr,
-  });
+  const head = pr?.head.sha ?? process.env.GITHUB_SHA;
+  const baseRef = pr?.base.sha ?? 'origin/main';
+  const git = gitAt(ROOT);
+  if (!/^claude\/obsidian-auto-/.test(branch ?? '')) {
+    const typedPr = pr && git('diff', '--name-only', git('merge-base', baseRef, head), head)
+      .split('\n').some(p => p.startsWith('docs/autonomy/company-evaluation-intents/'));
+    if (!typedPr) { console.log('decision-ci: not an autonomous picker branch or typed evaluation PR'); return; }
+  }
+  git('fetch', 'origin', 'main');
+  const result = await verifyDecision({ branch, head, baseRef, pr });
   console.log(JSON.stringify(result, null, 2));
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
