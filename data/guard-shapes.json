@@ -1180,6 +1180,18 @@
       "expr": "d",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-01: plain(d) は null・非object・配列をfalseにし、parseManifestが最上位/collection/rawentry/secondaryHTMLで無条件assertする。値が無い場合に検査を消す規則ではなくHTTP前に拒否する型ゲート。実root readonlyで正しい205raw+1HTMLを許容し、canonical JSON null/array/bool/number/stringの最上位5型とcollection/entry/secondary各5型、計20負例を拒否（HTTP0/source変更0）。原17suiteのhash/timeout/budget失敗証拠と206loopback別範囲を保持。既存guardrows・no_ledger_binding・計測metadataや検査コードは変更しない。"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "value",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: boundedRetryAfter(value, now) の value === null は任意Retry-Afterヘッダの欠測を state:absent と明示する。null以外も文字列型/128文字上限、整数秒またはHTTP-date/24時間上限を満たす値だけ記録し、型不正・範囲外は invalid_or_out_of_bounds。HTTP429時のqueue停止・peer中断・FAILED本文保持はヒントの有無に依存せず無条件で行い、この値で待機・再試行・PASS判定をしない。HTTP-dateはDate.nowの壁時計で解釈し、単調時計deadlineへ流用しない。private統合14回帰の bounded Retry-After（null/正常秒/date/負数/小数/過大/任意文字）と429停止/body保全で確認、production復旧は未認定。既存budget/上限/原台帳条件は変更しない。"
+    },
+    {
+      "file": "scripts/full-public-assets-readback.mjs",
+      "expr": "testTiming",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-01: runChecks の testTiming === null（2site）は既定の実performance.now/実delayを選ぶabsence分岐と、通常productionでrequest/observer/requestMs/overallMsを固定値へ拘束する分岐。testTiming自体はnullまたはplain objectをHTTP前に無条件assertし、明示testTimingはnow/delayのexact keys・function型・private requestとの組合せ・mode productionを必須にする。明示seamのreport.modeはprivate-production-pacing-test、pacingClockScopeもpublic証明を否定し、60秒cooldown/global1秒pacer/10秒600秒上限は維持。仮引数欠測によって検証を消す分岐ではなく、通常productionの上書きを拒否する型/実行境界。private統合14回帰で通常productionのrequest/clock/observer/間隔/並列/予算上書き・unpaired testTiming拒否、explicit fakeproduction pacing/初期cooldown/spacing中deadline/429停止を確認。原budget・既存台帳metadata・no_ledger_binding・既存guard行は変更しない。"
     }
   ]
 }
