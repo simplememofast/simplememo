@@ -927,7 +927,9 @@ jobs:
       # 組み合わせ**を総当たりで踏む。2026-08-21の二重着手は、まさに
       # 書かれていなかった組み合わせだった。種を固定して反例を再現可能にする。
       - name: Property-based tests
-        run: node scripts/property-tests.mjs --check
+        run: |
+          node scripts/property-tests.mjs --selftest
+          node scripts/property-tests.mjs --check
 
       # 【モデル評価セット】替えたあとに「前より良くなった気がする」で決めない。
       # 入力と合格条件を先に固定し、**結果が無いことを空配列として持つ。**
