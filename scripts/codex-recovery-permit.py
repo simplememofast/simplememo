@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import sqlite3
 import stat
 import subprocess
@@ -279,6 +280,51 @@ def recovery_status(root=ROOT, home=None, codex_dir=None, native=None, clock=Non
 
 
 class RecoveryTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Freeze the owner-approved historical inputs. Later genuine failures
+        # must affect production admission, never this simulated eligible slot.
+        cls.historical = {name: json.loads(subprocess.check_output(
+            ['git', 'show', REPAIR + ':data/' + name + '.json'], cwd=ROOT, text=True))
+            for name in ['autopilot-runs', 'authority-matrix', 'escalation-rules']}
+
+    def storage_fixture(self, home, value):
+        root = home / 'repository'
+        root.mkdir()
+        subprocess.run(['git', 'init', '--quiet', str(root)], check=True)
+        # Share read-only objects, with an independent HEAD/index and files.
+        objects = Path(subprocess.check_output(['git', 'rev-parse', '--git-path', 'objects'],
+                                               cwd=ROOT, text=True).strip())
+        if not objects.is_absolute(): objects = ROOT / objects
+        (root / '.git/objects/info/alternates').write_text(str(objects.resolve()) + '\n')
+        subprocess.run(['git', 'update-ref', 'HEAD', REPAIR], cwd=root, check=True)
+        for name, doc in self.historical.items():
+            file = root / ('data/' + name + '.json'); file.parent.mkdir(exist_ok=True)
+            file.write_text(json.dumps(doc))
+        (root / 'data/emergency-stop.json').write_text(json.dumps(value['stop']))
+        # Exercise current production readers and the real bounded-support
+        # regressions against the isolated repository, without remote writes.
+        for name in ['scripts/autopilot-selfheal.mjs', 'scripts/lib/selftest.mjs',
+                     'growth/lib/measurement-support.test.mjs', 'growth/lib/measurement-support.mjs',
+                     'growth/lib/experiment-overlap.mjs', 'growth/lib/experiment-coexistence.mjs',
+                     'growth/lib/ledger.mjs']:
+            file = root / name; file.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / name, file)
+        codex = home / '.codex'; (codex / 'sqlite').mkdir(parents=True)
+        db = sqlite3.connect(codex / 'sqlite/codex-dev.db')
+        db.executescript('CREATE TABLE automations(id,status,kind,rrule); '
+                        'CREATE TABLE automation_runs(thread_id,automation_id,status,created_at);')
+        db.execute('INSERT INTO automations VALUES(?,?,?,?)', ('obsidian', 'ACTIVE', 'cron', SCHEDULE))
+        db.execute('INSERT INTO automation_runs VALUES(?,?,?,?)',
+                   (value['native']['thread_id'], 'obsidian', 'IN_PROGRESS', value['scheduler']['created_at']))
+        db.commit(); db.close(); self.write_origin(codex, value['native'])
+        folder = home / '.config/simplememo/company-os/recovery/native-actions'
+        folder.mkdir(parents=True, mode=0o700)
+        (folder / 'permit.json').write_text(json.dumps(value['permit']))
+        (folder / 'owner-authorization.json').write_bytes(value['authorization'])
+        for file in folder.iterdir(): file.chmod(0o600)
+        return root, codex, folder
+
     def regression_already_verified(self):
         # The first live-storage integration runs the real repository regression.
         # Retention/expiry variants exercise their own boundary, without repeating
@@ -309,7 +355,7 @@ class RecoveryTests(unittest.TestCase):
             'trigger': 'automation_cron_scheduled', 'records': [{'log_id': 1, 'sha256': 'a' * 64}]}
         analysis = {'problems': [], 'limit': 3, 'escalate': [{'run_id': TARGET, 'route': 'actions',
             'failure_class': 'no_artifact', 'repair_attempts_for_class': 3, 'escalate': True}]}
-        rows = [r for r in json.loads((ROOT / 'data/autopilot-runs.json').read_text())['runs']
+        rows = [r for r in json.loads(json.dumps(self.historical['autopilot-runs']))['runs']
                 if r['run_id'] in EXPECTED_ROWS]
         return dict(permit=permit, authorization=auth, native=native, scheduler=scheduler, analysis=analysis, rows=rows,
                     stop={'stopped': False, 'agents': {'actions': {'stopped': False}}}, now=now, repair_ok=True)
@@ -380,29 +426,16 @@ class RecoveryTests(unittest.TestCase):
                 self.assertFalse(recovery_status(home=home)['allowed'])
 
     def test_live_scheduler_storage_and_atomic_consumption(self):
-        # Synthetic private scheduler; the actual repository repair and its
-        # actual regression tests are checked by the production reader.
+        # Synthetic scheduler and frozen ledger; current production readers and
+        # actual regressions still check every boundary of the eligible case.
         value = self.fixture()
         with tempfile.TemporaryDirectory() as tmp:
-            home = Path(tmp).resolve(); codex = home / '.codex'
-            (codex / 'sqlite').mkdir(parents=True)
-            db = sqlite3.connect(codex / 'sqlite/codex-dev.db')
-            db.executescript('CREATE TABLE automations(id,status,kind,rrule); '
-                            'CREATE TABLE automation_runs(thread_id,automation_id,status,created_at);')
-            db.execute('INSERT INTO automations VALUES(?,?,?,?)', ('obsidian', 'ACTIVE', 'cron', SCHEDULE))
+            root, codex, folder = self.storage_fixture(Path(tmp).resolve(), value)
             tid = value['native']['thread_id']
-            db.execute('INSERT INTO automation_runs VALUES(?,?,?,?)',
-                       (tid, 'obsidian', 'IN_PROGRESS', value['scheduler']['created_at']))
-            db.commit(); db.close()
-            self.write_origin(codex, value['native'])
-            folder = home / '.config/simplememo/company-os/recovery/native-actions'
-            folder.mkdir(parents=True, mode=0o700)
-            (folder / 'permit.json').write_text(json.dumps(value['permit']))
-            (folder / 'owner-authorization.json').write_bytes(value['authorization'])
-            for file in folder.iterdir(): file.chmod(0o600)
+            home = root.parent
             with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs:
                 obs.return_value.thread_state.return_value = value['native']
-                result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
+                result = recovery_status(root=root, home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
             self.assertTrue(result['allowed'], result)
             self.assertEqual(len(list(folder.glob('consumed-*.json'))), 1)
             # Production runtime prunes the initial log during long turns.
@@ -410,12 +443,12 @@ class RecoveryTests(unittest.TestCase):
             db = sqlite3.connect(codex / 'logs_2.sqlite'); db.execute('DELETE FROM logs'); db.commit(); db.close()
             with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                 obs.return_value.thread_state.return_value = value['native']
-                result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
+                result = recovery_status(root=root, home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
             self.assertTrue(result['allowed'], result)
             native = {**value['native'], 'gate_receipt': {'admitted': False}}
             with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                 obs.return_value.thread_state.return_value = native
-                result = recovery_status(home=home, codex_dir=codex, native=native, clock=lambda: value['now'])
+                result = recovery_status(root=root, home=home, codex_dir=codex, native=native, clock=lambda: value['now'])
             self.assertFalse(result['allowed'])
             self.assertEqual(len(list(folder.glob('consumed-*.json'))), 1)
             retained = next(folder.glob('origin-*.json'))
@@ -423,7 +456,7 @@ class RecoveryTests(unittest.TestCase):
             retained.write_text(json.dumps(cached))
             with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                 obs.return_value.thread_state.return_value = value['native']
-                result = recovery_status(home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
+                result = recovery_status(root=root, home=home, codex_dir=codex, native=value['native'], clock=lambda: value['now'])
             self.assertFalse(result['allowed'])
 
     def write_origin(self, codex, native, trigger='automation_cron_scheduled', quoted=False):
@@ -479,27 +512,46 @@ class RecoveryTests(unittest.TestCase):
         for times, consumed in [([stamp('2026-09-30T22:30:00Z')], False),
                 ([value['now'], stamp('2026-09-30T22:30:00Z')], True)]:
             with tempfile.TemporaryDirectory() as tmp:
-                home = Path(tmp).resolve(); codex = home / '.codex'
-                (codex / 'sqlite').mkdir(parents=True)
-                db = sqlite3.connect(codex / 'sqlite/codex-dev.db')
-                db.executescript('CREATE TABLE automations(id,status,kind,rrule); '
-                                'CREATE TABLE automation_runs(thread_id,automation_id,status,created_at);')
-                db.execute('INSERT INTO automations VALUES(?,?,?,?)', ('obsidian', 'ACTIVE', 'cron', SCHEDULE))
+                root, codex, folder = self.storage_fixture(Path(tmp).resolve(), value)
+                home = root.parent
                 tid = value['native']['thread_id']
-                db.execute('INSERT INTO automation_runs VALUES(?,?,?,?)',
-                           (tid, 'obsidian', 'IN_PROGRESS', value['scheduler']['created_at']))
-                db.commit(); db.close(); self.write_origin(codex, value['native'])
-                folder = home / '.config/simplememo/company-os/recovery/native-actions'
-                folder.mkdir(parents=True, mode=0o700)
-                (folder / 'permit.json').write_text(json.dumps(value['permit']))
-                (folder / 'owner-authorization.json').write_bytes(value['authorization'])
-                for file in folder.iterdir(): file.chmod(0o600)
                 with patch.dict(os.environ, {'CODEX_THREAD_ID': tid}), patch(__name__ + '.observer') as obs, self.regression_already_verified():
                     obs.return_value.thread_state.return_value = value['native']
-                    result = recovery_status(home=home, codex_dir=codex, native=value['native'],
+                    result = recovery_status(root=root, home=home, codex_dir=codex, native=value['native'],
                                              clock=iter(times).__next__)
                 self.assertFalse(result['allowed'])
                 self.assertEqual(bool(list(folder.glob('consumed-*.json'))), consumed)
+
+    def test_repository_faults_deny_without_consuming_permission(self):
+        value = self.fixture()
+        for fault in ['additional_failure', 'changed_seal', 'missing_ledger', 'missing_repair', 'failed_regression']:
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as tmp:
+                root, codex, folder = self.storage_fixture(Path(tmp).resolve(), value)
+                file = root / 'data/autopilot-runs.json'
+                ledger = json.loads(file.read_text())
+                if fault == 'additional_failure':
+                    ledger['runs'].append({'run_id': 'fixture-new-failure', 'outcome': 'no_artifact',
+                                          'attempted': True, 'failure_class': 'no_artifact', 'route': 'actions'})
+                    file.write_text(json.dumps(ledger))
+                    analysis = json.loads(subprocess.check_output(
+                        ['node', str(root / 'scripts/autopilot-selfheal.mjs'), '--json'], text=True))
+                    self.assertEqual(analysis['problems'], [])
+                    self.assertEqual({t['run_id'] for t in analysis['escalate']}, {TARGET, 'fixture-new-failure'})
+                elif fault == 'changed_seal':
+                    next(r for r in ledger['runs'] if r['run_id'] == TARGET)['failure_reason'] = 'changed'
+                    file.write_text(json.dumps(ledger))
+                elif fault == 'missing_ledger': file.unlink()
+                elif fault == 'missing_repair':
+                    subprocess.run(['git', 'update-ref', 'HEAD', REPAIR + '^'], cwd=root, check=True)
+                else: (root / 'growth/lib/measurement-support.test.mjs').write_text('throw new Error("fixture regression failed");\n')
+                with patch.dict(os.environ, {'CODEX_THREAD_ID': value['native']['thread_id']}), patch(__name__ + '.observer') as obs:
+                    obs.return_value.thread_state.return_value = value['native']
+                    result = recovery_status(root=root, home=root.parent, codex_dir=codex,
+                                             native=value['native'], clock=lambda: value['now'])
+                self.assertFalse(result['allowed'], result)
+                self.assertEqual(result['reason'], 'native_recovery_evidence_unverified')
+                self.assertEqual(list(folder.glob('consumed-*.json')), [])
+                self.assertEqual(list(folder.glob('origin-*.json')), [])
 
     def test_effective_gate_retains_budget_claim_stop_and_unknown_checks(self):
         current = dt.datetime.now(dt.timezone.utc)

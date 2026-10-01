@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback } from './value-contracts.mjs';
+import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback, retireIntent } from './value-contracts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -91,7 +91,10 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
       if(e.supporting_changes!==undefined)verifySupportRegistration(e,base,head,files,git);
       const scope=changeScope(e.page,e.change_paths,e.supporting_changes);
       for(const owner of after.filter(o=>o.id!==e.id&&isOpen(o)))assert(!ownershipConflict(owner,scope),'active experiment conflicts at final head: '+owner.id);
-      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/');
+      // A failed declaration is retired before selecting its replacement. Its
+      // JSON record is bookkeeping, as in required() and verifyHistory(). This
+      // does not exempt treatment/support paths or changes to protected gates.
+      const bookkeeping=p=>['growth/experiments/experiments.json','data/autopilot-runs.json','data/autopilot-status.json','autopilot/index.html','docs/obsidian/AUTOPILOT_LOG.md'].includes(p)||p.startsWith('data/decision-intents/')||/^data\/decision-rejections\/[a-z0-9-]+\.json$/.test(p);
       assert(files.every(p=>bookkeeping(p)||e.change_paths.includes(p)),'undeclared measurement change path at final head');
       verifySupportingGitDiff(e,base,head,(...a)=>execFileSync('git',a,{cwd,encoding:'utf8',maxBuffer:16*1024*1024}));
     }
@@ -279,8 +282,66 @@ async function selftest() {
       await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }),
         error => error.message === `autonomous decision cannot change its gate or policy: ${gate}`);
     }
+    // Real retirement -> replacement declaration -> measurement -> treatment.
+    // The retired JSON must not invalidate the new measurement's final scope.
+    g('checkout', '--detach', baseRef);
+    const registry = 'growth/experiments/experiments.json';
+    save(registry, { experiments: [] }); g('add', '.'); g('commit', '-m', 'measurement fixture base');
+    const measurementBase = g('rev-parse', 'HEAD');
+    save(`data/decision-intents/${c.id}.json`, c); g('add', '.'); g('commit', '-m', 'abandoned fixture declaration');
+    save(`data/decision-rejections/${c.id}.json`, retireIntent(c, {
+      reason: 'Declaring fixture failed before treatment; select a prospective replacement.',
+      now: new Date('2026-09-04T00:00:00Z'),
+    }));
+    fs.rmSync(path.join(dir, `data/decision-intents/${c.id}.json`));
+    g('add', '-A'); g('commit', '-m', 'retire fixture before replacement');
+    const measurementChoices = choices.map((x, i) => ({ ...x,
+      id: i ? 'measurement-alternative' : 'measurement-contract', run_id: 'measurement-run',
+      touches: ['index.html', registry],
+      counterfactual: { id: i ? 'measurement-contract' : 'measurement-alternative', reason: 'Compare two prospective fixture improvements' },
+    }));
+    const replacement = await selectContract(measurementChoices, { metrics: m, runs: before,
+      costs: read('data/autopilot-cost.json').runs, now: new Date('2026-09-04T00:00:00Z'), eligibility: {
+        policy: read('data/eligibility-policy.json'), scorePolicy: read('data/autonomy-score.json'),
+        authority: read('data/authority-matrix.json'), routing: read('data/model-routing.json'), costDoc: read('data/autopilot-cost.json'),
+      } }, { selections: [] }, []);
+    save(`data/decision-intents/${replacement.id}.json`, replacement);
+    g('add', '.'); g('commit', '-m', 'declare measurement fixture');
+    const experiment = { id: 'fixture-measurement', page: '/fixture', type: 'title', status: 'running',
+      started_at: '2026-09-04', evaluation_at: '2026-10-04', change_paths: ['index.html'],
+      target_metric: 'ctr', baseline: { clicks: 2, impressions: 200, ctr: .01, position: 8 },
+      control: { kind: 'pre_post', note: 'Compare the same fixture page and fixed source before and after.',
+        confounders: ['Provider changes and other website treatments cannot establish causality.'] },
+      min_sample: { metric: 'impressions', threshold: 150, rationale: 'Retain the fixed minimum cohort for this synthetic regression.' },
+      stop_conditions: ['Stop if the registered page scope changes.'],
+      company_measurement: { schema_version: 1, company_run_id: '00000000-0000-0000-0000-000000000001' } };
+    save(registry, { experiments: [experiment] }); g('add', '.'); g('commit', '-m', 'register measurement fixture');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'measured treatment\n');
+    save('data/autopilot-runs.json', { runs: [...before, { ...run, run_id: replacement.run_id }] });
+    g('add', '.'); g('commit', '-m', 'implement and record measurement fixture');
+    const measurementHead = g('rev-parse', 'HEAD');
+    const measurementOptions = { ...options, baseRef: measurementBase, head: measurementHead,
+      pr: { ...pr, head: { ...pr.head, sha: measurementHead } } };
+    assert.equal((await verifyDecision(measurementOptions)).state, 'bound');
+    for (const extra of ['other.html', 'assets/shared.js', 'data/decision-rejections/hidden.html',
+      'data/decision-rejections/nested/hidden.json', 'scripts/decision-ci.mjs']) {
+      g('checkout', '--detach', measurementHead);
+      save(extra, { undeclared: true }); g('add', '.'); g('commit', '-m', 'undeclared measurement change');
+      await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+        /undeclared measurement change path at final head/, extra);
+    }
+    g('checkout', '--detach', measurementHead);
+    save('data/decision-rejections/late-retirement.json', { stage: 'execution', reason: 'Too late for undeclared history metadata.' });
+    g('add', '.'); g('commit', '-m', 'undeclared retirement after replacement declaration');
+    await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+      /undeclared path: data\/decision-rejections\/late-retirement.json/);
+    g('checkout', '--detach', measurementHead);
+    save(registry, { experiments: [experiment, { ...experiment, id: 'other-owner', company_measurement: undefined }] });
+    g('add', '.'); g('commit', '-m', 'conflicting measurement owner');
+    await assert.rejects(verifyDecision({ ...measurementOptions, head: g('rev-parse', 'HEAD') }),
+      /active experiment conflicts at final head/);
   } finally { fs.rmSync(dir, { recursive: true }); }
-  console.log('decision-ci: real Git declaration-to-run binding and PR-only autonomous merge checks passed');
+  console.log('decision-ci: real Git declaration, retirement/measurement scope, run binding and PR-only autonomous merge checks passed');
 }
 
 async function main() {
