@@ -310,3 +310,16 @@ Manualpolicy42 does not waive Companyfullscopeglobal13; directHTMLowner0 is sepa
 4. 既存日次`actions` ownerの導出停止と、9月30日承認の次回自然起動限定の復旧許可。手動Goalから再開・再分類・成功認定しない。
 
 これらの依存関係を残したまま独立した修理を進める。10月の倍増は未達成・未判定であり、デプロイや監査完了だけでは達成扱いにしない。
+
+
+### 11件の実公開照合と有限掲載範囲の完了記録（2026-10-01 JST）
+
+C21・C22・C24と、C23・C25・C28・C30・C31・C34・C35・C36の原有限掲載範囲を、原素材と実公開の証拠で完了として記録する。C23は既存 `/resources/obsidian-uri/` の改善であり、キューの歴史 `/tools/obsidian-uri-generator/` URLは保持する。
+
+PR [#1807](https://github.com/simplememofast/simplememo/pull/1807) の最終head `e4aec20fd9d1b9b1bb85cc6de28323b742f2def3`、通常CI SEO36795716455/job110158639565146success/1main-onlyskip/0fail; GSC36795716378/job110158558935source85+60/baseline85PASS; Mobile36795716366/job11015855896512success; Renderer36795716355jobs110158559330/110158559210/110158559372all3success。実merge `c46f3be183423642b736862ef1e16e97b9d9665e` / tree `71e08ea0b2825ff8be8955cbf1905371cb7860ff` / 実first parent `277399806970761d860fb90945eda09dc8845625` と原129ファイル・実親の他担当2,363ファイルを独立照合した。対応Pages check 110162783207 / deployment `1d774460-c432-4e10-8333-95d432fae8b0` は `2026-10-01T00:36:53Z` に成功。後続mainの変更と混同せず、公開readback source `db7b8577fb5a548388d8af4bc09db711e20bc6f1` / tree `c94cbdac93b48e3d14a7352f5139846767e9fdb6`、対応Pages check 110162891376 / deployment `dcda965c-f95a-4119-988b-d8f9cfa1bf52` success `2026-10-01T00:37:19Z` を別に保全する。
+
+通常公開照合 run [36797044332](https://github.com/simplememofast/simplememo/actions/runs/36797044332) / job 110162755941 は、元85と比較60（HTML20・素材40）が全PASS、failed0/skipped0。report SHA256 `0fed3e61cf3d4f5ea7be8522e6690bdca247f32e506f5bca30a524a09a3aa7b3`。全raw298+C22secondary1=299も全PASS、failed0/incomplete0、各attempt1/retry0、manifest SHA256 `1bca45dbda9f113052414f4d6812aa60171f19e5859ae77cc3ee9559ddb77f06` / report SHA256 `138f775b74f6215fa9a5e79e64724e63b7b965bffd28a7529cd2dc2e6bcdcf46`。実entity body・metadataと両reportを native artifact 11134561270 / ZIP SHA256 `869ae6d44d33035d4b39146090a4bcd8565ad99e3c12f9d6e164ffc1c3e34b5a` に保持する。
+
+Primary HTMLは実HTTPのtitle/canonical/robots/sitemapの有限policy、rawはsourceと実entity bodyのbytes/SHA256、C22secondary HTMLはnoindex,followの有限policyとして区別する。記事・文脈案内・根拠文書31ファイルの実repository readbackを別に保全し、primary HTML全文一致・全サイト版・Google登録・AIO引用・流入効果を認定しない。最初のPR原本照合で生じたC25日本語URL表記の失敗、旧head SEO cancelled、元206件81PASS/125HTTP429と全著者・readerの限界を保持する。元Markdown/PNG/OG/ZIP/APIを置換せず、元queue metadata/order/title/unique/evidence/publication_noteとowner/stop/budget/windowの逆変換は全bytes一致。変更元はcoverage queueのstatus11件/done_note11件と本節の追記だけ。
+
+台帳はdone33/pending1/blocked2。C08の既存Notion担当、C19の実機iOS担当、C29のCraft現行エクスポート一次資料不足は継続する。既存実験の観測期限・最小標本・10月3日/12日/23日/11月11日の窓、既存Company13の衝突と自然schedule承認条件を保全する。Company無人率・自然schedule復旧へ加点せず、実費unknownを0へ読み替えない。10月倍増は同じ計測元/property/stream/host/timezone/filter/session/dedupでの成熟した月間比較待ち。9月全月baselineの不足は未観測であり、GSC/AIO指標・部分月・記事公開を倍増達成の代用にしない。
