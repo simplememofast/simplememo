@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {businessPolicy,businessTaskId,inventoryBusinessRates,measuredBusinessRates,sustainedTarget,jstDay,weekKey,recordBusinessWeek,validateBusinessPolicy,businessScope,fixedScopeAssessment,businessStatus,currentGoalAssessment} from '../growth/lib/business-automation.mjs';
+import {BUSINESS_MEASUREMENT_CONTRACT,businessPolicy,businessTaskId,inventoryBusinessRates,measuredBusinessRates,sustainedTarget,jstDay,weekKey,recordBusinessWeek,validateBusinessPolicy,businessScope,fixedScopeAssessment,businessStatus,currentGoalAssessment} from '../growth/lib/business-automation.mjs';
 import {renderBusinessChart,validateWeeklySeries,privateWeeklyChart,exportWeeklyAggregates} from './business-automation.mjs';
 import {taskKey} from '../growth/lib/company-metrics.mjs';
 const now=new Date('2026-09-30T14:00:00Z');
@@ -29,7 +29,10 @@ test('all-scope rates retain human/nobody and legacy conditional rates',()=>{
 test('IDs preserve existing Company identity across classification changes',()=>{assert.equal(businessTaskId(coverage.tasks[0]),taskKey(coverage.tasks[0]));});
 test('JST Monday buckets cross UTC midnight correctly',()=>{assert.equal(weekKey('2026-09-27T14:59:59Z'),'2026-09-21');assert.equal(weekKey('2026-09-27T15:00:00Z'),'2026-09-28');});
 test('no runtime evidence is unknown, never classification-as-zero-touch',()=>{const s=score(null);assert.equal(s.state,'NO_EVIDENCE');assert.equal(s.verified_full_automation_rate,null);});
-test('full chain, native origin and complete trigger/human coverage admit machine gates',()=>{const s=score(fixture());assert.equal(s.state,'MEASURED');assert.equal(s.verified_full_automation_rate,1);});
+test('full chain, native origin and complete trigger/human coverage admit the explicit measurement method',()=>{
+ const s=score(fixture());assert.equal(s.state,'MEASURED');assert.equal(s.verified_full_automation_rate,1);
+ assert.equal(s.measurement_contract,BUSINESS_MEASUREMENT_CONTRACT);assert.deepEqual(s.measurement_scope,businessScope(coverage));
+});
 test('human touch/manual origin/human stage do not qualify as full automation',()=>{
  for(const mutate of [t=>t.human_touches=1,t=>t.origin='manual',t=>t.stages.decide='human',t=>t.all_occurrences_succeeded=false,t=>t.safety_passed=false]) {
   const d=fixture();mutate(d.tasks[0]);assert.equal(score(d).verified_full_automation_rate,.5);assert.equal(score(d).verified_ai_utilization_rate,1);
@@ -55,7 +58,9 @@ const targetNow=new Date('2026-11-01T01:00:00Z');
 const targetPoints=(full=179)=>['2026-10-05','2026-10-12','2026-10-19','2026-10-26'].map(week=>({
  week,scope_key:targetPolicy.fixed_scope.included_scope_key,excluded_scope_key:targetPolicy.fixed_scope.excluded_scope_key,
  policy_id:targetPolicy.policy_id,actual:{state:'MEASURED',policy_id:targetPolicy.policy_id,scope_completeness:'attested',
+ measurement_contract:BUSINESS_MEASUREMENT_CONTRACT,measurement_scope:businessScope(targetCoverage),
  defined_tasks:192,unknown_tasks:0,verified_full_tasks:full,verified_full_automation_rate:full/192,
+ confirmed_full_automation_lower_bound:full/192,
  source_observed_at:week+'T01:00:00Z',window:{from:new Date(Date.parse(week)-27*86400000).toISOString().slice(0,10),through:week}}}));
 const targetSustained=p=>sustainedTarget(p,targetPolicy,{now:targetNow,coverage:targetCoverage});
 test('fixed192 needs179 real full tasks for inclusive93, retained178 is below target',()=>{
@@ -63,12 +68,42 @@ test('fixed192 needs179 real full tasks for inclusive93, retained178 is below ta
  assert.equal(inventoryBusinessRates(targetCoverage).target.minimum_automated_tasks,179);
  assert.equal(inventoryBusinessRates(targetCoverage).target.additional_declared_tasks_needed,15);
 });
-test('old policy, missing policy, different scope and broken weeks cannot receive retrospective93 credit',()=>{
- for(const mutate of [p=>p[0].policy_id='business-automation-v1',p=>delete p[0].policy_id,
-  p=>p[0].actual.policy_id=null,p=>p[0].scope_key='a'.repeat(64),p=>p[0].excluded_scope_key='a'.repeat(64),
+test('missing measurement method, different fixed sets and broken weeks cannot prove four-week achievement',()=>{
+ for(const mutate of [p=>delete p[0].actual.measurement_contract,p=>p[0].actual.measurement_contract='old-unverified-method',
+  p=>delete p[0].actual.measurement_scope,p=>p[0].actual.measurement_scope.excluded_scope_key='a'.repeat(64),
+  p=>p[0].scope_key='a'.repeat(64),p=>p[0].excluded_scope_key='a'.repeat(64),
   p=>p[0].week='2026-09-29',p=>p[0].actual.state='PARTIAL_EVIDENCE',p=>p[0].actual.scope_completeness='not_attested',
   p=>{p[0].actual.source_observed_at='2026-10-01T00:56:07Z';p[0].week='2026-09-28';p[0].actual.window={from:'2026-09-04',through:'2026-10-01'}}]) {
   const points=targetPoints();mutate(points);assert.equal(targetSustained(points),false);
+ }
+});
+test('same verified method and fixed cohort are not disqualified solely by old or missing policy labels',()=>{
+ for(const mutate of [p=>p[0].policy_id='business-automation-v1',p=>delete p[0].policy_id,
+  p=>p[0].actual.policy_id=null,p=>p[0].actual.policy_id=targetPolicy.previous_policy.policy_id]) {
+  const points=targetPoints();mutate(points);const before=structuredClone(points);
+  assert.equal(targetSustained(points),true);assert.deepEqual(points,before);
+ }
+ const points=targetPoints();
+ ['2026-09-07','2026-09-14','2026-09-21','2026-09-28'].forEach((week,i)=>{
+  points[i].week=week;points[i].actual.source_observed_at=week+'T01:00:00Z';
+  points[i].actual.window={from:new Date(Date.parse(week)-27*86400000).toISOString().slice(0,10),through:week};
+ });
+ const original=structuredClone(points);
+ assert.equal(sustainedTarget(points,targetPolicy,{now:new Date('2026-10-01T01:00:00Z'),coverage:targetCoverage}),true);
+ assert.deepEqual(points,original);
+ delete points[0].actual.measurement_contract;
+ assert.equal(sustainedTarget(points,targetPolicy,{now:new Date('2026-10-01T01:00:00Z'),coverage:targetCoverage}),false);
+});
+test('179 confirmed tasks and13 unknown tasks prove the lower bound for four fresh weeks without an exact rate',()=>{
+ const points=targetPoints();
+ points.forEach(p=>{p.actual.state='PARTIAL_EVIDENCE';p.actual.unknown_tasks=13;p.actual.verified_full_automation_rate=null;});
+ const original=structuredClone(points);
+ assert.equal(targetSustained(points),true);assert.deepEqual(points,original);
+ assert(points.every(p=>p.actual.unknown_tasks===13 && p.actual.verified_full_automation_rate===null));
+ for(const mutate of [p=>{p[0].actual.verified_full_tasks=178;p[0].actual.unknown_tasks=14;p[0].actual.confirmed_full_automation_lower_bound=178/192;},
+  p=>p[0].actual.confirmed_full_automation_lower_bound=.99,p=>p[0].actual.verified_full_automation_rate=179/192,
+  p=>p[0].actual.unknown_tasks=0,p=>p[0].actual.scope_completeness='not_attested']) {
+  const changed=structuredClone(points);mutate(changed);assert.equal(targetSustained(changed),false);
  }
 });
 test('aggregate omits individual IDs, references and sensitive input extensions',()=>{const d=fixture();d.private_note='never-copy-this';const s=JSON.stringify(score(d));for(const x of ['never-copy-this','original-receipts-review',businessTaskId(coverage.tasks[0])])assert.equal(s.includes(x),false);});
@@ -94,6 +129,7 @@ const publicHistory=d=>{
  return {schema_version:1,points:[{week:p.week,as_of:d.through,observed_at:d.generated_at,scope_key:p.inventory.scope_fingerprint,
   inventory:{inventory_measured_at:p.inventory.inventory_measured_at,overall:{defined:n,ai_executes:p.inventory.ai_executes,counts:{ai_proposes:p.inventory.ai_proposes}}},
   actual:{state:'MEASURED',source_observed_at:d.generated_at,window:{from:new Date(Date.parse(d.through)-27*86400000).toISOString().slice(0,10),through:d.through},scope_completeness:'not_attested',defined_tasks:n,unknown_tasks:0,
+   measurement_contract:BUSINESS_MEASUREMENT_CONTRACT,measurement_scope:businessScope(targetCoverage),confirmed_full_automation_lower_bound:164/n,
    verified_full_tasks:164,verified_ai_utilization_tasks:171,verified_full_automation_rate:164/n,verified_ai_utilization_rate:171/n,observed_work_saved_rate:null},
   private_ref:'never-publish-this-original-reference',private_note:'never-publish-this-note'}]};
 };
@@ -107,14 +143,16 @@ const publicPolicyHistory=(d,policyId=targetPolicy.policy_id)=>{
  const h=publicHistory(d),p=h.points[0],a=p.actual;
  p.policy_id=policyId;a.policy_id=policyId;p.excluded_scope_key=targetPolicy.fixed_scope.excluded_scope_key;
  a.scope_completeness='attested';a.verified_full_tasks=179;a.verified_ai_utilization_tasks=179;
+ a.confirmed_full_automation_lower_bound=179/192;
  a.verified_full_automation_rate=179/192;a.verified_ai_utilization_rate=179/192;
  return h;
 };
-test('public legacy and null policies preserve above93 measurements without current goal credit',()=>{
+test('public legacy and null labels preserve above93 arithmetic but missing method proof receives no goal credit',()=>{
  for(const id of [undefined,null,targetPolicy.previous_policy.policy_id]) {
   const d=base(),h=publicPolicyHistory(d,id),p=h.points[0];
   if(id===undefined){delete p.policy_id;delete p.actual.policy_id;}
   delete p.excluded_scope_key;
+  delete p.actual.measurement_contract;delete p.actual.measurement_scope;
   const e=exportWeeklyAggregates(h,d),a=e.points.at(-1).actual;
   assert.deepEqual(validateWeeklySeries(e),[]);assert.equal(a.policy_id,id??null);
   assert.equal(a.excluded_scope_fingerprint,null);assert.equal(a.verified_full_tasks,179);
@@ -123,7 +161,7 @@ test('public legacy and null policies preserve above93 measurements without curr
   assert.deepEqual(exportWeeklyAggregates({schema_version:1,points:[]},d,e).points.at(-1).actual,a);
  }
 });
-test('public current-policy measurements require both fixed sets,192 tasks and a postactivation source',()=>{
+test('public current method requires both fixed sets and192 tasks, while the source can predate policy activation',()=>{
  const d=base(),h=publicPolicyHistory(d),e=exportWeeklyAggregates(h,d),a=e.points.at(-1).actual;
  assert.deepEqual(validateWeeklySeries(e),[]);assert.equal(a.policy_id,targetPolicy.policy_id);
  assert.equal(a.excluded_scope_fingerprint,targetPolicy.fixed_scope.excluded_scope_key);
@@ -131,12 +169,64 @@ test('public current-policy measurements require both fixed sets,192 tasks and a
  for(const mutate of [h=>h.points[0].scope_key='a'.repeat(64),h=>delete h.points[0].excluded_scope_key,
   h=>h.points[0].excluded_scope_key='b'.repeat(64),
   h=>{const p=h.points[0];p.inventory.overall.defined=193;p.actual.defined_tasks=193;
-    p.actual.verified_full_automation_rate=179/193;p.actual.verified_ai_utilization_rate=179/193;},
-  h=>{const p=h.points[0],at=new Date(Date.parse(targetPolicy.effective_at)-1000).toISOString();
-    p.observed_at=at;p.actual.source_observed_at=at;p.week=weekKey(at);
-    const through=jstDay(at);p.actual.window={from:new Date(Date.parse(through)-27*86400000).toISOString().slice(0,10),through};}]) {
+    p.actual.verified_full_automation_rate=179/193;p.actual.verified_ai_utilization_rate=179/193;p.actual.confirmed_full_automation_lower_bound=179/193;}]) {
   const changed=publicPolicyHistory(d);mutate(changed);
   assert.throws(()=>exportWeeklyAggregates(changed,d),/weekly_aggregate_rejected/);
+ }
+ const earlier=publicPolicyHistory(d),p=earlier.points[0],at=new Date(Date.parse(targetPolicy.effective_at)-1000).toISOString();
+ p.observed_at=at;p.actual.source_observed_at=at;p.week=weekKey(at);
+ const through=jstDay(at);p.actual.window={from:new Date(Date.parse(through)-27*86400000).toISOString().slice(0,10),through};
+ const exported=exportWeeklyAggregates(earlier,d),actual=exported.points.at(-1).actual;
+ assert.equal(actual.source_observed_at,at);assert.equal(actual.verified_full_tasks,179);
+ assert.equal(currentGoalAssessment(actual,targetCoverage,{now:new Date(d.generated_at)}).one_window_qualified,true);
+});
+test('public export retains the qualifying179-of192 lower bound alongside13 unknown and a null exact rate',()=>{
+ const d=base(),h=publicPolicyHistory(d),a=h.points[0].actual;
+ a.state='PARTIAL_EVIDENCE';a.unknown_tasks=13;a.verified_full_automation_rate=null;a.verified_ai_utilization_rate=null;
+ const e=exportWeeklyAggregates(h,d),actual=e.points.at(-1).actual;
+ assert.deepEqual(validateWeeklySeries(e),[]);assert.equal(actual.verified_full_tasks,179);
+ assert.equal(actual.defined_tasks,192);assert.equal(actual.unknown_tasks,13);
+ assert.equal(actual.verified_full_automation_rate,null);assert.equal(actual.confirmed_full_automation_lower_bound,179/192);
+ assert.equal(actual.measurement_contract,BUSINESS_MEASUREMENT_CONTRACT);
+ assert.deepEqual(actual.measurement_scope,businessScope(targetCoverage));
+ const goal=currentGoalAssessment(actual,targetCoverage,{now:new Date(d.generated_at)});
+ assert.equal(goal.one_window_qualified,true);assert.equal(goal.evidence_basis,'confirmed_runtime_lower_bound');
+ assert.equal(goal.exact_rate_confirmed,false);
+});
+test('a newer qualified lower-bound source can replace the earlier exact178 public point without changing the old point',()=>{
+ const d=base(),morning=publicPolicyHistory(d),a=morning.points[0].actual;
+ a.verified_full_tasks=178;a.verified_ai_utilization_tasks=178;a.verified_full_automation_rate=178/192;
+ a.verified_ai_utilization_rate=178/192;a.confirmed_full_automation_lower_bound=178/192;
+ const previous=exportWeeklyAggregates(morning,d),original=structuredClone(previous);
+ const lateBase=structuredClone(d);lateBase.generated_at=new Date(Date.parse(d.generated_at)+60000).toISOString();
+ const late=publicPolicyHistory(lateBase),p=late.points[0];
+ p.actual.state='PARTIAL_EVIDENCE';p.actual.unknown_tasks=13;
+ p.actual.verified_full_automation_rate=null;p.actual.verified_ai_utilization_rate=null;
+ const changed=exportWeeklyAggregates(late,lateBase,previous),actual=changed.points.at(-1).actual;
+ assert.equal(actual.state,'PARTIAL_EVIDENCE');assert.equal(actual.verified_full_tasks,179);
+ assert.equal(actual.unknown_tasks,13);assert.equal(actual.verified_full_automation_rate,null);
+ assert.equal(actual.source_observed_at,lateBase.generated_at);assert.equal(actual.confirmed_full_automation_lower_bound,179/192);
+ assert.deepEqual(previous,original);
+ for(const mutate of [a=>delete a.measurement_contract,a=>delete a.measurement_scope,
+  a=>a.measurement_scope.excluded_scope_key='a'.repeat(64),a=>a.scope_completeness='not_attested',
+  a=>a.window.from=new Date(Date.parse(a.window.from)+86400000).toISOString().slice(0,10)]) {
+  const deficient=structuredClone(late);mutate(deficient.points[0].actual);
+  const held=exportWeeklyAggregates(deficient,lateBase,previous);
+  assert.deepEqual(held.points.at(-1).actual,previous.points.at(-1).actual);
+ }
+});
+test('unknown private method values and scope extensions cannot cross the public export boundary',()=>{
+ const marker='SYNTHETIC_PRIVATE_METHOD_SCOPE_MUST_NOT_RETURN';
+ for(const mutate of [a=>a.measurement_contract=marker,a=>a.measurement_scope.included_scope_key=marker,
+  a=>a.measurement_scope.private_note=marker]) {
+  const d=base(),h=publicPolicyHistory(d);mutate(h.points[0].actual);
+  const e=exportWeeklyAggregates(h,d);
+  assert(!JSON.stringify(e).includes(marker));assert.deepEqual(validateWeeklySeries(e),[]);
+  if(h.points[0].actual.measurement_contract!==BUSINESS_MEASUREMENT_CONTRACT
+    ||h.points[0].actual.measurement_scope.included_scope_key!==targetPolicy.fixed_scope.included_scope_key) {
+    assert(!Object.hasOwn(e.points.at(-1).actual,'measurement_contract'));
+    assert.equal(currentGoalAssessment(e.points.at(-1).actual,targetCoverage,{now:new Date(d.generated_at)}).one_window_qualified,false);
+  }
  }
 });
 test('unknown private policy and exclusion strings are omitted from both new and preserved public points',()=>{
@@ -184,7 +274,9 @@ test('a later same-week inventory change preserves the original measured runtime
 });
 test('nested private metadata is never copied and free-form date annotations are rejected',()=>{
  const d=base(),h=publicHistory(d);h.points[0].actual.window.private_evidence_ref='never-publish-window-reference';
+ h.points[0].actual.measurement_scope.private_note='never-publish-scope-reference';
  const e=exportWeeklyAggregates(h,d);assert.equal(JSON.stringify(e).includes('never-publish-window-reference'),false);
+ assert.equal(JSON.stringify(e).includes('never-publish-scope-reference'),false);
  for(const mutate of [h=>h.points[0].observed_at+=' (never-publish-date-note)',h=>h.points[0].inventory.inventory_measured_at='never-publish-private-date',h=>h.points[0].actual.window.from='2026-09-03 (private-note)']){
   const h=publicHistory(d);mutate(h);assert.throws(()=>exportWeeklyAggregates(h,d));
  }
@@ -307,13 +399,45 @@ test('current goal remains unverified on absent operational evidence and auxilia
  assert.equal(status.current_goal.minimum_automated_tasks,179);assert.equal(status.current_goal.state,'runtime_unverified');
  assert.equal(status.current_goal.runtime_execution_credit,0);assert.equal(status.current_goal.scope.matches_target_scope,true);
 });
-test('single-window assessment requires current policy, fixed scope and effective source observation',()=>{
+test('single-window assessment requires verified method, fixed measured scope, exact arithmetic and source observation',()=>{
  const actual=targetPoints()[0].actual;
- assert.equal(currentGoalAssessment(actual,targetCoverage,{now:targetNow}).one_window_qualified,true);
- for(const mutate of [a=>a.policy_id=null,a=>a.verified_full_tasks=178,a=>a.unknown_tasks=1,
-  a=>a.source_observed_at='2026-10-01T00:56:07Z',a=>a.scope_completeness='not_attested']) {
+ const qualified=currentGoalAssessment(actual,targetCoverage,{now:targetNow});
+ assert.equal(qualified.one_window_qualified,true);assert.equal(qualified.evidence_basis,'exact_runtime_rate');
+ const invalidTime=currentGoalAssessment(actual,targetCoverage,{now:new Date('invalid')});
+ assert.equal(invalidTime.one_window_qualified,false);assert.equal(invalidTime.confirmed_rate_lower_bound,null);
+ for(const mutate of [a=>delete a.measurement_contract,a=>delete a.measurement_scope,
+  a=>a.measurement_scope.included_scope_key='a'.repeat(64),a=>a.measurement_scope.excluded_scope_key='a'.repeat(64),
+  a=>a.verified_full_tasks=178,a=>a.unknown_tasks=1,a=>a.confirmed_full_automation_lower_bound=.99,
+  a=>delete a.source_observed_at,a=>a.source_observed_at='2026-11-02T01:00:00Z',
+  a=>a.window.through='2026-10-06',a=>a.scope_completeness='not_attested']) {
   const a=structuredClone(actual);mutate(a);assert.equal(currentGoalAssessment(a,targetCoverage,{now:targetNow}).one_window_qualified,false);
  }
+ for(const policy of [undefined,null,targetPolicy.previous_policy.policy_id]) {
+  const a=structuredClone(actual);if(policy===undefined)delete a.policy_id;else a.policy_id=policy;
+  assert.equal(currentGoalAssessment(a,targetCoverage,{now:targetNow}).one_window_qualified,true);
+ }
+});
+test('invalid count or rate arithmetic has no assessment basis or displayed lower bound, while valid178 remains below target',()=>{
+ const original=targetPoints()[0].actual;
+ for(const mutate of [
+  a=>{a.verified_full_tasks=193;a.verified_full_automation_rate=193/192;a.confirmed_full_automation_lower_bound=193/192;},
+  a=>{a.verified_full_tasks=179.5;a.verified_full_automation_rate=179.5/192;a.confirmed_full_automation_lower_bound=179.5/192;},
+  a=>{a.verified_full_tasks=NaN;a.verified_full_automation_rate=NaN;a.confirmed_full_automation_lower_bound=NaN;},
+  a=>{a.state='PARTIAL_EVIDENCE';a.unknown_tasks=14;a.verified_full_automation_rate=null;},
+  a=>a.confirmed_full_automation_lower_bound=.99,
+  a=>{a.state='PARTIAL_EVIDENCE';a.unknown_tasks=13;a.verified_full_automation_rate=179/192;},
+  a=>{a.verified_full_tasks=-1;a.verified_full_automation_rate=-1/192;a.confirmed_full_automation_lower_bound=-1/192;},
+ ]) {
+  const invalid=structuredClone(original);mutate(invalid);
+  const goal=currentGoalAssessment(invalid,targetCoverage,{now:targetNow});
+  assert.equal(goal.one_window_qualified,false);assert.equal(goal.state,'runtime_arithmetic_unverified');
+  assert.equal(goal.evidence_basis,null);assert.equal(goal.confirmed_rate_lower_bound,null);
+  assert.equal(goal.exact_rate_confirmed,false);
+ }
+ const below=currentGoalAssessment(targetPoints(178)[0].actual,targetCoverage,{now:targetNow});
+ assert.equal(below.state,'below_target');assert.equal(below.one_window_qualified,false);
+ assert.equal(below.evidence_basis,'exact_runtime_rate');assert.equal(below.confirmed_rate_lower_bound,178/192);
+ assert.equal(below.exact_rate_confirmed,true);
 });
 test('old measured arithmetic is retained but cannot qualify for the current fixed goal',()=>{
  const d=fixture(),legacy=score(d);
@@ -328,21 +452,51 @@ test('policy cannot lower93, redefine the192 cohort, remove11 or backdate activa
  }
 });
 
-const fixedRuntimeFixture=(full=179)=>{
+const fixedRuntimeFixture=(full=179,remaining='unimplemented')=>{
  const inScope=targetCoverage.tasks.filter(t=>t.executor!=='intentional_no');
  return {schema_version:1,policy_id:targetPolicy.policy_id,window:{from:'2026-09-08',through:'2026-10-05'},
   observation:{kind:'runtime_source_snapshot',at:'2026-10-05T01:00:00Z',evidence_ref:'synthetic-fixed-runtime'},
   review:{kind:'human',at:'2026-10-05T01:30:00Z',evidence_ref:'synthetic-review'},
   scope:{company_wide_complete:true,evidence_ref:'synthetic-corporate-census'},
-  tasks:inScope.map((t,i)=>i>=full?{task_id:businessTaskId(t),state:'unimplemented',evidence_ref:'synthetic-not-implemented'}
+  tasks:inScope.map((t,i)=>i>=full?{task_id:businessTaskId(t),state:remaining,evidence_ref:'synthetic-not-implemented'}
    :{...observed(t),source_window:{from:'2026-09-08',through:'2026-10-05'},last_occurrence_at:'2026-10-05T00:00:00Z'})};
 };
 const fixedScore=d=>measuredBusinessRates(d,targetCoverage,{now:new Date('2026-10-05T02:00:00Z')});
+const datedRuntimeFixture=(full,remaining,day,sourceHour='01')=>{
+ const d=fixedRuntimeFixture(full,remaining),window={from:new Date(Date.parse(day)-27*86400000).toISOString().slice(0,10),through:day};
+ d.window=window;d.observation.at=`${day}T${sourceHour}:00:00Z`;d.review.at=`${day}T${sourceHour}:30:00Z`;
+ d.observation.evidence_ref=`synthetic-source-${day}-${sourceHour}`;
+ for(const task of d.tasks) if(task.state==='observed') {task.source_window=window;task.last_occurrence_at=day+'T00:00:00Z';}
+ return d;
+};
 test('synthetic full fixed-cohort evidence qualifies179 but unimplemented13 stays in192',()=>{
  const admitted=fixedScore(fixedRuntimeFixture());
  assert.equal(admitted.state,'MEASURED');assert.equal(admitted.verified_full_tasks,179);
  assert.equal(admitted.defined_tasks,192);assert.equal(admitted.diagnostics.unimplemented_tasks,13);
+ assert.equal(admitted.measurement_contract,BUSINESS_MEASUREMENT_CONTRACT);assert.deepEqual(admitted.measurement_scope,targetPolicy.fixed_scope);
  assert.equal(admitted.target_state,'one_window_at_target');assert.equal(fixedScore(fixedRuntimeFixture(178)).target_state,'below_target');
+});
+test('179 proven six-stage completions with13 unknown preserve null exact rate and qualify only by the conservative lower bound',()=>{
+ const doc=fixedRuntimeFixture(179,'unknown'),before=structuredClone(doc),actual=fixedScore(doc);
+ const goal=currentGoalAssessment(actual,targetCoverage,{now:targetNow});
+ assert.equal(actual.state,'PARTIAL_EVIDENCE');assert.equal(actual.verified_full_tasks,179);
+ assert.equal(actual.unknown_tasks,13);assert.equal(actual.defined_tasks,192);
+ assert.equal(actual.verified_full_automation_rate,null);assert.equal(actual.verified_ai_utilization_rate,null);
+ assert.equal(actual.confirmed_full_automation_lower_bound,179/192);assert.equal(actual.possible_full_automation_upper_bound,1);
+ assert.equal(actual.target_state,'one_window_at_target');assert.equal(goal.one_window_qualified,true);
+ assert.equal(goal.evidence_basis,'confirmed_runtime_lower_bound');assert.deepEqual(doc,before);
+ const below=fixedScore(fixedRuntimeFixture(178,'unknown'));
+ assert.equal(below.unknown_tasks,14);assert.equal(below.verified_full_automation_rate,null);
+ assert.equal(currentGoalAssessment(below,targetCoverage,{now:targetNow}).one_window_qualified,false);
+ const missingCompany=fixedRuntimeFixture(179,'unknown');delete missingCompany.scope;
+ assert.equal(currentGoalAssessment(fixedScore(missingCompany),targetCoverage,{now:targetNow}).one_window_qualified,false);
+ for(const mutate of [a=>delete a.measurement_contract,a=>delete a.measurement_scope,
+  a=>a.measurement_scope.defined_tasks=191,a=>a.measurement_scope.excluded_scope_key='a'.repeat(64),
+  a=>a.confirmed_full_automation_lower_bound=.94,a=>a.verified_full_automation_rate=179/192,
+  a=>a.state='MEASURED',a=>a.verified_full_tasks=180,a=>delete a.window]) {
+  const forged=structuredClone(actual);mutate(forged);
+  assert.equal(currentGoalAssessment(forged,targetCoverage,{now:targetNow}).one_window_qualified,false);
+ }
 });
 test('fixed runtime evidence never converts missing execution, approvals, failure or unknown stages to completion',()=>{
  for(const mutate of [t=>t.human_touches=1,t=>t.stages.decide='human',t=>t.all_occurrences_succeeded=false]) {
@@ -354,12 +508,24 @@ test('fixed runtime evidence never converts missing execution, approvals, failur
  const pending=fixedRuntimeFixture();pending.tasks[0]={task_id:pending.tasks[0].task_id,state:'not_due'};
  assert.equal(fixedScore(pending).verified_full_automation_rate,null);assert.equal(fixedScore(pending).unknown_tasks,1);
 });
-test('old or missing policy declarations preserve genuine arithmetic without93 qualification',()=>{
+test('raw originals passing the six-stage method retain old or missing labels without losing threshold evidence',()=>{
  for(const id of [undefined,targetPolicy.previous_policy.policy_id]) {
   const d=fixedRuntimeFixture();if(id===undefined)delete d.policy_id;else d.policy_id=id;
   const a=fixedScore(d);assert.equal(a.verified_full_tasks,179);assert.equal(a.verified_full_automation_rate,179/192);
-  assert.equal(a.target_state,'policy_unverified');assert.equal(a.policy_id,id??null);
+  assert.equal(a.target_state,'one_window_at_target');assert.equal(a.policy_id,id??null);
+  assert.equal(a.measurement_contract,BUSINESS_MEASUREMENT_CONTRACT);
  }
+});
+test('same-quality raw proof before policy declaration retains its source time and creates no new observation',()=>{
+ const doc=fixedRuntimeFixture(179,'unknown'),window={from:'2026-09-03',through:'2026-09-30'};
+ doc.policy_id=targetPolicy.previous_policy.policy_id;doc.window=window;
+ doc.observation.at='2026-09-30T12:00:00Z';doc.review.at='2026-09-30T13:00:00Z';
+ for(const t of doc.tasks) if(t.state==='observed') {t.source_window=window;t.last_occurrence_at='2026-09-30T01:00:00Z';}
+ const before=structuredClone(doc),a=measuredBusinessRates(doc,targetCoverage,{now});
+ assert.equal(a.target_state,'one_window_at_target');assert.equal(a.source_observed_at,'2026-09-30T12:00:00.000Z');
+ assert.equal(a.policy_id,targetPolicy.previous_policy.policy_id);assert.equal(a.unknown_tasks,13);
+ assert.equal(a.verified_full_automation_rate,null);assert.deepEqual(doc,before);
+ assert(!Object.hasOwn(a,'new_runtime_measurement'));
 });
 test('weekly receipts preserve current policy and both fixed sets without exposing the source reference',()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'business-fixed-history-'));fs.mkdirSync(path.join(dir,'data'),{mode:0o700});
@@ -376,9 +542,48 @@ test('weekly receipts preserve current policy and both fixed sets without exposi
   const h=JSON.parse(fs.readFileSync(path.join(dir,'business-automation/weekly.json')));
   assert.equal(h.observations[0].policy_id,targetPolicy.policy_id);
   assert.equal(h.observations[0].excluded_scope_key,targetPolicy.fixed_scope.excluded_scope_key);
+  assert.equal(h.observations[0].actual.measurement_contract,BUSINESS_MEASUREMENT_CONTRACT);
+  assert.deepEqual(h.observations[0].actual.measurement_scope,targetPolicy.fixed_scope);
   d.policy_id=targetPolicy.previous_policy.policy_id;fs.writeFileSync(file,JSON.stringify(d),{mode:0o600});
   assert.throws(()=>recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:at}),/conflicting_runtime_review/);
  } finally {fs.rmSync(dir,{recursive:true,force:true});}
+});
+test('a later real source with179 confirmed plus13 unknown can complete four weeks after an earlier exact178 read',()=>{
+ for(const corporateComplete of [true,false]) {
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'business-new-lower-bound-'));fs.mkdirSync(path.join(dir,'data'),{mode:0o700});
+  const file=path.join(dir,'data/business-automation-observations.json'),historyFile=path.join(dir,'business-automation/weekly.json');
+  try {
+   for(const day of ['2026-10-05','2026-10-12','2026-10-19']) {
+    fs.writeFileSync(file,JSON.stringify(datedRuntimeFixture(179,'unimplemented',day)),{mode:0o600});
+    recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:new Date(day+'T02:00:00Z')});
+   }
+   const day='2026-10-26',morning=datedRuntimeFixture(178,'unimplemented',day);
+   fs.writeFileSync(file,JSON.stringify(morning),{mode:0o600});
+   const before=recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:new Date(day+'T02:00:00Z')});
+   assert.equal(before.point.actual.state,'MEASURED');assert.equal(before.point.actual.verified_full_tasks,178);
+   assert.equal(before.sustained_above_target,false);
+   const history=JSON.parse(fs.readFileSync(historyFile));
+   const originalSnapshot=structuredClone(history.observations.find(o=>o.measurement_ref===morning.observation.evidence_ref));
+   const late=datedRuntimeFixture(179,'unknown',day,'03');
+   if(!corporateComplete)delete late.scope;
+   fs.writeFileSync(file,JSON.stringify(late),{mode:0o600});
+   const result=recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:new Date(day+'T04:00:00Z')});
+   const after=JSON.parse(fs.readFileSync(historyFile));
+   assert.equal(result.new_runtime_measurement,true);assert.equal(result.sustained_above_target,corporateComplete);
+   assert.equal(result.retained_prior_measurement,!corporateComplete);
+   assert.deepEqual(after.observations.find(o=>o.measurement_ref===morning.observation.evidence_ref),originalSnapshot);
+   assert(after.observations.some(o=>o.measurement_ref===late.observation.evidence_ref));
+   if(corporateComplete) {
+    assert.equal(result.point.actual.state,'PARTIAL_EVIDENCE');assert.equal(result.point.actual.verified_full_tasks,179);
+    assert.equal(result.point.actual.unknown_tasks,13);assert.equal(result.point.actual.verified_full_automation_rate,null);
+    assert.equal(result.point.current_goal.evidence_basis,'confirmed_runtime_lower_bound');
+    assert.equal(result.point.observed_at,day+'T03:00:00.000Z');
+   } else {
+    assert.deepEqual(result.point,before.point);assert.equal(result.current_read.state,'PARTIAL_EVIDENCE');
+    assert.equal(result.current_read.scope_completeness,'not_attested');
+   }
+  } finally {fs.rmSync(dir,{recursive:true,force:true});}
+ }
 });
 test('pre-metadata receipts and old90 verdicts stay immutable on reread and cannot be relabeled to93',()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'business-legacy-history-'));fs.mkdirSync(path.join(dir,'data'),{mode:0o700});
@@ -390,6 +595,7 @@ test('pre-metadata receipts and old90 verdicts stay immutable on reread and cann
   const history=JSON.parse(fs.readFileSync(historyFile));
   for(const aggregate of [history.points[0],history.observations[0]]) {
    delete aggregate.policy_id;delete aggregate.excluded_scope_key;delete aggregate.actual.policy_id;
+   delete aggregate.actual.measurement_contract;delete aggregate.actual.measurement_scope;
    aggregate.actual.target_state='one_window_above_target';
   }
   delete history.points[0].current_goal;
@@ -399,6 +605,7 @@ test('pre-metadata receipts and old90 verdicts stay immutable on reread and cann
   const reread=recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:at});
   assert.equal(reread.new_runtime_measurement,false);assert.equal(reread.retained_prior_measurement,true);
   assert.equal(reread.sustained_above_target,false);assert.deepEqual(reread.point,legacy.points[0]);
+  assert.equal(currentGoalAssessment(reread.point.actual,targetCoverage,{now:at}).one_window_qualified,false);
   assert.deepEqual(JSON.parse(fs.readFileSync(historyFile)),legacy);
   d.tasks[0].human_touches=1;fs.writeFileSync(file,JSON.stringify(d),{mode:0o600});
   assert.throws(()=>recordBusinessWeek({stateRoot:dir,coverage:targetCoverage,now:at}),/conflicting_runtime_review/);

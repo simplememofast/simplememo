@@ -8,6 +8,8 @@ import {readPrivateInput} from '../../scripts/autonomy-outcome-score.mjs';
 import {privateState,acquireLock} from './company-loop.mjs';
 
 export const BUSINESS_POLICY_PATH = 'data/business-automation-policy.json';
+// Measurement quality is separate from the target's administrative policy label.
+export const BUSINESS_MEASUREMENT_CONTRACT = 'business-runtime-six-stage-source-v2';
 export const ROOT = path.resolve(import.meta.dirname, '../..');
 export const businessPolicy = () => JSON.parse(fs.readFileSync(path.join(ROOT, BUSINESS_POLICY_PATH)));
 export const businessCoverage = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'data/automation-coverage.json')));
@@ -44,25 +46,34 @@ export function fixedScopeAssessment(coverage,policy=businessPolicy()) {
 }
 
 export function currentGoalAssessment(actual,coverage,{policy=businessPolicy(),now=new Date()}={}) {
-  const scope=fixedScopeAssessment(coverage,policy),n=policy.fixed_scope?.defined_tasks??192;
+  const scope=fixedScopeAssessment(coverage,policy),n=policy.fixed_scope?.defined_tasks??192,nowTime=new Date(now).getTime();
   const base={policy_id:policy.policy_id,policy_revision:policy.revision,effective_at:policy.effective_at,
     threshold:policy.target?.at_least,inclusive:true,defined_tasks:n,minimum_automated_tasks:Math.ceil(n*.93),
-    sustained_weeks:4,scope,one_window_qualified:false,sustained_qualified:false,runtime_execution_credit:0};
+    sustained_weeks:4,scope,one_window_qualified:false,sustained_qualified:false,runtime_execution_credit:0,
+    evidence_basis:null,confirmed_full_tasks:actual?.verified_full_tasks??0,unknown_tasks:actual?.unknown_tasks??n,
+    confirmed_rate_lower_bound:null,exact_rate_confirmed:false};
   let state;
   if(validateBusinessPolicy(policy).length)state='invalid_policy';
   else if(!scope.matches_target_scope)state='fixed_scope_mismatch';
-  else if(actual?.state!=='MEASURED'||actual.defined_tasks!==n||actual.unknown_tasks!==0)state='runtime_unverified';
-  else if(actual.policy_id!==policy.policy_id)state='policy_unverified';
-  else if(!stamp(actual.source_observed_at)||Date.parse(actual.source_observed_at)<Date.parse(policy.effective_at)
-    ||Date.parse(actual.source_observed_at)>new Date(now).getTime()
+  else if(!['MEASURED','PARTIAL_EVIDENCE'].includes(actual?.state)||actual.defined_tasks!==n
+    ||actual.measurement_contract!==BUSINESS_MEASUREMENT_CONTRACT
+    ||!Object.keys(scope.current).every(k=>actual.measurement_scope?.[k]===scope.current[k])
+    ||!Number.isSafeInteger(actual.unknown_tasks)||actual.unknown_tasks<0||actual.unknown_tasks>n
+    ||(actual.state==='MEASURED')!==(actual.unknown_tasks===0))state='runtime_unverified';
+  else if(!Number.isFinite(nowTime)||!stamp(actual.source_observed_at)
+    ||Date.parse(actual.source_observed_at)>nowTime
     ||actual.window?.through!==jstDay(actual.source_observed_at)
     ||actual.window?.from!==new Date(Date.parse(actual.window.through)-27*86400000).toISOString().slice(0,10))state='source_observation_unverified';
   else if(actual.scope_completeness!=='attested')state='corporate_scope_unverified';
-  else if(!Number.isSafeInteger(actual.verified_full_tasks)||actual.verified_full_tasks<0||actual.verified_full_tasks>n
-    ||actual.verified_full_automation_rate!==actual.verified_full_tasks/n
-    ||actual.verified_full_tasks<n*.93)state='below_target';
+  else if(!Number.isSafeInteger(actual.verified_full_tasks)||actual.verified_full_tasks<0||actual.verified_full_tasks>n-actual.unknown_tasks
+    ||actual.verified_full_automation_rate!==(actual.state==='MEASURED'?actual.verified_full_tasks/n:null)
+    ||actual.confirmed_full_automation_lower_bound!==actual.verified_full_tasks/n)state='runtime_arithmetic_unverified';
+  else if(actual.verified_full_tasks<n*.93)state='below_target';
   else state='one_window_at_target';
-  return {...base,state,one_window_qualified:state==='one_window_at_target'};
+  const valid=['below_target','one_window_at_target'].includes(state);
+  return {...base,state,one_window_qualified:state==='one_window_at_target',
+    evidence_basis:valid?(actual.state==='MEASURED'?'exact_runtime_rate':'confirmed_runtime_lower_bound'):null,
+    confirmed_rate_lower_bound:valid?actual.verified_full_tasks/n:null,exact_rate_confirmed:valid&&actual.state==='MEASURED'};
 }
 
 export function validateBusinessPolicy(p) {
@@ -106,6 +117,7 @@ export function measuredBusinessRates(doc, coverage, {now = new Date(), policy =
     verified_full_automation_rate:null, verified_ai_utilization_rate:null, observed_work_saved_rate:null,
     verified_full_tasks:0, verified_ai_utilization_tasks:0, unknown_tasks:n,
     scope_completeness:'not_attested', target_state:'unverified', source_observed_at:null,policy_id:null,
+    measurement_contract:null,measurement_scope:null,
     diagnostics:{observed_tasks:0,not_due_tasks:0,unimplemented_tasks:0,human_only_tasks:0,
       failed_tasks:0,safety_failed_tasks:0,human_intervened_tasks:0,reported_human_touches:0,
       unknown_stage_tasks:Object.fromEntries(STAGES.map(k=>[k,n])),
@@ -186,7 +198,8 @@ export function measuredBusinessRates(doc, coverage, {now = new Date(), policy =
   if(![baseline,actual,usd,jpy].every(Number.isFinite) || !Number.isSafeInteger(diagnostics.reported_human_touches))return {...empty,state:'INVALID_EVIDENCE'};
   const complete = known === n && n > 0;
   const scopeAttested=doc.scope?.company_wide_complete === true && ref(doc.scope.evidence_ref);
-  return {...empty, state:complete ? 'MEASURED' : 'PARTIAL_EVIDENCE', window:{from,through},
+  const result={...empty, state:complete ? 'MEASURED' : 'PARTIAL_EVIDENCE', window:{from,through},
+    measurement_contract:BUSINESS_MEASUREMENT_CONTRACT,measurement_scope:businessScope(coverage),
     scope_completeness:scopeAttested ? 'attested' : 'not_attested', source_observed_at:new Date(doc.observation.at).toISOString(),
     policy_id:doc.policy_id===policy.policy_id?policy.policy_id
       :doc.policy_id===policy.previous_policy.policy_id?policy.previous_policy.policy_id:null,
@@ -203,11 +216,9 @@ export function measuredBusinessRates(doc, coverage, {now = new Date(), policy =
       observed_minutes_delta:burdenKnown?actual-baseline:null,observed_work_increased:burdenKnown?actual>baseline:null},
     cost:{...empty.cost,measured_tasks:costKnown,usd_subtotal:usdKnown?usd:null,jpy_subtotal:jpyKnown?jpy:null,
       usd_total:usdKnown===n&&n>0?usd:null,jpy_total:jpyKnown===n&&n>0?jpy:null},
-    target_state:!fixedScopeAssessment(coverage,policy).matches_target_scope?'fixed_scope_mismatch'
-      :doc.policy_id!==policy.policy_id?'policy_unverified'
-      :Date.parse(doc.observation.at)<Date.parse(policy.effective_at)?'pre_policy_observation'
-      :complete && full/n >= policy.target.at_least
-        ? scopeAttested?'one_window_at_target':'scope_unverified_at_threshold' : complete ? 'below_target' : 'unverified'};
+    target_state:'unverified'};
+  result.target_state=currentGoalAssessment(result,coverage,{policy,now}).state;
+  return result;
 }
 
 export function businessStatus({stateRoot, now = new Date(), coverage = businessCoverage(),observations} = {}) {
@@ -224,19 +235,17 @@ export function sustainedTarget(points, policy = businessPolicy(), {now=new Date
   // Historical four-week evidence stays in the ledger; current maintenance requires this JST week.
   const nowTime=new Date(now).getTime();
   return Number.isFinite(nowTime) && p.length === policy.target.sustained_weeks
-    && p.at(-1)?.week===weekKey(now) && p.every((v,i)=>v.actual?.state === 'MEASURED'
-    && v.policy_id===policy.policy_id && v.actual.policy_id===policy.policy_id
+    && p.at(-1)?.week===weekKey(now) && p.every((v,i)=>currentGoalAssessment(v.actual,coverage,{policy,now}).one_window_qualified
     && v.scope_key===policy.fixed_scope.included_scope_key && v.excluded_scope_key===policy.fixed_scope.excluded_scope_key
-    && stamp(v.actual.source_observed_at) && Date.parse(v.actual.source_observed_at)>=Date.parse(policy.effective_at)
+    && stamp(v.actual.source_observed_at)
     && Date.parse(v.actual.source_observed_at)<=nowTime
     && weekKey(v.actual.source_observed_at)===v.week
     && v.actual.window?.through===jstDay(v.actual.source_observed_at)
     && v.actual.window?.from===new Date(Date.parse(v.actual.window.through)-27*86400000).toISOString().slice(0,10)
-    && v.actual.defined_tasks===policy.fixed_scope.defined_tasks && v.actual.unknown_tasks===0
+    && v.actual.defined_tasks===policy.fixed_scope.defined_tasks
     && v.actual.defined_tasks===p[0].actual.defined_tasks
     && Number.isSafeInteger(v.actual.verified_full_tasks) && v.actual.verified_full_tasks<=v.actual.defined_tasks
-    && v.actual.verified_full_automation_rate===v.actual.verified_full_tasks/v.actual.defined_tasks
-    && v.actual.verified_full_automation_rate >= policy.target.at_least
+    && v.actual.confirmed_full_automation_lower_bound >= policy.target.at_least
     && v.actual.scope_completeness === 'attested' && v.scope_key === p[0].scope_key
     && (!i || Date.parse(v.week) - Date.parse(p[i-1].week) === 7*86400000));
 }
@@ -275,14 +284,17 @@ export function recordBusinessWeek({stateRoot,now = new Date(),coverage = busine
   const comparable=structuredClone(snapshot);
   if(legacy){delete comparable.policy_id;delete comparable.excluded_scope_key;delete comparable.actual.policy_id;
     comparable.actual.target_state=same.actual.target_state;}
+  const previousMethod=same&&!Object.hasOwn(same.actual,'measurement_contract');
+  if(previousMethod){delete comparable.actual.measurement_contract;delete comparable.actual.measurement_scope;
+    comparable.actual.target_state=same.actual.target_state;}
   if(same&&!isDeepStrictEqual(same,comparable))throw new Error('conflicting_runtime_review');
   const repeated=JSON.stringify(history.observations.at(-1))===JSON.stringify(snapshot);
   if(!same&&!repeated)history.observations.push(snapshot);
   const previous=history.points.find(p=>p.week===week);
   // A later stale/missing read must not erase an already admitted observation.
   const retain=previous && (['MEASURED','PARTIAL_EVIDENCE'].includes(previous.actual?.state)&&!admitted
-    || previous.actual?.state==='MEASURED'&&status.actual.state!=='MEASURED'
-    || legacy&&previous.actual?.source_observed_at===same.source_observed_at
+    || previous.actual?.state==='MEASURED'&&status.actual.state!=='MEASURED'&&!status.current_goal.one_window_qualified
+    || (legacy||previousMethod)&&previous.actual?.source_observed_at===same.source_observed_at
     || admitted&&previous.actual?.source_observed_at&&Date.parse(previous.actual.source_observed_at)>Date.parse(status.actual.source_observed_at));
   if(!retain)history.points=history.points.filter(p=>p.week!==week).concat(point).sort((a,b)=>a.week.localeCompare(b.week));
   const tmp=file+'.'+randomUUID()+'.tmp';

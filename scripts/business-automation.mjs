@@ -5,7 +5,7 @@ import {execFileSync,spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {readPrivateInput} from './autonomy-outcome-score.mjs';
-import {ROOT,businessPolicy,businessCoverage,inventoryBusinessRates,validateBusinessPolicy,businessStatus,jstDay,weekKey,businessTaskId} from '../growth/lib/business-automation.mjs';
+import {ROOT,BUSINESS_MEASUREMENT_CONTRACT,businessPolicy,businessCoverage,inventoryBusinessRates,validateBusinessPolicy,businessStatus,currentGoalAssessment,jstDay,weekKey,businessTaskId} from '../growth/lib/business-automation.mjs';
 
 export const SERIES_FILE = 'data/business-automation-weekly.json';
 export const CHART_FILE = 'assets/img/autopilot/business-automation-weekly.svg';
@@ -98,9 +98,13 @@ export function validateWeeklySeries(d) {
         || a.window?.from!==shift(a.window.through,-27)
         || !['attested','not_attested'].includes(a.scope_completeness)) errors.push('runtime_aggregate');
       if(a.policy_id!=null && ![businessPolicy().policy_id,businessPolicy().previous_policy.policy_id].includes(a.policy_id))errors.push('runtime_policy_identity');
+      if(a.measurement_contract!=null && (a.measurement_contract!==BUSINESS_MEASUREMENT_CONTRACT
+        ||!Object.keys(businessPolicy().fixed_scope).every(k=>a.measurement_scope?.[k]===businessPolicy().fixed_scope[k])
+        ||a.scope_fingerprint!==a.measurement_scope.included_scope_key
+        ||a.excluded_scope_fingerprint!==a.measurement_scope.excluded_scope_key
+        ||a.confirmed_full_automation_lower_bound!==a.verified_full_tasks/n))errors.push('runtime_measurement_contract');
       if(a.policy_id===businessPolicy().policy_id && (a.scope_fingerprint!==businessPolicy().fixed_scope.included_scope_key
-        ||a.excluded_scope_fingerprint!==businessPolicy().fixed_scope.excluded_scope_key ||n!==192
-        ||Date.parse(a.source_observed_at)<Date.parse(businessPolicy().effective_at)))errors.push('runtime_fixed_goal_scope');
+        ||a.excluded_scope_fingerprint!==businessPolicy().fixed_scope.excluded_scope_key ||n!==192))errors.push('runtime_fixed_goal_scope');
     } else if(a?.state!=='NO_EVIDENCE' || ['verified_full_automation_rate','verified_ai_utilization_rate','observed_work_saved_rate'].some(k=>a[k]!==null)) errors.push('historical_runtime_claim');
   }
   return [...new Set(errors)];
@@ -118,13 +122,16 @@ export function renderBusinessChart(d) {
     return value=>bottom-(bottom-top)*value;
   };
   const actualY=panel(118,288,'実運用：AI完全自動化率・AI活用率・省力化率（直近28日）');
-  if(!d.points.some(p=>p.actual?.verified_full_automation_rate!=null || p.actual?.verified_ai_utilization_rate!=null || p.actual?.observed_work_saved_rate!=null))
+  if(!d.points.some(p=>p.actual?.verified_full_automation_rate!=null || p.actual?.verified_ai_utilization_rate!=null || p.actual?.observed_work_saved_rate!=null || p.actual?.state==='PARTIAL_EVIDENCE'))
     text(225,214,'週次の実運用証拠は未確認。欠測は0%ではありません。',18,'#64748b');
   for(const [key,color] of [['verified_full_automation_rate','#2563eb'],['verified_ai_utilization_rate','#059669'],['observed_work_saved_rate','#9333ea']]) {
     let segment=[];
     const flush=()=>{if(segment.length)elements.push(`<polyline fill="none" stroke="${color}" stroke-width="3" points="${segment.map(p=>p.join(',')).join(' ')}"/>`);segment=[];};
     d.points.forEach((p,i)=>{const val=p.actual?.[key];if(val==null || (i>0 && p.actual?.scope_fingerprint!==d.points[i-1].actual?.scope_fingerprint))flush();if(val!=null){segment.push([x(i),actualY(val)]);elements.push(`<circle cx="${x(i)}" cy="${actualY(val)}" r="4" fill="${color}"/>`);}});flush();
   }
+  // Open markers show a conservative bound, never an invented exact point or carried-forward line.
+  d.points.forEach((p,i)=>{const a=p.actual;if(a?.state==='PARTIAL_EVIDENCE'&&a.defined_tasks>0&&Number.isSafeInteger(a.verified_full_tasks))
+    elements.push(`<circle cx="${x(i)}" cy="${actualY(a.verified_full_tasks/a.defined_tasks)}" r="5" fill="#fff" stroke="#d97706" stroke-width="2"/>`);});
   text(520,321,'完全自動化',14,'#2563eb');text(680,321,'AI活用',14,'#059669');text(820,321,'実測省力化',14,'#9333ea');
   const y=panel(397,567,'台帳の参考値：AI実行の構成率・AI活用の構成率（全業務を分母）');
   for(const [key,color,label] of [['declared_execution_rate','#2563eb','AI実行'],['declared_ai_utilization_rate','#059669','AI活用']]) {
@@ -140,8 +147,8 @@ export function renderBusinessChart(d) {
   text(82,622,'2026年 / 日本時間の週 · 対象変更時は線を切る',13);
   text(82,650,'3月～最初の台帳以前は未確認。週次値の補間・捏造はしない。',13);
   text(82,674,'台帳はテスト済み準備を含む実装分類。実際の無人完走を示す証拠とは別。',13);
-  text(82,701,'現在の目標：固定192業務・93%以上×4週。旧90%超の観測は新目標へ換算しない。',13);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="736" viewBox="0 0 1080 736" role="img" aria-labelledby="title desc"><title id="title">YURIKA + SimpleMemo weekly business automation</title><desc id="desc">Actual operation and inventory snapshots are separate. Missing observations are not zero. Current goal: at least 93 percent on the fixed 192 tasks and same 11 exclusions for four weeks. Previous target observations are not retroactive goal credit.</desc><rect width="1080" height="736" fill="#fff"/><g font-family="Arial, Hiragino Sans, sans-serif"><text x="78" y="38" font-size="26" font-weight="bold" fill="#0f172a">ユリカ社＋シンプルメモ · 毎週のAI自動化率</text><text x="78" y="65" font-size="14" fill="#64748b">登録済み業務の範囲。法人全体の網羅性は未確認 · ${xml(d.through)}</text>${elements.join('')}</g></svg>\n`;
+  text(82,701,'固定192・93%以上×4週。白抜き点は確認済み下限。旧90%評価と元観測は保持。',13);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="736" viewBox="0 0 1080 736" role="img" aria-labelledby="title desc"><title id="title">YURIKA + SimpleMemo weekly business automation</title><desc id="desc">Actual operation and inventory snapshots are separate. Missing observations are not zero. Open markers are confirmed lower bounds with unknown tasks retained. Current goal: at least 93 percent on the fixed 192 tasks and same 11 exclusions for four weeks. Reassessment is separate from original observations and previous target verdicts.</desc><rect width="1080" height="736" fill="#fff"/><g font-family="Arial, Hiragino Sans, sans-serif"><text x="78" y="38" font-size="26" font-weight="bold" fill="#0f172a">ユリカ社＋シンプルメモ · 毎週のAI自動化率</text><text x="78" y="65" font-size="14" fill="#64748b">登録済み業務の範囲。法人全体の網羅性は未確認 · ${xml(d.through)}</text>${elements.join('')}</g></svg>\n`;
 }
 
 export function privateWeeklyChart(history, base=JSON.parse(fs.readFileSync(path.join(ROOT,SERIES_FILE)))) {
@@ -180,11 +187,13 @@ export function exportWeeklyAggregates(history,base,previous=null) {
     if(source.policy_id===businessPolicy().policy_id && a.policy_id!==businessPolicy().policy_id)throw new Error('runtime_policy_identity_mismatch');
     if(!utcStamp(a.source_observed_at)||a.source_observed_at!==source.observed_at)throw new Error('runtime_source_time_mismatch');
     const p=d.points.find(p=>p.week===source.week);if(!p)throw new Error('weekly_source_outside_series');
-    if(p.actual?.state==='MEASURED' && a.state!=='MEASURED')continue;
+    if(p.actual?.state==='MEASURED' && a.state!=='MEASURED'
+      &&!currentGoalAssessment(a,businessCoverage(),{now:new Date(d.generated_at)}).one_window_qualified)continue;
     if(p.actual?.source_observed_at && Date.parse(p.actual.source_observed_at)>Date.parse(source.observed_at))continue;
     const s=source.inventory?.overall;
     p.actual=selectPublicActual({basis:'reviewed_private_weekly_aggregate',source_observed_at:source.observed_at,scope_fingerprint:source.scope_key,
       policy_id:source.policy_id??null,excluded_scope_fingerprint:source.excluded_scope_key??null,
+      measurement_contract:a.measurement_contract,measurement_scope:a.measurement_scope,
       inventory_at_observation:{defined_tasks:s?.defined,ai_executes:s?.ai_executes,ai_proposes:s?.counts?.ai_proposes,
         inventory_measured_at:source.inventory?.inventory_measured_at,scope_fingerprint:source.scope_key},
       state:a.state,window:{from:a.window?.from,through:a.window?.through},scope_completeness:a.scope_completeness,
@@ -202,8 +211,14 @@ function selectPublicActual(a) {
   const policy=businessPolicy();
   const policyId=[policy.policy_id,policy.previous_policy.policy_id].includes(a.policy_id)?a.policy_id:null;
   const excluded=a.excluded_scope_fingerprint===policy.fixed_scope.excluded_scope_key?a.excluded_scope_fingerprint:null;
+  const method=a.measurement_contract===BUSINESS_MEASUREMENT_CONTRACT
+    &&Object.keys(policy.fixed_scope).every(k=>a.measurement_scope?.[k]===policy.fixed_scope[k])
+    &&a.scope_fingerprint===policy.fixed_scope.included_scope_key&&excluded===policy.fixed_scope.excluded_scope_key;
   return {basis:'reviewed_private_weekly_aggregate',source_observed_at:new Date(a.source_observed_at).toISOString(),scope_fingerprint:a.scope_fingerprint,
     policy_id:policyId,excluded_scope_fingerprint:excluded,
+    ...(method?{measurement_contract:BUSINESS_MEASUREMENT_CONTRACT,
+      measurement_scope:Object.fromEntries(Object.keys(policy.fixed_scope).map(k=>[k,policy.fixed_scope[k]])),
+      confirmed_full_automation_lower_bound:a.verified_full_tasks/a.defined_tasks}:{}),
     inventory_at_observation:{defined_tasks:c.defined_tasks,ai_executes:c.ai_executes,ai_proposes:c.ai_proposes,
       inventory_measured_at:c.inventory_measured_at,scope_fingerprint:c.scope_fingerprint},
     state:a.state,window:{from:a.window.from,through:a.window.through},scope_completeness:a.scope_completeness,

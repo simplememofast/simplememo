@@ -830,13 +830,19 @@
       "file": "scripts/business-automation.mjs",
       "expr": "a.policy_id",
       "disposition": "前提",
-      "note": "2026-10-01: 公開週次集計のpolicy識別子が明示されている場合に、既知の旧/現policy以外を拒否する分岐。旧履歴の欠損はnullとして実測事実・原観測日時を保持するが、現93%目標への適格性を与えない。現policyを主張する点には別の必須照合で原actualの同じpolicy_id・固定included/excluded集合・192業務・effective_at以降の原観測を要求し、currentGoalAssessment/sustainedTargetも欠損・旧policyを不適格にする。selectPublicActualは未知私的policy文字列と未知除外文字列を公開せずnullへ限定する。旧/nullの179/192実測保持・新目標非加点、現policyの集合/192/有効日時欠落拒否、未知文字列遮断、原policyにないtop-level currentラベルによる昇格拒否を回帰で確認。走査範囲・検出規則・既存記録は変更しない。"
+      "note": "2026-10-01: 公開週次集計のpolicy識別子が明示されている場合に、既知の旧/現policy以外を拒否する分岐。旧履歴の欠損はnullとして実測事実・原観測日時を保持するが、現93%目標への適格性を与えない。現policyを主張する点には別の必須照合で原actualの同じpolicy_id・固定included/excluded集合・192業務・effective_at以降の原観測を要求し、currentGoalAssessment/sustainedTargetも欠損・旧policyを不適格にする。selectPublicActualは未知私的policy文字列と未知除外文字列を公開せずnullへ限定する。旧/nullの179/192実測保持・新目標非加点、現policyの集合/192/有効日時欠落拒否、未知文字列遮断、原policyにないtop-level currentラベルによる昇格拒否を回帰で確認。走査範囲・検出規則・既存記録は変更しない。 2026-10-01追加監査（定義v5）: 前記の目標policy/有効時刻だけによる一律不適格を撤回し、測定方法の品質と固定観測対象を別検査する。ラベルが欠損/旧でも同品質原測定は別再評価可能だが、原ラベルの後付けとtop-level昇格は拒否を維持。旧marker無し履歴は直接認定しない。原資料の所有者確認、元日時、同included/excluded、全発生/工程/人活動、法人範囲を要求し、再読を新測定にしない。"
     },
     {
       "file": "scripts/business-automation.mjs",
       "expr": "p.actual?.source_observed_at",
       "disposition": "前提",
       "note": "2026-09-30: 公開済みの実運用観測がある場合だけ、古い私的観測による置換を止める。最初の観測では比較相手が無い。新しいsourceの日時・窓・測定日はselectPublicActualが別に厳格検証し、欠落や注記は拒否する。欠測・部分観測による測定点の削除を防ぐ回帰と、古い有効観測が新しい公開点を置換しない回帰を確認。存在条件を無くしたり監査走査を緩めたりしない。"
+    },
+    {
+      "file": "scripts/business-automation.mjs",
+      "expr": "a.measurement_contract",
+      "disposition": "前提",
+      "note": "2026-10-01: 公開週次集計に測定方法を明示する点だけ、固定した品質定数・観測対象/除外・下限算数を照合する。旧点の方法欄欠損は元の実率と日時を保持するが、currentGoalAssessment/sustainedTargetは方法欠損を別に無条件拒否。selectPublicActualは既知定数と全固定scope値が一致した場合だけ狭い公開メタデータを転記し、未知の私的methodや余分なscope文字列を出さない。方法欠損の旧点不適格、偽下限拒否、未知13の下限認定、元時間/集合不一致拒否、任意私的文字列非転記を合成回帰で確認。原資料真正性の独立認証ではない。検出規則・走査範囲・既存記録の本文は保持する。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
