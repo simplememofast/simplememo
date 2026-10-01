@@ -1130,6 +1130,11 @@ jobs:
           node scripts/check-definitions.mjs --selftest
           node scripts/check-definitions.mjs --check
 
+      - name: Existing SQL definitions and lineage (no query)
+        run: |
+          node scripts/check-query-definitions.mjs --check
+          node --test scripts/check-query-definitions.test.mjs
+
       # 【コード著者率】原稿の「変更行の98.8%」は**再現できなかった。**
       #
       # 2026-08-22 に同じ窓で数え直したところ、どの数え方をしても
