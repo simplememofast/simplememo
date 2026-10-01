@@ -135,7 +135,7 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
     if (typeof v !== 'string' || v.trim() === '') return hold(`リリースノートが無い: ${loc}`);
   }
 
-  // TestFlight で実際に載って、寝かせたか
+  // TestFlightがVALIDであること。提出前の独自待機はpolicyで0h、実機確認は別に要求する。
   if (build.testflight_state !== 'VALID') {
     return build.testflight_state === undefined
       ? unknown('TestFlight の処理状態')
@@ -353,8 +353,21 @@ function selftest() {
         `ASC の実ロケールは ja（release_notes/ja-JP/ はフォルダ名）: ${JSON.stringify(locales)}`);
     }],
     ['TestFlight が VALID でなければ出さない', () => heldS({ build: { ...subOk().build, testflight_state: 'PROCESSING' } }, 'VALID')],
-    ['**寝かせが足りなければ出さない**', () => {
-      const b = { ...subOk().build, testflight_available_at: ago(1) };
+    ['提出前待機は0時間', () => {
+      assert(doc.policy.min_testflight_soak_hours === 0);
+      for (const h of [0, 1, 23]) {
+        const c = subOk(); c.build.testflight_available_at = ago(h);
+        assert(evaluateSubmission(c).decision === 'submit', `待機${h}hで提出できない`);
+      }
+    }],
+    ['正の待機を指定したpolicyでは不足時にhold', () => {
+      const c = subOk(); c.policy.min_testflight_soak_hours = 24;
+      c.build.testflight_available_at = ago(1);
+      const r = evaluateSubmission(c);
+      assert(r.decision === 'hold' && r.why.includes('寝ていない'), JSON.stringify(r));
+    }],
+    ['待機0時間でも未来のTestFlight利用可能時刻はhold', () => {
+      const b = { ...subOk().build, testflight_available_at: ago(-1) };
       heldS({ build: b }, '寝ていない');
     }],
     ['寝かせの起点が読めなければ hold', () => {
