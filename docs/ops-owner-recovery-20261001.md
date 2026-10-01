@@ -1,0 +1,20 @@
+# Owner-requested Autopilot recovery — 2026-10-01 JST
+
+The owner requested resolution of the ten items in the October 1 direct-owner alert. This is a manual repair and reconciliation, with a recorded human request; it is not an unattended decision or a new content treatment.
+
+## Verified repairs and retained failures
+
+- September 20 native run `ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9` failed at complete-scope measurement admission. Merged PR [#1506](https://github.com/simplememofast/simplememo/pull/1506) introduced prospective bounded supporting changes. Current measurement/support regressions verify that target-only distribution, sitemap and story changes coexist with unrelated page experiments; undeclared shared changes and protected-page changes remain blocked.
+- October 1 native run `ap-20261001-actions-codex-01a0f41e-d80a-7a70-b927-485e8385da0e` failed because final-head measurement validation rejected a required earlier retirement record. Merged PR [#1806](https://github.com/simplememofast/simplememo/pull/1806) fixes that validation and isolates its regression fixtures. Current real-Git decision regressions accept the valid retirement sequence and reject late retirement, undeclared paths and competing ownership.
+- This release connects those demonstrated repairs to both original failures through one owner-requested repair record. Both original outcomes remain `no_artifact`; the three historical repair attempts remain intact. It does not renew or modify the consumed one-use permit, change an emergency-stop flag, reset repair attempts, raise a budget or relax a check. With no unrepaired recurrence, the ordinary derived containment no longer applies. A further `no_artifact` recurrence will again reach the unchanged repair limit.
+- The seven `usage_limit` requests use their existing `no_failure_since` close condition. The genuinely attempted October 1 native run, after the September 28 failure, provides recovery evidence for that failure class only. Its different `no_artifact` outcome does not establish a successful business publication. No quota failure receives `repair_of`, and no failed run is rewritten.
+
+## Reviewed orphan
+
+Commit `3bf435dd2b28e601d1d4cda3b677aea09f65cf00` on `claude/vendor-terms-body-2026-09-24` contains an unmerged explanatory correction and an obsolete AppsFlyer fingerprint edit. Recover the explanation: nine original vendors were migrated in that PR, with AppsFlyer deferred to its separate MSA-source correction. Preserve the current MSA source, fingerprint, source history and human-review limitations. Reapplying the old vendor edit would revert the subsequent repair. The existing orphan acknowledgement records only the reviewed commit; a different future commit reopens review.
+
+## Cron recovery
+
+Retain issue [#1587](https://github.com/simplememofast/simplememo/issues/1587) until its existing monitor independently verifies all tracked workflows. Current scheduled AI Visibility Probe, Devlog Syndication and Decision Monitor executions are successful. The old scheduled Obsidian fallback failed at derived repair-limit containment. After the repaired ledger is released, revalidate that existing run through its normal gates, then let Cron Health verify recovery. A manual workflow success does not prove a new natural scheduled business execution. No duplicate automation, model collection or notification is created.
+
+Validation and final release/readback evidence are retained privately. Actual native business shipment remains unproven until a future ordinary admitted run completes its own publication checks.
