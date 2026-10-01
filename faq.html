@@ -285,7 +285,7 @@
       "name": "サブスクリプションの解約方法を教えてください。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Apple IDの「サブスクリプション管理」画面から解約できます：\n\n \n iPhoneの「設定」アプリを開く\n 画面上部の自分の名前をタップ\n 「サブスクリプション」をタップ\n 「シンプルメモ」のサブスクリプション（「シンプルメモ：プレミアム」または「シンプルメモ：年間プレミアム」）を選択\n 「サブスクリプションをキャンセル」をタップ\n \n 解約後も、現在の課金期間の終了日まではプレミアム機能をご利用いただけます。"
+        "text": "Apple IDの「サブスクリプション管理」画面から解約できます：\n\n \n iPhoneの「設定」アプリを開く\n 画面上部の自分の名前をタップ\n 「サブスクリプション」をタップ\n 「シンプルメモ」のサブスクリプション（「シンプルメモ：プレミアム」または「シンプルメモ：年間プレミアム」）を選択\n 「サブスクリプションをキャンセル」をタップ\n \n 解約後も、現在の課金期間の終了日まではプレミアム機能をご利用いただけます。解約後はFreeプラン（1日3通まで）でそのまま無料でお使いいただけます。"
       }
     },
     {
@@ -413,7 +413,7 @@
       "name": "メモの暗号化について詳しく教えてください。",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Simple Memoでは、端末内に保存されるすべてのメモデータ（Outbox・履歴）をAES-GCM（256ビット）で暗号化しています。\n\n \n 暗号化キーはKeychainに保存され、端末のセキュアエンクレーブで保護されます\n ファイルにはApple標準のData Protection（completeUntilFirstUserAuthentication）が適用されます\n 暗号化キーが端末外に送信されることはありません"
+        "text": "Simple Memoでは、端末内に保存されるすべてのメモデータ（Outbox・履歴）をAES-GCM（256ビット）で暗号化しています。\n\n \n 暗号化キーはKeychainに保存され、端末のセキュアエンクレーブで保護されます\n ファイルにはApple標準のData Protection（completeUntilFirstUserAuthentication）が適用されます\n 暗号化キーが端末外に送信されることはありません メモ1通がどこを通り、どこに残らないか（Vault追記のローカル完結・オンデバイスAIタグ付け・E2EEではない理由）はプライバシー設計ページで図解しています。"
       }
     },
     {
@@ -733,7 +733,7 @@
       "name": "このアプリはObsidian公式のアプリですか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "いいえ。本アプリ（Obsidian連携シンプルメモ）はObsidian公式のアプリ・プラグインではなく、株式会社ユリカが開発する独立アプリです。Obsidian連携機能は、送信したメモをあなたのObsidian保管庫のノートに自動追記するもので、Obsidian本体のアカウントやプラグインを必要としません。Obsidianは Dynalist Inc. の商標です。"
+        "text": "いいえ。本アプリ（Obsidian連携シンプルメモ）はObsidian公式のアプリ・プラグインではなく、株式会社ユリカが開発する独立アプリです。Obsidian連携機能は、送信したメモをあなたのObsidian保管庫のノートに自動追記するもので、Obsidian本体のアカウントやプラグインを必要としません。Obsidianは Dynalist Inc. の商標です。Obsidian公式1.13の共有シート・ショートカット・QuickAddとの使い分けは誠実比較ページにまとめています。"
       }
     },
     {
@@ -742,6 +742,62 @@
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "はい。v3.4から基本的なApple Watch対応（クイックキャプチャ）を提供しています。Apple Watchから自分宛メールを送信でき、音声入力とスマートスタックにも対応しています（高度な自動化は非対応）。設定が済んでいれば、アプリを開くと標準の入力画面が自動で開きます。表示される入力方法はモデル・言語・画面の状態で変わり、音声入力をそのまま使えれば「開く」「完了」の最短2タップで送信に進めます。詳しくはApple Watch対応ページをご覧ください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "メール本文・認証コード・メールアドレスはサーバーに残りますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "メモの本文は、送信の処理のために当社の Relay API（Cloudflare Workers）と配信サービス（Resend）を通りますが、当社は恒常的な保存を行いません（プライバシーポリシーと同じ）。認証コードは、有効期限の10分が過ぎると自動で消えます。 メールアドレスについては、当社のサーバーに記録が残ります。たとえば次のものです（ほかはプライバシーポリシーをご覧ください）： 送信IDと、宛先メールアドレスのハッシュ（SHA-256から生成）の対応（Cloudflare D1） 宛先を認証したことの記録。アプリが端末ごとに作るランダムな識別子と、宛先メールアドレスのハッシュの組で、1年で自動削除（Cloudflare KV） これらのハッシュや識別子は、完全に匿名の情報としては扱いません。 端末内のOutbox・履歴データはAES-GCM暗号化、暗号化キーはKeychainに保管されています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "宛先メールアドレスと認証をリセットしたいです（宛先をクリア）。",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "設定画面の「メール設定」セクションの最下部にある「宛先をクリア」（赤文字）をタップしてください。確認ダイアログで「クリア」をタップすると、以下がすべて削除されます： 設定済みの宛先メールアドレス 認証済みのステータス（Keychainに保存された検証済みアドレス） 過去の検証状態（レガシーデータを含む） クリア後はTo欄が空になり、認証チェックマークも消えます。再度設定・認証を行うまでメモは送信できません。別のアカウントで使い始めたいときや、認証をやり直したいときにご利用ください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "アプリ内にヘルプはありますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。設定画面の「使い方（How It Works）」セクションから、3ステップの図解ヘルプが表示できます： メール設定：宛先メールアドレスを登録・認証 メモを書く：起動直後からキーボードが表示、すぐに入力可能 送信：ワンタップで宛先メールへ送信 各言語（日本語・英語を含む10言語）に翻訳されています。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "履歴に「未送信」と表示されたのに、実はメールが届いていました。なぜ？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "通信タイムアウトやバックグラウンド遷移などでサーバーの応答が端末に届かず、実際には送信済みなのにアプリ側で「失敗」と判断してしまうケースです。v1.5では次のように改善されています： 5秒後の即時再送：タイムアウト扱いになっても、すぐバックグラウンドで1回だけ自動再送を試みます アプリ復帰時の即リトライ：ホーム画面からアプリに戻った瞬間、未送信メッセージがあればすぐ再送されます 重複送信の防止：全送信経路で同じ Idempotency-Key を使用するため、実際にはサーバー側に届いていた場合でもメールが二重に送信されることはありません 履歴の自動修復：再送が成功すると、該当の履歴エントリは自動的に「送信済み」に更新されます そのため、短時間「未送信」が表示されていても、実メールは1通だけ正しく届きます。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "同じ本文を連続で送っても、履歴は正しく区別されますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。v1.5から、各送信は本文ではなく履歴エントリIDで個別に追跡されます。「OK」のような同じ短文を3回連続で送っても、3つの履歴エントリそれぞれが正しく「送信済み」にマークされます（以前のバージョンでは本文一致による誤判定が起きる可能性がありました）。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "メールを送らず、Obsidianだけに保存できますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。メールを送らずObsidianだけに保存する機能はPremiumで利用できます。保存先のフォルダを選び、アクセスを許可する設定が必要です。 ほかの端末への同期は、ご自身の同期サービスと設定に依存します。詳しくはApp Storeの公式説明をご覧ください。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "対話メモはどのように使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "音声入力中に短い追加質問を受けながら、同じ入力画面で音声で答えてメモをまとめる機能です。メモをタップして止め、文字で修正できます。内容を確認してから送信ボタンを使ってください。 質問とメモの整理にはiPhone上のApple Intelligenceを使います。対応iPhone、iOS 26以降、Apple Intelligenceの有効化、対応言語モデルが必要です。音声入力にはマイクの許可も必要です。対話メモ自体にSiriの設定は不要です。詳しくはApp Storeの公式説明をご覧ください。"
       }
     }
   ]
@@ -818,6 +874,16 @@
           <!-- 料金・プラン -->
           <div class="faq-category">
             <h2 id="pricing-ja" class="faq-category__title">料金・プラン</h2>
+
+            <div class="faq-item">
+              <details class="faq-details">
+                <summary class="faq-summary">メールを送らず、Obsidianだけに保存できますか？</summary>
+                <div class="faq-answer">
+                  <p>はい。メールを送らずObsidianだけに保存する機能はPremiumで利用できます。保存先のフォルダを選び、アクセスを許可する設定が必要です。</p>
+                  <p>ほかの端末への同期は、ご自身の同期サービスと設定に依存します。詳しくは<a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="reference" href="https://apps.apple.com/us/app/simple-memo-obsidian-voice/id6758438948">App Storeの公式説明</a>をご覧ください。</p>
+                </div>
+              </details>
+            </div>
 
             <div class="faq-item">
               <details class="faq-details">
@@ -1177,6 +1243,16 @@
           <!-- 使い方 -->
           <div class="faq-category">
             <h2 id="howto-ja" class="faq-category__title">使い方</h2>
+
+            <div class="faq-item">
+              <details class="faq-details">
+                <summary class="faq-summary">対話メモはどのように使えますか？</summary>
+                <div class="faq-answer">
+                  <p>音声入力中に短い追加質問を受けながら、同じ入力画面で音声で答えてメモをまとめる機能です。メモをタップして止め、文字で修正できます。内容を確認してから送信ボタンを使ってください。</p>
+                  <p>質問とメモの整理にはiPhone上のApple Intelligenceを使います。対応iPhone、iOS 26以降、Apple Intelligenceの有効化、対応言語モデルが必要です。音声入力にはマイクの許可も必要です。対話メモ自体にSiriの設定は不要です。詳しくは<a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="reference" href="https://apps.apple.com/us/app/simple-memo-obsidian-voice/id6758438948">App Storeの公式説明</a>をご覧ください。</p>
+                </div>
+              </details>
+            </div>
 
             <div class="faq-item">
               <details class="faq-details">
