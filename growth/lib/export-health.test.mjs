@@ -151,6 +151,45 @@ test('2026-08-22: five dates in the failure mail, nothing actually missing', () 
     'no day was missing: every failure was a restatement of a day already in the table');
 });
 
+/* Empty query results are not evidence that a destination is healthy. */
+test('a current site table cannot make an unobserved URL namespace healthy', () => {
+  const findings = exportHealth({ siteDates: days('2026-08-01', 28), urlDates: [] });
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].level, 'bad');
+  assert.equal(findings[0].code, 'unobserved-namespace');
+  assert.match(findings[0].message, /searchdata_url_impression/);
+  assert.match(findings[0].detail, /does not establish the cause or a lost day/);
+});
+
+test('a current URL table cannot make an unobserved site namespace healthy', () => {
+  const findings = exportHealth({ siteDates: [], urlDates: days('2026-08-01', 28) });
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].level, 'bad');
+  assert.equal(findings[0].code, 'unobserved-namespace');
+  assert.match(findings[0].message, /searchdata_site_impression/);
+});
+
+test('two empty namespaces retain both unverified observations', () => {
+  const findings = exportHealth({ siteDates: [], urlDates: [] });
+  assert.deepEqual(findings.map((f) => [f.level, f.code]), [
+    ['bad', 'unobserved-namespace'], ['bad', 'unobserved-namespace'],
+  ]);
+  assert.match(findings[0].message, /searchdata_site_impression/);
+  assert.match(findings[1].message, /searchdata_url_impression/);
+});
+
+test('an unobserved namespace does not erase an observed restatement warning', () => {
+  const findings = exportHealth({
+    staging: [{ id: 't', namespace: 'SEARCHDATA_SITE_IMPRESSION', dataDate: '2026-08-14' }],
+    siteDates: days('2026-08-10', 10),
+    urlDates: [],
+  });
+  assert.deepEqual(findings.map((f) => [f.level, f.code]), [
+    ['bad', 'unobserved-namespace'], ['warn', 'restatement-failed'],
+  ]);
+  assert.match(findings[1].detail, /do not change IAM/);
+});
+
 /* ── run ───────────────────────────────────────────────────────────────── */
 
 let failed = 0;
