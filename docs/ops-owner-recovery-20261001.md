@@ -1,6 +1,6 @@
 # Owner-requested Autopilot recovery — 2026-10-01 JST
 
-The owner requested resolution of the ten items in the October 1 direct-owner alert. This is a manual repair and reconciliation, with a recorded human request; it is not an unattended decision or a new content treatment.
+The owner requested resolution of the ten items in the October 1 direct-owner alert (「すべて直して」). This current request authorizes manual review and correction of the previously owner-routed faults and restoration of ordinary admission after their demonstrated repair. This is a manual repair and reconciliation, with a recorded human request; it is not an unattended decision or a new content treatment. The repair linkage has a real admission effect: derived containment ends when its last unresolved recurrence is repaired. It supplies no exception to any remaining gate and grants no new one-use permission.
 
 ## Verified repairs and retained failures
 

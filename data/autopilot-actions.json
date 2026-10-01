@@ -875,12 +875,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28",
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -915,12 +915,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28",
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1001,11 +1001,11 @@
           ]
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-25",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1",
+      "closed_jst": "2026-10-01",
+      "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 0",
       "reopened_jst": "2026-09-25"
     },
     {
@@ -1753,12 +1753,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28",
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01",
       "owner_needed": false,
       "owner_needed_review": {
         "mode": "human",
@@ -2591,11 +2591,11 @@
           "since": "2026-09-23"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-25",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "2026-09-23 以降どの経路も出荷していない",
+      "closed_jst": "2026-10-01",
+      "evidence": "2026-09-23 より後に出荷が戻った（2026-10-01）",
       "reopened_jst": "2026-09-25"
     },
     {
@@ -2621,8 +2621,8 @@
     },
     {
       "id": "act-route-silent-actions",
-      "title": "actions が 11日ぶん出荷していない（2026-09-20〜2026-09-30・最後の出荷 2026-09-19）",
-      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27 / 2026-09-28 / 2026-09-29 / 2026-09-30）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
+      "title": "actions が 12日ぶん出荷していない（2026-09-20〜2026-10-01・最後の出荷 2026-09-19）",
+      "detail": "この経路の行は立っているが、2026-09-19 より後に出荷が1件も無い（2026-09-20 / 2026-09-21 / 2026-09-22 / 2026-09-23 / 2026-09-24 / 2026-09-25 / 2026-09-26 / 2026-09-27 / 2026-09-28 / 2026-09-29 / 2026-09-30 / 2026-10-01）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
       "source": "route",
       "domain": null,
       "touches": [
@@ -2875,12 +2875,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28"
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01"
     },
     {
       "id": "act-selfheal-ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1",
@@ -2901,12 +2901,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28"
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01"
     },
     {
       "id": "act-health-1463",
@@ -2948,12 +2948,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-28"
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01"
     },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260919",
@@ -2995,11 +2995,11 @@
           "run_id": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-20",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9 は未修理のまま（repair_of で名指しされていない）"
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9 は selfheal の未修理リストから消えた"
     },
     {
       "id": "act-health-1520",
@@ -3206,11 +3206,12 @@
           "after_run_id": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-28",
+      "state": "done",
+      "created_jst": "2026-10-01",
       "last_seen_jst": "2026-10-01",
-      "closed_jst": null,
-      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+      "closed_jst": "2026-10-01",
+      "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-10-01"
     }
   ],
   "escalation_review_authorization": {

@@ -2108,6 +2108,32 @@
       "failure_stage": "execution",
       "failure_class": "no_artifact",
       "detected_note": "Existing no_artifact classification: local final-head decision-ci rejected the required retirement path; draft reverted before any publication. Exact diagnostic retained privately; bookkeeping CI also identified the missing classification field."
+    },
+    {
+      "run_id": "ap-20261001-owner-session-owner-backlog-recovery",
+      "date_jst": "2026-10-01",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 1813,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "codex:01a0f4f4-0557-72f0-a91e-fd530ad3bda2",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "Owner explicitly requested resolution of all ten October 1 direct-owner backlog items. Manual verification and recovery bookkeeping; not an autonomous selection or natural business shipment."
+        }
+      ],
+      "source": "session",
+      "repair_of": [
+        "ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9",
+        "ap-20261001-actions-codex-01a0f41e-d80a-7a70-b927-485e8385da0e"
+      ],
+      "repair_note": "Owner-requested manual repair verification and reconciliation: PR1506 (merge e297acb927e4e9ba7887b359e44585d913149342) fixes the September20 complete-scope admission conflict with prospectively bounded supporting changes; PR1806 (merge 9f02a8fde2761c9356f0debeac9331b0e634e1f2) fixes the October1 valid earlier retirement record rejection. Both are ancestors of this tested checkout. Current 34 measurement/support tests, real-Git decision regression and 10 recovery tests passed before this record. The original no_artifact runs and three repair attempts are unchanged. No quota failure is repaired, no consumed permit is renewed, and no stop/limit/budget/check is changed. This PR publishes the missing repair linkage and orphan explanation; future natural business delivery remains unproven.",
+      "evidence": "docs/ops-owner-recovery-20261001.md"
     }
   ],
   "retracted_observations": [
