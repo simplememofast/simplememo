@@ -5,7 +5,7 @@ import { once, EventEmitter } from 'node:events';
 import { spawn, execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import { webDriverCall, stopDrivers, driverDiagnostic, REQUEST_TIMEOUT_MS,
-  ensureDisplay, terminateOwnedProcess } from './lib/webkit-driver.mjs';
+  ensureDisplay, terminateOwnedProcess, initializeDriverSessions } from './lib/webkit-driver.mjs';
 
 function ownedFixture(onKill) {
   const proc = Object.assign(new EventEmitter(), { pid: 123, exitCode: null, signalCode: null });
@@ -16,6 +16,109 @@ function ownedFixture(onKill) {
   };
   return proc;
 }
+
+function deferred() {
+  let resolve;
+  const promise = new Promise(r => { resolve = r; });
+  return { promise, resolve };
+}
+
+function setupFixtures({ pauses = {}, failures = {} } = {}) {
+  const events = [];
+  const drivers = Array.from({ length: 3 }, (_, i) => ({
+    session: null,
+    proc: ownedFixture(() => events.push(['killed', i])),
+    call: async (method, url, body) => {
+      if (method === 'DELETE') {
+        events.push(['delete', i]);
+        return;
+      }
+      assert.equal(method, 'POST');
+      const stage = url === '/session' ? 'session' : url.endsWith('/timeouts') ? 'timeouts' : 'url';
+      if (stage === 'session') assert.deepEqual(body, { capabilities: { alwaysMatch: { browserName: 'MiniBrowser' } } });
+      else {
+        assert.equal(url, `/session/fixture-${i}/${stage}`);
+        assert.deepEqual(body, stage === 'timeouts' ? { script: 60000 }
+          : { url: 'http://127.0.0.1:4242/robots.txt' });
+      }
+      events.push(['started', i, stage]);
+      if (pauses[i]?.[stage]) await pauses[i][stage];
+      if (failures[i]?.[stage]) throw failures[i][stage];
+      events.push(['completed', i, stage]);
+      return stage === 'session' ? { sessionId: `fixture-${i}` } : undefined;
+    },
+  }));
+  return { drivers, events };
+}
+
+async function setupBeforeMeasurementAndCleanup({ drivers, events }) {
+  try {
+    await initializeDriverSessions(drivers, 4242);
+    events.push(['measurement']);
+  } finally {
+    events.push(['cleanup']);
+    await stopDrivers(drivers, { proc: null });
+  }
+}
+
+test('parallel WebKit setup preserves each command chain and waits for all successes', async () => {
+  const gates = Array.from({ length: 3 }, deferred);
+  const fixture = setupFixtures({ pauses: Object.fromEntries(gates.map((g, i) => [i, { session: g.promise }])) });
+  const pending = setupBeforeMeasurementAndCleanup(fixture);
+  assert.deepEqual(fixture.events, [0, 1, 2].map(i => ['started', i, 'session']));
+  gates[2].resolve();
+  await new Promise(setImmediate);
+  assert(fixture.events.some(e => e[0] === 'completed' && e[1] === 2 && e[2] === 'url'));
+  assert(!fixture.events.some(e => ['measurement', 'cleanup'].includes(e[0])));
+  gates[0].resolve(); gates[1].resolve();
+  await pending;
+  for (let i = 0; i < 3; i++) {
+    assert.deepEqual(fixture.events.filter(e => e[0] === 'started' && e[1] === i).map(e => e[2]), ['session', 'timeouts', 'url']);
+    assert.equal(fixture.drivers[i].session, `fixture-${i}`);
+  }
+  const measurement = fixture.events.findIndex(e => e[0] === 'measurement');
+  assert.equal(fixture.events.slice(0, measurement).filter(e => e[0] === 'completed' && e[2] === 'url').length, 3);
+  assert.equal(fixture.events[measurement + 1][0], 'cleanup');
+  assert.equal(fixture.events.filter(e => e[0] === 'killed').length, 3);
+});
+
+test('parallel WebKit setup failure waits for a slow sibling before cleanup', async () => {
+  const gate = deferred();
+  const failure = new Error('fixture-session-failed');
+  const fixture = setupFixtures({ pauses: { 2: { timeouts: gate.promise } }, failures: { 0: { session: failure } } });
+  const pending = setupBeforeMeasurementAndCleanup(fixture);
+  const rejected = assert.rejects(pending, error => error === failure);
+  await new Promise(setImmediate);
+  assert(fixture.events.some(e => e[0] === 'completed' && e[1] === 1 && e[2] === 'url'));
+  assert(!fixture.events.some(e => ['measurement', 'cleanup', 'killed'].includes(e[0])));
+  gate.resolve();
+  await rejected;
+  const cleanup = fixture.events.findIndex(e => e[0] === 'cleanup');
+  assert(fixture.events.slice(0, cleanup).some(e => e[0] === 'completed' && e[1] === 2 && e[2] === 'url'));
+  assert(!fixture.events.some(e => e[0] === 'measurement'));
+  assert.deepEqual(fixture.events.filter(e => e[0] === 'delete').map(e => e[1]), [1, 2]);
+  assert.equal(fixture.events.filter(e => e[0] === 'killed').length, 3);
+  assert.deepEqual(failure.diagnostics, ['Error | fixture-session-failed']);
+});
+
+test('parallel WebKit setup retains all failures in driver order after every sibling settles', async () => {
+  const urlGate = deferred(), timeoutGate = deferred();
+  const errors = [new Error('fixture-url-failed'), new Error('fixture-session-failed'), new Error('fixture-timeouts-failed')];
+  const fixture = setupFixtures({ pauses: { 0: { url: urlGate.promise }, 2: { timeouts: timeoutGate.promise } },
+    failures: { 0: { url: errors[0] }, 1: { session: errors[1] }, 2: { timeouts: errors[2] } } });
+  const pending = setupBeforeMeasurementAndCleanup(fixture);
+  const rejected = assert.rejects(pending, error => error === errors[0]);
+  await new Promise(setImmediate);
+  timeoutGate.resolve();
+  await new Promise(setImmediate);
+  assert(!fixture.events.some(e => ['measurement', 'cleanup', 'killed'].includes(e[0])));
+  urlGate.resolve();
+  await rejected;
+  assert(!fixture.events.some(e => e[0] === 'measurement'));
+  assert.deepEqual(errors[0].diagnostics, ['Error | fixture-url-failed', 'Error | fixture-session-failed', 'Error | fixture-timeouts-failed']);
+  assert.deepEqual(fixture.events.filter(e => e[0] === 'delete').map(e => e[1]), [0, 2]);
+  assert.equal(fixture.events.filter(e => e[0] === 'killed').length, 3);
+});
 
 function displayFixture(code) {
   let child;
