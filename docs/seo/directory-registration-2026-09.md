@@ -2103,7 +2103,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 時刻 | PR | 中身 |
 | --- | --- | --- |
 | 10/1 12:04 | [#1826](https://github.com/simplememofast/simplememo/pull/1826) | 第81弾（18ページ＋サイトマップ2つ、26か所）：シンプルメモの AES-GCM は端末内の送信待ちのメモと送信履歴だけで、配送は E2E 暗号化ではない。`/blog/how-to-choose-memo-app` 日英の暗号化の比較で「強」（E2E の次、サーバー側の暗号化より上）に置いていた → 「端末内のAES-GCM暗号化＋メールでの配送（中）」。`/blog/business-memo-apps-2026` 日英の「セキュリティ最重視 → Standard Notes or シンプルメモ」からシンプルメモを外し、表を「端末内AES-GCM（E2Eではない）」に（日本語のカード名の重複も直した）。`/guides/` 日英の Proton Mail のカード「二重保護で最もプライベート」→ 届いたメモは Proton のゼロアクセス暗号化、配送は E2E ではない。`/vs/`・`/vs/bear/`・`/blog/captio-discontinued` 日英、`/en/send-email-to-yourself`、`/en/` の「AES-GCM」に「端末内」。`/vs/bear/` の Bear の「iCloud標準」に付いていた否定の印を外した。「No SMTP」「The ultimate … comparison」→ SMTP 設定不要・比較 |
-| — | この PR | 第81弾の計測の台帳の note と annotations の行、この §5.43、§5.42 の「この PR」の行 |
+| 10/1 12:31 | [#1828](https://github.com/simplememofast/simplememo/pull/1828) | 第81弾の計測の台帳の note と annotations の行、この §5.43、§5.42 の「この PR」の行 |
 
 ### 見つけたこと
 
@@ -2112,6 +2112,26 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | **端末内の暗号化を、E2E やサーバー側の暗号化と同じ物差しで上に並べていた**：暗号化の比較の「強」、ビジネス向けの記事の「セキュリティ最重視」のおすすめ、`/vs/bear/` の肯定・否定の印。守っているのは端末内の送信待ちと送信履歴で、送ったメモはメールサービス側の暗号化に従う | 第81弾で直した。`/privacy-architecture/`・`/about/`・`llms.txt` の書き方（端末内・E2E ではない）にそろえた |
 | **カードだけが本文と食い違う**：`/guides/` の Proton Mail のカードは「二重保護で最もプライベート」だったが、`/guides/proton-mail/` の本文は「経路全体が E2EE になるわけではない」と書いていた | 第81弾でカードを本文に合わせた |
 | **GitHub のアップロード画面で、ファイルの入力欄の位置がずれることがある**：画面に「There was an error while loading」が出た回は、入力欄が3つ後ろにずれていた（`growth/experiments`）。間違った位置には送られず、エラーで止まる | 画面を読み直して位置を確かめてから送った。中身はアップロード後に手元と差分 0 を確かめている |
+
+### 次にやること
+
+- 毎晩の確認は 10/1 20:40 JST に予約済み。10/08 まで毎日かけ直す。
+- オーナー判断待ち：#43、#44、#47〜#51、#54、トップの Siri のバナー画像（#53 の残り）。公開の台帳に書かない確認事項は、オーナーに直接伝える。
+
+## 5.44 2026-10-01 昼（続き）：検索・到着の「即座に」（第82弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/1 12:39 | [#1829](https://github.com/simplememofast/simplememo/pull/1829) | 第82弾（8ページ＋サイトマップ2つ、14か所）：`/vs/simplenote/` 日英の「書いたら即座に受信トレイへ届けたいならシンプルメモが最適」「Instant delivery to your inbox?」、`/vs/stock/` 日英の「過去のメモを即座に見つけられます」「can instantly find any past memo」（FAQ の表示と JSON-LD を含む）、`/blog/minimalist-digital-memo` 日英の「検索で瞬時に見つかります」「instantly searchable」、`/blog/iphone-memo-tips` 日英の見出し「Spotlight検索でメモを瞬時に見つける」「背面タップでメモアプリを即起動」 |
+| — | この PR | 第82弾の計測の台帳の note と annotations の行、この §5.44、§5.43 の「この PR」の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **検索や到着の速さの言い切りが残っていた**：「即座に見つけられる」「瞬時に見つかる」「Instant delivery」。検索の速さはメールアプリしだいで、到着の時間は `/blog/email-yourself-memo` などで「一律には保証されない」と書いている | 第82弾で直した。「即座にメモ」「即座に送信」のように書き始め・送信の操作を言う所は、届く速さを言っていないので残した |
 
 ### 次にやること
 
