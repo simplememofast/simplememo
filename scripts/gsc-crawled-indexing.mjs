@@ -82,6 +82,10 @@ const publicationPaths = [
   { kind: "html", url: "/obsidian/use-cases/" },
   { kind: "asset", url: "/assets/img/og/obsidian-use-cases.png" },
   { kind: "asset", url: "/assets/downloads/obsidian-use-cases/role-mapping.json" },
+  // A7 is one metadata publication comparison after the original 60 cases.
+  { kind: "html", url: "/glossary/pkm/", checkDescriptions: true },
+  // A1 is one structured metadata comparison after the original 60 and A7.
+  { kind: "html", url: "/en/blog/ios26-speechanalyzer-live-mic", checkTechArticleMetadata: true },
 ];
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const clean = (html) => html.replace(/<!--[\s\S]*?-->/g, "")
@@ -117,13 +121,87 @@ function headTitle(html, urlPath) {
   return title;
 }
 
+function descriptionAttributes(tag, urlPath) {
+  const attributes = new Map();
+  for (const [, name, doubleQuoted, singleQuoted, unquoted] of tag.matchAll(/\s+([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>]+)))?/g)) {
+    const key = name.toLowerCase();
+    assert(!attributes.has(key), `${urlPath}: duplicate description element attribute ${key}`);
+    attributes.set(key, (doubleQuoted ?? singleQuoted ?? unquoted ?? "").replace(/&amp;/g, "&"));
+  }
+  return attributes;
+}
+
+function descriptionJson(source, urlPath) {
+  const value = JSON.parse(source), stack = [];
+  // JSON.parse otherwise silently accepts duplicate keys in an object.
+  for (const [token] of source.matchAll(/"(?:\\.|[^"\\])*"|[{}\[\],]/g)) {
+    if (token === "{") stack.push({ keys: new Set(), expectingKey: true });
+    else if (token === "[") stack.push(null);
+    else if (token === "}" || token === "]") stack.pop();
+    else if (token === ",") { if (stack.at(-1)) stack.at(-1).expectingKey = true; }
+    else if (stack.at(-1)?.expectingKey) {
+      const key = JSON.parse(token), object = stack.at(-1);
+      assert(!object.keys.has(key), `${urlPath}: duplicate JSON-LD key ${key}`);
+      object.keys.add(key);
+      object.expectingKey = false;
+    }
+  }
+  return value;
+}
+
+function headDescriptions(html, urlPath, structuredFields = [["article", "Article", "description"], ["definedTerm", "DefinedTerm", "description"]]) {
+  const document = html.replace(/<!--[\s\S]*?-->/g, block => " ".repeat(block.length));
+  // Retain JSON-LD for parsing, but mask raw-text elements when locating the head.
+  const masked = document.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, block => " ".repeat(block.length));
+  const heads = [...masked.matchAll(/<head\b[^>]*>([\s\S]*?)<\/head\s*>/gi)];
+  assert.equal(heads.length, 1, `${urlPath}: one complete real head is required for descriptions`);
+  const head = document.slice(heads[0].index, heads[0].index + heads[0][0].length);
+  const meta = [...clean(head).matchAll(/<meta\b(?:"[^"]*"|'[^']*'|[^'">])*>/gi)].map(([tag]) => tag);
+  const descriptions = {};
+  for (const [key, attribute, selector] of [["meta", "name", "description"], ["openGraph", "property", "og:description"], ["twitter", "name", "twitter:description"]]) {
+    const selected = meta.filter(tag => attr(tag, attribute).toLowerCase() === selector);
+    assert.equal(selected.length, 1, `${urlPath}: one ${selector} in the real head is required`);
+    const attributes = descriptionAttributes(selected[0], urlPath), value = attributes.get("content");
+    assert(typeof value === "string" && value.trim(), `${urlPath}: empty ${selector}`);
+    descriptions[key] = value;
+  }
+  const nodes = [];
+  const visit = value => {
+    if (Array.isArray(value)) value.forEach(visit);
+    else if (value && typeof value === "object") {
+      nodes.push(value);
+      for (const [key, nested] of Object.entries(value)) if (key !== "@context") visit(nested);
+    }
+  };
+  for (const [tag, , source] of head.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
+    const opening = tag.slice(0, tag.indexOf(">") + 1);
+    if (attr(opening, "type").toLowerCase() !== "application/ld+json") continue;
+    descriptionAttributes(opening, urlPath);
+    visit(descriptionJson(source, urlPath));
+  }
+  for (const [key, type, field] of structuredFields) {
+    const selected = nodes.filter(node => [node["@type"]].flat().some(value => [type, `https://schema.org/${type}`, `http://schema.org/${type}`].includes(value)));
+    assert.equal(selected.length, 1, `${urlPath}: one JSON-LD ${type} in the real head is required`);
+    const value = selected[0][field];
+    assert(typeof value === "string" && value.trim(), `${urlPath}: empty JSON-LD ${type}.${field}`);
+    descriptions[key] = value;
+  }
+  return descriptions;
+}
+
+function headTechArticleMetadata(html, urlPath) {
+  return headDescriptions(html, urlPath, [["techArticleHeadline", "TechArticle", "headline"], ["techArticleDescription", "TechArticle", "description"], ["techArticleDateModified", "TechArticle", "dateModified"]]);
+}
+
 function publicationTargets(readBytes = file => readFileSync(path.join(ROOT, file))) {
   return publicationPaths.map(target => {
     const file = target.kind === "html" ? htmlFile(target.url) : target.url.slice(1);
     const bytes = readBytes(file);
     assert(bytes.length > 0, `${target.url}: publication source is empty`);
     return target.kind === "html"
-      ? { ...target, expectedTitle: headTitle(bytes.toString("utf8"), target.url) }
+      ? { ...target, expectedTitle: headTitle(bytes.toString("utf8"), target.url),
+        ...(target.checkDescriptions ? { expectedDescriptions: headDescriptions(bytes.toString("utf8"), target.url) } : {}),
+        ...(target.checkTechArticleMetadata ? { expectedTechArticleMetadata: headTechArticleMetadata(bytes.toString("utf8"), target.url) } : {}) }
       : { ...target, expectedSha256: sha256(bytes), expectedBytes: bytes.length };
   });
 }
@@ -142,6 +220,18 @@ function publicationResponse(target, response) {
       checkHtml(response.body, target.url);
       assert(!noindex(response.robots), `${target.url}: live publication HTML is noindex`);
       assert.equal(row.actualTitle, target.expectedTitle, `${target.url}: live title differs from checkout`);
+      if (target.checkDescriptions) {
+        row.actualDescriptions = headDescriptions(response.body, target.url);
+        for (const [field, expected] of Object.entries(target.expectedDescriptions)) {
+          assert.equal(row.actualDescriptions[field], expected, `${target.url}: live ${field} description differs from checkout`);
+        }
+      }
+      if (target.checkTechArticleMetadata) {
+        row.actualTechArticleMetadata = headTechArticleMetadata(response.body, target.url);
+        for (const [field, expected] of Object.entries(target.expectedTechArticleMetadata)) {
+          assert.equal(row.actualTechArticleMetadata[field], expected, `${target.url}: live ${field} metadata differs from checkout`);
+        }
+      }
     } else {
       if (target.url.endsWith(".png")) assert(/^image\/png(?:\s*;|$)/i.test(response.contentType || ""), `${target.url}: not a PNG response`);
       assert.equal(row.actualSha256, target.expectedSha256, `${target.url}: served bytes differ from checkout`);
@@ -219,12 +309,29 @@ async function selftest() {
   assert(!robotsAllows("User-agent: *\nDisallow: /data/", "/data/x.json"));
   assert(robotsAllows("User-agent: *\nDisallow: /\nUser-agent: Googlebot\nAllow: /data/", "/data/x.json"));
   const fixtureHtml = (url, title) => `<html><head><title>${title}</title><link rel="canonical" href="${ORIGIN}${url}"></head><body>Fixture</body></html>`;
+  const a7Descriptions = { meta: "A7 meta 日本語 & current", openGraph: "A7 Open Graph current", twitter: "A7 Twitter current", article: "A7 Article current", definedTerm: "A7 DefinedTerm current" };
+  const fixtureA7Html = (url, title, descriptions = a7Descriptions) => fixtureHtml(url, title).replace("</head>",
+    `<meta name="description" content="${descriptions.meta?.replace(/&/g, "&amp;") ?? ""}"><meta property="og:description" content="${descriptions.openGraph ?? ""}"><meta name="twitter:description" content="${descriptions.twitter ?? ""}">` +
+    `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": ["Article"], description: descriptions.article }, { "@type": "https://schema.org/DefinedTerm", description: descriptions.definedTerm }] })}</script></head>`);
+  const a1Metadata = { meta: "A1 meta current", openGraph: "A1 Open Graph current", twitter: "A1 Twitter current", techArticleHeadline: "A1 structured headline current", techArticleDescription: "A1 structured description current", techArticleDateModified: "2026-09-09" };
+  const fixtureA1Html = (url, title, metadata = a1Metadata) => fixtureHtml(url, title).replace("</head>",
+    `<meta name="description" content="${metadata.meta ?? ""}"><meta property="og:description" content="${metadata.openGraph ?? ""}"><meta name="twitter:description" content="${metadata.twitter ?? ""}">` +
+    `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": ["https://schema.org/TechArticle"], headline: metadata.techArticleHeadline, description: metadata.techArticleDescription, dateModified: metadata.techArticleDateModified }] })}</script></head>`);
   const fixtureBytes = new Map(publicationPaths.map(target => [target.kind === "html" ? htmlFile(target.url) : target.url.slice(1),
-    target.kind === "html" ? Buffer.from(fixtureHtml(target.url, `Synthetic ${target.url}`))
+    target.kind === "html" ? Buffer.from((target.checkDescriptions ? fixtureA7Html : target.checkTechArticleMetadata ? fixtureA1Html : fixtureHtml)(target.url, `Synthetic ${target.url}`))
       : target.url.endsWith(".png") ? Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe, 0x00, 0x80]) : Buffer.from("Synthetic 日本語\nsecond capture\n")]));
   const readBytes = file => { assert(fixtureBytes.has(file), `Unexpected synthetic source: ${file}`); return fixtureBytes.get(file); };
   const publication = publicationTargets(readBytes), htmlTarget = publication[0], pngTarget = publication.find(target => target.url.endsWith(".png"));
-  assert.equal(publication.length, 60);
+  assert.equal(publication.length, 62);
+  const a7Target = publication.at(-2), a7Html = readBytes(htmlFile(a7Target.url)).toString("utf8");
+  assert.equal(a7Target.url, "/glossary/pkm/");
+  assert.equal(publication.filter(target => target.checkDescriptions).length, 1);
+  assert.deepEqual(a7Target.expectedDescriptions, a7Descriptions);
+  const a1Target = publication.at(-1), a1Html = readBytes(htmlFile(a1Target.url)).toString("utf8");
+  assert.equal(a1Target.url, "/en/blog/ios26-speechanalyzer-live-mic");
+  assert.equal(htmlFile(a1Target.url), "en/blog/ios26-speechanalyzer-live-mic.html", "A1 must preserve its extensionless nonslash canonical");
+  assert.equal(publication.filter(target => target.checkTechArticleMetadata).length, 1);
+  assert.deepEqual(a1Target.expectedTechArticleMetadata, a1Metadata);
   assert.throws(() => publicationTargets(() => { throw new Error("Missing publication source"); }), /Missing publication source/);
   const html = fixtureHtml(htmlTarget.url, htmlTarget.expectedTitle);
   assert.equal(headTitle(html.replace("<body>", "<body><title>Wrong body title</title>"), htmlTarget.url), htmlTarget.expectedTitle);
@@ -234,6 +341,78 @@ async function selftest() {
   const responseSnapshot = (bytes, contentType = "text/html", status = 200, robots = null) => ({ status, contentType, robots, bytes, body: bytes.toString("utf8") });
   const goodHtml = publicationResponse(htmlTarget, responseSnapshot(Buffer.from(html)));
   assert(goodHtml.ok);
+  const goodA7 = publicationResponse(a7Target, responseSnapshot(Buffer.from(a7Html)));
+  assert(goodA7.ok, "Different descriptions across the five source fields are legitimate");
+  assert.deepEqual(goodA7.actualDescriptions, a7Descriptions);
+  assert.deepEqual(goodA7.expectedDescriptions, a7Descriptions);
+  for (const field of Object.keys(a7Descriptions)) {
+    const staleDescriptions = { ...a7Descriptions, [field]: `Previous ${field} description` };
+    const staleA7 = publicationResponse(a7Target, responseSnapshot(Buffer.from(fixtureA7Html(a7Target.url, a7Target.expectedTitle, staleDescriptions))));
+    assert.equal(staleA7.actualTitle, a7Target.expectedTitle, "Same title must not hide stale A7 metadata");
+    assert(!staleA7.ok);
+    assert(staleA7.error.includes(`live ${field} description differs from checkout`));
+    assert.deepEqual(staleA7.actualDescriptions, staleDescriptions);
+    assert.deepEqual(staleA7.expectedDescriptions, a7Descriptions);
+    const missing = fixtureA7Html(a7Target.url, a7Target.expectedTitle, { ...a7Descriptions, [field]: undefined });
+    assert.throws(() => headDescriptions(missing, a7Target.url), /empty/);
+  }
+  const oldDescriptions = Object.fromEntries(Object.keys(a7Descriptions).map(field => [field, `Previous ${field} description`]));
+  const allStaleA7 = publicationResponse(a7Target, responseSnapshot(Buffer.from(fixtureA7Html(a7Target.url, a7Target.expectedTitle, oldDescriptions))));
+  assert.equal(allStaleA7.actualTitle, a7Target.expectedTitle);
+  assert(!allStaleA7.ok);
+  assert.deepEqual(allStaleA7.actualDescriptions, oldDescriptions);
+  for (const tag of a7Html.matchAll(/<meta\b[^>]*>/g)) {
+    assert.throws(() => headDescriptions(a7Html.replace(tag[0], ""), a7Target.url), /one .* in the real head/);
+    assert.throws(() => headDescriptions(a7Html.replace(tag[0], tag[0] + tag[0]), a7Target.url), /one .* in the real head/);
+  }
+  for (const type of ["Article", "DefinedTerm"]) {
+    const duplicate = `<script type="application/ld+json">${JSON.stringify({ "@type": type, description: "Duplicate" })}</script>`;
+    assert.throws(() => headDescriptions(a7Html.replace("</head>", duplicate + "</head>"), a7Target.url), /one JSON-LD .* in the real head/);
+  }
+  assert.throws(() => headDescriptions(a7Html.replace('name="description"', 'name="description" content="Previous"'), a7Target.url), /duplicate description element attribute content/);
+  assert.throws(() => headDescriptions(a7Html.replace('"description":"A7 Article current"', '"description":"Previous","description":"A7 Article current"'), a7Target.url), /duplicate JSON-LD key description/);
+  assert.throws(() => headDescriptions(a7Html.replace('"@graph":', '"@graph":broken'), a7Target.url), SyntaxError);
+  const decoy = `<head><meta name="description" content="Decoy"></head>`;
+  assert.deepEqual(headDescriptions(a7Html.replace("<head>", `<head><!--${decoy}--><script>${JSON.stringify(decoy)}</script>`).replace("<body>", `<body>${a7Html.match(/<meta\b[^>]*>/)[0]}<script type="application/ld+json">{"@type":"Article","description":"Body decoy"}</script>`), a7Target.url), a7Descriptions);
+  assert.deepEqual(headDescriptions(a7Html.replace("<head>", `<head><script>const metadata = 'type="application/ld+json"';</script>`), a7Target.url), a7Descriptions);
+  const markupDescriptions = { ...a7Descriptions, article: decoy };
+  assert.deepEqual(headDescriptions(fixtureA7Html(a7Target.url, a7Target.expectedTitle, markupDescriptions), a7Target.url), markupDescriptions);
+  const goodA1 = publicationResponse(a1Target, responseSnapshot(Buffer.from(a1Html)));
+  assert(goodA1.ok, "TechArticle and meta descriptions need not be identical");
+  assert.deepEqual(goodA1.actualTechArticleMetadata, a1Metadata);
+  assert.deepEqual(goodA1.expectedTechArticleMetadata, a1Metadata);
+  for (const field of Object.keys(a1Metadata)) {
+    const staleMetadata = { ...a1Metadata, [field]: field === "techArticleDateModified" ? "2026-06-16" : `Previous ${field}` };
+    const staleA1 = publicationResponse(a1Target, responseSnapshot(Buffer.from(fixtureA1Html(a1Target.url, a1Target.expectedTitle, staleMetadata))));
+    assert.equal(staleA1.actualTitle, a1Target.expectedTitle, "Same title must not hide stale A1 metadata");
+    assert(!staleA1.ok);
+    assert(staleA1.error.includes(`live ${field} metadata differs from checkout`));
+    assert.deepEqual(staleA1.actualTechArticleMetadata, staleMetadata);
+    assert.deepEqual(staleA1.expectedTechArticleMetadata, a1Metadata);
+    assert.throws(() => headTechArticleMetadata(fixtureA1Html(a1Target.url, a1Target.expectedTitle, { ...a1Metadata, [field]: undefined }), a1Target.url), /empty/);
+  }
+  const oldA1Metadata = { ...a1Metadata, techArticleHeadline: "Previous headline", techArticleDescription: "Previous description", techArticleDateModified: "2026-06-16" };
+  const allStaleA1 = publicationResponse(a1Target, responseSnapshot(Buffer.from(fixtureA1Html(a1Target.url, a1Target.expectedTitle, oldA1Metadata))));
+  assert.equal(allStaleA1.actualTitle, a1Target.expectedTitle);
+  assert(!allStaleA1.ok);
+  assert.deepEqual(allStaleA1.actualTechArticleMetadata, oldA1Metadata);
+  for (const tag of a1Html.matchAll(/<meta\b[^>]*>/g)) {
+    assert.throws(() => headTechArticleMetadata(a1Html.replace(tag[0], ""), a1Target.url), /one .* in the real head/);
+    assert.throws(() => headTechArticleMetadata(a1Html.replace(tag[0], tag[0] + tag[0]), a1Target.url), /one .* in the real head/);
+  }
+  for (const type of ["TechArticle", "http://schema.org/TechArticle"]) {
+    const duplicate = `<script type="application/ld+json">${JSON.stringify({ "@type": type, headline: "Duplicate", description: "Duplicate", dateModified: "2026-09-09" })}</script>`;
+    assert.throws(() => headTechArticleMetadata(a1Html.replace("</head>", duplicate + "</head>"), a1Target.url), /one JSON-LD TechArticle in the real head/);
+  }
+  assert.throws(() => headTechArticleMetadata(a1Html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, ""), a1Target.url), /one JSON-LD TechArticle in the real head/);
+  assert.throws(() => headTechArticleMetadata(a1Html.replace('name="description"', 'name="description" content="Previous"'), a1Target.url), /duplicate description element attribute content/);
+  for (const [field, value] of [["headline", a1Metadata.techArticleHeadline], ["description", a1Metadata.techArticleDescription], ["dateModified", a1Metadata.techArticleDateModified]]) {
+    const keyValue = `${JSON.stringify(field)}:${JSON.stringify(value)}`;
+    assert.throws(() => headTechArticleMetadata(a1Html.replace(keyValue, `${JSON.stringify(field)}:"Previous",${keyValue}`), a1Target.url), new RegExp(`duplicate JSON-LD key ${field}`));
+    assert.throws(() => headTechArticleMetadata(a1Html.replace(keyValue, `${JSON.stringify(field)}:null`), a1Target.url), /empty JSON-LD TechArticle/);
+  }
+  assert.throws(() => headTechArticleMetadata(a1Html.replace('"@graph":', '"@graph":broken'), a1Target.url), SyntaxError);
+  assert.deepEqual(headTechArticleMetadata(a1Html.replace("<head>", `<head><!--${decoy}--><script>${JSON.stringify(decoy)}</script>`).replace("<body>", `<body>${a1Html.match(/<meta\b[^>]*>/)[0]}<script type="application/ld+json">{"@type":"TechArticle","headline":"Body decoy","description":"Body decoy","dateModified":"2026-06-16"}</script>`), a1Target.url), a1Metadata);
   assert(!publicationResponse(htmlTarget, responseSnapshot(Buffer.from(html.replace(htmlTarget.expectedTitle, "Stale title")))).ok);
   assert(!publicationResponse(htmlTarget, responseSnapshot(Buffer.from(html), "text/html", 404)).ok);
   assert(!publicationResponse(htmlTarget, responseSnapshot(Buffer.from(html), "text/plain")).ok);
@@ -251,7 +430,7 @@ async function selftest() {
     assert(!publicationResponse(target, responseSnapshot(Buffer.concat([bytes, Buffer.from("changed")]), "text/plain")).ok);
   }
   const allSitemap = [...new Set([...cases.map(c => c.to), ...publication.filter(c => c.kind === "html").map(c => c.url)])].map(url => `<loc>${ORIGIN}${url}</loc>`).join("\n");
-  const makeRequest = ({ staleTitle = false, staleSitemap = false, staleAsset = false, unavailable = false } = {}) => {
+  const makeRequest = ({ staleTitle = false, staleSitemap = false, staleAsset = false, staleDescriptions = false, staleTechArticleMetadata = false, unavailable = false } = {}) => {
     const calls = new Map();
     return { calls, request: async (url, method) => {
       const key = `${method} ${url}`, call = (calls.get(key) || 0) + 1;
@@ -265,6 +444,8 @@ async function selftest() {
         let bytes = readBytes(target.kind === "html" ? htmlFile(url) : url.slice(1));
         if (staleTitle && target === htmlTarget && call === 1) bytes = Buffer.from(fixtureHtml(url, "Stale title"));
         if (staleAsset && target === pngTarget && call === 1) bytes = Buffer.from("Stale PNG");
+        if (staleDescriptions && target === a7Target && call === 1) bytes = Buffer.from(fixtureA7Html(url, target.expectedTitle, oldDescriptions));
+        if (staleTechArticleMetadata && target === a1Target && call === 1) bytes = Buffer.from(fixtureA1Html(url, target.expectedTitle, oldA1Metadata));
         return new Response(bytes, { headers: { "Content-Type": target.kind === "html" ? "text/html" : url.endsWith(".png") ? "image/png" : "text/plain" } });
       }
       const c = cases.find(c => c.from === url);
@@ -275,16 +456,22 @@ async function selftest() {
       return new Response(fixtureHtml(url, "Existing fixture"), { headers: { "Content-Type": "text/html" } });
     } };
   };
-  const stale = makeRequest({ staleTitle: true, staleSitemap: true, staleAsset: true }), cache = snapshotCache(stale.request), delays = [];
+  const stale = makeRequest({ staleTitle: true, staleSitemap: true, staleAsset: true, staleDescriptions: true, staleTechArticleMetadata: true }), cache = snapshotCache(stale.request), delays = [];
   const ready = await propagation(publication, cache, async ms => delays.push(ms));
   assert(ready.ready);
   assert.equal(ready.attempts, 2);
   assert.deepEqual(delays, [5000]);
   assert.equal(stale.calls.get(`GET ${htmlTarget.url}`), 2);
   assert.equal(stale.calls.get(`GET ${pngTarget.url}`), 2);
+  assert.equal(stale.calls.get(`GET ${a7Target.url}`), 2, "Stale A7 descriptions must invalidate the same-title snapshot");
+  assert.deepEqual(ready.publication.at(-2).actualDescriptions, a7Descriptions);
+  assert.equal(stale.calls.get(`GET ${a1Target.url}`), 2, "Stale A1 structured metadata must invalidate the same-title snapshot");
+  assert.deepEqual(ready.publication.at(-1).actualTechArticleMetadata, a1Metadata);
   assert.equal(stale.calls.get(`GET ${publication[1].url}`), 1, "Sitemap lag must not duplicate successful HTML GETs");
   for (const target of publication) await cache.snapshot(target.url);
   assert.equal(stale.calls.get(`GET ${htmlTarget.url}`), 2, "Final verification must reuse the successful publication snapshot");
+  assert.equal(stale.calls.get(`GET ${a7Target.url}`), 2, "Final verification must reuse the matched A7 description snapshot");
+  assert.equal(stale.calls.get(`GET ${a1Target.url}`), 2, "Final verification must reuse the matched A1 structured metadata snapshot");
   const unavailable = makeRequest({ unavailable: true }), boundedDelays = [];
   const failed = await propagation(publication, snapshotCache(unavailable.request), async ms => boundedDelays.push(ms));
   assert(!failed.ready);
@@ -300,14 +487,18 @@ async function selftest() {
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
   assert.equal(baselineReport.passed, 85);
-  assert.equal(baselineReport.publication.skipped, 60);
+  assert.equal(baselineReport.publication.skipped, 62);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
   for (const target of publication) assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
   assert.equal(deployedReport.passed, 85);
-  assert.equal(deployedReport.publication.passed, 60);
+  assert.equal(deployedReport.publication.passed, 62);
+  assert.deepEqual(deployedReport.publication.cases.at(-2).actualDescriptions, a7Descriptions);
+  assert.deepEqual(deployedReport.publication.cases.at(-2).expectedDescriptions, a7Descriptions);
+  assert.deepEqual(deployedReport.publication.cases.at(-1).actualTechArticleMetadata, a1Metadata);
+  assert.deepEqual(deployedReport.publication.cases.at(-1).expectedTechArticleMetadata, a1Metadata);
   assert.equal(deployedReport.publication.failed, 0);
   assert(deployedReport.ok);
   assert.equal(deployedReport.costUsd, null);
@@ -321,12 +512,14 @@ async function selftest() {
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
-  assert.equal(sourceFailureReports[0].publication.skipped, 60);
+  assert.equal(sourceFailureReports[0].publication.skipped, 62);
   assert(!sourceFailureReports[0].ok, "An incomplete strict run cannot pass");
   const controlReports = [], controlFailure = makeRequest();
   await assert.rejects(liveAudit(false, { request: async (url, method) => url === "/robots.txt" ? new Response("Missing", { status: 503 }) : controlFailure.request(url, method), saveReport: report => controlReports.push(report), logReport: () => {} }), /robots.txt must return 200/);
   assert.equal(controlReports.length, 1, "Crawl-control failure must retain report evidence");
   console.log("GSC indexing detector and publication regression self-tests passed (synthetic sources and HTTP responses; no network)");
+  console.log("A7 real-head description regression passed: five independent same-title stale-field failures, source uniqueness and malformed JSON checks, retained expected/actual descriptions");
+  console.log("A1 TechArticle regression passed: independent same-title stale headline/description/dateModified failures plus three meta descriptions, unique real-head source extraction, malformed JSON rejection, bounded cached-stale propagation and retained expected/actual metadata");
 }
 
 async function sourceAudit() {
