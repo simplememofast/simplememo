@@ -3,12 +3,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_STATE, observe, auditObservation, persistRun } from '../growth/lib/company-loop.mjs';
 import { compareMetrics } from '../growth/lib/company-metrics.mjs';
+import { outcomeStatus } from './autonomy-outcome-score.mjs';
+import { businessStatus } from '../growth/lib/business-automation.mjs';
+import {loadBusinessWorkPlan} from '../growth/lib/business-work-plan.mjs';
 import { collectData } from '../growth/lib/company-data.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
 import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from '../growth/lib/company-growth-followup.mjs';
-import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/lib/company-observability.mjs';
+import { recordCommand, recordHumanTouch, observabilityStatus,humanBurdenStatus } from '../growth/lib/company-observability.mjs';
 import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/company-goal-followup.mjs';
 import {recordMentionReview,recordMentionResolution} from '../growth/lib/company-mention-decisions.mjs';
 import {companyCtaMeasurement,recordCtaDiagnosis} from '../growth/lib/company-cta-measurement.mjs';
@@ -26,7 +29,11 @@ const startedAt=new Date().toISOString(), started=performance.now();
 let result;
 let failed=false;
 try {
-if(command==='record-apple-ads-observation') {
+if(command==='business-work-plan') {
+  result=loadBusinessWorkPlan();
+} else if(command==='human-burden-status') {
+  result=humanBurdenStatus({stateRoot});
+} else if(command==='record-apple-ads-observation') {
   result=recordAppleAdsObservation({stateRoot,evidenceFile:option('evidence')});
 } else if(command==='prepare-measurement') {
   result=prepareMeasurement({stateRoot,evidenceFile:option('evidence')});
@@ -79,7 +86,12 @@ if(command==='record-apple-ads-observation') {
 } else if (command === 'observability-status') {
   result=observabilityStatus({stateRoot});
 } else if (command === 'record-human-touch') {
-  result=recordHumanTouch({stateRoot,eventId:option('event'),runId:option('run'),stage:option('stage'),kind:option('kind'),evidenceFile:option('evidence'),occurredAt:option('occurred-at')});
+  const minutes=option('minutes');
+  const event=recordHumanTouch({stateRoot,eventId:option('event'),runId:option('run'),stage:option('stage'),kind:option('kind'),evidenceFile:option('evidence'),occurredAt:option('occurred-at'),
+    taskId:option('task'),durationMinutes:minutes===undefined?undefined:Number(minutes),measuredAt:option('measured-at')});
+  result={state:'recorded',stage:event.stage,touch_kind:event.touch_kind,
+    measured_minutes:event.duration_minutes??null,timing_state:event.measurement==='observed'?'source_verified_declaration':'unknown',
+    runtime_completion_credit:0};
 } else if (command === 'bind') {
   result = await bindExistingRun({stateRoot,id:option('run'),autopilotRunId:option('autopilot-run')});
 } else if (command === 'finish') {
@@ -96,6 +108,8 @@ if(command==='record-apple-ads-observation') {
   if (command === 'autonomy-status') {
     const baseline = path.join(stateRoot, 'metrics-baseline.json');
     result = { metrics: o.formal_metrics?.metrics,
+      outcome_autonomy: outcomeStatus({file:path.join(stateRoot,'data/autonomy-outcome-evaluations.json')}),
+      business_automation: businessStatus({stateRoot}),
       comparison: fs.existsSync(baseline) && o.formal_metrics ? compareMetrics(JSON.parse(fs.readFileSync(baseline)), o.formal_metrics) : null,
       human_touches: o.human_touches, active_failures: o.automation.failures.map(reportFailure),
       active_failures_scope:'Legacy field retains all observed failure states, including disabled and event/manual history. Use reporting_context and failure_summary for current diagnosis; no rows are hidden.',

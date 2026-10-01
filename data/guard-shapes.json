@@ -825,6 +825,18 @@
       "expr": "d.history",
       "disposition": "前提",
       "note": "2026-09-30: bump の既存履歴型検査。history が明示された場合は配列以外を拒否し、version/checksum/history を変える前に停止する。省略は従来の新しい履歴を開始するだけで、過去の変更がゼロだったという証明には使わない。source_file と明示した source_dependencies の正本読取り・checksum照合は currentSources が別に必須とし、履歴の省略・空配列・既存配列のどれでも依存欠落/読取失敗を拒否する。独立15ケースで不正履歴6型のNOWRITE、許容3型のv+1/旧prefix保持、各許容型と欠落/読取失敗の組合せを確認。既存19定義・原履歴・期間/配点/分母を削除して検査を通す例外ではない。"
+    },
+    {
+      "file": "scripts/business-automation.mjs",
+      "expr": "a.policy_id",
+      "disposition": "前提",
+      "note": "2026-10-01: 公開週次集計のpolicy識別子が明示されている場合に、既知の旧/現policy以外を拒否する分岐。旧履歴の欠損はnullとして実測事実・原観測日時を保持するが、現93%目標への適格性を与えない。現policyを主張する点には別の必須照合で原actualの同じpolicy_id・固定included/excluded集合・192業務・effective_at以降の原観測を要求し、currentGoalAssessment/sustainedTargetも欠損・旧policyを不適格にする。selectPublicActualは未知私的policy文字列と未知除外文字列を公開せずnullへ限定する。旧/nullの179/192実測保持・新目標非加点、現policyの集合/192/有効日時欠落拒否、未知文字列遮断、原policyにないtop-level currentラベルによる昇格拒否を回帰で確認。走査範囲・検出規則・既存記録は変更しない。"
+    },
+    {
+      "file": "scripts/business-automation.mjs",
+      "expr": "p.actual?.source_observed_at",
+      "disposition": "前提",
+      "note": "2026-09-30: 公開済みの実運用観測がある場合だけ、古い私的観測による置換を止める。最初の観測では比較相手が無い。新しいsourceの日時・窓・測定日はselectPublicActualが別に厳格検証し、欠落や注記は拒否する。欠測・部分観測による測定点の削除を防ぐ回帰と、古い有効観測が新しい公開点を置換しない回帰を確認。存在条件を無くしたり監査走査を緩めたりしない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -845,7 +857,8 @@
     "scripts/execution-priorities.test.mjs",
     "scripts/property-tests.mjs",
     "scripts/qr-routing.test.mjs",
-    "scripts/should-snapshot.mjs"
+    "scripts/should-snapshot.mjs",
+    "scripts/autonomy-outcome-score.test.mjs"
   ],
   "$no_ledger_binding": [
     {
@@ -866,7 +879,8 @@
       "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
-      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence."
+      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
+      "scripts/autonomy-outcome-score.test.mjs": "合成の前向き目標・人レビュー・作業時間を純粋計算へ渡し、私的入力の権限・Git内・親symlink・不正JSONを一時検体で検査する。実ポリシーは別モジュールのloadPolicy経由で読むため、この単一ファイル走査には読取束縛が無い。実績入力・秘密・ネットワークは読まない。"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
@@ -1180,6 +1194,18 @@
       "expr": "d",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-01: plain(d) は null・非object・配列をfalseにし、parseManifestが最上位/collection/rawentry/secondaryHTMLで無条件assertする。値が無い場合に検査を消す規則ではなくHTTP前に拒否する型ゲート。実root readonlyで正しい205raw+1HTMLを許容し、canonical JSON null/array/bool/number/stringの最上位5型とcollection/entry/secondary各5型、計20負例を拒否（HTTP0/source変更0）。原17suiteのhash/timeout/budget失敗証拠と206loopback別範囲を保持。既存guardrows・no_ledger_binding・計測metadataや検査コードは変更しない。"
+    },
+    {
+      "file": "scripts/autonomy-outcome-score.mjs",
+      "expr": "doc",
+      "disposition": "報告のみ",
+      "note": "2026-09-30: 入力なしをNO_EVIDENCE、total:null、登録0件として返す。欠測を0点や満点にせず、5件以上の全登録目標・レビュー・安全確認が揃うまで総合点を出さない。空入力・欠測レビュー・安全違反の回帰で無加点を確認。"
+    },
+    {
+      "file": "scripts/autonomy-outcome-score.mjs",
+      "expr": "quality",
+      "disposition": "報告のみ",
+      "note": "2026-09-30: AI判断の妥当性が不明なら成分をnullにし、登録目標を分母に残して総合点を保留する。human起源はAI自律点0で、未知の品質をAIの成功へ換算しない。未知の判断元・品質・方法比較の回帰でnull総合を確認。"
     }
   ]
 }
