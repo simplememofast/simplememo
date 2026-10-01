@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { deepStrictEqual } from 'node:assert/strict';
 import { ledgerScenarios, run, assert } from './lib/selftest.mjs';
 import { readJSON } from './lib/read-json.mjs';
 
@@ -180,7 +181,8 @@ const STATIC_SCENARIOS = [
     const exists = defaultDetectorExists('/site', { directoryExists: () => false,
       fileExists: () => { files++; return true; } });
     const result = inventory({ signals: [sourceSignal({ sibling: true })] }, { exists });
-    assert(result.detectors[0].state === 'unknown' && !result.errors.length && files === 0,
+    deepStrictEqual(result.errors, [], '不可視siblingのエラーは空配列でなければならない');
+    assert(result.detectors[0].state === 'unknown' && files === 0,
       '不可視siblingをmissing/verifiedにした');
   }],
   ['可視sibling内の欠落を..で免除しない', () => {
@@ -193,7 +195,8 @@ const STATIC_SCENARIOS = [
     const exists = defaultDetectorExists('/fixture/site', { directoryExists: () => { throw new Error('不要'); },
       fileExists: p => { calls.push(p); return p === path.resolve('/fixture/site', s.detector); } });
     const result = inventory({ signals: [s] }, { exists });
-    assert(result.detectors[0].state === 'verified' && !result.errors.length && calls.length === 1, 'rootが違う');
+    deepStrictEqual(result.errors, [], '内部path確認のエラーは空配列でなければならない');
+    assert(result.detectors[0].state === 'verified' && calls.length === 1, 'rootが違う');
   }],
   ['実ディレクトリを検知器ファイルと数えない', () => {
     const s = { ...sourceSignal(), detector: 'scripts/lib' };
@@ -203,8 +206,9 @@ const STATIC_SCENARIOS = [
   ['複合の実区切りで両pathを確認する', () => {
     const s = sourceSignal({ compound: true }); const calls = [];
     const result = inventory({ signals: [s] }, { exists: p => { calls.push(p); return true; } });
+    deepStrictEqual(result.errors, [], '複合path確認のエラーは空配列でなければならない');
     assert(JSON.stringify(calls) === JSON.stringify(s.detector.split(' / ')) && calls.length === 2
-      && result.detectors[0].state === 'verified' && !result.errors.length, '丸ごと/片方だけ確認した');
+      && result.detectors[0].state === 'verified', '丸ごと/片方だけ確認した');
   }],
   ['複合true/nullはunknown、true/falseとnull/falseはmissing', () => {
     const s = sourceSignal({ compound: true });
@@ -218,7 +222,8 @@ const STATIC_SCENARIOS = [
     const s = { ...a, detector: `${a.detector} / ${b.detector}` };
     const result = inventory({ signals: [s] }, { exists: defaultDetectorExists('/site', {
       directoryExists: () => false, fileExists: () => true }) });
-    assert(result.detectors[0].state === 'unknown' && !result.errors.length
+    deepStrictEqual(result.errors, [], '混在unknownのエラーは空配列でなければならない');
+    assert(result.detectors[0].state === 'unknown'
       && result.detectors[0].paths[0].available === true && result.detectors[0].paths[1].available === null, '混在unknownを隠した');
   }],
   ['truthy/undefinedの存在応答を補正せず拒否する', () => {
