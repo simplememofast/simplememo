@@ -52,7 +52,7 @@ SHARED_JA_EN = {
     "読みもの": "Learn",
     "サポート": "Support",
     "© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ":
-        "© 2026 Simple Memo - for Obsidian / Yurika Inc.",
+        "© 2026 Simple Memo - for Obsidian / YURIKA, K.K.",
 }
 
 

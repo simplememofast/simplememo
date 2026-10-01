@@ -47,7 +47,7 @@ EXTRA_EXACT={
 }
 EXACT={
  '© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ':
-   '© 2026 Simple Memo - for Obsidian / Yurika Inc.',
+   '© 2026 Simple Memo - for Obsidian / YURIKA, K.K.',
  'Obsidian連携シンプルメモ開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.4秒・メモ→メール特化」のシンプルメモを開発。プライバシーファースト設計（端末内 Outbox / 履歴の AES-GCM 暗号化、メール本文の恒常保存なし）を信条とする。':
    'Developer of Simple Memo - for Obsidian, an iOS quick-capture app focused on fast note-to-email workflows, with an on-device Outbox, AES-GCM-encrypted history, and no persistent storage of memo bodies by the relay.',
  'Captio利用者向けの紹介・検証資料':'Reference and verification material for former Captio users',
