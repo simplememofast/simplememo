@@ -1159,7 +1159,9 @@ jobs:
       # 検知器と書いたファイルが実在するかと、**実際に起きた障害種別に
       # 検知経路があるか**を見る（起きた実績があるものは、次も起きる）。
       - name: Monitoring coverage
-        run: node scripts/check-monitoring.mjs --check
+        run: |
+          node scripts/check-monitoring.mjs --selftest
+          node scripts/check-monitoring.mjs --check
 
       # 【ベンダー】依存している外部サービスの棚卸し。
       #
