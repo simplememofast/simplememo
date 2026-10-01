@@ -1,0 +1,386 @@
+<!DOCTYPE html><html lang="ja"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/anytype/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianの著者Markdown保存例と、公式Linux版Anytype 0.57.3の起動画面を比較。ファイルとリンク、独自データモデル、暗号化・P2Pの公式説明を分け、ローカルファーストの選び方を整理します。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈">
+  <meta property="og:description" content="Obsidianの著者Markdown保存例と、公式Linux版Anytype 0.57.3の起動画面を比較。ファイルとリンク、独自データモデル、暗号化・P2Pの公式説明を分け、ローカルファーストの選び方を整理します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01T08:07:09+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/compare/anytype/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-compare-anytype.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈">
+  <meta name="twitter:description" content="Obsidianの著者Markdown保存例と、公式Linux版Anytype 0.57.3の起動画面を比較。ファイルとリンク、独自データモデル、暗号化・P2Pの公式説明を分け、ローカルファーストの選び方を整理します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-compare-anytype.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/compare/anytype/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/compare/anytype/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/compare/anytype/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "@id": "https://simplememofast.com/obsidian/compare/anytype/#article", "headline": "ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈", "description": "Obsidianの著者Markdown保存例と、公式Linux版Anytype 0.57.3の起動画面を比較。ファイルとリンク、独自データモデル、暗号化・P2Pの公式説明を分け、ローカルファーストの選び方を整理します。", "url": "https://simplememofast.com/obsidian/compare/anytype/", "mainEntityOfPage": "https://simplememofast.com/obsidian/compare/anytype/", "image": "https://simplememofast.com/assets/img/og/obsidian-compare-anytype.png", "inLanguage": "ja", "datePublished": "2026-10-01", "dateModified": "2026-10-01", "author": {"@type": "Person", "@id": "https://simplememofast.com/about/#person", "name": "AI ATAKA", "url": "https://simplememofast.com/about/"}, "publisher": {"@type": "Organization", "@id": "https://simplememofast.com/#organization", "name": "Obsidian連携シンプルメモ", "url": "https://simplememofast.com/", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon-256.png", "width": 256, "height": 256}}}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"}, {"@type": "ListItem", "position": 2, "name": "Obsidian", "item": "https://simplememofast.com/obsidian/"}, {"@type": "ListItem", "position": 3, "name": "ObsidianとAnytypeの比較", "item": "https://simplememofast.com/obsidian/compare/anytype/"}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "ObsidianとAnytypeは、どちらもローカルファーストですか？", "acceptedAnswer": {"@type": "Answer", "text": "ローカルを重視する点は共通していても、今回示せる根拠は異なります。Obsidianでは著者VaultのMarkdown本文を実GUIで編集・保存し、開き直して照合しました。Anytypeは公式READMEがローカルストレージと任意のP2P同期を説明しています。今回のLinux実操作は起動とwelcome画面の観測までです。"}}, {"@type": "Question", "name": "AnytypeはMarkdownファイルをそのまま管理するアプリですか？", "acceptedAnswer": {"@type": "Answer", "text": "固定した公式READMEは、自分のデータモデルとテキスト・データベース・カンバン・カレンダー・custom Typesを説明しています。今回、Anytypeの内部保存形式やMarkdownの取り込み・書き出しは測定していません。Obsidianの配布Markdownと同じファイルをAnytypeで往復できる、という比較結果ではありません。"}}, {"@type": "Question", "name": "Anytypeの起動画面で、どこまで確認できましたか？", "acceptedAnswer": {"@type": "Answer", "text": "公式Linux AppImage 0.57.3を一度起動し、I am new hereとI already have a Keyのあるwelcome画面を二回観測しました。ボタンはクリックしていません。別の所有ウィンドウは空白のNew tabで、ログイン後のワークスペースではありません。画面上のアプリ版も未確認です。"}}, {"@type": "Question", "name": "暗号化されているほうが、常に安全ですか？", "acceptedAnswer": {"@type": "Answer", "text": "この記録から安全性の順位は出せません。Anytypeのend-to-end encryptionとzero-knowledgeは固定公式READMEの記述です。実装、鍵の管理・復旧、同期通信の暗号化は未測定です。Obsidianの保存例をMarkdownで読めることも、暗号化やバックアップの保証にはなりません。"}}, {"@type": "Question", "name": "配布ZIPは、Anytypeのエクスポートですか？", "acceptedAnswer": {"@type": "Answer", "text": "配布するのはObsidianの独立した著者検証で保存した四つのMarkdownです。元の日本語ファイル名をZIP内で保ち、索引のリンク先も含めています。Anytypeから書き出したデータではなく、読者側の取り込み操作も未検証です。"}}, {"@type": "Question", "name": "スマホや同期の使い勝手まで比較していますか？", "acceptedAnswer": {"@type": "Answer", "text": "確認した実アプリはLinuxのAnytype起動画面と、別のLinux Obsidian著者Vaultです。iOS、Android、端末間同期、Anytypeのオブジェクト操作、SimpleMemoとの連携、速度・生産性・流入の効果は比較測定していません。同期や外部バックアップを選ぶ際は、使う版と保存先の条件を別に確認してください。"}}]}</script><script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://simplememofast.com/obsidian/compare/anytype/#webpage", "name": "ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈", "url": "https://simplememofast.com/obsidian/compare/anytype/", "inLanguage": "ja", "isPartOf": {"@id": "https://simplememofast.com/#website"}}</script></head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/obsidian/compare/anytype/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">
+          <span lang="ja">ダウンロード</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero"><p class="lp-hero__label">Obsidian · ローカルファーストの比較</p><h1 class="lp-hero__title">ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈</h1><p class="lp-hero__sub">手元のMarkdownをつなぐ使い方と、自分のデータモデルを組み立てる使い方。Obsidianの実保存例、Anytypeの公式説明とLinux起動画面を分けて、選ぶ軸を整理します。</p><p>確認日: 2026年9月30日（UTC） · Linux版の著者検証</p><img class="hero-graphic" src="/assets/img/og/obsidian-compare-anytype.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="ObsidianのMarkdown保存例とAnytype公式のデータモデル説明を比較する案内図"></header>
+<section class="lp-section" id="choose"><h2 class="lp-section__title">選ぶ軸は、ファイルとデータモデル</h2><p class="plugin-answer"><strong>保存した文章をMarkdownファイルとして扱うことを重視するなら、今回のObsidian実例が判断材料になります。情報の種類や表示を独自のデータモデルで組み立てたいなら、Anytypeの公式説明が検討の入口になります。</strong> どちらも「ローカル」を掲げるだけで、同じ保存形式・同期条件になるわけではありません。</p><p>この記事では、Obsidianの四つの保存ファイルとリンク表示を実際の著者Vaultで確認しました。Anytypeは公式Linux版を実際に一度起動し、welcome画面を観測しました。保存・編集まで同じ課題を両アプリで行った比較ではないため、根拠の種類を表へ明記します。</p><table class="plugin-table"><thead><tr><th>比較の軸</th><th>Obsidian</th><th>Anytype</th></tr></thead><tbody>
+<tr><th scope="row">文章の保存</th><td data-label="Obsidian">著者VaultのMarkdownを実GUIで保存・再オープン。元本文を下で取得できます。</td><td data-label="Anytype">公式READMEはoffline-first/local storageを説明。内部保存形式と実保存操作は未測定です。</td></tr>
+<tr><th scope="row">情報をつなぐ方法</th><td data-label="Obsidian">著者のwikilinkを辿り、最終的に四ノート・三つの解決済みリンクを観測。</td><td data-label="Anytype">公式READMEは独自データモデル、composable blocks、custom Typesを説明。実オブジェクト作成は未確認です。</td></tr>
+<tr><th scope="row">同期と暗号化</th><td data-label="Obsidian">このVaultの保存と再オープンを確認。同期や暗号化はこの実例の検証対象外。</td><td data-label="Anytype">P2P、end-to-end/zero-knowledge encryptionは公式READMEの記述。実通信・実装・鍵管理は未測定です。</td></tr>
+<tr><th scope="row">今回の実アプリ観測</th><td data-label="Obsidian">Linux版1.13.7の実General表示、編集・保存・リンク・再オープン。</td><td data-label="Anytype">選定した公式Linux AppImage 0.57.3の起動とwelcome二観測。画面上のバージョン表示は未確認。</td></tr></tbody></table>
+<nav class="toc-links" aria-label="この記事の目次"><a href="#markdown">Obsidianの保存例</a><a href="#anytype">Anytypeの起動画面</a><a href="#model">公式説明を読む</a><a href="#decision">選び方</a><a href="#faq">FAQ</a><a href="#next">次の手順</a></nav></section>
+<section class="lp-section" id="markdown"><h2 class="lp-section__title">Obsidian: 保存した本文とリンクを、ファイルで確かめる</h2><p>隔離した著者Vaultへ三つの短い日本語ノートを入力として置き、実GUIで関連への理由を追記し、索引を新しく作りました。索引から二つのノートへ進むリンクを本文へ入れ、保存後に開き直して元ファイルと一致することを確認しています。</p><figure class="shot"><a href="/assets/img/obsidian-compare-anytype/obsidian-index.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-compare-anytype/obsidian-index.png" width="1024" height="800" loading="lazy" decoding="async" alt="Obsidianで保存した索引を再び開いた原画面"></a><figcaption>実GUIで作成・保存した索引を開き直した元画面。二つのリンク先と日本語本文を、324 bytesの保存Markdownと照合しました。 <a href="/assets/img/obsidian-compare-anytype/obsidian-index.png" target="_blank" rel="noopener">元画像を開く</a></figcaption></figure><p>以下は、実際に保存された索引の全文です。コピーすると、元ファイルと同じ本文を取得できます。</p><div class="code-heading"><strong>著者が保存した索引.mdの全文</strong><button class="copy-button" type="button" data-copy="index">本文をコピー</button></div><pre class="capture-code"><code data-code="index"># 索引
+
+この例で扱うテーマは、メモを書く段階と、関連を残す段階を分けること。
+
+- [[20260930-01 入力と整理を分ける]] — 書き留める内容と整理する内容を分ける例。
+- [[20260930-02 関係に理由を添える]] — 関連ノートへ進む理由を添える例。
+</code></pre><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-compare-anytype/index.md" download="index.md">索引のMarkdown（324 bytes）</a></div>
+<p>この例では、本文のwikilinkが別のノートへの関係を表します。リンクを追加する前は三ノート・ゼロリンク、関連への理由を追記した後は三ノート・一リンク、索引を加えた後は四ノート・三リンクになりました。グラフはこの保存内容を別の見方で表示したものです。</p><figure class="shot"><a href="/assets/img/obsidian-compare-anytype/obsidian-graph.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-compare-anytype/obsidian-graph.png" width="1024" height="800" loading="lazy" decoding="async" alt="Obsidian著者Vaultの四ノート三リンクの元グラフ"></a><figcaption>最終状態の四ノートと三つの解決済みwikilink。索引と二つの関連ノートがつながり、仮メモは独立しています。作業速度や生産性の測定ではありません。 <a href="/assets/img/obsidian-compare-anytype/obsidian-graph.png" target="_blank" rel="noopener">元画像を開く</a></figcaption></figure><p>Markdownをファイルとして読めることは、この小さな実保存例から確認できます。他アプリで同じwikilink表記を解釈するか、追加機能まで再現するかは別の条件です。詳細なリンク・バックリンク・読み取り画面の実操作は<a href="/obsidian/zettelkasten/">Zettelkastenの著者実例</a>にまとめています。</p></section>
+<section class="lp-section" id="anytype"><h2 class="lp-section__title">Anytype: 公式Linux版を一度起動した実画面</h2><p>公式リリースv0.57.3のLinux AppImageを取得し、公開されたファイルサイズ285,484,043 bytesとSHA256の一致を確認して、一度起動しました。以下は、その実アプリを読み取り専用で観測した元のPNGです。</p><figure class="shot"><a href="/assets/img/obsidian-compare-anytype/anytype-welcome.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-compare-anytype/anytype-welcome.png" width="1024" height="740" loading="lazy" decoding="async" alt="公式Linux版Anytypeを起動して表示されたwelcomeの原画面"></a><figcaption>一回の起動後の最初の観測。I am new hereとI already have a Keyの二つの入口が表示されています。いずれもクリックせず、welcomeの表示まで確認しました。 <a href="/assets/img/obsidian-compare-anytype/anytype-welcome.png" target="_blank" rel="noopener">元画像を開く</a></figcaption></figure><p>続く二回目の観測でも同じ入口が表示されました。アニメーションの見え方は変わっていますが、オブジェクト、編集画面、ログイン後のワークスペースを開いた結果ではありません。別の所有ウィンドウは空白のNew tabで、ワークスペースの証拠として数えていません。</p><details class="proof-details"><summary>二回目に観測した同じ起動画面</summary><figure class="shot"><a href="/assets/img/obsidian-compare-anytype/anytype-welcome-second.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-compare-anytype/anytype-welcome-second.png" width="1024" height="740" loading="lazy" decoding="async" alt="Anytype同一起動の二回目のwelcome観測原画面"></a><figcaption>同じ一回の起動に対する二回目の観測。新しい起動や操作を追加せず、welcome表示を再確認しました。 <a href="/assets/img/obsidian-compare-anytype/anytype-welcome-second.png" target="_blank" rel="noopener">元画像を開く</a></figcaption></figure></details><p class="scope-note">この実機起動の固有例は、公式Linux版のwelcome描画までです。アカウント作成・ログイン・Key操作・取り込み・オブジェクト作成・書き出しは行っていません。版0.57.3は公式release、固定sourceと取得ファイルの識別で、画面上の版表示を確認した主張ではありません。</p></section>
+<section class="lp-section" id="model"><h2 class="lp-section__title">Anytypeの公式説明: 自分のデータモデルを組み立てる</h2><p>v0.57.3のタグに固定した公式READMEは、Anytypeをpersonal knowledge baseと説明し、ページ、タスク、wiki、日誌などを作り、<strong>自分のデータモデルを定義する</strong>使い方を紹介しています。さらにテキスト、データベース、カンバン、カレンダー、custom Typesというcomposable blocksを挙げています。これは今回のwelcomeから観察した機能ではなく、公式sourceに基づく説明です。</p><blockquote><p>“Offline‑first, local storage with optional peer‑to‑peer sync.”</p><p>“Composable blocks: text, databases, kanban, calendar &amp; custom Types.”</p><p><a href="https://github.com/anyproto/anytype-ts/blob/af8bacfcdd6bf5276d3d5be37ddd14f02f52adb4/README.md" target="_blank" rel="noopener">Anytype v0.57.3の固定commit・公式README</a></p></blockquote><p>同じREADMEはend-to-end-encrypted、zero-knowledge encryption powered by any-syncとも記載しています。ローカルストレージ、任意のP2P同期、暗号化という設計の説明として読めますが、今回の起動観測では内部保存形式、同期相手への通信、暗号化実装、鍵の管理・復旧を測定していません。</p><p>このため、ObsidianのMarkdown保存例とAnytypeの設計説明は、根拠の深さが異なります。ファイル単位で本文を扱いたいか、情報の種類や表示をデータモデルで設計したいか、という判断軸には使えます。両者の安全性、同期の確実さ、書き出し後の再現性の順位は、この記録からは出せません。</p></section>
+<section class="lp-section" id="decision"><h2 class="lp-section__title">自分のノートで、重視する条件を決める</h2><ol class="steps-list"><li><strong>文章をファイル単位で持ちたい:</strong> 下のMarkdown例を読むと、Obsidianで保存した本文とリンク表記を具体的に確認できます。追加機能の依存も含め、必要な状態を別途把握します。</li><li><strong>同じ情報を種類や表示ごとに整理したい:</strong> Anytypeの公式データモデル説明を検討の入口にできます。実際に使う版の操作や、必要なデータの出入りは、保存例とは別の確認事項です。</li><li><strong>複数端末で使いたい:</strong> 保存先、同期、復旧、バックアップを別々の条件として選びます。「ローカルファースト」という一語で、スマホや同期の結果を保証する比較にはなりません。</li></ol><p>実アプリの起動画面と保存した本文を見たうえで、日々扱う情報が文章中心か、種類や表示を持つ情報かを決めると、比較しやすくなります。</p></section>
+<section class="lp-section" id="downloads"><h2 class="lp-section__title">Obsidianの実保存例を取得する</h2><p>ZIPには、索引、リンク先二つ、仮メモの<strong>元のMarkdown四件</strong>を日本語ファイル名で収めています。索引のwikilink先を同梱しており、元PNGと元Markdownの本文は加工していません。Anytypeのエクスポート、実アプリ、プラグイン、設定やアカウント情報は含めていません。</p><div class="download-row"><a class="md-download" data-file="note1" href="/assets/downloads/obsidian-compare-anytype/atomic-note-1.md" download="atomic-note-1.md">関連ノート1（365 bytes）</a><a class="md-download" data-file="note2" href="/assets/downloads/obsidian-compare-anytype/atomic-note-2.md" download="atomic-note-2.md">関連ノート2（217 bytes）</a><a class="md-download" data-file="fleeting" href="/assets/downloads/obsidian-compare-anytype/fleeting-note.md" download="fleeting-note.md">仮メモ（309 bytes）</a><a class="zip-download" href="/assets/downloads/obsidian-compare-anytype/obsidian-author-markdown-examples.zip" download="obsidian-author-markdown-examples.zip">著者Markdown四件のZIP</a></div><p>著者が作った練習用の内容です。読者側のVaultへ置く操作や、別アプリへ取り込む操作は、この記録の実検証には含めていません。</p></section>
+<section class="lp-section" id="faq"><h2 class="lp-section__title">よくある質問</h2><details class="faq-item"><summary class="faq-summary">ObsidianとAnytypeは、どちらもローカルファーストですか？</summary><div class="faq-answer">ローカルを重視する点は共通していても、今回示せる根拠は異なります。Obsidianでは著者VaultのMarkdown本文を実GUIで編集・保存し、開き直して照合しました。Anytypeは公式READMEがローカルストレージと任意のP2P同期を説明しています。今回のLinux実操作は起動とwelcome画面の観測までです。</div></details><details class="faq-item"><summary class="faq-summary">AnytypeはMarkdownファイルをそのまま管理するアプリですか？</summary><div class="faq-answer">固定した公式READMEは、自分のデータモデルとテキスト・データベース・カンバン・カレンダー・custom Typesを説明しています。今回、Anytypeの内部保存形式やMarkdownの取り込み・書き出しは測定していません。Obsidianの配布Markdownと同じファイルをAnytypeで往復できる、という比較結果ではありません。</div></details><details class="faq-item"><summary class="faq-summary">Anytypeの起動画面で、どこまで確認できましたか？</summary><div class="faq-answer">公式Linux AppImage 0.57.3を一度起動し、I am new hereとI already have a Keyのあるwelcome画面を二回観測しました。ボタンはクリックしていません。別の所有ウィンドウは空白のNew tabで、ログイン後のワークスペースではありません。画面上のアプリ版も未確認です。</div></details><details class="faq-item"><summary class="faq-summary">暗号化されているほうが、常に安全ですか？</summary><div class="faq-answer">この記録から安全性の順位は出せません。Anytypeのend-to-end encryptionとzero-knowledgeは固定公式READMEの記述です。実装、鍵の管理・復旧、同期通信の暗号化は未測定です。Obsidianの保存例をMarkdownで読めることも、暗号化やバックアップの保証にはなりません。</div></details><details class="faq-item"><summary class="faq-summary">配布ZIPは、Anytypeのエクスポートですか？</summary><div class="faq-answer">配布するのはObsidianの独立した著者検証で保存した四つのMarkdownです。元の日本語ファイル名をZIP内で保ち、索引のリンク先も含めています。Anytypeから書き出したデータではなく、読者側の取り込み操作も未検証です。</div></details><details class="faq-item"><summary class="faq-summary">スマホや同期の使い勝手まで比較していますか？</summary><div class="faq-answer">確認した実アプリはLinuxのAnytype起動画面と、別のLinux Obsidian著者Vaultです。iOS、Android、端末間同期、Anytypeのオブジェクト操作、SimpleMemoとの連携、速度・生産性・流入の効果は比較測定していません。同期や外部バックアップを選ぶ際は、使う版と保存先の条件を別に確認してください。</div></details></section>
+<section class="lp-section" id="evidence"><h2 class="lp-section__title">資料と検証範囲</h2><ul><li>Anytypeは公式Linux AppImage v0.57.3の一回の起動、二回の読み取り観測。welcomeの原PNGを掲載しました。実GUIのクリックやアカウント操作はゼロです。</li><li>Obsidianは別のLinux著者Vaultの実GUI編集・保存・再オープンと実ファイル。三件の事前入力、Settingsやレイアウトの補助API、状態読み取りと原本コピーを用いた経路を検証記録で区別しています。</li><li>Anytype終了は所有プロセスへSIGTERMを送り、appとXorgの実wait0と解放を確認した記録です。GUIのCloseをクリックした結果ではありません。</li><li>原PNGと配布MarkdownのbytesとSHA256を照合。Anytypeの公式sourceは固定タグに紐づく保存本文を使用し、今回追加のsource取得は行っていません。</li></ul><ul class="source-list"><li><a href="https://github.com/anyproto/anytype-ts/releases/tag/v0.57.3" target="_blank" rel="noopener">Anytype v0.57.3の公式release・Linux AppImage</a></li><li><a href="https://github.com/anyproto/anytype-ts/blob/af8bacfcdd6bf5276d3d5be37ddd14f02f52adb4/README.md" target="_blank" rel="noopener">Anytypeの固定commit・公式README</a></li><li><a href="/obsidian/zettelkasten/">Obsidianの独立した著者実例と保存ファイル</a></li><li><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/compare-anytype-20260930.md" target="_blank" rel="noopener">今回の原本と公開ファイルの対応をまとめた検証記録</a></li></ul><p class="receipt-line">Anytypeの同期・暗号化・保存形式・オブジェクト編集・書き出し、モバイル、SimpleMemo、速度・生産性・流入の効果は未検証です。公式sourceと配布binaryの再現ビルド同一性も検証していません。</p></section>
+<section class="lp-section" id="next"><h2 class="lp-section__title">次は、保存する文章と関係を試す</h2><p>Markdownの本文とリンクを具体的に見るなら、四ノートの著者実例へ進めます。iPhoneからの短いメモやメール送信を含むSimpleMemoとAnytypeの比較は、用途が別の比較記事にあります。</p><div class="internal-links"><a data-next-step="zettelkasten" href="/obsidian/zettelkasten/">Zettelkastenの保存・リンク実例へ</a><a href="/vs/anytype/">SimpleMemoとAnytypeの比較へ</a></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var e=document.querySelector('[data-code="'+b.dataset.copy+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent='コピーしました';setTimeout(function(){b.textContent='本文をコピー'},1600)}catch(err){b.textContent='コピーできませんでした'}})});</script><footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja">Apple Watch対応</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja">Obsidian連携</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja">比較</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

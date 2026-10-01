@@ -267,6 +267,41 @@ C32three-methodLinux boundedauthor original26/28+supplement30/46 andsource30/29n
 
 C24は標準/拡張記法の全捕捉family114/59を74有限例へ、C22は38入力を58原観測・24効果/14不足へ対応。異なるarticleintentとjournalingmanualpaste/generatorstandardURI文脈の各1paragraphを保持。共通support9を1回に合成しfull204。原C24independent88/author90とC22author89/independent229consistency/savedQAを区別し、新currentreaderはrootapply後必要。[C24原本](../evidence/obsidian-markdown-catalogue-20261001.md)・[C22原本](../obsidian/evidence/uri-scheme-20260930.md)。local6bdsource30とmainb975/source27を分離し、own6候補36は全193newcontent配信証明ではない。workflow/strict/gate改変0、queuecloseout0、audit3future合成含まず。通常finalCI/実対応mergePages/alloriginalpublicreadbackまでpending。
 
+### C36 既存職種用途のObsidian整理への有限再編候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C36 NEWsource25（14new/1contextinbound/shared9+topicmapextra1）。既存8用途のObsidianリンク/索引/Inbox編集再編、原historical3/9 CTR33.333%とcurrent0/19 CTR0%、timezone/query-page/newURLbaseline不足を保全。MD8は著者編集例で顧客実績/GUI保存原本でなくZIP8はリンク先未同梱。原C17/C26/C13/C14有限Linux証拠を新8職業成果へ昇格0。原QAexit2/Nextguard/別Next成功/CSSheightauto12/finalizer失敗と最終QA89保全。source36≠配信proof、GSC原85/order36+own3候補39のみ、原209/publicauditor205全保持、既存JSONownerstopbudgetwindows/pendingcloseout0。newgraphhighはbusinessRelevance1分類、verifiednull/Notverified/SM未検証。manual42/Companyglobal13非免除、自然schedule/無人率加点0、10月2x同定義成熟待ち/欠測非0。
+
+原title/unique/collision/pendingを保持し、14new+既存親案内1+shared9+topicmap追加1の25source。publicadmission/最終CI/main/Pages/full14readbackは未実行。公開証拠のURL https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/use-cases-20261001.md。
+
+### C30+C31+C34 有限Linux検証の統合公開候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C30/C31/C34 NEW source66（new12+23+19/inbound3/shared9）。原Linux startup/finite Importerfixtures/dayweek実作成保存を原titleunique/旧GUI失敗と分離保全。source36≠配信proof、GSC原85/36order＋own9候補45は全54public証明でない。原209/currentJSON全meta/order/ownerstopbudgetwindowsとC21C22C24pending保持、closeout0。新3graphhigh/nullは分類。manual42/Companyglobal13非免除、自然schedule無人率/10月2x加点0。
+
+3originalintent: Obsidian/Anytype files vsdata-model Linuxstartup、公式Importer fixtureの変換差、Calendar/PeriodicNotesのdayweek作成保存。既存VSAnytype/VSNotionEvernote/daily-noteの実文脈各1guide、共有support9合成、full66。原source87/private74・Importer453/private85・Calendar500/old1003/private72と独立86/88/86を保全。C30のQA後1文inverse、GUIversionunknown/SIGTERMwait0、C31controllerXlibexit1/Apple未実施、C34invalidtrace/CtrlO不発/Close直後SIGTERMを成功へ後付けしない。
+
+## NEW C30+C31+C34 selected-source66 integration
+
+Selected committed source b33101672d93db3923e64267fa3dfda82149f360 has36 ordered GSC comparisons. This is source-only, not publication proof; remote PR1804/main/Pages and wholeorigin206 are separate parent-owned evidence. This NEW private component has54 new content paths (C30 12, C31 23, C34 19), three distinct originalcontext inbounds, nine sharedsupport paths once, total66. Originalfullsource/private/receipt/independentreview hashes are pinned in externalcomponentmanifest; originalGUI/QA/OG/ZIP/code/raw/negative/failure caps are unchanged. Sourcecalendar 2026-10-01 JST/2026-10-01T08:07:09+09:00 is metadata, not a measured deployment timestamp; C34 ISO field remains calendar-date.
+
+Only three newhigh/verifiednull/Notverified/SMversionnull nodes follow unchanged businessRelevance1. GSC preserves original85/entireordered36/dynamic2/strict and currentactualworkflow; add nine representatives only, candidate45 HTML15/assets30. Nine representatives are not whole54 publicdelivery. All selected209 current sourcepaths outside sharedsupport are protected; all oldsharedJSON/meta/rows/order/ownerstopbudgetwindow contracts and C21/C22/C24pending remain inverseexact. No queuecloseout is included, including C33 olddone preserved. Later optionalexistingthree-row closeout needs separatelydeclared NEWderivative and actual fullorigin206 plus matchingmergedmain/Pages evidence; no fakefutureproof.
+
+Manualpolicy42 does not waive Companyfullscopeglobal13; directHTMLowner0 is separate. No Company/unmannedrate/naturalschedule/Octobertraffic credit, no paid/account/dependency/provider/key/senderidentity action. Missingbaseline is not0; October2x requires same-definition maturemeasurement. Root freshmain/owners/openPR/currentreader/normalfinalheadCI/matchingmergePages/full54 publicHTML+originalassetsreadback remain pending. Historical originalsingle27→30 component paragraphs are superseded for currentintegration counts by this section, their sourcefacts/failures unchanged.
+
+
+### C23 Resource Refresh＋C35日本語情報源候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C23ExistingResourceRefresh+C35日本語情報源combinedsource30（13+6content、inbound2、sharedsupport9）。selectedSOURCE b33101672d93db3923e64267fa3dfda82149f360 tree 7ce3ac2f928d42960fb934ebc9d9f3ef0cc86df1≠publishedproof、GSC36+own6候補42のみ。C22guide232B保存、oldAPI/default16/33fixed58records/24effects14gaps/arbitrarysyntaxonly/bareflags区別・dailyUIappend未測定省略。C35rootqualified3情報源28/2,4/3,0/0、32commit/poststatsgate0・0≠欠測/休眠。graphactualC23medium.5/C35high1 verifiednull、oldlow.3/.65仮定を旧失敗として保全、旧JSONorder/ownerstopbudgetwindows/eval/fullinverse、C21/C22/C24pending保持closeout0。manual42/Companyglobal13非免除、GUI/URI/旧QA/OG再生成0、Company無人率/自然schedule加点0、missingbaseline非0/10月2x同定義成熟計測待ち。
+
+[C23原本とAPI境界](../obsidian/evidence/uri-generator-20260930.md)／[C35原稿更新の出典](../obsidian/evidence/community-20260930.md)。C23品質87・C35固定private87/rootoriginalunique a967 qualified3sourcesはfinalappliedreaderではない。C21/C22/C24pendingと全旧JSON/owner/eval契約保持、noqueuecloseout。source30fullscope/actualmainPages/fullorigin206未達ではdoneにしない。
+
+### C25/C28 読み取り専用の公開source候補（2026-10-01 JST）
+
+2026-10-01：manual Goal C25 source準備。Linux Obsidian1.13.7の一回の隔離起動で、架空三ノートのProperties五型・保存YAML・DQL TABLE2/LIST2→1/対象なし・同一起動内再openを実GUI確認。release tag0.5.70と配布manifest/UI0.5.68を区別。直接manual asset配置後の実Trust/enableでありBrowse/Installではない。8 persisted+5 inline=13観測、原max12との差・p09 exact app exit未記録・beforeTABLE PNGのscroll不足を保持。全型/datevalidation/wholeapp restart/iOS/Sync/SimpleMemo/security/performance/生産性/流入未検証。 原title/unique/pending、共有full33scope・既存context各1。Companyglobal13未免除、元owner/stop/budget/windowと履歴不変。普通CI/main/Pages/public readback別gate、Company無人率/自然schedule/10月効果加点なし。
+
+2026-10-01：manual Goal C28 source準備。固定Quartz d25a6eab/package4.5.2、Linux Node24.19/npm11.9の隔離npm ciと二回の実CLI build（各20生成物）。直接作成三日本語MD+SVGと変更private config、unusedLatex無効の追加計画後、localhost四幅/12内部click/生成8HTTP原本一致。初回失敗JSONの上書き欠落・言語期待値訂正・初期KaTeX要求を保持。Publish現行料金/契約/account/実操作、GitHub Pages/他host配信、ObsidianGUI、math/任意QuartzOG/全機能/iOS/Sync/SimpleMemo/security/performance/生産性/流入未検証。 原title/unique/pending、共有full33scope・既存context各1。Companyglobal13未免除、元owner/stop/budget/windowと履歴不変。普通CI/main/Pages/public readback別gate、Company無人率/自然schedule/10月効果加点なし。
+
+新22＋既存文脈2＋共有support9＝33。GSC source36＋own6＝候補42。原C25 129+self130/33assert、C28 111+self112/31assert、raw各8/OG/コード/旧QAを保持。原品質記録86/91はprivate評価でadmissionではない。C25 actual13観測と原max12差・p09/scroll不足、C28初回JSON欠落・localbuildとhosting/pricingの差を維持。原Company13/manual42/owner/stop/budget/windowsは不変。
+
 ## 残る依存関係
 
 1. 同一条件のGA4歴史データと既存私有受領書。BigQueryの部分月やGSCを主指標へ代用できない。
