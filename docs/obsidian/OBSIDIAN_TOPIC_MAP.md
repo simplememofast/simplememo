@@ -66,6 +66,7 @@
 | **obsidian memo** | 12 | **0.0%** | 11.7 | Informational | Awareness | ❌ |
 | **obsidian ジャーナリング** | 9 | **0.0%** | 11.7 | Informational | Awareness | ❌ |
 | obsidian 活用事例 | 9 | 33.3% | 10.6 | Informational | Awareness | ✅ CTR高い |
+| C36 `/obsidian/use-cases/` 編集再編候補 | 過去9／最新19 | 過去33.333%／最新0% | 過去10.56／最新9.263 | Informational | Awareness | 既存8用途のリンク・索引・Inbox案。3/9（7/11–8/7）と0/19（8/30–9/26）は別期間、newURL baseline・顧客実績ではない。2026-10-01 source-only／配信未証明 |
 | obsidian iphone アプリ | 9 | 22.2% | 9.9 | Informational | Solution-aware | ✅ |
 | **obsidian 解約** | 10 | 0.0% | 11.8 | Troubleshooting | — | Relevance **NONE**。作らない |
 
