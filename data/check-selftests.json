@@ -538,6 +538,12 @@
       "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
     },
     {
+      "script": "scripts/check-query-definitions.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-01",
+      "broke": "scripts/check-query-definitions.test.mjs の7ケースを実行。全8SQLの原本変異、CTR分母逆転、同16桁prefixの偽fullSHA、欠落・重複・path逸脱・kind・履歴・日付・依存欄の不正、読取失敗・空理由・不一致IOを拒否。実CLIでSQL-only変異を --check が拒否し、空理由では更新せず、理由付き --bump 後に原KPI・他定義・元履歴を保持して通ることを確認。新KPI値や本番クエリは生成しない"
+    },
+    {
       "script": "scripts/check-release-gate-pin.mjs",
       "state": "demonstrated",
       "at": "2026-09-03",
