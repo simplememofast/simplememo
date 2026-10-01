@@ -1975,7 +1975,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 9/30 23:49 | [#1773](https://github.com/simplememofast/simplememo/pull/1773) | 第62弾（4ページ、34か所）：`/blog/digital-vs-handwritten-notes` 日英の「手書きメモの写真をシンプルメモで送る」（テキスト専用で送れない）と「手書きは記憶に有利」の言い切り（回答ブロック・説明文・表・コツ）、英語の「zero idea loss」。`/blog/ai-vs-simple-memo` の日本語 FAQ「AI非搭載」、英語の「not stored on servers」、「AI機能はオフライン不可」 |
 | 10/1 01:43 | [#1779](https://github.com/simplememofast/simplememo/pull/1779) | CI：`.github/workflows/seo-check.yml` の WebKit の導入手順に `timeout-minutes: 10`。apt が失敗せずに止まったとき、検証がジョブ既定の360分まで終わらずマージが止まるのを防ぐ（下の「見つけたこと」） |
 | 10/1 01:47 | [#1774](https://github.com/simplememofast/simplememo/pull/1774) | 第63弾（4ページ＋サイトマップ3つ、7か所）：`/vs/drafts/` の FAQ「入力→自動送信」（送信はタップ）。`/en/blog/offline-first-comparison` の「Email is delivered, receipt is logged」「The moment you reconnect … delivers all queued notes」（アプリが記録するのは送信の受け付けで、再送は次にアプリを開いたときかバックグラウンド）。`/blog/morning-memo-routine` 日英の「メモアプリの定型文・プリセット」（本文の定型文の機能は無く、テンプレートは貼り付け）。最初の検証が止まっているうちに日付をまたいだので、sitemap の lastmod をマージ参照の上で作り直して足した（下の「見つけたこと」） |
-| — | この PR | 第59〜第63弾の計測の台帳の note と annotations の行、この §5.40（#1779 と、日付をまたいだ sitemap の記録を含む）、オーナー判断 #55 の追加、§5.30〜§5.32・§5.39 の「この PR」の行 |
+| 10/1 02:10 | [#1780](https://github.com/simplememofast/simplememo/pull/1780) | 第59〜第63弾の計測の台帳の note と annotations の行、この §5.40（#1779 と、日付をまたいだ sitemap の記録を含む）、オーナー判断 #55 の追加、§5.30〜§5.32・§5.39 の「この PR」の行 |
 
 ### 見つけたこと
 
@@ -2002,6 +2002,54 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 0時をまたいで持ち越した PR は、マージ参照の上で sitemap を作り直してからマージに回す（第63弾で実施）。
 - Obsidian 1.14 が公開版になったら（obsidian.md/changelog の「Mobile (Public)」）、Quick Capture を踏まえて比較ページの「保管庫の読み込み」の書き方を見直す。
 - オーナー判断待ち：#43〜#45、#47〜#55。公開の台帳に書かない確認事項は、オーナーに直接伝える。
+
+## 5.41 2026-10-01 未明：他社アプリの説明（Moca・メモポスト）、片方の言語だけ古いページ、作り話の「話題」と「実例」、英語の Captio のページ（第64〜第75弾）、#1779 の上限が働いた回
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/1 02:27 | [#1781](https://github.com/simplememofast/simplememo/pull/1781) | 第64弾（6ページ＋サイトマップ2つ、41か所）：`/vs/` 日英の FAQ「メールの受信箱が唯一の保存先」「タグ機能は無い」（同じページの冒頭は Obsidian への追記を書いていた）。`/obsidian/sync/` 日英の Syncthing「無料・全プラットフォーム対応」（iPhone・iPad は Obsidian の公式ヘルプで公式には非対応、Android は公式アプリの開発が終わりコミュニティ版。参考文献に2本）。`/blog/chatgpt-memo-workflow` 日英の「翌日にはほぼ消えます」「7±2（ミラーの法則）」（サイト自身の研究ページと食い違う）と「唯一」「最強」「30分→2分」 |
+| 10/1 02:35 | [#1782](https://github.com/simplememofast/simplememo/pull/1782) | 第65弾（7ページ＋サイトマップ2つ、31か所）：`/vs/moca/` 日英が Moca を「メモの保存先はアプリ内」「機種変更で失われる」と逆に書いていた（App Store の説明ではアプリ内に保存せずメールで送る）。計測していない「速い」、根拠の無い「標準メール送信」。`/en/` の「capture-to-email (0.4s vs Drafts' 0.9s)」、`/en/blog/productivity-methods-comparison` の「email in 0.4s」、`/blog/which-memo-app-flowchart` 日英の Drafts「起動0.8秒」 |
+| 10/1 02:51 | [#1784](https://github.com/simplememofast/simplememo/pull/1784) | 第66弾（2ページ＋サイトマップ2つ、41か所）：`/vs/memo-post/` 日英のメモポスト：公式サイトに無い「AI処理のためにメモをサーバーに保存」（本文と FAQ）、「デスクトップ対応」（Mac は App Store から iPhone・iPad 向けアプリとして、Android もある）、無料プランと料金、計測していない起動速度。日本語の Premium「月額$2.99」→「月額500円・年額5,000円」 |
+| 10/1 03:02 | [#1785](https://github.com/simplememofast/simplememo/pull/1785) | 第67弾（10ページ＋サイトマップ2つ、41か所）：`/blog/minimalist-digital-memo` 日英の「アプリ内にデータを貯めず」（端末内に暗号化した送信履歴が残る）、著書から「」で引いた確認できない一文、「追加のバックアップ戦略は一切不要」、記録の無い体験談と出典の無い数字。`/vs/day-one/`・`/vs/tana/`・`/vs/roam-research/`・`/vs/line-keep-memo/` 日英の出典の無い一般化 |
+| 10/1 03:30 | [#1786](https://github.com/simplememofast/simplememo/pull/1786) | 第68弾（4ページ＋サイトマップ2つ、19か所）：`/use-cases/writers/` 日英の「件名に日付とキーワードが並び」（件名に日付は入らない）。`/methods/gtd/` 日英の「ほぼ確実に忘れます」「最適なツール」「完璧に対応」「Absolutely.」と、作った人物の1日の見出し「実際のシナリオ」「Real Scenario」。検証の WebKit の導入が #1779 の上限で打ち切られたまま通った（下の「見つけたこと」） |
+| 10/1 03:36 | [#1788](https://github.com/simplememofast/simplememo/pull/1788) | 第69弾（2ページ＋サイトマップ2つ、26か所）：`/en/blog/ai-information-workflow` を 9/29 に書き直された日本語版にそろえた（出典の無い「メールは10年以上保存」、アプリが付けない「Memo」ラベルの手順、顧客のヒアリングや感情のメモを注意なしに AI へ貼る案内）。日英の「ラベルで自動的に整理」「劇的に向上」「最も重要なテクニック」 |
+| 10/1 04:00 | [#1789](https://github.com/simplememofast/simplememo/pull/1789) | 第70弾（10ページ＋サイトマップ2つ、83か所）：`/blog/gen-z-memo` 日英の「TikTokで話題のCaptio式」「#captio式メモ」「#CaptioStyle」（題・見出し・CTA を含む）と、名前の無い TikTok クリエイターの発言を削除し、題を「書いてすぐ送るCaptio式とは」「Write and Send, Captio-Style」に。出典の無い流行の言い切り、Captio の「設計思想を受け継いだ」、Evernote の手順。`/methods/` の4ページ日英の「実際のシナリオ」「Real Scenario」 |
+| 10/1 04:05 | [#1791](https://github.com/simplememofast/simplememo/pull/1791) | 第71弾（1ページ＋サイトマップ、13か所）：`/en/captio-alternative/` の「App Size: Under 10 MB」（App Store の掲載は約21MB）、Gmail のフィルタの「sender: Simple Memo - for Obsidian」（差出人名は「シンプルメモ」か「Simple Memo」→ 送信元アドレスに）、「Real-World Scenarios: How People Use Simple Memo」「the most common scenarios … every day」、Android の人への「Email Me」（Apple の端末向けだけ） |
+| 10/1 04:15 | [#1792](https://github.com/simplememofast/simplememo/pull/1792) | 第72弾（3ページ＋サイトマップ2つ、37か所）：`/en/blog/reading-notes-guide` と `/en/vs/ios-shortcuts/` を 9/29 に書き直された日本語版にそろえた（出典の無い「If you read 50 books a year … over a decade」「80% of a book's value … in 20% of its pages」「more than 2 seconds … is unsuitable」、「you may have experienced it breaking」「multiple cases reported」、計測していない「5-10 minutes」、「implements email sending natively」）。日英の「丸写しは…記憶にほとんど残りません」 |
+| 10/1 04:25 | [#1793](https://github.com/simplememofast/simplememo/pull/1793) | 第73弾（4ページ＋サイトマップ2つ、14か所）：`/vs/note-to-self-mail/` 日英の「顕著な違い」「4つの技術的優位」「diverge significantly」「technical differentiators」（同じページの表では Note To Self Mail の起動速度は未計測、オフラインと暗号化は不明）。`/vs/mail-to-self/` 日英の、メーラーで送ると通信エラーで「消えてしまう」（本文と FAQ）、「摩擦は半分以下」「根本的に変えます」 |
+| 10/1 09:36 | [#1808](https://github.com/simplememofast/simplememo/pull/1808) | 第74弾（1ページ＋サイトマップ、10か所）：`/en/blog/how-to-email-yourself-note-iphone` の確かめられない「The app has become the preferred solution for thousands of power users」、計測していない「Slower to start than a dedicated app」、表の「Voice Support: Limited」、フィルタの「emails from yourself」 |
+| 10/1 09:38 | [#1809](https://github.com/simplememofast/simplememo/pull/1809) | 第75弾（2ページ＋サイトマップ2つ、8か所）：`/voices/` 日英の、初期テスターへの当時の回答「自分のメールに送る一択」「メモは必ずメール送信される」「AI機能は載っていない」を「当時の」とし、その後の変化を足した |
+| — | この PR | 第64〜第75弾の計測の台帳の note と annotations の行、この §5.41、オーナー判断 #56 の追加と判断の委任（10/1）の記録、§5.40 の「この PR」の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **実在の他社アプリを、確かめられない・逆の事実で不利に書いていた**：`/vs/moca/`（Moca。App Store の説明とは逆の「アプリ内保存」と、そこから推した「機種変更で失われる」）、`/vs/memo-post/`（メモポスト。公式サイトに無い「サーバーに保存」、「デスクトップ対応」、無料プランの中身）。どちらも開発者名の出ている個人のアプリ | 第65・第66弾で、App Store の説明・公式サイト・開発者の note（いずれも 10/1 に確認）に合わせた。確かめられない点は「公開情報では確認できず」「当サイトでは未計測」と書いた |
+| **同じページの中で FAQ だけが古い**：`/vs/` の冒頭は Obsidian への追記を書いているのに、FAQ（表示と JSON-LD）が「受信箱が唯一の保存先」「タグ機能は無い」のままだった | 第64弾で直した |
+| **他社の対応端末の書き過ぎ**：`/obsidian/sync/` の Syncthing「全プラットフォーム対応」。Obsidian の公式ヘルプは iPhone・iPad を公式には非対応の選択肢に挙げ、Android の公式アプリは開発が終わっている | 第64弾で直し、出典を参考文献に足した（内部リンクは不変。internal-link-2026-09-02-003 に note） |
+| **サイト自身の研究ページと食い違う記憶の話**：`/blog/chatgpt-memo-workflow` の「翌日にはほぼ消えます」「7±2（ミラーの法則）」。`/blog/memo-taking-tips`（Ebbinghaus の節約率は1日後34%）・`/blog/brain-science-memo`（Cowan 2001 の3〜5チャンク）と合わない | 第64弾で直した |
+| **0.4秒と Drafts の数字の残り**：「capture-to-email 0.4s」「email in 0.4s」（0.4秒はタップから入力できるまで）、Drafts の「0.8秒」（計測は最速0.9秒・中央値1.45秒） | 第65弾で直した。第61弾（#1772）の取りこぼし |
+| **アプリの仕組みと違う説明**：「アプリ内にデータを貯めない」（端末内に暗号化した送信履歴が残る）、「件名に日付」（件名は1行目かテンプレート＋1行目、AIタグ自動追加ならタイトル。日付は入らない）、「件名・日付・ラベルで自動的に整理される」（ラベルはフィルタか手作業）、Gmail のフィルタの差出人名「Simple Memo - for Obsidian」 | 第67〜第69弾・第71弾で直した。件名に日付が入ると読める書き方は、ほかに無かった |
+| **片方の言語だけが古い（続き）**：9/29 の #1668（別の作業）は3ページの日本語版だけを書き直していた。英語版には「メールは10年以上保存」「Memo ラベル」、顧客や感情のメモを注意なしに AI へ貼る案内（`/en/blog/ai-information-workflow`）、「50 books a year … over a decade」「80% … in 20% of its pages」（`/en/blog/reading-notes-guide`）、「you may have experienced it breaking」「multiple cases reported」「5-10 minutes」（`/en/vs/ios-shortcuts/`）が残っていた | 第69・第72弾で英語版をそろえた。ほかの作業が日本語版だけを直した最近の PR（#1681・#1684 など）は、英語版もすでに直っていた |
+| **作り話を「話題」「実例」として見せていた**：`/blog/gen-z-memo` の「TikTokで話題のCaptio式」「#captio式メモ」（検索では、Captio式はシンプルメモ自身のページ・アプリ名・プレスリリースにしか出てこない）と、名前の無い TikTok クリエイターの発言。`/methods/` の5ページの、作った人物の1日を「実際のシナリオ」とする見出し。`/en/captio-alternative/` の「How People Use Simple Memo」「the most common scenarios where former Captio users rely on Simple Memo every day」 | 第68・第70・第71弾で直した。`/use-cases/` の「実際のシナリオ例」「リアルなシナリオ例」「Real Scenario Examples」（約40ページ）は、名前の無い場面の例の一覧で、特定の人の体験として書いていないので変えていない |
+| **表では「未計測」「不明」なのに、本文で差や優位を言い切る**：`/vs/note-to-self-mail/` の「顕著な違い」「4つの技術的優位」、`/vs/mail-to-self/` の「メーラーだと通信エラーで消える」 | 第73弾で、分かっている違いだけにした |
+| **確かめられない利用者数・古くなった「今の答え」**：`/en/blog/how-to-email-yourself-note-iphone` の「thousands of power users」（日本の App Store の評価は27件）。`/voices/` の初期テスターへの回答が、Obsidian 連携・Obsidian だけに保存・AIタグ自動追加より前のまま「現在の考え」になっていた（冒頭で引いている App Store のレビューは公開レビューに実在） | 第74・第75弾で直した。`/voices/` のほかのカードは §5.36 のとおり当時の記録として残した |
+| **他社アプリの勧め方の誤り**：`/en/captio-alternative/` の FAQ が、Android の人に「Email Me」を勧めていた（[公式サイト](https://emailmeapp.net/) では Apple の端末向けだけ）。同じページのアプリの容量「Under 10 MB」（App Store の掲載は 20,776,960 バイト） | 第71弾で直した |
+| **#1779 の上限が初めて働いた**：#1786 の検証（SEO Validation #4033）で、WebKit の導入が「timed out after 10 minutes」（10分13秒、10/1 03:07 ごろ〜）。検証はそのまま先へ進み、横スクロールの確認は WebKit なし（Blink だけ）で報告して、24分31秒で通った（03:30 にマージ）。apt の止まりは今夜2回目（1回目は 9/30 深夜の #4014） | 設計どおり。上限が無ければ、ジョブ既定の360分まで待った可能性がある。もう一度起きたら、WebKit の導入の経路（apt のミラーやキャッシュ）を見直す |
+| **手元の検証で disk が一杯になった**：手元で CI と同じ手順を流すたびに、作業用の一時フォルダ（1回あたり約170MB）が消えずに残り、10/1 04:20 ごろに空きが無くなった（GA4 の SQL のテストが venv を作れずに失敗）。サイトにも CI にも影響は無い | 一時フォルダを消して流し直した。以後は流すたびに片付ける |
+| **確かめて残したもの**：Outbox の再送の「when connectivity returns」「オンライン復帰時に自動再送」など（回線の復帰を NWPathMonitor で検知して送り直し、閉じているときは次の起動かバックグラウンドのタスク。`/en/devlog/outbox-architecture` と `/faq` のとおり）。トップの「LINE Keep終了後のテキストメモ保存先としても最適です」（#55 と同じ種類。計測中の実験の対象ページ）。「Captio式」という呼び方そのもの（シンプルメモ自身の呼び方で、App Store のアプリ名にもある） | 直していない |
+| **記録の無い3月の計測が1ページに残っている**：`/en/send-email-to-yourself` の2026年3月の計測（8アプリの起動・送信の秒数、「We installed and tested every major … app」、題の「5 Methods Tested」）。1回ごとの記録がリポジトリに無い。ほかのページ（`/blog/memo-app-speed-test-2026`・`/blog/iphone-memo-app-fast`・`/en/blog/fastest-note-app-iphone-2026`）は、同じ理由で3月の数字を取り下げている（`data/benchmark.json` の `otherPublishedRuns`） | §5.35 で「方法がページに明記されている」として残したが、記録が無い点はほかのページと同じなので、オーナー判断 #56 にした |
+
+### 次にやること
+
+- 毎晩の確認は 10/1 20:40 JST に予約済み。10/08 まで毎日かけ直す。
+- Obsidian 1.14 が公開版になったら、Quick Capture を踏まえて比較ページの「保管庫の読み込み」の書き方を見直す（§5.40 のとおり）。
+- 実在の個人のアプリとの比較ページは、公式情報（App Store の説明・公式サイト）と照らし合わせて見直しを続ける。
+- 10/1 朝、オーナーからサイトの文言の判断を任された（「あなたにおまかせ」）。#45 は ②（「最速」を使わない言い方）、#55 は ①（条件のない言い切りをやめる）で、第76弾として進めている。#52・#53・#56 も表の推奨（①）で続ける。ただし英語トップ `/en/` の題は、title-2026-08-20-home-grammar の注記（英語トップは対象外で、変えるなら別に起票）と GROWTH_ROI_PLAN の R10（英語への新しい投資の凍結）があり、本文と説明文はすでに条件つきなので、題は変えずに残す（③）。`/autopilot/` の「AirPodsに話すだけでObsidianへ（Siri対応）」は、過去のプレスリリースの件名を載せた表なので変えない。
+- オーナー判断待ち（アプリ・規約・社名など、サイトの文言だけでは決められないもの）：#43、#44、#47〜#51、#54。公開の台帳に書かない確認事項は、オーナーに直接伝える。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -2255,3 +2303,4 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 53 | **Siri・AirPods の題とリンクの言い切り**：`/obsidian/airpods/` の題・見出し「AirPodsに話すだけでObsidianへ残す」、`/siri/` の題「スマホを触らずSiriでObsidianへ送る」、それを写したリンクの文言（トップ・`/hands-free/` の「AirPodsから、スマホを触らず送る」、`/apple-watch/`・`/autopilot/` の「AirPodsに話すだけでObsidianへ」）、トップの Siri のバナー画像（画像の中の文言と代替テキスト）。本文・説明文・構造化データは #1727 と第54〜第56弾で条件つきに直したが、題とリンクと画像は変えていない（§5.39） | 題は検索結果の見出しで、順位と実行中の実験の読み（`/` の title-2026-08-20-home-grammar、`/siri/` を含む video-2026-08-11-five-clips）に響く。画像は作り直しが要る | ① 題にも条件を入れる（例：「AirPodsからSiriでObsidianへ送る」）、② 機能の名前の言い方に変える（例：「AirPodsとSiriで音声メモ」）、③ このまま（本文で条件を示す） |
 | 54 | **英語の社名の書き方がそろっていない**：英語ページのフッター（約210ページ。`data/site-constants.json` の `copyrightLineEn`）は「Yurika Inc.」、App Store の販売元（iTunes の `sellerName`）・`/en/about/` の本文・`/en/terms`・`/en/privacy`・`site-constants.json` の `publisher`・この台帳の会社欄は「YURIKA, K.K.」 | 同じ会社が英語で2つの名前になっていて、AI の検索や読む人が同じ会社だと結び付けにくい（aio-2026-08-12-entity-attribution・brand-2026-08-11-entity-merge の読みにも響く）。英語の全ページのフッターが変わるので判断を取る | ① 「YURIKA, K.K.」にそろえる（App Store・規約と同じ）、② 「Yurika Inc.」のまま（英語の通称として台帳に書く）、③ フッターだけ併記 |
 | 55 | **題と CTA の見出しに残る誇張**：`/use-cases/ideas/` の題「アイデアメモアプリ — ひらめきを逃さない」と JSON-LD の headline、CTA の見出し・説明文の「GTDのキャプチャを完璧にする」（`/glossary/gtd/`・`/methods/gtd/`）「Inbox Zeroを実践する最高のキャプチャツール」「最適なメモキャプチャ」（`/glossary/inbox-zero/`）「究極のシンプルメモを体験」、英語の「Perfect Your GTD Capture」「The Perfect Capture Tool for Inbox Zero」「the ideal capture tool」「… at Lightning Speed」（`/en/glossary/markdown/`・`/en/glossary/spaced-repetition/`・`/en/use-cases/writers/`）「Experience ultimate simplicity」など約18か所（§5.40） | 計測や機能の誤りではないが、第34弾・第59弾で直した「逃さない」「すべてを」と同じ種類の言い切り。題は検索結果の見出しで、CTA の見出しは計測中の CTA の読みにも響くので、まとめて判断を取る | ① 条件のない言い切りをやめる（例：「GTDのキャプチャを手早く」「Capture Markdown Notes Quickly」）、② 題だけ残して CTA を直す、③ このまま |
+| 56 | **`/en/send-email-to-yourself` の2026年3月の計測に、1回ごとの記録が残っていない**：8アプリの起動・送信の秒数（シンプルメモは「起動1.0秒・送信1.0秒」、Pigeon「0.8秒」、Email Me「送信0.4秒」など）、「We installed and tested every major … app」、題の「5 Methods Tested」（§5.41） | ほかのページ（`/blog/memo-app-speed-test-2026`・`/blog/iphone-memo-app-fast`・`/en/blog/fastest-note-app-iphone-2026`）は、同じく記録の無い3月の数字を取り下げ、8/11 の計測に置き換えた（`data/benchmark.json` の `otherPublishedRuns`）。このページは §5.35 で「方法がページに明記されている」として残したが、記録が無い点は同じ。シンプルメモの「起動1.0秒（コールド）」は、公開している 0.4 秒（ウォーム）と条件が違う | ① 3月の数字を取り下げ、8/11 に計測したアプリはその数字、計測していないアプリは「未計測」にする（題と導入も合わせる）、② 「2026年3月の、1回ごとの記録が残っていない計測」と明記して残す、③ このまま |
