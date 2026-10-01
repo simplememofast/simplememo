@@ -1,12 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {ROOT} from './company-metrics.mjs';
 import {prepareCompanyDecision,decisionTraceStatus,verifyDecisionDelivery} from './company-decision.mjs';
 import {bindExistingRun,finishExistingRun} from './company-proof.mjs';
+import {recordHumanTouch,parentReportedInterventions,observabilityStatus} from './company-observability.mjs';
 import {selectContract,predictionFeedback} from '../../scripts/value-contracts.mjs';
 import {loadContext as eligibilityContext} from '../../scripts/autonomy-eligibility.mjs';
 
@@ -65,8 +67,9 @@ function fixture(t) {
     return{contract,declaration};
   };
   const bind=()=>bindExistingRun({stateRoot,id,autopilotRunId:runId,call,cwd,now:new Date(+now+2000),currentCandidates:candidates});
-  const deliver=({newPage=false}={})=>{gitTime=new Date(+now+3000).toISOString();
+  const deliver=({newPage=false,interventions}={})=>{gitTime=new Date(+now+3000).toISOString();
     const row={run_id:runId,outcome:'shipped',attempted:true,route:'owner-session',lane:newPage?'E':'A',action:newPage?'new':'refresh',artifact:input.scope.artifact,pr:1};
+    if(interventions!==undefined)row.interventions=interventions;
     const target=path.join(cwd,input.scope.paths[0]);fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,'<html>fixture</html>\n');
     write(path.join(cwd,'data/autopilot-runs.json'),{runs:[...historical,row]});git('add','.');git('commit','-qm','fixture implementation');
     const head=git('rev-parse','HEAD');return{row,merge:{pr:1,merge_sha:head,head_sha:head,merged_at:new Date(+now+3000).toISOString()}};
@@ -193,4 +196,155 @@ test('Company applies the original R0 new-URL guard on every branch',async t=>{
   const f=fixture(t);f.input.scope={artifact:'/obsidian/new-url/',paths:['obsidian/new-url/index.html']};f.write(f.inputFile,f.input);
   const {contract}=await f.declare();await f.bind();const {row,merge}=f.deliver();
   await assert.rejects(()=>verifyDecisionDelivery(f.load(),contract,row,[],[row],merge,f.call,f.cwd),/new public URL is R1/);
+});
+
+
+function parentFixture(t) {
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'company-parent-'));fs.chmodSync(root,0o700);
+  t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+  const runId='11111111-1111-4111-8111-111111111111',startedAt='2026-09-04T00:00:00Z',finishedAt='2026-09-04T00:01:00Z',now=new Date(finishedAt);
+  const source=path.join(root,'source.txt');fs.writeFileSync(source,'Synthetic reported approval; not a real human event.',{mode:0o600});
+  const record=(over={})=>recordHumanTouch({stateRoot:root,eventId:'approval-1',runId,stage:'execute',kind:'approval',evidenceFile:source,occurredAt:'2026-09-04T00:00:30Z',now,...over});
+  const summary=(over={})=>parentReportedInterventions({stateRoot:root,runId,startedAt,finishedAt,canonicalInterventions:[],now,...over});
+  const file=path.join(root,'human-touch-events/approval-1.json');
+  return{root,runId,startedAt,finishedAt,now,source,file,record,summary};
+}
+
+test('parent reports retain source claims, raw record SHA, stages and canonical-zero discrepancy without H0',t=>{
+  const f=parentFixture(t);f.record();f.record();const report=f.summary();
+  assert.equal(report.state,'reported_positive_events');assert.equal(report.reported_count_lower_bound,1);
+  assert.equal(report.stage_reported_lower_bounds.execute,1);assert.equal(report.parent_human_touches,null);assert.equal(report.parent_zero_touch_completion,null);
+  assert.deepEqual(report.discrepancies,[{code:'reported_positive_vs_canonical_recorded_zero'}]);
+  assert.equal(report.events[0].source_evidence.source_integrity_reverified,false);assert.equal(report.events[0].evidence_provenance,'agent_reported');
+  assert.equal(report.events[0].event_file.sha256,createHash('sha256').update(fs.readFileSync(f.file)).digest('hex'));
+  assert.deepEqual(f.summary({canonicalInterventions:[{kind:'request'}]}).discrepancies,[]);
+  // Changing the unavailable original bytes is not independently reverified.
+  fs.writeFileSync(f.source,'changed synthetic original');assert.deepEqual(f.summary(),report);
+});
+
+test('Company UUID does not alias canonical run IDs; missing/empty stores never prove zero touch',t=>{
+  const f=parentFixture(t);let report=f.summary();assert.equal(report.state,'observation_unknown');assert.equal(report.reported_count_lower_bound,0);assert.equal(report.parent_zero_touch_completion,null);
+  f.record({runId:'fixture-run'});report=f.summary();assert.equal(report.reported_count_lower_bound,0);assert.equal(report.events.length,0);assert.equal(report.state,'no_matching_reported_events');
+  assert.equal(f.summary({runId:'fixture-run'}).reported_count_lower_bound,null);
+});
+
+test('known positive reports survive partial invalid stores while the full observation remains unknown',t=>{
+  const f=parentFixture(t);f.record();fs.writeFileSync(path.join(f.root,'human-touch-events/broken.json'),'{bad',{mode:0o600});
+  const r=f.summary();assert.equal(r.state,'observation_unknown');assert.equal(r.reported_count_lower_bound,1);assert.equal(r.events.length,1);assert.equal(r.errors.length,1);
+  assert.equal(r.parent_human_touches,null);assert.equal(r.parent_zero_touch_completion,null);
+});
+
+for(const [name,change] of [
+  ['before actual start',f=>f.record({occurredAt:'2026-09-03T23:59:59Z'})],
+  ['after actual finish',f=>f.record({occurredAt:'2026-09-04T00:01:01Z',now:new Date('2026-09-04T00:02:00Z')})],
+  ['duplicate JSON keys',f=>{f.record();let s=fs.readFileSync(f.file,'utf8');s=s.replace('"stage": "execute",','"stage": "detect",\n  "stage": "execute",');fs.writeFileSync(f.file,s);}],
+  ['aliased duplicate file',f=>{f.record();fs.copyFileSync(f.file,path.join(path.dirname(f.file),'approval-2.json'));}],
+  ['unsupported top-level fields',f=>{f.record();const r=JSON.parse(fs.readFileSync(f.file));r.complete=true;fs.writeFileSync(f.file,JSON.stringify(r,null,2)+'\n');}],
+  ['unsupported evidence fields',f=>{f.record();const r=JSON.parse(fs.readFileSync(f.file));r.evidence.authoritative=true;fs.writeFileSync(f.file,JSON.stringify(r,null,2)+'\n');}],
+  ['unsupported validation claim',f=>{f.record();const r=JSON.parse(fs.readFileSync(f.file));r.validation='complete independent proof';fs.writeFileSync(f.file,JSON.stringify(r,null,2)+'\n');}],
+  ['invalid typed source hash',f=>{f.record();const r=JSON.parse(fs.readFileSync(f.file));r.evidence.sha256=1;fs.writeFileSync(f.file,JSON.stringify(r,null,2)+'\n');}],
+  ['symlink event',f=>{f.record();fs.renameSync(f.file,f.file+'.original');fs.symlinkSync(f.file+'.original',f.file);}],
+  ['symlink store',f=>{f.record();const dir=path.dirname(f.file);fs.renameSync(dir,dir+'-original');fs.symlinkSync(dir+'-original',dir);}],
+  ['oversized event',f=>{f.record();fs.writeFileSync(f.file,' '.repeat(65537));}],
+  ['world-readable event',f=>{f.record();fs.chmodSync(f.file,0o644);}],
+])test('parent report rejects '+name+' without discarding observation errors',t=>{
+  const f=parentFixture(t);change(f);const r=f.summary();assert.equal(r.state,'observation_unknown');assert(r.errors.length>0);assert.equal(r.parent_zero_touch_completion,null);
+  if(name==='aliased duplicate file')assert.equal(r.reported_count_lower_bound,1);else assert.equal(r.reported_count_lower_bound,null);
+});
+
+test('invalid and future Company windows cannot establish a supplemental observation',t=>{
+  const f=parentFixture(t);f.record();
+  for(const over of [{startedAt:'2026-02-30T00:00:00Z'},{startedAt:f.finishedAt,finishedAt:f.startedAt},{finishedAt:'2026-09-04T00:02:00Z'},
+    {runId:null},{stateRoot:null},{stateRoot:''},{expectedEventStoreSha256:1},{expectedEventStoreSha256:[]}]) {
+    const r=f.summary(over);assert.equal(r.state,'observation_unknown');assert.equal(r.reported_count_lower_bound,null);assert.equal(r.parent_zero_touch_completion,null);
+  }
+});
+
+test('event-record changes invalidate the saved binding but retain a known positive as reported only',t=>{
+  const f=parentFixture(t);f.record();const before=f.summary();let r=JSON.parse(fs.readFileSync(f.file));r.touch_kind='manual_execution';fs.writeFileSync(f.file,JSON.stringify(r,null,2)+'\n');
+  const after=f.summary({expectedEventStoreSha256:before.event_store_sha256});assert.equal(after.state,'observation_unknown');assert.equal(after.reported_count_lower_bound,1);
+  assert(after.errors.some(e=>e.code==='event_store_changed_after_finish'));assert.notEqual(after.event_store_sha256,before.event_store_sha256);assert.equal(after.parent_human_touches,null);
+});
+
+for(const mode of ['positive','malformed','missing'])test('real verified finish keeps canonical semantics and reports '+mode+' observation separately',async t=>{
+  const f=fixture(t);await f.declare();await f.bind();const {merge}=f.deliver({interventions:[]});
+  if(mode!=='missing') {
+    const source=path.join(f.stateRoot,'approval.txt');fs.writeFileSync(source,'Synthetic explicit reported approval.',{mode:0o600});
+    recordHumanTouch({stateRoot:f.stateRoot,eventId:'approval-1',runId:f.id,stage:'execute',kind:'approval',evidenceFile:source,occurredAt:new Date(+f.now+2500).toISOString(),now:new Date(+f.now+3000)});
+    if(mode==='malformed')fs.writeFileSync(path.join(f.stateRoot,'human-touch-events/approval-1.json'),'{bad');
+  }
+  const evidence=path.join(f.stateRoot,'finish.json');f.write(evidence,{kind:'autopilot_run',run_id:f.runId,pr:1});
+  const call=(name,args)=>{
+    if(name==='gh' && args[0]==='pr')return JSON.stringify({state:'MERGED',baseRefName:'main',mergedAt:merge.merged_at,mergeCommit:{oid:merge.merge_sha},headRefOid:merge.head_sha,files:[]});
+    if(name==='gh')return JSON.stringify([{databaseId:1,headSha:merge.head_sha,event:'pull_request',status:'completed',conclusion:'success'}]);
+    if(args[0]==='fetch' || args.at(-1)==='origin/main')return '';return f.call(name,args);
+  };
+  const args={stateRoot:f.stateRoot,id:f.id,evidenceFile:evidence,call,cwd:f.cwd,now:new Date(+f.now+4000),fetchImpl:async url=>({ok:true,url,text:async()=>'<html>fixture</html>\n'})};
+  const result=await finishExistingRun(args);assert.equal(result.status,'verified_existing_autopilot');assert.deepEqual(result.human_interventions,[]);
+  assert.equal(result.parent_reported_interventions.reported_count_lower_bound,mode==='positive'?1:mode==='missing'?0:null);
+  assert.equal(result.parent_reported_interventions.parent_zero_touch_completion,null);
+  const status=observabilityStatus({stateRoot:f.stateRoot});assert.equal(status.parent_reported_interventions.length,1);
+  assert.equal(status.parent_reported_interventions[0].reported_count_lower_bound,result.parent_reported_interventions.reported_count_lower_bound);
+  assert.equal(status.parent_reported_interventions[0].at_finish_summary.state,result.parent_reported_interventions.state);
+  assert.equal(status.parent_reported_interventions[0].at_finish_summary.reported_count_lower_bound,result.parent_reported_interventions.reported_count_lower_bound);
+  assert.deepEqual(status.parent_reported_interventions[0].at_finish_summary.errors,result.parent_reported_interventions.errors.map(e=>({code:e.code})));
+  assert.equal(Object.hasOwn(status.parent_reported_interventions[0].at_finish_summary,'events'),false);
+  assert.equal(status.parent_reported_interventions[0].at_finish_observation_unknown,mode!=='positive');
+  if(mode==='missing') {
+    assert.equal(status.parent_reported_interventions[0].state,'no_matching_reported_events');
+    assert.equal(status.parent_reported_interventions[0].at_finish_summary.state,'observation_unknown');
+    assert(status.parent_reported_interventions[0].at_finish_summary.errors.some(e=>e.code==='event_store_not_present'));
+  }
+  assert.equal(status.zero_touch_completion_rate,null);assert.equal(status.human_touches_per_successful_output,null);
+  if(mode==='positive') {
+    const canary='SYNTHETIC_RAW_SOURCE_CANARY_DO_NOT_EMIT';
+    for(const mutate of [
+      p=>p.raw_source_body=canary,p=>p.parent_zero_touch_completion=true,p=>p.parent_human_touches=0,
+      p=>p.coverage='complete',p=>p.state='complete',p=>p.reported_count_lower_bound='1',
+      p=>p.errors=[{code:canary}],p=>p.events[0].source_evidence.raw_source_body=canary,
+      p=>p.window.raw_source_body=canary,p=>p.canonical_interventions.raw_source_body=canary,
+      p=>p.discrepancies[0].raw_source_body=canary,p=>p.events[0].event_file.raw_source_body=canary,
+    ]) {
+      const altered=structuredClone(result);mutate(altered.parent_reported_interventions);f.write(f.file,altered);const privateBytes=fs.readFileSync(f.file);
+      const view=observabilityStatus({stateRoot:f.stateRoot});assert.equal(view.parent_reported_interventions.length,0);
+      assert(view.failures.some(e=>e.source==='parent_reported_interventions'));assert.equal(JSON.stringify(view).includes(canary),false);
+      assert.equal(view.zero_touch_completion_rate,null);assert.deepEqual(fs.readFileSync(f.file),privateBytes);
+    }
+    f.write(f.file,result);
+  }
+  for(const invalid of [null,false,0,'']) {
+    const altered=structuredClone(result);altered.parent_reported_interventions=invalid;f.write(f.file,altered);
+    const privateBytes=fs.readFileSync(f.file),view=observabilityStatus({stateRoot:f.stateRoot});
+    assert.equal(view.parent_reported_interventions.length,0);assert(view.failures.some(e=>e.source==='parent_reported_interventions'));
+    assert.equal(view.zero_touch_completion_rate,null);assert.deepEqual(fs.readFileSync(f.file),privateBytes);
+  }
+  for(const [start,end] of [
+    ['SYNTHETIC_WINDOW_CANARY_DO_NOT_EMIT','SYNTHETIC_WINDOW_CANARY_DO_NOT_EMIT'],
+    ['2026-02-30T00:00:00Z','2026-02-30T00:00:01Z'],
+    [result.finished_at,result.started_at],['2040-01-01T00:00:00Z','2040-01-01T00:00:01Z'],
+  ]) {
+    const altered=structuredClone(result);altered.started_at=start;altered.finished_at=end;
+    altered.parent_reported_interventions.window={started_at:start,finished_at:end};f.write(f.file,altered);
+    const privateBytes=fs.readFileSync(f.file),view=observabilityStatus({stateRoot:f.stateRoot});
+    assert.equal(view.parent_reported_interventions.length,0);assert(view.failures.some(e=>e.source==='parent_reported_interventions'));
+    assert.equal(JSON.stringify(view).includes('SYNTHETIC_WINDOW_CANARY_DO_NOT_EMIT'),false);assert.deepEqual(fs.readFileSync(f.file),privateBytes);
+    assert.equal(view.zero_touch_completion_rate,null);
+  }
+  f.write(f.file,result);
+  const frozen=fs.readFileSync(f.file);await finishExistingRun(args);assert.deepEqual(fs.readFileSync(f.file),frozen);
+  // An already finished historical receipt is not upgraded by retry or status.
+  const historical={...result};delete historical.parent_reported_interventions;f.write(f.file,historical);const old=fs.readFileSync(f.file);
+  await finishExistingRun(args);assert.deepEqual(fs.readFileSync(f.file),old);assert.equal(observabilityStatus({stateRoot:f.stateRoot}).parent_reported_interventions.length,0);
+});
+
+
+test('existing microsecond ISO reports preserve exact submillisecond window boundaries',t=>{
+  const f=parentFixture(t);f.record({occurredAt:'2026-09-04T00:00:30.123456Z'});assert.equal(f.summary().reported_count_lower_bound,1);
+  assert.equal(f.summary({finishedAt:'2026-09-04T00:00:30.123Z'}).reported_count_lower_bound,null);
+  assert.equal(f.summary({startedAt:'2026-09-04T00:00:30.123457Z'}).reported_count_lower_bound,null);
+  assert.equal(f.summary({startedAt:'2026-09-04T00:00:30.123456Z',finishedAt:'2026-09-04T00:00:30.123456Z'}).reported_count_lower_bound,1);
+  assert.equal(f.summary({startedAt:'2026-09-04T00:00:30.123457Z',finishedAt:'2026-09-04T00:00:30.123456Z'}).reported_count_lower_bound,null);
+  const offset=parentFixture(t);offset.record({occurredAt:'2026-09-04T09:00:30.123456+09:00'});assert.equal(offset.summary().reported_count_lower_bound,1);
+  const nano=parentFixture(t);nano.record({occurredAt:'2026-09-04T00:00:30.123456789Z'});assert.equal(nano.summary({finishedAt:'2026-09-04T00:00:30.123456788Z'}).reported_count_lower_bound,null);
+  assert.equal(nano.summary({finishedAt:'2026-09-04T00:00:30.123456789Z'}).reported_count_lower_bound,1);
 });

@@ -11,6 +11,7 @@ import { startOperationalFollowup } from './company-followup.mjs';
 import {decisionCommitment,verifyDecisionContract,verifyDecisionDelivery,decisionTrace,candidateDigest} from './company-decision.mjs';
 import {verifyMeasurementInput,verifyMeasurementDelivery,verifyMeasurementMergeScope} from './company-measurement.mjs';
 import {intentPath} from '../../scripts/value-contracts.mjs';
+import {parentReportedInterventions} from './company-observability.mjs';
 import {decisionCheckRuns} from '../../scripts/decision-monitor.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -174,6 +175,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,cwd=
     receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,decision_trace:trace,
       limitation:'Exact final SHA CI and canonical run/merge are verified. Domain-specific effect and rollback evidence remain in the existing experiment/PR.'};
     receipt.human_interventions=row.interventions??null;
+    receipt.parent_reported_interventions=parentReportedInterventions({stateRoot:dir,runId:receipt.id,startedAt:receipt.started_at,finishedAt:receipt.finished_at,canonicalInterventions:receipt.human_interventions,now});
     receipt.learnings=typeof evidence.learning==='string'&&evidence.learning.length<=2000 ? [evidence.learning] : ['Implementation verified; business impact awaits its existing experiment horizon.'];
     receipt.followup=measurement??{source:'growth/experiments/experiments.json and existing value contracts',status:'preserve original evaluation date and evidence gate'};
     atomicJson(file,receipt);atomicJson(path.join(dir,'latest-run.json'),receipt);return receipt;
