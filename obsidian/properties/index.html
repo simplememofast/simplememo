@@ -1,0 +1,142 @@
+<!-- PRIVATE C25: public admission/dates/evidence URL/CI/Pages/readback pending -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/properties/">
+  <title>Obsidianのプロパティ活用 — frontmatterとDataviewの実機例 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianのプロパティで状態・数値・チェック・日付・タグを保存し、DataviewのTABLEとLISTへつなぐ入門。Linux 1.13.7の実GUIで三件の架空ノートを確認し、完了変更で一覧が二件から一件になる結果、保存YAML、元Markdownと検証範囲を掲載します。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidianのプロパティ活用 — frontmatterとDataviewの実機例">
+  <meta property="og:description" content="Obsidianのプロパティで状態・数値・チェック・日付・タグを保存し、DataviewのTABLEとLISTへつなぐ入門。Linux 1.13.7の実GUIで三件の架空ノートを確認し、完了変更で一覧が二件から一件になる結果、保存YAML、元Markdownと検証範囲を掲載します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/properties/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-properties.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidianのプロパティ活用 — frontmatterとDataviewの実機例">
+  <meta name="twitter:description" content="Obsidianのプロパティで状態・数値・チェック・日付・タグを保存し、DataviewのTABLEとLISTへつなぐ入門。Linux 1.13.7の実GUIで三件の架空ノートを確認し、完了変更で一覧が二件から一件になる結果、保存YAML、元Markdownと検証範囲を掲載します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-properties.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/properties/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.properties-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.properties-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.properties-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.properties-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.properties-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.properties-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.properties-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.properties-guide h2,.properties-guide h3{scroll-margin-top:76px}@media(max-width:720px){.properties-guide .note-flow{grid-template-columns:1fr}.properties-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.properties-guide .source-note{font-size:.85rem;line-height:1.8;color:var(--text-muted)}.properties-guide .raw-link{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 0}.properties-guide code{overflow-wrap:anywhere}.properties-guide pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.properties-guide h2{scroll-margin-top:76px}.properties-guide .raw-source summary{cursor:pointer;min-height:44px;padding:.65rem 0}.properties-guide ol{padding-left:1.5rem}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/properties/#article","inLanguage":"ja","headline":"Obsidianのプロパティ活用 — frontmatterとDataviewの実機例","description":"Obsidianのプロパティで状態・数値・チェック・日付・タグを保存し、DataviewのTABLEとLISTへつなぐ入門。Linux 1.13.7の実GUIで三件の架空ノートを確認し、完了変更で一覧が二件から一件になる結果、保存YAML、元Markdownと検証範囲を掲載します。","url":"https://simplememofast.com/obsidian/properties/","datePublished":"2026-10-01","dateModified":"2026-10-01","author":{"@type":"Person","name":"シンプルメモ開発者","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/"},"image":"https://simplememofast.com/assets/img/og/obsidian-properties.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/properties/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Obsidian","item":"https://simplememofast.com/obsidian/"},{"@type":"ListItem","position":3,"name":"プロパティ","item":"https://simplememofast.com/obsidian/properties/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/properties/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidianのプロパティとfrontmatterは別のデータですか？","acceptedAnswer":{"@type":"Answer","text":"プロパティはノートの構造化された値を操作するUIで、値はファイル先頭のYAML frontmatterとして保存されます。今回の実機ではstatus、tags、done、due、priorityをGUIで操作し、保存されたMarkdownの値と照合しました。"}},{"@type":"Question","name":"プロパティの型はノートごとに設定しますか？","acceptedAnswer":{"@type":"Answer","text":"公式資料では、同じプロパティ名には保管庫全体で同じ型が使われます。名前の横の型アイコンからProperty typeを開いて型を選びます。今回の実機ではpriorityにNumberを選んで3を保存しました。すべての型や日付入力の検証を行ったわけではありません。"}},{"@type":"Question","name":"Dataviewでプロパティを一覧にする基本形は？","acceptedAnswer":{"@type":"Answer","text":"dataviewコードブロックにTABLEまたはLIST、FROMとWHEREを書きます。今回の三件では、FROM \"記録\"でフォルダーを対象にし、status = \"進行中\"のTABLEは二件、done = falseのLISTは完了チェック変更前に二件、変更後に一件でした。"}},{"@type":"Question","name":"ダウンロードした例はどの状態ですか？","acceptedAnswer":{"@type":"Answer","text":"GUIで調査Aのdoneをtrueに変更した後の保存原本です。記録フォルダー内に調査A・B・C、同じ保管庫の直下に一覧.mdを置く構成を示しています。今回の実機結果はTABLE二件、未完了LISTは調査C一件、保留は該当なしでした。読者の保管庫への取り込みや別環境の動作は未検証です。"}}]}</script>
+</head>
+<body class="properties-guide">
+<nav class="global-nav" aria-label="Global navigation"><div class="global-nav__inner"><a href="/" class="global-nav__logo"><img src="/assets/img/app-icon-56.png" alt="" width="28" height="28"><span>Obsidian連携シンプルメモ</span></a><ul class="global-nav__links"><li><a href="/guides/">使い方</a></li><li><a href="/use-cases/">活用事例</a></li><li><a href="/vs/">比較</a></li><li><a href="/blog/">ブログ</a></li><li><a href="/about/">開発者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">ダウンロード</a></div></nav>
+<main class="page-content"><article class="properties-guide container"><header class="lp-hero"><p class="quickadd-crumb"><a href="/obsidian/">Obsidian</a> / Properties</p><span class="lp-hero__label">ノートの値を揃えて、一覧へつなぐ</span><h1 class="lp-hero__title">Obsidianのプロパティ活用<br>frontmatterから一覧へ</h1><p class="lp-hero__sub">状態、数値、チェック、日付、タグをノートに保存し、Dataviewで条件に合う記録を表示します。架空の三件を使った実GUI操作と、保存Markdownを確認した入門です。</p><p class="article-meta">著者: <a href="/about/">シンプルメモ開発者</a> · 実機確認: <time datetime="2026-10-01">2026年10月1日（日本時間）</time> · Obsidian 1.13.7 / Linux</p></header>
+<section class="lp-section" id="answer"><h2 class="lp-section__title">プロパティは、ノート先頭のYAMLを扱うUI</h2><p><strong>Propertiesで入力した名前と値は、ノート先頭のfrontmatterに保存されます。</strong>例えば<code>status: 進行中</code>を揃えておくと、DataviewのWHERE条件で「進行中」のノートを選べます。本文に書いた普通の文章とは扱いが違います。</p><p>まず、何を比較したいかを決めて少数の項目を使います。この例では、状態を<code>status</code>、優先度を<code>priority</code>、完了を<code>done</code>、期限を<code>due</code>、分類を<code>tags</code>としました。著者作成の架空記録で、利用者のデータではありません。</p><nav class="capture-toc" aria-label="プロパティと一覧の手順"><a href="#properties">GUIで入力</a><a href="#yaml">保存YAML</a><a href="#query">TABLE・LIST</a><a href="#results">変更と結果</a><a href="#raw">練習用原本</a></nav></section>
+<section class="lp-section" id="properties"><h2 class="lp-section__title">名前、型、値を順に決める</h2><ol><li>ノートを開き、<strong>Add property</strong>または公式の<code>Ctrl/Cmd+;</code>から項目を追加します。実機例ではAdd propertyをクリックして<code>priority</code>を追加しました。</li><li>項目名の横の型アイコンを押し、<strong>Property type</strong>を開いて型を選びます。実機ではNumberを選び、3を入力して保存しました。</li><li>既存の<code>status</code>はTextを選び、「未着手」から「進行中」へ変更しました。チェック、Date入力、Tags入力も実際のUIで変更し、保存YAMLへ反映されることを確認しました。</li><li>Tagsは文字を入力するだけで終わらせず、フォーカスした入力でEnterを押して確定します。今回の補助操作も一度確定できず、再度Enterとフォーカス移動で保存を確認しました。</li></ol><table class="rt-table"><thead><tr><th scope="col">名前</th><th scope="col">この例の型と値</th><th scope="col">実機で行ったこと</th></tr></thead><tbody><tr><th scope="row">status</th><td data-label="型">Text / 進行中</td><td data-label="操作">Text選択、未着手→進行中</td></tr><tr><th scope="row">priority</th><td data-label="型">Number / 3</td><td data-label="操作">項目追加、Number選択、3入力</td></tr><tr><th scope="row">done</th><td data-label="型">Checkbox / trueまたはfalse</td><td data-label="操作">false→true→false、最後にtrue</td></tr><tr><th scope="row">due</th><td data-label="型">Date / 2026-10-03</td><td data-label="操作">10月1日→10月3日</td></tr><tr><th scope="row">tags</th><td data-label="型">Tags / 検証、プロパティ</td><td data-label="操作">プロパティを追加し確定</td></tr></tbody></table><p>公式資料では、同じ名前の型は保管庫全体で共通です。別の意味の値へ同じ名前を使い回す前に、型と用途を確認します。ListやDate &amp; timeなど、ここで扱っていない型は今回の動作確認に含みません。</p><figure class="shot"><a href="/assets/img/obsidian-properties/properties-number.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/properties-number.png" width="1024" height="800" loading="lazy" decoding="async" alt="priorityをNumberとして3に保存した実Obsidianプロパティ画面"></a><figcaption>priorityのNumber型と保存値3。日付はまだ変更前。 <a href="/assets/img/obsidian-properties/properties-number.png" target="_blank" rel="noopener">原画像を開く</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-properties/properties-final.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/properties-final.png" width="1024" height="800" loading="lazy" decoding="async" alt="最終状態のstatus進行中、二つのタグ、完了チェック、10月3日期限、priority3が見える実画面"></a><figcaption>最終の保存状態。doneはチェック済み。 <a href="/assets/img/obsidian-properties/properties-final.png" target="_blank" rel="noopener">原画像を開く</a></figcaption></figure></section>
+<section class="lp-section" id="yaml"><h2 class="lp-section__title">保存したfrontmatterを確認する</h2><p>下は調査Aの<strong>最後の保存全文、211 bytes</strong>です。GUIでdoneをtrueに変更した後の状態で、本文も含めて元Markdownと同じ内容です。</p><details class="raw-source"><summary>調査Aの保存Markdown全文を見る</summary><pre class="capture-code" data-evidence="記録/調査A.md"><code>---
+status: 進行中
+tags:
+  - 検証
+  - プロパティ
+done: true
+due: 2026-10-03
+priority: 3
+---
+
+# 調査A
+
+著者が検証用に作成した架空の記録です。顧客データではありません。
+</code></pre></details><p>公式資料では、frontmatterはファイル先頭を<code>---</code>で囲み、<code>名前: 値</code>のYAML形式で記述します。プロパティ名は一つのノート内で重複させません。この例の数値3とチェックtrueは、それぞれ数値とbooleanとして保存されています。Dateはこの値を保存した確認であり、あらゆる日付形式や入力の正しさを検証した結果ではありません。</p></section>
+<section class="lp-section" id="query"><h2 class="lp-section__title">同じ値をTABLEとLISTの条件にする</h2><p>実機では、公式Dataview安定リリースの三ファイルを隔離した保管庫へ事前にコピーし、実際の信頼確認でプラグインを有効にしました。これはBrowse/Installの画面操作を検証した記録ではありません。プラグインは第三者コードを実行するため、配布元と利用条件を確認して選びます。</p><p><strong>リリース名は0.5.70、配布manifestと実画面の表示版は0.5.68でした。</strong>必要なObsidian最小版はmanifest上0.13.11、実際に動かしたObsidianは1.13.7です。DataviewJS設定はfalseで、次のDQLを実際のエディターへ入力し、Reading viewで表示しました。</p><p>フォルダー名<code>記録</code>、項目名、状態文字列を一致させます。調査A/Bは進行中、Cは完了です。</p><pre class="capture-code"><code># Properties接続検証
+
+著者が作成した架空の3件だけを表示します。
+
+## 進行中の表
+
+```dataview
+TABLE status AS &quot;状態&quot;, priority AS &quot;優先度&quot;, done AS &quot;完了&quot;, due AS &quot;期限&quot;
+FROM &quot;記録&quot;
+WHERE status = &quot;進行中&quot;
+SORT file.name ASC
+```
+
+## 未完了の一覧
+
+```dataview
+LIST
+FROM &quot;記録&quot;
+WHERE done = false
+SORT file.name ASC
+```
+
+## 保留の該当なし
+
+```dataview
+LIST
+FROM &quot;記録&quot;
+WHERE status = &quot;保留&quot;
+SORT file.name ASC
+```
+</code></pre><p>TABLEは進行中の二件を表へ、LISTはdoneがfalseのノートを一覧へ出します。最後のLISTは保留のノートを選び、対象がない場合の実表示も確認しました。DQLの全機能、インラインフィールド、DataviewJSはここで試していません。</p></section>
+<section class="lp-section" id="results"><h2 class="lp-section__title">完了チェックを変えると、未完了一覧が2件から1件へ</h2><table class="rt-table"><thead><tr><th scope="col">条件</th><th scope="col">調査Aのdone=false</th><th scope="col">GUIでdone=trueへ変更後</th></tr></thead><tbody><tr><th scope="row">status = 進行中のTABLE</th><td data-label="変更前">調査A・B / 2件</td><td data-label="変更後">調査A・B / 2件。Aの完了値trueを表示</td></tr><tr><th scope="row">done = falseのLIST</th><td data-label="変更前">調査A・C / 2件</td><td data-label="変更後">調査C / 1件</td></tr><tr><th scope="row">status = 保留のLIST</th><td data-label="変更前">該当なし</td><td data-label="変更後">該当なし</td></tr></tbody></table><figure class="shot"><a href="/assets/img/obsidian-properties/dataview-before-list.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/dataview-before-list.png" width="1024" height="800" loading="lazy" decoding="async" alt="変更前の未完了一覧に調査Aと調査C、保留条件に該当なしが見えるReading画面"></a><figcaption>変更前のLIST二件と、保留の結果なし。 <a href="/assets/img/obsidian-properties/dataview-before-list.png" target="_blank" rel="noopener">原画像を開く</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-properties/dataview-updated-results.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/dataview-updated-results.png" width="1024" height="800" loading="lazy" decoding="async" alt="完了変更後のTABLE調査AとB、未完了LIST調査Cだけが見えるReading画面"></a><figcaption>変更後：TABLE二件、LIST一件。実画面をそのまま掲載。 <a href="/assets/img/obsidian-properties/dataview-updated-results.png" target="_blank" rel="noopener">原画像を開く</a></figcaption></figure><p>変更前のTABLE二件は実Reading DOMで確認しましたが、そのときのPNGは表より下へスクロールしていました。上の変更後PNGでは表二件と未完了一覧一件が見えます。表示位置や画像を作り直して置き換えていません。</p><p>ファイル一覧から調査Aと一覧ノートを再度開き、保存MarkdownのbytesとSHA256が同じことも確認しました。同じアプリ起動中の再表示で、アプリ全体の再起動や別端末の確認ではありません。今回の条件で値が表示へ反映された結果で、作業速度や生産性が上がるという因果は計測していません。</p></section>
+<section class="lp-section" id="raw"><h2 class="lp-section__title">最終状態の四ファイルを保存する</h2><p>実機で保存した原Markdownのbytesをそのままコピーしたファイルです。調査Aのdoneはtrue。以下の構成で、クエリのFROMとフォルダー名を合わせています。読者の保管庫での取り込みは未検証です。</p><pre class="capture-code"><code>保管庫/
+  一覧.md
+  記録/
+    調査A.md
+    調査B.md
+    調査C.md</code></pre><table class="rt-table"><thead><tr><th scope="col">保管庫内の相対パス</th><th scope="col">保存原本</th></tr></thead><tbody><tr><th scope="row"><code>記録/調査A.md</code></th><td data-label="保存原本"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBA.md" data-source-path="記録/調査A.md" download="調査A.md">調査A.mdを保存（211 bytes）</a></td></tr><tr><th scope="row"><code>記録/調査B.md</code></th><td data-label="保存原本"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBB.md" data-source-path="記録/調査B.md" download="調査B.md">調査B.mdを保存（152 bytes）</a></td></tr><tr><th scope="row"><code>記録/調査C.md</code></th><td data-label="保存原本"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBC.md" data-source-path="記録/調査C.md" download="調査C.md">調査C.mdを保存（150 bytes）</a></td></tr><tr><th scope="row"><code>一覧.md</code></th><td data-label="保存原本"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E4%B8%80%E8%A6%A7.md" data-source-path="一覧.md" download="一覧.md">一覧.mdを保存（472 bytes）</a></td></tr></tbody></table><p class="source-note">三記録の初期内容は検証前に直接作成しています。調査Aの項目変更と一覧ノートのクエリ入力がGUI操作の範囲です。B/CをGUIで一から作成した記録にはしません。</p></section>
+<section class="lp-section" id="faq"><h2 class="lp-section__title">よくある質問</h2><details class="faq-item"><summary class="faq-summary">Obsidianのプロパティとfrontmatterは別のデータですか？</summary><div class="faq-answer">プロパティはノートの構造化された値を操作するUIで、値はファイル先頭のYAML frontmatterとして保存されます。今回の実機ではstatus、tags、done、due、priorityをGUIで操作し、保存されたMarkdownの値と照合しました。</div></details><details class="faq-item"><summary class="faq-summary">プロパティの型はノートごとに設定しますか？</summary><div class="faq-answer">公式資料では、同じプロパティ名には保管庫全体で同じ型が使われます。名前の横の型アイコンからProperty typeを開いて型を選びます。今回の実機ではpriorityにNumberを選んで3を保存しました。すべての型や日付入力の検証を行ったわけではありません。</div></details><details class="faq-item"><summary class="faq-summary">Dataviewでプロパティを一覧にする基本形は？</summary><div class="faq-answer">dataviewコードブロックにTABLEまたはLIST、FROMとWHEREを書きます。今回の三件では、FROM "記録"でフォルダーを対象にし、status = "進行中"のTABLEは二件、done = falseのLISTは完了チェック変更前に二件、変更後に一件でした。</div></details><details class="faq-item"><summary class="faq-summary">ダウンロードした例はどの状態ですか？</summary><div class="faq-answer">GUIで調査Aのdoneをtrueに変更した後の保存原本です。記録フォルダー内に調査A・B・C、同じ保管庫の直下に一覧.mdを置く構成を示しています。今回の実機結果はTABLE二件、未完了LISTは調査C一件、保留は該当なしでした。読者の保管庫への取り込みや別環境の動作は未検証です。</div></details></section>
+<section class="lp-section" id="evidence"><h2 class="lp-section__title">公式資料と、この実機確認の範囲</h2><p>GUI確認のUTC日は2026年9月30日、日本時間は2026年10月1日です。実画面、保存原本、固定ソース、補助の訂正、終了記録の不足は<a href="https://github.com/simplememofast/simplememo/blob/main/docs/evidence/obsidian-properties-20261001.md" target="_blank" rel="noopener">検証記録</a>にまとめます。終了Closeは送信しましたが、記録器の終了順によりObsidianの終了コードは未記録です。</p><ul><li><strong>確認済み：</strong>Linux Obsidian 1.13.7、五つの型の有限GUI操作、保存YAML、DQL三条件の実Reading表示、値変更と再表示、同じ起動中の保存一致。</li><li><strong>公式説明：</strong>Propertiesの保存形式・型の共有、Dataviewのfrontmatter/QUERY/TABLE/LIST/WHEREを固定資料で確認。</li><li><strong>未確認：</strong>全型・全入力検証、プラグインのセキュリティ監査、全DQL/JS、アプリ再起動、iOS、同期、SimpleMemo連携、大保管庫・速度・生産性。</li></ul><p><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Editing%20and%20formatting/Properties.md" target="_blank" rel="noopener">公式Properties資料（固定commit）</a> · <a href="https://github.com/blacksmithgu/obsidian-dataview/tree/77ab745aee787d519642a87ed8f68be12fdc4b0d/docs/docs" target="_blank" rel="noopener">Dataview公式資料（固定commit）</a> · <a href="https://github.com/blacksmithgu/obsidian-dataview/releases/tag/0.5.70" target="_blank" rel="noopener">確認した安定リリース</a></p></section>
+<section class="lp-section next-step" id="next"><h2 class="lp-section__title">次に、クエリの書き方を広げる</h2><p>値の名前と型が揃ったら、Dataviewの表示形式と書き方を確認します。一般的なDQL・インライン式・JSの違いは既存の解説へ進みます。</p><a class="lp-btn-primary" href="/obsidian/plugins/dataview/" data-next-step="explore">Dataviewの使い方を読む</a></section></article></main>
+<footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">プロダクト</p><a href="/download/" class="footer__link">ダウンロード</a><a href="/" class="footer__link">ホーム</a><a href="/obsidian/" class="footer__link">Obsidian連携</a></div><div class="footer__col"><p class="footer__col-title">比較・乗り換え</p><a href="/vs/" class="footer__link">比較</a><a href="/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">サポート</p><a href="/about/" class="footer__link">開発者について</a><a href="/faq" class="footer__link">FAQ</a><a href="/privacy" class="footer__link">プライバシー</a></div></nav><p class="footer__copyright">© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+
+</body>
+</html>

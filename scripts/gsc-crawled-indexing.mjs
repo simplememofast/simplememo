@@ -58,6 +58,30 @@ const publicationPaths = [
   { kind: "html", url: "/obsidian/uri-scheme/" },
   { kind: "asset", url: "/assets/evidence/uri-scheme-20260930/images/encoded-content.png" },
   { kind: "asset", url: "/assets/evidence/uri-scheme-20260930/results/38-action-parameter-units.json" },
+  { kind: "html", url: "/obsidian/compare/anytype/" },
+  { kind: "asset", url: "/assets/img/obsidian-compare-anytype/anytype-welcome.png" },
+  { kind: "asset", url: "/assets/downloads/obsidian-compare-anytype/index.md" },
+  { kind: "html", url: "/obsidian/import/" },
+  { kind: "asset", url: "/assets/downloads/obsidian-import/notion-attachment.md" },
+  { kind: "asset", url: "/assets/img/obsidian-import/notion-finished.png" },
+  { kind: "html", url: "/obsidian/daily-note-plugins/" },
+  { kind: "asset", url: "/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" },
+  { kind: "asset", url: "/assets/img/obsidian-daily-note-plugins/daily.png" },
+  { kind: "html", url: "/resources/obsidian-uri/" },
+  { kind: "asset", url: "/assets/img/obsidian-uri-generator/encoded-content.png" },
+  { kind: "asset", url: "/assets/downloads/obsidian-uri-generator/encoded-new-saved.md" },
+  { kind: "html", url: "/obsidian/community/" },
+  { kind: "asset", url: "/assets/downloads/obsidian-community/source-update-observations.json" },
+  { kind: "asset", url: "/assets/img/og/obsidian-community.png" },
+  { kind: "html", url: "/obsidian/properties/" },
+  { kind: "asset", url: "/assets/img/obsidian-properties/properties-final.png" },
+  { kind: "asset", url: "/assets/downloads/obsidian-properties/記録/調査A.md" },
+  { kind: "html", url: "/obsidian/publish/" },
+  { kind: "asset", url: "/assets/img/obsidian-publish/quartz-home-desktop.png" },
+  { kind: "asset", url: "/assets/downloads/obsidian-publish/index.md" },
+  { kind: "html", url: "/obsidian/use-cases/" },
+  { kind: "asset", url: "/assets/img/og/obsidian-use-cases.png" },
+  { kind: "asset", url: "/assets/downloads/obsidian-use-cases/role-mapping.json" },
 ];
 const sha256 = bytes => createHash("sha256").update(bytes).digest("hex");
 const clean = (html) => html.replace(/<!--[\s\S]*?-->/g, "")
@@ -200,7 +224,7 @@ async function selftest() {
       : target.url.endsWith(".png") ? Buffer.from([0x89, 0x50, 0x4e, 0x47, 0xff, 0xfe, 0x00, 0x80]) : Buffer.from("Synthetic 日本語\nsecond capture\n")]));
   const readBytes = file => { assert(fixtureBytes.has(file), `Unexpected synthetic source: ${file}`); return fixtureBytes.get(file); };
   const publication = publicationTargets(readBytes), htmlTarget = publication[0], pngTarget = publication.find(target => target.url.endsWith(".png"));
-  assert.equal(publication.length, 36);
+  assert.equal(publication.length, 60);
   assert.throws(() => publicationTargets(() => { throw new Error("Missing publication source"); }), /Missing publication source/);
   const html = fixtureHtml(htmlTarget.url, htmlTarget.expectedTitle);
   assert.equal(headTitle(html.replace("<body>", "<body><title>Wrong body title</title>"), htmlTarget.url), htmlTarget.expectedTitle);
@@ -276,14 +300,14 @@ async function selftest() {
   const baseline = makeRequest(), baselineReports = [];
   const baselineReport = await liveAudit(false, { request: baseline.request, readBytes: () => { throw new Error("PR baseline must not load candidate sources"); }, saveReport: report => baselineReports.push(report), logReport: () => {} });
   assert.equal(baselineReport.passed, 85);
-  assert.equal(baselineReport.publication.skipped, 36);
+  assert.equal(baselineReport.publication.skipped, 60);
   assert(baselineReport.ok);
   assert.equal(baselineReports.length, 1);
   for (const target of publication) assert(!baseline.calls.has(`GET ${target.url}`), "PR baseline must not fetch unpublished candidates");
   const deployed = makeRequest(), deployedReports = [];
   const deployedReport = await liveAudit(true, { request: deployed.request, readBytes, wait: async () => {}, saveReport: report => deployedReports.push(report), logReport: () => {} });
   assert.equal(deployedReport.passed, 85);
-  assert.equal(deployedReport.publication.passed, 36);
+  assert.equal(deployedReport.publication.passed, 60);
   assert.equal(deployedReport.publication.failed, 0);
   assert(deployedReport.ok);
   assert.equal(deployedReport.costUsd, null);
@@ -297,7 +321,7 @@ async function selftest() {
   assert(!failureReports[0].ok);
   const sourceFailureReports = [];
   await assert.rejects(liveAudit(true, { request: async () => { throw new Error("Missing sources must fail before HTTP"); }, readBytes: () => { throw new Error("Missing publication source"); }, saveReport: report => sourceFailureReports.push(report), logReport: () => {} }), /Missing publication source/);
-  assert.equal(sourceFailureReports[0].publication.skipped, 36);
+  assert.equal(sourceFailureReports[0].publication.skipped, 60);
   assert(!sourceFailureReports[0].ok, "An incomplete strict run cannot pass");
   const controlReports = [], controlFailure = makeRequest();
   await assert.rejects(liveAudit(false, { request: async (url, method) => url === "/robots.txt" ? new Response("Missing", { status: 503 }) : controlFailure.request(url, method), saveReport: report => controlReports.push(report), logReport: () => {} }), /robots.txt must return 200/);
