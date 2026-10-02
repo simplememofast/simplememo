@@ -1,0 +1,856 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "one_release_local_quality.v1",
+  "title": "One externally reviewed 5.9.13 quality alternative; raw claims unchanged",
+  "type": "object",
+  "required": [
+    "schema",
+    "purpose",
+    "repository",
+    "version",
+    "status",
+    "consumed",
+    "valid_from",
+    "expires_at",
+    "target",
+    "authorization",
+    "review",
+    "local_build",
+    "fast_unit",
+    "simulator",
+    "github",
+    "cloud",
+    "physical",
+    "known_failure_review"
+  ],
+  "properties": {
+    "schema": {
+      "const": "one_release_local_quality.v1"
+    },
+    "purpose": {
+      "enum": [
+        "integration",
+        "submission"
+      ]
+    },
+    "repository": {
+      "const": "simplememofast/simplememo-ios"
+    },
+    "version": {
+      "const": "5.9.13"
+    },
+    "status": {
+      "const": "active"
+    },
+    "consumed": {
+      "const": false
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    },
+    "target": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "source_tree",
+        "simulator_inventory_sha256",
+        "simulator_cases_sha256"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "source_tree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "pr_number": {
+          "const": 659
+        },
+        "base_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "merge_tree": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "main_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "build_number": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "apple_build_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "archive_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "ipa_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_inputs_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "simulator_inventory_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "simulator_cases_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "required": [
+        "basis",
+        "version",
+        "human_instruction_observed_at",
+        "adopted_at",
+        "target_sha256",
+        "ref"
+      ],
+      "properties": {
+        "basis": {
+          "const": "direct_human_one_version_instruction"
+        },
+        "version": {
+          "const": "5.9.13"
+        },
+        "adopted_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "target_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "human_instruction_observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": [
+        "decision",
+        "by",
+        "target_sha256",
+        "ref"
+      ],
+      "properties": {
+        "decision": {
+          "const": "ONE_RELEASE_LOCAL_QUALITY_ACCEPTED"
+        },
+        "by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "known_failure_review": {
+      "type": "object",
+      "required": [
+        "unresolved",
+        "ref"
+      ],
+      "properties": {
+        "unresolved": {
+          "const": 0
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "local_build": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "observed_at",
+        "ref",
+        "conclusion",
+        "native_exit_code"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "native_exit_code": {
+          "const": 0
+        }
+      }
+    },
+    "fast_unit": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "observed_at",
+        "ref",
+        "scheme",
+        "plan",
+        "conclusion",
+        "whole_plan",
+        "expected_cases",
+        "passed",
+        "failed",
+        "skipped",
+        "expected_failures",
+        "unknown_cases",
+        "attempts_reviewed",
+        "blocking_issues",
+        "inventory_ref"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "scheme": {
+          "const": "SimpleMemoQA"
+        },
+        "plan": {
+          "const": "TestPlans/SimpleMemo-FastUnit.xctestplan"
+        },
+        "conclusion": {
+          "const": "passed"
+        },
+        "whole_plan": {
+          "const": true
+        },
+        "expected_cases": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "passed": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "failed": {
+          "const": 0
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "expected_failures": {
+          "const": 0
+        },
+        "unknown_cases": {
+          "const": 0
+        },
+        "attempts_reviewed": {
+          "const": true
+        },
+        "blocking_issues": {
+          "const": 0
+        },
+        "inventory_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "skip_is_existing_physical_only": {
+          "const": true
+        }
+      }
+    },
+    "simulator": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "observed_at",
+        "ref",
+        "conclusion",
+        "coverage_ref",
+        "required_cases",
+        "cases"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "conclusion": {
+          "const": "passed"
+        },
+        "coverage_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "required_cases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "identifier",
+              "conclusion",
+              "attempts"
+            ],
+            "properties": {
+              "identifier": {
+                "type": "string",
+                "minLength": 1
+              },
+              "conclusion": {
+                "const": "passed"
+              },
+              "attempts": {
+                "const": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "github": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "observed_at",
+        "raw_ref"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "raw_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "cloud": {
+      "type": "object",
+      "required": [
+        "conclusion",
+        "reason",
+        "quota_recovered",
+        "raw_ref",
+        "unverified_check_ids",
+        "unverified_status_ids"
+      ],
+      "properties": {
+        "conclusion": {
+          "enum": [
+            "cancelled",
+            "unknown",
+            "not_run"
+          ]
+        },
+        "reason": {
+          "const": "quota_exhausted"
+        },
+        "quota_recovered": {
+          "const": false
+        },
+        "raw_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "unverified_check_ids": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "unverified_status_ids": {
+          "type": "array",
+          "minItems": 0,
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "not_run_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "quota_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "physical": {
+      "type": "object",
+      "required": [
+        "conclusion",
+        "raw_ref",
+        "replaced_for_this_one_release"
+      ],
+      "properties": {
+        "conclusion": {
+          "const": "unknown"
+        },
+        "raw_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "replaced_for_this_one_release": {
+          "const": true
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "source_sha",
+        "apple_build_id",
+        "build_number",
+        "version",
+        "archive_sha256",
+        "ipa_sha256",
+        "source_inputs_sha256",
+        "testflight_available_at",
+        "testflight_availability_ref",
+        "independent_acceptance_ref",
+        "processing_state",
+        "distribution_eligibility",
+        "distribution_signed",
+        "archive_signature_verified",
+        "ipa_signature_verified",
+        "four_bundle_identity_verified",
+        "source_custody_verified",
+        "package_resource_inputs_verified"
+      ],
+      "properties": {
+        "source_sha": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "apple_build_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "build_number": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "version": {
+          "const": "5.9.13"
+        },
+        "archive_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "ipa_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_inputs_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "testflight_available_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "(Z|\\+00:00)$"
+        },
+        "testflight_availability_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "independent_acceptance_ref": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2048
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "processing_state": {
+          "const": "VALID"
+        },
+        "distribution_eligibility": {
+          "const": "APP_STORE_ELIGIBLE"
+        },
+        "distribution_signed": {
+          "const": true
+        },
+        "archive_signature_verified": {
+          "const": true
+        },
+        "ipa_signature_verified": {
+          "const": true
+        },
+        "four_bundle_identity_verified": {
+          "const": true
+        },
+        "source_custody_verified": {
+          "const": true
+        },
+        "package_resource_inputs_verified": {
+          "const": true
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "integration"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "target": {
+            "required": [
+              "pr_number",
+              "base_sha",
+              "merge_tree"
+            ]
+          }
+        },
+        "not": {
+          "required": [
+            "artifact"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "purpose": {
+            "const": "submission"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "artifact"
+        ],
+        "properties": {
+          "target": {
+            "required": [
+              "main_sha",
+              "build_number",
+              "apple_build_id",
+              "archive_sha256",
+              "ipa_sha256",
+              "source_inputs_sha256"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "cloud": {
+            "properties": {
+              "conclusion": {
+                "const": "not_run"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "cloud": {
+            "required": [
+              "not_run_ref",
+              "quota_ref"
+            ],
+            "properties": {
+              "unverified_status_ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$comment": "Runtime validator also enforces exact linkage, freshness, counts, suite identities/raw-row preservation, expiry and consumption. It does not manufacture actual evidence or consume the external record; successful owner action must consume it."
+}
