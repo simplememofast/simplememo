@@ -111,6 +111,7 @@ const UNSERVED_DATA = new Set([
   "model-routing.json",
   "monitoring-coverage.json",
   "obsidian-feature-observation-20260911.json",
+  "one-release-local-quality.schema.json",
   "pr-claims.json",
   "pr-release-ledger.json",
   "press-release-next.json",
