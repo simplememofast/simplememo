@@ -831,7 +831,9 @@ jobs:
       # **静かに欠けたデータ**。重複と内部不整合は落とす（数字が黙って嘘になる）。
       # 日付の欠けと鮮度は報告のみ — 元データ側の遅れで無関係な出荷を止めない。
       - name: Data quality (GSC snapshots)
-        run: node growth/scripts/check-data-quality.mjs --check
+        run: |
+          node growth/scripts/check-data-quality.mjs --selftest
+          node growth/scripts/check-data-quality.mjs --check
 
       # 【シグナル台帳】要望・レビュー・問い合わせ・競合を1つの台帳に集め、
       # **同じ話を1行にする**。声の大きさを「何回転記されたか」で測らないため。
