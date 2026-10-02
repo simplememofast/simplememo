@@ -40,9 +40,66 @@ export function targetsOf(ledger) {
   return (ledger.experiments || []).filter((e) => isOpen(e) && measuresPageCtr(e));
 }
 
+/**
+ * Select exactly one usable GSC page row. A duplicate is ambiguous even when
+ * counts match; row order must never choose a rollback. Unknown input stays hold.
+ * This checks selection only, not snapshot freshness or causal attribution.
+ */
+export function selectCurrent(pagePath, rows) {
+  const hold = (code, reason, matchingRows = null) => ({
+    status: 'hold', current: null, reason_code: code, reason, matching_rows: matchingRows,
+  });
+  if (typeof pagePath !== 'string' || !pagePath.length) {
+    return hold('invalid_page_target', '対象pageを確定できないため判定しない');
+  }
+  if (rows == null) {
+    return hold('snapshot_unavailable', '現在値が取れない（スナップショット欠落。変化なしとは数えない）');
+  }
+  if (!Array.isArray(rows)) {
+    return hold('invalid_page_collection', '現在のpagesが配列ではないため判定しない');
+  }
+  // Inspect every row before accepting a hit: a later malformed row might hide
+  // another target row. Unrelated, identifiable pages need no count admission.
+  for (const row of rows) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)
+        || !Object.hasOwn(row, 'page') || typeof row.page !== 'string' || !row.page.length) {
+      return hold('invalid_page_row', '現在のpagesにpageを確定できない行があるため判定しない');
+    }
+  }
+  const matching = rows.filter((row) => row.page === pagePath);
+  if (matching.length === 0) {
+    return hold('page_row_missing', '対象pageの現在値が無い（観測ゼロとは推定しない）', 0);
+  }
+  if (matching.length > 1) {
+    return hold('duplicate_page_rows', '対象pageの現在値が複数あるため判定しない（行順で選ばない）', matching.length);
+  }
+  const hit = matching[0];
+  if (!Object.hasOwn(hit, 'clicks') || !Object.hasOwn(hit, 'impressions')
+      || !Number.isFinite(hit.clicks) || !Number.isFinite(hit.impressions)
+      || hit.clicks < 0 || hit.impressions <= 0 || hit.clicks > hit.impressions) {
+    return hold('invalid_matching_counts', '対象pageのclicks/impressionsが有効な観測件数ではないため判定しない', 1);
+  }
+  return {
+    status: 'ok', current: { clicks: hit.clicks, impressions: hit.impressions },
+    reason_code: null, reason: null, matching_rows: 1,
+  };
+}
+
+/** Preserve the existing counts-or-null API for other callers. */
 export function currentFor(pagePath, rows) {
-  const hit = (rows || []).find((r) => r.page === pagePath);
-  return hit ? { clicks: hit.clicks, impressions: hit.impressions } : null;
+  return selectCurrent(pagePath, rows).current;
+}
+
+/** The actual CLI consumer preserves explicit hold reasons before evaluating CTR. */
+export function evaluateCurrent(baseline, pagePath, rows, rules = DEFAULT_RULES) {
+  const selected = selectCurrent(pagePath, rows);
+  if (selected.status !== 'ok') {
+    return {
+      action: 'hold', reason: selected.reason,
+      evidence: { current_selection: { code: selected.reason_code, matching_rows: selected.matching_rows } },
+    };
+  }
+  return evaluate(baseline, selected.current, rules);
 }
 
 function selftest() {
@@ -105,6 +162,72 @@ function selftest() {
   t('複数ページ集合を1ページのGSC行と比べない', !picked.includes('multipage'));
   t('GA4起点の実験を対象に取らない', !picked.includes('ga4'));
 
+
+  // Source-selection regressions. No live ledger/snapshot, query, or rollback.
+  const baseline = { clicks: 100, impressions: 2000 };
+  const low = { page: '/selection-fixture', clicks: 20, impressions: 2000 };
+  const high = { page: '/selection-fixture', clicks: 200, impressions: 2000 };
+  const unrelated = { page: '/other-fixture', clicks: 1, impressions: 100 };
+  const selectionHold = (rows, code) => {
+    const result = evaluateCurrent(baseline, '/selection-fixture', rows);
+    return result.action === 'hold'
+      && result.evidence.current_selection?.code === code
+      && currentFor('/selection-fixture', rows) === null;
+  };
+  t('唯一の有効行のcurrentFor counts/null互換を保つ',
+    JSON.stringify(currentFor('/selection-fixture', [unrelated, low]))
+      === JSON.stringify({ clicks: 20, impressions: 2000 }));
+  t('唯一行の実consumerは原revertを保つ',
+    evaluateCurrent(baseline, '/selection-fixture', [low]).action === 'revert');
+  t('唯一行の実consumerは原continueを保つ',
+    evaluateCurrent(baseline, '/selection-fixture', [high]).action === 'continue');
+  t('矛盾する重複は低い行が先でも明示hold',
+    selectionHold([low, high], 'duplicate_page_rows'));
+  t('矛盾する重複は高い行が先でも明示hold',
+    selectionHold([high, low], 'duplicate_page_rows'));
+  t('同じcountsの重複も一意な観測とは数えずhold',
+    selectionHold([low, { ...low }], 'duplicate_page_rows'));
+  t('欠測snapshotはゼロやcontinueにせず理由付きhold',
+    [null, undefined].every((rows) => selectionHold(rows, 'snapshot_unavailable')));
+  t('不正collectionは空配列へ補完せず理由付きhold',
+    [{}, 'invalid-fixture', 3].every((rows) => selectionHold(rows, 'invalid_page_collection')));
+  t('不正rowが唯一行より前でも後でも理由付きhold',
+    [null, 4, [], {}, { page: null }, { page: '' }].every((bad) =>
+      selectionHold([bad, low], 'invalid_page_row')
+      && selectionHold([low, bad], 'invalid_page_row')));
+  t('対象の欠落行や空集合を観測ゼロとは数えない',
+    selectionHold([], 'page_row_missing')
+      && selectionHold([unrelated], 'page_row_missing'));
+  t('対象countsの欠測・型・非有限・負数・分母超過を拒否',
+    [{ impressions: 2000 }, { clicks: 20 }, { clicks: '20', impressions: 2000 },
+      { clicks: 20, impressions: '2000' }, { clicks: -1, impressions: 2000 },
+      { clicks: 20, impressions: -1 }, { clicks: 2001, impressions: 2000 },
+      { clicks: NaN, impressions: 2000 }, { clicks: 20, impressions: Infinity }]
+      .every((counts) => selectionHold([{ page: '/selection-fixture', ...counts }], 'invalid_matching_counts')));
+  t('別pageのcountsへ不要な新制約を広げない',
+    evaluateCurrent(baseline, '/selection-fixture', [{ page: '/other-fixture' }, low]).action === 'revert');
+  t('分母0を有効なCTRとして採らず理由付きhold',
+    selectionHold([{ page: '/selection-fixture', clicks: 0, impressions: 0 }], 'invalid_matching_counts'));
+  t('有限の小数countsも元evaluateとcounts/null互換を保つ',
+    [{ clicks: 20.5, impressions: 2000 }, { clicks: 20, impressions: 2000.5 },
+      { clicks: 20.5, impressions: 2000.5 }, { clicks: 20, impressions: Number.MAX_SAFE_INTEGER + 1 }]
+      .every((counts) =>
+        JSON.stringify(currentFor('/selection-fixture', [{ page: '/selection-fixture', ...counts }])) === JSON.stringify(counts)
+        && JSON.stringify(evaluateCurrent(baseline, '/selection-fixture', [{ page: '/selection-fixture', ...counts }]))
+          === JSON.stringify(evaluate(baseline, counts))));
+  t('唯一の有効currentと基準値NULLは元理由とevidenceを保つ',
+    JSON.stringify(evaluateCurrent(null, '/selection-fixture', [low]))
+      === JSON.stringify(evaluate(null, { clicks: low.clicks, impressions: low.impressions })));
+  t('不正な対象pageも空集合へ補完せずhold',
+    selectCurrent('', [low]).reason_code === 'invalid_page_target'
+      && evaluateCurrent(baseline, '', [low]).action === 'hold');
+  t('新consumerもexpand/promoteを出さずholdに自律rollback権を与えない',
+    [evaluateCurrent(baseline, '/selection-fixture', [low]),
+      evaluateCurrent(baseline, '/selection-fixture', [high]),
+      evaluateCurrent(baseline, '/selection-fixture', [low, high])]
+      .every((result) => ['revert', 'continue', 'hold'].includes(result.action))
+      && !isAutonomous('hold'));
+
   return finish();
 }
 
@@ -124,8 +247,7 @@ if (isMain) {
 
   const byAction = { revert: [], continue: [], hold: [] };
   for (const e of targets) {
-    const cur = rows ? currentFor(e.page, rows) : null;
-    const r = evaluate({ clicks: e.baseline.clicks, impressions: e.baseline.impressions }, cur);
+    const r = evaluateCurrent({ clicks: e.baseline.clicks, impressions: e.baseline.impressions }, e.page, rows);
     byAction[r.action].push({ e, r });
   }
 

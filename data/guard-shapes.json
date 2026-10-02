@@ -1192,6 +1192,12 @@
       "expr": "testTiming",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-01: runChecks の testTiming === null（2site）は既定の実performance.now/実delayを選ぶabsence分岐と、通常productionでrequest/observer/requestMs/overallMsを固定値へ拘束する分岐。testTiming自体はnullまたはplain objectをHTTP前に無条件assertし、明示testTimingはnow/delayのexact keys・function型・private requestとの組合せ・mode productionを必須にする。明示seamのreport.modeはprivate-production-pacing-test、pacingClockScopeもpublic証明を否定し、60秒cooldown/global1秒pacer/10秒600秒上限は維持。仮引数欠測によって検証を消す分岐ではなく、通常productionの上書きを拒否する型/実行境界。private統合14回帰で通常productionのrequest/clock/observer/間隔/並列/予算上書き・unpaired testTiming拒否、explicit fakeproduction pacing/初期cooldown/spacing中deadline/429停止を確認。原budget・既存台帳metadata・no_ledger_binding・既存guard行は変更しない。"
+    },
+    {
+      "file": "growth/scripts/check-stoploss.mjs",
+      "expr": "rows",
+      "disposition": "安全側へ倒れる",
+      "note": "2026-10-02: selectCurrent(pagePath, rows) の rows == null は欠測snapshot（null/undefined）を status:hold・current:null・reason_code:snapshot_unavailable・matching_rows:null と明示する。currentFor は counts/null 互換を保ち、実CLIの evaluateCurrent は current_selection の欠測理由を保持した hold を返す。欠測をゼロcounts、continue、検査の空集合、自律revertへ補完しない。私有原CLIの33自己検査（旧16＋新17）のうち欠測snapshot両型・currentFor null・実consumer hold/reasonのnamed caseは通過済み。通常PR初回はこの未登録keyで前段Guard51が失敗しMarketing110はskippedであり、通常CI実行済みとは扱わない。元threshold/targets/権限・scanner・既存guard50行・known/no_ledger_binding・計測metadata/予算を変更せず、この既存安全側分岐の読みを登録するだけ。"
     }
   ]
 }
