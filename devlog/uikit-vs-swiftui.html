@@ -25,12 +25,12 @@
     })();
   </script>
   <title>UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由 | Obsidian連携シンプルメモ 開発日誌</title>
-  <meta name="description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta name="description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を目標に、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponderを選んだ設計判断。">
   <meta name="theme-color" content="#070b14">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由">
-  <meta property="og:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta property="og:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を目標に、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponderを選んだ設計判断。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/devlog/uikit-vs-swiftui">
@@ -45,7 +45,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由">
-  <meta name="twitter:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta name="twitter:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を目標に、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponderを選んだ設計判断。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -383,7 +383,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":["BlogPosting","TechArticle"],"@id":"https://simplememofast.com/devlog/uikit-vs-swiftui#article","headline":"UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由","description":"2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。","url":"https://simplememofast.com/devlog/uikit-vs-swiftui","datePublished":"2026-02-13","dateModified":"2026-09-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/uikit-vs-swiftui"},"inLanguage":"ja","keywords":"UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026","proficiencyLevel":"Expert","dependencies":"Xcode 16, Swift 6, iOS 17+"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":["BlogPosting","TechArticle"],"@id":"https://simplememofast.com/devlog/uikit-vs-swiftui#article","headline":"UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由","description":"2026年にあえてUIKitを選択。Time-to-Text 500ms以下を目標に、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponderを選んだ設計判断。","url":"https://simplememofast.com/devlog/uikit-vs-swiftui","datePublished":"2026-02-13","dateModified":"2026-10-02","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/uikit-vs-swiftui"},"inLanguage":"ja","keywords":"UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026","proficiencyLevel":"Expert","dependencies":"Xcode 16, Swift 6, iOS 17+"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -450,7 +450,7 @@
           <p>SwiftUIでは、<code>@StateObject</code>の初期化、<code>body</code>の再評価、<code>.onAppear</code>のタイミング制御など、宣言的UIフレームワーク固有のオーバーヘッドが存在する。これらは一般的なアプリでは無視できる程度だが、ミリ秒単位の最適化を追求する場面では無視できない。</p>
           <p>一方、UIKitの<code>viewDidAppear</code>から<code>becomeFirstResponder()</code>を呼ぶパスは<strong>決定論的に高速</strong>だ。ViewControllerのライフサイクルは明確で、いつキーボードが表示されるかを正確に制御できる。</p>
           <div class="metric-highlight">
-            <strong>設計判断：</strong>Time-to-Text 500ms以下という非機能要件を確実に満たすため、UIKitを採用。実機計測で<strong>200〜300ms</strong>を安定して達成。
+            <strong>設計判断：</strong>Time-to-Text 500ms以下という非機能要件を満たすため、UIKitを採用。
           </div>
 
           <h2>2. Storyboardを完全に排除した理由</h2>
@@ -487,7 +487,7 @@ private func activateTextInput() {
 }</code></pre>
           <p><code>os_signpost</code>による計測をナノ秒精度で実施している。<code>PerformanceLogger.shared.endTimeToText()</code>がSignpostの終了イベントを記録し、Instrumentsでの詳細な分析を可能にしている。</p>
           <div class="metric-highlight">
-            <strong>計測結果：</strong>目標 500ms以下 → 実機実測値 <strong>200〜300ms</strong>で安定動作。なお、アイコンのタップからの様子を画面録画で測った記録（2026年8月11日、iPhone 16e・ウォーム起動）では、入力欄へのフォーカスが0.17秒、キーボードの表示完了が0.4秒でした。
+            <strong>計測結果：</strong>目標は500ms以下。アイコンのタップからの様子を画面録画で測った記録（2026年8月11日、iPhone 16e・ウォーム起動）では、入力欄へのフォーカスが0.17秒、キーボードの表示完了が0.4秒でした。
           </div>
 
           <h2>4. パフォーマンス計測の仕組み</h2>
@@ -526,7 +526,7 @@ private func activateTextInput() {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. 実機での計測結果は？</div>
-              <div class="faq-item__answer">目標500ms以下に対し、実機で200〜300ms台で安定。<code>os_signpost</code>でナノ秒単位で計測し、Instrumentsで詳細分析を実施している。</div>
+              <div class="faq-item__answer">目標は500ms以下。記録の残っている計測は、アイコンのタップからの様子を画面録画で測ったもの（2026年8月11日、iPhone 16e・ウォーム起動）で、入力欄へのフォーカスが0.17秒、キーボードの表示完了が0.4秒。開発中は<code>os_signpost</code>で区間を記録し、Instrumentsで分析している。</div>
             </div>
 
             <div class="faq-item">

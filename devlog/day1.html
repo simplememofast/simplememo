@@ -373,7 +373,7 @@ override func viewDidAppear(_ animated: Bool) {
 
             <p>この2つのコードだけで、起動からキーボード表示までのパスが最短になる。</p>
 
-            <p>実機計測の結果は<strong>200〜300ms</strong>。目標の500msを大幅に下回った。SwiftUIで同等のことを実現しようとすると、`@FocusState`の遅延やbody再評価のタイミングの問題で、安定して500ms以下を達成するのは困難だった。</p>
+            <p>目標は500ms以下。のちに画面録画で測った記録（2026年8月11日、iPhone 16e・ウォーム起動）では、アイコンのタップからキーボードの表示完了まで0.4秒だった。SwiftUIでは`@FocusState`やbodyの再評価のタイミングを細かく制御しにくく、この経路を詰めるのは難しいと判断した（両者を同じ条件で計測して比べたわけではない）。</p>
 
             <p>UIKitは「古い」かもしれない。しかし「速い」。この1点において、UIKitは今でも最良の選択肢だ。</p>
           </section>
@@ -624,7 +624,7 @@ func applyLanguageChange() {
 
             <p>技術的な数値をまとめてみる：</p>
             <ul>
-              <li><strong>Time-to-Text</strong>：500ms以下（実測200〜300ms）</li>
+              <li><strong>Time-to-Text</strong>：500ms以下（目標）</li>
               <li><strong>Send-to-Reset</strong>：待ちを感じない短さ（目標）</li>
               <li><strong>メッセージの取りこぼし</strong>：Outboxパターンで防ぐ</li>
               <li><strong>暗号化</strong>：AES-GCM（CryptoKit）</li>
@@ -675,7 +675,7 @@ func applyLanguageChange() {
 
             </div>
             <div class="related-card__desc">
-              <span lang="ja">2026年にUIKitを選んだ理由。Time-to-Text 500ms以下を実現するアーキテクチャ設計。</span>
+              <span lang="ja">2026年にUIKitを選んだ理由。Time-to-Text 500ms以下を目標にしたアーキテクチャ設計。</span>
 
             </div>
           </a>
