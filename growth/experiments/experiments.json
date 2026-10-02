@@ -3,6 +3,101 @@
   "note": "Seeded 2026-08-09 from the git diffs of PRs #367/#374/#376. See growth/README.md.",
   "experiments": [
     {
+      "id": "gsc-email-yourself-title-20261003",
+      "page": "/blog/email-yourself-memo",
+      "change_paths": [
+        "blog/email-yourself-memo.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20261003-email-yourself-guide"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20261003-email-yourself-guide"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "Replacing the broad one-tap app promise with the actual Gmail/Outlook self-email guide intent may improve qualified search clicks; the observed CTR gap alone does not prove the title causes it.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-10-02",
+      "evaluation_at": "2026-11-02",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.015625,
+        "clicks": 9,
+        "impressions": 576,
+        "ctr": 0.015625,
+        "position": 5.989583333333333,
+        "window": "2026-09-02..2026-09-29",
+        "source": "gsc:c3545ddb22f42560935d154f73bc4267a46773fd441453d76999bb6b950f5e24"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/blog/email-yourself-memo"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/blog/email-yourself-memo"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact-page source and equal windows; no randomized control.",
+        "confounders": [
+          "Search ranking and query composition may change independently.",
+          "Other site treatments and release changes may affect observed traffic."
+        ]
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 500,
+        "rationale": "Comparable exposure to the measured 576-impression baseline is needed; nine baseline clicks still provide limited power."
+      },
+      "stop_conditions": [
+        "Stop if the description becomes inaccurate or another owner protects the exact page."
+      ],
+      "guardrails": [
+        "Keep the canonical, body, CTA, tracking and product facts unchanged; verify exact-head CI, actual served bytes and search-query/position changes."
+      ],
+      "decision_rule": "Compare the exact-page WEB GSC CTR across equal 28-day windows after at least 500 impressions, retaining clicks, position and query composition. Treat changed mix, low sample and concurrent changes as limits; no causal, install or revenue claim.",
+      "post_window": {
+        "start": "2026-10-03",
+        "end": "2026-10-30",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "a3b0db29dc9494f49aa198ef84e67f1504877a7e4e39e866f21e8df1d4350406",
+        "company_run_id": "f2bfe354-ab83-4ed6-998f-6213c9a8bd75",
+        "decision_sha256": "3dce5f89dae09416b1eacc8ef5797bd2177b8658f708c0187d5e84dbae628192"
+      }
+    },
+    {
       "id": "title-2026-07-01-001",
       "page": "/apple-watch/",
       "type": "title_test",

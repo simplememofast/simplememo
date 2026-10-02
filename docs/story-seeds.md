@@ -215,3 +215,15 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: 音声メモの案内を読む前に、対応するiPhoneとiOSの条件を確認。シンプルメモの音声入力ページは、既存本文にある利用条件を検索タイトルにも揃えました。
 - **英語圏向け**: The voice-input page title now exposes the iPhone and iOS requirements already explained in its body. Search and installation effects remain unmeasured.
 - **使わない表現**: 全機種対応、初回設定不要、検索順位やインストールの改善、今回新しく実機確認したという表現。
+
+## S-20261003-email-yourself-guide
+
+- **対象URL**: https://simplememofast.com/blog/email-yourself-memo
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: メールで自分にメモを送る記事の検索タイトルを、本文のGmail・Outlookの手順に揃えた。
+- **引用できる数字**: 2026-10-03確認：本文は宛先入力から受信確認までの5手順を案内（出典: blog/email-yourself-memo.html）。今回変更したのは検索タイトルで、新しい速度や検索効果の実測はない。
+- **note向け**: 記事を開く前に読める説明も、本文で確かめられる操作と同じ範囲に揃える。
+- **X向け**: 自分にメールでメモを残すなら、送信後の受信確認まで。iPhoneのGmail・Outlookの手順を案内する記事の検索タイトルを、本文の内容に揃えました。
+- **英語圏向け**: The search title now describes the existing iPhone Gmail and Outlook self-email guide. Delivery checks remain part of the guide; search impact is unmeasured.
+- **使わない表現**: すべてワンタップ、到着保証、今回の実機検証、検索流入・インストール・売上が増えたという未確認の主張。
