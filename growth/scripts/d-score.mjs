@@ -123,7 +123,15 @@ export function score(record) {
   }
   const gates = GATES.map(([key, label]) => ({ key, label, value: d.gates?.[key] ?? null }));
   const gateFailed = gates.filter((g) => g.value === false || g.value === 0);
-  const gateUnknown = gates.filter((g) => g.value === null || g.value === undefined);
+  // **判定済みなのは true/1・false/0 だけ。**未知の値を「全通過」にしない。
+  const gateUnknown = gates.filter((g) => ![true, 1, false, 0].includes(g.value));
+  for (const g of gateUnknown) {
+    if (![null, undefined].includes(g.value)) {
+      problems.push(
+        `${g.key} が未対応のゲート値（true/1・false/0・null/未記入のみ）— 未判定として配信しない`,
+      );
+    }
+  }
 
   const need = necessary(d);
   const needFailed = need.filter((n) => n.ok === false);
@@ -388,6 +396,68 @@ const SCENARIOS = [
     if (r.problems.length) throw new Error(r.problems.join(' / '));
   }],
 ];
+
+// 4つのゲートすべてで同じ型契約を確認する。採点・満点・必要条件は変更しない。
+// 値の本文をエラーへ転記せず、判定不能な項目の key だけを知らせる。
+const INVALID_GATE_VALUES = [
+  ['string-true', 'true'], ['string-false', 'false'], ['empty-string', ''],
+  ['number-two', 2], ['negative-number', -1], ['fractional-number', 0.5],
+  ['NaN', NaN], ['Infinity', Infinity], ['negative-Infinity', -Infinity],
+  ['array', []], ['object', {}], ['boxed-boolean', new Boolean(true)],
+];
+const GATE_VALUE_CONTROLS = [
+  ['true', true, 'passed'], ['one', 1, 'passed'],
+  ['false', false, 'failed'], ['zero', 0, 'failed'],
+  ['null', null, 'unknown'], ['undefined', undefined, 'unknown'],
+];
+function gateAdmissionFixture(key, value) {
+  return {
+    id: 'synthetic-gate-admission', type: 'pr_release', status: 'running',
+    started_at: '2026-10-01',
+    d_score_pre: {
+      ...Object.fromEntries(AXES.map(([name, max]) => [name, max])),
+      total: AXES.reduce((sum, [, max]) => sum + max, 0),
+      scored_at: '2026-10-01', headline: 'synthetic gate admission fixture',
+      gates: { ...Object.fromEntries(GATES.map(([name]) => [name, true])), [key]: value },
+    },
+  };
+}
+for (const [key] of GATES) {
+  for (const [kind, value] of INVALID_GATE_VALUES) {
+    SCENARIOS.push([`gate ${key} rejects ${kind}`, () => {
+      const r = score(gateAdmissionFixture(key, value));
+      if (r.gateUnknown.length !== 1 || r.gateUnknown[0].key !== key || r.gateFailed.length) {
+        throw new Error('未知値が未判定の1項目として残っていない');
+      }
+      if (!r.problems.some((p) => p.includes(key) && p.includes('未対応のゲート値'))) {
+        throw new Error('未知値の具体的な問題が無い');
+      }
+      if (!r.verdict.startsWith('PENDING')) throw new Error('未知値が配信可能になった');
+    }]);
+  }
+  for (const [kind, value, state] of GATE_VALUE_CONTROLS) {
+    SCENARIOS.push([`gate ${key} preserves ${kind}`, () => {
+      const r = score(gateAdmissionFixture(key, value));
+      if (r.problems.some((p) => p.includes('未対応のゲート値'))) {
+        throw new Error('原契約の値が不正扱いになった');
+      }
+      if (state === 'passed') {
+        if (r.gateUnknown.length || r.gateFailed.length || r.problems.length
+          || !r.verdict.startsWith('GO')) throw new Error('原通過値の意味が変わった');
+      } else if (state === 'failed') {
+        if (r.gateUnknown.length || r.gateFailed.length !== 1
+          || r.gateFailed[0].key !== key || !r.verdict.startsWith('BLOCKED')
+          || !r.problems.some((p) => p.includes('不合格のゲート'))) {
+          throw new Error('原不合格値の意味が変わった');
+        }
+      } else if (r.gateUnknown.length !== 1 || r.gateUnknown[0].key !== key
+        || r.gateFailed.length || !r.verdict.startsWith('PENDING')
+        || !r.problems.some((p) => p.includes('未判定のゲート'))) {
+        throw new Error('原未記入値の意味が変わった');
+      }
+    }]);
+  }
+}
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
