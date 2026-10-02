@@ -437,6 +437,7 @@ const RATE_LIMITS = {
 <p><strong>Update, 2026-09:</strong> The per-device limits and the global daily cap were removed in June 2026. The sending limit in place now is the per-IP hourly cap.</p>
 <h3>Idempotency Guarantee</h3>
 <p>To prevent duplicate sends due to network instability, each message is assigned a UUID, and the Relay API performs duplicate checking. If the same UUID is resent, subsequent attempts return a success response without actually sending the email. Combined with the Outbox pattern's retry mechanism, this keeps users from receiving the same memo twice.</p>
+<p><strong>Update, 2026-10:</strong> The current relay server does not run its own duplicate check. It passes the message ID to Resend as the request's Idempotency-Key; Resend remembers the key for 24 hours and returns the same response to a repeated request with the same content. So within 24 hours, the same memo is not sent twice (details in <a href="/en/devlog/relay-api-design">the Relay API design</a>).</p>
 </section>
 <!-- Section 6 -->
 <section id="en-section6">
