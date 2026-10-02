@@ -260,7 +260,9 @@ if (isMain) {
   }
 
   console.log(`依存ベンダー ${doc.vendors.length}社（data/vendor-register.json）\n`);
-  console.log(`  AIによる4観点の運用審査: ${operatingReview.decisions.length}社 / ${operatingReview.reviewed_at}`);
+  console.log(`  AIによる4観点の運用判断: ${operatingReview.decisions.length}社`);
+  console.log(`  審査レコード: ${operatingReview.id} / 記録の日時 ${operatingReview.reviewed_at}`);
+  console.log('  各社の追加審査日は根拠文書を参照。記録の日時を全社の同日再審査とみなさない。');
   console.log(`  期限: ${operatingReview.valid_until} UTC。契約適用・是正完了は各社の未解決事項を参照。\n`);
   if (discoveries.length) {
     console.log(`  追加依存先 ${discoveries.length}社（契約・支払許可なし）:`);
