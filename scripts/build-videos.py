@@ -97,6 +97,9 @@ def _latin(ch):
     return ch.isascii() and (ch.isalnum() or ch in "'-.")
 
 
+NO_LINE_START = '、。，．）」』】！？ー・…'
+
+
 def wrap_ja(s, per_line):
     """
     Wrap on character count, since Japanese has no spaces — but never break
@@ -113,7 +116,8 @@ def wrap_ja(s, per_line):
             continue
         nxt = s[i + 1] if i + 1 < len(s) else ''
         mid_word = _latin(ch) and _latin(nxt)
-        if len(line) >= per_line and not mid_word:
+        # Never start a line with closing punctuation (「…に / 、同時に」).
+        if len(line) >= per_line and not mid_word and nxt not in NO_LINE_START:
             out.append(line)
             line = ''
         elif ch in '、。' and len(line) >= per_line - 4:
@@ -360,12 +364,16 @@ def build_siri_airpods(bg, icon, c):
     # iPhoneはそのまま". A caption that describes a different screen is a
     # caption that is simply wrong, and beside a real screenshot it is worse
     # than wrong because the screenshot lends it credibility.
+    # The in-app guide grew from five screens to six (assets/img/siri/onboarding-1..6,
+    # 2026-09): screen 2 is now 「まず、Siriを呼ぶ」. Captions follow the screen each
+    # one sits beside, so the list is keyed by the file, not by the old order.
     slides = [
-        (1, 'AirPodsから、Obsidianへ', '話した内容が、いつものメールと保管庫に届く'),
-        (2, '合言葉は「シンプルメモで残す」', 'AirPodsのステム長押し、または「Hey Siri」から'),
-        (3, '「何をメモしますか？」に答えるだけ', '話した内容がそのまま本文になる。アプリは開かない'),
-        (4, 'メールとObsidianに、同時に届く', '行き先はアプリから送ったときとまったく同じ'),
-        (5, '3つだけ、確認しておく', 'ここが揃っていれば、あとは話しかけるだけ'),
+        (1, 'AirPodsから、Obsidianへ', '話した内容が、\nいつものメールと保管庫に届く'),
+        (2, 'まず、Siriを呼ぶ', '確実なのは「Hey Siri」。ステムの長押しは機種で違う'),
+        (3, '合言葉は\n「シンプルメモで残す」', 'Siriが応えたら、そのまま言うだけ'),
+        (4, '「何をメモしますか？」に\n答えるだけ', '話した内容がそのまま本文になる。アプリは開かない'),
+        (5, 'メールとObsidianに、同時に届く', '画面は従来の表現。\nメールと保管庫は別の経路で届く'),
+        (6, '3つだけ、確認しておく', 'ここが揃っていれば、あとは話しかけるだけ'),
     ]
     frames = [(title_scene(bg, icon, 'SIRI · AIRPODS', ['合言葉ひとつで、', 'ハンズフリー。'],
                            '以下はアプリ内のガイド画面です（実機のスクリーンショット）。'), 3.0)]
@@ -388,7 +396,7 @@ def build_siri_airpods(bg, icon, c):
                             radius=38, fill=(24, 31, 56), outline=CARD_EDGE, width=2)
         im.paste(shot, (px, py), mask)
         tx = px + shot.width + 78
-        text(d, (tx, 236), f'アプリ内ガイド {idx} / 5', 20, True, BLUE)
+        text(d, (tx, 236), f'アプリ内ガイド {idx} / {len(slides)}', 20, True, BLUE)
         y = 284
         for ln in wrap_ja(cap, 13):
             text(d, (tx, y), ln, 38, True, INK)
@@ -399,16 +407,16 @@ def build_siri_airpods(bg, icon, c):
             y += 36
         frames.append((im, 2.6))
     frames.append((caveat_scene(bg, '推奨する日本語の合言葉',
-                                ['「シンプルメモで残す」', '', 'AirPodsのステム長押しからも呼び出せます。'],
+                                ['「シンプルメモで残す」', '', 'ステムの長押しで呼べるかは、機種と設定で違います。'],
                                 tone=GREEN), 3.0))
-    frames.append((outro_scene(bg, icon, '手を使わずに、残す。'), 2.4))
+    frames.append((outro_scene(bg, icon, 'アプリを開かず、声で残す。'), 2.4))
     return frames
 
 
 def build_obsidian(bg, icon, c):
     frames = [(title_scene(bg, icon, 'OBSIDIAN連携', ['送ったメモが、', 'ノートに追記される。'],
-                           'メールで自分に送ると、Obsidianの保管庫のノートへ自動で追記されます。'), 3.2)]
-    steps = [('書く / 話す', 'メモを1つ'), ('メールで送信', '自分の受信箱へ'), ('追記', 'Obsidianのノートに')]
+                           'Obsidian連携を設定すると、送ったメモがメールとは別に、保管庫のノートへ追記されます。'), 3.2)]
+    steps = [('書く / 話す', 'メモを1つ'), ('送信', 'メールは自分の受信箱へ'), ('追記', 'メールとは別に、ノートへ')]
     for k in range(1, 4):
         frames.append((steps_scene(bg, 'メモがノートになるまで', steps, k, accent=PURPLE), 1.1))
     frames.append((steps_scene(bg, 'メモがノートになるまで', steps, 3, accent=PURPLE), 1.6))
@@ -416,13 +424,13 @@ def build_obsidian(bg, icon, c):
                                 ['メール本文は通常のSMTPで届きます。',
                                  'つまりエンドツーエンド暗号化ではありません。',
                                  '端末内のOutboxと送信履歴はAES-GCM-256で暗号化。']), 4.0))
-    frames.append((outro_scene(bg, icon, 'いつものメールが、保管庫の入口になる。'), 2.4))
+    frames.append((outro_scene(bg, icon, '送ったメモが、保管庫にも残る。'), 2.4))
     return frames
 
 
 def build_ai_tags(bg, icon, c):
     frames = [(title_scene(bg, icon, 'AIタグ自動追加', ['話すだけで、', 'AIが整える。'],
-                           'メモの内容をAIが読み、タイトル・タグ・種別を自動で付けます。2026年7月の無料アップデートで提供開始。'), 3.2)]
+                           'Obsidian連携でオンにすれば、AIがタイトル・タグ・種別を\n自動で付けます（既定はオフ）。\n2026年7月の無料アップデートで提供開始。'), 3.2)]
     memo = '来週の打ち合わせまでに見積もりを作り直す。先方は金額より納期を気にしていた。'
     after = [('タイトル（20文字以内）', '見積もり作り直し'),
              ('タグ（1〜3個）', '#打ち合わせ #見積もり'),
@@ -446,7 +454,7 @@ VIDEOS = {
     'siri-airpods': (build_siri_airpods, 'Siriとその場のAirPodsでハンズフリーにメモを残す',
                      'アプリ内ガイドの実機スクリーンショットを使って、合言葉ひとつでAirPodsから音声メモを残す流れを紹介するスライドショー動画です。'),
     'obsidian-append': (build_obsidian, 'メモがObsidianのノートに追記されるまで',
-                        'メモをメールで自分に送ると、Obsidianの保管庫のノートへ自動で追記される流れを示した図解動画です。メール本文が通常のSMTPで届くため、エンドツーエンド暗号化ではない点も明示します。'),
+                        '通常モードでメモをメールに送り、別途Obsidianの保管庫へ追記する流れを示した図解動画です。メール経由で保管庫へ転送する仕組みではありません。メール本文は通常のSMTPで届くため、エンドツーエンド暗号化ではない点も明示します。'),
     'ai-tags': (build_ai_tags, 'AIがメモにタイトルとタグを自動で付ける',
                 'オンデバイスAIがメモを読み、20文字以内のタイトル・1〜3個のタグ・種別（todo／idea／log）を自動付与する様子を示した図解動画です。タグ付けは端末内で完結し、外部サーバーへの送信はありません。'),
 }
