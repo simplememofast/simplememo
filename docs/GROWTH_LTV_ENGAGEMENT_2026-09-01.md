@@ -756,6 +756,14 @@ SimpleMemoは「無料メモアプリ」という大市場で表示を増やせ�
 | `purchase_completed` | `paywall_purchase_success` / `paywall_plan_selected` | ある（別名） |
 | Retention / Churn | ASC の Subscription State / Event Report（`simplememo-ios/data/asc/`）、`cancel_flow_*` | ある |
 
+**2026-10-03 観測追記（過去の提案・実験条件を保持）**
+
+ソース `73738c8ca3008540416f20e0d8d3c3dc2e0d90e8` の `js/app-store-tracking.js` では、§8・上表の提案名 `app_store_cta_click` は存在せず、対象の App Store リンクの同一クリックから `app_store_click` と `seo_cta_click` を同じ payload で `dataLayer` へ積む。両イベントを合算しない。これはソース上の観測であり、本番送信や同意制御全体の検証ではない。
+
+同じソースの台帳で、10/3 評価対象 `selector-hub-2026-09-02-001` と `cta-placement-2026-09-02-002` は `target_metric=ctr` と notes の主評価が競合する記録を保持している。既存 baseline は GSC のみで、GA4/CPP の主評価に対応した baseline/post 集計値・抽出参照は未確認、`measurement_contract` と `post_window` は未登録のため、効果は未証明。開始日・評価日・80/50 の最小標本・停止条件、既存の SEO/PPO 観測条件を変更せず、欠測をゼロや「効果なし」に置き換えない。
+
+現時点で、有効有料人数・10月失効予定人数・同期間トラフィックは、対象と期間をそろえた実計数が未取得のため `null` として扱う。契約数・churn・install 数から推測した値で代用しない。
+
 ### 16-5. 未確定・オーナー判断待ち
 
 1. **CPP — 両方とも配線済み（2026-09-02 追記）。**オーナーの委任で自律判断した。`obsidian-voice` は `obsidian-vault`（1408d7a4…・APPROVED）を流用。`free-memo-generic` は、simplememo-ios に足した `asc-cpp.yml`（ASC API で CPP を一覧・作成。#296 / #298 / #299）で ASC の 69 本を読み、汎用無料流入に最も近い承認済み `plain-notes` を**暫定で配線**（計測がすぐ始まる）。専用 CPP `free-memo-generic`（ppid `3b8f2fd5-768b-48da-9d65-e7346432f569`・版1・PREPARE_FOR_SUBMISSION・雛形 plain-notes・プロモ ja/en『無料・広告なし・開いた瞬間に書ける・受信箱に届く・無料枠1日3通』）も同日に作成した。**残る人手は1つ:** 次の App 版の審査提出に同乗させ、APPROVED になったら `data/cpp-map.json` の ppid を差し替える（CPP 単独の提出は App 版の提出を塞ぐので出さない）。
