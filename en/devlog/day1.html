@@ -343,7 +343,7 @@ override func viewDidAppear(_ animated: Bool) {
     textView.becomeFirstResponder()
 }</code></pre>
 <p>These two pieces of code alone create the shortest path from launch to keyboard display.</p>
-<p>Real device measurements: <strong>200-300ms</strong>. Well below our 500ms target. Trying to achieve the same with SwiftUI, we found that `@FocusState` delays and body re-evaluation timing made it difficult to consistently stay under 500ms.</p>
+<p>Our target was under 500ms. A later screen-recording measurement (August 11, 2026, iPhone 16e, warm launch) recorded 0.4 seconds from the icon tap to the keyboard being fully up. With SwiftUI, `@FocusState` and body re-evaluation timing are harder to control precisely, so we judged this path harder to tighten (we did not measure both under the same conditions).</p>
 <p>UIKit may be "old." But it's "fast." On this single point, UIKit remains the best choice.</p>
 </section>
 <!-- Section 3 -->
@@ -544,7 +544,7 @@ func applyLanguageChange() {
 <p>Finishing Day 1, what strikes me is that the essence of this product is designing for trust.</p>
 <p>Let me summarize the technical metrics:</p>
 <ul>
-<li><strong>Time-to-Text</strong>: Under 500ms (measured 200-300ms)</li>
+<li><strong>Time-to-Text</strong>: Under 500ms (target)</li>
 <li><strong>Send-to-Reset</strong>: no noticeable wait (target)</li>
 <li><strong>Message loss</strong>: guarded against by the Outbox pattern</li>
 <li><strong>Encryption</strong>: AES-GCM (CryptoKit)</li>
@@ -586,7 +586,7 @@ func applyLanguageChange() {
 </div>
 <div class="related-card__desc">
 
-<span lang="en">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</span>
+<span lang="en">Why UIKit in 2026. Architecture designed around a Time-to-Text target under 500ms.</span>
 </div>
 </a>
 <a class="related-card" href="/en/devlog/outbox-architecture">
