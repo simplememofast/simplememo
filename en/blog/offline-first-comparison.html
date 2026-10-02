@@ -340,7 +340,7 @@
           <li>User hits "Send" — the memo is saved to the on-device Outbox, encrypted with AES-GCM</li>
           <li>App attempts to send to email</li>
           <li>If connected: send immediately</li>
-          <li>If offline: the memo waits in the Outbox (stored on the device) and is retried with exponential backoff and again when the connection returns</li>
+          <li>If offline: the memo waits in the Outbox (stored on the device) and is sent again when the connection returns, when you open the app, or from a background task</li>
           <li>Once the send is accepted, it is recorded in the send history and leaves the Outbox (arrival in your inbox still depends on email delivery)</li>
         </ol>
 

@@ -25,14 +25,14 @@
     })();
   </script>
   <title>Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Obsidian連携シンプルメモ 開発日誌</title>
-  <meta name="description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングのメール送信基盤について、メールアドレス検証（6桁コード方式）、多層レート制限、メモが2通届かない冪等性保証の実装を解説します。">
+  <meta name="description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングのメール送信基盤について、メールアドレス検証（6桁コード方式）、多層レート制限、同じメモを二重に送らないための冪等性の実装を解説します。">
   <meta name="theme-color" content="#070b14">
 
   <!-- SEO keywords targeting -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Obsidian連携シンプルメモ 開発日誌">
-  <meta property="og:description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。">
+  <meta property="og:description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性の実装詳細。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/devlog/relay-api-design">
@@ -47,7 +47,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Obsidian連携シンプルメモ 開発日誌">
-  <meta name="twitter:description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。">
+  <meta name="twitter:description" content="メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性の実装詳細。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png">
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -63,7 +63,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/relay-api-design#article","headline":"Relay API設計：Cloudflare Workersでメール送信基盤を構築","description":"メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。","url":"https://simplememofast.com/devlog/relay-api-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/relay-api-design#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/relay-api-design#article","headline":"Relay API設計：Cloudflare Workersでメール送信基盤を構築","description":"メールボックスの OAuth 連携に頼らない送信。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性の実装詳細。","url":"https://simplememofast.com/devlog/relay-api-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-10-02","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/relay-api-design#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"Relay API設計","item":"https://simplememofast.com/devlog/relay-api-design"}]}</script>
@@ -559,9 +559,9 @@
             <span class="node">Email Delivery</span>
           </div>
 
-          <p><strong>Cloudflare Workers</strong>は、世界中のエッジロケーションでTypeScriptコードを実行するサーバーレスプラットフォームです。従来のサーバーレスで問題になるコールドスタートがほぼゼロで、リクエストを受けた瞬間から処理が始まります。</p>
-          <p><strong>Resend API</strong>は、モダンなメール送信サービスです。SPF/DKIM/DMARCの設定が容易で、高い到達率を実現します。開発者フレンドリーなAPIで、TypeScriptからシンプルに呼び出せます。</p>
-          <p>コスト面でも優れています。メモアプリのトラフィック量であれば、Cloudflare Workersの無料枠（1日10万リクエスト）で十分にまかなえます。Resend APIも月100通まで無料。個人開発のメモアプリにとって、ほぼゼロコストで運用できるインフラです。</p>
+          <p><strong>Cloudflare Workers</strong>は、世界中のエッジロケーションでTypeScriptコードを実行するサーバーレスプラットフォームです。Cloudflare の説明では、isolate という軽い実行環境でコードを動かすので、仮想マシン型のサーバーレスで起きるコールドスタートがありません。</p>
+          <p><strong>Resend API</strong>は、モダンなメール送信サービスです。SPF/DKIM/DMARCを設定しやすく、TypeScriptから簡単に呼び出せます。</p>
+          <p>費用の面では、Cloudflare Workersの無料プランは1日10万リクエストまで、Resendの無料プランは1日100通・月3,000通まで使えます（2026年10月時点の各社の料金ページ）。小さく始めて、送る量に合わせて有料のプランに移れる構成です。</p>
 
           <h2>3. メールアドレス検証（6桁コード方式）</h2>
           <p>Relay APIは、検証済みのメールアドレスにのみメモを送信します。これは悪用防止の最も基本的な防御層です。</p>
@@ -572,7 +572,7 @@
             <li>ユーザーが受信した6桁コードをアプリに入力</li>
             <li>検証完了。以降、そのメールアドレスへのメモ送信が許可される</li>
           </ul>
-          <p>この仕組みにより、他人のメールアドレスに無断でメモが送信されることを防ぎます。メールアドレスの所有者本人だけが検証コードを受信できるため、なりすまし送信は不可能です。</p>
+          <p>この仕組みにより、他人のメールアドレスに無断でメモが送信されることを防ぎます。検証コードはそのアドレスの受信箱に届くので、受信箱を見られない人は、そのアドレスを送信先として確認できません。</p>
           <p>検証はメールアドレスごとに一度だけ。一度検証が完了すれば、以降はコード入力なしでメモを送信し続けられます。</p>
 
           <h2>4. 多層レート制限の実装</h2>
@@ -609,18 +609,18 @@
             <div class="info-card__desc">端末ごとの上限と全体の1日の上限は、2026年6月に撤去しました。いまの送信の上限は、IPアドレスごとの1時間あたりの上限です。</div>
           </div>
 
-          <p>カウンターはCloudflare KVに保存され、各時間ウィンドウごとにリセットされます。エッジコンピューティングの利点により、レート制限チェックも数十ミリ秒で完了。正当なリクエストの遅延を最小限に抑えつつ、不正な大量アクセスを抑えます。</p>
+          <p>カウンターはCloudflare KVに保存され、各時間ウィンドウごとにリセットされます。通常の送信は通しつつ、不正な大量アクセスを抑えます。</p>
 
-          <h2>5. 冪等性の保証：メモが2通届かない設計</h2>
+          <h2>5. 冪等性：同じメモを二重に送らないための設計</h2>
           <p>ネットワーク通信には不確実性がつきものです。送信ボタンを押してから応答が返るまでの間に、通信が途切れることがあります。アプリはタイムアウトと判断して再送信を試みますが、実は最初のリクエストはサーバーに届いていた——よくあるシナリオです。</p>
-          <p>この問題を解決するのが冪等性（idempotency）の保証です。</p>
+          <p>この場面には、冪等性（idempotency）で備えます。</p>
           <ul>
             <li>各メモに一意のUUID（メッセージID）を付与</li>
-            <li>Relay APIは受信したメッセージIDを記録</li>
-            <li>同一のメッセージIDを持つリクエストが再度届いた場合、メールの重複送信は行わない</li>
-            <li>クライアントには成功レスポンスを返す（すでに送信済みであることを通知）</li>
+            <li>Relay APIは、そのメッセージIDを、メール送信サービス（Resend）への要求の冪等キー（Idempotency-Key）として渡す</li>
+            <li>Resendは同じキーを24時間覚えていて、同じ内容の要求がもう一度来たら、メールは送らずに前と同じ応答を返す</li>
+            <li>アプリには成功の応答が返る（2回目も1回目と同じ応答）</li>
           </ul>
-          <p>この設計により、ネットワーク不安定な環境でリトライが発生しても、リレーは同じメモを重ねて送りません。ユーザーの信頼を守るための重要な設計判断です。</p>
+          <p>この設計により、ネットワークが不安定でリトライが起きても、24時間のうちは同じメモが重ねて送られません（Resendがキーを覚えている期間）。それより後の送り直しは見分けられないので、重複を止められるのはこの期間の中です。</p>
 
           <h2>6. エッジコンピューティングの利点</h2>
           <p>Cloudflare Workersをメール送信基盤に採用した最大の理由は、エッジコンピューティングの本質的な利点にあります。</p>
@@ -628,13 +628,13 @@
           <div class="info-card">
             <div class="info-card__label">Latency</div>
             <div class="info-card__title">世界中のエッジロケーション = 低レイテンシ</div>
-            <div class="info-card__desc">Cloudflareは世界300以上の都市にエッジサーバーを展開。ユーザーに最も近いロケーションでリクエストが処理されるため、どの国からでも数十ミリ秒でAPIレスポンスが返ります。</div>
+            <div class="info-card__desc">Cloudflareは世界300以上の都市に拠点を置いています。リクエストは利用者に近い拠点で処理されるので、遠くの1か所のサーバーまで往復するより通信の距離が短くなります（応答までの時間は、メール送信サービスの処理を含めて変わります）。</div>
           </div>
 
           <div class="info-card">
             <div class="info-card__label">Cold Start</div>
-            <div class="info-card__title">コールドスタートがほぼゼロ</div>
-            <div class="info-card__desc">従来のサーバーレス（AWS Lambdaなど）ではコールドスタートに数百ミリ秒〜数秒かかることがあります。Cloudflare Workersはその問題がほぼ存在しません。メモの送信ボタンを押した瞬間に処理が始まります。</div>
+            <div class="info-card__title">仮想マシン型のコールドスタートが無い</div>
+            <div class="info-card__desc">仮想マシンやコンテナで動くサーバーレスでは、しばらく使われなかったあとの最初の要求で、起動を待つこと（コールドスタート）があります。Cloudflare Workersはisolateで動くため、この待ちが起きない、とCloudflareは説明しています。</div>
           </div>
 
           <div class="info-card">
@@ -643,7 +643,7 @@
             <div class="info-card__desc">サーバーの管理、キャパシティプランニング、スケーリング設定——これらすべてが不要です。リクエストが増えれば自動的にスケールし、アイドル時にはコストが発生しません。</div>
           </div>
 
-          <p>メモアプリにとって、この組み合わせは理想的です。速い、信頼性が高い、安い。ユーザーが世界中どこにいても、メモを送信した瞬間に処理が完了する。それがエッジコンピューティングで構築したRelay APIの強みです。</p>
+          <p>メモアプリにとって、この組み合わせは扱いやすい選択でした。利用者に近い拠点で処理が始まり、サーバーの管理が要らず、小さな規模なら費用も抑えられます。それが、エッジコンピューティングでRelay APIを作った理由です。</p>
 
           <div class="cta-box">
             <p>この技術基盤の上に構築された「Obsidian連携シンプルメモ」を、ぜひお試しください。</p>
@@ -661,16 +661,16 @@
           <h2>よくある質問</h2>
 
           <h3>Q. なぜCloudflare Workersを選んだのですか？</h3>
-          <p>コールドスタートがほぼゼロ、世界中のエッジから配信、月額ほぼ無料。メモアプリに必要な速さと信頼性の両方を実現できるプラットフォームだからです。</p>
+          <p>仮想マシン型のコールドスタートが無く、利用者に近い拠点で処理でき、小さな規模なら無料プランから始められるからです。</p>
 
           <h3>Q. メールの到達率は？</h3>
-          <p>Resend APIは高い到達率を実現しています。SPF/DKIM/DMARC設定済みで、迷惑メール判定を最小化しています。</p>
+          <p>送信元のドメインにはSPF・DKIM・DMARCを設定しています。それでも、宛先のメールサービスの判断で迷惑メールに振り分けられることがあります。届かないときは、迷惑メールのフォルダと、送信先のアドレスの確認が済んでいるかを見てください。</p>
 
           <h3>Q. サーバーにメモの内容は保存されますか？</h3>
           <p>Relay APIは通過型です。メモ内容の恒常的な保存は行いません。送信処理に必要な範囲でのみ一時的に扱います。</p>
 
           <h3>Q. レート制限に引っかかったらどうなりますか？</h3>
-          <p>アプリ側でOutboxにキューイングされ、制限解除後に自動リトライします。メモは端末のOutboxに残ります。</p>
+          <p>メモは端末の送信待ち（Outbox）に残り、回線の復帰・アプリを開いたとき・バックグラウンドの処理をきっかけに、自動で送り直します（自動の再送には回数の上限があります）。</p>
         </div>
       </div>
 
