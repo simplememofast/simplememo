@@ -115,7 +115,7 @@ const RULES = [
   // drift further. It is one field in site-constants.json now.
   ['JSON-LD softwareVersion',
     /("softwareVersion":\s?")([^"]+)(")/g,
-    (m, a, v, b) => a + C.appVersion + b, false],
+    (m, a, v, b) => a + C.appVersion + b, 'app-version'],
   // © line — unified string, unambiguous
   ['© line',
     /((?:©|&copy;)\s?2026[^<\n]{0,200})(?=<\/p>|\n|<\/div>)/g,
@@ -325,8 +325,102 @@ if (SELFTEST) {
     scanHtml(drifted, 'fixture/x.html', { write: true }).out === okPage);
   t('--check は書き換えない', scanHtml(drifted, 'fixture/x.html').out === drifted);
 
+
+  let versionSelftestCount = 0;
+  const vt = (name, condition) => { versionSelftestCount++; t(name, condition); };
+
+  // Version scope is the direct own entity, never nearby text or an ancestor.
+  const versionTag = (body, quote = '"') => '<script type=' + quote + 'application/ld+json' + quote + '>' + body + '</script>';
+  const ownVersion = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  const correctVersion = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  const rivalVersion = '{"@type":"SoftwareApplication","@id":"https://fixture.invalid/rival","name":"Other memo","softwareVersion":"2.3"}';
+  const vscan = (html, write = false) => scanHtml(html, 'vs/fixture/index.html', { write });
+  vt('version: stale own entity is detected', vscan(versionTag(ownVersion)).findings.length === 1);
+  vt('version: writer changes only own token', vscan(versionTag(ownVersion), true).out === versionTag(correctVersion));
+  vt('version: check leaves stale bytes intact', vscan(versionTag(ownVersion)).out === versionTag(ownVersion));
+  vt('version: canonical own entity is quiet', vscan(versionTag(correctVersion)).findings.length === 0);
+  vt('version: competitor entity is quiet', vscan(versionTag(rivalVersion)).findings.length === 0);
+  vt('version: competitor writer is byte-identical', vscan(versionTag(rivalVersion), true).out === versionTag(rivalVersion));
+  vt('version: mixed own-first keeps rival bytes',
+    vscan(versionTag('[' + ownVersion + ',' + rivalVersion + ']'), true).out === versionTag('[' + correctVersion + ',' + rivalVersion + ']'));
+  vt('version: mixed rival-first keeps rival bytes',
+    vscan(versionTag('[' + rivalVersion + ',' + ownVersion + ']'), true).out === versionTag('[' + rivalVersion + ',' + correctVersion + ']'));
+  vt('version: graph nesting retains entity boundary',
+    vscan(versionTag('{"@graph":[' + rivalVersion + ',' + ownVersion + ']}'), true).out === versionTag('{"@graph":[' + rivalVersion + ',' + correctVersion + ']}'));
+  const reverseVersion = '{"softwareVersion":"0.0","name":"Own","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app"}';
+  vt('version: version-before-identity is still own',
+    vscan(versionTag(reverseVersion), true).out === versionTag(reverseVersion.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const spacedVersion = '{ "@type" : "SoftwareApplication", "@id" : "https://simplememofast.com/#app", "softwareVersion":   "0.0" }';
+  vt('version: whitespace stays byte-exact outside value',
+    vscan(versionTag(spacedVersion), true).out === versionTag(spacedVersion.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const nestedRival = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","item":' + rivalVersion + '}';
+  vt('version: own parent does not own nested rival', vscan(versionTag(nestedRival), true).out === versionTag(nestedRival));
+  const nonApp = ownVersion.replace('SoftwareApplication', 'WebPage');
+  vt('version: same id with non-app type is untouched', vscan(versionTag(nonApp), true).out === versionTag(nonApp));
+  const noId = '{"@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: identity missing is not inferred', vscan(versionTag(noId), true).out === versionTag(noId));
+  vt('version: JSON outside JSON-LD is untouched', vscan(ownVersion, true).out === ownVersion);
+  const malformed = versionTag(ownVersion.slice(0, -1));
+  vt('version: malformed JSON-LD is not rewritten', vscan(malformed, true).out === malformed);
+  const duplicateId = '{"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: duplicate id is not admitted', vscan(versionTag(duplicateId), true).out === versionTag(duplicateId));
+  const duplicateVersion = ownVersion.slice(0, -1) + ',"softwareVersion":"2.3"}';
+  vt('version: duplicate version is not admitted', vscan(versionTag(duplicateVersion), true).out === versionTag(duplicateVersion));
+  const quoted = '{"description":"quoted \\"{ sibling }\\" text","@type":"SoftwareApplication","softwareVersion":"0.0","@id":"https://simplememofast.com/#app"}';
+  vt('version: quoted braces do not cross object boundaries',
+    vscan(versionTag(quoted), true).out === versionTag(quoted.replace('"0.0"', JSON.stringify(C.appVersion))));
+  const noVersion = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"}';
+  vt('version: absent own version never reaches next rival',
+    vscan(versionTag('[' + noVersion + ',' + rivalVersion + ']'), true).out === versionTag('[' + noVersion + ',' + rivalVersion + ']'));
+  const ordinaryScript = '<script type="application/json">' + ownVersion + '</script>';
+  vt('version: other script type is untouched', vscan(ordinaryScript, true).out === ordinaryScript);
+  const arrayType = ownVersion.replace('"SoftwareApplication"', '["SoftwareApplication"]');
+  vt('version: unqualified array type stays untouched', vscan(versionTag(arrayType), true).out === versionTag(arrayType));
+  const numericVersion = ownVersion.replace('"0.0"', '0');
+  vt('version: numeric version stays untouched', vscan(versionTag(numericVersion), true).out === versionTag(numericVersion));
+  vt('version: single-quoted script type is admitted',
+    vscan(versionTag(ownVersion, "'"), true).out === versionTag(correctVersion, "'"));
+
+
+  const escapedDuplicateId = '{"@id":"https://simplememofast.com/#app","@\\u0069d":"https://fixture.invalid/rival","@type":"SoftwareApplication","softwareVersion":"0.0"}';
+  vt('version: escaped duplicate id is not admitted',
+    vscan(versionTag(escapedDuplicateId), true).out === versionTag(escapedDuplicateId));
+  const escapedDuplicateVersion = ownVersion.slice(0, -1) + ',"software\\u0056ersion":"2.3"}';
+  vt('version: escaped duplicate version is not admitted',
+    vscan(versionTag(escapedDuplicateVersion), true).out === versionTag(escapedDuplicateVersion));
+
+
+  // Independent exact expected strings for the four parser/regex divergence
+  // cases. Only the actual scanHtml writer is called; no parser oracle reuse.
+  const colonSpacedVersion = ownVersion.replace('"softwareVersion":', '"softwareVersion" : ');
+  const colonSpacedExpected = colonSpacedVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: colon-before whitespace is detected',
+    vscan(versionTag(colonSpacedVersion)).findings.length === 1);
+  vt('version span: colon-before whitespace writer preserves other bytes',
+    vscan(versionTag(colonSpacedVersion), true).out === versionTag(colonSpacedExpected));
+  const escapedKeyVersion = ownVersion.replace('softwareVersion', 'software\\u0056ersion');
+  const escapedKeyExpected = escapedKeyVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: single escaped key is detected',
+    vscan(versionTag(escapedKeyVersion)).findings.length === 1);
+  vt('version span: single escaped key writer preserves key bytes',
+    vscan(versionTag(escapedKeyVersion), true).out === versionTag(escapedKeyExpected));
+  const emptyVersion = ownVersion.replace('"0.0"', '""');
+  const emptyExpected = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: empty string is detected',
+    vscan(versionTag(emptyVersion)).findings.length === 1);
+  vt('version span: empty string writer changes only complete token',
+    vscan(versionTag(emptyVersion), true).out === versionTag(emptyExpected));
+  const quotedVersion = ownVersion.replace('"0.0"', '"0.0\\\"beta"');
+  const quotedExpected = ownVersion.replace('"0.0"', JSON.stringify(C.appVersion));
+  vt('version span: escaped quote string is detected',
+    vscan(versionTag(quotedVersion)).findings.length === 1);
+  const quotedWritten = vscan(versionTag(quotedVersion), true).out;
+  vt('version span: escaped quote writer preserves valid JSON and other bytes',
+    quotedWritten === versionTag(quotedExpected) &&
+    JSON.parse(quotedWritten.slice(quotedWritten.indexOf('>') + 1, quotedWritten.indexOf('</script>'))).softwareVersion === C.appVersion);
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 68 件中 ${failures.length} 件失敗`);
+  console.log('自己テスト ' + (68 + versionSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
   process.exit(failures.length ? 1 : 0);
 }
 
@@ -342,6 +436,101 @@ if (SELFTEST) {
  * 呼び出し側の挙動は切り出し前と同じ（`--check` / `--write` の出力が
  * バイト単位で一致することを確認してある）。
  */
+
+/**
+ * Complete JSON string value spans in valid JSON-LD objects.
+ * Ownership is direct, unique, same-object identity/type/version. The actual
+ * writer admits only owned tokens and preserves all other lexical bytes.
+ * Invalid JSON or ambiguous/missing identity/type/version is outside admission,
+ * not proof of version synchronization.
+ */
+function softwareVersionTokens(src) {
+  const tokens = [];
+  const tags = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
+  for (const tag of src.matchAll(tags)) {
+    if (!/(?:^|\s)type\s*=\s*(['"])application\/ld\+json\1(?:\s|$)/i.test(tag[1])) continue;
+    const text = tag[2];
+    const offset = tag.index + tag[0].indexOf('>') + 1;
+    try {
+      JSON.parse(text);
+      let i = 0;
+      const objects = [];
+      const whitespace = () => { while (i < text.length && /\s/.test(text[i])) i++; };
+      const string = () => {
+        const start = i++;
+        while (i < text.length) {
+          if (text[i] === '\\') { i += 2; continue; }
+          if (text[i++] === '"') return { kind: 'string', value: JSON.parse(text.slice(start, i)), start, end: i };
+        }
+        throw new Error('invalid JSON string span');
+      };
+      const value = () => {
+        whitespace();
+        if (text[i] === '"') return string();
+        if (text[i] === '{') {
+          i++;
+          const fields = [];
+          whitespace();
+          if (text[i] !== '}') {
+            while (true) {
+              whitespace();
+              const key = string();
+              whitespace();
+              if (text[i++] !== ':') throw new Error('invalid JSON object separator');
+              fields.push({ key: key.value, keyStart: key.start, node: value() });
+              whitespace();
+              if (text[i] !== ',') break;
+              i++;
+            }
+          }
+          if (text[i++] !== '}') throw new Error('invalid JSON object end');
+          const object = { kind: 'object', fields };
+          objects.push(object);
+          return object;
+        }
+        if (text[i] === '[') {
+          i++;
+          const entries = [];
+          whitespace();
+          if (text[i] !== ']') {
+            while (true) {
+              entries.push(value());
+              whitespace();
+              if (text[i] !== ',') break;
+              i++;
+            }
+          }
+          if (text[i++] !== ']') throw new Error('invalid JSON array end');
+          return { kind: 'array', entries };
+        }
+        const token = text.slice(i).match(/^(?:-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null)/);
+        if (!token) throw new Error('invalid JSON scalar');
+        i += token[0].length;
+        return { kind: 'scalar' };
+      };
+      value();
+      whitespace();
+      if (i !== text.length) throw new Error('unconsumed JSON payload');
+      for (const object of objects) {
+        const fields = (key) => object.fields.filter((field) => field.key === key);
+        const ids = fields('@id'); const types = fields('@type'); const versions = fields('softwareVersion');
+        const owned = ids.length === 1 && types.length === 1 && versions.length === 1 &&
+          ids[0].node.kind === 'string' && ids[0].node.value === 'https://simplememofast.com/#app' &&
+          types[0].node.kind === 'string' && types[0].node.value === 'SoftwareApplication';
+        for (const version of versions) {
+          if (version.node.kind !== 'string') continue;
+          tokens.push({ owned, value: version.node.value,
+            fieldStart: offset + version.keyStart,
+            start: offset + version.node.start, end: offset + version.node.end });
+        }
+      }
+    } catch {
+      // Unknown/invalid nodes remain untouched, without a synchronization claim.
+    }
+  }
+  return tokens.sort((a, b) => a.start - b.start);
+}
+
 function scanHtml(src, rel, { write = false } = {}) {
   const findings = [];
   // byte ranges of pricing sections / plan cards on this page
@@ -352,6 +541,23 @@ function scanHtml(src, rel, { write = false } = {}) {
   const inPriceZone = (i) => priceZones.some(([a, b]) => i >= a && i < b);
   for (const [desc, re, build, scope] of RULES) {
     if (scope === 'own' && !OWN_VALUE_PAGES.has(rel)) continue;
+    // Keep the legacy RULE for its original isolated selftests. The real
+    // version consumer uses complete JSON string value spans, never that regex.
+    if (scope === 'app-version') {
+      const edits = [];
+      for (const token of softwareVersionTokens(src)) {
+        if (!token.owned) continue;
+        if (token.value === C.appVersion) continue;
+        const m = src.slice(token.fieldStart, token.end);
+        const canonical = src.slice(token.fieldStart, token.start) + JSON.stringify(C.appVersion);
+        findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        if (write) edits.push({ start: token.start, end: token.end, value: JSON.stringify(C.appVersion) });
+      }
+      for (const edit of edits.sort((a, b) => b.start - a.start)) {
+        src = src.slice(0, edit.start) + edit.value + src.slice(edit.end);
+      }
+      continue;
+    }
     src = src.replace(re, (...args2) => {
       const m = args2[0];
       const index = args2[args2.length - 2];
