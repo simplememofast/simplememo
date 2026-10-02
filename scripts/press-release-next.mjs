@@ -35,9 +35,10 @@ export function captureCommitted(coverage, sourceCommit, committedCoverage, now)
 const pct = n => (n * 100).toFixed(1);
 export function render(manifest) {
   const s = manifest.snapshot;
-  const title = `「牛乳を買う」のひと言をNotionへ。シンプルメモがNotion連携を提供開始`;
-  const subtitle = `文字・音声・Siri・Apple Watchから「SimpleMemo Inbox」に1メモ1ページ。運営業務のAI実行率${pct(s.ai_execution_rate)}%（${s.ai_executes}/${s.doing}）と、未着手を含む総合自動化率${pct(s.overall_automation_rate)}%も証拠付きで公開`;
-  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「Obsidian連携シンプルメモ」（以下「シンプルメモ」）で、書いたり話したりしたメモをNotionへ保存する連携機能の提供を開始しました。既存の自分宛メール、Obsidianへの記録に加え、Notionの「SimpleMemo Inbox」へ1メモ1ページで保存できます。
+  const snapshotDate = new Date(s.observed_at).toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" });
+  const title = `「牛乳を買う」のひと言をNotionへ。シンプルメモのNotion連携を紹介`;
+  const subtitle = `文字・音声・Siri・Apple Watchから「SimpleMemo Inbox」に1メモ1ページ。${snapshotDate}時点の業務台帳分類によるAI実行率${pct(s.ai_execution_rate)}%（${s.ai_executes}/${s.doing}）と、未着手を含む総合自動化率${pct(s.overall_automation_rate)}%も集計根拠とともに公開`;
+  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「Obsidian連携シンプルメモ」（以下「シンプルメモ」）で、書いたり話したりしたメモをNotionへ保存する既存の連携機能を紹介します。既存の自分宛メール、Obsidianへの記録に加え、Notionの「SimpleMemo Inbox」へ1メモ1ページで保存できます。
 
 ■ 買い物メモを、Notionを開かずに残す
 
@@ -60,9 +61,9 @@ https://simplememofast.com/notion/
 
 ■ 開発・運営の進捗も、実行記録とともに公開
 
-シンプルメモの運営では、データの確認、改善案の選定、実装、自動検査、本番反映、結果の記録をAIが担う範囲を広げています。以下は${new Date(s.observed_at).toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}（日本時間）に取得した業務台帳の集計です。Notion連携の成功率や、今回の機能だけによる改善値ではありません。
+シンプルメモの運営では、データの確認、改善案の選定、実装、自動検査、本番反映、結果の記録をAIが担う範囲を広げています。以下は${snapshotDate}（日本時間）に取得した業務台帳の集計です。Notion連携の成功率や、今回の機能だけによる改善値ではありません。
 
-棚卸しした203業務のうち、意図的に実施しない4業務を除く${s.defined}業務を対象にしています。内訳は、AIが実行${s.ai_executes}件、AIが提案・下書きまで${s.counts.ai_proposes}件、人が担当${s.counts.human_only}件、未着手${s.counts.nobody}件です。
+棚卸しした203業務のうち、意図的に実施しない4業務を除く${s.defined}業務を対象にしています。内訳は、台帳上でAI実行に分類した${s.ai_executes}件、AIが提案・下書きまで${s.counts.ai_proposes}件、人が担当${s.counts.human_only}件、未着手${s.counts.nobody}件です。
 
 AI実行率：${pct(s.ai_execution_rate)}%（${s.ai_executes}/${s.doing}、実施中の業務が分母）
 総合自動化率：${pct(s.overall_automation_rate)}%（${s.ai_executes}/${s.defined}、未着手も分母に含む）
@@ -98,7 +99,7 @@ https://simplememofast.com/
 株式会社ユリカ シンプルメモ 広報担当
 support@simplememofast.com
 
-アプリ画面を参照したAI生成イメージ。
+本文の更新にAIを使用しています。アプリ画面を参照したAI生成イメージ。
 `;
   return { title, subtitle, body };
 }
