@@ -276,9 +276,14 @@ export function planAutoPost({ doc, intakeIds = null, observed = [], postedToday
       decisions.push(hold('ASC に該当のレビューが無い — **実物を見ずに公開しない**'));
       continue;
     }
-    if (obs.has_response) {
+    if (obs.has_response === true) {
       decisions.push(hold('ASC 側にすでに返信が付いている'
         + ' — **POST は上書きなので、人が書いた返信を消しうる**'));
+      continue;
+    }
+    if (obs.has_response !== false) {
+      decisions.push(hold('ASC 側の返信有無が未確認'
+        + ' — **返信が無いと確認できたレビューだけ公開する**'));
       continue;
     }
     if (typeof r.rating === 'number' && r.rating !== obs.rating) {
@@ -428,6 +433,31 @@ function selftest() {
   t('ASC に無いレビューは止める', d1({}, []).decision === 'hold');
   t('**すでに返信が付いていれば止める**（POST は上書きなので人の返信を消しうる）',
     d1({}, [obs({ has_response: true })]).why.includes('上書き'));
+  const missingResponseObservation = obs();
+  delete missingResponseObservation.has_response;
+  const unknownResponseObservations = [
+    ['欠測', missingResponseObservation],
+    ['undefined', obs({ has_response: undefined })],
+    ['null', obs({ has_response: null })],
+    ['数値0', obs({ has_response: 0 })],
+    ['数値1', obs({ has_response: 1 })],
+    ['空文字', obs({ has_response: '' })],
+    ['文字列false', obs({ has_response: 'false' })],
+    ['文字列true', obs({ has_response: 'true' })],
+  ];
+  for (const [label, observation] of unknownResponseObservations) {
+    const decision = d1({}, [observation]);
+    t(`**返信有無が${label}なら未確認として保留し、投稿本文を渡さない**`,
+      decision.decision === 'hold' && decision.response_body === null
+      && decision.why.includes('未確認'));
+  }
+  const confirmedNoResponse = d1({}, [obs({ has_response: false })]);
+  t('**返信なしのboolean falseだけは元の投稿ゲートを通れる**',
+    confirmedNoResponse.decision === 'post'
+    && confirmedNoResponse.response_body === planDoc().replies[0].draft);
+  t('dry_runでも返信有無が未確認ならwould_postにしない',
+    d1({ policy: { auto_post: { ...okPolicy.auto_post, dry_run: true } } },
+       [missingResponseObservation]).decision === 'hold');
   t('**台帳が星を持っていなくても ASC が★1なら止まる**',
     d1({}, [obs({ rating: 1 })]).why.includes('★1'));
   t('台帳の星と ASC の星が食い違えば止める',
@@ -453,6 +483,16 @@ function selftest() {
   t('**上限は1回の実行の中でも効く**（cap 1 で2件目は止まる）',
     two.decisions[0].decision === 'post' && two.decisions[1].decision === 'hold'
     && two.decisions[1].why.includes('上限'));
+  const unknownThenValid = plan({
+    policy: { auto_post: { enabled: true, dry_run: false, daily_cap: 1 } },
+    replies: [{ review_id: 'r1', draft: 'ありがとうございます。' },
+              { review_id: 'r2', draft: 'ご報告ありがとうございます。' }],
+  }, [missingResponseObservation, obs({ review_id: 'r2', has_response: false })]);
+  t('**未確認の保留は日次枠を消費せず、次の確認済みレビューだけが投稿枠を使う**',
+    unknownThenValid.decisions[0].decision === 'hold'
+    && unknownThenValid.decisions[0].response_body === null
+    && unknownThenValid.decisions[1].decision === 'post'
+    && unknownThenValid.decisions[1].response_body === 'ご報告ありがとうございます。');
   t('すでに今日の上限に達していれば1件目から止まる',
     plan({ policy: { auto_post: { enabled: true, dry_run: false, daily_cap: 1 } } },
          [obs()], 1).decisions[0].decision === 'hold');

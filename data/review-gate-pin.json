@@ -26,11 +26,11 @@
     "変わったのが判断に効く変更なのかを読んでから書くこと。"
   ],
   "entry": "scripts/check-review-replies.mjs",
-  "reviewed_at": "2026-09-02",
-  "reviewed_note": "**[2026-09-02] 同じ日に2つの規則が別々のセッションから足された回。**マージ後の指紋は 10669f9474aa で、どちらか片方の値（c9236bd4f67e / e864770e9e3d）ではない。\n\n**(1) rate-without-window**（#789・Fable 5.1）—— 「同期間」＋率で同じ行に日付の窓が無い文を落とす。配信前日に踏んだ形で、原稿が「同期間の99.5%」と書きながら 8/11〜21 の値を引いていた（23日間なら 81.9%）。\n\n**(2) stale-launch-time-split**（#791・Opus 5）—— 数値とラベルが別要素に割れた起動時間を落とす。トップページの `<div>約1<span>秒</span></div>` ＋ 別要素のラベルが既存の stale-launch-time（`起動 … N秒` が1行に収まる前提）を素通りしていた。\n\n**読んだ差分と、投稿への影響:** どちらも RULES への追加のみで、evaluateAutoPost / planAutoPost / 承認境界（★3以上・重い話題・日次上限・has_response）には触れていない。checkText の違反は check-review-replies.mjs で problems になるので、**2つとも投稿を止める方向にしか効かない** —— 起こりうるのは「返信が保留になる」であって「通らなかったものが通る」ではない。check-review-replies.mjs と read-ledger.mjs は不変。\n\n**#789 が留めた c9236bd4f67e は、この PR がマージされた時点で古くなる。**並行して同じファイルを触ると指紋は必ずずれるので、隣（simplememo-ios/data/review-reply-gate.json）も同じ 10669f9474aa へ直す",
+  "reviewed_at": "2026-10-02",
+  "reviewed_note": "**[2026-09-02] 同じ日に2つの規則が別々のセッションから足された回。**マージ後の指紋は 10669f9474aa で、どちらか片方の値（c9236bd4f67e / e864770e9e3d）ではない。\n\n**(1) rate-without-window**（#789・Fable 5.1）—— 「同期間」＋率で同じ行に日付の窓が無い文を落とす。配信前日に踏んだ形で、原稿が「同期間の99.5%」と書きながら 8/11〜21 の値を引いていた（23日間なら 81.9%）。\n\n**(2) stale-launch-time-split**（#791・Opus 5）—— 数値とラベルが別要素に割れた起動時間を落とす。トップページの `<div>約1<span>秒</span></div>` ＋ 別要素のラベルが既存の stale-launch-time（`起動 … N秒` が1行に収まる前提）を素通りしていた。\n\n**読んだ差分と、投稿への影響:** どちらも RULES への追加のみで、evaluateAutoPost / planAutoPost / 承認境界（★3以上・重い話題・日次上限・has_response）には触れていない。checkText の違反は check-review-replies.mjs で problems になるので、**2つとも投稿を止める方向にしか効かない** —— 起こりうるのは「返信が保留になる」であって「通らなかったものが通る」ではない。check-review-replies.mjs と read-ledger.mjs は不変。\n\n**#789 が留めた c9236bd4f67e は、この PR がマージされた時点で古くなる。**並行して同じファイルを触ると指紋は必ずずれるので、隣（simplememo-ios/data/review-reply-gate.json）も同じ 10669f9474aa へ直す\n\n[2026-10-02] planAutoPostの返信有無観測を厳密に確認する修正を読み、has_response=trueの既返信保護とfalseの従来ゲートを保持した。missing/null/文字列/数値等のunknownはhold・response_body=nullとし、投稿候補に進めず日次枠も消費しない。原57回帰を保った追加11回帰を含む68件が通過。原自然CLIで欠測がpostとなる条件を、修正後のholdと後続known-falseのpostで確認した。合成検証でありASC取得・投稿実績ではない。依存閉包は同じ3ファイルで、check-pr-facts.mjs/read-ledger.mjsは不変。公開側とsimplememo-ios/data/review-reply-gate.jsonの両pinをこの同じ内容指紋へ同期する。承認・停止・星評価・本文・dry_run・日次上限を緩めていない。",
   "files": {
     "scripts/check-pr-facts.mjs": "10669f9474aa",
-    "scripts/check-review-replies.mjs": "d9a2f393081d",
+    "scripts/check-review-replies.mjs": "741faa12df1f",
     "scripts/lib/read-ledger.mjs": "a6e0cdd4c945"
   }
 }
