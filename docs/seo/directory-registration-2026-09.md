@@ -2290,7 +2290,9 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/2 17:17 | [#1887](https://github.com/simplememofast/simplememo/pull/1887) | 第92弾（よくある質問 日英＋開発記事 Day1 日英）：`/faq` の「Keychain内のデータもアンインストール時に削除されます」を、iOS の仕組みどおり「アプリを削除しても端末に残ることがある（暗号化したメモのファイルはアプリと一緒に消える）」に。「暗号化キーは端末のセキュアエンクレーブで保護」を Keychain の実際の設定（この端末だけ・最初のロック解除のあとから読める）に。重複送信の防止の言い切り（「二重に送信されることはありません」「実メールは1通だけ正しく届きます」）を24時間の範囲つきに、再送の説明（「充電中、Wi-Fi接続中など」「通常は数分以内に復旧します」）を実際のきっかけと回数の上限に。`/devlog/day1` の「Relay API側で重複チェックを行う」に 2026-10 の追記（今は Resend の Idempotency-Key、24時間） |
 | 10/2 17:48 | [#1890](https://github.com/simplememofast/simplememo/pull/1890) | 第93弾（英語の Obsidian ガイド10ページ＋`/en/about/`＋よくある質問 日英＋サイトマップ）：「Yurica Inc.」を「YURIKA, K.K.」に（オーナー判断 #54 ①の英語の社名）。`/faq` の「株式会社YURIKA」を「株式会社ユリカ」に（`/legal` の販売事業者名と同じ）。`/faq` のトラブルシューティングの最後で重複していた3問を外した（FAQPage も 71件 → 68件） |
 | 10/2 18:10 | [#1892](https://github.com/simplememofast/simplememo/pull/1892) | 第94弾（用語集 日英＋サイトマップ）：`/glossary/outbox-architecture` の定義「『ネットワーク障害時のデータ損失』と『重複送信』の両方を防止します」を、Outbox だけでは応答の失われたメッセージが送り直されるので、受け取る側の重複防止（冪等キー）と組み合わせる、シンプルメモではメッセージIDを冪等キーとして渡し24時間の重複を防ぐ、に |
-| — | この PR | 第92〜第94弾の計測の台帳の note と annotations の行、この §5.47、§5.46 の「この PR」の行、§7 の新しい #60 |
+| 10/2 18:36 | [#1895](https://github.com/simplememofast/simplememo/pull/1895) | 第92〜第94弾の計測の台帳の note と annotations の行、この §5.47、§5.46 の「この PR」の行、§7 の新しい #60 |
+| 10/2 21:09 | [#1896](https://github.com/simplememofast/simplememo/pull/1896) | 第95弾（`llms.txt`＋よくある質問 日英）：`llms.txt` の「AES-GCM-256 for the Outbox queue and send history only」を、入力中の下書きも含める書き方に（同じファイルの「Draft auto-save (on-device AES-GCM)」と `/guides/draft-autosave/` と食い違っていた。アプリでも下書きは AES-GCM で暗号化して保存）。`/faq` の「すべてのメモデータ（Outbox・履歴）」にも入力中の下書きを足した |
+| — | この PR | 第95弾の annotations の行、§5.47 の毎晩の確認と「この PR」の行 |
 
 ### 見つけたこと
 
@@ -2305,9 +2307,17 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | **よくある質問の重複**：`/faq`（日英）のトラブルシューティングの最後に、すぐ下の「お問い合わせ・サポート」と「使い方」にある3問が、同じ答えでもう一度入っていた（FAQPage にも二重に入っていた） | 第93弾 [#1890](https://github.com/simplememofast/simplememo/pull/1890) で外した |
 | **「摩擦ゼロ」「ゼロフリクション」「frictionless」**：シンプルメモについて「キャプチャの摩擦をゼロにしています」「摩擦ゼロのメモ体験」「Zero-friction memo experience」などと言い切る所が、日本語8ページ・英語9ページほどに残る（題・説明・見出し・CTA を含む）。「逃さない」（§7 #58）と同じ種類の言い切り。方法の説明（Zettelkasten の一時メモの原則など）と、Captio を使っていたころの話は別。Gmail のスター運用ガイドの「二度と埋もれない」も同じ種類 | オーナーに聞く（§7 #60） |
 
+### 毎晩の確認（10/2 20:40 JST の予約分。20:45 前後に実施）
+
+- **main と手元の一致**：今日マージした第87〜第94弾と台帳（[#1879](https://github.com/simplememofast/simplememo/pull/1879)・[#1881](https://github.com/simplememofast/simplememo/pull/1881)・[#1882](https://github.com/simplememofast/simplememo/pull/1882)・[#1883](https://github.com/simplememofast/simplememo/pull/1883)・[#1884](https://github.com/simplememofast/simplememo/pull/1884)・[#1886](https://github.com/simplememofast/simplememo/pull/1886)・[#1887](https://github.com/simplememofast/simplememo/pull/1887)・[#1890](https://github.com/simplememofast/simplememo/pull/1890)・[#1892](https://github.com/simplememofast/simplememo/pull/1892)・[#1895](https://github.com/simplememofast/simplememo/pull/1895)）と 10/1 の [#1842](https://github.com/simplememofast/simplememo/pull/1842)・[#1845](https://github.com/simplememofast/simplememo/pull/1845) は、マージの時点で手元の検証した木と同じ。その後に変わったファイルは、こちらの次の弾か、ほかの作業の変更（台帳の差し込みの直しの [#1891](https://github.com/simplememofast/simplememo/pull/1891) など）だけ。本番のページにも第92〜第94弾の文言が出ていることを確かめた（`/faq`・`/en/faq`・`/en/about/`・`/glossary/outbox-architecture/`）。
+- **iOS Dev Weekly**：770号（10/2 の号）は 20:45 JST の時点でまだ出ていない（最新は 769号・9/25）。#1547 の記事が載るかは次の確認で見る。
+- **受信箱（support@、読むだけ。返信はしていない）**：返信の要るものは無い。新しく届いたのは、SEO ツールの営業メール1件（サイトを無料で診断する、という提案）、テレビ番組からの紹介の提案1件（対話メモについて。費用の有無は本文の冒頭だけでは分からない。新しい種類の対外送信は凍結中なので返信していない）、ほかは利用中のサービスの規約改定のお知らせ・通知・ニュースレター。
+- **awesome 系リスト（§6.5）**：7件すべて open のまま、メンテナの反応なし（20:50 ごろ確認）。
+- **事実訂正の次の弾**：第95弾 [#1896](https://github.com/simplememofast/simplememo/pull/1896)（10/2 21:09）。
+
 ### 次にやること
 
-- 毎晩の確認（10/2 20:40 JST の予約分）。
+- 毎晩の確認は 10/3 20:40 JST に予約した（10/2 の分は上のとおり）。10/08 まで毎日かけ直す。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
 - さくらのナレッジ：編集部の返事を待つ。原稿の下書きの事実の確認を進めた（送信待ちの保存の順番・失敗の種類ごとの扱い・送り直しの順番）。再送の節の書き方は、オーナーに確認してから決める。
 
