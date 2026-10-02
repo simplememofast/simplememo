@@ -25,12 +25,12 @@
     })();
   </script>
   <title>Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌</title>
-  <meta name="description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。Outboxパターンの設計フロー、SendManagerの実装、AES-GCM暗号化、指数バックオフリトライ、NWPathMonitorによる回線復帰検知まで、その全容を解説します。">
+  <meta name="description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。Outboxパターンの設計フロー、SendManagerの実装、AES-GCM暗号化、自動の再送、NWPathMonitorによる回線復帰検知まで、その全容を解説します。">
   <meta name="theme-color" content="#070b14">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌">
-  <meta property="og:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta property="og:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・自動の再送・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/devlog/outbox-architecture">
@@ -45,7 +45,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Outboxアーキテクチャ：メッセージを取りこぼさないための設計 | Obsidian連携シンプルメモ 開発日誌">
-  <meta name="twitter:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta name="twitter:description" content="送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・自動の再送・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -229,7 +229,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-09-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・自動の再送・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-10-02","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -308,7 +308,7 @@
             <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標は、待ちを感じない短さ（アニメーション込みで0.25秒）。</li>
             <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
             <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
-            <li><strong>失敗したら指数バックオフで自動リトライ</strong><br>ネットワークエラーやサーバーエラーの場合、指数バックオフ（1秒→2秒→4秒→8秒…）で自動リトライする。BGTaskSchedulerを使い、アプリがバックグラウンドにあってもリトライできるようにする（実行のタイミングは iOS が決める）。</li>
+            <li><strong>失敗したら自動で送り直す</strong><br>ネットワークエラーやサーバーエラーの場合は、送信待ちに残したまま、回線が戻ったとき・アプリを開いたとき・バックグラウンドの処理（BGTaskScheduler。実行のタイミングは iOS が決める）をきっかけに送り直す。自動の再送には回数の上限がある。</li>
             <li><strong>オフラインならNWPathMonitorで回線復帰を検知して自動再送</strong><br>送信時点でオフラインの場合、Network.frameworkのNWPathMonitorが回線状態を監視。Wi-Fiやセルラーが復帰した瞬間に自動的にOutbox内の全未送信メッセージを再送する。</li>
           </ol>
 
@@ -342,7 +342,7 @@
           <p>Outbox に保存されるメッセージは、ユーザーのプライベートなメモだ。ローカルストレージとはいえ、平文で保存するわけにはいかない。Apple CryptoKit の AES-GCM を使い、暗号化に関しては外部 SDK を一切介さない実装にしている。</p>
           <ul>
             <li><strong>Apple CryptoKit</strong> — iOS 13以降で利用可能。暗号化処理に外部 SDK を介さない（Apple 純正のみ）。</li>
-            <li><strong>256-bit対称鍵</strong> — Keychainに保存され、デバイスに紐づく。</li>
+            <li><strong>256-bit対称鍵</strong> — Keychainに保存する。</li>
             <li><strong>認証付き暗号化</strong> — AES-GCMはデータの機密性と完全性を同時に保証。改ざんされたデータは復号時に検知される。</li>
           </ul>
 <pre><code>enum OutboxEncryption {
@@ -367,7 +367,7 @@
         return combined
     }
 }</code></pre>
-          <p>鍵はアプリ初回起動時に自動生成され、Keychainに安全に保存される。Keychainはデバイスのセキュアエンクレーブに紐づいており、他のアプリやバックアップからはアクセスできない。</p>
+          <p>鍵は初めて必要になったときに自動で作られ、Keychainに保存される。保存の設定は「この端末だけ・最初のロック解除のあとから読める」（kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly）で、ほかのアプリからは読めず、バックアップから別の端末へ移ることもない。再起動のあと一度ロックを解除すれば、ロック中のバックグラウンド処理からも読める。なお、上のコード例は記事を書いた時点の簡略版で、今のコードでは、キーチェーンの読み取りに失敗したときに「鍵が無い」と扱って新しい鍵を作ることはしない。</p>
 
           <!-- Section 5 -->
           <h2>データパスを Apple 純正のみで構成する意味</h2>
@@ -377,13 +377,12 @@
             <li><strong>Network.framework</strong> — NWPathMonitorによる回線状態監視。Reachabilityライブラリは不要。</li>
             <li><strong>BackgroundTasks</strong> — BGTaskSchedulerによるバックグラウンドリトライ。</li>
           </ul>
-          <p>外部依存がゼロであることの意味は大きい。</p>
+          <p>送信待ちの経路に外部のライブラリが無いことには、次の意味がある。</p>
           <ul>
-            <li><strong>破壊的変更のリスクがない</strong> — OSアップデート時にサードパーティライブラリが壊れることがない。</li>
-            <li><strong>セキュリティ</strong> — ユーザーのメモデータに触れるコードパスに、第三者のコードが一切含まれない。</li>
-            <li><strong>アプリバイナリの軽量化</strong> — 不要なフレームワークを含まないため、ダウンロードサイズが最小限。</li>
-            <li><strong>ビルドの高速化</strong> — 依存関係の解決が不要で、CIが速い。</li>
+            <li><strong>外部の更新に左右されない</strong> — 送信待ちの処理が、サードパーティのライブラリの更新や提供終了で動かなくなることがない。</li>
+            <li><strong>セキュリティ</strong> — 送信待ちのメモの本文に触れる処理（暗号化・保存・送信）に、第三者のコードが入らない。</li>
           </ul>
+          <p>なお、アプリ全体では外部のSDK（Googleサインイン、Firebase、AppsFlyer）も使っている（<a href="/devlog/privacy-first-design">プライバシーファースト設計</a>を参照）。ここで言う「Apple純正のみ」は、送信待ちのデータの経路の話だ。</p>
 
           <!-- Section 6 -->
           <h2>UIクリアとネットワーク送信の分離</h2>
@@ -427,10 +426,10 @@
           <p>Outboxは永続ストレージです。アプリを終了しても、iPhoneを再起動しても残ります。次回アプリ起動時、またはバックグラウンドタスクにより自動的にリトライされます。</p>
 
           <h3>Q. なぜAES-GCMを選んだのですか？</h3>
-          <p>Apple CryptoKitがネイティブサポートしており、認証付き暗号化（Authenticated Encryption）により改ざん検知も可能です。外部ライブラリ依存がゼロになる点も大きな利点です。</p>
+          <p>Apple CryptoKitがネイティブサポートしており、認証付き暗号化（Authenticated Encryption）により改ざん検知も可能です。暗号化の処理に外部ライブラリが要らない点も利点です。</p>
 
           <h3>Q. 送信失敗時のリトライ回数は？</h3>
-          <p>指数バックオフで自動リトライします。BGTaskSchedulerでバックグラウンドタスクとしてもスケジュールされるため、失敗した送信は捨てずに再試行されます。ユーザーのメモを取りこぼさないための設計です。</p>
+          <p>自動で送り直します。きっかけは、回線が戻ったとき、アプリを開いたとき、バックグラウンドの処理（BGTaskScheduler。実行の時刻は iOS が決める）です。送れなかったメモは送信待ちから消さずに送り直しますが、自動の再送には回数の上限があります。</p>
 
           <!-- Related Articles -->
           <h2>関連記事</h2>
@@ -449,7 +448,7 @@
             </a>
             <a href="/devlog/relay-api-design" class="related-card">
               <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
-              <div class="related-card__desc">エッジコンピューティングで世界中から数十msでメール送信する設計。</div>
+              <div class="related-card__desc">メールボックスの OAuth 連携に頼らない送信。エッジで動く中継API（Cloudflare Workers）から Resend で送る。</div>
             </a>
             <a href="/devlog/privacy-first-design" class="related-card">
               <div class="related-card__title">プライバシーファースト設計：偏執的なこだわり</div>
