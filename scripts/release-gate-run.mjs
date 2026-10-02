@@ -37,7 +37,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, run } from './lib/selftest.mjs';
-import { evaluateSubmission, evaluateRelease, hoursSince } from './check-release-gate.mjs';
+import { evaluateSubmission, evaluateRelease, evaluateIntegration, hoursSince } from './check-release-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LEDGER_PATH = path.join(ROOT, 'data/release-gate.json');
@@ -227,6 +227,7 @@ export function toGateInput({ ledger, materials, now }) {
     policy: ledger.policy,
     build: m.build ?? {},
     ci: m.ci ?? {},
+    quality_alternative: m.quality_alternative,
     releaseNotes: m.releaseNotes,
     review: m.review ?? {},
     health: m.health ?? {},
@@ -246,10 +247,12 @@ export function evaluateBoth(input) {
   const hypothetical = { ...input, policy: { ...input.policy, enabled: true } };
   return {
     actual: {
+      integration: evaluateIntegration(input),
       submission: evaluateSubmission(input),
       release: evaluateRelease(input),
     },
     ifEnabled: {
+      integration: evaluateIntegration(hypothetical),
       submission: evaluateSubmission(hypothetical),
       release: evaluateRelease(hypothetical),
     },
@@ -415,6 +418,8 @@ if (isMain) {
     console.log(`  この門を通った出荷  ${(ledger.releases ?? []).length} 件\n`);
 
     console.log('判定（実台帳のまま）');
+    if (materials?.quality_alternative?.purpose === 'integration')
+      console.log(`  統合  ${r.actual.integration.decision}  — ${r.actual.integration.why ?? ''}`);
     console.log(`  提出  ${r.actual.submission.decision}  — ${r.actual.submission.why ?? ''}`);
     console.log(`  公開  ${r.actual.release.decision}  — ${r.actual.release.why ?? ''}\n`);
 
@@ -450,6 +455,7 @@ if (isMain) {
       materials_present: have,
       materials_total: inv.length,
       materials_why: why ?? null,
+      integration: r.actual.integration,
       submission: r.actual.submission,
       release: r.actual.release,
     };

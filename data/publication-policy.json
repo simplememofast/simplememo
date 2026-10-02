@@ -382,6 +382,11 @@
       "why": "実行側（simplememo-ios・非公開）が留めている出荷ゲート指紋の写し。**中身は公開ファイルのハッシュだけ**で秘密は無いが、サイトが参照しないので配信しない（review-gate-pin.json / rollout-gate-pin.json と同じ扱い）",
       "ok_in_public_repo": "ok"
     },
+    "one-release-local-quality.schema.json": {
+      "served_by_site": false,
+      "why": "5.9.13一度の品質代替を検証する公開JSON Schema。型・必須項目・enum・指紋形式のみで、実証記録、許可原文、端末・AppleビルドID、非公開pathや資格情報を含まない。既存release-gate/pin資料と同じく公開Gitへ保存し、サイトでは配信しない。",
+      "ok_in_public_repo": "ok"
+    },
     "release-gate.json": {
       "served_by_site": false,
       "why": "提出・公開の門の数値・真偽値と、通過した実行の版数・日時・工程・公開証拠の参照。2026-09-12に初めて提出受付1件を記録した。審査連絡先、やり取り、却下理由、資格情報、クラッシュ率の原本は含めない。公開Gitへ保存し、サイトでは配信しない。",

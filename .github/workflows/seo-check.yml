@@ -635,6 +635,7 @@ jobs:
       - name: Release gate (App Review / App Store)
         run: |
           node scripts/check-release-gate.mjs --selftest
+          node --test scripts/one-release-local-quality.test.mjs
           node scripts/check-release-gate.mjs --check
           # Read-only evidence classifier; this never authorizes publication.
           node scripts/assess-release-health-evidence.mjs --selftest
