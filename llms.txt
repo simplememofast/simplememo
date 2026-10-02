@@ -157,7 +157,7 @@ A: Any provider that accepts incoming SMTP — Gmail, Outlook, iCloud Mail, Yaho
 - App Store: https://apps.apple.com/jp/app/id6758438948
 
 ## Encryption (factual, scoped)
-- On-device storage: AES-GCM-256 for the Outbox queue and send history only
+- On-device storage: AES-GCM-256 for memo text kept on the device (the Outbox queue, send history and the auto-saved draft)
 - Key storage: Apple Keychain Services (kSecClassGenericPassword), `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly` (the key does not migrate to another device)
 - Transport: TLS (HTTPS) over URLSessionConfiguration.ephemeral — no cookies, no caches
 - Storage of memo bodies on Simple Memo's servers: none (transit only during send via Cloudflare Workers + Resend)
