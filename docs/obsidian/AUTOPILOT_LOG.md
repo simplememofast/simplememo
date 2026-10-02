@@ -4134,3 +4134,16 @@ p=0.20。`publishing_day_rate` は5件の決済のうち p=0.70/0.55/0.35/0.25 �
 - PR1853: title/description/SNS/Article/WebPageと既存アイコン、対象sitemap・配信/記事ネタの種を同期。本文・CTA・計測を保持。0 SEO errors/54既存warnings、Chrome4幅で横漏れ0・画像読込み確認。出荷は最終SHA CI・マージ・本番一致後に成立。
 - 観測: GSC/BingAPI/AppsFlyer検証、ASC既存出力再利用、同一UUIDのGA4再開。BingW40と当週固定AI観測は再利用。service_notice_monitor直近48時間48行はinactiveで最新鮮度と数値0を確認。過去の観測空白は消さない。
 - 実験: GSC新規28日窓10/02〜10/29・11/01評価。10/03・10/23の既存実験を維持。AppsFlyer自然日5/7はINCONCLUSIVE。Codex実費USDは未取得null、Claude実費台帳への追記なし。
+
+
+## 2026-10-03 — Refresh: self-email guide search title
+
+- Native owner: obsidian; actions; planned06:00JST; task01a0fe6a-df2f-7403-a65a-d60d3297e89d. Scheduler row, initial turn, fresh preflight and unique daily claim verified. Original gate receipt6cb53b7e33e56517b7b815605fc93291c6c778e6ffb7b1bd4a21fcb8d66161ae.
+- Compared VFU diagnosis, the second-brain page and this exact page. The retained VFU failure matches the current last-failure timestamp and gives no safe replay/recipient/token repair. Health issue1902 was raised before the daily slot; no observer rule was changed. Its intake patch remains private for the original Act because it is outside this sealed measurement scope.
+- One action: replace the one-tap app promise in the search title with the Gmail/Outlook steps already present in the article. Body, CTA, canonical and tracking unchanged. No new device or speed claim.
+- Prospective value contract email-yourself-title-20261003; Company f2bfe354-ab83-4ed6-998f-6213c9a8bd75 bound before implementation. Registry-only registration commit preserves original rows and their order before the first page edit; no later registry formatting change.
+- GSC source36946659155: 2026-09-02..09-29,576impressions/9clicks. Original plan freezes10-03..10-30 and11-02 review; publishing_day_rate forecasts only an operational publishing day. No causal search, install or revenue effect claimed.
+- PR #1903 pending: final-head SEO Validation, actual merge and served-byte match are required. SEO0errors/58existingwarnings; relevant static gates passed. TargetChrome320/390/900/1100px: overflow0 and no broken images. FullChrome sweep pending; localWebKit unavailable and not passed.
+- DailyGSC/BingAPI/AppsFlyer verified; ASC reused; sameGA4request resumed and verified. BingW40 and current Sep30 AI probe reused; no paid requery. service_notice_monitor:49rows/48h, latestfresh/errors0/eligible0, inactive with no active/failure row. Earlier historical gap remains.
+- AppsFlyer6/7natural days remainsINCONCLUSIVE. ExistingOct3CTA primary-metric conflicts and mature-period requirements remain; UTC evaluation date has not arrived. Oct23SEO windows unchanged. Priorvoice-input publication remains successful but Companyfinish unavailable.
+- CodexactualUSD unavailable: private null with reason; no Claudeactual-cost append. Execution, publication and later business outcome stay separate. No owner intervention observed in this scheduled turn; this does not establish complete H0 measurement.
