@@ -9,7 +9,7 @@
   "contract_approved": false,
   "payment_authorized": false,
   "historical_human_reviews_replaced": false,
-  "inventory_sha256": "bad5f2c5055eb7b6d6ac7d63924694e34af67cc10078bb0f0a47286bbf83ac9c",
+  "inventory_sha256": "3141e2251b0176740ce6f7ed4ccbf157acfda94dd1a71e707981c03dab388c6d",
   "recheck_on": [
     "account_or_plan_change",
     "processing_change",
@@ -97,6 +97,10 @@
     {
       "path": "docs/vendor-runtime-review-2026-09-07.md",
       "sha256": "1e008a34adb6e17bc20fc138724f51e618d1d13b5fc418d1f6076ed84189c43d"
+    },
+    {
+      "path": "docs/1password-developer-environments-operating-review-2026-10-02.md",
+      "sha256": "7832a44ae2cfe37e19f99ff687bba6b2fbd205e28eaafc024eefa96655696e8e"
     }
   ],
   "decisions": [
@@ -664,6 +668,46 @@
         "docs/vendor-review-source-addendum-2026-09-08.md",
         "docs/openai-dependency-review-2026-09-08.md",
         "docs/execution-records-and-rd-20260908.md"
+      ]
+    },
+    {
+      "vendor_id": "onepassword",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Authenticated local Developer Environments MCP and necessary metadata-only discovery. Actual October2 inventory is empty; no secret, variable, mount or production-consumer migration performed.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "October2 additional review located public DPA v4.8 and Developer Tools section9.5 independent-controller terms. Password Management DPA existence does not establish the applicable company agreement or local MCP processing role.",
+          "action": "Confirm account, product, accepted version and processing role before expanding personal or production-secret scope; do not record contract acceptance."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "The local MCP does not return stored secret values to the client; local mounts and downstream processes have separate access and logging boundaries. Service/Diagnostic Data uses, actual region and complete downstream retention are unresolved.",
+          "action": "Keep the current metadata-only scope; verify the selected Environment authorization, consumer, mount and logging controls before use. No prompt/log secrets or arbitrary Vault/CLI fallback."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "Developer Tools availability is not guaranteed; the published legacy Trelica SLA is not an Environments entitlement. Actual product beta designation, company agreement and production-use applicability remain unknown.",
+          "action": "Before new production-secret or data use verify product designation and contractual scope and define consumer interruption/recovery behavior. Keep unavailable states distinct from verified empty data."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "Vault exports are plaintext and do not prove complete Environment restoration. Local mount removal, lock-scoped MCP approvals, irreversible Environment deletion and downstream copies require distinct steps; complete exit is not tested.",
+          "action": "Inventory only names/consumers, use an authorized non-exposing migration route, validate the replacement then remove mounts and revoke access. Do not export or delete Environment/account without the separate instruction for those actions."
+        }
+      },
+      "conditions": [
+        "Continue only the existing authenticated connection and necessary metadata discovery; no additional purchase or contractual acceptance.",
+        "Before selecting a new Environment confirm its explicit permission, beta/product and agreement scope, data/production suitability, consumer and exit path; this record grants no new secret or mount authority.",
+        "Keep the existing September8 judgments and October8 expiry. Reassess on account/plan, processing, terms/subprocessor, incident or termination changes."
+      ],
+      "unresolved": [
+        "Actual company contract, accepted DPA, plan, Developer Tools scope, beta designation, SLA, storage geography, diagnostic data, Environment migration/restoration and complete deletion remain unverified."
+      ],
+      "evidence": [
+        "docs/1password-developer-environments-operating-review-2026-10-02.md"
       ]
     }
   ]

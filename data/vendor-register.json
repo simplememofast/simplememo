@@ -542,6 +542,25 @@
       "contract_approved": false,
       "payment_authorized": false,
       "operating_review_id": "vendor-operating-decision-20260908"
+    },
+    {
+      "id": "onepassword",
+      "name": "1Password（Developer Environments local MCP）",
+      "status": "account_verification_pending",
+      "personal_data": "personal",
+      "observed_at": "2026-10-02",
+      "observation": "2026-10-02に専用local MCPの認証と既存Environment一覧取得が成功し一覧は空。秘密値、変数、Environment作成、local mountは未操作。運営アカウントと将来扱う秘密の取扱分類を保守的にpersonalとするもので、顧客メモや平文秘密を送ったという主張ではない。",
+      "contract_approved": false,
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20260908",
+      "evidence": [
+        "docs/1password-developer-environments-operating-review-2026-10-02.md"
+      ],
+      "open_questions": [
+        "実アカウントの契約主体・プラン・受諾版、Password ManagementとDeveloper Toolsの処理役割、Environments/MCPのbeta指定と適用範囲",
+        "対象Environmentの明示権限、実際の秘密・個人情報・診断ログ・local mount・下流consumerの範囲と保持",
+        "当社SLA・保存地域・終了条件の適用、Environmentの移行・復旧・権限失効と下流コピーの整理"
+      ]
     }
   ],
   "$operating_review": "2026-09-08: data/vendor-operating-review.json contains AI operating decisions for all 14 dependencies, covering DPA, data use, SLA and exit plans. Historical human dpa_reviewed dates are unchanged. account_verification_pending means the AI operating review is complete but actual agreement/account conditions remain unresolved; payment_authorized and contract_approved remain false."
