@@ -44,13 +44,14 @@ const OWN_VALUE_PAGES = new Set([
 
 // [description, regex, canonicalReplacement, needsBrandContext]
 const RULES = [
-  // JSON-LD: our own offers — always authoritative
+  // Legacy price patterns support original isolated RULE tests only.
+  // Actual JSON-LD pricing requires admitted direct own-app offers and currency.
   ['JSON-LD monthly offer price',
     /("name":\s?"Premium Monthly"[^}]{0,400}?"price":\s?")(\d+)(")/gs,
-    (m, a, v, b) => a + C.priceMonthlyJpy + b, false],
+    (m, a, v, b) => a + C.priceMonthlyJpy + b, 'app-price-monthly'],
   ['JSON-LD yearly offer price',
     /("name":\s?"Premium Yearly"[^}]{0,400}?"price":\s?")(\d+)(")/gs,
-    (m, a, v, b) => a + C.priceYearlyJpy.replace(',', '') + b, false],
+    (m, a, v, b) => a + C.priceYearlyJpy.replace(',', '') + b, 'app-price-yearly'],
   // JSON-LD aggregateRating on our own app node.
   //
   // Anchored on the `#app` @id, not on the shape of the aggregateRating,
@@ -419,8 +420,89 @@ if (SELFTEST) {
     quotedWritten === versionTag(quotedExpected) &&
     JSON.parse(quotedWritten.slice(quotedWritten.indexOf('>') + 1, quotedWritten.indexOf('</script>'))).softwareVersion === C.appVersion);
 
+
+  // Price ownership cases use explicit inputs and expected source-ledger values,
+  // not the parser/ownership implementation as their oracle.
+  let priceSelftestCount = 0;
+  const pt = (name, condition) => { priceSelftestCount++; t(name, condition); };
+  const priceFixtureTag = (body) => '<script type="application/ld+json">' + body + '</script>';
+  const priceFixtureApp = (offers) => '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","offers":' + offers + '}';
+  const priceFixtureRival = (offers) => '{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + offers + '}';
+  const priceFixtureOffer = (name, currency, raw) => '{"@type":"Offer","name":' + JSON.stringify(name) + ',"price":' + raw + ',"priceCurrency":' + JSON.stringify(currency) + '}';
+  const pmj = priceFixtureOffer('Premium Monthly', 'JPY', '"1"');
+  const pyj = priceFixtureOffer('Premium Yearly', 'JPY', '"1"');
+  const pmu = priceFixtureOffer('Premium Monthly', 'USD', '"1.25"');
+  const pyu = priceFixtureOffer('Premium Yearly', 'USD', '"1.25"');
+  const pmjOk = priceFixtureOffer('Premium Monthly', 'JPY', JSON.stringify(C.priceMonthlyJpy));
+  const pyjOk = priceFixtureOffer('Premium Yearly', 'JPY', JSON.stringify(C.priceYearlyJpy.replace(',', '')));
+  const pmuOk = priceFixtureOffer('Premium Monthly', 'USD', JSON.stringify(C.priceMonthlyUsd));
+  const pyuOk = priceFixtureOffer('Premium Yearly', 'USD', JSON.stringify(C.priceYearlyUsd));
+
+  const priceCases = [
+    { name: "price: own JPY monthly check detects", input: priceFixtureTag(priceFixtureApp(pmj)), expected: priceFixtureTag(priceFixtureApp(pmj)), drifts: 1, unknown: false, write: false },
+    { name: "price: own JPY monthly writer", input: priceFixtureTag(priceFixtureApp(pmj)), expected: priceFixtureTag(priceFixtureApp(pmjOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own JPY yearly writer", input: priceFixtureTag(priceFixtureApp(pyj)), expected: priceFixtureTag(priceFixtureApp(pyjOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own USD monthly decimal writer", input: priceFixtureTag(priceFixtureApp(pmu)), expected: priceFixtureTag(priceFixtureApp(pmuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: own USD yearly decimal writer", input: priceFixtureTag(priceFixtureApp(pyu)), expected: priceFixtureTag(priceFixtureApp(pyuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: string token kind preserved", input: priceFixtureTag(priceFixtureApp(pmu)), expected: priceFixtureTag(priceFixtureApp(pmuOk)), drifts: 1, unknown: false, write: true },
+    { name: "price: numeric JPY token kind preserved", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','1'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',C.priceMonthlyJpy))), drifts: 1, unknown: false, write: true },
+    { name: "price: numeric USD decimal token kind preserved", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','USD','1.25'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','USD',C.priceMonthlyUsd))), drifts: 1, unknown: false, write: true },
+    { name: "price: direct offers array owns both plans", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pyj + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmjOk + ',' + pyjOk + ']')), drifts: 2, unknown: false, write: true },
+    { name: "price: mixed check reports own only", input: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), expected: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), drifts: 1, unknown: false, write: false },
+    { name: "price: mixed writer preserves rival bytes", input: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmj) + ',' + priceFixtureRival(pmj) + ']}'), expected: priceFixtureTag('{"@graph":[' + priceFixtureApp(pmjOk) + ',' + priceFixtureRival(pmj) + ']}'), drifts: 1, unknown: false, write: true },
+    { name: "price: rival same plan untouched", input: priceFixtureTag(priceFixtureRival(pmj)), expected: priceFixtureTag(priceFixtureRival(pmj)), drifts: 0, unknown: false, write: true },
+    { name: "price: bare descendant cannot inherit ownership", input: priceFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + pmj + '}'), expected: priceFixtureTag('{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","extra":' + pmj + '}'), drifts: 0, unknown: false, write: true },
+    { name: "price: sibling Offer cannot inherit ownership", input: priceFixtureTag('{"@graph":[{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"},' + pmj + ']}'), expected: priceFixtureTag('{"@graph":[{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication"},' + pmj + ']}'), drifts: 0, unknown: false, write: true },
+    { name: "price: nested genuine own app independent", input: priceFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + pmj + ',"nested":' + priceFixtureApp(pyu) + '}'), expected: priceFixtureTag('{"@id":"https://fixture.invalid/rival","@type":"SoftwareApplication","offers":' + pmj + ',"nested":' + priceFixtureApp(pyuOk) + '}'), drifts: 1, unknown: false, write: true },
+    { name: "price: missing app identity untouched", input: priceFixtureTag('{"@type":"SoftwareApplication","offers":' + pmj + '}'), expected: priceFixtureTag('{"@type":"SoftwareApplication","offers":' + pmj + '}'), drifts: 0, unknown: false, write: true },
+    { name: "price: own marker non-app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','"WebPage"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','"WebPage"')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate app id unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"@id":"https://simplememofast.com/#app"', '"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"@id":"https://simplememofast.com/#app"', '"@id":"https://simplememofast.com/#app","@id":"https://fixture.invalid/rival"')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"@type":"SoftwareApplication"', '"@type":"SoftwareApplication","@type":"SoftwareApplication"')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"@type":"SoftwareApplication"', '"@type":"SoftwareApplication","@type":"SoftwareApplication"')), drifts: 0, unknown: true, write: true },
+    { name: "price: array app type unknown", input: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','["SoftwareApplication"]')), expected: priceFixtureTag(priceFixtureApp(pmj).replace('"SoftwareApplication"','["SoftwareApplication"]')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate offers property unknown", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"offers":' + pyj + '}'), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"offers":' + pyj + '}'), drifts: 0, unknown: true, write: true },
+    { name: "price: malformed direct collection unknown", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',0]')), expected: priceFixtureTag(priceFixtureApp('[' + pmj + ',0]')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate plan currency unknown", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmj + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmj + ']')), drifts: 0, unknown: true, write: true },
+    { name: "price: same plan distinct currencies admitted", input: priceFixtureTag(priceFixtureApp('[' + pmj + ',' + pmu + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmjOk + ',' + pmuOk + ']')), drifts: 2, unknown: false, write: true },
+    { name: "price: unsupported currency unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','EUR','"1"'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','EUR','"1"'))), drifts: 0, unknown: true, write: true },
+    { name: "price: missing currency unknown", input: priceFixtureTag(priceFixtureApp(pmj.replace(',"priceCurrency":"JPY"',''))), expected: priceFixtureTag(priceFixtureApp(pmj.replace(',"priceCurrency":"JPY"',''))), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate currency unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"priceCurrency":"USD"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: missing price unknown", input: priceFixtureTag(priceFixtureApp(pmj.replace(',"price":"1"',''))), expected: priceFixtureTag(priceFixtureApp(pmj.replace(',"price":"1"',''))), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate price unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"price":"2"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"price":"2"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate name unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"name":"Premium Monthly"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"name":"Premium Monthly"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: duplicate Offer type unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"@type":"Offer"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"@type":"Offer"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: escaped duplicate price unknown", input: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"pri\\u0063e":"2"}')), expected: priceFixtureTag(priceFixtureApp(pmj.slice(0,-1) + ',"pri\\u0063e":"2"}')), drifts: 0, unknown: true, write: true },
+    { name: "price: escaped duplicate app id unknown", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"@\\u0069d":"https://simplememofast.com/#app"}'), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"@\\u0069d":"https://simplememofast.com/#app"}'), drifts: 0, unknown: true, write: true },
+    { name: "price: property order independent", input: priceFixtureTag(priceFixtureApp('{"price":"1","priceCurrency":"JPY","name":"Premium Monthly","@type":"Offer"}')), expected: priceFixtureTag(priceFixtureApp('{"price":' + JSON.stringify(C.priceMonthlyJpy) + ',"priceCurrency":"JPY","name":"Premium Monthly","@type":"Offer"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: escaped keys and value token retained", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","na\\u006de":"Premium Monthly","pri\\u0063e":"\\u0031","price\\u0043urrency":"JPY"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","na\\u006de":"Premium Monthly","pri\\u0063e":' + JSON.stringify(C.priceMonthlyJpy) + ',"price\\u0043urrency":"JPY"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: escaped quote price unknown valid JSON", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','"1\\\"bad"'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','"1\\\"bad"'))), drifts: 0, unknown: true, write: true },
+    { name: "price: whitespace outside price token preserved", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","name":"Premium Monthly","price" :  "1", "priceCurrency":"JPY"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","name":"Premium Monthly","price" :  ' + JSON.stringify(C.priceMonthlyJpy) + ', "priceCurrency":"JPY"}')), drifts: 1, unknown: false, write: true },
+    { name: "price: canonical own two currencies quiet", input: priceFixtureTag(priceFixtureApp('[' + pmuOk + ',' + pyjOk + ']')), expected: priceFixtureTag(priceFixtureApp('[' + pmuOk + ',' + pyjOk + ']')), drifts: 0, unknown: false, write: true },
+    { name: "price: unnamed Free own untouched", input: priceFixtureTag(priceFixtureApp('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureApp('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), drifts: 0, unknown: false, write: true },
+    { name: "price: unnamed rival untouched", input: priceFixtureTag(priceFixtureRival('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), expected: priceFixtureTag(priceFixtureRival('{"@type":"Offer","price":"0","priceCurrency":"USD"}')), drifts: 0, unknown: false, write: true },
+    { name: "price: outside JSON-LD untouched", input: priceFixtureApp(pmj), expected: priceFixtureApp(pmj), drifts: 0, unknown: false, write: true },
+    { name: "price: malformed JSON-LD unadmitted", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1)), expected: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1)), drifts: 0, unknown: false, write: true },
+    { name: "price: numeric exponent accepts finite value", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY','1e2'))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',C.priceMonthlyJpy))), drifts: 1, unknown: false, write: true },
+    { name: "price: braces in description do not change boundary", input: priceFixtureTag(priceFixtureApp(pmj).slice(0,-1) + ',"description":"quoted braces { rival }"}'), expected: priceFixtureTag(priceFixtureApp(pmjOk).slice(0,-1) + ',"description":"quoted braces { rival }"}'), drifts: 1, unknown: false, write: true },
+    { name: "price: standalone Offer has no app owner", input: priceFixtureTag(pmj), expected: priceFixtureTag(pmj), drifts: 0, unknown: false, write: true },
+    { name: "price: invalid null unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"null"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"null"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid boolean unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"true"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"true"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid negative number unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"-1"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"-1"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid overflow number unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"1e999"))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"1e999"))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid empty string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid nonnumeric string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"not-money\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"not-money\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid negative string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"-1\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"-1\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid grouped string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"1,000\""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\"1,000\""))), drifts: 0, unknown: true, write: true },
+    { name: "price: invalid padded string unknown", input: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\" 1 \""))), expected: priceFixtureTag(priceFixtureApp(priceFixtureOffer('Premium Monthly','JPY',"\" 1 \""))), drifts: 0, unknown: true, write: true },
+  ];
+  for (const priceCase of priceCases) {
+    const priceActual = scanHtml(priceCase.input, 'vs/price-fixture/index.html', { write: priceCase.write });
+    pt(priceCase.name, priceActual.out === priceCase.expected &&
+      priceActual.findings.length === priceCase.drifts &&
+      (priceActual.priceProblems.length > 0) === priceCase.unknown);
+  }
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log('自己テスト ' + (68 + versionSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
+  console.log('自己テスト ' + (68 + versionSelftestCount + priceSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
   process.exit(failures.length ? 1 : 0);
 }
 
@@ -444,8 +526,8 @@ if (SELFTEST) {
  * Invalid JSON or ambiguous/missing identity/type/version is outside admission,
  * not proof of version synchronization.
  */
-function softwareVersionTokens(src) {
-  const tokens = [];
+function jsonLdObjectDocuments(src) {
+  const documents = [];
   const tags = /<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi;
   for (const tag of src.matchAll(tags)) {
     if (!/(?:^|\s)type\s*=\s*(['"])application\/ld\+json\1(?:\s|$)/i.test(tag[1])) continue;
@@ -505,12 +587,26 @@ function softwareVersionTokens(src) {
         }
         const token = text.slice(i).match(/^(?:-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null)/);
         if (!token) throw new Error('invalid JSON scalar');
+        const start = i;
         i += token[0].length;
-        return { kind: 'scalar' };
+        const scalar = JSON.parse(token[0]);
+        return typeof scalar === 'number'
+          ? { kind: 'number', value: scalar, start, end: i } : { kind: 'scalar' };
       };
       value();
       whitespace();
       if (i !== text.length) throw new Error('unconsumed JSON payload');
+      documents.push({ offset, objects });
+    } catch {
+      // Unknown/invalid nodes remain untouched, without a synchronization claim.
+    }
+  }
+  return documents;
+}
+
+function softwareVersionTokens(src) {
+  const tokens = [];
+  for (const { offset, objects } of jsonLdObjectDocuments(src)) {
       for (const object of objects) {
         const fields = (key) => object.fields.filter((field) => field.key === key);
         const ids = fields('@id'); const types = fields('@type'); const versions = fields('softwareVersion');
@@ -524,15 +620,109 @@ function softwareVersionTokens(src) {
             start: offset + version.node.start, end: offset + version.node.end });
         }
       }
-    } catch {
-      // Unknown/invalid nodes remain untouched, without a synchronization claim.
-    }
   }
   return tokens.sort((a, b) => a.start - b.start);
 }
 
+/** Own named offer prices only; never inherit ownership through arbitrary
+ * descendants. JPY/USD come from the original owner-confirmed constants.
+ * Unknown positively own named offers are refused, not counted synchronized. */
+function softwareOfferPriceTokens(src) {
+  const docs = jsonLdObjectDocuments(src);
+  const fields = (object, key) => object.fields.filter((field) => field.key === key);
+  const names = ['Premium Monthly', 'Premium Yearly'];
+  const recognized = (object) => fields(object, 'name').some((field) =>
+    field.node.kind === 'string' && names.includes(field.node.value));
+  const tokens = []; const problems = [];
+  const claimed = new Set(); const owned = new Set();
+  const problem = (code) => { if (!problems.includes(code)) problems.push(code); };
+  for (const { objects } of docs) {
+    for (const object of objects) {
+      const ids = fields(object, '@id'); const types = fields(object, '@type');
+      if (!ids.some((field) => field.node.kind === 'string' &&
+        field.node.value === 'https://simplememofast.com/#app')) continue;
+      const offerFields = fields(object, 'offers');
+      if (offerFields.length === 0) continue;
+      const entries = []; let shapeValid = offerFields.length === 1;
+      for (const field of offerFields) {
+        if (field.node.kind === 'object') entries.push(field.node);
+        else if (field.node.kind === 'array') {
+          for (const item of field.node.entries) {
+            if (item.kind === 'object') entries.push(item);
+            else shapeValid = false;
+          }
+        } else shapeValid = false;
+      }
+      for (const entry of entries) claimed.add(entry);
+      if (!shapeValid) problem('own_offer_collection_unknown');
+      const appValid = ids.length === 1 && types.length === 1 &&
+        ids[0].node.kind === 'string' && ids[0].node.value === 'https://simplememofast.com/#app' &&
+        types[0].node.kind === 'string' && types[0].node.value === 'SoftwareApplication';
+      if (!appValid && entries.some(recognized)) problem('own_app_identity_or_type_unknown');
+      if (!shapeValid || !appValid) continue;
+      const pairs = new Map();
+      for (const entry of entries) {
+        const ns = fields(entry, 'name'); const cs = fields(entry, 'priceCurrency');
+        if (ns.length === 1 && ns[0].node.kind === 'string' && names.includes(ns[0].node.value) &&
+            cs.length === 1 && cs[0].node.kind === 'string') {
+          const pair = ns[0].node.value + '\n' + cs[0].node.value;
+          pairs.set(pair, (pairs.get(pair) || 0) + 1);
+        }
+      }
+      for (const entry of entries) {
+        const ns = fields(entry, 'name'); const cs = fields(entry, 'priceCurrency');
+        const pair = ns.length === 1 && ns[0].node.kind === 'string' &&
+          cs.length === 1 && cs[0].node.kind === 'string'
+          ? ns[0].node.value + '\n' + cs[0].node.value : null;
+        if (pair !== null && pairs.get(pair) > 1 && recognized(entry)) {
+          problem('own_offer_plan_currency_ambiguous');
+        } else owned.add(entry);
+      }
+    }
+  }
+  for (const { offset, objects } of docs) {
+    for (const object of objects) {
+      if (!recognized(object)) continue;
+      const ns = fields(object, 'name'); const ts = fields(object, '@type');
+      const cs = fields(object, 'priceCurrency'); const ps = fields(object, 'price');
+      const directClaim = claimed.has(object);
+      const nameValid = ns.length === 1 && ns[0].node.kind === 'string' && names.includes(ns[0].node.value);
+      const typeValid = ts.length === 1 && ts[0].node.kind === 'string' && ts[0].node.value === 'Offer';
+      const currencyValid = cs.length === 1 && cs[0].node.kind === 'string' && ['JPY', 'USD'].includes(cs[0].node.value);
+      const priceValid = ps.length === 1 &&
+        ((ps[0].node.kind === 'string' && /^\d+(?:\.\d+)?$/.test(ps[0].node.value) &&
+          Number.isFinite(Number(ps[0].node.value))) ||
+         (ps[0].node.kind === 'number' && Number.isFinite(ps[0].node.value) && ps[0].node.value >= 0));
+      if (directClaim) {
+        if (!nameValid) problem('own_offer_name_unknown');
+        if (!typeValid) problem('own_offer_type_unknown');
+        if (!currencyValid) problem('own_offer_currency_unknown');
+        if (!priceValid) problem('own_offer_price_unknown');
+      }
+      if (!nameValid || !typeValid || !currencyValid || !priceValid) continue;
+      const currency = cs[0].node.value;
+      const monthly = ns[0].node.value === 'Premium Monthly';
+      const canonical = currency === 'JPY'
+        ? (monthly ? C.priceMonthlyJpy : C.priceYearlyJpy.replace(',', ''))
+        : (monthly ? C.priceMonthlyUsd : C.priceYearlyUsd);
+      if (typeof canonical !== 'string' || !/^\d+(?:\.\d+)?$/.test(canonical) ||
+          !Number.isFinite(Number(canonical))) {
+        problem('canonical_offer_price_unknown'); continue;
+      }
+      const price = ps[0].node;
+      tokens.push({ owned: owned.has(object), period: monthly ? 'monthly' : 'yearly',
+        value: price.value, kind: price.kind, canonical,
+        start: offset + price.start, end: offset + price.end,
+        fieldStart: offset + ps[0].keyStart });
+    }
+  }
+  return { tokens: tokens.sort((a, b) => a.start - b.start), problems };
+}
+
+
 function scanHtml(src, rel, { write = false } = {}) {
   const findings = [];
+  const priceProblems = [];
   // byte ranges of pricing sections / plan cards on this page
   const priceZones = [];
   for (const zm of src.matchAll(/<(?:section|div)[^>]*class="[^"]*(?:pricing|plan-summary)[^"]*"[^>]*>/g)) {
@@ -541,6 +731,34 @@ function scanHtml(src, rel, { write = false } = {}) {
   const inPriceZone = (i) => priceZones.some(([a, b]) => i >= a && i < b);
   for (const [desc, re, build, scope] of RULES) {
     if (scope === 'own' && !OWN_VALUE_PAGES.has(rel)) continue;
+    // Legacy regex/build remain unchanged for original isolated RULE tests.
+    // The real offer writer changes only complete, admitted value tokens.
+    if (scope === 'app-price-monthly' || scope === 'app-price-yearly') {
+      const packet = softwareOfferPriceTokens(src);
+      for (const code of packet.problems) {
+        if (!priceProblems.includes(code)) priceProblems.push(code);
+      }
+      // Refuse all price writes in this HTML when an own offer is ambiguous.
+      if (packet.problems.length) continue;
+      const period = scope === 'app-price-monthly' ? 'monthly' : 'yearly';
+      const edits = [];
+      for (const token of packet.tokens) {
+        if (token.period !== period) continue;
+        if (!token.owned) continue;
+        const correct = token.kind === 'string' ? token.value === token.canonical
+          : token.value === Number(token.canonical);
+        if (correct) continue;
+        const replacement = token.kind === 'string' ? JSON.stringify(token.canonical) : token.canonical;
+        const m = src.slice(token.fieldStart, token.end);
+        const canonical = src.slice(token.fieldStart, token.start) + replacement;
+        findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        if (write) edits.push({ start: token.start, end: token.end, value: replacement });
+      }
+      for (const edit of edits.sort((a, b) => b.start - a.start)) {
+        src = src.slice(0, edit.start) + edit.value + src.slice(edit.end);
+      }
+      continue;
+    }
     // Keep the legacy RULE for its original isolated selftests. The real
     // version consumer uses complete JSON string value spans, never that regex.
     if (scope === 'app-version') {
@@ -579,7 +797,7 @@ function scanHtml(src, rel, { write = false } = {}) {
       }
     }
   }
-  return { out: src, findings };
+  return { out: src, findings, priceProblems };
 }
 
 /**
@@ -611,13 +829,18 @@ function scanLlms(src, { write = false } = {}) {
 let driftCount = 0;
 let filesChanged = 0;
 const report = [];
+const priceAdmissionProblems = [];
 
 for (const file of htmlFiles(ROOT)) {
   const orig = fs.readFileSync(file, 'utf8');
   const rel = path.relative(ROOT, file);
-  const { out, findings } = scanHtml(orig, rel, { write: WRITE });
+  const { out, findings, priceProblems } = scanHtml(orig, rel, { write: WRITE });
   driftCount += findings.length;
   report.push(...findings);
+  for (const code of priceProblems) {
+    const issue = 'UNKNOWN: ' + rel + ': own named offer price: ' + code;
+    report.push(issue); priceAdmissionProblems.push(issue);
+  }
   if (WRITE && out !== orig) {
     fs.writeFileSync(file, out);
     filesChanged++;
@@ -636,11 +859,15 @@ for (const file of htmlFiles(ROOT)) {
 }
 
 report.forEach((l) => console.log(l));
+if (priceAdmissionProblems.length) {
+  console.error('FAIL: ' + priceAdmissionProblems.length + ' own named offer price admission issue(s)');
+  process.exit(1);
+}
 if (WRITE) {
   console.log(`done: ${driftCount} value(s) updated in ${filesChanged} file(s)`);
 } else if (driftCount) {
   console.error(`FAIL: ${driftCount} value(s) drift from data/site-constants.json`);
   process.exit(1);
 } else {
-  console.log('OK: rating/price/©/og:site_name all match data/site-constants.json');
+  console.log('OK: admitted rating/price/©/og:site_name rules match data/site-constants.json; unknown or unadmitted price nodes not certified');
 }
