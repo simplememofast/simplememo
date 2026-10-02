@@ -118,12 +118,32 @@ export function inspectSnapshot(dir, label) {
       out.fatal.push(`meta.row_counts.${name}=${rc[name]} が実データ ${rows.length} 行と違う`);
     }
   }
-  const clicksOf = (rows) => rows.reduce((a, r) => a + (r.clicks || 0), 0);
-  const byDate = clicksOf(dates), byQuery = clicksOf(queries);
+  // 欠測・不正値を0へ補わない。合計が計算できない組だけNULLで残す。
+  // pagesも同じ入力契約を守る（現在のqueries対dates比較で使わなくても検査する）。
+  const clicksOf = (name, rows) => {
+    let total = 0, valid = true;
+    for (const [index, row] of rows.entries()) {
+      const clicks = row?.clicks;
+      if (typeof clicks !== 'number' || !Number.isFinite(clicks) || clicks < 0) {
+        out.fatal.push(`${name}: 行 ${index + 1} の clicks が有限の非負数でない — 欠測を0へ補わない`);
+        valid = false;
+        continue;
+      }
+      total += clicks;
+    }
+    if (!Number.isFinite(total)) {
+      out.fatal.push(`${name}: clicks の合計が有限でない — オーバーフローした合計を採用しない`);
+      valid = false;
+    }
+    return valid ? total : null;
+  };
+  const byDate = clicksOf('dates', dates), byQuery = clicksOf('queries', queries);
   out.stats.clicks_by_date = byDate;
   out.stats.clicks_by_query = byQuery;
+  out.stats.clicks_by_page = clicksOf('pages', pages);
   // クエリ側は上位1000行までなので、日付側を超えることは無い。超えたら壊れている。
-  if (byQuery > byDate) {
+  // どちらかの合計が不明なら、0との比較として扱わない。
+  if (byQuery !== null && byDate !== null && byQuery > byDate) {
     out.fatal.push(`queries のクリック合計 ${byQuery} が dates の ${byDate} を超えている`
       + '（クエリ側は上位n件の切り出しなので、原理的に超えない）');
   }
@@ -265,6 +285,64 @@ if (process.argv.includes('--selftest')) {
       if (!has(r.fatal, '1件も無い')) throw new Error(JSON.stringify(r.fatal));
     }],
   ];
+
+  // 実ファイルを通して、欠測と実測0を全3組で区別する。
+  const TOTAL_FIELD = { dates: 'clicks_by_date', queries: 'clicks_by_query', pages: 'clicks_by_page' };
+  const INVALID_CLICKS = [
+    { name: 'missing', missing: true },
+    { name: 'null', value: null },
+    { name: 'numeric string', value: '1' },
+    { name: 'empty string', value: '' },
+    { name: 'false', value: false },
+    { name: 'true', value: true },
+    // JSONの数値字句は巨大な指数を持てる。parse後の非有限値も実ファイルで検査。
+    { name: 'positive nonfinite', raw: '1e400' },
+    { name: 'negative nonfinite', raw: '-1e400' },
+    { name: 'negative', value: -0.5 },
+  ];
+  for (const group of ['dates', 'queries', 'pages']) {
+    for (const bad of INVALID_CLICKS) {
+      SCENARIOS.push([`${group}: clicks ${bad.name} is fatal with null total`, () => {
+        const rows = BASE()[group];
+        if (bad.missing) delete rows[0].clicks;
+        else if (!bad.raw) rows[0].clicks = bad.value;
+        const dir = snap({ [group]: rows });
+        if (bad.raw) {
+          const file = path.join(dir, `${group}.json`);
+          const text = fs.readFileSync(file, 'utf8');
+          if (!text.includes('"clicks":1')) throw new Error('raw numeric fixture marker missing');
+          fs.writeFileSync(file, text.replace('"clicks":1', `"clicks":${bad.raw}`));
+        }
+        const r = inspectSnapshot(dir, 't');
+        if (!has(r.fatal, `${group}: 行 1 の clicks が有限の非負数でない`)) {
+          throw new Error(JSON.stringify(r.fatal));
+        }
+        if (r.stats[TOTAL_FIELD[group]] !== null) throw new Error('invalid clicks became a known total');
+        for (const other of ['dates', 'queries', 'pages'].filter(x => x !== group)) {
+          const expected = other === 'dates' ? 3 : 2;
+          if (r.stats[TOTAL_FIELD[other]] !== expected) throw new Error('unaffected group lost its valid total');
+        }
+        if (has(r.fatal, '超えている')) throw new Error('unknown total was compared as zero');
+      }]);
+    }
+    for (const value of [0, 0.5]) {
+      SCENARIOS.push([`${group}: finite clicks ${value} preserves the original sum`, () => {
+        const rows = BASE()[group];
+        rows[0].clicks = value;
+        const r = inspectSnapshot(snap({ [group]: rows }), 't');
+        if (r.fatal.length || r.warn.length) throw new Error(JSON.stringify([r.fatal, r.warn]));
+        const expected = (group === 'dates' ? 2 : 1) + value;
+        if (r.stats[TOTAL_FIELD[group]] !== expected) throw new Error('valid zero/decimal total changed');
+      }]);
+    }
+    SCENARIOS.push([`${group}: finite rows with overflowing sum are fatal with null total`, () => {
+      const rows = BASE()[group].map(row => ({ ...row, clicks: Number.MAX_VALUE }));
+      const r = inspectSnapshot(snap({ [group]: rows }), 't');
+      if (!has(r.fatal, `${group}: clicks の合計が有限でない`)) throw new Error(JSON.stringify(r.fatal));
+      if (r.stats[TOTAL_FIELD[group]] !== null) throw new Error('overflow remained a known total');
+      if (has(r.fatal, '超えている')) throw new Error('overflow total was used in comparison');
+    }]);
+  }
 
   let failed = 0;
   for (const [name, fn] of SCENARIOS) {
