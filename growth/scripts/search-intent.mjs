@@ -107,7 +107,12 @@ function collectionIssues(before, after, beforeWindow, afterWindow) {
       || before.query_page_min_impressions !== after.query_page_min_impressions) {
       issues.push('different_or_unknown_query_page_threshold');
     }
-    if (before.page_normalization_version !== after.page_normalization_version) {
+    if (!Number.isSafeInteger(before.page_normalization_version)
+      || before.page_normalization_version <= 0
+      || !Number.isSafeInteger(after.page_normalization_version)
+      || after.page_normalization_version <= 0) {
+      issues.push('unknown_page_normalization');
+    } else if (before.page_normalization_version !== after.page_normalization_version) {
       issues.push('different_page_normalization');
     }
   }
@@ -298,7 +303,7 @@ const snap = (label, queries, queryPages, meta = {}) =>
     period_start: '2026-08-01', period_end: '2026-08-14', source: 'bigquery',
     complete_window: true, totals: { source: 'dates' },
     bigquery: { search_type: 'WEB', window_days_available: 14, window_days_requested: 14,
-      min_query_page_impressions: 2 },
+      min_query_page_impressions: 2, canonical_page_normalization: { version: 1 } },
     ...meta,
   }, queries, queryPages });
 const Q = (query, position, ctr, impressions = 100) => ({ query, position, ctr, impressions, clicks: 1 });
@@ -384,12 +389,12 @@ function selftest() {
     snap('week1', [Q('a', 5, 0.1)], [QP('a', 'https://x/old/')], {
       period_start: '2026-08-23', period_end: '2026-09-19',
       bigquery: { search_type: 'WEB', window_days_available: 28, window_days_requested: 28,
-        min_query_page_impressions: 2 },
+        min_query_page_impressions: 2, canonical_page_normalization: { version: 1 } },
     }),
     snap('week2', [Q('a', 5, 0.1)], [QP('a', 'https://x/new/')], {
       period_start: '2026-08-30', period_end: '2026-09-26',
       bigquery: { search_type: 'WEB', window_days_available: 28, window_days_requested: 28,
-        min_query_page_impressions: 2 },
+        min_query_page_impressions: 2, canonical_page_normalization: { version: 1 } },
     }),
   );
   t('同じ収集条件でも21日重複を記述的に扱う',
@@ -400,7 +405,7 @@ function selftest() {
     snap('a', [Q('a', 5, 0.1)], [QP('a', 'https://x/old/')]),
     snap('b', [Q('a', 5, 0.1)], [QP('a', 'https://x/new/')], {
       bigquery: { search_type: 'WEB', window_days_available: 14, window_days_requested: 14,
-        min_query_page_impressions: 5 },
+        min_query_page_impressions: 5, canonical_page_normalization: { version: 1 } },
     }),
   );
   t('query-page の収集下限が変われば候補を出さない',
@@ -410,6 +415,48 @@ function selftest() {
   // 比べられない状態を「変化なし」と読まない
   t('**比べられるクエリが0件なら落ちる**（0件と「変化なし」を混ぜない）',
     validate({ comparable: 0, switched: [], moved: [] }).length === 1);
+
+  // Normalization version is an explicit positive safe-integer contract identifier.
+  // Matching unknown/malformed identifiers do not establish equal collection conditions.
+  const normalizationSnap = (label, version, after = false) => snap(label,
+    [Q('normalization-switch', 5, 0.1), Q('normalization-move', after ? 5 : 12, 0.1)],
+    [QP('normalization-switch', after ? 'https://x/new/' : 'https://x/old/'),
+      QP('normalization-move', 'https://x/same/')], {
+      bigquery: { search_type: 'WEB', window_days_available: 14, window_days_requested: 14,
+        min_query_page_impressions: 2, canonical_page_normalization: { version } },
+    });
+  const invalidVersions = [
+    ['undefined', undefined], ['null', null], ['string-one', '1'], ['empty-string', ''],
+    ['boolean-true', true], ['boolean-false', false], ['zero', 0], ['negative', -1],
+    ['fractional', 1.5], ['NaN', NaN], ['Infinity', Infinity], ['negative-Infinity', -Infinity],
+    ['array', []], ['object', {}], ['unsafe-integer', Number.MAX_SAFE_INTEGER + 1],
+    ['boxed-one', new Number(1)],
+  ];
+  for (const [label, value] of invalidVersions) {
+    for (const side of ['before', 'after', 'both']) {
+      const r = compare(normalizationSnap('before', side === 'after' ? 1 : value),
+        normalizationSnap('after', side === 'before' ? 1 : value, true));
+      t(`正規化version不明を候補にしない: ${label}/${side}`,
+        r.collection_issues.includes('unknown_page_normalization')
+          && !r.collection_comparable && r.comparable === 0
+          && r.switched.length === 0 && r.moved.length === 0
+          && validate(r).some((p) => p.includes('unknown_page_normalization'))
+          && render(r).includes('比較不能'));
+    }
+  }
+  for (const [label, version] of [['one', 1], ['two', 2], ['max-safe-integer', Number.MAX_SAFE_INTEGER]]) {
+    const r = compare(normalizationSnap('before', version), normalizationSnap('after', version, true));
+    t(`同じ明示正規化versionの記述的候補を保持: ${label}`,
+      r.collection_comparable && r.switched.length === 1 && r.moved.length === 1
+        && r.interpretation === 'overlapping_windows_descriptive'
+        && validate(r).length === 0);
+  }
+  const normalizationMismatch = compare(normalizationSnap('before', 1), normalizationSnap('after', 2, true));
+  t('明示正規化version不一致の元issueを保持',
+    normalizationMismatch.collection_issues.includes('different_page_normalization')
+      && !normalizationMismatch.collection_issues.includes('unknown_page_normalization')
+      && !normalizationMismatch.collection_comparable && normalizationMismatch.comparable === 0
+      && normalizationMismatch.switched.length === 0 && normalizationMismatch.moved.length === 0);
 
   // 実データ
   const labels = listSnapshots();
