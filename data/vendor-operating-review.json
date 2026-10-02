@@ -9,7 +9,7 @@
   "contract_approved": false,
   "payment_authorized": false,
   "historical_human_reviews_replaced": false,
-  "inventory_sha256": "3141e2251b0176740ce6f7ed4ccbf157acfda94dd1a71e707981c03dab388c6d",
+  "inventory_sha256": "951098cdc79eb41053b011c58bfeb83f3b292ba65fb4d3bb9d6d674c63c939c6",
   "recheck_on": [
     "account_or_plan_change",
     "processing_change",
@@ -101,6 +101,10 @@
     {
       "path": "docs/1password-developer-environments-operating-review-2026-10-02.md",
       "sha256": "7832a44ae2cfe37e19f99ff687bba6b2fbd205e28eaafc024eefa96655696e8e"
+    },
+    {
+      "path": "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+      "sha256": "7a07715f207aa98ef177355f8c654ceb256d1f45bc62569bbc8c204ec6d89a37"
     }
   ],
   "decisions": [
@@ -708,6 +712,166 @@
       ],
       "evidence": [
         "docs/1password-developer-environments-operating-review-2026-10-02.md"
+      ]
+    },
+    {
+      "vendor_id": "postiz",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Declared hosted Postiz consumer; existing suspended SNS authority and disabled scheduled path remain in force. Current account, connections and contract are unverified.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "Public May3,2026 policy offers a separately requested signed DPA for processor scope; our execution and applicability are unknown.",
+          "action": "Verify actual hosted agreement, DPA and account scope before any expansion; do not record acceptance."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "Content, OAuth information, logs and connected destinations have separate processing boundaries; optional AI input exclusions are not a global training guarantee.",
+          "action": "Keep original suspension; no new channels, AI features, keys or personal data."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "Hosted terms do not guarantee continuous or error-free service; status is observation, not our SLA.",
+          "action": "Preserve independent consumers and distinguish interruption from verified empty data."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "Disconnect and account termination or portable-copy requests exist, but backup exceptions and full queue migration, restoration and deletion are untested.",
+          "action": "Validate authorized replacement and queue/downstream-post retention separately; no irreversible deletion without its instruction."
+        }
+      },
+      "conditions": [
+        "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
+        "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
+        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+      ],
+      "unresolved": [
+        "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+      ]
+    },
+    {
+      "vendor_id": "microsoft",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Original Bing Webmaster site-statistics reader only; read permission, first verification and BING_API_ENABLED conditions stay unchanged. Current configured connection is unverified.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "Webmaster API refers to the July30/September30,2026 MSA. Our acceptance and DPA applicability are unknown; Azure terms are not adopted.",
+          "action": "Check the actual product, accepted version and agreement role before expansion; no contract acceptance."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "September2026 general privacy includes service improvement and AI development/training, but Webmaster-specific scope and exclusion are unknown. OAuth separates read from manage.",
+          "action": "Keep original read scope and activation gates; no new consent, manage permission or URL submission."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "MSA anticipates interruption; URL Submission API 99.9 percent is not the read-statistics API entitlement.",
+          "action": "Leave unverified connection unavailable and preserve other original readers."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "OAuth revocation and account-information export or irreversible deletion are documented; complete statistics transfer, retention and deletion are untested.",
+          "action": "Stop only the affected reader and validate authorized transfer before revocation; irreversible deletion requires its own instruction."
+        }
+      },
+      "conditions": [
+        "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
+        "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
+        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+      ],
+      "unresolved": [
+        "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+      ]
+    },
+    {
+      "vendor_id": "devto",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Existing owned public-article consumer only; original postgate, interval, validation, STOP and publishing-key separation remain unchanged. Current key and agreement are unverified.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "No applicable DEV article-API DPA identified; a Forem operator agreement is not treated as our DEV-user agreement.",
+          "action": "Verify actual account and agreement scope before any expansion; keep contract and payment approval false."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "March6,2026 privacy describes public articles/profiles, improvement, marketing, processors, international transfers and retention; no secret or customer-data scope is authorized.",
+          "action": "Use rights-cleared public articles only and check restrictions on promotional or backlink-driven posts; no secrets or customer information."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "Terms provide no confirmed article-API uptime, recovery or remedy entitlement; API documentation may lag.",
+          "action": "Keep original gate and failure evidence; no untested API or new provider fallback."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "Own-article listing and unpublishing exist; account deletion is separate. Complete restoration and immediate deletion are untested.",
+          "action": "Retain original text and article IDs; distinguish consumer stop, unpublishing, account deletion and downstream copies."
+        }
+      },
+      "conditions": [
+        "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
+        "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
+        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+      ],
+      "unresolved": [
+        "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+      ]
+    },
+    {
+      "vendor_id": "hatena",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Existing owned public-blog AtomPub consumer only; original gate, interval, validation, STOP and publishing-key separation remain unchanged. Local scheduled-off is not an Actions-off proof.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "No applicable AtomPub DPA identified in reviewed official materials; our execution and applicability remain unknown.",
+          "action": "Verify actual product, account and agreement scope before expansion; do not record contractual approval."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "October14,2025 privacy and July1,2023 terms cover usage analysis/improvement and broad service, promotional, API/RSS and research-support content licensing; no private-customer scope is authorized.",
+          "action": "Keep rights-cleared public content and original consumer/key boundaries; no secret or customer information."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "No AtomPub-specific company SLA identified; published terms limit interruption, change and termination liability.",
+          "action": "Preserve original failure evidence and stop rules; do not infer Actions state from an unrelated local schedule."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "MT export covers posts/comments but images need separate preservation. AtomPub deletion exists; full transfer, restoration and deletion are untested.",
+          "action": "Inventory all consumers sharing the key and preserve originals, IDs and images; validate replacement before separately authorized revocation/deletion."
+        }
+      },
+      "conditions": [
+        "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
+        "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
+        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+      ],
+      "unresolved": [
+        "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
       ]
     }
   ]
