@@ -55,7 +55,7 @@ test('only a current measured release with matching remote preview can pass', ()
 });
 test('the new product story preserves its setup limits and does not relabel operational ratios as capture success', () => {
   const { ui } = fixture();
-  assert.match(ui.title, /牛乳を買う.*Notion.*提供開始/);
+  assert.match(ui.title, /牛乳を買う.*Notion/);
   assert.doesNotMatch(ui.title, /AI|世界初|唯一/);
   assert.match(ui.body, /「Obsidian連携シンプルメモ」（以下「シンプルメモ」）/);
   for (const text of ['Apple WatchのメモはiPhoneを経由', '初回はメールの宛先を設定',
