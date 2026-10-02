@@ -90,6 +90,13 @@
       "kind": "bug",
       "ref": "simplememo-ios 545dd1f (claude/fix-auto-reply-comments-cgssi1)",
       "note": "★4・2026-08-27・JPN。「起動時に音声入力の自動オンが始まらず、アプリの再起動が必要」。**再現条件を特定した。原因は2つあり、どちらも症状が同じ。**(1) 自動開始の入口が viewDidAppear しか無く、iOS は前面復帰でこれを呼ばないため **cold start の一回しか動かない**。(2) 録音中に背面へ落ちると state が .recording のまま凍り、以後 toggle も自動開始も落ちる。**強制終了で直る**のは、どちらもプロセスが畳まれて次回が cold start になるため —— レビュアーの回避策がそのまま原因の証拠になっている。なお 5.8.2 は既に審査中（WAITING_FOR_REVIEW）で、この修正は載っていない"
+    },
+    {
+      "review_id": "00000192-d598-2403-650f-eeda00000000",
+      "kind": "bug",
+      "ref": "docs/customer-review-availability-triage-2026-10-02.md",
+      "decided_at": "2026-10-02",
+      "note": "★1・2026-09-22。「使いたい時に／使えない」という利用不能の申告を受付・分類した。ASC写し2026-10-02T00:43:02Zではhas_response=true。端末・OS・版・入口・操作・原因・再現・解決は不明。既存delivery-reliability signalは関連課題の参照先であり、このレビューが送信失敗や同じ障害であるとの判定ではない。原症状と不足条件を参照文書に残し、新しい回答送信・テスト成功・製品修復は認定しない。"
     }
   ]
 }
