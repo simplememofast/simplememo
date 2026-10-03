@@ -229,7 +229,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・自動の再送・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-10-02","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/outbox-architecture#article","inLanguage":"ja","headline":"Outboxアーキテクチャ：メッセージを取りこぼさないための設計","description":"送信ボタンを押した瞬間にUIクリア、でも未送信のメッセージは端末に残り、再送される。AES-GCM暗号化・自動の再送・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。","url":"https://simplememofast.com/devlog/outbox-architecture","datePublished":"2026-02-13","dateModified":"2026-10-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30","publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/outbox-architecture"},"keywords":["Outbox パターン","オフライン ファースト iOS","offline first architecture","AES-GCM iOS encryption","メッセージ 取りこぼし 対策"],"proficiencyLevel":"Expert","dependencies":"Apple CryptoKit, Network.framework, BackgroundTasks"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -309,7 +309,7 @@
             <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
             <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
             <li><strong>失敗したら自動で送り直す</strong><br>ネットワークエラーやサーバーエラーの場合は、送信待ちに残したまま、回線が戻ったとき・アプリを開いたとき・バックグラウンドの処理（BGTaskScheduler。実行のタイミングは iOS が決める）をきっかけに送り直す。自動の再送には回数の上限がある。</li>
-            <li><strong>オフラインならNWPathMonitorで回線復帰を検知して自動再送</strong><br>送信時点でオフラインの場合、Network.frameworkのNWPathMonitorが回線状態を監視。Wi-Fiやセルラーが復帰した瞬間に自動的にOutbox内の全未送信メッセージを再送する。</li>
+            <li><strong>オフラインならNWPathMonitorで回線復帰を検知して自動再送</strong><br>送信時点でオフラインの場合、Network.frameworkのNWPathMonitorが回線状態を監視し、Wi-Fiやセルラーの復帰を検知すると、Outboxの未送信のメッセージを自動で送り直す（上の5と同じく、自動の再送には回数の上限がある）。</li>
           </ol>
 
           <!-- Section 3 -->
@@ -420,7 +420,7 @@
           <h2>よくある質問</h2>
 
           <h3>Q. オフラインで送信したメモはどうなりますか？</h3>
-          <p>Outboxに暗号化保存され、回線復帰時にNWPathMonitorが検知して自動再送します。ユーザーが何もしなくても、自動で送り直します。</p>
+          <p>Outboxに暗号化して保存され、回線の復帰（NWPathMonitorで検知）・アプリを開いたとき・バックグラウンドの処理をきっかけに、自動で送り直します。自動の再送には回数の上限があり、上限に達したメモは「履歴」で長押しして「再送信」を選びます。</p>
 
           <h3>Q. アプリを閉じてもメモは失われませんか？</h3>
           <p>Outboxは永続ストレージです。アプリを終了しても、iPhoneを再起動しても残ります。次回アプリ起動時、またはバックグラウンドタスクにより自動的にリトライされます。</p>
