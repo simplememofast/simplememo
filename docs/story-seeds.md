@@ -227,3 +227,16 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **X向け**: 自分にメールでメモを残すなら、送信後の受信確認まで。iPhoneのGmail・Outlookの手順を案内する記事の検索タイトルを、本文の内容に揃えました。
 - **英語圏向け**: The search title now describes the existing iPhone Gmail and Outlook self-email guide. Delivery checks remain part of the guide; search impact is unmeasured.
 - **使わない表現**: すべてワンタップ、到着保証、今回の実機検証、検索流入・インストール・売上が増えたという未確認の主張。
+
+
+## S-20261004-second-brain-guide
+
+- **対象URL**: https://simplememofast.com/methods/second-brain/
+- **媒体**: note / X
+- **分類**: readers
+- **一行の主張**: セカンドブレイン記事の検索タイトルを、本文のCODE・PARAと1件から試す手順に揃えた。
+- **引用できる数字**: 2026-10-04本文確認：CODEの4段階とPARAの4分類、1週間の記入用シートを掲載（出典: methods/second-brain/index.html）。今回の変更はタイトルで、実機検証や生産性・検索効果の実測ではない。
+- **note向け**: メモの数や道具を増やす前に、1件を出典から実際の利用へつなぐ試し方を考える。
+- **X向け**: 集めたメモをあとで使うために、まず1件。セカンドブレイン記事の検索タイトルを、本文のCODE・PARAと1件からの試し方に揃えました。
+- **英語圏向け**: The title now describes the existing CODE/PARA guide and its one-note exercise. Productivity and search effects remain unmeasured.
+- **使わない表現**: 生産性向上の保証、今回の実機検証、完全な実践の証明、検索流入や売上が改善したという未確認の主張。
