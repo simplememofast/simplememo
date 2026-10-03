@@ -256,7 +256,7 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/mail-to-self/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動で2ステップ送信を実現しています。"}},{"@type":"Question","name":"メーラーのSMTP設定なしで自分にメールできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを登録して確認すれば、すぐにメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。"}},{"@type":"Question","name":"電波の悪い場所で自分にメールしたメモが消えることはありますか？","acceptedAnswer":{"@type":"Answer","text":"メーラー経由の場合、通信エラーの時にどうなるか（送信トレイに残るか、下書きに戻るかなど）は、メールアプリしだいです。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。"}},{"@type":"Question","name":"Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/mail-to-self/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動（iPhone 16e・ウォーム起動の実測）で2ステップ送信を実現しています。"}},{"@type":"Question","name":"メーラーのSMTP設定なしで自分にメールできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを登録して確認すれば、すぐにメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。"}},{"@type":"Question","name":"電波の悪い場所で自分にメールしたメモが消えることはありますか？","acceptedAnswer":{"@type":"Answer","text":"メーラー経由の場合、通信エラーの時にどうなるか（送信トレイに残るか、下書きに戻るかなど）は、メールアプリしだいです。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。"}},{"@type":"Question","name":"Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -332,7 +332,7 @@
           <table class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">一般的なMail to Selfアプリ</th></tr></thead>
             <tbody>
-              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>未計測</td></tr>
+              <tr><th scope="row">起動速度（iPhone 16e・ウォーム起動の実測）</th><td class="yes">0.4秒（即入力可）</td><td>未計測</td></tr>
               <tr><th scope="row">SMTP設定</th><td class="yes">不要</td><td>アプリによる</td></tr>
               <tr><th scope="row">アカウント登録</th><td class="yes">不要（メールアドレスのみ）</td><td>アプリによる</td></tr>
               <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td>アプリによる（未検証）</td></tr>
@@ -362,7 +362,7 @@
           <li>
             <span class="diff-num">2</span>
             <strong>起動→送信の所要ステップ数</strong><br>
-            一般的なMail to Selfの方法では、メーラー起動→新規作成→宛先入力→本文入力→送信と5ステップかかります。シンプルメモは起動0.4秒でキーボードが即表示され、本文入力→送信ボタンの2ステップで完了します。毎日何度もメモを送る人ほど、このステップ数の差は積み重なります。
+            一般的なMail to Selfの方法では、メーラー起動→新規作成→宛先入力→本文入力→送信と5ステップかかります。シンプルメモは起動0.4秒（iPhone 16e・ウォーム起動の実測）でキーボードが即表示され、本文入力→送信ボタンの2ステップで完了します。毎日何度もメモを送る人ほど、このステップ数の差は積み重なります。
           </li>
           <li>
             <span class="diff-num">3</span>
@@ -425,7 +425,7 @@
 
         </h2>
         <div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？</summary><div class="faq-answer"><p>メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動で2ステップ送信を実現しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？</summary><div class="faq-answer"><p>メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動（iPhone 16e・ウォーム起動の実測）で2ステップ送信を実現しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メーラーのSMTP設定なしで自分にメールできますか？</summary><div class="faq-answer"><p>はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを登録して確認すれば、すぐにメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">電波の悪い場所で自分にメールしたメモが消えることはありますか？</summary><div class="faq-answer"><p>メーラー経由の場合、通信エラーの時にどうなるか（送信トレイに残るか、下書きに戻るかなど）は、メールアプリしだいです。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？</summary><div class="faq-answer"><p>はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。</p></div></details></div>
