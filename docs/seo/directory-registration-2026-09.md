@@ -2593,7 +2593,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/4 04:51 | [#1956](https://github.com/simplememofast/simplememo/pull/1956) | 第130弾（日本語1・英語1ページ＋サイトマップ）：`/vs/evernote/`（日英）。Evernote のメール取り込みを「有料プラン」と書いていた→ 使えるプランは Evernote の公式の案内で確認。シンプルメモの宛先を Evernote の取り込み用アドレスにする方法は、宛先の認証まで含めて試していないので「届いたメールを転送」に。「最強の組み合わせ」を外し、Evernote はノートをメールで共有できることも直した |
 | 10/4 05:08 | [#1957](https://github.com/simplememofast/simplememo/pull/1957) | 第131弾（日本語6・英語6ページ＋`llms.txt`＋サイトマップ）：ユーザーの声（日英）の「Slack のチャネルのメールを宛先にすれば今の設計のまま実現できる」→ 認証のコードもチャネルに届く・試していない。メーリングリスト・Google グループを宛先にするなら、リストがメンバー以外からのメールを受け付ける設定が要る（活用事例4種、日英）。アプリ内の履歴は新しいものから100件（ユーザーの声・FAQ・`llms.txt`）。ユーザーの声の初回の流れ（当時の話として書き、今の流れを添えた）と認証コードの自動入力の条件 |
 | 10/4 06:12 | [#1958](https://github.com/simplememofast/simplememo/pull/1958) | 第132弾（各言語のトップ4・英語4・日本語1ページ＋サイトマップ）：自動の再送には回数の上限がある（中国語・繁体字・スペイン語・インドネシア語のトップの「手動の操作は一切いらない」、`/en/vs/drafts/`）。Apple Watch × Obsidian（日英）の「起動時の自動音声入力」に iOS 26 以降の条件。`/en/vs/joplin/`・`/en/vs/notion-vs-obsidian/` の「メールを認証してから書き始める」→ すぐ書けて、初めて送るときに宛先を聞く |
-| — | この PR | §5.53 の「この PR」の行、この §5.54、第127〜132弾の annotations の行 |
+| 10/4 07:22 | [#1963](https://github.com/simplememofast/simplememo/pull/1963) | §5.53 の「この PR」の行、この §5.54、第127〜132弾の annotations の行 |
 
 ### 見つけたこと
 
@@ -2616,6 +2616,48 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 11/02 以降：`/blog/email-yourself-memo`（日本語）の「初回はメールアドレスの認証とテスト送信が必要です」（テスト送信は必須ではない）。11/11 以降：`/en/ai-tags/` の「Nothing leaves your iPhone」「All of it happens on your iPhone」（メールで送るメモは配送の仕組みを通る。タグ付けに限る書き方に）。
 - 10/11 のあと：`/siri/`（日本語）の音声メモの条件。11/12 以降：日本語の `/ai-tags/` ほか（§5.53 のとおり）。11/21 以降：日本語のトップ（`/`）の音声入力の条件ほか。
 - 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）。10/24 以降：`/note-to-email/`（日本語）の FAQ。
+- 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。毎晩の確認は 10/4 20:40 JST に予約済み。
+- §7 #63・#64 をオーナーに聞く。
+
+## 5.55 2026-10-04 朝：アプリの事実と出典の無い数字（第133弾）、日本語と英語の食い違い（第134弾）、各言語のトップ（第135弾）、見えない所と説明文（第136・137弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/4 06:54 | [#1960](https://github.com/simplememofast/simplememo/pull/1960) | 第133弾（日本語16・英語18・各言語のトップ3ページ＋サイトマップ）：比較表のアプリの言語（Moca・NotePost、日英。アプリは10言語）、「外部サーバーに送られない」をタグ付けに限る（韓国語・中国語のトップ、`/en/privacy-architecture/` の説明文）、比較の一覧の Standard Notes のカード、英語のトップのオフラインの答えに再送の上限。ページの中に出典の無い数字・研究の断定・「多くのユーザー」（Evernote の併用で成功、21日で習慣化、未読100通、0.1秒、1週間で忘れる、起動3秒、Zettelkasten の100枚、メラトニン、決定疲れ、SwiftUI が多数派ほか）を外し、助言は残した |
+| 10/4 07:33 | [#1964](https://github.com/simplememofast/simplememo/pull/1964) | 第134弾（日本語5・英語10ページ＋サイトマップ）：日本語と英語の食い違いを、間違っている側で直した。`/en/vs/evernote/` の英語の本文（第130弾で直し残した「宛先に設定すれば自動のパイプライン」「paid plans」）、`/en/ai-tags/` の「Nothing leaves your iPhone」ほか、`/vs/bear/` の「無料プランは機能に制限なし」、Captio の時期、Craft は計っていない、Apple Watch の「何も失われない」、Obsidian のコア機能は31のうち21がオン、ほか |
+| 10/4 07:58 | [#1965](https://github.com/simplememofast/simplememo/pull/1965) | 第135弾（各言語のトップ8ページ）：説明文（meta・OG・Twitter）の AI タグに「オンにしたとき（Obsidian 連携が必要）」の条件、中国語の説明文の音声入力に iOS 26 の条件、韓国語・アラビア語・ポルトガル語・トルコ語のオフラインの答えに再送の上限 |
+| 10/4 08:28 | [#1966](https://github.com/simplememofast/simplememo/pull/1966) | 第136弾（日本語5・英語6ページ＋サイトマップ）：見えない所（説明文・構造化データ・スクリプトのデータ）と FAQ の残り。`/vs/`（日英）の LINE Keep の答えの「恒久的な記録保存を実現」、`/vs/notion-vs-obsidian/`（日英）の「メールプロバイダーのバックアップインフラに守られ」「サービス終了リスクがゼロ」、`/en/blog/email-management-tips` の「forever」、`/hands-free/`（日英）の説明文に iOS 26 の条件と、計っていない「高精度」「Accurate」、`/en/ai-tags/` の構造化データの説明・プライバシーの FAQ・デモの「種別で送り先が変わる」見せ方、`/download/` の構造化データの Obsidian 連携の条件、`/devlog/outbox-architecture`（日英）の「回線が戻った瞬間に全未送信を再送」「何もしなくても」 |
+| 10/4 08:39 | [#1967](https://github.com/simplememofast/simplememo/pull/1967) | 第137弾（日本語6・英語7ページ＋サイトマップ）：説明文どうしの食い違いと言い過ぎ。`/comparison/`（日英）の「37記事」「37以上のアプリ」「37+ apps」（比較ページは38本、`/vs/` の一覧表は25アプリ）と「必ず見つかります」、`/blog/instant-capture-workflow`（日英）の「Works perfectly on subways and airplanes」、`/vs/google-keep/`（日英）の「どちらのメモも受信箱に集約」（Keep のメモは共有からメールで送る）、用語集 Outbox の「コア技術革新」「core technical innovation」、iCloud の設定ガイドの「Appleエコシステムと完全統合」「Seamless Apple ecosystem integration」、`/apple-watch-obsidian/` の OG・Twitter の「話すだけで」（iPhone 経由が抜けていた）、`/en/captio-alternative/` の古い構造化データの説明、`/en/vs/captioo/` の構造化データの 0.4秒の条件 |
+| — | この PR | §5.54 の「この PR」の行、この §5.55、第133〜137弾の annotations の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **洗い直しを6つの見方で続けた**：①アプリの実装で確かめた事実の一覧（2回目：送信元・件名・署名・認証コード・設定の名前・アプリの言語・暗号化の範囲・Obsidian と Notion の連携・Apple Watch）と食い違う文、②ページの中に出典の無い数字・研究の断定・利用者についての言い切り、③日本語と英語の同じページ195組の事実の食い違い、④各言語のトップ8ページと英語のトップ・事実の一覧の食い違い、⑤**見えない所**（説明文 meta・OG・Twitter、構造化データ JSON-LD、画像の代替テキスト、ページの中のスクリプトのデータ）をこれまでの言い過ぎの型（永久・ゼロ・保証・最速・0.4秒・E2E・無制限・外に送らない・AI タグと音声入力の条件・高精度・革新など）で、⑥1ページの説明文の4つ（meta・OG・Twitter・構造化データ）を並べて、片方だけ直っているもの・条件が抜けたもの。候補は1件ずつ、もう一方の言語・同じページ・アプリの実装と突き合わせてから直した | 第133〜137弾 |
+| **アプリの言語の数**：比較表（Moca・NotePost、日英）が「日本語・英語」（英語版は「Bilingual」）と書いていた。アプリは10言語 | 第133弾 [#1960](https://github.com/simplememofast/simplememo/pull/1960)（アプリの言語ファイルで確認） |
+| **「外に送らない」の範囲**：タグ付けは端末の中だけで行うが、メールで送るメモは中継と配送の仕組みを通る。韓国語・中国語（簡体字・繁体字）のトップ、`/en/privacy-architecture/` の説明文、`/en/ai-tags/`（説明文・構造化データ・FAQ）が、メモそのものが外に出ないように書いていた | 第133・134・136弾 |
+| **出典の無い数字・研究の断定**：ブログ・用語集・比較・活用事例・開発記事の約30か所。同じサイトの別の記事が引いている研究と食い違うもの（21日で習慣化 ↔ Lally ほか 2010 の中央値66日、手書きの記憶の優位 ↔ 2021年に再現されず、決定疲れ ↔ 結果が一様でない）もあった | 第133弾 [#1960](https://github.com/simplememofast/simplememo/pull/1960)。実験の対象ページに残るものは下の「次にやること」 |
+| **「多くのユーザー」**：`/vs/evernote/`（日英）の「多くの Evernote ユーザーが併用で成功」「Evernote 単体より効率的」に根拠が無かった | 第133弾 [#1960](https://github.com/simplememofast/simplememo/pull/1960)（併用のしかたの説明に） |
+| **日本語と英語の食い違い**：片方だけ直っていたもの（`/en/vs/evernote/` の英語の本文、Captio の時期、Craft の計測、`/en/vs/` の「stores zero」ほか） | 第134弾 [#1964](https://github.com/simplememofast/simplememo/pull/1964) |
+| **訂正**：第133弾の PR 本文と §5.54 で `/en/ai-tags/` を実行中の実験の対象と書いたが、対象は日本語の `/ai-tags/` だけだった | 第134弾 [#1964](https://github.com/simplememofast/simplememo/pull/1964) で英語のページを直した |
+| **AI タグのデモ**：`/en/ai-tags/` のデモ（最初の表示とスクリプトのデータ）が「Filed to Inbox」「Appended to daily note」と、種別で送り先が変わるように見せていた。第123弾で本文から外した書き方で、アプリは種別を判定するだけ・追記先は設定で選んだノート | 第136弾 [#1966](https://github.com/simplememofast/simplememo/pull/1966)。日本語の `/ai-tags/` の同じ書き方は実験の対象なので 11/12 以降 |
+| **音声認識の「高精度」**：`/hands-free/`（日英）の説明文・カード・FAQ が「高精度」「accurate」と書いていたが、精度は計っていない | 第136弾で外し、FAQ には「測っていない・話し方や周りの音や言語で変わるので送る前に確かめる」と答えた |
+| **比較のまとめの数**：`/comparison/`（日英）の「37」は、比較ページ（38本）とも `/vs/` の一覧表（25アプリ）とも合わない。個別の比較の多くは起動の速さを計っていない | 第137弾で数を書かない言い方に（第103弾の `/vs/` と同じ） |
+| **App Store の名前と最低対応 OS**（10/4 の iTunes Lookup）：日本のストアの名前は 10/2 から「Obsidian連携音声シンプルメモ」、米国・英国は「Simple Memo - Obsidian Voice」のまま。最低対応 OS は 16.0 で、サイトの「iOS 16.0以降」と合っている。ダウンロードのページ（日英）の「日本の App Store では『シンプルメモ - Obsidian連携・高速音声入力』」は古いが、§7 #47（このまま）のとおり 11/12 以降に回す | 変更なし（予定どおり） |
+| **新しい実験**：自動の PR [#1959](https://github.com/simplememofast/simplememo/pull/1959)（10/4 06:42）で `gsc-second-brain-title-20261004`（`/methods/second-brain/`、11/03 に評価）が始まった。手元の「実験の対象ページ」の一覧を `growth/experiments/experiments.json` から作り直した（28ページ） | 対象ページは触らない |
+| **`llms.txt` の末尾の一部が読みにくい**：「Original research and reusable resources」の3行と、Calendar / Periodic Notes の行が、空白の抜けた圧縮文（[#1804](https://github.com/simplememofast/simplememo/pull/1804)・[#1807](https://github.com/simplememofast/simplememo/pull/1807) 由来）。事実の誤りではない | 変更なし（記録のみ） |
+
+### 次にやること
+
+- 10/11 のあと：`/siri/`（日本語）の音声メモの条件と「詳細設定」。
+- 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）。10/24 以降：`/note-to-email/`（日本語）の FAQ（「件名と署名は自由に設定できる」→ 件名は1行目＋設定の先頭の文字）。
+- 11/03 以降：`/blog/email-yourself-memo`（日本語）の「初回はメールアドレスの認証とテスト送信が必要」（テスト送信は必須ではない）。
+- 11/12 以降：日本語の `/ai-tags/`（種別ごとの送り先・デモ、0.4秒・自動オンの条件、「外部通信なし」の範囲）、`/blog/business-memo-apps-2026`（「起動に3秒」、OneNote の「約2秒」→ 計測の2.6秒、0.4秒の条件）、`/blog/fastest-memo-app-benchmark`（0.4秒の条件）、日本語の `/blog/digital-vs-handwritten-notes`（「脳の創造性回路」）、`/download/`（日英）の日本のストアの名前（§7 #47）。11/13 以降：`/blog/memo-app-hikaku-matome`（「多くのユーザーに支持」）と §7 #61 の残り。
+- 11/21 以降：日本語のトップ（`/`）の音声入力の条件（構造化データの機能一覧「音声自動入力（完全オンデバイス）」を含む）・「プラグイン不要・アプリを開かずバックグラウンドで」の条件・「圏外で書いたメモ」・App Store のレビューの日付（`/voices/` は5月）。
+- 10/5 09:04：毎週の被リンクの確認（予約の一覧で、9/28 の実行は数秒で失敗していた）の結果を見る。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。毎晩の確認は 10/4 20:40 JST に予約済み。
 - §7 #63・#64 をオーナーに聞く。
 
