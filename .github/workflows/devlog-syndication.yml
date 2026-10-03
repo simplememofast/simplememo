@@ -1,4 +1,4 @@
-# 開発記録の外部ブログ配信（dev.to / はてなブログ）。
+# 開発記録の外部ブログ配信（dev.to / はてなブログ2つ / ライブドアブログ）。
 #
 # 【なぜここに置くか — 2026-09-24】
 # 自社サイトへの dofollow リンクが実測で確認できた投稿先は dev.to（simple_memo）と
@@ -6,6 +6,13 @@
 # 両方への投稿は Mac 上のローカル定期タスクに載っていて、dev.to は 9/18 から止まり、
 # はてなも間隔が崩れていた。ローカルの設定とログはクラウドのセッションから読めず、
 # 止まった理由を外から確かめる手段が無かった。**Mac が眠っていても、外から結果が読める経路に移す。**
+#
+# 【媒体を2つ足した — 2026-10-03】
+# はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp）とライブドアブログ（captio.livedoor.blog）も、
+# ローカル定期タスクがブラウザ操作で投稿していた（AI の開示なし・出典の無い数字あり）。オーナーが選択式で
+# 「新しい仕組みに移す（推奨）」を選んだので、開示と事実の機械検査のあるこの経路に載せる。
+# はてなの2つは同じ HATENA_API_KEY。ライブドアの LIVEDOOR_API_KEY はオーナーがこれから登録するので、
+# **登録されるまでは門が key_pending で休む（失敗にしない）**。見張りも鍵の登録前は alert でなく注意にする。
 #
 # 【1回に1媒体1本・状態ファイルを持たない】
 # 門（scripts/devlog-syndication.mjs gate）は**公開面の最新投稿**だけで決める:
@@ -16,15 +23,17 @@
 # 1枠が落ちても、次の枠（約9〜15時間後）が同じ判定で拾い直す。
 # **公開面はキャッシュを通さずに読む**（2026-09-29、dev.to の公開一覧が25.7時間前のキャッシュを返し、
 # 投稿の10分後も新しい記事が無かった）。古い応答は「読めない」として投稿しない。投稿の直前には、
-# キャッシュの無い認証済みの一覧（dev.to は me/all、はてなは AtomPub）で間隔と上限をもう一度確かめる。
+# キャッシュの無い認証済みの一覧（dev.to は me/all、はてな・ライブドアは AtomPub）で間隔と上限をもう一度確かめる。
+# 日本語の3媒体（はてな2つ・ライブドア）は「使った題材」を共有する（同じ種で日本語の似た記事を3本出さない）。
 #
 # 【鍵をモデルに渡さない】
 # 執筆ステップ（Claude Code）には投稿用の鍵を渡さない。鍵を読むのは決定的なスクリプトの
 # 「投稿」ステップだけで、しかも matrix の媒体に対応する1本だけを渡す。
+# 門の前の「鍵の有無」は真偽だけを出力にする（値は渡さない）。
 #
 # 【正直さ】DEV は 2026-08-26 から、未開示のAI記事と「合成した内容を本人の体験として出すこと」を
 # アカウント停止の対象にしている。dev.to は ai_disclosure_level=fully_autonomous を API で付け、
-# はてなは本文末尾に固定の開示文を付ける（どちらもスクリプト側が付けるので、モデルは消せない）。
+# はてな・ライブドアは本文末尾に固定の開示文を付ける（どれもスクリプト側が付けるので、モデルは消せない）。
 #
 # 【手動実行】workflow_dispatch の既定は dry_run（書いて検査するが投稿しない）。
 # dry_run は門の「間隔」と「24時間に1本」を見ない（停止と読めないときは止める）。いつでも経路全体を試せる。
@@ -42,9 +51,9 @@ on:
   workflow_dispatch:
     inputs:
       platform:
-        description: '対象の媒体'
+        description: '対象の媒体（hatenadiary は はてなブログ「メモの設計図」、livedoor は ライブドアブログ）'
         type: choice
-        options: [all, devto, hatena]
+        options: [all, devto, hatena, hatenadiary, livedoor]
         default: all
       mode:
         description: 'dry_run は書いて検査するが投稿しない'
@@ -68,7 +77,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        platform: [devto, hatena]
+        platform: [devto, hatena, hatenadiary, livedoor]
     concurrency:
       group: devlog-syndication-${{ matrix.platform }}
       cancel-in-progress: false
@@ -101,24 +110,27 @@ jobs:
         if: steps.select.outputs.on == 'true'
         run: node scripts/devlog-syndication.mjs --selftest
 
-      - name: 門（緊急停止・公開面の最新投稿からの間隔）
+      # 鍵の値は渡さない。真偽だけを出力にして、門が「鍵が無い」をどう扱うかを決める
+      # （旧「投稿用の鍵があるか」は門に吸収した。dev.to・はてなは投稿する番に no_key で落とし、
+      #   鍵をこれから登録するライブドアは key_pending で休む。dry_run は鍵を見ない）。
+      - name: 鍵の有無（値は渡さない・真偽だけ）
+        id: key
+        if: steps.select.outputs.on == 'true'
+        env:
+          HAS_KEY: ${{ (matrix.platform == 'devto' && secrets.DEVTO_API_KEY != '') || ((matrix.platform == 'hatena' || matrix.platform == 'hatenadiary') && secrets.HATENA_API_KEY != '') || (matrix.platform == 'livedoor' && secrets.LIVEDOOR_API_KEY != '') }}
+        run: echo "has_key=$HAS_KEY" >> "$GITHUB_OUTPUT"
+
+      - name: 門（緊急停止・鍵・公開面の最新投稿からの間隔）
         id: gate
         if: steps.select.outputs.on == 'true'
+        env:
+          HAS_KEY: ${{ steps.key.outputs.has_key }}
         run: |
           ARGS=(gate --platform "$PLATFORM" --github-output "$GITHUB_OUTPUT")
           if [ "$FORCE" = "true" ]; then ARGS+=(--force); fi
           if [ "$MODE" != "publish" ]; then ARGS+=(--dry-run); fi
+          if [ "$MODE" = "publish" ] && [ "$HAS_KEY" != "true" ]; then ARGS+=(--key-missing); fi
           node scripts/devlog-syndication.mjs "${ARGS[@]}"
-
-      - name: 投稿用の鍵があるか（投稿モードだけ）
-        if: steps.gate.outputs.due == 'true' && env.MODE == 'publish'
-        env:
-          HAS_KEY: ${{ (matrix.platform == 'devto' && secrets.DEVTO_API_KEY != '') || (matrix.platform == 'hatena' && secrets.HATENA_API_KEY != '') }}
-        run: |
-          if [ "$HAS_KEY" != "true" ]; then
-            echo "::error title=Devlog syndication::$PLATFORM の投稿用の鍵が GitHub Secrets に無い（DEVTO_API_KEY / HATENA_API_KEY）。黙って休まずに落とす。"
-            exit 1
-          fi
 
       - name: 文脈（記事ネタ台帳・既存記事・リンク候補）
         if: steps.gate.outputs.due == 'true'
@@ -256,7 +268,8 @@ jobs:
         if: steps.gate.outputs.due == 'true'
         env:
           DEVTO_API_KEY: ${{ matrix.platform == 'devto' && secrets.DEVTO_API_KEY || '' }}
-          HATENA_API_KEY: ${{ matrix.platform == 'hatena' && secrets.HATENA_API_KEY || '' }}
+          HATENA_API_KEY: ${{ (matrix.platform == 'hatena' || matrix.platform == 'hatenadiary') && secrets.HATENA_API_KEY || '' }}
+          LIVEDOOR_API_KEY: ${{ matrix.platform == 'livedoor' && secrets.LIVEDOOR_API_KEY || '' }}
           IDENTITY_DENYLIST: ${{ secrets.IDENTITY_DENYLIST }}
         run: |
           ARGS=(publish --platform "$PLATFORM" --article .syndication/article.json \
@@ -309,6 +322,10 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # 鍵の値ではなく「登録されているか」の真偽だけ。ライブドアは鍵の登録前（この経路の投稿がまだ無い間）は
+      # alert でなく注意にする。クラウドの外の見張りはこれを持たないので、未設定も「未登録」と同じ扱い。
+      LIVEDOOR_KEY_SET: ${{ secrets.LIVEDOOR_API_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -341,5 +358,5 @@ jobs:
             exit 1
           fi
           if [ "$code" -eq 1 ]; then
-            echo "::warning title=Devlog syndication watch::注意（期限を過ぎた枠が投稿できていない、または公開面を読めない。要約を参照）"
+            echo "::warning title=Devlog syndication watch::注意（期限を過ぎた枠が投稿できていない・公開面を読めない・投稿用の鍵が未登録、のいずれか。要約を参照）"
           fi
