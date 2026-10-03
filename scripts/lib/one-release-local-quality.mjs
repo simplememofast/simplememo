@@ -100,9 +100,17 @@ export function validateOneReleaseLocalQuality(q, { purpose, build, ci, now } = 
     && s.cases.every((r) => object(r) && s.required_cases.includes(r.identifier)
       && r.conclusion === 'passed' && r.attempts === 1), 'simulator_coverage_or_failure');
   require(ref(q.github.raw_ref) && ref(q.cloud.raw_ref) && ref(q.physical.raw_ref), 'raw_refs_missing');
-  require(['cancelled', 'unknown', 'not_run'].includes(q.cloud.conclusion) && q.cloud.reason === 'quota_exhausted'
-    && q.cloud.quota_recovered === false && Array.isArray(q.cloud.unverified_check_ids)
-    && q.cloud.unverified_check_ids.length === 0, 'cloud_not_quota_only_or_unqualified_check');
+  const humanCloudReplacement = q.cloud.reason === 'human_authorized_local_quality';
+  const cloudBasisAccepted = (q.cloud.reason === 'quota_exhausted' && q.cloud.quota_recovered === false)
+    || (humanCloudReplacement && q.cloud.conclusion === 'cancelled'
+      && q.cloud.cancellation_cause === 'unknown' && q.cloud.replaced_for_this_one_release === true
+      && Object.hasOwn(q.cloud, 'quota_recovered') && q.cloud.quota_recovered === null
+      && ref(q.cloud.reason_ref) && Object.keys(q.cloud.reason_ref).sort().join(',') === 'path,sha256'
+      && canonical(q.cloud.reason_ref) === canonical(a.ref)
+      && !Object.hasOwn(q.cloud, 'quota_ref') && !Object.hasOwn(q.cloud, 'not_run_ref'));
+  require(['cancelled', 'unknown', 'not_run'].includes(q.cloud.conclusion) && cloudBasisAccepted
+    && Array.isArray(q.cloud.unverified_check_ids) && q.cloud.unverified_check_ids.length === 0,
+    'cloud_not_authorized_or_unqualified_check');
   require(q.physical.conclusion === 'unknown' && q.physical.replaced_for_this_one_release === true,
     'physical_raw_claim_changed');
 
@@ -137,6 +145,9 @@ export function validateOneReleaseLocalQuality(q, { purpose, build, ci, now } = 
         'github_check_failed_or_pending');
       const currentStatuses = latest(statuses, (r) => r.context);
       const cloudRows = currentStatuses.filter((r) => r.context === CLOUD_CONTEXT && r.state !== 'success');
+      if (humanCloudReplacement) require(cloudRows.length > 0
+        && cloudRows.every((r) => r.state === 'failure' && r.description === 'cancelled'),
+        'human_cloud_raw_cancellation_not_preserved');
       if (q.cloud.conclusion === 'not_run') {
         require(currentStatuses.every((r) => r.context !== CLOUD_CONTEXT)
           && sameIDs(q.cloud.unverified_status_ids, []) && ref(q.cloud.not_run_ref)
