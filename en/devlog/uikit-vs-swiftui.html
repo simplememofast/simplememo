@@ -431,7 +431,7 @@
 <div class="" lang="en">
 <div class="article-body">
 <h2>1. Why UIKit in 2026</h2>
-<p>In 2026, the majority of new iOS apps are built with SwiftUI. Apple emphasizes SwiftUI's evolution at every WWDC, and the convenience of declarative UI is beyond question.</p>
+<p>Apple emphasizes SwiftUI's evolution at every WWDC, and the convenience of declarative UI is beyond question.</p>
 <p>However, this app has a <strong>non-negotiable requirement</strong>: <strong>Time-to-Text (the time from launch to text input readiness) must be under 500ms</strong>.</p>
 <p>SwiftUI introduces overhead inherent to declarative UI frameworks: <code>@StateObject</code> initialization, <code>body</code> re-evaluation, and <code>.onAppear</code> timing control. While negligible for most apps, these become significant when optimizing at the millisecond level.</p>
 <p>In contrast, UIKit's <code>viewDidAppear</code> to <code>becomeFirstResponder()</code> path is <strong>deterministically faster</strong>. The ViewController lifecycle is explicit, giving precise control over when the keyboard appears.</p>
