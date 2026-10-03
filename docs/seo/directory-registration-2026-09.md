@@ -2437,7 +2437,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/3 19:36 | [#1929](https://github.com/simplememofast/simplememo/pull/1929) | 第110弾（日本語3ページ・英語3ページ＋サイトマップ）：「設定 → Apple ID → …」の道順（いまの「設定」の一番上は自分の名前。Apple の案内も「設定」→ 自分の名前）を、`/guides/icloud/`（日英）・`/faq`（日英）の「メディアと購入」・`/blog/captioo-alternative`（日英）の解約で直した。iCloud ガイドの「iCloud メールを有効にするとアドレスが自動で作られる」→ 画面の案内で作る・あとから変えられない、「オフだとメールは受信されない」→ この iPhone のメールAppで見られない（スイッチは端末ごと） |
 | 10/3 19:53 | [#1930](https://github.com/simplememofast/simplememo/pull/1930) | 第111弾（日本語2ページ・英語1ページ。3ページとも更新日はすでに 10/3）：Captio メソッドの用語ページ（日英）の「SMTP不要の送信」「SMTP-free sending」と `/vs/mail-to-self/` の説明文の「SMTP不要」→ SMTP の設定が要らない送信（アプリは HTTPS でリレーに渡し、メールは通常の SMTP で配送される） |
 | 10/3 20:16 | [#1931](https://github.com/simplememofast/simplememo/pull/1931) | 第112弾（英語4ページ＋サイトマップ）：英語の活用事例3ページ（管理職・ペットの世話・研究者）と `/en/vs/standard-notes/` が Premium の料金を日本の円だけ（「500 yen/month」「JPY 500/month」）で書いていたのを、英語のほかのページと同じ「$2.99/month（日本では ¥500）」に |
-| — | この PR | §5.49 の「この PR」の行、この §5.50、第105〜112弾の annotations の行 |
+| 10/3 20:38 | [#1932](https://github.com/simplememofast/simplememo/pull/1932) | §5.49 の「この PR」の行、この §5.50、第105〜112弾の annotations の行 |
 
 ### 見つけたこと
 
@@ -2472,6 +2472,41 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。10/24 以降：`/note-to-email/`（日本語）の FAQ「件名や署名はカスタマイズできますか？」。11/12 以降：`/obsidian/compare/logseq/`、`/en/blog/offline-first-comparison` の「Privacy-Focused Capture」、`/en/blog/business-memo-apps-2026` の「Security first」、`/blog/memo-app-hikaku-matome` の「多くのユーザーに支持」（それぞれの実験の評価のあと）、`/download/`（日英）の日本のストアの名前（§7 #47）。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
 - オーナーに聞いている §7 #61（条件なしの0.4秒）・#62（Apple Watch に対応した版）の答えを待つ。
+
+## 5.51 2026-10-03 夜（続き）：オーナーの判断 #61・#62、Apple Watch に対応した版と月（第113弾）、0.4秒の起動に計測の条件（第114〜118弾）、実験の対象ページの一覧の取りこぼし
+
+オーナーの答え（10/3 20:40 すぎ、選択式）：§7 #61「① 条件を添える」、§7 #62「③ 版と月を書かない」。
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/3 22:08 | [#1933](https://github.com/simplememofast/simplememo/pull/1933) | 第113弾（日本語3ページ・英語2ページ＋`llms.txt`）：§7 #62 ③。`/`・`/en/` の「2026年7月のv3.9でApple Watchに対応」「Version 3.9 (July 2026) adds Apple Watch support」（本文と JSON-LD の説明）、`/` のレビュー紹介の「v3.9で」、`/faq`（日英）の「v3.4から」「since v3.4」、`llms.txt` のプレスリリースの行の「v3.9」を外した。同じ文の「メールとObsidianの両方に」には `/apple-watch-obsidian/` と同じ条件（iPhone で Obsidian 連携をオンにしていれば）。文字が増えたのでトップのフォントの部分集合を作り直した（`assets/home-perf/`） |
+| 10/3 22:28 | [#1934](https://github.com/simplememofast/simplememo/pull/1934) | 第114弾（ブログ 日本語29・英語28ページ＋サイトマップ）：§7 #61 ①の1本目。条件の書いていない0.4秒に「（iPhone 16e・ウォーム起動の実測）」「(warm launch, iPhone 16e)」、説明文は短く「（ウォーム起動の実測）」。FAQ は見える答えと FAQPage の両方。`/blog/email-management-tips` の「効率化化」の誤字も |
+| 10/3 22:49 | [#1935](https://github.com/simplememofast/simplememo/pull/1935) | 第115弾（比較 日本語25・英語27ページ＋サイトマップ）：同じ書き方。比較表の「起動速度」の行の見出しに条件（計測はどのアプリもウォーム起動）。0.4秒を入力・キャプチャにかかる時間として書いていた6か所（`/vs/tana/`・`/vs/anytype/`・`/vs/heptabase/`）を書き始められるまでの時間に、アイコンの置き場所の助言（`/vs/note-to-self-mail/` 日英）から数字を外した |
+| 10/3 23:09 | [#1936](https://github.com/simplememofast/simplememo/pull/1936) | 第116弾（活用事例 日本語17・英語17ページ＋サイトマップ）：同じ書き方。`/en/use-cases/ideas/` の H1 とパンくずにも |
+| 10/3 23:33 | [#1937](https://github.com/simplememofast/simplememo/pull/1937) | 第117弾（用語集・メソッド・ガイド・使い方・紹介・声・LINE Keep・Captio など 日本語23・英語21・繁体字1ページ＋サイトマップ）：同じ書き方。`/line-keep/` の比較表の見出し（LINE Keep の欄はもともと「未計測」）、`/en/note-to-email/` のカードの見出し、`/zh-Hant/` は繁体字で「熱啟動，iPhone 16e 實測」 |
+| 10/3 23:44 | [#1938](https://github.com/simplememofast/simplememo/pull/1938) | 第118弾（`/faq`・`/en/faq` の冒頭の要約と `llms.txt`）：同じ書き方。`/en/faq` の要約の「stores zero memo content on servers」→「does not persistently store memo bodies on its servers (transit only during send)」（同じページの FAQ の答え・日本語版・`llms.txt` と同じ言い方） |
+| — | この PR | §5.50 の「この PR」の行、この §5.51、§7 #61・#62 の判断と #63、第113〜118弾の annotations の行、3つの実験（video-2026-08-11-five-clips・title-2026-08-20-home-grammar・aio-2026-08-11-answer-blocks）の note |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **実行中の実験の対象ページの一覧の取りこぼし**：#61 では実験の対象ページを避けて評価日のあとに回していたが、そのための一覧から、aio-2026-08-11-answer-blocks の `pages` の欄にある `/blog/digital-vs-handwritten-notes`・`/blog/meeting-memo-template`・`/blog/best-memo-apps-2026` が抜けていた（`/apple-watch/`・`/ai-tags/` も、この実験の評価日 11/11 ではなく動画の実験の 10/11 で数えていた）。第114弾 [#1934](https://github.com/simplememofast/simplememo/pull/1934) で `/blog/digital-vs-handwritten-notes` の3か所（カード・段落・CTA。回答ブロックの外）に条件を足し、PR の本文でもこの実験を書き漏らした | 戻すとまた変更が増えるので戻さず、その実験に交絡の note を足した（このPR）。一覧は experiments.json の `page`・`pages` の両方から作り直し、第117・118弾はそれで確かめた（対象ページは0）。ほかの2ページは第113〜118弾で変えていない |
+| **[#1933](https://github.com/simplememofast/simplememo/pull/1933) の CI の赤**：Homepage Section Rendering の chromium だけが、変えていない9番目の区画の高さ（±2px）で落ちた。firefox・webkit は通り、前の実行は緑 | 一時的な揺れとみて、落ちた job だけを再実行して通った |
+| **`/en/faq` の要約の「stores zero memo content on servers」**：送るときにメモ本文はリレー（Cloudflare Workers）と配送（Resend）を通る。同じページの答えは「not persistently stored」 | 第118弾 [#1938](https://github.com/simplememofast/simplememo/pull/1938) |
+| **#61 で理由を書いて残した所**：計測の記事の本文（冒頭で条件を書いている）、計測方法のページ（日英）、0.4秒が何ではないかを説明する文、読者の質問、計測方法の記事へのリンクの文、下書きの自動保存の「約0.4秒」（入力が止まってから保存までの時間で、起動の話ではない）、`/en/blog/revenue-report-2025` の2025年の記録 | 残した |
+| **#61 の実験の対象ページ（5ページ・19か所）**：`/ai-tags/`（1か所）・`/blog/fastest-memo-app-benchmark`（9か所）、`/blog/business-memo-apps-2026`（5か所）・`/blog/memo-app-hikaku-matome`（3か所）・`/en/blog/offline-first-comparison`（1か所） | 前の2ページは 11/12 以降、後の3ページは 11/13 以降（それぞれの実験の評価のあと） |
+| **下書きのまま公開されている `/en/blog/revenue-report-2025`**：数字が「[X,XXX]」「[XX%]」のまま、ページの上に「DRAFT: This article contains placeholder data」。noindex・nofollow で、サイトマップにもサイト内のリンクにも無いが、URL を知っていれば開ける。「I'll update this table monthly」という約束もある | 触っていない。§7 #63 としてオーナーに聞く |
+
+### 次にやること
+
+- 毎晩の確認は 10/4 20:40 JST に予約済み（10/08 まで毎日かけ直す）。
+- 11/12 以降：`/ai-tags/`・`/blog/fastest-memo-app-benchmark` の条件なしの0.4秒。11/13 以降：`/blog/business-memo-apps-2026`・`/blog/memo-app-hikaku-matome`・`/en/blog/offline-first-comparison`（§7 #61 の残り）。
+- 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。10/24 以降：`/note-to-email/`（日本語）の FAQ。11/12 以降：§5.50 の残り（`/obsidian/compare/logseq/` ほか、`/download/` の日本のストアの名前）。
+- 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
+- §7 #63 をオーナーに聞く。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -2730,5 +2765,6 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 58 | ~~**本文に残る「逃さない」**：`/blog/ai-information-workflow`・`/blog/business-memo-apps-2026`・`/blog/captio-discontinued`・`/methods/`・`/use-cases/`・`/use-cases/job-hunting/`・`/use-cases/writers/`・`/vs/bear/`・`/vs/craft/`・`/vs/day-one/`・`/vs/heptabase/` の本文（例：「考えを逃さないためのツール」「その瞬間を逃さないためのツールとしてCaptioは最適でした」「考えを逃さないことだけに最適化されています」）~~ → **2026-10-02 判断：② 約束に読める所だけ直す** → 第91弾 [#1884](https://github.com/simplememofast/simplememo/pull/1884)（10/2 16:49。5か所。§5.46。`/blog/captio-discontinued` の「最適でした」は Captio の説明で、シンプルメモの約束ではないので残した） | 題・説明・OG 画像の「逃さない」は直してある（第34・59・76・85弾）。本文は目的を言う書き方が多く、保証の言い切りとまでは言えない所もあるので、どこまで直すかの判断が要る | ① 本文も「その場で書き留める」などに直す ② 保証に読める所（「最適化されています」「最適でした」と組み合わさった所）だけ直す ③ このまま |
 | 59 | ~~**開発記事の「実機計測で 200〜300ms」**：`/devlog/uikit-vs-swiftui`（日英）の「Time-to-Text 500ms以下という非機能要件…実機計測で 200〜300ms を安定して達成」とよくある質問の「実機で200〜300ms台で安定」~~ → **2026-10-02 判断：② 数字を外して目標だけにする** → 第91弾 [#1884](https://github.com/simplememofast/simplememo/pull/1884)（10/2 16:49。`/devlog/day1` も。§5.46） | 台帳に計測の記録（日時・端末・回数・測った区間）の場所が無い。サイトの起動時間は、記録のある「0.4秒（ウォーム起動の実測）」にそろえてきた | ① 記録があれば、条件（端末・区間・回数）と一緒に残す ② 記録が無ければ数字を外し、目標（500ms以下）だけにする ③ このまま |
 | 60 | ~~**シンプルメモについての「摩擦ゼロ」「ゼロフリクション」「frictionless」**：`/use-cases/reading-notes/`「強みは『ゼロフリクションのキャプチャ』」、`/blog/memo-habit` の CTA「摩擦ゼロのメモ体験」、`/vs/evernote/`「キャプチャだけに特化することで摩擦をゼロにしています」、`/glossary/inbox-zero/`・`/glossary/kanban/`・`/glossary/gtd/`、`/methods/`・`/methods/gtd/` の見出し「ゼロフリクション・キャプチャ」、英語の同じページと `/en/methods/` の説明「Simple Memo strengthens your productivity system with frictionless capture」、`/en/vs/` のカード「zero-friction Simple Memo」など。`/guides/gmail-star-todo/` の「メモを、二度と埋もれさせない」も同じ種類~~ → **2026-10-03 判断：① 約束に読める所だけ直す** → 第97弾 [#1911](https://github.com/simplememofast/simplememo/pull/1911)（10/3 13:31。日本語11ページ・英語13ページ。§5.48）。方法の説明と、Captio を使っていたころの話は残した | 「逃さない」（#58）と同じく、計測や確認ができない言い切り。方法の説明（Zettelkasten の一時メモの原則「摩擦ゼロで書き留める」など）と、Captio を使っていたころの話は対象外 | ① 約束に読める所だけ「摩擦の少ない」などに直す ② 全部直す ③ このまま |
-| 61 | **条件なしの「0.4秒起動」「0.4s launch」「Launches in 0.4 seconds」**：ブログ・活用事例・比較ページ・CTA などに約140ページ・約240か所（2026-10-03 の数え）。計測（iPhone 16e・ウォーム起動・アイコンのタップから入力できるまでの中央値）は記録があるが、条件を書かずに「0.4秒で起動」と言うと、どの端末・冷えた状態からの起動でも0.4秒に読める（§5.49） | §7 #31 は「主要ページに条件を添える」で、残りは範囲の外として残してきた。数が多く、題・CTA にも入っているので判断が要る | ① 条件を添える（「タップから0.4秒で書き始められる（ウォーム起動の実測）」など） ② 数字を外して「すぐ書き始められる」などにする ③ このまま（主要ページだけ条件つき） |
-| 62 | **Apple Watch に対応した版**：`/` と `/en/` は「2026年7月のv3.9で Apple Watchに対応」、`/` のレビュー紹介は「この声を受けて（6月のレビュー）、v3.9でApple Watchに対応しました」。App Store Connect の配信の履歴では 3.4 が 6/10、3.9 が 7/4（§5.49） | どの版で Watch のアプリを公開し、どの版で Watch から送ったメモが Obsidian にも入るようになったかは、こちらでは公開の記録から確かめきれない | ① Watch の対応は 3.4（6月）、Obsidian への追記は 3.9（7月）と書き分ける ② いまの書き方のまま（3.9 で対応） ③ 版と月を書かない |
+| 61 | ~~**条件なしの「0.4秒起動」「0.4s launch」「Launches in 0.4 seconds」**：ブログ・活用事例・比較ページ・CTA などに約140ページ・約240か所（2026-10-03 の数え）。計測（iPhone 16e・ウォーム起動・アイコンのタップから入力できるまでの中央値）は記録があるが、条件を書かずに「0.4秒で起動」と言うと、どの端末・冷えた状態からの起動でも0.4秒に読める（§5.49）~~ → **2026-10-03 判断：① 条件を添える** → 第114〜118弾 [#1934](https://github.com/simplememofast/simplememo/pull/1934)（ブログ）・[#1935](https://github.com/simplememofast/simplememo/pull/1935)（比較）・[#1936](https://github.com/simplememofast/simplememo/pull/1936)（活用事例）・[#1937](https://github.com/simplememofast/simplememo/pull/1937)（用語集・メソッドほか）・[#1938](https://github.com/simplememofast/simplememo/pull/1938)（よくある質問・`llms.txt`）（10/3 22:28〜23:44。§5.51）。計測の記事の本文などは理由を書いて残した。実験の対象の5ページは評価日のあと（11/12・11/13 以降） | §7 #31 は「主要ページに条件を添える」で、残りは範囲の外として残してきた。数が多く、題・CTA にも入っているので判断が要る | ① 条件を添える（「タップから0.4秒で書き始められる（ウォーム起動の実測）」など） ② 数字を外して「すぐ書き始められる」などにする ③ このまま（主要ページだけ条件つき） |
+| 62 | ~~**Apple Watch に対応した版**：`/` と `/en/` は「2026年7月のv3.9で Apple Watchに対応」、`/` のレビュー紹介は「この声を受けて（6月のレビュー）、v3.9でApple Watchに対応しました」。App Store Connect の配信の履歴では 3.4 が 6/10、3.9 が 7/4（§5.49）~~ → **2026-10-03 判断：③ 版と月を書かない** → 第113弾 [#1933](https://github.com/simplememofast/simplememo/pull/1933)（10/3 22:08。日本語3ページ・英語2ページ＋`llms.txt`。§5.51） | どの版で Watch のアプリを公開し、どの版で Watch から送ったメモが Obsidian にも入るようになったかは、こちらでは公開の記録から確かめきれない | ① Watch の対応は 3.4（6月）、Obsidian への追記は 3.9（7月）と書き分ける ② いまの書き方のまま（3.9 で対応） ③ 版と月を書かない |
+| 63 | **下書きのまま公開されている `/en/blog/revenue-report-2025`**：数字が「[X,XXX]」「[XX%]」のままで、ページの上に「DRAFT: This article contains placeholder data」と出る。noindex・nofollow で、サイトマップにもサイト内のリンクにも無いが、URL を知っていれば開ける。「I'll update this table monthly」という約束もある（§5.51） | 売上・利用者数などの数字はオーナーしか持っていないので、仕上げるか、公開をやめるかはこちらでは決められない | ① このまま（下書きの表示・noindex のまま） ② 公開をやめる（ページを消して `/en/blog/` へ転送） ③ 実際の数字で仕上げる（数字はオーナーから） |
