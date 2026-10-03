@@ -313,6 +313,11 @@
     .guide-body p a,.guide-body li a{color:#6ab4ff;text-underline-offset:.2em}
     .guide-body h3{margin-top:1.5rem;margin-bottom:.5rem}
 
+    .quick-route{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin:1.25rem 0 1.5rem;max-width:32rem}
+    .quick-route a{position:relative;display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:64px;border:1px solid #5182ae;border-radius:12px;background:#14253a;color:#eaf2ff;text-decoration:none;font-size:1.125rem;font-weight:700}
+    .quick-route a+a::before{content:'→';position:absolute;left:-1.15rem;color:#a8d3ff}
+    .quick-route span{font-size:.875rem;color:#a8d3ff}
+    .capture-step{scroll-margin-top:76px}
     /* Beginner guide: semantic HTML diagram, with decorative line icons. */
     .guide-body{max-width:920px;font-size:1.125rem}
     .guide-body .lp-hero{text-align:left;padding:2rem 0 1rem}
@@ -392,27 +397,28 @@
     <header class="lp-hero">
       <p class="lp-hero__label">はじめてのSiriメモ</p>
       <h1 class="lp-hero__title">iPhoneに話すだけで、<br>メモを送る。</h1>
-      <p class="intro"><strong>Siri（シリ）は、iPhoneに声でお願いできる機能です。</strong>シンプルメモと使うと、話した内容を文字にして、設定したメールアドレスへ送れます。</p>
-      <p>まずは「明日、牛乳を買う」と、短いメモで試してみましょう。必要なのはiPhoneとシンプルメモです。</p>
+      <nav class="quick-route" aria-label="3ステップの全体像"><a href="#prepare"><span>1</span>設定</a><a href="#talk"><span>2</span>話す</a><a href="#receive"><span>3</span>受信箱</a></nav>
+      <p class="intro"><strong>Siri（シリ）は、iPhoneに声でお願いできる機能。</strong>シンプルメモと使うと、話した内容を文字にしてメールで送れます。</p>
+      <p>まずは「明日、牛乳を買う」で試しましょう。</p>
     </header>
     <section id="say" aria-labelledby="say-title">
       <h2 id="say-title" class="lp-section__title">やることは、この3つ</h2>
       <figure class="capture-diagram">
         <figcaption>使い方の流れを表した図です。実際の操作画面ではありません。</figcaption>
         <ol class="capture-flow">
-          <li class="capture-step">
+          <li id="prepare" class="capture-step">
             <div class="capture-heading"><svg class="capture-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="13" y="3" width="22" height="42" rx="5"/><path d="M20 9h8M21 38h6M18 23l4 4 9-10"/></svg><div><span class="capture-kicker">1 · 最初の1回</span><h3>送る準備をする</h3></div></div>
             <p>シンプルメモで<strong>受け取りたいメールアドレスを設定・認証</strong>します。Siriも使える状態にします。</p>
             <p><a href="#setup">初めてなら、下の設定へ ↓</a></p>
           </li>
-          <li class="capture-step capture-step--talk">
+          <li id="talk" class="capture-step capture-step--talk">
             <div class="capture-heading"><svg class="capture-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="18" y="4" width="12" height="25" rx="6"/><path d="M11 22a13 13 0 0 0 26 0M24 35v9M17 44h14"/></svg><div><span class="capture-kicker">2 · iPhoneに話す</span><h3>呼んで、メモを話す</h3></div></div>
             <div class="speech"><span class="speech__who">あなたが言う言葉</span><strong>「Hey Siri、<br>シンプルメモで残す」</strong></div>
             <div class="speech speech--siri"><span class="speech__who">Siriが聞きます</span><strong>「何をメモしますか？」</strong></div>
             <div class="speech"><span class="speech__who">聞かれたら、本文を話す</span><strong>「明日、牛乳を買う」</strong></div>
             <p class="guide-note">Hey Siri は「ヘイ、シリ」と読みます。</p>
           </li>
-          <li class="capture-step capture-step--mail">
+          <li id="receive" class="capture-step capture-step--mail">
             <div class="capture-heading"><svg class="capture-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="4" y="10" width="40" height="29" rx="4"/><path d="m5 13 19 14 19-14M5 37l12-13M43 37 31 24"/></svg><div><span class="capture-kicker">3 · 届いたか確認</span><h3>メールを開く</h3></div></div>
             <p><strong>設定したアドレスの受信箱</strong>を開き、「明日、牛乳を買う」が届いているか確認します。</p>
             <p>普段そのメールを読むアプリ（メール、Gmailなど）で確認できます。</p>
