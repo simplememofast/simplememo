@@ -3,98 +3,164 @@
   "note": "Seeded 2026-08-09 from the git diffs of PRs #367/#374/#376. See growth/README.md.",
   "experiments": [
     {
-      "id": "gsc-email-yourself-title-20261003",
-      "page": "/blog/email-yourself-memo",
-      "change_paths": [
-        "blog/email-yourself-memo.html",
-        "sitemap-ja.xml",
-        "data/distribution-queue.json",
-        "docs/story-seeds.md"
-      ],
-      "supporting_changes": [
-        {
-          "path": "sitemap-ja.xml",
-          "kind": "sitemap_lastmod"
-        },
-        {
-          "path": "data/distribution-queue.json",
-          "kind": "distribution_seed",
-          "id": "20261003-email-yourself-guide"
-        },
-        {
-          "path": "docs/story-seeds.md",
-          "kind": "story_seed",
-          "id": "S-20261003-email-yourself-guide"
-        }
-      ],
-      "type": "company_gsc_treatment",
-      "hypothesis": "Replacing the broad one-tap app promise with the actual Gmail/Outlook self-email guide intent may improve qualified search clicks; the observed CTR gap alone does not prove the title causes it.",
+      "id": "pr-2026-action-router",
+      "page": "(PR TIMES配信 — 追記G 第1弾「言ったら、終わる。」。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "PR⑥（D-SCORE 85・非乗車）で分かった必要条件 —— S1>=20 かつ S2>=10 の AND —— を、合計点ではなく必要条件のほうで通す初の弾。訴求は「『明日、牛乳』はリマインダーへ。『金曜15時、歯医者』はカレンダーへ」で、見出しに **リマインダー / カレンダー（D-1 の最高帯「全国民級」）とアプリ名（Obsidian を含む）** を必ず入れる。乗車した2本（②Obsidian連携 提供開始 / ③Apple Watch初対応）と同じ「大きな固有名詞 × 初対応・提供開始」の形に戻す。**リマインダーとカレンダーは1本に束ねる**（追記B・追記F-3 の小出し厳禁。割ると2本目が⑤と同じ死に方をする）。**時流（S5）は買わない** —— 追記E-3 が「時間減衰リスクあり＝待たずに撃つ」と名指ししている弾であり、乗車した③は S5=3 だった。",
       "source": {
         "pr": null,
         "commit": null
       },
-      "started_at": "2026-10-02",
-      "evaluation_at": "2026-11-02",
-      "status": "running",
-      "target_metric": "ctr",
+      "started_at": null,
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
       "baseline": {
-        "metric": "ctr",
-        "value": 0.015625,
-        "clicks": 9,
-        "impressions": 576,
-        "ctr": 0.015625,
-        "position": 5.989583333333333,
-        "window": "2026-09-02..2026-09-29",
-        "source": "gsc:c3545ddb22f42560935d154f73bc4267a46773fd441453d76999bb6b950f5e24"
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45・docs/pr-discover-strategy-2026-09-04.md §3-1）。転載の床は22-34本/回で乗車とは無関係（追記A-5）。**合計点ではなく必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する**"
       },
-      "measurement_contract": {
-        "source": "gsc",
-        "definition": "Original WEB GSC exact page ctr",
-        "unit": "ratio",
-        "time_zone": "America/Los_Angeles",
-        "scope": {
-          "kind": "page",
-          "page": "/blog/email-yourself-memo"
-        },
-        "lag_days": 3
-      },
-      "measurement_scope": {
-        "kind": "page",
-        "page": "/blog/email-yourself-memo"
-      },
-      "control": {
-        "kind": "pre_post",
-        "note": "Same exact-page source and equal windows; no randomized control.",
-        "confounders": [
-          "Search ranking and query composition may change independently.",
-          "Other site treatments and release changes may affect observed traffic."
-        ]
-      },
-      "min_sample": {
-        "metric": "impressions",
-        "threshold": 500,
-        "rationale": "Comparable exposure to the measured 576-impression baseline is needed; nine baseline clicks still provide limited power."
-      },
-      "stop_conditions": [
-        "Stop if the description becomes inaccurate or another owner protects the exact page."
-      ],
-      "guardrails": [
-        "Keep the canonical, body, CTA, tracking and product facts unchanged; verify exact-head CI, actual served bytes and search-query/position changes."
-      ],
-      "decision_rule": "Compare the exact-page WEB GSC CTR across equal 28-day windows after at least 500 impressions, retaining clicks, position and query composition. Treat changed mix, low sample and concurrent changes as limits; no causal, install or revenue claim.",
-      "post_window": {
-        "start": "2026-10-03",
-        "end": "2026-10-30",
-        "days": 28
-      },
+      "target_metric": "discover_boarding",
       "decision": null,
       "evaluated_at": null,
-      "notes": [],
-      "company_measurement": {
-        "schema_version": 1,
-        "plan_sha256": "a3b0db29dc9494f49aa198ef84e67f1504877a7e4e39e866f21e8df1d4350406",
-        "company_run_id": "f2bfe354-ab83-4ed6-998f-6213c9a8bd75",
-        "decision_sha256": "3dce5f89dae09416b1eacc8ef5797bd2177b8658f708c0187d5e84dbae628192"
+      "d_score_pre": {
+        "$comment": "配信前採点（初回・2026-09-04）。**追記F の 93〜95 ではなく 76 で置いている。**下げたのは訴求を弱めたからではなく、(a) 追記G-1 が S1 の完全初出30を既に否定していること、(b) S7 は計画が実在してから付ける点であること、の2つによる。**見出し確定稿で必ず再採点すること**（PR⑥ はこれをやらずに、配信されていない見出しの85点で撃った）。",
+        "scored_at": "2026-09-04",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度／追記G-1 の競合裏取り／docs/pr-discover-strategy-2026-09-04.md の必要条件。較正は growth/scripts/d-score.mjs --backtest で再現できる",
+        "S1_novelty": 20,
+        "S2_entity_reach": 20,
+        "S3_concrete_nouns": 15,
+        "S4_transformation": 13,
+        "S5_timing": 3,
+        "S6_news_verb": 5,
+        "S7_launch_design": 0,
+        "total": 76,
+        "total_note": "76。**必要条件（S1>=20 かつ S2>=10）は余裕で通る**——ここが PR⑥ の85点との決定的な差で、あちらは配信物では S2 が 3 だった。合計点だけ見れば 85 > 76 だが、n=5 を分離するのは合計ではなく積のほう。S7 を埋めれば 81、Apple/iOS の窓に当たれば 86〜89 まで伸びる余地がある。",
+        "score_rationale": {
+          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。**30（カテゴリ完全初出）は取れない** —— 追記G-1 が競合を裏取り済みで、Voice Inbox for Obsidian（音声→Obsidian＋カレンダー）と Remindian（Obsidian Tasks↔Apple Reminders 双方向）が実在する。差別化の芯は「モバイル単体（Mac常駐なし・プラグインなし）で Capture→判定→Apple実行系→Obsidian へ完了が戻る」の一本化で、これは日本語ニュース面では未発見だが、**「世界初」は書けない**（check-pr-facts の overclaim 規則が落とす）。",
+          "S2_entity_reach": "20。D-1 の「20=全国民級（LINE・iPhone標準・**カレンダー・リマインダー**）」に、尺度が挙げている例そのものが入る。加えてアプリ名「Obsidian連携シンプルメモ」で見出しに Obsidian も乗る。**PR⑥ が落としたのはここで、配信見出しには固有名詞が1つも無かった。**",
+          "S3_concrete_nouns": "15。D-1 の「15=生活名詞が見出しに入る（**牛乳・歯医者**・スクショ）」に、尺度が挙げている例そのものが入る。**PR⑥ の15点は本文の固有数値（11チェック・261ファイル）に対して付いていて、この軸が測っている見出しの生活名詞ではなかった。**",
+          "S4_transformation": "13。「言ったら、鳴る」で Before→After が1文になり、ギミック（アプリを開かない・プラグイン不要・Mac常駐不要）もある。**15にしないのは、完了同期が結果整合だから** —— iOS は常駐できないのでアプリ起動時/BG更新時の突合になる（追記G-3）。原稿で「即時反映」を約束できない以上、変身の一文も一段割り引く。",
+          "S5_timing": "3。平時。**追記E-3 が「時間減衰リスクあり → 待たずに撃つ。S5は捨てる」とこの弾を名指ししている。**乗車した③（7/6 Apple Watch初対応）も S5=3 で乗っており、時流は増幅器であって主因ではない（追記E-1）。窓に間に合わせるために弾の質を落とさない（追記E-4）。",
+          "S6_news_verb": "5。「提供開始」。D-1 の 5点帯そのもの。",
+          "S7_launch_design": "0。**まだ計画が無いので 0。**D-1 は「コミュニティ同時投下＋記事化媒体への情報提供＋X連携の**計画あり**=5」で、計画の実在が条件。PR⑥ は受け皿ページ /autopilot/ を公開して 0→5 にした。**この5点はいちばん安く買える** —— 受け皿ページ＋Obsidianコミュニティ投下＋X で埋まる。"
+        },
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": null,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない**（PR⑥ は「AI語を許す代わりに S2 の固有名詞を必ず入れる」と交換したが、配信物では担保のほうだけが落ちた）。G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-09-04【起案】PR⑥ の D+1 実測（非乗車が実質確定）を受けて起案した。**この弾は EventKit を必要とするが、simplememo-ios には import EventKit が1行も無い**（grep 実測・VISION §12 も「Destination は実質1つで、選択も分岐も無い」と書いている）。したがって **status は planned のままで、実装が揃うまで配信しない。**原稿の骨格は docs/pr-action-router-2026-10.md。",
+        "2026-09-04【小出し厳禁】リマインダーとカレンダーを別リリースに割らない（追記B・追記F-3）。割ると2本目が「同じ話の2回目」になり、S1=0 で ⑤（AirPods/Siri・非乗車）と同じ死に方をする。**カレンダーが間に合わないなら、リリースごと待つ。**",
+        "2026-09-04【市場語条項】見出し・ストア・サイトに社内語（Multi-Destination / Capture OS / Routing）を出さない（追記D-3 の二層言語ルール）。出せば S2 3・S3 0 に落ちる。市場語は「場面名詞＋話すだけ＋行き先アプリ名」。",
+        "2026-09-04【VISION 整合】Routing の Level を本文に明示する（VISION §4.2）。**Level 1（提案）→ Level 2（ワンタップ）を作る。Level 3（Silent）は作らない。**「全自動」と書かない（check-pr-facts の overclaim 規則が落とす）。ユーザーの修正は Correction Learning の受け皿へ記録する設計にする（VISION §5.1・§13 の問5）。",
+        "2026-09-04【オーナー判断・実装範囲を確定】**リマインダーとカレンダーを同梱する。**追記B・追記F-3 の「小出し厳禁」を守る形。EventKit はリマインダー/カレンダーを同系APIで書けるため同梱コストは小さい（追記F-2）。**完了同期（Obsidian へ [x] が戻る）は、この版では約束しない** —— iOS は常駐できないので結果整合になり（追記G-3）、原稿で「即時反映」を書けない。したがって S4 は 13 のまま（15 にしない）。**カレンダーが間に合わない場合はリリースごと待つ。**割って撃つと2本目が S1=0 になり ⑤（AirPods/Siri・非乗車）と同じ死に方をする。",
+        "2026-09-04【オーナー判断・S7 の3件を作る】受け皿ページ `/routing/`（仮）／Obsidian コミュニティへの同時投下／X・note でのプリテスト、の3つを作る。計画は docs/pr-action-router-launch-plan.md。**S7 は 0 のままにしてある** —— D-1 の尺度は「計画あり=5」だが、PR⑥ は受け皿ページを実際に公開してから 0→5 にしたので、その厳しいほうの読みを採る。昇格条件は launch-plan §5 の3項目（ページが本番で 200 / 投下原稿が確定 / 言い回しが決定）。**S7 が 5 になっても必要条件の当落は変わらない**（76 の時点で既に ○○）ので、**この5点を取りに行って配信を遅らせない。**",
+        "2026-09-04【⚠ 受け皿ページを機能より先に公開しない】PR⑥ の /autopilot/ が S7 を埋められたのは、書いてあることが全部すでに存在していたから。`/routing/` を先に出すと**実装されていない機能の説明が本番サイトに載る**。ページの仕様は先に決めてよいが、**公開は機能が App Store に出た日と同時**（launch-plan §0）。",
+        "2026-09-04【⚠ プリテストで機能を予告しない】テストするのは言い回しであって機能の告知ではない。「近日提供」を書くと、配信日の S1（初出性）を自分で削る —— ニュース面から見て「もう聞いた話」になる。また **プリテストする候補は平語だけ**（おまかせ仕分け／言うだけ仕分け）。追記D-3'' は「話し分け」「声わけ」を造語として挙げているが、docs/story-seeds.md §0 が全媒体で「造語を作らない」と定めており、**媒体側の規律が勝つ**（launch-plan §3-1）。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
+      }
+    },
+    {
+      "id": "pr-2026-notion",
+      "page": "(PR TIMES配信 — Notion Inbox 提供開始。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "乗車した②（Obsidian連携 提供開始・12,332PV）と**同型**の弾 —— 「大きな固有名詞 × 提供開始」。PR⑥ で分かった必要条件（S1>=20 かつ S2>=10）を通す。**Action Router ではなくこちらを先に撃つ理由は2つ**: (a) **実装が公開版に載っている** —— Notion Inbox は 5.8.12 で入り、公開版 5.8.17 が持っている（relay の /v1/notion/config も 2026-09-04 14:31Z から available:true）。Action Router は EventKit が1行も無い。(b) **自社GSCの実測で Notion 735imp に対しリマインダー60・カレンダー3** —— D-1 の S2 尺度はリマインダー/カレンダーを最高帯に置くが、実測は逆を向いている（docs/pr-discover-strategy-2026-09-04.md §4-3）。**ただし尺度そのものは書き換えていない**ので、この弾の S2 は尺度どおり 15 で置く。**訴求で言えないことがある** —— 出荷は「メールに足すコピー」で、「Notionのみ」は Premium（同 §4-3-3）。「メール登録不要」「Notionが保存先になる」は書けない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": null,
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,332 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45）。**⑥の非乗車は D+1 の初期観測で、9/17 の D+14 評価まで確定しない。**転載の床は22-34本/回で乗車とは無関係（追記A-5）。必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する"
+      },
+      "target_metric": "discover_boarding",
+      "decision": null,
+      "evaluated_at": null,
+      "d_score_pre": {
+        "$comment": "**見出しを確定して採り直した（2026-09-24）。61 → 61（据置）。**`docs/pr-discover-strategy-2026-09-04.md` §6-1'' の案A を確定稿にした。**点は動かなかったが、動かなかったことを確かめたのが仕事である** —— PR⑥ が落ちた穴は「見出しが最後に決まり、決まったあとで採点し直さなかった」ことで、その穴は点が動いたかどうかとは関係がない。`headline` 欄に採点対象を書いたので、次のセッションは**何を採点したのか**を読める。**配信直前にもう一度回すこと** —— サブタイトルや本文の確定で見出しが1文字でも動いたら、この採点は配信物に対するものではなくなる。",
+        "scored_at": "2026-09-24",
+        "headline": "新機能「Notion連携」を提供開始、Obsidian連携シンプルメモ―話したメモを\"アプリを開かず\"Notionのデータベースへ",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度。採点対象は上の headline（確定稿）。出荷実態の制約は docs/pr-discover-strategy-2026-09-04.md §4-3-3、書けないことの表は docs/pr-notion-2026-09.md §2。",
+        "S1_novelty": 20,
+        "S2_entity_reach": 15,
+        "S3_concrete_nouns": 8,
+        "S4_transformation": 10,
+        "S5_timing": 3,
+        "S6_news_verb": 5,
+        "S7_launch_design": 0,
+        "total": 61,
+        "total_note": "61。**必要条件（S1>=20 かつ S2>=10）は通る。**合計では Action Router の 76 に負けるが、**合計点は n=6 で分離しなくなった側**であり（⑥85点が非乗車。ただし D+1 の初期観測）、S2 の尺度は実測と逆を向いていることが分かっている軸である。**合計で弾を選ばない。****61 は薄い** —— 乗車2本は 65-71 だった。伸ばせるのは S7（+5・受け皿ページとコミュニティ投下が実在したら）と S3（+7・見出しに生活名詞を入れられたら）。**S4 は出荷形が変わらない限り上がらない。**",
+        "score_rationale": {
+          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。SimpleMemo にとって Notion 結合は初出。**30（カテゴリ完全初出）は取れない** —— Notion へ保存するアプリは多数実在する。「世界初」「唯一」は書かない。",
+          "S2_entity_reach": "15。D-1 の「15=大衆化ツール級」。**20（全国民級）ではない。****尺度を実測で上書きしていない** —— 自社GSC では Notion 735imp でリマインダー60・カレンダー3 を大きく上回るが、それは自社サイトが Obsidian 文脈で作られている偏りを含む数字で、尺度を書き換える根拠には足りない（§4-3 の限界）。**必要条件の 10 は余裕で超える。**見出しにはアプリ名経由で Obsidian も乗る。",
+          "S3_concrete_nouns": "8。確定稿に入る名詞は Notion / Obsidian（アプリ名経由）/ メモ / データベース。**D-1 が S3 で測っているのは生活名詞**（牛乳・歯医者・スクショ）で、それは入っていない。**ここを埋めるために見出しを伸ばさない** —— S3 は乗車を分離せず（乗車 8,10 / 非乗車 0,10,0）、S4 のほうが分離する。2026-09-04 に一度 S3 を満点に寄せて見出しを66字にし、オーナーに却下されている。",
+          "S4_transformation": "10。確定稿のギミックは「**アプリを開かず**」。Before→After は立つが、**出荷が「置き換え」ではなく「追加コピー」**なので「保存先が変わる」という強い変身を書けない（§4-3-3）。乗車は 15,12 / 非乗車は 8,10,5 で、**10 は非乗車側の帯。この弾のいちばん弱い軸。****出荷形が変わらない限り上がらない。**",
+          "S5_timing": "3。平時。Apple の9月窓には当てない（追記E-3・§6-3）。乗車した③も S5=3 だった。",
+          "S6_news_verb": "5。「提供開始」。②が使った動詞そのもの。",
+          "S7_launch_design": "0。**受け皿ページもコミュニティ投下もまだ無い。**docs/pr-action-router-launch-plan.md §5 と同じ厳しい読み（3つ揃った日に初めて5）を適用する。**計画があることにしない。**"
+        },
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": true,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない。**G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。 **2026-09-24: G2 のみ 1 にした。**確定稿「新機能「Notion連携」を提供開始、Obsidian連携シンプルメモ―話したメモを\"アプリを開かず\"Notionのデータベースへ」に、AI語・煽り語・造語・誇大表現のいずれも無い（『世界初』『唯一』『全自動』も書いていない）。**G1 / G3 / G4 は人の作業待ちなので null のまま** —— サムネイル未作成・配信未予約・配信日未定。status を running にするのは、3つとも 0/1 で埋まってから。"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。**D+1 では埋めない。D+14 で埋める。**",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-09-05 起票。**Action Router（pr-2026-action-router・76点）を追い越して先に置いた。**理由は合計点ではなく、(a) 実装が公開版 5.8.17 に載っていること、(b) 自社GSCの実測（Notion 735 vs リマインダー60/カレンダー3）。**Action Router は planned のまま残す** —— EventKit が入れば撃てる弾で、消す理由が無い。",
+        "**②（Obsidian連携 提供開始・12,332PV・乗車）と同型。**「大きな固有名詞 × 提供開始」。見出し候補は docs/pr-discover-strategy-2026-09-04.md §6-1''、配信原稿の骨格は docs/pr-notion-2026-09.md。",
+        "**書けないことが3つある**（§4-3-3・コードで確認）: 「メール登録不要」／「Notionが保存先になる」／「Notionのみ」を無料機能として書くこと。無料の既定は**メール送信＋Notionコピー＋Obsidian追記**で、3つ同時に出る。「Notionのみに保存」は Premium で、ONにすると **Obsidian も止まる**。",
+        "**5.8.17 で初回の宛先設定画面から「Notionに接続」を外している。**新規ユーザーは初回導線で Notion に出会わない（設定画面から接続する）。**「はじめから使える」と書かない。**",
+        "S7 を 0 のままにしてある。**この記録が存在するだけでは 5 にしない** —— docs/pr-action-router-launch-plan.md §5 の3条件（受け皿ページが本番で200・コミュニティ投下の原稿確定・プリテストで言い回し決定）を流用する。**S7 は当落を変えない5点で、初速を変える5点。取りに行って配信を遅らせない。**",
+        "**61 は薄い。**乗車2本は 65-71 だった。撃つかどうかは人が決める —— この記録は「必要条件を通る弾が実在する」ことを台帳に置いただけで、**配信の決定ではない。**status は planned のまま。",
+        "**2026-09-24 見出し確定。**§6-1'' の案A を確定稿にし、その文言で採り直した（61 据置）。案B（NotionとObsidianの両方へ）は無料の既定では正しいが、**「Notionのみに保存」の説明と並べると誤りになる**（ONにすると Obsidian が止まる）ので採らない。案C はギミックが前に出るぶん S4 が +1 だが、②の型（大きな固有名詞 × 提供開始）からは遠い。**②は乗車した唯一の『提供開始』型**なので、そこに寄せた。",
+        "**⚠ 小出しの危険（2026-09-12 の企画と衝突しうる）。**`docs/pr-siri-notion-next-2026-09-12.md` が「Siriと考えて、Notionに残す。」を本命に置いている。**あちらは Siri × Notion の2枚看板**で、S2 も S5（Apple の窓）もこの弾より強い。**この弾を先に撃つと、あちらの見出しから Notion の初出性が落ちる。**追記B・追記F-3 の「小出し厳禁。割ると2本目が⑤と同じ死に方をする」に当たる形である。**ただし待つ側にも費用がある** —— あちらは (a) 日本語 Siri AI が未提供（年内予定・日付未確定）、(b) Siri → App Intent → Notion が**未検証**、の2つに依存していて、同文書自身が「配信日を先に固定しない」と書いている。**どちらを先に撃つかは人が決める。**この弾は planned のままで、撃つ決定はしていない。",
+        "**2026-09-24 オーナー判断: 撃つ。**(1) 実Notion接続での認可・保存の実機確認が **OK**（オーナー確認。私には観測手段が無いので自己申告を採る）。(2) 小出しの論点は**承知のうえでこの弾を先に出す** —— `docs/pr-siri-notion-next-2026-09-12.md`（Siri × Notion）は日本語 Siri AI の提供（年内・日付未確定）と Siri → App Intent → Notion の実証（未検証）に依存しており、待つ側の費用のほうが大きいと判断した。**あちらの見出しから Notion の初出性が落ちることは記録に残す。**",
+        "**⛔ 配信前に残っている3つ（どれも私にはできない）。**(1) **`notion_destination_row` を開ける** —— 本番は 2026-09-24 時点で **false**（`/v1/config` 実測）。`simplememo-api/src/config.ts` 自身が「実 workspace で認可と保存を1回確認 → **最後に**このフラグ」と順序を書いており、実機確認が済んだいまがその番。**開けないと宛先カードにNotionの行が出ないので、リリースを読んで新規インストールした人が初回導線で見つけられない。**`wrangler secret put REMOTE_FLAGS_JSON` → `{\"notion_destination_row\":true}`（新ビルド不要）。(2) ヒーローバナー（`docs/pr-thumbnail-spec.md`）。(3) PR TIMES の配信予約（平日 08:40〜09:00 JST）。原稿は `docs/pr-notion-2026-09.md` §9 に貼って出せる形で置いた。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
       }
     },
     {
@@ -2050,75 +2116,6 @@
       }
     },
     {
-      "id": "title-2026-08-20-home-grammar",
-      "page": "/",
-      "type": "title_test",
-      "hypothesis": "トップページtitleの先頭が「AIタグ自動追加」でVISION §0とPR実測（AI前面回のPV 1/26・8/3=469PV）に逆行している。勝ち文法（話すだけ→宛先に残る）へ是正し、AI言及はdescription後半へ降格（削除はしない）。CTRは動かない見込み（指名検索が主imp源）——判定はブランド検索表示数とAIO表示数で行う。",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": "2026-08-20",
-      "evaluation_at": "2026-11-20",
-      "status": "running",
-      "before": {
-        "title": "Obsidian連携シンプルメモ｜AIタグ自動追加・話すだけでメールとObsidianへ"
-      },
-      "after": {
-        "title": "Obsidian連携シンプルメモ｜話すだけで、メールとObsidianへ残る"
-      },
-      "baseline": {
-        "clicks": 187,
-        "impressions": 1720,
-        "ctr": 0.109,
-        "position": 7.6,
-        "window": "2026-05-18..2026-08-17",
-        "source": "GSC 3ヶ月ページ次元 / （docs/GROWTH_ROI_PLAN_2026-08-20.md §5-2）。併読指標: ブランド検索14クエリ 702imp（05-09..08-08・v3 §2-4）とAIO表示 約7.4千/3M"
-      },
-      "target_metric": "brand_search_impressions",
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [
-        "2026-08-20: 主指標はブランド検索表示数とAIO表示数（v3ノーススター系）。CTRは主判定に使わない——ベースラインCTR 10.9%は指名検索が主imp源で、タイトル文言では動かない見込み（v4 §5-2で事前宣言）。期待する効果は AI引用文言の是正とブランド一貫性で、2〜3ヶ月遅れの指標。",
-        "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
-        "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
-        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。",
-        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
-        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。",
-        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
-        "2026-09-25: 言い過ぎ（根拠のない断定）の修正 #1562（9/24 16:10）・#1564（9/24 16:43）・#1573（9/24 18:43）・#1575（9/24 21:16）・#1591（9/25 10:37）・#1596（9/25 10:55）・#1607（9/25 21:40） が、本文・検索用description・FAQ/JSON-LDの言い回しに重なる（計169ページ。題を変えたのは12ページ：blog/email-yourself-app-comparison、en/blog/best-note-to-self-apps-2026、devlog/outbox-architecture（日英）、en/use-cases/commute・ideas、es・pt-BR・zh-Hantのトップ、guides/draft-autosave、hands-free、en/send-email-to-yourself）。0.4秒への計測条件の付記、「消えない／Never lose／最速／no data retention」などの断定の言い換え、JSON-LDの別名を現行のApp Store名へ、2026-06の一括置換（#359）で壊れた文の修復、AIタグ提供後も残っていた「AI機能なし」の訂正、他社の事実の更新と比較記事2本の作り直し（#1564）。URL・canonical・hreflang・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。公開時刻は各PRのmerge時刻と本番配備記録を参照（growth/data/annotations.json の 2026-09-24 の行）。このページ（/）の題は変えていない。#1573でmeta descriptionの「起動0.4秒」に「（ウォーム起動の実測）」を足し、JSON-LDの別名・説明と本文を言い換え、#1607でリンク文言1か所とAIタグの説明（タグ付けのためにメモを外部サーバーへ送らない）を言い換えた。CTRの前後比較にはdescriptionの変更が併発している。",
-        "2026-09-26: 言い過ぎの修正 第7弾 #1618（9/26 13:19）。速度の数字を data/benchmark.json（2026-08-11、iPhone 16e・ウォーム起動、タップから入力できるまで）に揃えた（比較ページの他社の数字を記録の値か「目安・未計測」に、記録の無い「計測した」文の削除、0.4秒を送信・入力完了の時間とした文の訂正、英語ページの「~1-second launch」を0.4秒（ウォーム起動）へ、en/blog/fastest-note-app-iphone-2026 の3月の表の撤回）。トップページの動画 launch-1s の1枚目「そこまでで約1秒」を「入力できるまで0.4秒」に作り直した。あわせて blog/brain-science-memo（日英）を研究の条件と限界つきに書き直して改題（「脳科学が証明する」→「メモと記憶の研究でわかること」、OG画像も作り直し、他の18ページの関連リンクの文言を追従）、memo-taking-tips（日英）の忘却曲線の数字、英語6ページの meta description に混入していたナビの文字列を直した。URL・canonical・hreflang・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページ（/）の題・meta description・本文は変えていない。動画の VideoObject（name・description・uploadDate）と、poster・動画の URL の ?v=（キャッシュ切り替え）を変えた。",
-        "2026-09-26: 言い過ぎの修正 第10弾 #1623（9/26 14:51）。届く・残ることを保証する言い切り（「確実にメモを送信」「確実に配信」「確実に保存」「guaranteed message delivery」「delivers reliably」ほか）と、「確実にキャプチャ」「メールで確実に残そう」を言い換え、トップページの「メモの『見逃し』がゼロになります」「あなたの思考を確実にキャッチします」「見逃しがなくなります」を「見逃しにくくなります」などに直した（トップの字形の一覧は変えていない）。URL・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページ（/）の題・meta description は変えていない。本文の2か所（コンセプトの段落と「買い物リスト」の説明）の言い切りを言い換えた。",
-        "2026-09-30: / の題は変えていないが、第27弾 #1703（9/30 10:02）で description・料金の欄・FAQ の「ずっと無料」を「利用期間の制限なし」に、第28弾 #1709（9/30 11:05）で機能の欄の見出し「3分で完了する設定」を「すぐに終わる設定」に、/fastest-voice-memo/ への帯の文言「アクションボタンで5秒メモ（おすすめの使い方）」を「アクションボタンで音声メモ（おすすめの使い方）」にした。検索結果の説明文が変わりうるので CTR の前後差に交絡する。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-09-30: `/` の title・meta description は変えていない。第55弾 #1763（9/30 21:35）で本文の AirPods の段落の1文（「「Hey Siri、シンプルメモで残す」だけで、スマホを触らずメールとObsidianへ」→「…と話しかけて本文を答えれば、アプリを開かずにメールやObsidianへ」）とフォントのサブセットを変えた。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-10-01: `/` の title・meta description は変えていない。第77弾 #1823（10/1 11:21）で本文の AirPods のリンクの文言「AirPodsから、スマホを触らず送る」を「AirPodsから、アプリを開かず送る」にした（`scripts/perf/build_home.py --check` 通過、フォントの部分集合は作り直し不要）。英語トップ `/en/` の題は、この実験の注記（英語トップは対象外）と R10 のため変えていない（オーナー判断 #52 のうち英語トップは ③）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-10-01: `/` の title・meta description は変えていない。第84弾 #1841（10/1 21:13）で Siri のバナー画像の中の文言「スマホを触らず、声で残す」を「アプリを開かず、声で残す」にし、代替テキストを画像に合わせた（`scripts/perf/build_home.py` で AVIF・manifest・日本語フォントの部分集合を作り直し、WebP・JPEG の参照に ?v=）。第85弾 #1842（10/1 21:56）で OG 画像を作り直した（「最速の音声自動入力・起動約1秒」→「音声自動入力・起動0.4秒（ウォーム起動の実測）」、AI の説明に条件。新しい名前の JPG）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-10-02: 第96弾 #1898（10/2 22:09）：App Store の公開版が 5.9.12 になった（10/2 10:19 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.11 から 5.9.12 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/` は JSON-LD の softwareVersion だけが変わった（サイトマップの lastmod も変わる）。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-10-03: 第98弾 #1914（10/3 14:17）で `/` の音声入力の欄の小さな表示（チップ）1つを「✓ 追加料金なし・アプリ容量ゼロ」から「✓ 追加料金なし」にした（「ゼロ」の言い切りの残りを直す §7 #60 の続き）。dateModified と内容の履歴から作るサイトマップの lastmod も 10/3 に変わった。title・meta description・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-10-03: `/` の title・meta description は変えていない。第113弾 #1933（10/3 22:08）で本文と JSON-LD の説明の Apple Watch の文から「2026年7月のv3.9で」を外し、Obsidian への追記に条件（iPhone で Obsidian 連携をオンにしていれば）を添え、レビュー紹介の「v3.9で」も外した（オーナー判断 §7 #62 ③）。日本語トップのフォントの部分集合を作り直した（`assets/home-perf/`）。CTA は変えていない。第114〜118弾（#1934〜#1938）は `/` を変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-09-30: 第37弾 #1726（9/30 14:55）：App Store の公開版が 5.9.11 になった（9/30 08:54 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.9 から 5.9.11 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
-        "2026-09-30: `/` の title・meta description は変えていない。第48弾 #1742（9/30 17:27）で数字の帯の1枠（150ms 送信リクエスト時間（API往復）→ ワンタップ／送信）を、第50弾 #1749（9/30 19:22）で本文・FAQ・JSON-LD の AIタグ自動追加の説明に条件（Obsidian 連携と設定のオン、既定オフ）を足し、メールに入るのは件名の短いタイトルだけ、と書き分けた。どちらも日本語トップのフォントの部分集合を作り直した（`assets/home-perf/`）。英語トップ `/en/` の meta description・og/twitter の説明も同じ条件で直したが、英語トップはこの実験の対象外（題は変えていない）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
-      ],
-      "control": {
-        "kind": "pre_post",
-        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
-        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
-        "filled_at": "2026-08-22",
-        "filled_by": "bulk",
-        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
-      },
-      "min_sample": {
-        "metric": "impressions",
-        "threshold": 100,
-        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
-      },
-      "stop_conditions": [
-        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
-        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
-        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
-    },
-    {
       "id": "pr-2026-multi-destination",
       "page": "(PR TIMES配信 — 弾薬庫案2「Multi-Destination一括」。ページ実験ではなくPRリリース型レコード)",
       "type": "pr_release",
@@ -2198,302 +2195,73 @@
       ]
     },
     {
-      "id": "pr-2026-rsi-autopilot",
-      "page": "(PR TIMES配信 — 自律運用/RSI。ページ実験ではなくPRリリース型レコード)",
-      "type": "pr_release",
-      "hypothesis": "プロダクトの新機能ではなく『運営体制』を弾にする初の回。訴求は『AIが計測・提案・実装・検証・配信準備を循環する自律型アプリ運営基盤を構築した』であり、**RSI／再帰的自己改善は名乗らない**（AIモデル自身は改良していないため誤読になる）。革命性は『人がいないこと』ではなく『人間を日常作業のボトルネックから外し、人は目的設定・高リスク判断・例外対応だけを担当する構造にしたこと』に置く。n=5の実績が示すとおり勝敗を分けているのはAI語の有無ではなくS2（見出しの固有名詞）なので、App Store / Obsidian を必ず入れる（現行のアプリ名『Obsidian連携シンプルメモ』自体がObsidianを含む）。D-SCORE>=60が配信条件。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
+      "id": "title-2026-08-20-home-grammar",
+      "page": "/",
+      "type": "title_test",
+      "hypothesis": "トップページtitleの先頭が「AIタグ自動追加」でVISION §0とPR実測（AI前面回のPV 1/26・8/3=469PV）に逆行している。勝ち文法（話すだけ→宛先に残る）へ是正し、AI言及はdescription後半へ降格（削除はしない）。CTRは動かない見込み（指名検索が主imp源）——判定はブランド検索表示数とAIO表示数で行う。",
       "source": {
         "pr": null,
         "commit": null
       },
-      "started_at": "2026-09-03",
-      "evaluation_at": "2026-09-17",
-      "status": "evaluated",
-      "before": null,
-      "after": null,
+      "started_at": "2026-08-20",
+      "evaluation_at": "2026-11-20",
+      "status": "running",
+      "before": {
+        "title": "Obsidian連携シンプルメモ｜AIタグ自動追加・話すだけでメールとObsidianへ"
+      },
+      "after": {
+        "title": "Obsidian連携シンプルメモ｜話すだけで、メールとObsidianへ残る"
+      },
       "baseline": {
-        "clicks": 0,
-        "impressions": 0,
-        "ctr": null,
-        "position": null,
-        "window": "2026-08-25〜2026-08-30（受け皿 /autopilot/ の公開 8/25 から、growth/data/gsc/2026-09-02 の期間末 8/30 まで）",
-        "source": "PR実績ベースライン（n=5）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車3本=21-46・PV 217-1,347。転載の床は20-34本/回。RSIはS2（市場語）とS5（時流）が構造的に低いため、1万PV級は狙わず転載の床を取りにいく弾と位置づける",
-        "pr_pv_boarded_min": 10434,
-        "pr_pv_boarded_max": 12188,
-        "pr_pv_not_boarded_min": 217,
-        "pr_pv_not_boarded_max": 1347,
-        "pr_syndication_floor_min": 20,
-        "pr_syndication_floor_max": 34,
-        "note": "[2026-09-03] running に切り替える時点の基準値。clicks/impressions=0 は growth/data/gsc/2026-09-02（BigQuery 由来・8/10〜8/30・234ページ）に /autopilot/ の行が1つも無いことから置いた（GSC の書き出しは表示1以上のページだけ載るので、行が無い＝表示0）。8/31〜9/2 は書き出しの遅れで未取得。pr_* は source に書いてある n=5 の実績をそのまま数値にしたもので、D+14 の PV・転載をこれと比べる"
+        "clicks": 187,
+        "impressions": 1720,
+        "ctr": 0.109,
+        "position": 7.6,
+        "window": "2026-05-18..2026-08-17",
+        "source": "GSC 3ヶ月ページ次元 / （docs/GROWTH_ROI_PLAN_2026-08-20.md §5-2）。併読指標: ブランド検索14クエリ 702imp（05-09..08-08・v3 §2-4）とAIO表示 約7.4千/3M"
       },
-      "target_metric": "discover_boarding",
-      "decision": "iterate",
-      "evaluated_at": "2026-09-19",
-      "d_score_pre": {
-        "$comment": "**配信物で採り直した（2026-09-24）。85 → 45。**D+14（2026-09-19）で `boarded: false` が確定したので、`docs/pr-discover-strategy-2026-09-04.md` §3-1 が「提案」として置いていた再採点を台帳に入れた。**採点対象を配信された見出しに合わせただけで、尺度（D-1）は1語も変えていない。**実際に配信された見出し: ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化 / 85点までの経緯は rescored_from。",
-        "scored_at": "2026-09-24",
-        "headline": "ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化",
-        "rescored_from": [
-          {
-            "total": 66,
-            "note": "初回。実装前・見出し方針未確定"
-          },
-          {
-            "total": 80,
-            "note": "改訂1。実装3件＋見出し方針の確定"
-          },
-          {
-            "total": 82,
-            "note": "改訂1b。現行アプリ名（Obsidian連携シンプルメモ）の反映でS2 +2"
-          },
-          {
-            "total": 76,
-            "note": "改訂2。外部レビュー反映・RSI取り下げで訴求を1段落とした"
-          },
-          {
-            "total": 80,
-            "note": "改訂3。タイトル確定と実測KPIの投入。S7は未充足のまま"
-          },
-          {
-            "total": 85,
-            "note": "改訂5（2026-08-25）。受け皿ページ /autopilot/ の公開で S7 0→5。**この85点は、配信されなかった見出しに対する採点である。**採点時に想定していた見出しにはアプリ名（Obsidian連携シンプルメモ）が入る前提があり、S2=19 はその前提に乗っていた。配信物にはアプリ名も Obsidian も App Store も無い。"
-          }
-        ],
-        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度。採点対象は**実際に配信された見出し**（PR TIMES 2026-09-03 08:03）。内訳の根拠は docs/pr-discover-strategy-2026-09-04.md §3-1。",
-        "S1_novelty": 25,
-        "S2_entity_reach": 3,
-        "S3_concrete_nouns": 0,
-        "S4_transformation": 5,
-        "S5_timing": 3,
-        "S6_news_verb": 4,
-        "S7_launch_design": 5,
-        "total": 45,
-        "total_note": "45。**合格ライン60を下回る。**つまり配信物は、この模型では最初から「撃たない」側だった。**必要条件も落ちている**（S2 3 < 10）。**この再採点で合計点の合格ラインは破れていない側に戻る** —— 非乗車は ④21・⑤40・⑥45・①46、乗車は ③65・②71 で、60 が 6/6 を分離する。`--backtest` で確かめること。",
-        "score_rationale": {
-          "S1_novelty": "25。据置。運営体制そのものを弾にするのは初。",
-          "S2_entity_reach": "**19 → 3。**D-1「3＝無形・汎用（AI・メモ術）」。配信見出しの名詞は ソロプレナー／ゼロプレナー（造語）／AI／アプリ運営／iPhoneアプリ。**19点の根拠は「アプリ名を書くだけで見出しに Obsidian が入る」で、その前提が配信物で消えている。**D-1 の20点例「iPhone標準」は標準アプリの意で、ここの「iPhoneアプリ」は総称修飾でありニュースの主語ではない。",
-          "S3_concrete_nouns": "**15 → 0。**D-1「15＝生活名詞が見出しに入る（牛乳・歯医者・スクショ）／0＝概念のみ」。配信見出しの具体は「76.4%」という率だけ。**15点の根拠（11チェック・261ファイル・13,195リンク）は本文の固有数値であって、この軸が測っている見出しの生活名詞ではない** —— 軸の定義とずれた根拠で満点が付いていた。",
-          "S4_transformation": "**14 → 5。**D-1「Before→After が1文で言え意外性のギミック＝12〜15／平凡＝5〜8」。**台帳の採点根拠自身が「15にしないのは受益者が読者ではなく自社であるため」と書いていた。**その理由なら14ではなく平凡帯。",
-          "S5_timing": "3。据置。平時。",
-          "S6_news_verb": "4。据置。「本番化」。",
-          "S7_launch_design": "5。据置。受け皿ページ /autopilot/ を配信前に公開済み。"
-        },
-        "gates": {
-          "G1_thumbnail_1200px": true,
-          "G2_no_ai_or_clickbait_words": true,
-          "G3_prtimes_distribution": true,
-          "G4_weekday_morning": true
-        }
-      },
-      "discover_boarding_post": {
-        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5 を目安に二値判定し、外した場合はどのSを読み違えたかをnotesに書いて重みを更新する",
-        "google_referral_ratio": 0.285714,
-        "mobile_ratio": 0.2533,
-        "syndication_count": 23,
-        "pv": 1574,
-        "day1_senders_vs_prev3avg": null,
-        "boarded": false
-      },
+      "target_metric": "brand_search_impressions",
+      "decision": null,
+      "evaluated_at": null,
       "notes": [
-        "2026-08-22: 起案。原稿ドラフト docs/pr-autopilot-2026-09.md / 主張の裏取り台帳 docs/pr-autopilot-2026-09-evidence.md / 段取り docs/pr-autopilot-2026-09-plan.md。",
-        "2026-08-22 改訂1【オーナー判断①: RSI優先】9月上旬の枠はRSIに決定。pr-2026-multi-destination（事前95）は10月以降の単独枠へ回す。引き受けたリスクは、9月上旬がAppleウィークであること（trend-radar-prompt.md は『混雑窓を避ける＝Appleイベント週に無関係弾を出さない』と定めている）。RSIはApple文脈と無関係なのでS5=3のまま撃つ。緩和策としてAppleイベントの前週に置く。",
-        "2026-08-22 改訂1【オーナー判断②: G2の読み替え】G2 `no_ai_or_clickbait_words` を、今回に限り『AI語の禁止』ではなく『S2を満たす固有名詞を見出しに必ず入れ、抽象語だけで組まない』と読み替える。根拠: --backtest が示すのはAI語の有無ではなくS2の差である。乗車した2本（65/71）はどちらも見出しに大きな固有名詞（Apple Watch / Obsidian）を持ち、最下位のPR④（21）は固有名詞ゼロだった。VISION §0 が禁じているのは『プロダクトの売り文句としてAIの賢さを掲げること』であって、運営体制のニュースで実在する道具の名前を出すことではない。**この例外は今回限りの読み替えであり、プロダクト訴求のPRには従来どおりG2を適用する。**",
-        "2026-08-22 改訂1【実装3件】この弾の主張を事実にするために実装した。(a) ⑤AI実費の自己制御: data/autopilot-cost.json + scripts/autopilot-budget.mjs + obsidian-autopilot.yml の予算ゲート + autopilot-report.ts の日報描画。上限到達で主系runが止まる。(b) ③D-SCOREの機械検算: growth/scripts/d-score.mjs（算数のズレ・満点超過・配信中のゲート矛盾・合格未満のrunningをCIが落とす。--backtest つき）。(c) ②独立2モデル監査: simplememo-ios の scripts/qa/ai_triage.sh を2モデル化し、判定が割れたら人間に上げる。",
-        "2026-08-22 改訂1【実測で判明・原稿に反映済み】GitHub Actions の主系（obsidian-autopilot.yml）は全11runのうち**一度も記事を出荷していない**（1〜8 Gateスキップ / 9 apt詰まりでcancelled / 10 allowed_botsでfailure / 11 permission_denials 14で成果物ゼロ）。この12日間の出荷はすべて副系CCR。隠さず『主系・副系の二重化で維持している』と書く — 冗長化が実際に効いた実例なので話として強い。",
-        "配信前チェックリスト: ①見出しは市場語＋固有名詞（『RSI』『再帰的自己改善』『オートパイロット』は社内語。見出し・リードに出さない — 二層言語ルール） ②見出しは短く（乗車した2本は28〜30字） ③『完全自動化』『無人経営』『人間不要』『AIが経営している』『予算に応じて最適配分』と書かない ④『世界初』と書かない ⑤未実測の数値（Zero-decision率・ルーティング精度・CPI）を出さない ⑥台帳 §10『まだ書けない』の10項目を原稿へ戻さない。",
-        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する。",
-        "2026-08-22 改訂1b【アプリ名を現行へ】原稿が旧名『Captio式シンプルメモ』を製品名として使っていた。data/site-constants.json の正は『Obsidian連携シンプルメモ』/『Simple Memo - for Obsidian』で、旧名は alternateName に残る旧称。**この修正はS2を17→19に押し上げる** — アプリ名を書くだけで見出しにObsidianが入り、それは乗車した2本を牽引したエンティティそのもの。逆に旧名のままなら、見出しにApp Storeから削除された別アプリ『Captio』の名が乗っていた。あわせてボイラープレートの『起動 約1秒』を現行の実測値『起動0.4秒』（ウォーム起動・タップ→キーボード表示まで／iPhone 16e・iOS 26.5.2・v5.7.3・2026-08-11実測）へ更新した。",
-        "2026-08-22 改訂2【外部レビュー反映・fix版】外部レビュー「自律型アプリ運営 現状整理と不足項目」を受領。結論に同意し、①〜⑦すべてが『部分実装または未実証』であることを原稿に反映した。主な変更: (a) **RSIの名乗りを取り下げ**。『ガードレール付き自律型アプリ運営基盤』『AIがアプリ改善サイクルを継続実行する仕組み』『再帰的プロダクト改善ループ』のいずれかを使う。表記も『再起的』ではなく『再帰的』だがそもそも対外文言に使わない。 (b) 革命性の置き所を『人がいない』→『人の位置が変わった』へ。担当分担表を本文冒頭に新設。 (c) 避けるべき表現9件を禁止表現へ追加（完全無人／全自動バグ修正／実機テスト完全自動化／法人経営の無人化／AIが売上を自動で伸ばした／RSI実現 ほか）。 (d) ⑧CS ⑨マネタイズ ⑩AgentOps ⑪データ・プライバシー ⑫事業継続性 と各領域の追加項目を docs/autopilot-maturity-backlog.md へ独立させた。 (e) **採点は 82→76 に下げた。**下がるのが正しく、誇張のぶんの点は1次確認で失う点でもある。 **レビューへの訂正2件**（evidence §12-2）: ①『8/21の記事公開は0/1件』は日報側の既知の誤報を読んだもので、実際は PR #521 `/obsidian/plugins/` を 08-21 09:44 JST に出荷済み（誤報の修正は PR #523・同日12:06 JST、日報配信10:00の2時間後）。②『主系失敗後のバックアップ実行の証跡が無い』は AUTOPILOT_LOG の 08-22 エントリに冪等性チェック(a)〜(e)・当日ブランチ占有・出荷まで全手順が残っている。ただし『自動フェイルオーバーではない／機械的に観測できない／切替演習が無い』というレビューの本質的指摘は正しく、plan §3 Tier 2 に積んだ。",
-        "2026-08-22 改訂3【タイトル確定・実測KPI投入・権限表】オーナー確定のタイトルは 「アプリが、自ら育ち続ける。」Obsidian連携シンプルメモ、AIによる\"自律型アプリ運営\"を実現 / サブは「ユーザー行動の計測から機能開発、QA、SEO・ASO、PR制作、配信準備までをAIが一気通貫で循環。公開・予算・契約はリスクに応じて人が承認し、自律性と安全性を両立。」。**採点は76→80。主張は広げていない**（サブタイトルが承認制を明記・「できていないこと」表も据え置き）。**採用条件を3つ課した**（原稿 §1）: ①タイトル単独で流通させずサブとセットで出す ②本文の最初の見出しで仕組みを即座に具体化する ③本文でこの比喩を拡張しない（「アプリが自分で考えて」「AIが自己進化して」は禁止表現へ追加）。理由: このコピーは取り下げたRSIの主張とほぼ同じ形をしており、正確には「アプリ**を**、AIが育て続ける」だから。 あわせて実装2件: (a) **共通実行IDと運転台帳**（data/autopilot-runs.json / scripts/autopilot-runs.mjs）で AI完走率76.9%・変更失敗率23.1%・人間介入率53.8%・出荷日率83.3%・主系0/3副系10/10・無運転日2日を実測として出せるようにした。 (b) **機械可読な権限表**（data/authority-matrix.json / scripts/check-authority.mjs）で13領域の承認境界を定義し、不可逆↔承認制の整合をCIが見る。これで Tier 1 の #2/#4/#5/#6 が埋まった。",
-        "2026-08-22 改訂3b【介入の内訳とレーンF】オーナー指摘「人間介入率53.8%を90%以上（＝自律側）にしたい。コーディング時間を考えるとすでにそうなっているのでは」を受けて実測し直した。**指摘は正しかった。** git実測では同期間の変更行の98.8%（56コミット中55件）がAI著者。現行の人間介入率は「その実行に人が1回でも触ったか」の二値で、YAMLを1行直した日も丸ごと介入ありになる。そこで介入を5種別（artifact/infra/substitute/bootstrap/request）に分けた: **成果物への介入 0件（0%）・基盤の修理4件（30.8%）・代走1件・立ち上げ1件・起票のみ1件。** 出荷10件すべてAIが書いており人は中身に触っていない（成果物のAI自律率100%）。**総計53.8%も併記して出す** — 都合のよい分母に乗り換えるのはgoodhartingそのものなので。 実質的な介入は基盤の修理の一点に集約され、その修理を書いたのも全部AIだった。人がやっていたのは『壊れていることに気づいて直せと言うこと』だけ＝**足りないのは能力ではなく起動条件**。そこで **レーンF（自己修復）** を実装: `scripts/autopilot-selfheal.mjs` が未修理の故障を検知し、その日の最優先を修理に切り替える（レーンA〜Eより先）。**歯止めは文章ではなくCIが実検出する** — 必須CIチェック15本が1本でも消えると落ち、対象ワークフローに actions: write が現れると落ちる（両方とも差し替えデータで実際に検出することを確認済み）。同一 failure_class を3回直しても再発するなら修理をやめて人間に上げる。判定スクリプトは修理を行わない（同じ場所に置くと判定側を都合よく変えられるため）。原稿に節を2つ追加した。**採点は80のまま** — 主張が増えたのではなく、既にあった事実の測り方が正確になっただけなので。",
-        "2026-09-02【配信日の前倒し・バナー監査・ゲート材料】オーナー指示で配信は **2026-09-03（木）朝**（plan §1 の 9/28 は失効）。Appleイベントは 9/9（水）10:00 PT で確定（招待状 8/26）なので、plan §1 の条件式では**前窓**（配信日 ≤ イベント−2日）に入る。運転日数は 8/11〜9/2 の23日で **28日の下限には届かない** —— 原稿は「約30日」を主張していないので配信は妨げないが、S5=3 は据え置き（採点は人）。ヒーローバナー（1536×1024・3:2・2.6MB PNG）を台帳に当てた結果は docs/pr-banner-audit-2026-09-02.md。率（76.4% / 66.8% / 174 / 203）は台帳と一致、**件数3つ（17日間・15件・67種）が古い**（台帳の現在値 23日・19件・81本）。3:2 は PR TIMES / OGP の 1.91:1 に中央トリミングされると**下段の実績4枚と上端の PRESS RELEASE が切れる**ことを描画で確かめた。ゲートは**人が 0/1 で埋める**（本レコードは planned のまま。値は入れていない）: G1 幅1536≥1200 は満たすが比率が要再生成、G2 は 08-22 の読み替えどおり見出しに Obsidian連携シンプルメモ（固有名詞）が在る、G3 PR TIMES、G4 木曜朝。**S6 の材料:** 09-02 差し替え後の見出し「…運営業務のAI実行率76.4%」には**ニュース動詞が無い**（旧案「実現」で 4/5 を付けた）。「…AI実行率76.4%を公開」なら動詞が戻る。**再採点は人。ここでは点を動かしていない。****実スコアは動かさない判断:** 到達可能32件のうち今日この環境で完遂できる行は0件（docs/reaching-85-audit-2026-08-28 と同じ結論。唯一の候補 ⑦契約・請求・納品・支払いの照合は api 側の実装＋本番で1周が要り verification_pending 止まり）。配信前に台帳を動かすとバナーの率が全部ずれるので、配信まで凍結する。",
-        "2026-09-02 夕【見出しに動詞】オーナー承認で見出し末尾に「を公開」を足した（「…運営業務のAI実行率76.4%を公開」・50字）。S6 の再採点は人が行う。あわせて data/distribution-queue.json に配信の種（/autopilot/・1行回答・X投稿文）を登録し、配信当日の同時投下を定期配信の経路が拾える形にした。",
-        "2026-09-02 夜【サブタイトル網羅版・オーナー承認】AIが実行している領域を claim で裏の取れる範囲で列挙（計測・監視／QA／SEO・ASO／PR制作・配信準備／問い合わせの定型回答／レビュー返信／AI実費の上限管理／残高・法定期限・契約の監視）し、末尾を「AGI時代に向けて、運営から経営までAIが日々回し、人は公開・価格・広告・予算・契約の境界だけを持つ会社へ」に。オーナー案の「90%超を目指す」「完全AI自動駆動」「日本初のAIカンパニー」は不採用: 前者2つは本文の「95%は永久に達成できない」（境界を渡さずに届く上限 82.9%）と権限表に矛盾、後者は根拠が出せず G2 の趣旨（AI語・煽り語）にも当たる。タイトルは据え置き（AI前面タイトルの 8/3 が n=5 最下位）。",
-        "2026-09-03 朝【配信・running へ】オーナーから配信確認（08:04 JST の時点で「今朝出した」。正確な配信時刻と PR TIMES の URL は未転記 — この環境から prtimes.jp へは届かないので、オーナーからもらって discover_boarding_post と annotations.json に足す）。評価日 2026-09-17（D+14）。**バナーはオーナー判断 A（v3 をそのまま）**: 大見出し「アプリが、自ら育ち続ける。」／主役の率 76.4%／「81種」の版で、数字は台帳と一致・検査本数だけ2つ古い（83）。ゲートは 0/1 を置いた根拠ごと書く: G1=1（v3 は 1733×907・1.91:1・幅≥1200）。G3=1（PR TIMES）。**G4=1 は字面（木曜の朝）で通したが、時刻は plan §0-1 が置いた 10〜11時ではなく 08:04 JST 以前** — n=5 で 08:32 に出した 8/18 は非乗車で、同じ帯に入る。D+14 で非乗車なら時刻を先に疑う。**G2=1 は「オーナーが見出しを承認して配信した」を人の判定として置いた。ただし 08-22 の読み替え条件（S2 を満たす固有名詞を見出しに必ず入れる）は配信見出し「AIがコードを書く会社から、AIがアプリを運営する会社へ——3か月で『AIが実行する仕事』が12.1%から66.8%に」には無く、AI が主語で3回出る。**n=5 で固有名詞ゼロの PR④ が最下位（21）だった事実と正面から当たるので、D+14 の判定では S2/G2 の読み違えを最初の候補にする。**採点（85）は動かしていない**（再採点は人）。",
-        "2026-09-03【訂正・配信された実物を転記】上の「2026-09-03 朝」の note は、**配信されていない見出しを前提に S2/G2 を論じている。**そこが引いている「AIがコードを書く会社から、AIがアプリを運営する会社へ——3か月で『AIが実行する仕事』が12.1%から66.8%に」は配信稿（docs/pr-autopilot-2026-09-final.md）の見出しで、**実際に出たのは別物**。オーナーが配信時に決めた実物はこれ:\n  見出し: ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化\n  サブ  : AIが毎日の改善施策を選定。13領域203タスクに棚卸しし、実施中174タスクのAI実行率は76.4%、未実装を含む総合自動化率は66.8%。23日間で19件を本番環境へ反映\n  配信  : 2026-09-03 08:03 JST / https://prtimes.jp/main/html/rd/p/000000009.000182412.html\n**転記元は配信画面。**prtimes.jp はこの環境の egress で塞がれていて機械では取りに行けないので、文言そのものは人の転記であって検証済みではない。**数字だけは機械が当てている** —— 76.4 / 66.8 / 13領域203タスク / 実施中174 は scripts/check-pr-claims.mjs の checkNumbers が data/automation-coverage.json に当てて通る（data/pr-claims.json の published も同日に実物へ差し替えた）。\n**D+14（2026-09-17）の判定に効く差はここ。****採点は動かしていない（再採点は人）。**\n  - 旧 note の「**固有名詞ゼロ・AI が主語で3回**」は配信稿の話で、**実物には当たらない。**実物は AI が1回、そして **iPhone**（Apple の製品名＝大きな固有名詞）を含む\n  - ただし **アプリ名（Obsidian連携シンプルメモ）も Obsidian も App Store も見出しに無い。**n=5 で乗車した2本（65/71）を牽引したのはまさにそのエンティティ（Apple Watch / Obsidian）で、08-22 の G2 読み替え条件は「S2 を満たす固有名詞を見出しに必ず入れる」だった。**iPhone がその代わりになるかは、この n=5 からは決まらない。**\n  - したがって D+14 で非乗車なら、**S2 の候補は「固有名詞ゼロ」ではなく「Obsidian を落としたこと」。**時刻（08:03 JST。旧 note の『08:04 以前』が確定した）は引き続き第一候補のまま —— n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で、同じ帯に入る\n  - `growth/data/annotations.json` の 2026-09-03 の label も同じ旧見出しだったので直した。**d-score --backtest は label.split('—')[0] を件名に読む**ので、配信見出しの「——」より前だけが件名になる形（「PR⑥ ソロプレナーから「ゼロプレナー」へ（AI実行率76.4%）」）にしてある\n**discover_boarding_post は空のまま。**PV・参照元比率・デバイス比・転載数は PR TIMES の分析画面にしかなく、この環境からは読めない。**空欄を埋めた形にしない。**",
-        "2026-09-04【D+1 の観測。台帳の discover_boarding_post は空のまま】オーナーが PR TIMES の分析画面を撮影して受領（12:54 / 12:55 JST）。 **参照元サイトは全2件しか無い —— t.co 45 / news.google.com 12（合計 57 UU・UU 1,326 の 4.3%）。** 乗車した2本に必ず立つ google.com と googlequicksearchbox が **1件も無い**（6/1 は 2,378 / 982、7/6 は 1,737 / 626。追記A-5）。 デバイス比は PC 73.86% / スマホ 25.66% / タブレット 0.47% で、判定式の2条件（Google系 > 0.9・スマホ > 0.5）を**両方**割る。 日次も 9/3 約1,150 → 9/4 約200 と減衰していて、乗車形（6/1 公開 → 6/2 に 4,710PV へ**増加**）と向きが逆。 **したがって非乗車が実質確定。ただしこれは D+1 であって D+14 ではないので、discover_boarding_post は空のままにしてある** —— 埋めると pr-evaluation-due.mjs が「転記済み」として 9/17 の評価をスキップする（prtimes-d14-capture.md §0 の二重転記ガードが逆に効く）。 9/17 に Chrome 経由で取り直したものを正とすること。 **事前登録した仮説（上の 2026-09-03 の note）を実測が支持した** —— 「S2 の候補は固有名詞ゼロではなく Obsidian を落としたこと」。 配信見出しを D-1 の尺度で採り直すと **45点**（S1 25 / S2 3 / S3 0 / S4 5 / S5 3 / S6 4 / S7 5）で、非乗車帯（21・40・46）のど真ん中に落ちる。 **採点は動かしていない（再採点は人。9/17 に行う）。**内訳の根拠は docs/pr-discover-strategy-2026-09-04.md §3-1。 同文書で **合格ライン60が足し算だったこと**（S3〜S7 の 55点で S2 の欠落を買える）を穴として特定し、 d-score.mjs に必要条件 **S1>=20 かつ S2>=10** を実装した（配信状態のレコードのみを落とす・n=5 を 5/5 で分離・自己テストで固定）。 いまの台帳の S2=19 では通るので --check は緑のまま。**次の弾から効く。** あわせて「採点日が配信日より前」の警告を --check の出力に足した（PR⑥ が該当。落としてはいない）。 **9/17 に再採点したら、その警告を problems へ移して落とすようにすること。** PR⑤ の PV は台帳の 1,347（8/20・D+2 の読み）ではなく、9/4 時点で **1,613**。乗車判定は動かない。",
-        "2026-09-19【D+14確定評価】PR TIMES管理画面を既存の明示承認済み・読み取り専用経路で再確認。対象はrelease_id=9、表示期間2026-09-03〜2026-09-17。期間合計は1,574PV・転載23・スマートフォン25.33%。参照元サイト一覧は全2件で t.co/ 45、news.google.com/ 18（合計63）だったため、Google系比率は18/63=0.285714。boarded = google_referral_ratio > 0.9 AND mobile_ratio > 0.5 の両条件を満たさず非乗車、decision=iterate。day1_senders_vs_prev3avg はPR TIMESに存在しないためnullを保持。d_score_preはこの取得タスクでは再採点せず既存85と履歴を保持した。D+1の観測値や過去の未完了記録は成功へ書き換えず履歴として残す。",
-        "**2026-09-24 再採点。85 → 45。**D+14（09-19）で `boarded: false`（google_referral_ratio 0.286 / mobile_ratio 0.253 / PV 1,574）が確定したので、§3-1 が提案として置いていた採点を台帳に入れた。**尺度は変えていない。採点対象を配信物に合わせただけ。**帰結が2つある: (1) この弾は模型上「撃たない」側だった（45 < 60、かつ S2 3 < 10 で必要条件も落ちる）。(2) **「合格ライン60は n=6 で破れた」は取り消し** —— 破っていたのは85点のほうで、それは配信されていない見出しの点だった。60 は 6/6 を分離する。"
+        "2026-08-20: 主指標はブランド検索表示数とAIO表示数（v3ノーススター系）。CTRは主判定に使わない——ベースラインCTR 10.9%は指名検索が主imp源で、タイトル文言では動かない見込み（v4 §5-2で事前宣言）。期待する効果は AI引用文言の是正とブランド一貫性で、2〜3ヶ月遅れの指標。",
+        "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
+        "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
+        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
+        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。",
+        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
+        "2026-09-25: 言い過ぎ（根拠のない断定）の修正 #1562（9/24 16:10）・#1564（9/24 16:43）・#1573（9/24 18:43）・#1575（9/24 21:16）・#1591（9/25 10:37）・#1596（9/25 10:55）・#1607（9/25 21:40） が、本文・検索用description・FAQ/JSON-LDの言い回しに重なる（計169ページ。題を変えたのは12ページ：blog/email-yourself-app-comparison、en/blog/best-note-to-self-apps-2026、devlog/outbox-architecture（日英）、en/use-cases/commute・ideas、es・pt-BR・zh-Hantのトップ、guides/draft-autosave、hands-free、en/send-email-to-yourself）。0.4秒への計測条件の付記、「消えない／Never lose／最速／no data retention」などの断定の言い換え、JSON-LDの別名を現行のApp Store名へ、2026-06の一括置換（#359）で壊れた文の修復、AIタグ提供後も残っていた「AI機能なし」の訂正、他社の事実の更新と比較記事2本の作り直し（#1564）。URL・canonical・hreflang・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。公開時刻は各PRのmerge時刻と本番配備記録を参照（growth/data/annotations.json の 2026-09-24 の行）。このページ（/）の題は変えていない。#1573でmeta descriptionの「起動0.4秒」に「（ウォーム起動の実測）」を足し、JSON-LDの別名・説明と本文を言い換え、#1607でリンク文言1か所とAIタグの説明（タグ付けのためにメモを外部サーバーへ送らない）を言い換えた。CTRの前後比較にはdescriptionの変更が併発している。",
+        "2026-09-26: 言い過ぎの修正 第7弾 #1618（9/26 13:19）。速度の数字を data/benchmark.json（2026-08-11、iPhone 16e・ウォーム起動、タップから入力できるまで）に揃えた（比較ページの他社の数字を記録の値か「目安・未計測」に、記録の無い「計測した」文の削除、0.4秒を送信・入力完了の時間とした文の訂正、英語ページの「~1-second launch」を0.4秒（ウォーム起動）へ、en/blog/fastest-note-app-iphone-2026 の3月の表の撤回）。トップページの動画 launch-1s の1枚目「そこまでで約1秒」を「入力できるまで0.4秒」に作り直した。あわせて blog/brain-science-memo（日英）を研究の条件と限界つきに書き直して改題（「脳科学が証明する」→「メモと記憶の研究でわかること」、OG画像も作り直し、他の18ページの関連リンクの文言を追従）、memo-taking-tips（日英）の忘却曲線の数字、英語6ページの meta description に混入していたナビの文字列を直した。URL・canonical・hreflang・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページ（/）の題・meta description・本文は変えていない。動画の VideoObject（name・description・uploadDate）と、poster・動画の URL の ?v=（キャッシュ切り替え）を変えた。",
+        "2026-09-26: 言い過ぎの修正 第10弾 #1623（9/26 14:51）。届く・残ることを保証する言い切り（「確実にメモを送信」「確実に配信」「確実に保存」「guaranteed message delivery」「delivers reliably」ほか）と、「確実にキャプチャ」「メールで確実に残そう」を言い換え、トップページの「メモの『見逃し』がゼロになります」「あなたの思考を確実にキャッチします」「見逃しがなくなります」を「見逃しにくくなります」などに直した（トップの字形の一覧は変えていない）。URL・CTAの宛先と計測属性は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。このページ（/）の題・meta description は変えていない。本文の2か所（コンセプトの段落と「買い物リスト」の説明）の言い切りを言い換えた。",
+        "2026-09-30: / の題は変えていないが、第27弾 #1703（9/30 10:02）で description・料金の欄・FAQ の「ずっと無料」を「利用期間の制限なし」に、第28弾 #1709（9/30 11:05）で機能の欄の見出し「3分で完了する設定」を「すぐに終わる設定」に、/fastest-voice-memo/ への帯の文言「アクションボタンで5秒メモ（おすすめの使い方）」を「アクションボタンで音声メモ（おすすめの使い方）」にした。検索結果の説明文が変わりうるので CTR の前後差に交絡する。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-09-30: `/` の title・meta description は変えていない。第55弾 #1763（9/30 21:35）で本文の AirPods の段落の1文（「「Hey Siri、シンプルメモで残す」だけで、スマホを触らずメールとObsidianへ」→「…と話しかけて本文を答えれば、アプリを開かずにメールやObsidianへ」）とフォントのサブセットを変えた。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-10-01: `/` の title・meta description は変えていない。第77弾 #1823（10/1 11:21）で本文の AirPods のリンクの文言「AirPodsから、スマホを触らず送る」を「AirPodsから、アプリを開かず送る」にした（`scripts/perf/build_home.py --check` 通過、フォントの部分集合は作り直し不要）。英語トップ `/en/` の題は、この実験の注記（英語トップは対象外）と R10 のため変えていない（オーナー判断 #52 のうち英語トップは ③）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-10-01: `/` の title・meta description は変えていない。第84弾 #1841（10/1 21:13）で Siri のバナー画像の中の文言「スマホを触らず、声で残す」を「アプリを開かず、声で残す」にし、代替テキストを画像に合わせた（`scripts/perf/build_home.py` で AVIF・manifest・日本語フォントの部分集合を作り直し、WebP・JPEG の参照に ?v=）。第85弾 #1842（10/1 21:56）で OG 画像を作り直した（「最速の音声自動入力・起動約1秒」→「音声自動入力・起動0.4秒（ウォーム起動の実測）」、AI の説明に条件。新しい名前の JPG）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-10-02: 第96弾 #1898（10/2 22:09）：App Store の公開版が 5.9.12 になった（10/2 10:19 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.11 から 5.9.12 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/` は JSON-LD の softwareVersion だけが変わった（サイトマップの lastmod も変わる）。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-10-03: 第98弾 #1914（10/3 14:17）で `/` の音声入力の欄の小さな表示（チップ）1つを「✓ 追加料金なし・アプリ容量ゼロ」から「✓ 追加料金なし」にした（「ゼロ」の言い切りの残りを直す §7 #60 の続き）。dateModified と内容の履歴から作るサイトマップの lastmod も 10/3 に変わった。title・meta description・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-10-03: `/` の title・meta description は変えていない。第113弾 #1933（10/3 22:08）で本文と JSON-LD の説明の Apple Watch の文から「2026年7月のv3.9で」を外し、Obsidian への追記に条件（iPhone で Obsidian 連携をオンにしていれば）を添え、レビュー紹介の「v3.9で」も外した（オーナー判断 §7 #62 ③）。日本語トップのフォントの部分集合を作り直した（`assets/home-perf/`）。CTA は変えていない。第114〜118弾（#1934〜#1938）は `/` を変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-09-30: 第37弾 #1726（9/30 14:55）：App Store の公開版が 5.9.11 になった（9/30 08:54 JST 公開、iTunes Lookup の日本のストア）ので、data/site-constants.json の appVersion を 5.9.9 から 5.9.11 にし、sync_constants.js で JSON-LD（SoftwareApplication）の softwareVersion を26ページで更新した。`/` は JSON-LD の softwareVersion だけが変わった。title・description・表示の本文・CTA は変えていない。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。",
+        "2026-09-30: `/` の title・meta description は変えていない。第48弾 #1742（9/30 17:27）で数字の帯の1枠（150ms 送信リクエスト時間（API往復）→ ワンタップ／送信）を、第50弾 #1749（9/30 19:22）で本文・FAQ・JSON-LD の AIタグ自動追加の説明に条件（Obsidian 連携と設定のオン、既定オフ）を足し、メールに入るのは件名の短いタイトルだけ、と書き分けた。どちらも日本語トップのフォントの部分集合を作り直した（`assets/home-perf/`）。英語トップ `/en/` の meta description・og/twitter の説明も同じ条件で直したが、英語トップはこの実験の対象外（題は変えていない）。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。前後の差をこの修正だけ、または既存施策だけの効果と断定しない。"
       ],
       "control": {
-        "kind": "none",
-        "note": "**対照群が置けない。**同じ日に同じ内容を配信しない版は作れない。n=5のバックテストで代用している",
-        "confounders": null,
+        "kind": "pre_post",
+        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
         "filled_at": "2026-08-22",
         "filled_by": "bulk",
         "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
       },
       "min_sample": {
-        "metric": "pageviews",
-        "threshold": 1,
-        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
       },
       "stop_conditions": [
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
-    },
-    {
-      "id": "pr-2026-action-router",
-      "page": "(PR TIMES配信 — 追記G 第1弾「言ったら、終わる。」。ページ実験ではなくPRリリース型レコード)",
-      "type": "pr_release",
-      "hypothesis": "PR⑥（D-SCORE 85・非乗車）で分かった必要条件 —— S1>=20 かつ S2>=10 の AND —— を、合計点ではなく必要条件のほうで通す初の弾。訴求は「『明日、牛乳』はリマインダーへ。『金曜15時、歯医者』はカレンダーへ」で、見出しに **リマインダー / カレンダー（D-1 の最高帯「全国民級」）とアプリ名（Obsidian を含む）** を必ず入れる。乗車した2本（②Obsidian連携 提供開始 / ③Apple Watch初対応）と同じ「大きな固有名詞 × 初対応・提供開始」の形に戻す。**リマインダーとカレンダーは1本に束ねる**（追記B・追記F-3 の小出し厳禁。割ると2本目が⑤と同じ死に方をする）。**時流（S5）は買わない** —— 追記E-3 が「時間減衰リスクあり＝待たずに撃つ」と名指ししている弾であり、乗車した③は S5=3 だった。",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": null,
-      "evaluation_at": null,
-      "status": "planned",
-      "before": null,
-      "after": null,
-      "baseline": {
-        "clicks": null,
-        "impressions": null,
-        "ctr": null,
-        "position": null,
-        "window": null,
-        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45・docs/pr-discover-strategy-2026-09-04.md §3-1）。転載の床は22-34本/回で乗車とは無関係（追記A-5）。**合計点ではなく必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する**"
-      },
-      "target_metric": "discover_boarding",
-      "decision": null,
-      "evaluated_at": null,
-      "d_score_pre": {
-        "$comment": "配信前採点（初回・2026-09-04）。**追記F の 93〜95 ではなく 76 で置いている。**下げたのは訴求を弱めたからではなく、(a) 追記G-1 が S1 の完全初出30を既に否定していること、(b) S7 は計画が実在してから付ける点であること、の2つによる。**見出し確定稿で必ず再採点すること**（PR⑥ はこれをやらずに、配信されていない見出しの85点で撃った）。",
-        "scored_at": "2026-09-04",
-        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度／追記G-1 の競合裏取り／docs/pr-discover-strategy-2026-09-04.md の必要条件。較正は growth/scripts/d-score.mjs --backtest で再現できる",
-        "S1_novelty": 20,
-        "S2_entity_reach": 20,
-        "S3_concrete_nouns": 15,
-        "S4_transformation": 13,
-        "S5_timing": 3,
-        "S6_news_verb": 5,
-        "S7_launch_design": 0,
-        "total": 76,
-        "total_note": "76。**必要条件（S1>=20 かつ S2>=10）は余裕で通る**——ここが PR⑥ の85点との決定的な差で、あちらは配信物では S2 が 3 だった。合計点だけ見れば 85 > 76 だが、n=5 を分離するのは合計ではなく積のほう。S7 を埋めれば 81、Apple/iOS の窓に当たれば 86〜89 まで伸びる余地がある。",
-        "score_rationale": {
-          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。**30（カテゴリ完全初出）は取れない** —— 追記G-1 が競合を裏取り済みで、Voice Inbox for Obsidian（音声→Obsidian＋カレンダー）と Remindian（Obsidian Tasks↔Apple Reminders 双方向）が実在する。差別化の芯は「モバイル単体（Mac常駐なし・プラグインなし）で Capture→判定→Apple実行系→Obsidian へ完了が戻る」の一本化で、これは日本語ニュース面では未発見だが、**「世界初」は書けない**（check-pr-facts の overclaim 規則が落とす）。",
-          "S2_entity_reach": "20。D-1 の「20=全国民級（LINE・iPhone標準・**カレンダー・リマインダー**）」に、尺度が挙げている例そのものが入る。加えてアプリ名「Obsidian連携シンプルメモ」で見出しに Obsidian も乗る。**PR⑥ が落としたのはここで、配信見出しには固有名詞が1つも無かった。**",
-          "S3_concrete_nouns": "15。D-1 の「15=生活名詞が見出しに入る（**牛乳・歯医者**・スクショ）」に、尺度が挙げている例そのものが入る。**PR⑥ の15点は本文の固有数値（11チェック・261ファイル）に対して付いていて、この軸が測っている見出しの生活名詞ではなかった。**",
-          "S4_transformation": "13。「言ったら、鳴る」で Before→After が1文になり、ギミック（アプリを開かない・プラグイン不要・Mac常駐不要）もある。**15にしないのは、完了同期が結果整合だから** —— iOS は常駐できないのでアプリ起動時/BG更新時の突合になる（追記G-3）。原稿で「即時反映」を約束できない以上、変身の一文も一段割り引く。",
-          "S5_timing": "3。平時。**追記E-3 が「時間減衰リスクあり → 待たずに撃つ。S5は捨てる」とこの弾を名指ししている。**乗車した③（7/6 Apple Watch初対応）も S5=3 で乗っており、時流は増幅器であって主因ではない（追記E-1）。窓に間に合わせるために弾の質を落とさない（追記E-4）。",
-          "S6_news_verb": "5。「提供開始」。D-1 の 5点帯そのもの。",
-          "S7_launch_design": "0。**まだ計画が無いので 0。**D-1 は「コミュニティ同時投下＋記事化媒体への情報提供＋X連携の**計画あり**=5」で、計画の実在が条件。PR⑥ は受け皿ページ /autopilot/ を公開して 0→5 にした。**この5点はいちばん安く買える** —— 受け皿ページ＋Obsidianコミュニティ投下＋X で埋まる。"
-        },
-        "gates": {
-          "G1_thumbnail_1200px": null,
-          "G2_no_ai_or_clickbait_words": null,
-          "G3_prtimes_distribution": null,
-          "G4_weekday_morning": null,
-          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない**（PR⑥ は「AI語を許す代わりに S2 の固有名詞を必ず入れる」と交換したが、配信物では担保のほうだけが落ちた）。G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。"
-        }
-      },
-      "discover_boarding_post": {
-        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。",
-        "google_referral_ratio": null,
-        "mobile_ratio": null,
-        "syndication_count": null,
-        "pv": null,
-        "day1_senders_vs_prev3avg": null,
-        "boarded": null
-      },
-      "notes": [
-        "2026-09-04【起案】PR⑥ の D+1 実測（非乗車が実質確定）を受けて起案した。**この弾は EventKit を必要とするが、simplememo-ios には import EventKit が1行も無い**（grep 実測・VISION §12 も「Destination は実質1つで、選択も分岐も無い」と書いている）。したがって **status は planned のままで、実装が揃うまで配信しない。**原稿の骨格は docs/pr-action-router-2026-10.md。",
-        "2026-09-04【小出し厳禁】リマインダーとカレンダーを別リリースに割らない（追記B・追記F-3）。割ると2本目が「同じ話の2回目」になり、S1=0 で ⑤（AirPods/Siri・非乗車）と同じ死に方をする。**カレンダーが間に合わないなら、リリースごと待つ。**",
-        "2026-09-04【市場語条項】見出し・ストア・サイトに社内語（Multi-Destination / Capture OS / Routing）を出さない（追記D-3 の二層言語ルール）。出せば S2 3・S3 0 に落ちる。市場語は「場面名詞＋話すだけ＋行き先アプリ名」。",
-        "2026-09-04【VISION 整合】Routing の Level を本文に明示する（VISION §4.2）。**Level 1（提案）→ Level 2（ワンタップ）を作る。Level 3（Silent）は作らない。**「全自動」と書かない（check-pr-facts の overclaim 規則が落とす）。ユーザーの修正は Correction Learning の受け皿へ記録する設計にする（VISION §5.1・§13 の問5）。",
-        "2026-09-04【オーナー判断・実装範囲を確定】**リマインダーとカレンダーを同梱する。**追記B・追記F-3 の「小出し厳禁」を守る形。EventKit はリマインダー/カレンダーを同系APIで書けるため同梱コストは小さい（追記F-2）。**完了同期（Obsidian へ [x] が戻る）は、この版では約束しない** —— iOS は常駐できないので結果整合になり（追記G-3）、原稿で「即時反映」を書けない。したがって S4 は 13 のまま（15 にしない）。**カレンダーが間に合わない場合はリリースごと待つ。**割って撃つと2本目が S1=0 になり ⑤（AirPods/Siri・非乗車）と同じ死に方をする。",
-        "2026-09-04【オーナー判断・S7 の3件を作る】受け皿ページ `/routing/`（仮）／Obsidian コミュニティへの同時投下／X・note でのプリテスト、の3つを作る。計画は docs/pr-action-router-launch-plan.md。**S7 は 0 のままにしてある** —— D-1 の尺度は「計画あり=5」だが、PR⑥ は受け皿ページを実際に公開してから 0→5 にしたので、その厳しいほうの読みを採る。昇格条件は launch-plan §5 の3項目（ページが本番で 200 / 投下原稿が確定 / 言い回しが決定）。**S7 が 5 になっても必要条件の当落は変わらない**（76 の時点で既に ○○）ので、**この5点を取りに行って配信を遅らせない。**",
-        "2026-09-04【⚠ 受け皿ページを機能より先に公開しない】PR⑥ の /autopilot/ が S7 を埋められたのは、書いてあることが全部すでに存在していたから。`/routing/` を先に出すと**実装されていない機能の説明が本番サイトに載る**。ページの仕様は先に決めてよいが、**公開は機能が App Store に出た日と同時**（launch-plan §0）。",
-        "2026-09-04【⚠ プリテストで機能を予告しない】テストするのは言い回しであって機能の告知ではない。「近日提供」を書くと、配信日の S1（初出性）を自分で削る —— ニュース面から見て「もう聞いた話」になる。また **プリテストする候補は平語だけ**（おまかせ仕分け／言うだけ仕分け）。追記D-3'' は「話し分け」「声わけ」を造語として挙げているが、docs/story-seeds.md §0 が全媒体で「造語を作らない」と定めており、**媒体側の規律が勝つ**（launch-plan §3-1）。"
-      ],
-      "control": {
-        "kind": "none",
-        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
-      }
-    },
-    {
-      "id": "pr-2026-notion",
-      "page": "(PR TIMES配信 — Notion Inbox 提供開始。ページ実験ではなくPRリリース型レコード)",
-      "type": "pr_release",
-      "hypothesis": "乗車した②（Obsidian連携 提供開始・12,332PV）と**同型**の弾 —— 「大きな固有名詞 × 提供開始」。PR⑥ で分かった必要条件（S1>=20 かつ S2>=10）を通す。**Action Router ではなくこちらを先に撃つ理由は2つ**: (a) **実装が公開版に載っている** —— Notion Inbox は 5.8.12 で入り、公開版 5.8.17 が持っている（relay の /v1/notion/config も 2026-09-04 14:31Z から available:true）。Action Router は EventKit が1行も無い。(b) **自社GSCの実測で Notion 735imp に対しリマインダー60・カレンダー3** —— D-1 の S2 尺度はリマインダー/カレンダーを最高帯に置くが、実測は逆を向いている（docs/pr-discover-strategy-2026-09-04.md §4-3）。**ただし尺度そのものは書き換えていない**ので、この弾の S2 は尺度どおり 15 で置く。**訴求で言えないことがある** —— 出荷は「メールに足すコピー」で、「Notionのみ」は Premium（同 §4-3-3）。「メール登録不要」「Notionが保存先になる」は書けない。",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": null,
-      "evaluation_at": null,
-      "status": "planned",
-      "before": null,
-      "after": null,
-      "baseline": {
-        "clicks": null,
-        "impressions": null,
-        "ctr": null,
-        "position": null,
-        "window": null,
-        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,332 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45）。**⑥の非乗車は D+1 の初期観測で、9/17 の D+14 評価まで確定しない。**転載の床は22-34本/回で乗車とは無関係（追記A-5）。必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する"
-      },
-      "target_metric": "discover_boarding",
-      "decision": null,
-      "evaluated_at": null,
-      "d_score_pre": {
-        "$comment": "**見出しを確定して採り直した（2026-09-24）。61 → 61（据置）。**`docs/pr-discover-strategy-2026-09-04.md` §6-1'' の案A を確定稿にした。**点は動かなかったが、動かなかったことを確かめたのが仕事である** —— PR⑥ が落ちた穴は「見出しが最後に決まり、決まったあとで採点し直さなかった」ことで、その穴は点が動いたかどうかとは関係がない。`headline` 欄に採点対象を書いたので、次のセッションは**何を採点したのか**を読める。**配信直前にもう一度回すこと** —— サブタイトルや本文の確定で見出しが1文字でも動いたら、この採点は配信物に対するものではなくなる。",
-        "scored_at": "2026-09-24",
-        "headline": "新機能「Notion連携」を提供開始、Obsidian連携シンプルメモ―話したメモを\"アプリを開かず\"Notionのデータベースへ",
-        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度。採点対象は上の headline（確定稿）。出荷実態の制約は docs/pr-discover-strategy-2026-09-04.md §4-3-3、書けないことの表は docs/pr-notion-2026-09.md §2。",
-        "S1_novelty": 20,
-        "S2_entity_reach": 15,
-        "S3_concrete_nouns": 8,
-        "S4_transformation": 10,
-        "S5_timing": 3,
-        "S6_news_verb": 5,
-        "S7_launch_design": 0,
-        "total": 61,
-        "total_note": "61。**必要条件（S1>=20 かつ S2>=10）は通る。**合計では Action Router の 76 に負けるが、**合計点は n=6 で分離しなくなった側**であり（⑥85点が非乗車。ただし D+1 の初期観測）、S2 の尺度は実測と逆を向いていることが分かっている軸である。**合計で弾を選ばない。****61 は薄い** —— 乗車2本は 65-71 だった。伸ばせるのは S7（+5・受け皿ページとコミュニティ投下が実在したら）と S3（+7・見出しに生活名詞を入れられたら）。**S4 は出荷形が変わらない限り上がらない。**",
-        "score_rationale": {
-          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。SimpleMemo にとって Notion 結合は初出。**30（カテゴリ完全初出）は取れない** —— Notion へ保存するアプリは多数実在する。「世界初」「唯一」は書かない。",
-          "S2_entity_reach": "15。D-1 の「15=大衆化ツール級」。**20（全国民級）ではない。****尺度を実測で上書きしていない** —— 自社GSC では Notion 735imp でリマインダー60・カレンダー3 を大きく上回るが、それは自社サイトが Obsidian 文脈で作られている偏りを含む数字で、尺度を書き換える根拠には足りない（§4-3 の限界）。**必要条件の 10 は余裕で超える。**見出しにはアプリ名経由で Obsidian も乗る。",
-          "S3_concrete_nouns": "8。確定稿に入る名詞は Notion / Obsidian（アプリ名経由）/ メモ / データベース。**D-1 が S3 で測っているのは生活名詞**（牛乳・歯医者・スクショ）で、それは入っていない。**ここを埋めるために見出しを伸ばさない** —— S3 は乗車を分離せず（乗車 8,10 / 非乗車 0,10,0）、S4 のほうが分離する。2026-09-04 に一度 S3 を満点に寄せて見出しを66字にし、オーナーに却下されている。",
-          "S4_transformation": "10。確定稿のギミックは「**アプリを開かず**」。Before→After は立つが、**出荷が「置き換え」ではなく「追加コピー」**なので「保存先が変わる」という強い変身を書けない（§4-3-3）。乗車は 15,12 / 非乗車は 8,10,5 で、**10 は非乗車側の帯。この弾のいちばん弱い軸。****出荷形が変わらない限り上がらない。**",
-          "S5_timing": "3。平時。Apple の9月窓には当てない（追記E-3・§6-3）。乗車した③も S5=3 だった。",
-          "S6_news_verb": "5。「提供開始」。②が使った動詞そのもの。",
-          "S7_launch_design": "0。**受け皿ページもコミュニティ投下もまだ無い。**docs/pr-action-router-launch-plan.md §5 と同じ厳しい読み（3つ揃った日に初めて5）を適用する。**計画があることにしない。**"
-        },
-        "gates": {
-          "G1_thumbnail_1200px": null,
-          "G2_no_ai_or_clickbait_words": true,
-          "G3_prtimes_distribution": null,
-          "G4_weekday_morning": null,
-          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない。**G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。 **2026-09-24: G2 のみ 1 にした。**確定稿「新機能「Notion連携」を提供開始、Obsidian連携シンプルメモ―話したメモを\"アプリを開かず\"Notionのデータベースへ」に、AI語・煽り語・造語・誇大表現のいずれも無い（『世界初』『唯一』『全自動』も書いていない）。**G1 / G3 / G4 は人の作業待ちなので null のまま** —— サムネイル未作成・配信未予約・配信日未定。status を running にするのは、3つとも 0/1 で埋まってから。"
-        }
-      },
-      "discover_boarding_post": {
-        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。**D+1 では埋めない。D+14 で埋める。**",
-        "google_referral_ratio": null,
-        "mobile_ratio": null,
-        "syndication_count": null,
-        "pv": null,
-        "day1_senders_vs_prev3avg": null,
-        "boarded": null
-      },
-      "notes": [
-        "2026-09-05 起票。**Action Router（pr-2026-action-router・76点）を追い越して先に置いた。**理由は合計点ではなく、(a) 実装が公開版 5.8.17 に載っていること、(b) 自社GSCの実測（Notion 735 vs リマインダー60/カレンダー3）。**Action Router は planned のまま残す** —— EventKit が入れば撃てる弾で、消す理由が無い。",
-        "**②（Obsidian連携 提供開始・12,332PV・乗車）と同型。**「大きな固有名詞 × 提供開始」。見出し候補は docs/pr-discover-strategy-2026-09-04.md §6-1''、配信原稿の骨格は docs/pr-notion-2026-09.md。",
-        "**書けないことが3つある**（§4-3-3・コードで確認）: 「メール登録不要」／「Notionが保存先になる」／「Notionのみ」を無料機能として書くこと。無料の既定は**メール送信＋Notionコピー＋Obsidian追記**で、3つ同時に出る。「Notionのみに保存」は Premium で、ONにすると **Obsidian も止まる**。",
-        "**5.8.17 で初回の宛先設定画面から「Notionに接続」を外している。**新規ユーザーは初回導線で Notion に出会わない（設定画面から接続する）。**「はじめから使える」と書かない。**",
-        "S7 を 0 のままにしてある。**この記録が存在するだけでは 5 にしない** —— docs/pr-action-router-launch-plan.md §5 の3条件（受け皿ページが本番で200・コミュニティ投下の原稿確定・プリテストで言い回し決定）を流用する。**S7 は当落を変えない5点で、初速を変える5点。取りに行って配信を遅らせない。**",
-        "**61 は薄い。**乗車2本は 65-71 だった。撃つかどうかは人が決める —— この記録は「必要条件を通る弾が実在する」ことを台帳に置いただけで、**配信の決定ではない。**status は planned のまま。",
-        "**2026-09-24 見出し確定。**§6-1'' の案A を確定稿にし、その文言で採り直した（61 据置）。案B（NotionとObsidianの両方へ）は無料の既定では正しいが、**「Notionのみに保存」の説明と並べると誤りになる**（ONにすると Obsidian が止まる）ので採らない。案C はギミックが前に出るぶん S4 が +1 だが、②の型（大きな固有名詞 × 提供開始）からは遠い。**②は乗車した唯一の『提供開始』型**なので、そこに寄せた。",
-        "**⚠ 小出しの危険（2026-09-12 の企画と衝突しうる）。**`docs/pr-siri-notion-next-2026-09-12.md` が「Siriと考えて、Notionに残す。」を本命に置いている。**あちらは Siri × Notion の2枚看板**で、S2 も S5（Apple の窓）もこの弾より強い。**この弾を先に撃つと、あちらの見出しから Notion の初出性が落ちる。**追記B・追記F-3 の「小出し厳禁。割ると2本目が⑤と同じ死に方をする」に当たる形である。**ただし待つ側にも費用がある** —— あちらは (a) 日本語 Siri AI が未提供（年内予定・日付未確定）、(b) Siri → App Intent → Notion が**未検証**、の2つに依存していて、同文書自身が「配信日を先に固定しない」と書いている。**どちらを先に撃つかは人が決める。**この弾は planned のままで、撃つ決定はしていない。",
-        "**2026-09-24 オーナー判断: 撃つ。**(1) 実Notion接続での認可・保存の実機確認が **OK**（オーナー確認。私には観測手段が無いので自己申告を採る）。(2) 小出しの論点は**承知のうえでこの弾を先に出す** —— `docs/pr-siri-notion-next-2026-09-12.md`（Siri × Notion）は日本語 Siri AI の提供（年内・日付未確定）と Siri → App Intent → Notion の実証（未検証）に依存しており、待つ側の費用のほうが大きいと判断した。**あちらの見出しから Notion の初出性が落ちることは記録に残す。**",
-        "**⛔ 配信前に残っている3つ（どれも私にはできない）。**(1) **`notion_destination_row` を開ける** —— 本番は 2026-09-24 時点で **false**（`/v1/config` 実測）。`simplememo-api/src/config.ts` 自身が「実 workspace で認可と保存を1回確認 → **最後に**このフラグ」と順序を書いており、実機確認が済んだいまがその番。**開けないと宛先カードにNotionの行が出ないので、リリースを読んで新規インストールした人が初回導線で見つけられない。**`wrangler secret put REMOTE_FLAGS_JSON` → `{\"notion_destination_row\":true}`（新ビルド不要）。(2) ヒーローバナー（`docs/pr-thumbnail-spec.md`）。(3) PR TIMES の配信予約（平日 08:40〜09:00 JST）。原稿は `docs/pr-notion-2026-09.md` §9 に貼って出せる形で置いた。"
-      ],
-      "control": {
-        "kind": "none",
-        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
-      }
     },
     {
       "id": "link-2026-08-28-feed-strongest-page",
@@ -2552,91 +2320,6 @@
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "受け側4本のいずれかで title / description が変わった → **表示回数の変化をこの実験の効果と読まない**"
       ]
-    },
-    {
-      "id": "selector-hub-2026-09-02-001",
-      "page": "/blog/free-memo-apps-ranking",
-      "type": "selector_hub",
-      "hypothesis": "サイト最大表示ページ（3,048imp/週・CTR 0.62%・順位9.5）を『直接売るページ』から『適合ユーザーを選別するハブ』へ。ファーストビューに開発者の情報開示（iPhone専用・テキスト専用・無料1日3通）と3問の分岐（Android/PC→Keep・Simplenote、多機能→Apple純正、最速→1位／Obsidian→/blog/obsidian-voice-input／画面を見ない→/apple-watch/・/siri/）、1位カード直後に文脈CTA（App Store＋Obsidian音声導線）を置く。低適合インストールを減らし、Store遷移1件あたりの活性・継続を上げる。",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": "2026-09-02",
-      "evaluation_at": "2026-10-03",
-      "status": "evaluated",
-      "before": {
-        "disclosure": false,
-        "selector": false,
-        "cta_placements": {
-          "nav": 2,
-          "mid": 1,
-          "bottom": 1
-        },
-        "note": "開発者である旨の開示が無く、弱点（Android非対応・画像非対応・無料枠）は本文に散在。最初のApp Store導線はFAQ後の mid（本文の約6割地点）で、1位カードの直後に導線が無かった。"
-      },
-      "after": {
-        "disclosure": true,
-        "selector": true,
-        "cta_placements": {
-          "nav": 2,
-          "hero": 1,
-          "mid": 2,
-          "bottom": 1
-        },
-        "note": "JA の1位直後CTAは tag-cta-placements が hero と判定（ct=jp__hero・このページで唯一）。EN 側は文書後半に置かれるため mid（既存FAQ後のENと同ラベル。GA4では page_path×placement で JA 側だけ分離できる）。title / description / next-step は触っていない。"
-      },
-      "baseline": {
-        "clicks": 19,
-        "impressions": 3048,
-        "ctr": 0.0062,
-        "position": 9.53,
-        "window": "2026-08-23..2026-08-29 (7d)",
-        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
-        "note": "日次 2.7クリック/日・435表示/日。比較は日次で行う。"
-      },
-      "target_metric": "ctr",
-      "measurement_issue": {
-        "code": "primary_metric_conflict",
-        "declared_metric": "ctr",
-        "detected_at": "2026-09-30",
-        "note": "The 2026-09-02 notes name on-page selection and App Store outbound as the primary outcome; GSC CTR is a guardrail. Do not decide this experiment from a GSC CTR comparison."
-      },
-      "decision": "measurement_failed",
-      "evaluated_at": "2026-10-03",
-      "notes": [
-        "2026-09-02: **主指標は GSC の CTR ではない。**分岐リンクのクリックと App Store outbound（GA4: page_path=/blog/free-memo-apps-ranking × data-cta-placement=hero）、その先の CPP（free-memo-generic・ppid 未記入）のDL。GSC は順位が実験と無関係に動いていないかのガードレール。",
-        "2026-09-02: title / description は据え置き。snippet-2026-08-09-free-memo-ranking（09-13評価）の窓に被るため。dateModified と最終更新は内容が増えたので 2026-09-02 へ動かした。",
-        "2026-09-02: レポートは『無料メモアプリおすすめ10選【2026年9月】…用途別に比較』への改題を提案しているが、**本文が並べているのは TOP5 で、10選の実体が無い**（用途別5件も同じ5本）。改題は 09-13 の評価時に、10本に増やすか『5選』へ正すかと一緒に決める。",
-        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。",
-        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
-        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
-        "2026-10-03: 主指標の競合と元baseline/post・抽出証跡の欠測を計測診断として記録。効果判定は未完了。元の期間・母数・停止条件・交絡を保持し、主指標に整合する定義と元データの復元・抽出証跡の確認を継続する。"
-      ],
-      "control": {
-        "kind": "pre_post",
-        "note": "ホールドアウトなし。情報開示・分岐・CTAを同時に入れたので、どれが効いたかは分離できない。分離できないことを承知で1回の変更として記録する。",
-        "confounders": "cta-2026-08-10-mid-placement / cta-2026-08-10-desktop-qr / snippet-2026-08-09-free-memo-ranking が同ページで走行中（いずれも 09-13 評価）。placement=hero は本実験のみが持つラベルなので、mid の実験は hero を除いて読む。"
-      },
-      "min_sample": {
-        "metric": "clicks",
-        "threshold": 80,
-        "rationale": "基準 2.7クリック/日 × 評価窓31日 ≒ 84。**80 に届かなければ結論を出さない。**分岐リンクのクリックは GA4 側で同じ窓・同じ下限（80セッション相当）で読む。"
-      },
-      "stop_conditions": [
-        "評価日までに min_sample に届かない → 結論を出さず次サイクルへ持ち越す（『効果なし』と書かない）",
-        "順位が 9.5 → 12 より悪化し、同期間のサイト全体の順位が動いていない → 分岐セクションが本文を押し下げたと疑い、セクションを FAQ 後へ移して再開",
-        "1〜2星レビューまたは返金率が同期間の基準を超えた → 『低適合を減らす』の逆が起きているので中断して記録",
-        "title / description が 09-13 の評価で変わった → 変更後の期間だけを別に読む（混ぜない）"
-      ],
-      "evidence": {
-        "schema_version": 1,
-        "kind": "private_reference",
-        "source_kind": "measurement_diagnostic",
-        "artifact": "experiment-evidence-332776275bbc728971f1c5273f90ff1517f01986f5206ef5e2a5f75cc1d1d22b.json",
-        "sha256": "332776275bbc728971f1c5273f90ff1517f01986f5206ef5e2a5f75cc1d1d22b",
-        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
-      }
     },
     {
       "id": "cta-placement-2026-09-02-002",
@@ -2797,99 +2480,226 @@
       ]
     },
     {
-      "id": "gsc-obsidian-install-20260922-r2",
-      "page": "/obsidian/getting-started/",
-      "change_paths": [
-        "obsidian/getting-started/index.html",
-        "sitemap-ja.xml",
-        "data/distribution-queue.json",
-        "docs/story-seeds.md"
-      ],
-      "supporting_changes": [
-        {
-          "path": "sitemap-ja.xml",
-          "kind": "sitemap_lastmod"
-        },
-        {
-          "path": "data/distribution-queue.json",
-          "kind": "distribution_seed",
-          "id": "20260922-obsidian-install-guide"
-        },
-        {
-          "path": "docs/story-seeds.md",
-          "kind": "story_seed",
-          "id": "S-20260922-obsidian-install-guide"
-        }
-      ],
-      "type": "company_gsc_treatment",
-      "hypothesis": "The existing exact-page GSC row has 1371 impressions and 9 clicks. The retained query-page source is dominated by installation and download intent. Make official downloads and OS-specific first steps visible before the historical tutorial, and align the title with that intent. Existing verified screenshots and historical dates remain unchanged.",
+      "id": "selector-hub-2026-09-02-001",
+      "page": "/blog/free-memo-apps-ranking",
+      "type": "selector_hub",
+      "hypothesis": "サイト最大表示ページ（3,048imp/週・CTR 0.62%・順位9.5）を『直接売るページ』から『適合ユーザーを選別するハブ』へ。ファーストビューに開発者の情報開示（iPhone専用・テキスト専用・無料1日3通）と3問の分岐（Android/PC→Keep・Simplenote、多機能→Apple純正、最速→1位／Obsidian→/blog/obsidian-voice-input／画面を見ない→/apple-watch/・/siri/）、1位カード直後に文脈CTA（App Store＋Obsidian音声導線）を置く。低適合インストールを減らし、Store遷移1件あたりの活性・継続を上げる。",
       "source": {
         "pr": null,
         "commit": null
       },
-      "started_at": "2026-09-22",
-      "evaluation_at": "2026-10-23",
-      "status": "running",
-      "target_metric": "ctr",
-      "baseline": {
-        "metric": "ctr",
-        "value": 0.006564551422319475,
-        "clicks": 9,
-        "impressions": 1371,
-        "ctr": 0.006564551422319475,
-        "position": 8.409190371991247,
-        "window": "2026-08-23..2026-09-19",
-        "source": "gsc:cad87a305ce9a506abf221f224f06a0565a058831ad66182851575e7bdd2f419"
-      },
-      "measurement_contract": {
-        "source": "gsc",
-        "definition": "Original WEB GSC exact page ctr",
-        "unit": "ratio",
-        "time_zone": "America/Los_Angeles",
-        "scope": {
-          "kind": "page",
-          "page": "/obsidian/getting-started/"
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-03",
+      "status": "evaluated",
+      "before": {
+        "disclosure": false,
+        "selector": false,
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1,
+          "bottom": 1
         },
-        "lag_days": 3
+        "note": "開発者である旨の開示が無く、弱点（Android非対応・画像非対応・無料枠）は本文に散在。最初のApp Store導線はFAQ後の mid（本文の約6割地点）で、1位カードの直後に導線が無かった。"
       },
-      "measurement_scope": {
-        "kind": "page",
-        "page": "/obsidian/getting-started/"
+      "after": {
+        "disclosure": true,
+        "selector": true,
+        "cta_placements": {
+          "nav": 2,
+          "hero": 1,
+          "mid": 2,
+          "bottom": 1
+        },
+        "note": "JA の1位直後CTAは tag-cta-placements が hero と判定（ct=jp__hero・このページで唯一）。EN 側は文書後半に置かれるため mid（既存FAQ後のENと同ラベル。GA4では page_path×placement で JA 側だけ分離できる）。title / description / next-step は触っていない。"
       },
+      "baseline": {
+        "clicks": 19,
+        "impressions": 3048,
+        "ctr": 0.0062,
+        "position": 9.53,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
+        "note": "日次 2.7クリック/日・435表示/日。比較は日次で行う。"
+      },
+      "target_metric": "ctr",
+      "measurement_issue": {
+        "code": "primary_metric_conflict",
+        "declared_metric": "ctr",
+        "detected_at": "2026-09-30",
+        "note": "The 2026-09-02 notes name on-page selection and App Store outbound as the primary outcome; GSC CTR is a guardrail. Do not decide this experiment from a GSC CTR comparison."
+      },
+      "decision": "measurement_failed",
+      "evaluated_at": "2026-10-03",
+      "notes": [
+        "2026-09-02: **主指標は GSC の CTR ではない。**分岐リンクのクリックと App Store outbound（GA4: page_path=/blog/free-memo-apps-ranking × data-cta-placement=hero）、その先の CPP（free-memo-generic・ppid 未記入）のDL。GSC は順位が実験と無関係に動いていないかのガードレール。",
+        "2026-09-02: title / description は据え置き。snippet-2026-08-09-free-memo-ranking（09-13評価）の窓に被るため。dateModified と最終更新は内容が増えたので 2026-09-02 へ動かした。",
+        "2026-09-02: レポートは『無料メモアプリおすすめ10選【2026年9月】…用途別に比較』への改題を提案しているが、**本文が並べているのは TOP5 で、10選の実体が無い**（用途別5件も同じ5本）。改題は 09-13 の評価時に、10本に増やすか『5選』へ正すかと一緒に決める。",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。",
+        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
+        "2026-09-19: PR #1484の日英URL分離がサイト内リンク・hreflang・英語FAQ/CTA/campaign/QRに重なる。変更範囲と公開時刻の参照先はdocs/i18n-split-2026-09-19.mdおよびgrowth/data/annotations.json。明示依頼の移行修正で、新たな介入実験の登録ではない。前後のURL・言語・campaignを同条件と扱わず、既存施策単独の因果を主張しない。元の開始日・評価日・母数・停止条件は維持する。",
+        "2026-10-03: 主指標の競合と元baseline/post・抽出証跡の欠測を計測診断として記録。効果判定は未完了。元の期間・母数・停止条件・交絡を保持し、主指標に整合する定義と元データの復元・抽出証跡の確認を継続する。"
+      ],
       "control": {
         "kind": "pre_post",
-        "note": "Same exact GSC WEB page, 28 days before versus 28 days after; no randomized control.",
-        "confounders": "Seasonality, ranking changes, query/country/device composition, Google title rewrites, other global observations and prior September 9 changes cannot be isolated."
+        "note": "ホールドアウトなし。情報開示・分岐・CTAを同時に入れたので、どれが効いたかは分離できない。分離できないことを承知で1回の変更として記録する。",
+        "confounders": "cta-2026-08-10-mid-placement / cta-2026-08-10-desktop-qr / snippet-2026-08-09-free-memo-ranking が同ページで走行中（いずれも 09-13 評価）。placement=hero は本実験のみが持つラベルなので、mid の実験は hero を除いて読む。"
       },
       "min_sample": {
-        "metric": "impressions",
-        "threshold": 1000,
-        "rationale": "Baseline has 1371 impressions but only 9 clicks. A 1000-impression floor avoids interpreting a tiny post cohort; even above it small differences remain noisy, not proof of a win."
+        "metric": "clicks",
+        "threshold": 80,
+        "rationale": "基準 2.7クリック/日 × 評価窓31日 ≒ 84。**80 に届かなければ結論を出さない。**分岐リンクのクリックは GA4 側で同じ窓・同じ下限（80セッション相当）で読む。"
       },
       "stop_conditions": [
-        "Broken official download or application CTA, unintended noindex/canonical change, or mobile overflow: repair or revert immediately and retain original observation window.",
-        "Do not repeatedly retitle before the fixed October 23 evaluation; missing sources or incompatible cohorts yield inconclusive, never a zero or a WIN."
+        "評価日までに min_sample に届かない → 結論を出さず次サイクルへ持ち越す（『効果なし』と書かない）",
+        "順位が 9.5 → 12 より悪化し、同期間のサイト全体の順位が動いていない → 分岐セクションが本文を押し下げたと疑い、セクションを FAQ 後へ移して再開",
+        "1〜2星レビューまたは返金率が同期間の基準を超えた → 『低適合を減らす』の逆が起きているので中断して記録",
+        "title / description が 09-13 の評価で変わった → 変更後の期間だけを別に読む（混ぜない）"
       ],
-      "guardrails": [
-        "Keep canonical, hreflang, existing CTAs and analytics scripts unchanged; do not add new paid services or change consent.",
-        "Check country/device/query mix and average position before interpretation; changing demand or concurrent global work prevents isolated causal attribution.",
-        "Retain old verified Linux screenshot date and identify new Windows/Mac instructions as official-documentation guidance, not fresh hands-on verification."
-      ],
-      "decision_rule": "Descriptive pre/post only: retain if CTR improves by at least 0.003 absolute with impressions at least 1000 and clicks above baseline; iterate if evidence is mixed; revert if CTR drops by at least 0.003 with impressions at least 1000 and no material country/device/query/position shift. Otherwise inconclusive. This is not causal proof or installation uplift.",
-      "post_window": {
-        "start": "2026-09-23",
-        "end": "2026-10-20",
-        "days": 28
-      },
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [],
-      "company_measurement": {
+      "evidence": {
         "schema_version": 1,
-        "plan_sha256": "12fc083d72538555230c4e49a24f3dbb06df77317a9626b25172be94720be908",
-        "company_run_id": "6b41f9e5-79d6-425d-92f8-d8da34cbf523",
-        "decision_sha256": "8d23d6f90cf592f67e85c0c048705bbcf50d684b4f30dd7fbd83fe0fc6b4d749"
+        "kind": "private_reference",
+        "source_kind": "measurement_diagnostic",
+        "artifact": "experiment-evidence-332776275bbc728971f1c5273f90ff1517f01986f5206ef5e2a5f75cc1d1d22b.json",
+        "sha256": "332776275bbc728971f1c5273f90ff1517f01986f5206ef5e2a5f75cc1d1d22b",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
       }
+    },
+    {
+      "id": "pr-2026-rsi-autopilot",
+      "page": "(PR TIMES配信 — 自律運用/RSI。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "プロダクトの新機能ではなく『運営体制』を弾にする初の回。訴求は『AIが計測・提案・実装・検証・配信準備を循環する自律型アプリ運営基盤を構築した』であり、**RSI／再帰的自己改善は名乗らない**（AIモデル自身は改良していないため誤読になる）。革命性は『人がいないこと』ではなく『人間を日常作業のボトルネックから外し、人は目的設定・高リスク判断・例外対応だけを担当する構造にしたこと』に置く。n=5の実績が示すとおり勝敗を分けているのはAI語の有無ではなくS2（見出しの固有名詞）なので、App Store / Obsidian を必ず入れる（現行のアプリ名『Obsidian連携シンプルメモ』自体がObsidianを含む）。D-SCORE>=60が配信条件。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-03",
+      "evaluation_at": "2026-09-17",
+      "status": "evaluated",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 0,
+        "impressions": 0,
+        "ctr": null,
+        "position": null,
+        "window": "2026-08-25〜2026-08-30（受け皿 /autopilot/ の公開 8/25 から、growth/data/gsc/2026-09-02 の期間末 8/30 まで）",
+        "source": "PR実績ベースライン（n=5）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車3本=21-46・PV 217-1,347。転載の床は20-34本/回。RSIはS2（市場語）とS5（時流）が構造的に低いため、1万PV級は狙わず転載の床を取りにいく弾と位置づける",
+        "pr_pv_boarded_min": 10434,
+        "pr_pv_boarded_max": 12188,
+        "pr_pv_not_boarded_min": 217,
+        "pr_pv_not_boarded_max": 1347,
+        "pr_syndication_floor_min": 20,
+        "pr_syndication_floor_max": 34,
+        "note": "[2026-09-03] running に切り替える時点の基準値。clicks/impressions=0 は growth/data/gsc/2026-09-02（BigQuery 由来・8/10〜8/30・234ページ）に /autopilot/ の行が1つも無いことから置いた（GSC の書き出しは表示1以上のページだけ載るので、行が無い＝表示0）。8/31〜9/2 は書き出しの遅れで未取得。pr_* は source に書いてある n=5 の実績をそのまま数値にしたもので、D+14 の PV・転載をこれと比べる"
+      },
+      "target_metric": "discover_boarding",
+      "decision": "iterate",
+      "evaluated_at": "2026-09-19",
+      "d_score_pre": {
+        "$comment": "**配信物で採り直した（2026-09-24）。85 → 45。**D+14（2026-09-19）で `boarded: false` が確定したので、`docs/pr-discover-strategy-2026-09-04.md` §3-1 が「提案」として置いていた再採点を台帳に入れた。**採点対象を配信された見出しに合わせただけで、尺度（D-1）は1語も変えていない。**実際に配信された見出し: ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化 / 85点までの経緯は rescored_from。",
+        "scored_at": "2026-09-24",
+        "headline": "ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化",
+        "rescored_from": [
+          {
+            "total": 66,
+            "note": "初回。実装前・見出し方針未確定"
+          },
+          {
+            "total": 80,
+            "note": "改訂1。実装3件＋見出し方針の確定"
+          },
+          {
+            "total": 82,
+            "note": "改訂1b。現行アプリ名（Obsidian連携シンプルメモ）の反映でS2 +2"
+          },
+          {
+            "total": 76,
+            "note": "改訂2。外部レビュー反映・RSI取り下げで訴求を1段落とした"
+          },
+          {
+            "total": 80,
+            "note": "改訂3。タイトル確定と実測KPIの投入。S7は未充足のまま"
+          },
+          {
+            "total": 85,
+            "note": "改訂5（2026-08-25）。受け皿ページ /autopilot/ の公開で S7 0→5。**この85点は、配信されなかった見出しに対する採点である。**採点時に想定していた見出しにはアプリ名（Obsidian連携シンプルメモ）が入る前提があり、S2=19 はその前提に乗っていた。配信物にはアプリ名も Obsidian も App Store も無い。"
+          }
+        ],
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度。採点対象は**実際に配信された見出し**（PR TIMES 2026-09-03 08:03）。内訳の根拠は docs/pr-discover-strategy-2026-09-04.md §3-1。",
+        "S1_novelty": 25,
+        "S2_entity_reach": 3,
+        "S3_concrete_nouns": 0,
+        "S4_transformation": 5,
+        "S5_timing": 3,
+        "S6_news_verb": 4,
+        "S7_launch_design": 5,
+        "total": 45,
+        "total_note": "45。**合格ライン60を下回る。**つまり配信物は、この模型では最初から「撃たない」側だった。**必要条件も落ちている**（S2 3 < 10）。**この再採点で合計点の合格ラインは破れていない側に戻る** —— 非乗車は ④21・⑤40・⑥45・①46、乗車は ③65・②71 で、60 が 6/6 を分離する。`--backtest` で確かめること。",
+        "score_rationale": {
+          "S1_novelty": "25。据置。運営体制そのものを弾にするのは初。",
+          "S2_entity_reach": "**19 → 3。**D-1「3＝無形・汎用（AI・メモ術）」。配信見出しの名詞は ソロプレナー／ゼロプレナー（造語）／AI／アプリ運営／iPhoneアプリ。**19点の根拠は「アプリ名を書くだけで見出しに Obsidian が入る」で、その前提が配信物で消えている。**D-1 の20点例「iPhone標準」は標準アプリの意で、ここの「iPhoneアプリ」は総称修飾でありニュースの主語ではない。",
+          "S3_concrete_nouns": "**15 → 0。**D-1「15＝生活名詞が見出しに入る（牛乳・歯医者・スクショ）／0＝概念のみ」。配信見出しの具体は「76.4%」という率だけ。**15点の根拠（11チェック・261ファイル・13,195リンク）は本文の固有数値であって、この軸が測っている見出しの生活名詞ではない** —— 軸の定義とずれた根拠で満点が付いていた。",
+          "S4_transformation": "**14 → 5。**D-1「Before→After が1文で言え意外性のギミック＝12〜15／平凡＝5〜8」。**台帳の採点根拠自身が「15にしないのは受益者が読者ではなく自社であるため」と書いていた。**その理由なら14ではなく平凡帯。",
+          "S5_timing": "3。据置。平時。",
+          "S6_news_verb": "4。据置。「本番化」。",
+          "S7_launch_design": "5。据置。受け皿ページ /autopilot/ を配信前に公開済み。"
+        },
+        "gates": {
+          "G1_thumbnail_1200px": true,
+          "G2_no_ai_or_clickbait_words": true,
+          "G3_prtimes_distribution": true,
+          "G4_weekday_morning": true
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5 を目安に二値判定し、外した場合はどのSを読み違えたかをnotesに書いて重みを更新する",
+        "google_referral_ratio": 0.285714,
+        "mobile_ratio": 0.2533,
+        "syndication_count": 23,
+        "pv": 1574,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": false
+      },
+      "notes": [
+        "2026-08-22: 起案。原稿ドラフト docs/pr-autopilot-2026-09.md / 主張の裏取り台帳 docs/pr-autopilot-2026-09-evidence.md / 段取り docs/pr-autopilot-2026-09-plan.md。",
+        "2026-08-22 改訂1【オーナー判断①: RSI優先】9月上旬の枠はRSIに決定。pr-2026-multi-destination（事前95）は10月以降の単独枠へ回す。引き受けたリスクは、9月上旬がAppleウィークであること（trend-radar-prompt.md は『混雑窓を避ける＝Appleイベント週に無関係弾を出さない』と定めている）。RSIはApple文脈と無関係なのでS5=3のまま撃つ。緩和策としてAppleイベントの前週に置く。",
+        "2026-08-22 改訂1【オーナー判断②: G2の読み替え】G2 `no_ai_or_clickbait_words` を、今回に限り『AI語の禁止』ではなく『S2を満たす固有名詞を見出しに必ず入れ、抽象語だけで組まない』と読み替える。根拠: --backtest が示すのはAI語の有無ではなくS2の差である。乗車した2本（65/71）はどちらも見出しに大きな固有名詞（Apple Watch / Obsidian）を持ち、最下位のPR④（21）は固有名詞ゼロだった。VISION §0 が禁じているのは『プロダクトの売り文句としてAIの賢さを掲げること』であって、運営体制のニュースで実在する道具の名前を出すことではない。**この例外は今回限りの読み替えであり、プロダクト訴求のPRには従来どおりG2を適用する。**",
+        "2026-08-22 改訂1【実装3件】この弾の主張を事実にするために実装した。(a) ⑤AI実費の自己制御: data/autopilot-cost.json + scripts/autopilot-budget.mjs + obsidian-autopilot.yml の予算ゲート + autopilot-report.ts の日報描画。上限到達で主系runが止まる。(b) ③D-SCOREの機械検算: growth/scripts/d-score.mjs（算数のズレ・満点超過・配信中のゲート矛盾・合格未満のrunningをCIが落とす。--backtest つき）。(c) ②独立2モデル監査: simplememo-ios の scripts/qa/ai_triage.sh を2モデル化し、判定が割れたら人間に上げる。",
+        "2026-08-22 改訂1【実測で判明・原稿に反映済み】GitHub Actions の主系（obsidian-autopilot.yml）は全11runのうち**一度も記事を出荷していない**（1〜8 Gateスキップ / 9 apt詰まりでcancelled / 10 allowed_botsでfailure / 11 permission_denials 14で成果物ゼロ）。この12日間の出荷はすべて副系CCR。隠さず『主系・副系の二重化で維持している』と書く — 冗長化が実際に効いた実例なので話として強い。",
+        "配信前チェックリスト: ①見出しは市場語＋固有名詞（『RSI』『再帰的自己改善』『オートパイロット』は社内語。見出し・リードに出さない — 二層言語ルール） ②見出しは短く（乗車した2本は28〜30字） ③『完全自動化』『無人経営』『人間不要』『AIが経営している』『予算に応じて最適配分』と書かない ④『世界初』と書かない ⑤未実測の数値（Zero-decision率・ルーティング精度・CPI）を出さない ⑥台帳 §10『まだ書けない』の10項目を原稿へ戻さない。",
+        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する。",
+        "2026-08-22 改訂1b【アプリ名を現行へ】原稿が旧名『Captio式シンプルメモ』を製品名として使っていた。data/site-constants.json の正は『Obsidian連携シンプルメモ』/『Simple Memo - for Obsidian』で、旧名は alternateName に残る旧称。**この修正はS2を17→19に押し上げる** — アプリ名を書くだけで見出しにObsidianが入り、それは乗車した2本を牽引したエンティティそのもの。逆に旧名のままなら、見出しにApp Storeから削除された別アプリ『Captio』の名が乗っていた。あわせてボイラープレートの『起動 約1秒』を現行の実測値『起動0.4秒』（ウォーム起動・タップ→キーボード表示まで／iPhone 16e・iOS 26.5.2・v5.7.3・2026-08-11実測）へ更新した。",
+        "2026-08-22 改訂2【外部レビュー反映・fix版】外部レビュー「自律型アプリ運営 現状整理と不足項目」を受領。結論に同意し、①〜⑦すべてが『部分実装または未実証』であることを原稿に反映した。主な変更: (a) **RSIの名乗りを取り下げ**。『ガードレール付き自律型アプリ運営基盤』『AIがアプリ改善サイクルを継続実行する仕組み』『再帰的プロダクト改善ループ』のいずれかを使う。表記も『再起的』ではなく『再帰的』だがそもそも対外文言に使わない。 (b) 革命性の置き所を『人がいない』→『人の位置が変わった』へ。担当分担表を本文冒頭に新設。 (c) 避けるべき表現9件を禁止表現へ追加（完全無人／全自動バグ修正／実機テスト完全自動化／法人経営の無人化／AIが売上を自動で伸ばした／RSI実現 ほか）。 (d) ⑧CS ⑨マネタイズ ⑩AgentOps ⑪データ・プライバシー ⑫事業継続性 と各領域の追加項目を docs/autopilot-maturity-backlog.md へ独立させた。 (e) **採点は 82→76 に下げた。**下がるのが正しく、誇張のぶんの点は1次確認で失う点でもある。 **レビューへの訂正2件**（evidence §12-2）: ①『8/21の記事公開は0/1件』は日報側の既知の誤報を読んだもので、実際は PR #521 `/obsidian/plugins/` を 08-21 09:44 JST に出荷済み（誤報の修正は PR #523・同日12:06 JST、日報配信10:00の2時間後）。②『主系失敗後のバックアップ実行の証跡が無い』は AUTOPILOT_LOG の 08-22 エントリに冪等性チェック(a)〜(e)・当日ブランチ占有・出荷まで全手順が残っている。ただし『自動フェイルオーバーではない／機械的に観測できない／切替演習が無い』というレビューの本質的指摘は正しく、plan §3 Tier 2 に積んだ。",
+        "2026-08-22 改訂3【タイトル確定・実測KPI投入・権限表】オーナー確定のタイトルは 「アプリが、自ら育ち続ける。」Obsidian連携シンプルメモ、AIによる\"自律型アプリ運営\"を実現 / サブは「ユーザー行動の計測から機能開発、QA、SEO・ASO、PR制作、配信準備までをAIが一気通貫で循環。公開・予算・契約はリスクに応じて人が承認し、自律性と安全性を両立。」。**採点は76→80。主張は広げていない**（サブタイトルが承認制を明記・「できていないこと」表も据え置き）。**採用条件を3つ課した**（原稿 §1）: ①タイトル単独で流通させずサブとセットで出す ②本文の最初の見出しで仕組みを即座に具体化する ③本文でこの比喩を拡張しない（「アプリが自分で考えて」「AIが自己進化して」は禁止表現へ追加）。理由: このコピーは取り下げたRSIの主張とほぼ同じ形をしており、正確には「アプリ**を**、AIが育て続ける」だから。 あわせて実装2件: (a) **共通実行IDと運転台帳**（data/autopilot-runs.json / scripts/autopilot-runs.mjs）で AI完走率76.9%・変更失敗率23.1%・人間介入率53.8%・出荷日率83.3%・主系0/3副系10/10・無運転日2日を実測として出せるようにした。 (b) **機械可読な権限表**（data/authority-matrix.json / scripts/check-authority.mjs）で13領域の承認境界を定義し、不可逆↔承認制の整合をCIが見る。これで Tier 1 の #2/#4/#5/#6 が埋まった。",
+        "2026-08-22 改訂3b【介入の内訳とレーンF】オーナー指摘「人間介入率53.8%を90%以上（＝自律側）にしたい。コーディング時間を考えるとすでにそうなっているのでは」を受けて実測し直した。**指摘は正しかった。** git実測では同期間の変更行の98.8%（56コミット中55件）がAI著者。現行の人間介入率は「その実行に人が1回でも触ったか」の二値で、YAMLを1行直した日も丸ごと介入ありになる。そこで介入を5種別（artifact/infra/substitute/bootstrap/request）に分けた: **成果物への介入 0件（0%）・基盤の修理4件（30.8%）・代走1件・立ち上げ1件・起票のみ1件。** 出荷10件すべてAIが書いており人は中身に触っていない（成果物のAI自律率100%）。**総計53.8%も併記して出す** — 都合のよい分母に乗り換えるのはgoodhartingそのものなので。 実質的な介入は基盤の修理の一点に集約され、その修理を書いたのも全部AIだった。人がやっていたのは『壊れていることに気づいて直せと言うこと』だけ＝**足りないのは能力ではなく起動条件**。そこで **レーンF（自己修復）** を実装: `scripts/autopilot-selfheal.mjs` が未修理の故障を検知し、その日の最優先を修理に切り替える（レーンA〜Eより先）。**歯止めは文章ではなくCIが実検出する** — 必須CIチェック15本が1本でも消えると落ち、対象ワークフローに actions: write が現れると落ちる（両方とも差し替えデータで実際に検出することを確認済み）。同一 failure_class を3回直しても再発するなら修理をやめて人間に上げる。判定スクリプトは修理を行わない（同じ場所に置くと判定側を都合よく変えられるため）。原稿に節を2つ追加した。**採点は80のまま** — 主張が増えたのではなく、既にあった事実の測り方が正確になっただけなので。",
+        "2026-09-02【配信日の前倒し・バナー監査・ゲート材料】オーナー指示で配信は **2026-09-03（木）朝**（plan §1 の 9/28 は失効）。Appleイベントは 9/9（水）10:00 PT で確定（招待状 8/26）なので、plan §1 の条件式では**前窓**（配信日 ≤ イベント−2日）に入る。運転日数は 8/11〜9/2 の23日で **28日の下限には届かない** —— 原稿は「約30日」を主張していないので配信は妨げないが、S5=3 は据え置き（採点は人）。ヒーローバナー（1536×1024・3:2・2.6MB PNG）を台帳に当てた結果は docs/pr-banner-audit-2026-09-02.md。率（76.4% / 66.8% / 174 / 203）は台帳と一致、**件数3つ（17日間・15件・67種）が古い**（台帳の現在値 23日・19件・81本）。3:2 は PR TIMES / OGP の 1.91:1 に中央トリミングされると**下段の実績4枚と上端の PRESS RELEASE が切れる**ことを描画で確かめた。ゲートは**人が 0/1 で埋める**（本レコードは planned のまま。値は入れていない）: G1 幅1536≥1200 は満たすが比率が要再生成、G2 は 08-22 の読み替えどおり見出しに Obsidian連携シンプルメモ（固有名詞）が在る、G3 PR TIMES、G4 木曜朝。**S6 の材料:** 09-02 差し替え後の見出し「…運営業務のAI実行率76.4%」には**ニュース動詞が無い**（旧案「実現」で 4/5 を付けた）。「…AI実行率76.4%を公開」なら動詞が戻る。**再採点は人。ここでは点を動かしていない。****実スコアは動かさない判断:** 到達可能32件のうち今日この環境で完遂できる行は0件（docs/reaching-85-audit-2026-08-28 と同じ結論。唯一の候補 ⑦契約・請求・納品・支払いの照合は api 側の実装＋本番で1周が要り verification_pending 止まり）。配信前に台帳を動かすとバナーの率が全部ずれるので、配信まで凍結する。",
+        "2026-09-02 夕【見出しに動詞】オーナー承認で見出し末尾に「を公開」を足した（「…運営業務のAI実行率76.4%を公開」・50字）。S6 の再採点は人が行う。あわせて data/distribution-queue.json に配信の種（/autopilot/・1行回答・X投稿文）を登録し、配信当日の同時投下を定期配信の経路が拾える形にした。",
+        "2026-09-02 夜【サブタイトル網羅版・オーナー承認】AIが実行している領域を claim で裏の取れる範囲で列挙（計測・監視／QA／SEO・ASO／PR制作・配信準備／問い合わせの定型回答／レビュー返信／AI実費の上限管理／残高・法定期限・契約の監視）し、末尾を「AGI時代に向けて、運営から経営までAIが日々回し、人は公開・価格・広告・予算・契約の境界だけを持つ会社へ」に。オーナー案の「90%超を目指す」「完全AI自動駆動」「日本初のAIカンパニー」は不採用: 前者2つは本文の「95%は永久に達成できない」（境界を渡さずに届く上限 82.9%）と権限表に矛盾、後者は根拠が出せず G2 の趣旨（AI語・煽り語）にも当たる。タイトルは据え置き（AI前面タイトルの 8/3 が n=5 最下位）。",
+        "2026-09-03 朝【配信・running へ】オーナーから配信確認（08:04 JST の時点で「今朝出した」。正確な配信時刻と PR TIMES の URL は未転記 — この環境から prtimes.jp へは届かないので、オーナーからもらって discover_boarding_post と annotations.json に足す）。評価日 2026-09-17（D+14）。**バナーはオーナー判断 A（v3 をそのまま）**: 大見出し「アプリが、自ら育ち続ける。」／主役の率 76.4%／「81種」の版で、数字は台帳と一致・検査本数だけ2つ古い（83）。ゲートは 0/1 を置いた根拠ごと書く: G1=1（v3 は 1733×907・1.91:1・幅≥1200）。G3=1（PR TIMES）。**G4=1 は字面（木曜の朝）で通したが、時刻は plan §0-1 が置いた 10〜11時ではなく 08:04 JST 以前** — n=5 で 08:32 に出した 8/18 は非乗車で、同じ帯に入る。D+14 で非乗車なら時刻を先に疑う。**G2=1 は「オーナーが見出しを承認して配信した」を人の判定として置いた。ただし 08-22 の読み替え条件（S2 を満たす固有名詞を見出しに必ず入れる）は配信見出し「AIがコードを書く会社から、AIがアプリを運営する会社へ——3か月で『AIが実行する仕事』が12.1%から66.8%に」には無く、AI が主語で3回出る。**n=5 で固有名詞ゼロの PR④ が最下位（21）だった事実と正面から当たるので、D+14 の判定では S2/G2 の読み違えを最初の候補にする。**採点（85）は動かしていない**（再採点は人）。",
+        "2026-09-03【訂正・配信された実物を転記】上の「2026-09-03 朝」の note は、**配信されていない見出しを前提に S2/G2 を論じている。**そこが引いている「AIがコードを書く会社から、AIがアプリを運営する会社へ——3か月で『AIが実行する仕事』が12.1%から66.8%に」は配信稿（docs/pr-autopilot-2026-09-final.md）の見出しで、**実際に出たのは別物**。オーナーが配信時に決めた実物はこれ:\n  見出し: ソロプレナーから「ゼロプレナー」へ——AIがアプリ運営の76.4%を自律実行、公開中のiPhoneアプリで本番化\n  サブ  : AIが毎日の改善施策を選定。13領域203タスクに棚卸しし、実施中174タスクのAI実行率は76.4%、未実装を含む総合自動化率は66.8%。23日間で19件を本番環境へ反映\n  配信  : 2026-09-03 08:03 JST / https://prtimes.jp/main/html/rd/p/000000009.000182412.html\n**転記元は配信画面。**prtimes.jp はこの環境の egress で塞がれていて機械では取りに行けないので、文言そのものは人の転記であって検証済みではない。**数字だけは機械が当てている** —— 76.4 / 66.8 / 13領域203タスク / 実施中174 は scripts/check-pr-claims.mjs の checkNumbers が data/automation-coverage.json に当てて通る（data/pr-claims.json の published も同日に実物へ差し替えた）。\n**D+14（2026-09-17）の判定に効く差はここ。****採点は動かしていない（再採点は人）。**\n  - 旧 note の「**固有名詞ゼロ・AI が主語で3回**」は配信稿の話で、**実物には当たらない。**実物は AI が1回、そして **iPhone**（Apple の製品名＝大きな固有名詞）を含む\n  - ただし **アプリ名（Obsidian連携シンプルメモ）も Obsidian も App Store も見出しに無い。**n=5 で乗車した2本（65/71）を牽引したのはまさにそのエンティティ（Apple Watch / Obsidian）で、08-22 の G2 読み替え条件は「S2 を満たす固有名詞を見出しに必ず入れる」だった。**iPhone がその代わりになるかは、この n=5 からは決まらない。**\n  - したがって D+14 で非乗車なら、**S2 の候補は「固有名詞ゼロ」ではなく「Obsidian を落としたこと」。**時刻（08:03 JST。旧 note の『08:04 以前』が確定した）は引き続き第一候補のまま —— n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で、同じ帯に入る\n  - `growth/data/annotations.json` の 2026-09-03 の label も同じ旧見出しだったので直した。**d-score --backtest は label.split('—')[0] を件名に読む**ので、配信見出しの「——」より前だけが件名になる形（「PR⑥ ソロプレナーから「ゼロプレナー」へ（AI実行率76.4%）」）にしてある\n**discover_boarding_post は空のまま。**PV・参照元比率・デバイス比・転載数は PR TIMES の分析画面にしかなく、この環境からは読めない。**空欄を埋めた形にしない。**",
+        "2026-09-04【D+1 の観測。台帳の discover_boarding_post は空のまま】オーナーが PR TIMES の分析画面を撮影して受領（12:54 / 12:55 JST）。 **参照元サイトは全2件しか無い —— t.co 45 / news.google.com 12（合計 57 UU・UU 1,326 の 4.3%）。** 乗車した2本に必ず立つ google.com と googlequicksearchbox が **1件も無い**（6/1 は 2,378 / 982、7/6 は 1,737 / 626。追記A-5）。 デバイス比は PC 73.86% / スマホ 25.66% / タブレット 0.47% で、判定式の2条件（Google系 > 0.9・スマホ > 0.5）を**両方**割る。 日次も 9/3 約1,150 → 9/4 約200 と減衰していて、乗車形（6/1 公開 → 6/2 に 4,710PV へ**増加**）と向きが逆。 **したがって非乗車が実質確定。ただしこれは D+1 であって D+14 ではないので、discover_boarding_post は空のままにしてある** —— 埋めると pr-evaluation-due.mjs が「転記済み」として 9/17 の評価をスキップする（prtimes-d14-capture.md §0 の二重転記ガードが逆に効く）。 9/17 に Chrome 経由で取り直したものを正とすること。 **事前登録した仮説（上の 2026-09-03 の note）を実測が支持した** —— 「S2 の候補は固有名詞ゼロではなく Obsidian を落としたこと」。 配信見出しを D-1 の尺度で採り直すと **45点**（S1 25 / S2 3 / S3 0 / S4 5 / S5 3 / S6 4 / S7 5）で、非乗車帯（21・40・46）のど真ん中に落ちる。 **採点は動かしていない（再採点は人。9/17 に行う）。**内訳の根拠は docs/pr-discover-strategy-2026-09-04.md §3-1。 同文書で **合格ライン60が足し算だったこと**（S3〜S7 の 55点で S2 の欠落を買える）を穴として特定し、 d-score.mjs に必要条件 **S1>=20 かつ S2>=10** を実装した（配信状態のレコードのみを落とす・n=5 を 5/5 で分離・自己テストで固定）。 いまの台帳の S2=19 では通るので --check は緑のまま。**次の弾から効く。** あわせて「採点日が配信日より前」の警告を --check の出力に足した（PR⑥ が該当。落としてはいない）。 **9/17 に再採点したら、その警告を problems へ移して落とすようにすること。** PR⑤ の PV は台帳の 1,347（8/20・D+2 の読み）ではなく、9/4 時点で **1,613**。乗車判定は動かない。",
+        "2026-09-19【D+14確定評価】PR TIMES管理画面を既存の明示承認済み・読み取り専用経路で再確認。対象はrelease_id=9、表示期間2026-09-03〜2026-09-17。期間合計は1,574PV・転載23・スマートフォン25.33%。参照元サイト一覧は全2件で t.co/ 45、news.google.com/ 18（合計63）だったため、Google系比率は18/63=0.285714。boarded = google_referral_ratio > 0.9 AND mobile_ratio > 0.5 の両条件を満たさず非乗車、decision=iterate。day1_senders_vs_prev3avg はPR TIMESに存在しないためnullを保持。d_score_preはこの取得タスクでは再採点せず既存85と履歴を保持した。D+1の観測値や過去の未完了記録は成功へ書き換えず履歴として残す。",
+        "**2026-09-24 再採点。85 → 45。**D+14（09-19）で `boarded: false`（google_referral_ratio 0.286 / mobile_ratio 0.253 / PV 1,574）が確定したので、§3-1 が提案として置いていた採点を台帳に入れた。**尺度は変えていない。採点対象を配信物に合わせただけ。**帰結が2つある: (1) この弾は模型上「撃たない」側だった（45 < 60、かつ S2 3 < 10 で必要条件も落ちる）。(2) **「合格ライン60は n=6 で破れた」は取り消し** —— 破っていたのは85点のほうで、それは配信されていない見出しの点だった。60 は 6/6 を分離する。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が置けない。**同じ日に同じ内容を配信しない版は作れない。n=5のバックテストで代用している",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "pageviews",
+        "threshold": 1,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
     },
     {
       "id": "gsc-note-to-email-20260923",
@@ -2991,6 +2801,101 @@
       }
     },
     {
+      "id": "gsc-obsidian-install-20260922-r2",
+      "page": "/obsidian/getting-started/",
+      "change_paths": [
+        "obsidian/getting-started/index.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20260922-obsidian-install-guide"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20260922-obsidian-install-guide"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "The existing exact-page GSC row has 1371 impressions and 9 clicks. The retained query-page source is dominated by installation and download intent. Make official downloads and OS-specific first steps visible before the historical tutorial, and align the title with that intent. Existing verified screenshots and historical dates remain unchanged.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-22",
+      "evaluation_at": "2026-10-23",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.006564551422319475,
+        "clicks": 9,
+        "impressions": 1371,
+        "ctr": 0.006564551422319475,
+        "position": 8.409190371991247,
+        "window": "2026-08-23..2026-09-19",
+        "source": "gsc:cad87a305ce9a506abf221f224f06a0565a058831ad66182851575e7bdd2f419"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/obsidian/getting-started/"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/obsidian/getting-started/"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact GSC WEB page, 28 days before versus 28 days after; no randomized control.",
+        "confounders": "Seasonality, ranking changes, query/country/device composition, Google title rewrites, other global observations and prior September 9 changes cannot be isolated."
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 1000,
+        "rationale": "Baseline has 1371 impressions but only 9 clicks. A 1000-impression floor avoids interpreting a tiny post cohort; even above it small differences remain noisy, not proof of a win."
+      },
+      "stop_conditions": [
+        "Broken official download or application CTA, unintended noindex/canonical change, or mobile overflow: repair or revert immediately and retain original observation window.",
+        "Do not repeatedly retitle before the fixed October 23 evaluation; missing sources or incompatible cohorts yield inconclusive, never a zero or a WIN."
+      ],
+      "guardrails": [
+        "Keep canonical, hreflang, existing CTAs and analytics scripts unchanged; do not add new paid services or change consent.",
+        "Check country/device/query mix and average position before interpretation; changing demand or concurrent global work prevents isolated causal attribution.",
+        "Retain old verified Linux screenshot date and identify new Windows/Mac instructions as official-documentation guidance, not fresh hands-on verification."
+      ],
+      "decision_rule": "Descriptive pre/post only: retain if CTR improves by at least 0.003 absolute with impressions at least 1000 and clicks above baseline; iterate if evidence is mixed; revert if CTR drops by at least 0.003 with impressions at least 1000 and no material country/device/query/position shift. Otherwise inconclusive. This is not causal proof or installation uplift.",
+      "post_window": {
+        "start": "2026-09-23",
+        "end": "2026-10-20",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "12fc083d72538555230c4e49a24f3dbb06df77317a9626b25172be94720be908",
+        "company_run_id": "6b41f9e5-79d6-425d-92f8-d8da34cbf523",
+        "decision_sha256": "8d23d6f90cf592f67e85c0c048705bbcf50d684b4f30dd7fbd83fe0fc6b4d749"
+      }
+    },
+    {
       "id": "gsc-voice-input-title-20261002",
       "page": "/voice-input/",
       "change_paths": [
@@ -3085,6 +2990,196 @@
         "plan_sha256": "9874dcc2b816bf491fbd26dde9229d080a084111fdbbfdf8c06965c19bdaaf57",
         "company_run_id": "377a1c88-c647-422c-ab0e-a7eafa7114e0",
         "decision_sha256": "b11dc229be36bd51dff464054341ad9726fb29a90b634df9ec9935d5e58bf88c"
+      }
+    },
+    {
+      "id": "gsc-email-yourself-title-20261003",
+      "page": "/blog/email-yourself-memo",
+      "change_paths": [
+        "blog/email-yourself-memo.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20261003-email-yourself-guide"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20261003-email-yourself-guide"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "Replacing the broad one-tap app promise with the actual Gmail/Outlook self-email guide intent may improve qualified search clicks; the observed CTR gap alone does not prove the title causes it.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-10-02",
+      "evaluation_at": "2026-11-02",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.015625,
+        "clicks": 9,
+        "impressions": 576,
+        "ctr": 0.015625,
+        "position": 5.989583333333333,
+        "window": "2026-09-02..2026-09-29",
+        "source": "gsc:c3545ddb22f42560935d154f73bc4267a46773fd441453d76999bb6b950f5e24"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/blog/email-yourself-memo"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/blog/email-yourself-memo"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact-page source and equal windows; no randomized control.",
+        "confounders": [
+          "Search ranking and query composition may change independently.",
+          "Other site treatments and release changes may affect observed traffic."
+        ]
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 500,
+        "rationale": "Comparable exposure to the measured 576-impression baseline is needed; nine baseline clicks still provide limited power."
+      },
+      "stop_conditions": [
+        "Stop if the description becomes inaccurate or another owner protects the exact page."
+      ],
+      "guardrails": [
+        "Keep the canonical, body, CTA, tracking and product facts unchanged; verify exact-head CI, actual served bytes and search-query/position changes."
+      ],
+      "decision_rule": "Compare the exact-page WEB GSC CTR across equal 28-day windows after at least 500 impressions, retaining clicks, position and query composition. Treat changed mix, low sample and concurrent changes as limits; no causal, install or revenue claim.",
+      "post_window": {
+        "start": "2026-10-03",
+        "end": "2026-10-30",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "a3b0db29dc9494f49aa198ef84e67f1504877a7e4e39e866f21e8df1d4350406",
+        "company_run_id": "f2bfe354-ab83-4ed6-998f-6213c9a8bd75",
+        "decision_sha256": "3dce5f89dae09416b1eacc8ef5797bd2177b8658f708c0187d5e84dbae628192"
+      }
+    },
+    {
+      "id": "gsc-second-brain-title-20261004",
+      "page": "/methods/second-brain/",
+      "change_paths": [
+        "methods/second-brain/index.html",
+        "sitemap-ja.xml",
+        "data/distribution-queue.json",
+        "docs/story-seeds.md"
+      ],
+      "supporting_changes": [
+        {
+          "path": "sitemap-ja.xml",
+          "kind": "sitemap_lastmod"
+        },
+        {
+          "path": "data/distribution-queue.json",
+          "kind": "distribution_seed",
+          "id": "20261004-second-brain-guide"
+        },
+        {
+          "path": "docs/story-seeds.md",
+          "kind": "story_seed",
+          "id": "S-20261004-second-brain-guide"
+        }
+      ],
+      "type": "company_gsc_treatment",
+      "hypothesis": "Naming CODE and PARA in the search title may better describe the existing method guide and its one-note exercise than the email-and-Obsidian-only framing. The CTR gap is evidence to test, not proof of its cause.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-10-03",
+      "evaluation_at": "2026-11-03",
+      "status": "running",
+      "target_metric": "ctr",
+      "baseline": {
+        "metric": "ctr",
+        "value": 0.013496932515337423,
+        "clicks": 11,
+        "impressions": 815,
+        "ctr": 0.013496932515337423,
+        "position": 8.250306748466258,
+        "window": "2026-09-02..2026-09-29",
+        "source": "gsc:835c9997ee558ee9107f20c7c168f7d56ce652a9853dcbdffe374cd525d61058"
+      },
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "Original WEB GSC exact page ctr",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "scope": {
+          "kind": "page",
+          "page": "/methods/second-brain/"
+        },
+        "lag_days": 3
+      },
+      "measurement_scope": {
+        "kind": "page",
+        "page": "/methods/second-brain/"
+      },
+      "control": {
+        "kind": "pre_post",
+        "note": "Same exact-page source and equal windows; no randomized control.",
+        "confounders": [
+          "Search ranking and query composition may change independently.",
+          "Other site treatments and release changes may affect observed traffic."
+        ]
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 500,
+        "rationale": "Comparable exposure to the observed 815 impressions and 11 clicks is required; this small click sample cannot establish causal uplift."
+      },
+      "stop_conditions": [
+        "Stop if the description becomes inaccurate or another owner protects the exact page."
+      ],
+      "guardrails": [
+        "Keep the canonical, body, CTA, tracking and product facts unchanged; verify exact-head CI, actual served bytes and search-query/position changes."
+      ],
+      "decision_rule": "Compare the exact-page WEB GSC CTR across equal 28-day windows after at least 500 impressions, retaining clicks, position and query composition. Treat changed mix, low sample and concurrent changes as limits; no causal, install or revenue claim.",
+      "post_window": {
+        "start": "2026-10-04",
+        "end": "2026-10-31",
+        "days": 28
+      },
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [],
+      "company_measurement": {
+        "schema_version": 1,
+        "plan_sha256": "8d2df1af6e9d3b602b8ecfa07269f8dd7be4f16c2ec65e99120ff3c4fbadf47c",
+        "company_run_id": "b0898ee2-79f3-40c8-9078-715106f1e91f",
+        "decision_sha256": "9b49a8a4be2468a5138cafbf09fdcb1179c387eeaa987ce98a429329ff3edf98"
       }
     }
   ],
