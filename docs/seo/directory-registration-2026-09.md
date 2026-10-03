@@ -2395,7 +2395,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/3 16:29 | [#1919](https://github.com/simplememofast/simplememo/pull/1919) | 第102弾（日本語6ページ・英語10ページ＋サイトマップ）：`/vs/ticktick/`（日英）の「無料プランは機能面での制約は一切ありません」「zero feature restrictions」と `/vs/standard-notes/`（日英）の「無料で機能制限なく使いたい」（Obsidian だけに保存するモードは Premium）。比較ページの「選ぶならこんな人」の一覧の言い過ぎ：「サーバーに保存しない」の主語（→ アプリのサーバー）、「メモの暗号化」（→ 端末内）、`/vs/moca/`（日英）の「業務メモのセキュリティを重視する」「Handle sensitive or work-related memos」、`/vs/anytype/` の「メール経由で即座に共有」、英語の「Can't afford …」。`/en/blog/best-note-to-self-apps-2026` の「For sensitive content, look for on-device encryption + minimal-server architecture」。英語の「in your inbox」「land in your inbox」と、`/en/vs/anytype/`・`/en/vs/joplin/` の設定の説明 |
 | 10/3 17:12 | [#1920](https://github.com/simplememofast/simplememo/pull/1920) | 第103弾（本文は日本語4ページ・英語4ページ＋サイトマップ。英語の比較ページ36ページはパンくずの名前だけ）：`/vs/`（日英）の見出しの「16アプリ」「8つのメモアプリ」「16 Popular Apps」（一覧表は25アプリ、比較ページは38本）→ 数を書かない言い方に。英語の見出しから作られるパンくず（BreadcrumbList の2番目の名前）を `finalize_split_pages.py --apply` で39ページ更新。`/vs/apple-notes/` の「クラウドに頼らない設計」「No Cloud Dependency」、`/vs/day-one/` の「iCloudを使わず」「余計な情報を一切付けません」。`/blog/which-memo-app-flowchart`（日英）でプライバシー重視の人に E2E 暗号化のアプリと同じ並びで勧めていた所・早見表の ◎・「個人情報の登録も不要」・「ダウンロード後すぐに使えます」 |
 | 10/3 17:37 | [#1921](https://github.com/simplememofast/simplememo/pull/1921) | 第104弾（日本語2ページ・英語2ページ。4ページとも更新日はすでに 10/3 なので、更新日とサイトマップは変わらない）：`/vs/`（日英）の「『プライバシー』重視 → シンプルメモ（プライバシーファーストのアーキテクチャ）」→「Standard Notes / シンプルメモ」（読まれては困る内容の保管はエンドツーエンド暗号化のアプリ、シンプルメモはアプリのサーバーに本文を残さない設計でE2E暗号化ではない）。`/vs/standard-notes/`（日英）の「暗号化されたデータがサーバーに存在すること自体がリスク」（比べる相手のメールは、受信箱にメールサービスが読める形で残る）→ トレードオフはノートを読めるアプリが限られること、と送ったメモはメールサービスに残ること。日本語の比較表「無料プランの機能：制限なし（送信数のみ）」→「1日3通まで（『Obsidianのみに保存』はPremium）」 |
-| — | この PR | §5.48 の「この PR」の行、この §5.49、第98〜104弾の annotations の行、`/` の2つの実験（video-2026-08-11-five-clips・title-2026-08-20-home-grammar）と en-2026-08-11-native-rewrite の note、§7 #61・#62 |
+| 10/3 18:10 | [#1923](https://github.com/simplememofast/simplememo/pull/1923) | §5.48 の「この PR」の行、この §5.49、第98〜104弾の annotations の行、`/` の2つの実験（video-2026-08-11-five-clips・title-2026-08-20-home-grammar）と en-2026-08-11-native-rewrite の note、§7 #61・#62 |
 
 ### 見つけたこと
 
@@ -2422,6 +2422,56 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。11/12 以降：`/obsidian/compare/logseq/`、`/en/blog/offline-first-comparison` の「Privacy-Focused Capture」、`/en/blog/business-memo-apps-2026` の「Security first」、`/blog/memo-app-hikaku-matome` の「多くのユーザーに支持」（それぞれの実験の評価のあと）。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
 - さくらのナレッジ：編集部の返事を待つ。
+
+## 5.50 2026-10-03 夜：プランの表の Premium だけの機能（第105・106弾）、件名の決まり（第107弾）、守っていない約束と見える最終更新日（第108弾）、メール設定ガイドのオフラインの答えとダウンロードページ（第109弾）、「設定」の道順と iCloud メール（第110弾）、「SMTP不要の送信」（第111弾）、英語ページの Premium の料金（第112弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/3 18:09 | [#1922](https://github.com/simplememofast/simplememo/pull/1922) | 第105弾（日本語2ページ・英語2ページ＋サイトマップ）：`/faq`（日英）の「プランの違い」の表が、送信上限のほかは無料とプレミアムで同じ（○ ○）行だけで、プレミアムだけの機能（メールを送らず Obsidian だけに保存）が抜けていたので行を足した（FAQPage も）。`/use-cases/freelancers/`（日英）の「すべてのタスクを受信トレイに届けます」「dropping every task directly into your inbox the moment it surfaces」→ 送れる、に |
+| 10/3 18:26 | [#1925](https://github.com/simplememofast/simplememo/pull/1925) | 第106弾（`llms.txt` だけ）：Premium の説明に「メールを送らず Obsidian だけに保存するのも Premium」、ハンズフリーの行の「送ると端末の Obsidian ノートに追記」に連携の条件（設定でオンにしたとき・選んだ保管庫フォルダのノート） |
+| 10/3 18:50 | [#1926](https://github.com/simplememofast/simplememo/pull/1926) | 第107弾（日本語8ページ・英語9ページ＋サイトマップ）：件名の決まりをアプリの作りに。`/guides/gmail/`（日英）の「件名のカスタマイズ機能は準備中」「planned for a future update」（設定の「件名」は前からあり、`/faq` にも書いてある）→ 1行目が件名・設定の「件名」は先頭に付く・署名は本文の最後。`/how-to/`・`/use-cases/entrepreneurs/`・`/journaling/`・`/meeting-notes/`・`/work-tasks/`（日英）の、設定の「件名」で [IDEA]・[FEEDBACK]・[JOURNAL] などをメモごとに付けられるように読める所 → 1行目の先頭に書く。`/en/note-to-email/` の FAQ、`/blog/idea-memo-organization`（日英）の「件名に書いて送信」、`/blog/work-efficiency-memo`（日英）の「完了したら件名に DONE」（受け取ったメールの件名は Gmail などでは変えられない）→ スター・フラグを外す。`/en/use-cases/entrepreneurs/` の「No valuable idea falls through the cracks」 |
+| 10/3 18:59 | [#1927](https://github.com/simplememofast/simplememo/pull/1927) | 第108弾（日本語2ページ・英語1ページ＋サイトマップ）：`/blog/benchmark-methodology`（日英）の「計測の画面収録を GitHub で公開準備中・公開しだいリンク」（公開しているリポジトリに動画は無い）→ いまは公開していない、「iOS やアプリの更新のたびに再テストしてこのページを更新することをお約束します」（表は 8/11 の計測・アプリ 5.7.3 のまま）→ 表は 8/11 の計測で、その後の更新で結果が変わりうる、見える「最終更新日 2026-08-11」→ 10/3。`/blog/obsidian-voice-fastest-route` の「（追記予定）…2026-08-27以降に確定…この位置に追記します」→ `/data/voice-shift/` と同じく、公開できる確定集計が無いので載せていない |
+| 10/3 19:16 | [#1928](https://github.com/simplememofast/simplememo/pull/1928) | 第109弾（日本語6ページ・英語6ページ＋サイトマップ）：メール設定ガイド（日英5ページずつ）の「オフライン時に書いたメモはどうなりますか？」の答え（書いただけのメモも自動で送られるように読めた）→ 送信ボタンを押したメモだけが送信待ち（Outbox）に入って暗号化して保存され、つながると送られる。書きかけは下書きとして暗号化して保存。`/en/guides/gmail/` の「No memos are ever lost.」と、履歴の「all past memos and their delivery status」（履歴は最近のものだけ残り、表示は送信の状態）。`/download/`（日英）の音声入力に条件（iOS 26以降の対応機種・言語）、「届きます」→ 送られます、「届いたメモが保管庫へ」→ 送ったメモが、「¥0（ずっと）」→ 利用期間の制限なし（§7 #40） |
+| 10/3 19:36 | [#1929](https://github.com/simplememofast/simplememo/pull/1929) | 第110弾（日本語3ページ・英語3ページ＋サイトマップ）：「設定 → Apple ID → …」の道順（いまの「設定」の一番上は自分の名前。Apple の案内も「設定」→ 自分の名前）を、`/guides/icloud/`（日英）・`/faq`（日英）の「メディアと購入」・`/blog/captioo-alternative`（日英）の解約で直した。iCloud ガイドの「iCloud メールを有効にするとアドレスが自動で作られる」→ 画面の案内で作る・あとから変えられない、「オフだとメールは受信されない」→ この iPhone のメールAppで見られない（スイッチは端末ごと） |
+| 10/3 19:53 | [#1930](https://github.com/simplememofast/simplememo/pull/1930) | 第111弾（日本語2ページ・英語1ページ。3ページとも更新日はすでに 10/3）：Captio メソッドの用語ページ（日英）の「SMTP不要の送信」「SMTP-free sending」と `/vs/mail-to-self/` の説明文の「SMTP不要」→ SMTP の設定が要らない送信（アプリは HTTPS でリレーに渡し、メールは通常の SMTP で配送される） |
+| 10/3 20:16 | [#1931](https://github.com/simplememofast/simplememo/pull/1931) | 第112弾（英語4ページ＋サイトマップ）：英語の活用事例3ページ（管理職・ペットの世話・研究者）と `/en/vs/standard-notes/` が Premium の料金を日本の円だけ（「500 yen/month」「JPY 500/month」）で書いていたのを、英語のほかのページと同じ「$2.99/month（日本では ¥500）」に |
+| — | この PR | §5.49 の「この PR」の行、この §5.50、第105〜112弾の annotations の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **よくある質問のプランの表に Premium だけの機能が無かった**：表は送信上限のほかすべて「○ ○」で、同じページの下の質問（「メールを送らずObsidianだけに保存する機能はPremiumで利用できます」）と食い違っていた。`llms.txt` の Premium の説明も「送信無制限」だけ | 第105弾 [#1922](https://github.com/simplememofast/simplememo/pull/1922)・第106弾 [#1925](https://github.com/simplememofast/simplememo/pull/1925) |
+| **件名の決まりの説明のずれ**：アプリでは、件名は「設定の『件名』（既定は空）＋空白＋メモの1行目」、空なら1行目だけ、60文字まで、Obsidian 連携で AIタグ自動追加をオンにしているときは端末内で作った短いタイトル（`/faq` のとおり）。`/guides/gmail/`（日英）だけが「準備中」と書き、使い方・活用事例は、1つしかない設定の「件名」でメモごとに目印を変えられるように書いていた。アプリに件名の入力欄は無い | 第107弾 [#1926](https://github.com/simplememofast/simplememo/pull/1926) で、メモごとの目印は1行目の先頭に書く、に |
+| **日本語の `/note-to-email/` の FAQ も同じ書き方**（「件名と署名はアプリ内で自由に設定できます」） | gsc-note-to-email-20260923（評価 10/23）の対象なので、10/24 以降に直す |
+| **サイトが自分で書いて守れていない約束**：計測の画面収録の公開（「公開準備中」）、アプリや iOS の更新のたびの再テスト（「お約束します」）、利用実態の追記（「2026-08-27以降に確定…追記します」） | 第108弾 [#1927](https://github.com/simplememofast/simplememo/pull/1927) で、いまの状態をそのまま書く文に（約束をやめた。動画を公開するか、測り直すかは別の判断） |
+| **見える「最終更新日」と `dateModified` のずれ**（サイト全体を数えた）：`/blog/benchmark-methodology`（日英）と `/autopilot/`（「最終更新 2026-09-04」、`dateModified` は 9/17） | 前の2ページは第108弾で直した。`/autopilot/` は自動運用の記録のページで、各節の計測時点を本文で書き分けているので触っていない |
+| **オフラインの答えの書き方**：アプリでは、送信ボタンを押したメモだけが送信待ちに入り、つながると送られる。送っていない書きかけは下書き（これも暗号化して保存。自動では送られない） | 第109弾 [#1928](https://github.com/simplememofast/simplememo/pull/1928) |
+| **履歴は最近のものだけ残る**：`/en/guides/gmail/` は「all past memos and their delivery status」。アプリでは新しいものから一定の件数を残し、表示は送信の状態（Sent・Pending・Failed） | 第109弾で直した。日本語版（「過去に送信したメモのリストと送信ステータス」）は変えていない |
+| **ダウンロードページの音声入力に条件が無かった**：ページの上は「iOS 16.0以降」、音声入力は iOS 26以降の対応機種・言語（`/voice-input/`） | 第109弾で直した |
+| **「設定」の道順の「Apple ID」**：いまの iOS の「設定」の一番上は自分の名前（Apple ID は Apple Account に名前が変わった）。Apple の案内（日英、10/3 に読んだ）も「設定」→ 自分の名前 → … | 第110弾 [#1929](https://github.com/simplememofast/simplememo/pull/1929) で直した。`/legal`（日英、特定商取引法に基づく表示）の「設定」＞「Apple ID」＞「サブスクリプション」は法定の表示なので残した（直すなら次に表示を改めるとき）。道順でない「同じApple IDでサインイン」などの呼び方も残した |
+| **「SMTP不要の送信」**：アプリはメモを HTTPS でリレーに渡し、メールそのものは通常の SMTP で配送される（`llms.txt` も「delivery over standard SMTP」）。ほとんどのページは「SMTP設定不要」と書いていた | 第111弾 [#1930](https://github.com/simplememofast/simplememo/pull/1930) で、Captio メソッドの用語ページ（日英）と `/vs/mail-to-self/` の説明文を直した |
+| **英語のページの円だけの料金**：英語のサイトは「$2.99/month or $29.99/year（日本では ¥500 / ¥5,000）」で書いているのに、4ページが「500 yen/month」だけだった | 第112弾 [#1931](https://github.com/simplememofast/simplememo/pull/1931) |
+| **`/download/`（日英）の「日本のApp Storeでは『シンプルメモ - Obsidian連携・高速音声入力』として提供」**：日本のストアの名前は 10/2 から「Obsidian連携音声シンプルメモ」（10/3 夜もそのまま） | §7 #47 の判断（名前は brand-2026-08-11-entity-merge の評価日 11/11 まで動かさない）に合わせ、11/12 以降に直す。JSON-LD の alternateName の並びも同じ |
+| **ロケールのトップページ（中・繁・韓・西・葡・印尼・亜・土）の「会議のあと」の段落**：「受信箱は毎日見るので、紙や開かないアプリに埋もれない」 | 毎日受信箱を見るという習慣を前提にした言い方で、アプリの性能の約束ではないので残した（§7 #58 の判断の範囲） |
+
+### 毎晩の確認（10/3 20:40 JST の予約分。20:10〜20:45 に実施）
+
+- **main と手元の一致**：今日の夕方からマージした第105〜第112弾と台帳（[#1922](https://github.com/simplememofast/simplememo/pull/1922)・[#1923](https://github.com/simplememofast/simplememo/pull/1923)・[#1925](https://github.com/simplememofast/simplememo/pull/1925)・[#1926](https://github.com/simplememofast/simplememo/pull/1926)・[#1927](https://github.com/simplememofast/simplememo/pull/1927)・[#1928](https://github.com/simplememofast/simplememo/pull/1928)・[#1929](https://github.com/simplememofast/simplememo/pull/1929)・[#1930](https://github.com/simplememofast/simplememo/pull/1930)・[#1931](https://github.com/simplememofast/simplememo/pull/1931)）は、変えたファイルが手元で検証した木と同じ（`git diff` が空。サイトマップは、あとからマージした弾の分が足されて main で `generate_sitemap.py --check` が通る）。どれも本番に出ていることを確かめた。
+- **iOS Dev Weekly**：770号（10/2 発行。10/3 に確認）には #1547 の記事は載らなかった。次の 771号は 10/9 の予定。770号は、Google が Firebase の SDK に壊れた設定を配り、それに頼るアプリの多くが動かなくなった件に触れている（シンプルメモも Firebase の認証・App Check を使う。サイト側からは影響が分からないので、オーナーへの報告に書いた）。
+- **App Store（日本）**：公開版は 5.9.12 のまま、評価 4.1（27件）。日本のストアの名前は「Obsidian連携音声シンプルメモ」（10/2 から。§7 #47）。米国は「Simple Memo - Obsidian Voice」、5.9.12。
+- **受信箱（support@、読むだけ。返信はしていない）**：返信の要るものは無い。10/2 の確認のあとに届いたのは、通知・ニュースレター（Instagram・Indie Hackers・LINE 公式アカウントの案内）と、別の作業でこちらから出した問い合わせの受付の控え1件。迷惑メールのフォルダには、セミナーの案内1件だけ。
+- **awesome 系リスト（§6.5）**：7件すべて open のまま、メンテナの反応なし（20:10 ごろ確認）。
+- **事実訂正の次の弾**：第105〜第112弾（上の表）。
+
+### 次にやること
+
+- 毎晩の確認は 10/4 20:40 JST に予約した。10/08 まで毎日かけ直す。
+- 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。10/24 以降：`/note-to-email/`（日本語）の FAQ「件名や署名はカスタマイズできますか？」。11/12 以降：`/obsidian/compare/logseq/`、`/en/blog/offline-first-comparison` の「Privacy-Focused Capture」、`/en/blog/business-memo-apps-2026` の「Security first」、`/blog/memo-app-hikaku-matome` の「多くのユーザーに支持」（それぞれの実験の評価のあと）、`/download/`（日英）の日本のストアの名前（§7 #47）。
+- 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
+- オーナーに聞いている §7 #61（条件なしの0.4秒）・#62（Apple Watch に対応した版）の答えを待つ。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
