@@ -445,7 +445,7 @@
         <div class="article-body">
 
           <h2>1. なぜ2026年にUIKitなのか</h2>
-          <p>2026年現在、新規iOSアプリの多くはSwiftUIで開発されている。Appleも毎年のWWDCでSwiftUIの進化を強調し、宣言的UIの利便性はもはや疑いようがない。</p>
+          <p>Appleは毎年のWWDCでSwiftUIの進化を強調しており、宣言的UIの利便性はもはや疑いようがない。</p>
           <p>しかし、このアプリには<strong>譲れない要件</strong>がある。それは<strong>Time-to-Text（起動からテキスト入力可能になるまでの時間）を500ms以下にすること</strong>だ。</p>
           <p>SwiftUIでは、<code>@StateObject</code>の初期化、<code>body</code>の再評価、<code>.onAppear</code>のタイミング制御など、宣言的UIフレームワーク固有のオーバーヘッドが存在する。これらは一般的なアプリでは無視できる程度だが、ミリ秒単位の最適化を追求する場面では無視できない。</p>
           <p>一方、UIKitの<code>viewDidAppear</code>から<code>becomeFirstResponder()</code>を呼ぶパスは<strong>決定論的に高速</strong>だ。ViewControllerのライフサイクルは明確で、いつキーボードが表示されるかを正確に制御できる。</p>
