@@ -15,51 +15,44 @@
 > `.github/workflows/x-post-scheduled.yml` / `x-post-en-scheduled.yml` / `auto-post-tiktok.yml`。
 > `workflow_dispatch` による手動実行（dry_run含む）は引き続き可能。
 
-A dark-themed, modern landing page for the Simple Memo iOS app, built with HTML, CSS, and Cloudflare Workers.
+The website for the Simple Memo iOS app (simplememofast.com): static HTML and CSS served by Cloudflare Pages, with Pages Functions (`functions/`) for redirects and for blocking internal paths.
 
 
 ## Project Structure
 
+Cloudflare Pages serves the repository as it is, so every tracked file is a URL unless
+`functions/_middleware.js` blocks it.
+
 ```
-simple-memo-v2/
-├── index.html              # Main landing page
-├── privacy.html            # Privacy policy page
-├── terms.html              # Terms of service page
-├── style.css               # Main stylesheet with dark theme & glassmorphism
-├── policy.css              # Policy pages stylesheet
-├── wrangler.toml           # Cloudflare Workers configuration
-├── public/
-│   ├── site.webmanifest    # PWA manifest
-│   ├── assets/             # Images, icons, and OG images
-│   │   ├── og.webp         # Open Graph image (1200x630)
-│   │   ├── favicon.svg     # SVG favicon
-│   │   ├── favicon.ico     # ICO favicon
-│   │   ├── favicon-32.png  # 32x32 PNG favicon
-│   │   └── apple-touch-icon.png  # 180x180 Apple touch icon
-│   └── ...
-└── README.md               # This file
+simplememo/
+├── index.html            # Japanese home page
+├── en/                   # English pages (ar/ es/ id/ ko/ pt-BR/ tr/ zh/ zh-Hant/ hold localized home pages)
+├── blog/ guides/ vs/ …   # content sections
+├── privacy.html          # Privacy policy (en/privacy.html in English)
+├── terms.html            # Terms of service (en/terms.html in English)
+├── contact.html          # Contact form
+├── assets/               # CSS (assets/css/style.css, style.min.css), images, fonts, video, favicons
+├── js/                   # small scripts, e.g. js/analytics.js (deferred Google Analytics 4 loader)
+├── functions/            # Pages Functions; _middleware.js handles redirects and returns 404 for internal paths
+├── _headers, _redirects  # Cloudflare Pages configuration
+├── scripts/ tools/ docs/ growth/ fixtures/   # repository-only working files (not served)
+├── CLAUDE.md             # working rules (not served)
+└── README.md             # this file (served at /README.md)
 ```
 
 ## Design Features
 
-- **Dark Theme**: Deep blue background (#000103, #001A2B) with cyan/blue accents
-- **Glassmorphism**: Semi-transparent cards with backdrop blur effects
-- **Glow Effects**: Cyan glow on buttons, icons, and text for visual depth
-- **Mobile-First**: Fully responsive design optimized for iPhone Safari
-- **No External Dependencies**: Pure HTML, CSS, and SVG icons
+- **Dark Theme**: midnight-navy surfaces with electric-blue, cyan and violet accents
+- **Glassmorphism**: semi-transparent cards with backdrop blur effects
+- **Glow Effects**: soft blue glow on buttons, icons, and text
+- **Mobile-First**: responsive layout designed for iPhone Safari
+- **No front-end framework**: plain HTML and CSS, with small scripts in `js/`
 
 ## Color Palette
 
-```css
---bg0: #000103          /* Almost black */
---bg1: #001A2B          /* Deep blue */
---bg2: #002D4A          /* Darker blue */
---text: #EAF2FF         /* Off-white */
---muted: #B7C7D9        /* Light gray */
---accent: #6AAAD0       /* Cyan */
---accent2: #3E85A2      /* Darker blue */
---glow: rgba(106, 170, 208, 0.55)  /* Glow effect */
-```
+The palette is defined in the `:root` block of `assets/css/style.css` (for example `--bg: #070b14`,
+`--text: #f2f6ff`, `--accent: #4da3ff`). Edit it there; this file does not keep a copy.
+
 
 ## Deployment
 
@@ -95,62 +88,44 @@ See `CLAUDE.md` for the full workflow and the auto-merge design notes.
 
 ## Pages
 
-### `/` - Landing Page
-Main landing page with:
-- Hero section with CTA buttons
-- Features showcase (3 cards)
-- Data & Privacy section (3 cards)
-- FAQ section (3 items)
-- Footer with links
+### `/` - Home page
+The Japanese home page (`index.html`); the English home page is `/en/`.
 
 ### `/privacy` - Privacy Policy
-Comprehensive privacy policy covering:
-- Data collection practices
-- Local storage of notes
-- Resend email delivery
-- No analytics/tracking
-- Contact information
+Sections: information collected, purposes of use, differences by plan, handling of memo content, the optional
+email reminder, provision to third parties, outsourcing (email delivery and others), security measures, retention
+periods, revisions, contact, and technical notes on encryption (English: `/en/privacy`).
 
 ### `/terms` - Terms of Service
-Terms of service covering:
-- Service description
-- Warranties and limitations
-- User responsibilities
-- Contact information
+Sections: the service, features by plan, sending limits and Premium, safety sending limits, payment and
+auto-renewing subscriptions, prohibited acts, sending results and disclaimers, intellectual property, changes to or
+suspension of the service, changes to the terms, governing law and jurisdiction, and contact.
 
-### `/support` - Support (mailto)
-Redirects to support email: `support@simplememofast.com`
+### `/contact` - Contact
+Contact form (`contact.html`). The support address is `support@simplememofast.com`. (`/support` is not a route; it returns 404.)
 
 ## Assets
 
-Place the following files in `public/assets/`:
-
-- `og.webp` - Open Graph image (1200x630px recommended)
-- `favicon.svg` - SVG favicon
-- `favicon.ico` - ICO favicon
-- `favicon-32.png` - 32x32 PNG favicon
-- `apple-touch-icon.png` - 180x180 PNG for Apple devices
+- Favicons: `favicon.ico` at the root and `assets/favicon/` (including `apple-touch-icon.png` and `site.webmanifest`)
+- Images, fonts and video: `assets/img/`, `assets/fonts/`, `assets/video/`
 
 ## Browser Support
 
-- Chrome/Edge 90+
-- Firefox 88+
-- Safari 14+
-- iOS Safari 14+
+Some CI checks render pages in a real browser engine (see the workflows under `.github/workflows/`).
+No list of supported browsers or versions is maintained or tested.
 
 ## Accessibility
 
-- WCAG 2.1 Level AA compliant
-- Supports `prefers-reduced-motion`
 - Semantic HTML structure
-- Proper color contrast ratios
+- Supports `prefers-reduced-motion`
+- Text colors are chosen for contrast on the dark background (see the comments in `assets/css/style.css`)
+- WCAG conformance has not been audited. Do not describe the site as WCAG compliant
 
 ## Performance
 
-- No external dependencies or frameworks
-- Minimal CSS (~12KB)
-- Optimized for mobile devices
-- Fast page load times
+- No front-end framework
+- On the production host, Google Analytics 4 loads after the page has loaded (`js/analytics.js` or an inline loader)
+- PageSpeed results are collected by `.github/workflows/pagespeed-audit.yml`
 
 ## License
 
