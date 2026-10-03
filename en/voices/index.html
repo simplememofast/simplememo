@@ -387,7 +387,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span lang="en">"It stops my notes from becoming write-only," "I use it as an email-draft pad too," and "even if I clear the email, the app still has it" — feedback we received from testers. A capture app is wasted if the captured thought has no path back to you. Simple Memo deliberately keeps two parallel paths: your own email inbox AND the in-app history. Pruning one of them does not destroy the other.</span>
+<span lang="en">"It stops my notes from becoming write-only," "I use it as an email-draft pad too," and "even if I clear the email, the app still has it" — feedback we received from testers. A capture app is wasted if the captured thought has no path back to you. Simple Memo deliberately gives you two ways back: your own email inbox and the in-app history (the history keeps the 100 most recent memos).</span>
 </div>
 </div>
 <div class="reason-card">
@@ -397,7 +397,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span lang="en">"I didn't get lost during sign-up — I could start using it right away," and "overall it was easy to use." The path from "open the app" to "send your first memo" is one of the UX decisions we guard most carefully. Every additional setting screen creates hesitation, so the initial flow is deliberately reduced to three screens (email → verification code → memo) — folder setup, preference toggles, and other one-time choices are intentionally moved out of the critical path so testers can come back to them later. Hearing "I just started using it" is the signal that the trade-off is working.</span>
+<span lang="en">"I didn't get lost during sign-up — I could start using it right away," and "overall it was easy to use." The path from "open the app" to "send your first memo" is one of the UX decisions we guard most carefully. Every additional setting screen creates hesitation, so the initial flow at the time was deliberately reduced to three screens (email → verification code → memo) — folder setup, preference toggles, and other one-time choices were intentionally moved out of the critical path so testers could come back to them later. Hearing "I just started using it" was the signal that the trade-off was working. (Today the app opens straight to the memo screen and asks for your email address the first time you send a memo.)</span>
 </div>
 </div>
 <div class="reason-card">
@@ -407,7 +407,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span lang="en">"Download → email → verification code → paste in → ready, all under one minute, no errors," and "the verification-code autofill was a wow moment." For the OTP input we use iOS's AutoFill hint (`textContentType: .oneTimeCode`), so the code that just arrived by email can be tapped directly from the keyboard suggestion bar — no manual copy/paste. Tiny detail, but the gap between "I had to copy-paste" and <strong>"I didn't even need to copy"</strong> is huge on first run. We never quite know if details like this land until testers spell them out.</span>
+<span lang="en">"Download → email → verification code → paste in → ready, all under one minute, no errors," and "the verification-code autofill was a wow moment." For the OTP input we set iOS's AutoFill hint (`textContentType: .oneTimeCode`), so when iOS suggests a code that arrived by email, you can tap it in the keyboard suggestion bar — no manual copy/paste (whether iOS suggests it depends on iOS and your mail app). Tiny detail, but the gap between "I had to copy-paste" and <strong>"I didn't even need to copy"</strong> is huge on first run. We never quite know if details like this land until testers spell them out.</span>
 </div>
 </div>
 <div class="reason-card">
@@ -555,7 +555,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span lang="en"><strong>A user-suggested workflow:</strong> "What if the destination were a Slack channel's post-by-email address? Memos would auto-collect inside Slack."<br/><strong>The answer:</strong> This actually <strong>already works with the current single-target design</strong>. On Slack's paid plans you can set up a dedicated email address for a channel, and emails sent to it are posted there. Setting Simple Memo's destination to that address means every memo flows straight into Slack. This is the same architectural philosophy as the existing <em>Send-to-Obsidian</em> card above: by keeping the app a single-target pipe, it composes naturally with any tool that accepts an email address as input.<br/><strong>Caveats:</strong> This Slack feature is on paid plans, and workspace owners and admins can restrict who may create these addresses. For setup, see <a href="https://slack.com/help/articles/206819278-Send-emails-to-Slack" rel="noopener" style="color:var(--accent)">Slack's help article</a>.</span>
+<span lang="en"><strong>A user-suggested workflow:</strong> "What if the destination were a Slack channel's post-by-email address? Memos would auto-collect inside Slack."<br/><strong>The answer:</strong> <strong>It fits the current single-destination design, but we have not tested it</strong>. On Slack's paid plans you can set up a dedicated email address for a channel, and emails sent to it are posted there. With Simple Memo's destination set to that address, memos would be posted to that channel. The destination is verified with a code, so the verification email would arrive in that channel first. Because we have not checked this, including the verification step, we don't present it as a confirmed setup. It applies the same idea as the <em>Send-to-Obsidian</em> card above: keep the app a single-destination pipe and leave organizing to the mail client or other tools.<br/><strong>Caveats:</strong> This Slack feature is on paid plans, and workspace owners and admins can restrict who may create these addresses. For setup, see <a href="https://slack.com/help/articles/206819278-Send-emails-to-Slack" rel="noopener" style="color:var(--accent)">Slack's help article</a>.</span>
 </div>
 </div>
 <div class="reason-card">
