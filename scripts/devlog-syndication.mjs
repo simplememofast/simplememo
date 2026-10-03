@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * 開発記録の外部ブログ配信（dev.to / はてなブログ）— 門・文脈・検証・投稿・公開確認。
+ * 開発記録の外部ブログ配信（dev.to / はてなブログ2つ / ライブドアブログ）— 門・文脈・検証・投稿・公開確認。
  *
- *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena [--force] [--dry-run] [--github-output FILE]
+ *   node scripts/devlog-syndication.mjs gate     --platform devto|hatena|hatenadiary|livedoor [--force] [--dry-run] [--key-missing] [--github-output FILE]
  *   node scripts/devlog-syndication.mjs context  --platform P --out FILE
  *   node scripts/devlog-syndication.mjs validate --platform P --article FILE --context FILE [--report FILE] [--offline]
  *   node scripts/devlog-syndication.mjs publish  --platform P --article FILE --context FILE --out FILE [--dry-run]
@@ -23,7 +23,7 @@
  *              （旧ローカルタスクが投稿しても、公開面を見るので二重に出ない）
  *   context  … 記事ネタ台帳・一次ファイル・既存記事・リンクしてよいURLを1つのJSONに固める
  *   validate … 数字の出典・禁止表現・名乗り・リンク・重複を機械で落とす
- *   publish  … 公式API（dev.to Forem API / はてなブログ AtomPub）。**APIキーはこのステップだけが持つ**
+ *   publish  … 公式API（dev.to Forem API / はてなブログ・ライブドアブログの AtomPub）。**APIキーはこのステップだけが持つ**
  *   verify   … 公開ページを取りに行き、自社リンクの rel と meta robots を実測する
  *
  * 【モデルに鍵を渡さない】
@@ -35,8 +35,18 @@
  * アカウント停止の対象と明記した。過去の記事には、リポジトリに出典の見当たらない数値
  * （起動187ms・開封率83% など）も見つかっている。だから:
  *   - dev.to は ai_disclosure_level=fully_autonomous を API で必ず付ける
- *   - はてなは本文末尾に固定の開示文を付ける（モデルに書かせない＝消されない）
+ *   - はてな・ライブドアは本文末尾に固定の開示文を付ける（モデルに書かせない＝消されない）
  *   - 本文の数量は、記事が宣言した出典ファイルか一次ファイルに同じ数字があるときだけ通す
+ *
+ * 【媒体を2つ足す（2026-10-03）】
+ * はてなブログ「メモの設計図」（simplememofast.hatenadiary.jp）とライブドアブログ（captio.livedoor.blog）も、
+ * これまで Mac のローカル定期タスクがブラウザ操作で投稿していた。AI の開示が無く、出典の無い数字も載っていた。
+ * オーナーが選択式で「新しい仕組みに移す（推奨）」を選んだので、この経路に載せる（CLAUDE.md の
+ * 「新しい種類の対外送信は…例外は人が名指しで出す」の名指しの例外）。分け方は次のとおり:
+ *   - 媒体名ではなく kind（devto / hatena / livedoor）と lang で分岐する。はてなの2つは同じ kind
+ *   - 日本語の3媒体は「使った題材」を共有する（同じ種で日本語の似た記事を3本出さない）
+ *   - ライブドアの鍵（LIVEDOOR_API_KEY）はオーナーがこれから登録する。登録されるまでは失敗にせず
+ *     「鍵待ち」として休む（門は key_pending・見張りは warn）
  */
 
 import crypto from 'node:crypto';
@@ -53,10 +63,25 @@ export const AGENT = 'syndication';
 export const MARKER = 'devlog-syndication';
 const UA = 'simplememo-devlog-syndication/1.0 (+https://simplememofast.com/)';
 
+/**
+ * 2026-10-03 に足した2媒体の開示文。既存のはてな（simplememofast.hatenablog.com）の開示文は変えない。
+ * 「開発元が運営するブログ」と書くのは、景品表示法のステルスマーケティング規制（広告であることの表示）に
+ * 当たらないよう、書き手と製品の関係を本文で明示するため。
+ * **「AIエージェントが自動で執筆・公開しています」は見張りがこの経路の記事を見分けるのに使う**（isPipelineFeedEntry）。
+ */
+const OWNED_BLOG_FOOTER_JA = '\n\n---\n\n*この記事は、シンプルメモの開発元が運営するブログの記事です。開発の公開記録（リポジトリと運用ログ）をもとに、AIエージェントが自動で執筆・公開しています。数値はそれらの記録にあるものだけを使っています。*\n';
+
+/**
+ * 媒体の設定。**分岐は媒体名ではなく kind（API と公開面の形）と lang で行う。**
+ *   kind … devto（Forem API）/ hatena（はてなブログ AtomPub・Atom 1.0 の公開フィード）/
+ *          livedoor（ライブドアブログ AtomPub・Atom 0.3 の公開フィード）
+ *   pendingUntilKey … 鍵がまだ登録されていない媒体。鍵が無い間は失敗にせず「鍵待ち」として休む（門・見張り）
+ */
 export const PLATFORMS = {
   devto: {
     label: 'dev.to',
     lang: 'en',
+    kind: 'devto',
     username: 'simple_memo',
     listUrl: 'https://dev.to/api/articles?username=simple_memo&per_page=60',
     articleApi: (id) => `https://dev.to/api/articles/${id}`,
@@ -73,6 +98,7 @@ export const PLATFORMS = {
   hatena: {
     label: 'はてなブログ',
     lang: 'ja',
+    kind: 'hatena',
     hatenaId: 'simplememofast',
     blogId: 'simplememofast.hatenablog.com',
     feedUrl: 'https://simplememofast.hatenablog.com/feed',
@@ -87,7 +113,99 @@ export const PLATFORMS = {
     series: [],
     footer: '\n\n---\n\n*この記事は、シンプルメモ開発の公開記録（リポジトリと運用ログ）をもとに、AIエージェントが自動で執筆・公開しています。数値はそれらの記録にあるものだけを使っています。*\n',
   },
+  // はてなブログ「メモの設計図」。同じはてなID・同じ HATENA_API_KEY で投稿できる（はてなのAPIキーはアカウント単位）。
+  // 読者向けの「メモの仕組みの設計」の文章を置くブログで、開発日誌の体にしない（RUNBOOK §3）。
+  hatenadiary: {
+    label: 'はてなブログ「メモの設計図」',
+    lang: 'ja',
+    kind: 'hatena',
+    hatenaId: 'simplememofast',
+    blogId: 'simplememofast.hatenadiary.jp',
+    feedUrl: 'https://simplememofast.hatenadiary.jp/feed',
+    atomUrl: 'https://blog.hatena.ne.jp/simplememofast/simplememofast.hatenadiary.jp/atom/entry',
+    secretEnv: 'HATENA_API_KEY',
+    sitemap: 'sitemap-ja.xml',
+    minIntervalHours: 66,
+    chars: [2500, 7500],
+    siteLinks: [1, 2],
+    otherLinksMax: 3,
+    tagsMax: 5,
+    series: [],
+    footer: OWNED_BLOG_FOOTER_JA,
+  },
+  // ライブドアブログ「captio式シンプルメモ開発日誌」。AtomPub の仕様は公式ヘルプ
+  // https://support.livedoor.info/hc/ja/articles/9615538421007 （エンドポイント /atompub/<ブログ名>/article・
+  // HTTPS の Basic 認証＝ライブドアID と APIキー（AtomPub用パスワード）・WSSE も可・無いカテゴリは自動で作られる・タグは付けられない）。
+  // **カテゴリは「メモ術」に固定**する（モデルの tags を送ると、カテゴリが勝手に増える）。
+  livedoor: {
+    label: 'ライブドアブログ',
+    lang: 'ja',
+    kind: 'livedoor',
+    livedoorId: 'captio',
+    blogName: 'captio',
+    publicHost: 'captio.livedoor.blog',
+    feedUrl: 'https://captio.livedoor.blog/atom.xml',
+    atomUrl: 'https://livedoor.blogcms.jp/atompub/captio/article',
+    secretEnv: 'LIVEDOOR_API_KEY',
+    pendingUntilKey: true,
+    keySetEnv: 'LIVEDOOR_KEY_SET',
+    sitemap: 'sitemap-ja.xml',
+    minIntervalHours: 66,
+    chars: [2500, 7500],
+    siteLinks: [1, 2],
+    otherLinksMax: 3,
+    tagsMax: 5,
+    series: [],
+    categories: ['メモ術'],
+    footer: OWNED_BLOG_FOOTER_JA,
+  },
 };
+
+/**
+ * 媒体の設定の整合。kind ごとに要る欄・鍵の環境変数名・https・開示文・ID と URL の食い違いを見る。
+ * 媒体を足すときに欄を書き落とすと、その媒体だけ投稿や見張りが黙って外れるので、自己テストで固定する。
+ */
+export function platformConfigProblems(platforms = PLATFORMS) {
+  const problems = [];
+  const need = {
+    devto: ['username', 'listUrl', 'articleApi'],
+    hatena: ['hatenaId', 'blogId', 'feedUrl', 'atomUrl'],
+    livedoor: ['livedoorId', 'blogName', 'publicHost', 'feedUrl', 'atomUrl', 'categories'],
+  };
+  for (const [p, c] of Object.entries(platforms)) {
+    if (!need[c.kind]) { problems.push(`${p}: 知らない kind「${c.kind}」`); continue; }
+    for (const k of need[c.kind]) if (c[k] === undefined || c[k] === null || c[k] === '') problems.push(`${p}: ${k} が無い`);
+    if (!['en', 'ja'].includes(c.lang)) problems.push(`${p}: lang「${c.lang}」`);
+    if (!/^[A-Z][A-Z0-9_]*_API_KEY$/.test(String(c.secretEnv))) problems.push(`${p}: secretEnv「${c.secretEnv}」`);
+    for (const k of ['listUrl', 'feedUrl', 'atomUrl']) {
+      if (k in c && !String(c[k]).startsWith('https://')) problems.push(`${p}: ${k} が https でない（${c[k]}）`);
+    }
+    if (c.pendingUntilKey === true && !c.keySetEnv) problems.push(`${p}: 鍵待ちの媒体に keySetEnv が無い（見張りが鍵の登録を知れない）`);
+    const disclosure = c.lang === 'en' ? 'by an AI agent' : 'AIエージェントが自動で執筆・公開しています';
+    if (!String(c.footer ?? '').includes(disclosure)) problems.push(`${p}: 開示文（${disclosure}）が無い`);
+    const range = c.lang === 'en' ? c.words : c.chars;
+    if (!Array.isArray(range) || range.length !== 2 || !(range[0] < range[1])) problems.push(`${p}: 長さの範囲が無い`);
+    if (!Array.isArray(c.siteLinks) || !(c.siteLinks[0] >= 1) || !(c.siteLinks[1] >= c.siteLinks[0])) problems.push(`${p}: siteLinks（自社リンクの本数）`);
+    if (c.kind === 'hatena' && !String(c.atomUrl).endsWith(`/${c.hatenaId}/${c.blogId}/atom/entry`)) problems.push(`${p}: atomUrl がはてなID・ブログIDと食い違う`);
+    if (c.kind === 'livedoor' && !String(c.atomUrl).endsWith(`/atompub/${c.blogName}/article`)) problems.push(`${p}: atomUrl がブログ名と食い違う`);
+    if (c.kind === 'livedoor' && !(Array.isArray(c.categories) && c.categories.length)) problems.push(`${p}: 固定のカテゴリが無い`);
+  }
+  return problems;
+}
+
+/** 投稿に使うアカウント名（published.json の account 欄）。 */
+export function accountOf(cfg) {
+  if (cfg.kind === 'devto') return cfg.username;
+  if (cfg.kind === 'hatena') return cfg.hatenaId;
+  if (cfg.kind === 'livedoor') return cfg.livedoorId;
+  throw new Error(`知らない kind: ${cfg.kind}`);
+}
+
+/** 同じ言語の他の媒体（姉妹ブログ）。日本語の3媒体は「使った題材」を共有する。 */
+export function siblingsOf(platform) {
+  const lang = PLATFORMS[platform]?.lang;
+  return Object.keys(PLATFORMS).filter((p) => p !== platform && PLATFORMS[p].lang === lang);
+}
 
 // ─────────────────────────────────────────────────────────────
 // 共通
@@ -191,13 +309,34 @@ export function readStop(file = STOP_PATH) {
  *   - 公開面が読めなければ走らない（読めないのに「前回から十分空いた」と推測しない）
  *   - 直近24時間に1本でもあれば、force でも走らない（連投の上限）
  *   - 最新投稿から minIntervalHours 未満なら走らない（force で飛ばせるのはここだけ）
+ *
+ * 投稿用の鍵が無いとき（keyMissing。ワークフローが真偽だけを渡す。値は渡さない）:
+ *   - pendingUntilKey の媒体（鍵をこれから登録する媒体）は key_pending で休む。**失敗にしない**（オーナー作業の待ち）。
+ *     公開面が読めなくても、鍵が無ければどのみち出さないので、読めないより先に判定する
+ *   - それ以外の媒体は、投稿する番（due）のときに no_key で落とす。旧ワークフローの「投稿用の鍵があるか」と同じく、
+ *     **黙って休まずに落とす**（間隔待ち・読めないの判定は今までどおり先に出る）
+ *   - 試験実行（dry_run）は鍵を見ない。鍵の登録前でも、書いて検査するところまで経路を試せる
  */
-export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHours, force = false, dryRun = false, readError = null }) {
+export function decideGate({ stop, latestIso, postsLast24h, now, minIntervalHours, force = false, dryRun = false, readError = null,
+  keyMissing = false, pendingUntilKey = false, secretEnv = '投稿用の鍵' }) {
   if (stop?.stopped) return { due: false, code: 'stopped', reason: stop.reason };
+  if (keyMissing && !dryRun && pendingUntilKey) {
+    return { due: false, code: 'key_pending', reason: `${secretEnv} が未登録。登録されるまで投稿しない（オーナー作業）` };
+  }
   if (readError) return { due: false, code: 'unreadable', reason: `公開面の最新投稿を読めない: ${readError}` };
   // 試験実行（dry_run）は投稿しないので、間隔と「24時間に1本」では止めない（いつでも経路全体を試せるように）。
   // 停止と「公開面を読めない」は本番と同じく止める。投稿しないことは publish --dry-run 側で保証する。
   if (dryRun) return { due: true, code: 'dry_run', reason: '試験実行（投稿しない）: 間隔と24時間の上限は見ない' };
+  const d = decideInterval({ latestIso, postsLast24h, now, minIntervalHours, force });
+  if (keyMissing && d.due === true) {
+    return { ...d, due: false, code: 'no_key',
+      reason: `${secretEnv} が GitHub Secrets に無い（投稿する番だった: ${d.reason}）。黙って休まずに落とす` };
+  }
+  return d;
+}
+
+/** 間隔と「24時間に1本」だけの判定（decideGate の後半）。 */
+function decideInterval({ latestIso, postsLast24h, now, minIntervalHours, force }) {
   if (postsLast24h > 0) {
     return { due: false, code: 'daily_cap', reason: `直近24時間に ${postsLast24h} 本ある（1日1本まで。force でも越えない）` };
   }
@@ -271,16 +410,38 @@ export function entryAlternateUrl(xml) {
   return null;
 }
 
-/** はてなブログの公開フィード（キー不要・最新30件）。 */
+/**
+ * XML の要素の中身を文字列にする。CDATA の部分は**そのまま**（実体参照を解かない）、それ以外は実体参照を解く。
+ * ライブドアの公開フィードは本文を `<content …><![CDATA[ …HTML… ]]></content>` で持つ（2026-10-03 実測）。
+ * CDATA の中の `&amp;` は HTML としての `&amp;` なので、解くと本文の意味が変わる。はてなは CDATA を使わないので、従来と同じ結果になる。
+ */
+export function xmlText(inner) {
+  const s = String(inner ?? '');
+  let out = '';
+  let last = 0;
+  for (const m of s.matchAll(/<!\[CDATA\[([\s\S]*?)\]\]>/g)) {
+    out += decodeEntities(s.slice(last, m.index)) + m[1];
+    last = m.index + m[0].length;
+  }
+  return out + decodeEntities(s.slice(last));
+}
+
+/**
+ * Atom の公開フィードと AtomPub の一覧を読む（はてな: Atom 1.0・最新30件 / ライブドア: Atom 0.3）。
+ * 公開日時は published → issued → updated → modified の順に読む。ライブドアの公開フィードは Atom 0.3 で、
+ * entry に published が無く `<issued>2026-09-22T18:55:24+09:00</issued>` と `<modified>…Z</modified>` を持つ
+ * （issued が公開時刻。modified は編集で動く）。題名は属性つき（`<title type="text">`）も読む。
+ */
 export function parseAtomFeed(xml) {
   const entries = [];
   for (const m of String(xml).matchAll(/<entry\b[^>]*>([\s\S]*?)<\/entry>/g)) {
     const e = m[1];
-    const title = decodeEntities((/<title>([\s\S]*?)<\/title>/.exec(e) || [])[1] || '').trim();
+    const title = xmlText((/<title\b[^>]*>([\s\S]*?)<\/title>/.exec(e) || [])[1] || '').trim();
     const url = entryAlternateUrl(e);
-    const published = (/<published>([^<]+)<\/published>/.exec(e) || /<updated>([^<]+)<\/updated>/.exec(e) || [])[1] || null;
-    const content = decodeEntities((/<content[^>]*>([\s\S]*?)<\/content>/.exec(e) || [])[1] || '');
-    const summary = decodeEntities((/<summary[^>]*>([\s\S]*?)<\/summary>/.exec(e) || [])[1] || '');
+    const published = ((/<published>([^<]+)<\/published>/.exec(e) || /<issued>([^<]+)<\/issued>/.exec(e)
+      || /<updated>([^<]+)<\/updated>/.exec(e) || /<modified>([^<]+)<\/modified>/.exec(e) || [])[1] || '').trim() || null;
+    const content = xmlText((/<content\b[^>]*>([\s\S]*?)<\/content>/.exec(e) || [])[1] || '');
+    const summary = xmlText((/<summary\b[^>]*>([\s\S]*?)<\/summary>/.exec(e) || [])[1] || '');
     // AtomPub の一覧だけが持つ欄。公開フィードには無い（= null で「読めない」）。
     const draftTag = /<app:draft>\s*(yes|no)\s*<\/app:draft>/.exec(e);
     const draft = draftTag ? draftTag[1] === 'yes' : null;
@@ -289,16 +450,21 @@ export function parseAtomFeed(xml) {
   return entries;
 }
 
-async function hatenaPublicPosts() {
-  const res = await fetchWithRetry(`${PLATFORMS.hatena.feedUrl}?${freshQuery()}`, { okStatuses: [200] });
-  assertFresh(res, 'はてなの公開フィード');
+/**
+ * はてな・ライブドアの公開フィード（キー不要）。**クエリを毎回変えてキャッシュを通さずに読む。**
+ * ライブドアの公開フィードは Age ヘッダを返さず、`?fresh=…` を付けても 200 を返す（2026-10-03 実測）。
+ */
+async function feedPublicPosts(cfg) {
+  const res = await fetchWithRetry(`${cfg.feedUrl}?${freshQuery()}`, { okStatuses: [200] });
+  assertFresh(res, `${cfg.label}の公開フィード`);
   const entries = parseAtomFeed(await res.text());
-  if (!entries.length) throw new Error('はてなのフィードに entry が無い（読み方が壊れている可能性）');
+  if (!entries.length) throw new Error(`${cfg.label}のフィードに entry が無い（読み方が壊れている可能性）`);
   return entries;
 }
 
 export async function publicPosts(platform) {
-  return platform === 'devto' ? devtoPublicPosts() : hatenaPublicPosts();
+  const cfg = PLATFORMS[platform];
+  return cfg.kind === 'devto' ? devtoPublicPosts() : feedPublicPosts(cfg);
 }
 
 async function cmdGate(argv) {
@@ -314,11 +480,17 @@ async function cmdGate(argv) {
   const latest = times.length ? new Date(Math.max(...times)).toISOString() : null;
   const postsLast24h = times.filter((t) => now.getTime() - t < 24 * 3600000).length;
   const d = decideGate({ stop, latestIso: latest, postsLast24h, now, minIntervalHours: cfg.minIntervalHours,
-    force: argv.includes('--force'), dryRun: argv.includes('--dry-run'), readError });
+    force: argv.includes('--force'), dryRun: argv.includes('--dry-run'), readError,
+    keyMissing: argv.includes('--key-missing'), pendingUntilKey: cfg.pendingUntilKey === true, secretEnv: cfg.secretEnv });
   console.log(`[${cfg.label}] ${d.due ? '投稿する' : '投稿しない'} — ${d.code}: ${d.reason}（最新: ${latest ?? 'なし'}）`);
   writeOutput(argValue(argv, '--github-output'), { due: d.due, code: d.code, latest: latest ?? '', reason: d.reason });
-  // 読めない・停止は「異常」なので目立たせる。間隔待ちは正常。
+  // 読めない・鍵が無いのに投稿する番・停止は「異常」なので目立たせる。間隔待ちは正常。鍵待ちはオーナー作業の待ちなので注意だけ。
   if (d.code === 'unreadable') process.exitCode = 1;
+  if (d.code === 'no_key') {
+    console.log(`::error title=Devlog syndication::${platform} の投稿用の鍵（${cfg.secretEnv}）が GitHub Secrets に無い。黙って休まずに落とす。`);
+    process.exitCode = 1;
+  }
+  if (d.code === 'key_pending') console.log(`::warning title=Devlog syndication key pending::${cfg.label}: ${d.reason}`);
   if (d.code === 'stopped') console.log(`::warning title=Devlog syndication stopped::${d.reason}`);
 }
 
@@ -350,9 +522,9 @@ export function parseSeeds(md) {
   return seeds;
 }
 
-/** その媒体で使える種か。dev.to は英語の下書きがある種、はてなは日本語長文（note向け）がある種。 */
+/** その媒体で使える種か。英語の媒体（dev.to）は英語の下書きがある種、日本語の媒体は日本語長文（note向け）がある種。 */
 export function seedFits(seed, platform) {
-  return platform === 'devto' ? Boolean(seed.drafts.en) : Boolean(seed.drafts.note);
+  return PLATFORMS[platform].lang === 'en' ? Boolean(seed.drafts.en) : Boolean(seed.drafts.note);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -425,20 +597,25 @@ export const LEGACY_HATENA_BASES = {
   'https://simplememofast.hatenablog.com/entry/2026/09/29/211832': 'S-20260907-fixed-but-unconfirmed',
 };
 
-/** はてなの公開フィードの entry から、使った題材を読む（印・見える記録・見える記録より前の記事の表）。 */
-export function hatenaBases(entry) {
+/**
+ * 公開フィード（はてな・ライブドア）の entry から、使った題材を読む（印・見える記録・見える記録より前の記事の表）。
+ * 表は URL で引くので、はてな以外の媒体の記事には当たらない。
+ */
+export function feedBases(entry) {
   const out = new Set(readMarkers(entry?.content).map((m) => m.basis).filter(Boolean));
   const legacy = LEGACY_HATENA_BASES[entry?.url];
   if (legacy) out.add(legacy);
   return [...out];
 }
+/** 旧名（はてなだけだったころの名前）。 */
+export const hatenaBases = feedBases;
 
 async function existingPosts(platform) {
   const posts = await publicPosts(platform);
   posts.sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
   const bases = new Set();
   const detailed = [];
-  if (platform === 'devto') {
+  if (PLATFORMS[platform].kind === 'devto') {
     // 本文は新しい15本だけ取りに行く（印と書き出しを読むため）。一覧だけでは本文が無い。
     for (const p of posts.slice(0, 15)) {
       try {
@@ -451,7 +628,7 @@ async function existingPosts(platform) {
     }
   } else {
     for (const p of posts) {
-      for (const b of hatenaBases(p)) bases.add(b);
+      for (const b of feedBases(p)) bases.add(b);
       detailed.push({ title: p.title, url: p.url, published_at: p.published_at,
         opening: String(p.summary || p.content.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').slice(0, 300) });
     }
@@ -459,6 +636,29 @@ async function existingPosts(platform) {
   const byUrl = new Map(detailed.map((d) => [d.url, d]));
   const all = posts.map((p) => byUrl.get(p.url) || { title: p.title, url: p.url, published_at: p.published_at, tags: p.tags });
   return { posts: all, usedBases: [...bases] };
+}
+
+/**
+ * 同じ言語の姉妹ブログの題材と記事を、文脈に合流させる（純粋関数）。
+ * **日本語の3媒体で同じ種から似た記事を3本出さない**ために、姉妹の公開面で使われた題材も「使用済み」に数える。
+ * 姉妹の記事は existing_posts に混ぜず sibling_posts に分けて載せる（題名の近さは両方に対して検査する）。
+ * 姉妹が読めないときは sibling_read_errors に残して続ける。**自媒体が読めないのは今まで通り失敗**（呼び出し側が投げる）。
+ *   own      … { usedBases }
+ *   siblings … [{ platform, posts, usedBases }] か、読めなかった姉妹は [{ platform, error }]
+ */
+export function mergeSiblingContext(own, siblings) {
+  const used = new Set(own?.usedBases || []);
+  const ownCount = used.size;
+  const sibling_posts = [];
+  const sibling_read_errors = [];
+  for (const s of siblings || []) {
+    if (s.error !== undefined) { sibling_read_errors.push({ platform: s.platform, error: String(s.error) }); continue; }
+    for (const b of s.usedBases || []) used.add(b);
+    for (const p of s.posts || []) {
+      sibling_posts.push({ platform: s.platform, title: p.title, url: p.url, published_at: p.published_at, opening: p.opening ?? null });
+    }
+  }
+  return { used_bases: [...used], sibling_bases_added: used.size - ownCount, sibling_posts, sibling_read_errors };
 }
 
 export function productFacts(constants) {
@@ -485,7 +685,21 @@ async function cmdContext(argv) {
   if (!out) throw new Error('--out が要る');
   const seeds = parseSeeds(fs.readFileSync(SEEDS_PATH, 'utf8'));
   if (!seeds.length) throw new Error('docs/story-seeds.md から種を1件も読めない — 読み方が壊れている');
-  const { posts, usedBases } = await existingPosts(platform);
+  // 自媒体の公開面が読めないのは失敗（投げる）。姉妹ブログが読めないのは記録して続ける。
+  const own = await existingPosts(platform);
+  const posts = own.posts;
+  const siblings = [];
+  for (const s of siblingsOf(platform)) {
+    try {
+      const r = await existingPosts(s);
+      siblings.push({ platform: s, posts: r.posts, usedBases: r.usedBases });
+    } catch (e) {
+      siblings.push({ platform: s, error: e.message });
+      console.log(`::warning title=Devlog syndication sibling::${PLATFORMS[s].label}の公開面を読めない（題材の共有から外して続ける）: ${e.message}`);
+    }
+  }
+  const merged = mergeSiblingContext(own, siblings);
+  const usedBases = merged.used_bases;
   const constants = JSON.parse(fs.readFileSync(CONSTANTS_PATH, 'utf8'));
   const links = allowedLinks(platform);
   const ctx = {
@@ -497,18 +711,25 @@ async function cmdContext(argv) {
       other_links_max: cfg.otherLinksMax, tags_max: cfg.tagsMax,
     },
     series_allowed: cfg.series,
+    // カテゴリをスクリプトが固定する媒体（ライブドア）。tags は書いてよいが送られない
+    categories_fixed: cfg.categories ?? null,
     used_bases: usedBases,
+    sibling_platforms: siblingsOf(platform),
     seeds_available: seeds.filter((s) => seedFits(s, platform) && !usedBases.includes(s.id))
       .map(({ raw, ...s }) => s),
     seeds_used_or_unfit: seeds.filter((s) => !seedFits(s, platform) || usedBases.includes(s.id)).map((s) => s.id),
     existing_posts: posts.map((p) => ({ title: p.title, published_at: p.published_at, url: p.url, opening: p.opening ?? undefined })),
+    sibling_posts: merged.sibling_posts,
+    sibling_read_errors: merged.sibling_read_errors,
     product_facts: productFacts(constants),
     fact_files: ['llms.txt', 'data/site-constants.json', 'data/benchmark.json', 'docs/story-seeds.md'],
     allowed_site_links: links.map(({ url, file, title }) => ({ url, file, title })),
   };
   fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
   fs.writeFileSync(out, JSON.stringify(ctx, null, 2));
-  console.log(`[${cfg.label}] 文脈: 既存 ${posts.length} 本 / 使用済みの題材 ${usedBases.length} / 使える種 ${ctx.seeds_available.length} / リンク候補 ${links.length} → ${out}`);
+  console.log(`[${cfg.label}] 文脈: 既存 ${posts.length} 本 / 使用済みの題材 ${usedBases.length}（うち姉妹ブログから ${merged.sibling_bases_added}）`
+    + ` / 姉妹ブログの記事 ${merged.sibling_posts.length} 本（読めない姉妹 ${merged.sibling_read_errors.length}）`
+    + ` / 使える種 ${ctx.seeds_available.length} / リンク候補 ${links.length} → ${out}`);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -739,8 +960,10 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
   if (lang === 'en' && (title.length < 20 || title.length > 110)) P(`題名の長さ ${title.length}（20〜110字）`);
   if (lang === 'ja' && (title.length < 12 || title.length > 60)) P(`題名の長さ ${title.length}（12〜60字）`);
   const tags = Array.isArray(article.tags) ? article.tags : [];
-  if (!tags.length || tags.length > cfg.tagsMax) P(`tags は1〜${cfg.tagsMax}個（${tags.length}個）`);
-  if (ctx.platform === 'devto') {
+  // カテゴリをスクリプトが固定する媒体（ライブドア）は tags を送らないので、書かなくてもよい（書くなら同じ形）
+  const minTags = cfg.categories ? 0 : 1;
+  if (tags.length < minTags || tags.length > cfg.tagsMax) P(`tags は${minTags}〜${cfg.tagsMax}個（${tags.length}個）`);
+  if (cfg.kind === 'devto') {
     for (const t of tags) if (!/^[a-z0-9]{2,30}$/.test(t)) P(`dev.to のタグ「${t}」は英小文字と数字だけ（2〜30字）`);
     if (String(article.description ?? '').length > 170) P('description は170字以内');
     // series は任意。**書いたなら**許可された名前のどれか（書かないのは null / 欄なし）
@@ -760,15 +983,16 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
   const [lo, hi] = lang === 'en' ? cfg.words : cfg.chars;
   if (len < lo || len > hi) P(`本文の長さ ${len}${lang === 'en' ? '語' : '字'}（${lo}〜${hi}）`);
 
-  // 題材・出典
+  // 題材・出典。日本語の媒体は、姉妹ブログ（日本語の他の2媒体）で使った題材も used_bases に入っている（文脈が合流させる）
   const basis = String(article.basis);
   const seed = (ctx.seeds_available || []).find((s) => s.id === basis);
+  const usedWhere = lang === 'ja' ? 'この媒体か日本語の姉妹ブログで使用済み' : 'この媒体で使用済み';
   if (/^S-\d{8}-/.test(basis)) {
-    if ((ctx.used_bases || []).includes(basis)) P(`題材 ${basis} はこの媒体で使用済み`);
+    if ((ctx.used_bases || []).includes(basis)) P(`題材 ${basis} は${usedWhere}`);
     else if (!seed) P(`題材 ${basis} は使える種の一覧に無い`);
   } else if (/^page:/.test(basis)) {
     const file = basis.slice(5);
-    if ((ctx.used_bases || []).includes(basis)) P(`題材 ${basis} はこの媒体で使用済み`);
+    if ((ctx.used_bases || []).includes(basis)) P(`題材 ${basis} は${usedWhere}`);
     if (!(ctx.allowed_site_links || []).some((l) => l.file === file)) P(`題材のページ ${file} がリンク候補（sitemap）に無い`);
   } else {
     P('basis は「S-YYYYMMDD-…」（記事ネタ台帳の種）か「page:<ファイル>」（サイトのページ）');
@@ -840,11 +1064,15 @@ export async function validateArticle(article, ctx, { readFile = (p) => fs.readF
     }
   }
 
-  // 既存記事との重複
+  // 既存記事との重複（自媒体と、同じ言語の姉妹ブログの両方）
   const tk = titleTokens(title, lang);
   for (const p of ctx.existing_posts || []) {
     const sim = jaccard(tk, titleTokens(p.title, lang));
     if (sim >= 0.55) P(`既存記事と題名が近い（${sim.toFixed(2)}）: 「${p.title}」`);
+  }
+  for (const p of ctx.sibling_posts || []) {
+    const sim = jaccard(tk, titleTokens(p.title, lang));
+    if (sim >= 0.55) P(`姉妹ブログ（${PLATFORMS[p.platform]?.label ?? p.platform}）の既存記事と題名が近い（${sim.toFixed(2)}）: 「${p.title}」`);
   }
   return { ok: problems.length === 0, problems, stats: { length: len, first_person: fp, site_links: siteLinks.length, other_links: otherLinks.length, product_mentions: mentions } };
 }
@@ -884,12 +1112,257 @@ async function cmdValidate(argv) {
 export function composeBody(article, platform, { runId = 'local', at = new Date().toISOString() } = {}) {
   const cfg = PLATFORMS[platform];
   const marker = `<!-- ${MARKER}: basis=${article.basis}; route=actions; run=${runId}; at=${at} -->`;
-  // はてなは HTML コメントを公開面から消すので、題材の記録を見える形でも付ける（VISIBLE_BASIS_LABEL の説明）
-  const visible = platform === 'hatena' ? `\n*${VISIBLE_BASIS_LABEL}: ${article.basis}*\n` : '';
+  // はてなは HTML コメントを公開面から消すので、題材の記録を見える形でも付ける（VISIBLE_BASIS_LABEL の説明）。
+  // ライブドアがコメントを残すかは投稿するまで分からないので、dev.to 以外はすべて見える記録を付ける。
+  const visible = cfg.kind !== 'devto' ? `\n*${VISIBLE_BASIS_LABEL}: ${article.basis}*\n` : '';
   return `${String(article.body_markdown).trim()}${cfg.footer}${visible}\n${marker}\n`;
 }
 
 const xmlEscape = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+// ─────────────────────────────────────────────────────────────
+// Markdown → HTML（ライブドアブログ用。**依存なし** — ワークフローは npm install せずにこのスクリプトを動かす）
+// ─────────────────────────────────────────────────────────────
+//
+// ライブドアの AtomPub は本文を HTML で受ける（はてなは Markdown のまま受ける）。執筆ステップには Markdown で書かせ、
+// ここで HTML にする。扱うのは記事に要る範囲だけ:
+//   見出し（# と ## は h2・### は h3・#### 以下は h4）/ 段落（段落内の単独改行は <br>）/ --- と *** の区切り線 /
+//   > 引用 / 箇条書き（- * +）と番号付き（1.）/ ``` のコードブロック / GFM のパイプ表 /
+//   インラインのコード・**太字**・*斜体*・[文字](http(s)://…) のリンク
+// **それ以外の HTML はすべてエスケープする**（モデルが書いたタグを本文に通さない）。例外は composeBody が付ける
+// 印 `<!-- devlog-syndication: … -->` の行だけ。アンダースコアの強調は扱わない（ファイル名の _ を壊さない）。
+// リンクは http(s) だけ。**自社リンクに rel を付けない**（dofollow のまま載せるため）。
+// リンクになる URL は、検証（extractLinks）が拾って確かめた URL の部分集合になる（同じ形の正規表現・コードの中は除く）。
+
+const escapeHtml = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const MD_MARKER_LINE = /^<!--\s*devlog-syndication:[^<>]*-->$/;
+const MD_FENCE = /^ {0,3}(`{3,}|~{3,})(.*)$/;
+const MD_HR = /^ {0,3}(?:(?:-[ \t]*){3,}|(?:\*[ \t]*){3,})$/;
+const MD_HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
+const MD_BULLET = /^( {0,3})([-*+])([ \t]+)(.*)$/;
+const MD_ORDERED = /^( {0,3})(\d{1,9})([.)])([ \t]+)(.*)$/;
+const MD_QUOTE = /^ {0,3}>[ ]?(.*)$/;
+const MD_TABLE_DELIM_CELL = /^:?-+:?$/;
+
+function mdFence(line) {
+  const m = MD_FENCE.exec(line);
+  if (!m) return null;
+  // ``` の後ろに ` があるものはコードブロックではない（インラインのコード）
+  if (m[1][0] === '`' && m[2].includes('`')) return null;
+  const lang = (/^\s*([A-Za-z0-9_+#.-]+)/.exec(m[2]) || [])[1] || '';
+  return { char: m[1][0], len: m[1].length, lang };
+}
+
+function mdListItem(line) {
+  let m = MD_BULLET.exec(line);
+  if (m) return { ordered: false, indent: m[1].length, contentIndent: m[1].length + 1 + Math.min(m[3].length, 4), text: m[4] };
+  m = MD_ORDERED.exec(line);
+  if (m) return { ordered: true, indent: m[1].length, start: Number(m[2]),
+    contentIndent: m[1].length + m[2].length + 1 + Math.min(m[4].length, 4), text: m[5] };
+  return null;
+}
+
+/** GFM の表の行を区切る（\| は区切りにしない）。 */
+function mdSplitRow(line) {
+  let s = line.trim();
+  if (s.startsWith('|')) s = s.slice(1);
+  if (s.endsWith('|') && !s.endsWith('\\|')) s = s.slice(0, -1);
+  const cells = [];
+  let cur = '';
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] === '\\' && s[i + 1] === '|') { cur += '|'; i++; continue; }
+    if (s[i] === '|') { cells.push(cur.trim()); cur = ''; continue; }
+    cur += s[i];
+  }
+  cells.push(cur.trim());
+  return cells;
+}
+
+/** 見出し行＋区切り行（|---|:---:|）なら表の頭を返す。区切り行の列数が見出しと違えば表にしない（GFM と同じ）。 */
+function mdTableHead(line, next) {
+  // 最後の行（次の行が無い）は区切り行を持てないので表ではない
+  if (typeof line !== 'string' || typeof next !== 'string' || !line.includes('|') || !next.includes('|')) return null;
+  const head = mdSplitRow(line);
+  const delim = mdSplitRow(next);
+  if (head.length !== delim.length || !delim.every((c) => MD_TABLE_DELIM_CELL.test(c))) return null;
+  const align = delim.map((c) => (c.startsWith(':') && c.endsWith(':') ? 'center' : c.endsWith(':') ? 'right' : c.startsWith(':') ? 'left' : null));
+  return { head, align };
+}
+
+/** 段落を途中で切る行か（CommonMark と同じく、番号付きは 1 で始まるときだけ段落を切る）。 */
+function mdStartsBlock(line, next) {
+  return MD_MARKER_LINE.test(line.trim()) || MD_HEADING.test(line) || MD_HR.test(line) || mdFence(line) !== null
+    || MD_QUOTE.test(line) || MD_BULLET.test(line) || /^ {0,3}1[.)][ \t]+\S/.test(line) || mdTableHead(line, next) !== null;
+}
+
+/** 強調（*斜体*・**太字**・***両方***）。エスケープ済みの文字列に当てる。アンダースコアは扱わない。 */
+function mdEmphasis(s) {
+  return s
+    .replace(/\*\*\*(?=\S)([\s\S]*?\S)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(?=\S)([\s\S]*?\S)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(?=\S)([^*]*?\S)\*/g, '<em>$1</em>');
+}
+
+/**
+ * インライン（コード・画像・リンク・バックスラッシュのエスケープ・強調）。**それ以外の文字はすべてエスケープする。**
+ * リンクは生の文字列の上で、検証の extractLinks と同じ形で拾う（描いた href は必ず検証が確かめた URL になる）。
+ */
+export function mdInline(text) {
+  const slots = [];
+  const hold = (html) => `\u0000${slots.push(html) - 1}\u0000`;
+  const plain = (t) => mdEmphasis(escapeHtml(String(t).replace(/\\([!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~])/g, (_, c) => hold(escapeHtml(c)))));
+  let s = String(text ?? '').replace(/\u0000/g, '');
+  s = s.replace(/(`+)([\s\S]*?[^`])\1(?!`)/g, (_, ticks, code) => hold(`<code>${escapeHtml(code.replace(/\n/g, ' ').replace(/^ ([\s\S]*) $/, '$1'))}</code>`));
+  // 画像は載せない（ホットリンクを作らない。検証も画像の URL を見ていない）。代替テキストだけ残す
+  s = s.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)(?:\s+"[^"]*")?\)/g, (_, alt) => hold(escapeHtml(alt)));
+  // リンクは http(s) だけ。rel も target も付けない（自社リンクを dofollow のまま載せる）
+  s = s.replace(/\[([^\]]*)\]\((https?:\/\/[^)\s]+)(?:\s+"[^"]*")?\)/g,
+    (_, label, url) => hold(`<a href="${escapeHtml(url)}">${plain(label)}</a>`));
+  s = plain(s);
+  for (let i = 0; i < 8 && s.includes('\u0000'); i++) s = s.replace(/\u0000(\d+)\u0000/g, (_, n) => slots[Number(n)]);
+  return s;
+}
+
+function mdRenderBlocks(lines, sep) {
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.trim() === '') { i++; continue; }
+    // composeBody が付ける印の行だけは、そのまま通す（題材の記録を本文に残す。中に < > を含むものは通さない）
+    if (MD_MARKER_LINE.test(line.trim())) { out.push(line.trim()); i++; continue; }
+    const fence = mdFence(line);
+    if (fence) {
+      // 閉じるのは、同じ文字で開きと同じ長さ以上の行（後ろは空白だけ）。閉じなければ最後までコード（CommonMark と同じ）
+      const closeRe = new RegExp(`^ {0,3}${fence.char === '~' ? '~' : '\\x60'}{${fence.len},}[ \\t]*$`);
+      const code = [];
+      i++;
+      for (; i < lines.length; i++) {
+        if (closeRe.test(lines[i])) { i++; break; }
+        code.push(lines[i]);
+      }
+      const cls = fence.lang ? ` class="language-${escapeHtml(fence.lang)}"` : '';
+      out.push(`<pre><code${cls}>${escapeHtml(code.join('\n'))}</code></pre>`);
+      continue;
+    }
+    const heading = MD_HEADING.exec(line);
+    if (heading) {
+      const level = Math.min(Math.max(heading[1].length, 2), 4);
+      out.push(`<h${level}>${mdInline((heading[2] || '').trim())}</h${level}>`);
+      i++;
+      continue;
+    }
+    if (MD_HR.test(line)) { out.push('<hr>'); i++; continue; }
+    if (MD_QUOTE.test(line)) {
+      const inner = [];
+      for (; i < lines.length; i++) {
+        const q = MD_QUOTE.exec(lines[i]);
+        if (!q) break;
+        inner.push(q[1]);
+      }
+      out.push(`<blockquote>${mdRenderBlocks(inner, '')}</blockquote>`);
+      continue;
+    }
+    const table = mdTableHead(line, lines[i + 1]);
+    if (table) {
+      // 表は空行か | の無い行で終わる
+      const rows = [];
+      for (i += 2; i < lines.length; i++) {
+        if (lines[i].trim() === '' || !lines[i].includes('|')) break;
+        rows.push(mdSplitRow(lines[i]));
+      }
+      const cell = (tag, text, k) => `<${tag}${table.align[k] ? ` style="text-align:${table.align[k]}"` : ''}>${mdInline(text)}</${tag}>`;
+      const head = `<thead><tr>${table.head.map((c, k) => cell('th', c, k)).join('')}</tr></thead>`;
+      const body = rows.length ? `<tbody>${rows.map((r) => `<tr>${table.head.map((_, k) => cell('td', r[k] ?? '', k)).join('')}</tr>`).join('')}</tbody>` : '';
+      out.push(`<table>${head}${body}</table>`);
+      continue;
+    }
+    const first = mdListItem(line);
+    if (first) {
+      const items = [];
+      let cur = null;
+      for (; i < lines.length; i++) {
+        const ln = lines[i];
+        const it = mdListItem(ln);
+        if (it && it.indent <= first.indent + 1) {
+          if (it.ordered !== first.ordered) break; // 種類の違うリストが続く
+          cur = { lines: [it.text], contentIndent: it.contentIndent };
+          items.push(cur);
+          continue;
+        }
+        if (ln.trim() === '') {
+          // 空行の後に同じ種類の項目か字下げした続きがあれば、同じリストのまま
+          const k = mdNextNonBlank(lines, i + 1);
+          const nx = k === -1 ? null : mdListItem(lines[k]);
+          const sameKind = nx ? nx.ordered === first.ordered : false;
+          const shallow = nx ? nx.indent <= first.indent + 1 : false;
+          if (k !== -1 && ((sameKind && shallow) || /^ {2,}\S/.test(lines[k]))) { cur.lines.push(''); continue; }
+          break;
+        }
+        const lead = (/^ */.exec(ln) || [''])[0].length;
+        if (lead >= 2) { cur.lines.push(ln.slice(Math.min(lead, cur.contentIndent))); continue; }
+        // 字下げの無い続きの行（直前が文字の行で、ほかの塊を始めない行）は、項目の文の続き
+        if (cur.lines[cur.lines.length - 1].trim() !== '' && !mdStartsBlock(ln, lines[i + 1])) { cur.lines.push(ln); continue; }
+        break;
+      }
+      const tag = first.ordered ? 'ol' : 'ul';
+      const start = first.ordered === true && first.start !== 1 ? ` start="${first.start}"` : '';
+      out.push(`<${tag}${start}>${items.map((it) => mdListItemHtml(it.lines)).join('')}</${tag}>`);
+      continue;
+    }
+    // 段落（単独の改行は <br>）。1行目は上のどの塊でもないので必ず取り込む（取り込まないと先へ進まない）
+    const para = [lines[i].trim()];
+    for (i++; i < lines.length; i++) {
+      if (lines[i].trim() === '' || mdStartsBlock(lines[i], lines[i + 1])) break;
+      para.push(lines[i].trim());
+    }
+    out.push(`<p>${mdInline(para.join('\n')).replace(/\n/g, '<br>')}</p>`);
+  }
+  return out.join(sep);
+}
+
+/** from から先で、最初の空でない行の位置（無ければ -1）。 */
+function mdNextNonBlank(lines, from) {
+  for (let k = from; k < lines.length; k++) if (lines[k].trim() !== '') return k;
+  return -1;
+}
+
+/** リストの項目。先頭の文（入れ子の塊が始まるまで）はインラインで、残りは塊として描く。 */
+function mdListItemHtml(itemLines) {
+  const lead = [];
+  let k = 0;
+  for (; k < itemLines.length; k++) {
+    const ln = itemLines[k];
+    if (ln.trim() === '' || (k > 0 && mdStartsBlock(ln, itemLines[k + 1]))) break;
+    lead.push(ln.trim());
+  }
+  const rest = itemLines.slice(k);
+  const restHtml = rest.some((x) => x.trim() !== '') ? mdRenderBlocks(rest, '') : '';
+  return `<li>${mdInline(lead.join('\n')).replace(/\n/g, '<br>')}${restHtml}</li>`;
+}
+
+/** Markdown を HTML にする（ライブドア用）。塊は改行で区切る（リスト・表・引用の中は1行にまとめる）。 */
+export function markdownToHtml(md) {
+  const lines = String(md ?? '').replace(/\r\n?/g, '\n').replace(/\u0000/g, '').split('\n')
+    .map((l) => l.replace(/^\t+/, (t) => '    '.repeat(t.length)));
+  return mdRenderBlocks(lines, '\n');
+}
+
+/**
+ * ライブドアの AtomPub に送る entry。本文は HTML を XML としてエスケープして content（type="text/html"）に入れる。
+ * **カテゴリは引数で受けた固定のものだけ**（呼び出し側は PLATFORMS.livedoor.categories を渡し、モデルの tags は渡さない）。
+ */
+export function livedoorEntryXml({ title, html, categories }) {
+  return `<?xml version="1.0" encoding="utf-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app">
+  <title>${xmlEscape(title)}</title>
+${categories.map((c) => `  <category term="${xmlEscape(c)}"/>`).join('\n')}
+  <content type="text/html">${xmlEscape(html)}</content>
+  <app:control><app:draft>no</app:draft></app:control>
+</entry>
+`;
+}
 
 export function hatenaEntryXml({ title, body, categories, author }) {
   return `<?xml version="1.0" encoding="utf-8"?>
@@ -989,7 +1462,9 @@ export async function publishDevto(article, key, body, { now = new Date(), wait 
 }
 
 /**
- * はてなの認証ヘッダ。公式は Basic（はてなID + APIキー・HTTPS）と WSSE の両方を受ける。
+ * AtomPub の認証ヘッダ。はてなは Basic（はてなID + APIキー・HTTPS）と WSSE の両方を受ける。
+ * ライブドアも同じ2方式（Basic は HTTPS だけ。ユーザー名はライブドアID、パスワードは APIキー＝AtomPub用パスワード。
+ * 公式ヘルプ https://support.livedoor.info/hc/ja/articles/9615538421007 ）。
  * Basic で 401 が返ったときだけ WSSE に切り替える（どちらも鍵の値をログに出さない）。
  */
 export function hatenaAuthHeaders(id, key, mode = 'basic', { nonce = crypto.randomBytes(16), created = new Date().toISOString() } = {}) {
@@ -1001,43 +1476,135 @@ export function hatenaAuthHeaders(id, key, mode = 'basic', { nonce = crypto.rand
   };
 }
 
-async function hatenaRequest(url, key, opts, okStatuses) {
-  const cfg = PLATFORMS.hatena;
-  // 記事の作成（POST）は 5xx・通信の失敗で送り直さない（作成済みかもしれない）。401 は作成されていないので WSSE で送り直す
+/**
+ * AtomPub への要求（はてな・ライブドア共通）。ユーザー名は媒体の設定から取る（はてなID / ライブドアID）。
+ * 記事の作成（POST）は 5xx・通信の失敗で送り直さない（作成済みかもしれない）。401 は作成されていないので WSSE で送り直す。
+ */
+async function atompubRequest(cfg, url, key, opts, okStatuses) {
+  const user = cfg.kind === 'livedoor' ? cfg.livedoorId : cfg.hatenaId;
   const idempotent = (opts.method || 'GET') !== 'POST';
   for (const mode of ['basic', 'wsse']) {
     try {
-      return await fetchWithRetry(url, { ...opts, headers: { ...(opts.headers || {}), ...hatenaAuthHeaders(cfg.hatenaId, key, mode) }, okStatuses, retries: 1, idempotent });
+      return await fetchWithRetry(url, { ...opts, headers: { ...(opts.headers || {}), ...hatenaAuthHeaders(user, key, mode) }, okStatuses, retries: 1, idempotent });
     } catch (e) {
       if (e.status === 401 && mode === 'basic') continue;
       throw e;
     }
   }
-  throw new Error('はてなの認証が Basic でも WSSE でも通らない');
+  throw new Error(`${cfg.label}の認証が Basic でも WSSE でも通らない`);
 }
 
-export async function publishHatena(article, key, body, { now = new Date(), force = false } = {}) {
-  const cfg = PLATFORMS.hatena;
+/** はてなの AtomPub（はてなブログの2つ。設定 cfg で投稿先を決める）。 */
+const hatenaRequest = (cfg, url, key, opts, okStatuses) => atompubRequest(cfg, url, key, opts, okStatuses);
+
+export async function publishHatena(cfg, article, key, body, { now = new Date(), force = false } = {}) {
   // 冪等: 直近の一覧（AtomPub・認証済み）に同じ題名があれば作らない
-  const listXml = await (await hatenaRequest(cfg.atomUrl, key, { method: 'GET' }, [200])).text();
+  const listXml = await (await hatenaRequest(cfg, cfg.atomUrl, key, { method: 'GET' }, [200])).text();
   const entries = parseAtomFeed(listXml);
   // 空の一覧は「投稿が無い」ではなく「読み方が壊れている」と扱う（空を通すと同題の採用も門も素通りする）
-  if (!entries.length) throw new Error('はてなの AtomPub の一覧に entry が無い（読み方が壊れている可能性）— 二重投稿を避けて止める');
+  if (!entries.length) throw new Error(`${cfg.label}の AtomPub の一覧に entry が無い（読み方が壊れている可能性）— 二重投稿を避けて止める`);
   for (const e of entries) {
     if (e.title !== article.title) continue;
     // 公開済みの同題 = 応答が失われた前回の投稿。下書きの同題は中身が同じ保証が無いので止める。
-    if (e.draft !== false) throw new Error(`同じ題名の下書き（または状態を読めない記事）がはてなにある: ${e.title} — 人が確認する`);
+    if (e.draft !== false) throw new Error(`同じ題名の下書き（または状態を読めない記事）が${cfg.label}にある: ${e.title} — 人が確認する`);
     if (!e.url) throw new Error(`同じ題名の記事があるが公開URLを読めない（二重投稿を避けて止める）: ${e.title}`);
     return { url: e.url, reused: true };
   }
   const guard = publishGuard(entries.map((e) => ({ ...e, published: e.draft === false })), now,
-    { minIntervalHours: PLATFORMS.hatena.minIntervalHours, force });
+    { minIntervalHours: cfg.minIntervalHours, force });
   if (!guard.ok) throw new Error(`投稿の直前の確認（AtomPub の一覧）で止めた: ${guard.reason} — 門が読んだ公開フィードが古かった可能性。続けて出さない`);
   const xml = hatenaEntryXml({ title: article.title, body, categories: article.tags, author: cfg.hatenaId });
-  const res = await hatenaRequest(cfg.atomUrl, key, { method: 'POST', headers: { 'content-type': 'application/atom+xml; charset=utf-8' }, body: xml }, [201]);
+  const res = await hatenaRequest(cfg, cfg.atomUrl, key, { method: 'POST', headers: { 'content-type': 'application/atom+xml; charset=utf-8' }, body: xml }, [201]);
   const text = await res.text();
   const url = entryAlternateUrl(text);
-  if (!url) throw new Error(`はてなの応答に公開URLが無い: ${text.slice(0, 300)}`);
+  if (!url) throw new Error(`${cfg.label}の応答に公開URLが無い: ${text.slice(0, 300)}`);
+  return { url, reused: false, member: res.headers.get('location') };
+}
+
+/** ライブドアの公開URLを、公開ホストなら https にそろえる（AtomPub の応答の alternate は http:// で返りうる）。 */
+export function normalizeLivedoorUrl(url, cfg) {
+  try {
+    const u = new URL(url);
+    if (u.protocol === 'http:' && u.hostname === cfg.publicHost) u.protocol = 'https:';
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * ライブドアの AtomPub の応答（作成した entry）から公開URLを読む。
+ * `<link rel="alternate" type="text/html" href="http://….livedoor.blog/archives/NNN.html"/>` があればそれ（公開ホストなら https に）。
+ * 無ければ `<link rel="edit" href="…/atompub/<ブログ名>/article/NNN"/>` の記事番号から公開ページの URL を組み立てる。
+ * どちらも無ければ null（呼び出し側が失敗にする）。
+ */
+export function livedoorPublicUrl(xml, cfg) {
+  const alt = entryAlternateUrl(xml);
+  if (alt) {
+    const u = normalizeLivedoorUrl(alt, cfg);
+    if (u) return u;
+  }
+  for (const m of String(xml ?? '').matchAll(/<link\b([^>]*?)\/?>/g)) {
+    const rel = (/\brel=["']([^"']*)["']/.exec(m[1]) || [])[1];
+    const href = (/\bhref=["']([^"']*)["']/.exec(m[1]) || [])[1];
+    if (rel !== 'edit' || !href) continue;
+    const id = (/\/article\/(\d+)\/?$/.exec(decodeEntities(href)) || [])[1];
+    if (id) return `https://${cfg.publicHost}/archives/${id}.html`;
+  }
+  return null;
+}
+
+/**
+ * ライブドアへ投稿する（AtomPub）。publishHatena と同じ考え方で、投稿の直前に**認証済みの一覧**を読み、
+ * 同じ題名があれば作らずに採用し（下書きの同題なら止める）、24時間に1本・66時間の間隔を確かめ直す。
+ *
+ * - 認証済みの一覧の形は、鍵が無いと実測できない（2026-10-03 時点で鍵は未登録）。**形が読めない**
+ *   （entry 0件・日付を読めない entry がある）ときは、公開フィード（キャッシュなし）で代わりに確かめて ::warning を出す。
+ *   公開フィードでも日付を読めなければ止める。401/403 は鍵かライブドアIDの誤りとして失敗にする（投稿しない）。
+ * - 一覧で app:draft が無い entry は「公開」とみなす。下書きを公開と数えても、止める側に倒れるだけなので安全。
+ * - 本文は Markdown を HTML にして送る。カテゴリは cfg.categories に固定（モデルの tags は送らない）。
+ */
+export async function publishLivedoor(cfg, article, key, body, { now = new Date(), force = false,
+  warn = (msg) => console.log(`::warning title=Devlog syndication::${msg}`) } = {}) {
+  const authError = (e) => (e.status === 401 || e.status === 403
+    ? new Error(`${cfg.label}の認証が通らない（HTTP ${e.status}）— ${cfg.secretEnv}（AtomPub用パスワード）とライブドアID「${cfg.livedoorId}」を確かめる。投稿しない`)
+    : e);
+  let listXml;
+  try {
+    listXml = await (await atompubRequest(cfg, cfg.atomUrl, key, { method: 'GET' }, [200])).text();
+  } catch (e) {
+    throw authError(e);
+  }
+  const datedOk = (list) => list.length > 0 && list.every((e) => Number.isFinite(Date.parse(e.published_at)));
+  let entries = parseAtomFeed(listXml);
+  let source = 'AtomPub の一覧';
+  if (!datedOk(entries)) {
+    warn(`${cfg.label}の認証済みの一覧の形を読めない（entry ${entries.length} 件・日付を読めない entry ${entries.filter((e) => !Number.isFinite(Date.parse(e.published_at))).length} 件）。公開フィード（キャッシュなし）で代わりに確かめる`);
+    entries = await feedPublicPosts(cfg);
+    source = '公開フィード';
+    if (!datedOk(entries)) throw new Error(`${cfg.label}の公開フィードでも日付を読めない entry がある — 間隔を確かめられないので投稿しない`);
+  }
+  for (const e of entries) {
+    if (e.title !== article.title) continue;
+    // 公開済みの同題 = 応答が失われた前回の投稿。下書きの同題は中身が同じ保証が無いので止める。
+    if (e.draft === true) throw new Error(`同じ題名の下書きが${cfg.label}にある: ${e.title} — 人が確認する`);
+    const url = e.url ? normalizeLivedoorUrl(e.url, cfg) : null;
+    if (!url) throw new Error(`同じ題名の記事があるが公開URLを読めない（二重投稿を避けて止める）: ${e.title}`);
+    return { url, reused: true };
+  }
+  const guard = publishGuard(entries.map((e) => ({ ...e, published: e.draft !== true })), now,
+    { minIntervalHours: cfg.minIntervalHours, force });
+  if (!guard.ok) throw new Error(`投稿の直前の確認（${source}）で止めた: ${guard.reason} — 門が読んだ公開フィードが古かった可能性。続けて出さない`);
+  const xml = livedoorEntryXml({ title: article.title, html: markdownToHtml(body), categories: cfg.categories });
+  let res;
+  try {
+    res = await atompubRequest(cfg, cfg.atomUrl, key, { method: 'POST', headers: { 'content-type': 'application/atom+xml;type=entry' }, body: xml }, [201]);
+  } catch (e) {
+    throw authError(e);
+  }
+  const text = await res.text();
+  const url = livedoorPublicUrl(text, cfg);
+  if (!url) throw new Error(`${cfg.label}の応答に公開URLが無い（記事は作成されたかもしれない。人が確認する）: ${text.slice(0, 300)}`);
   return { url, reused: false, member: res.headers.get('location') };
 }
 
@@ -1055,6 +1622,11 @@ async function cmdPublish(argv) {
   const body = composeBody(article, platform, { runId: process.env.GITHUB_RUN_ID || 'local' });
   if (argv.includes('--dry-run')) {
     const result = { platform, dry_run: true, title: article.title, body_preview: body.slice(0, 500) };
+    // ライブドアは HTML にして送るので、送るはずの HTML と entry をそのまま残す（目で確かめるため）
+    if (cfg.kind === 'livedoor') {
+      result.html = markdownToHtml(body);
+      result.entry_xml = livedoorEntryXml({ title: article.title, html: result.html, categories: cfg.categories });
+    }
     if (out) fs.writeFileSync(out, JSON.stringify(result, null, 2));
     console.log(`[${cfg.label}] dry-run: 投稿しない（検証は通過）`);
     return;
@@ -1062,11 +1634,16 @@ async function cmdPublish(argv) {
   const key = process.env[cfg.secretEnv];
   if (!key) throw new Error(`${cfg.secretEnv} が無い — GitHub の Secrets に登録が要る（鍵の値はこのスクリプトしか読まない）`);
   const force = argv.includes('--force');
-  const res = platform === 'devto' ? await publishDevto(article, key, body, { force }) : await publishHatena(article, key, body, { force });
+  let res;
+  if (cfg.kind === 'devto') res = await publishDevto(article, key, body, { force });
+  else if (cfg.kind === 'hatena') res = await publishHatena(cfg, article, key, body, { force });
+  else if (cfg.kind === 'livedoor') res = await publishLivedoor(cfg, article, key, body, { force });
+  else throw new Error(`知らない kind: ${cfg.kind}`);
   // 対外送信の記録（時刻・経路・表示名・本文のハッシュ）。本文そのものは成果物の article.json に残る。
+  // ライブドアは HTML にして送るが、ハッシュは他の媒体と同じく組み立てた Markdown（composeBody の出力）で取る。
   const result = { platform, title: article.title, url: res.url, id: res.id ?? null, reused: res.reused, basis: article.basis,
     published_at: new Date().toISOString(), route: 'actions:devlog-syndication', run_id: process.env.GITHUB_RUN_ID || 'local',
-    account: platform === 'devto' ? cfg.username : cfg.hatenaId,
+    account: accountOf(cfg),
     body_sha256: crypto.createHash('sha256').update(body).digest('hex'), identity_check: 'passed' };
   if (out) fs.writeFileSync(out, JSON.stringify(result, null, 2));
   console.log(`[${cfg.label}] ${res.reused ? '既存の同題記事を採用' : '投稿した'}: ${res.url}`);
@@ -1076,13 +1653,25 @@ async function cmdPublish(argv) {
 // 公開確認
 // ─────────────────────────────────────────────────────────────
 
-/** 本文の範囲を切り出す。**範囲が取れないのを「リンクが無い」にしない。** */
+/**
+ * 本文の範囲を切り出す。**範囲が取れないのを「リンクが無い」にしない。**
+ * ライブドアは `class="article-body-inner"` から `<!-- /記事本文 -->` まで（2026-10-03 に
+ * https://captio.livedoor.blog/archives/17287077.html で実測）。終わりの印が無ければ、サイドバーの
+ * リンクを本文と取り違えないよう範囲を取れない（null）とする。
+ */
 export function articleRegion(html, platform) {
-  if (platform === 'devto') {
+  const kind = PLATFORMS[platform].kind;
+  if (kind === 'devto') {
     const i = html.indexOf('id="article-body"');
     if (i === -1) return null;
     const j = html.indexOf('</article>', i);
     return html.slice(i, j === -1 ? undefined : j);
+  }
+  if (kind === 'livedoor') {
+    const m = /class=["'][^"']*\barticle-body-inner\b[^"']*["']/.exec(html);
+    if (!m) return null;
+    const j = html.indexOf('<!-- /記事本文 -->', m.index);
+    return j === -1 ? null : html.slice(m.index, j);
   }
   const i = html.indexOf('entry-content');
   if (i === -1) return null;
@@ -1135,7 +1724,7 @@ async function cmdVerify(argv) {
     ...last.siteLinks.map((l) => `- 自社リンク: ${l.href}（rel="${l.rel || 'なし'}"）`),
     ...last.problems.map((p) => `- ⚠ ${p}`),
   ];
-  if (platform === 'hatena' && last.markerVisible === false) {
+  if (PLATFORMS[platform].kind !== 'devto' && last.markerVisible === false) {
     const note = `本文末尾の題材の記録（「${VISIBLE_BASIS_LABEL}」か印）が公開ページに無い — 次の回の「使用済みの題材」に載らず、同じ種を再利用しうる`;
     lines.push(`- 注意: ${note}`);
     console.log(`::warning title=Devlog syndication marker::${note}`);
@@ -1157,10 +1746,27 @@ async function cmdVerify(argv) {
  */
 export const WATCH = { warnHours: 80, alertHours: 96, scan: 6, since: '2026-09-25T00:00:00Z' };
 
-/** はてなの公開フィードの entry が、この経路の記事か（本文末尾の開示文か印で見分ける）。 */
-export function isPipelineHatena(entry) {
+/**
+ * 公開フィード（はてな・ライブドア）の entry が、この経路の記事か（本文末尾の開示文か印で見分ける）。
+ * 開示文は媒体ごとに違うが、どれも「AIエージェントが自動で執筆・公開しています」を含む（OWNED_BLOG_FOOTER_JA の説明）。
+ */
+export function isPipelineFeedEntry(entry) {
   const c = String(entry?.content || '');
   return c.includes('AIエージェントが自動で執筆・公開しています') || c.includes(`${MARKER}:`);
+}
+/** 旧名（はてなだけだったころの名前）。 */
+export const isPipelineHatena = isPipelineFeedEntry;
+
+/**
+ * 鍵待ちの媒体か（見張り用・純粋関数）。pendingUntilKey の媒体で、**この経路の投稿がまだ1本も無く**、
+ * 鍵が登録されたことを示す環境変数（keySetEnv。ワークフローが真偽だけを渡す）が 'true' でないとき。
+ * クラウドの外の見張りはこの環境変数を持たないので、「未設定」も「未登録」と同じに扱う。
+ * この経路の投稿が1本でもあれば、鍵の有無にかかわらず通常の判定に戻す（止まっていれば alert になる）。
+ */
+export function keyPendingFor(cfg, posts, env = process.env) {
+  if (cfg?.pendingUntilKey !== true) return false;
+  if (String(env?.[cfg.keySetEnv] ?? '').trim() === 'true') return false;
+  return !(posts || []).some((p) => p?.fromRun === true || isPipelineFeedEntry(p));
 }
 
 /** dev.to の記事がこの経路の記事か（本文 Markdown の印で見分ける）。 */
@@ -1257,6 +1863,16 @@ export async function watchPlatform(platform, now, opts, stop) {
     r.age_hours = Math.round(((now.getTime() - new Date(latest.published_at).getTime()) / 3600000) * 10) / 10;
   }
 
+  // 鍵待ちの媒体（この経路の投稿がまだ無く、鍵も未登録）は、間隔の alert を出さずに注意だけにする。
+  // 配信が始まっていないのはオーナー作業の待ちで、止まったのではない。
+  if (keyPendingFor(cfg, posts, opts.env ?? process.env)) {
+    r.key_pending = true;
+    r.status = worse(r.status, 'warn');
+    r.pipeline_age_reason = `投稿用の鍵（${cfg.secretEnv}）が未登録のため、この媒体の配信はまだ始まっていない（オーナー作業）`;
+    r.problems.push(r.pipeline_age_reason);
+    return r;
+  }
+
   // 直近 scan 本のうち、この経路の最新記事と、since 以降のこの経路以外の記事。
   // 印・この run の公開結果は経路の出力証拠だけであり、自然 schedule や人介入ゼロの証明ではない。
   const pipelineUnknownReasons = posts.some((p) => watchPublishedTime(p.published_at) === null)
@@ -1264,7 +1880,7 @@ export async function watchPlatform(platform, now, opts, stop) {
   let pipeline = null;
   for (const p of sorted.slice(0, opts.scan)) {
     let isPipe = false, disclosure = null;
-    if (platform === 'devto') {
+    if (cfg.kind === 'devto') {
       try {
         if (p.id == null) throw new Error('id が無い');
         const a = await readDevtoArticle(p.id, { attempts: p.fromRun ? 6 : 1, wait: opts.wait });
@@ -1282,7 +1898,7 @@ export async function watchPlatform(platform, now, opts, stop) {
         if (!pipeline) pipelineUnknownReasons.push(`より新しい記事 ${p.url} の経路を確認できない`);
         r.status = worse(r.status, 'unreadable'); r.problems.push(`記事 ${p.url} の本文を読めない（経路を判定できない）`); continue;
       }
-      isPipe = p.fromRun === true || isPipelineHatena(p);
+      isPipe = p.fromRun === true || isPipelineFeedEntry(p);
     }
     if (isPipe && !pipeline) pipeline = { ...p, disclosure };
     if (!isPipe && new Date(p.published_at).getTime() >= new Date(opts.since).getTime()) {
@@ -1305,14 +1921,14 @@ export async function watchPlatform(platform, now, opts, stop) {
     } catch (e) {
       r.status = worse(r.status, 'unreadable'); r.problems.push(`この経路の最新記事のページを読めない: ${e.message}`);
     }
-    if (platform === 'devto' && pipeline.disclosure !== 'fully_autonomous') {
+    if (cfg.kind === 'devto' && pipeline.disclosure !== 'fully_autonomous') {
       r.status = 'alert'; r.problems.push(`この経路の最新記事の AI 開示が「${pipeline.disclosure}」（fully_autonomous でない）`);
     }
-    // はてなは「使用済みの題材」を公開フィードの本文にある印から読む。印が消えていると題材の重複防止が効かない。
+    // はてな・ライブドアは「使用済みの題材」を公開フィードの本文にある印から読む。印が消えていると題材の重複防止が効かない。
     // この run の投稿はまだフィードに無い（本文を読めない）ので、次の見張りで確かめる。
-    if (platform === 'hatena' && pipeline.fromRun) {
-      r.notes.push('この run の投稿はまだ公開フィードに出ていないので、印（HTML コメント）の確認は次の見張りで行う');
-    } else if (platform === 'hatena' && !hatenaBases(pipeline).length) {
+    if (cfg.kind !== 'devto' && pipeline.fromRun) {
+      r.notes.push('この run の投稿はまだ公開フィードに出ていないので、印（題材の記録）の確認は次の見張りで行う');
+    } else if (cfg.kind !== 'devto' && !feedBases(pipeline).length) {
       r.status = worse(r.status, 'warn');
       r.problems.push(`この経路の最新記事の題材（「${VISIBLE_BASIS_LABEL}」か印）がフィードから読めない — 使用済みの題材が文脈に載らず、同じ種を再利用しうる`);
     }
@@ -1373,10 +1989,10 @@ async function cmdWatch(argv) {
   out.status = overall;
   const lines = [`見張り ${now.toISOString()}: ${overall === 'ok' ? '異常なし' : overall}${stop.stopped ? `（停止中: ${stop.reason}）` : ''}`];
   for (const r of out.platforms) {
-    lines.push(`- ${r.label}: ${r.status} / 最新 ${r.age_hours ?? '—'} 時間前${r.latest ? `「${r.latest.title}」` : ''}`);
+    lines.push(`- ${r.label}: ${r.status}${r.key_pending ? '（鍵待ち）' : ''} / 最新 ${r.age_hours ?? '—'} 時間前${r.latest ? `「${r.latest.title}」` : ''}`);
     if (r.pipeline_latest) {
       const rels = (r.pipeline_latest.site_links || []).map((l) => `rel="${l.rel || 'なし'}"`).join(', ');
-      lines.push(`  - この経路の最新: ${r.pipeline_latest.url}（${r.pipeline_age_hours ?? '—'} 時間前 / 間隔 ${r.pipeline_age_status} / ${rels || '自社リンク未確認'}${r.platform === 'devto' ? ` / 開示 ${r.pipeline_latest.disclosure}` : ''}）`);
+      lines.push(`  - この経路の最新: ${r.pipeline_latest.url}（${r.pipeline_age_hours ?? '—'} 時間前 / 間隔 ${r.pipeline_age_status} / ${rels || '自社リンク未確認'}${PLATFORMS[r.platform].kind === 'devto' ? ` / 開示 ${r.pipeline_latest.disclosure}` : ''}）`);
     }
     for (const x of r.problems) lines.push(`  - ⚠ ${x}`);
     for (const x of r.notes) lines.push(`  - ${x}`);
@@ -1818,15 +2434,15 @@ export async function selftest() {
         return new Response(xml, { status: 200 });
       };
       globalThis.fetch = hatena(feed(hoursAgo(3)), 201);
-      const hcap = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      const hcap = await threw(() => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now }));
       assert(hcap && hcap.includes('24時間') && hPosts === 0, `**はてなで公開フィードが古いときに連投した**（${hcap} / POST ${hPosts} 回）`);
       hPosts = 0;
       globalThis.fetch = hatena('<feed></feed>', 201);
-      const hEmpty = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      const hEmpty = await threw(() => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now }));
       assert(hEmpty && hPosts === 0, `**はてなの空の一覧を「投稿が無い」と読んで出した**（POST ${hPosts} 回）`);
       hPosts = 0;
       globalThis.fetch = hatena(feed(hoursAgo(3), 'yes'), 500);
-      const h5 = await threw(() => publishHatena(art, 'k', 'b', { now }));
+      const h5 = await threw(() => publishHatena(PLATFORMS.hatena, art, 'k', 'b', { now }));
       assert(h5 && hPosts === 1, `下書きを上限に数えた、または作成の 5xx を送り直した（${h5} / POST ${hPosts} 回）`);
     } finally {
       globalThis.fetch = orig;
@@ -1883,6 +2499,429 @@ export async function selftest() {
       const ls = allowedLinks(p);
       assert(ls.length >= 50, `${p}: 候補が ${ls.length} 件`);
       assert(ls.every((l) => l.url.startsWith('https://simplememofast.com/') && l.file), `${p}: 引き当てられない URL`);
+    }
+  });
+
+  // ── 2026-10-03: はてな「メモの設計図」とライブドアを足した分 ──────────────────
+  await t('設定: 全媒体の kind・鍵・https の URL がそろい、壊すと落ちる（ワークフローとも一致）', () => {
+    const problems = platformConfigProblems();
+    assert(problems.length === 0, `本番の設定に穴: ${problems.join(' / ')}`);
+    assert(Object.values(PLATFORMS).every((c) => accountOf(c)), 'アカウント名の無い媒体がある');
+    for (const k of ['secretEnv', 'hatenaId']) {
+      assert(PLATFORMS.hatenadiary[k] === PLATFORMS.hatena[k], `はてなの2つで ${k} が違う（はてなのAPIキーはアカウント単位）`);
+    }
+    const pending = Object.keys(PLATFORMS).filter((p) => PLATFORMS[p].pendingUntilKey === true);
+    assert(pending.join() === 'livedoor', `鍵待ちの媒体の指定が違う（鍵のある媒体を鍵待ちにすると、鍵が消えても黙って休む）: ${pending}`);
+    assert(siblingsOf('hatena').sort().join() === 'hatenadiary,livedoor' && siblingsOf('livedoor').sort().join() === 'hatena,hatenadiary'
+      && siblingsOf('devto').length === 0, `姉妹ブログ: ${siblingsOf('hatena')}`);
+    const breakages = [
+      ['http の URL', (c) => { c.livedoor.atomUrl = 'http://livedoor.blogcms.jp/atompub/captio/article'; }, /https でない/],
+      ['知らない kind', (c) => { c.hatenadiary.kind = 'hatena-diary'; }, /知らない kind/],
+      ['鍵の名前', (c) => { c.livedoor.secretEnv = 'livedoor'; }, /secretEnv/],
+      ['開示文が無い', (c) => { c.hatenadiary.footer = '\n'; }, /開示文/],
+      ['ブログIDと atomUrl の食い違い', (c) => { c.hatenadiary.blogId = 'simplememofast.hatenablog.com'; }, /食い違う/],
+      ['固定カテゴリが無い', (c) => { c.livedoor.categories = []; }, /固定のカテゴリ/],
+      ['鍵待ちなのに keySetEnv が無い', (c) => { delete c.livedoor.keySetEnv; }, /keySetEnv/],
+      ['kind ごとの欄の書き落とし', (c) => { delete c.livedoor.publicHost; }, /publicHost が無い/],
+    ];
+    for (const [name, mutate, expect] of breakages) {
+      const copy = Object.fromEntries(Object.entries(PLATFORMS).map(([k, v]) => [k, { ...v }]));
+      mutate(copy);
+      const ps = platformConfigProblems(copy);
+      assert(ps.some((p) => expect.test(p)), `「${name}」で落ちない: ${ps.join(' / ')}`);
+    }
+    // ワークフローが選べる・回す・鍵を渡す媒体と、この表が一致する（片方だけ足すと、その媒体は回らないか鍵が無いまま回る）
+    const wf = fs.readFileSync(path.join(ROOT, '.github/workflows/devlog-syndication.yml'), 'utf8');
+    for (const [p, c] of Object.entries(PLATFORMS)) {
+      assert(new RegExp(`platform: \\[[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `ワークフローの matrix に ${p} が無い`);
+      assert(new RegExp(`options: \\[all,[^\\]]*\\b${p}\\b[^\\]]*\\]`).test(wf), `workflow_dispatch の選択肢に ${p} が無い`);
+      assert(new RegExp(`matrix\\.platform == '${p}'[^\\n]*secrets\\.${c.secretEnv}`).test(wf), `ワークフローが ${p} に ${c.secretEnv} を渡していない`);
+    }
+    assert(wf.includes(`${PLATFORMS.livedoor.keySetEnv}: \${{ secrets.${PLATFORMS.livedoor.secretEnv} != '' }}`), '見張りに鍵の登録の有無（真偽）を渡していない');
+  });
+
+  await t('門: 鍵の無い媒体 — 鍵待ちは休み（key_pending）、鍵のある媒体は投稿する番に落とす（no_key）、試験実行は鍵を見ない', () => {
+    const base = { stop: go, latestIso: hoursAgo(70), postsLast24h: 0, now, minIntervalHours: 66 };
+    const kp = decideGate({ ...base, keyMissing: true, pendingUntilKey: true, secretEnv: 'LIVEDOOR_API_KEY' });
+    assert(kp.due === false && kp.code === 'key_pending' && kp.reason.includes('LIVEDOOR_API_KEY') && kp.reason.includes('オーナー作業'), JSON.stringify(kp));
+    assert(decideGate({ ...base, keyMissing: true, pendingUntilKey: true, readError: 'HTTP 503' }).code === 'key_pending',
+      '鍵待ちの媒体を「読めない」で赤くした（鍵が無ければどのみち出さない）');
+    assert(decideGate({ ...base, stop: { stopped: true, reason: 't' }, keyMissing: true, pendingUntilKey: true }).code === 'stopped', '停止より鍵待ちを先にした');
+    const nk = decideGate({ ...base, keyMissing: true, secretEnv: 'DEVTO_API_KEY' });
+    assert(nk.due === false && nk.code === 'no_key' && nk.reason.includes('DEVTO_API_KEY'), `**鍵の無い投稿の番を通した**: ${JSON.stringify(nk)}`);
+    assert(decideGate({ ...base, latestIso: hoursAgo(30), keyMissing: true, force: true }).code === 'no_key', 'force で鍵の無い投稿を通した');
+    assert(decideGate({ ...base, latestIso: null, keyMissing: true }).code === 'no_key', '初回の投稿で鍵を見ない');
+    // 旧ワークフローは「投稿する番」のときだけ鍵を見ていた。間隔待ち・読めない・停止は今までどおり先に出す
+    assert(decideGate({ ...base, latestIso: hoursAgo(30), keyMissing: true }).code === 'too_soon', '間隔待ちを no_key にした');
+    assert(decideGate({ ...base, keyMissing: true, readError: 'HTTP 503' }).code === 'unreadable', '読めないを no_key にした');
+    assert(decideGate({ ...base, postsLast24h: 1, keyMissing: true }).code === 'daily_cap', '上限を no_key にした');
+    for (const pendingUntilKey of [true, false]) {
+      const dr = decideGate({ ...base, keyMissing: true, pendingUntilKey, dryRun: true });
+      assert(dr.due === true && dr.code === 'dry_run', `試験実行で鍵を見た（pendingUntilKey=${pendingUntilKey}）: ${JSON.stringify(dr)}`);
+    }
+    assert(decideGate({ ...base, pendingUntilKey: true }).code === 'interval_elapsed', '鍵が登録された後も鍵待ちのまま');
+  });
+
+  await t('Markdown→HTML: 見出し・段落・リスト・引用・表・コード・リンク。それ以外の HTML はエスケープし、印の行だけ素通し', () => {
+    const md = [
+      '# 一つ目', '', '段落の一行目は **太字** と *斜体* と `a<b>_c` を含む。', '二行目 file_name_here と 5 * 3 = 15。', '',
+      '## 二つ目', '### 三つ目', '#### 四つ目', '##### 五つ目', '',
+      '> 引用の一行目', '> 引用の二行目', '',
+      '- 項目A [説明の文字](https://simplememofast.com/obsidian/)', '- 項目B', '  - 入れ子B1', '- 項目C', '',
+      '1. 手順一', '2. 手順二', '',
+      '| 列A | 列B |', '|:---|---:|', '| 1 \\| 2 | <i>x</i> |', '',
+      '```js', 'const a = 1 < 2 && "x";', '```', '',
+      '---', '',
+      '<script>alert(1)</script> と <a href="https://evil.example/">生のリンク</a> と [危ない](javascript:alert(1)) と ![画像](https://example.com/a.png)',
+      '<!-- devlog-syndication: basis=S-20260903-x; route=actions -->',
+      '<!-- devlog-syndication: basis=<b>x</b> -->',
+    ].join('\n');
+    const html = markdownToHtml(md);
+    const has = (s, why) => assert(html.includes(s), `${why}: ${s}\n${html}`);
+    has('<h2>一つ目</h2>', '# を h2 にしない');
+    has('<h2>二つ目</h2>', '## を h2 にしない');
+    has('<h3>三つ目</h3>', '### を h3 にしない');
+    has('<h4>四つ目</h4>', '#### を h4 にしない');
+    has('<h4>五つ目</h4>', '##### を h4 に丸めない');
+    has('<p>段落の一行目は <strong>太字</strong> と <em>斜体</em> と <code>a&lt;b&gt;_c</code> を含む。<br>二行目 file_name_here と 5 * 3 = 15。</p>', '段落・改行・強調・コード');
+    has('<blockquote><p>引用の一行目<br>引用の二行目</p></blockquote>', '引用');
+    has('<ul><li>項目A <a href="https://simplememofast.com/obsidian/">説明の文字</a></li><li>項目B<ul><li>入れ子B1</li></ul></li><li>項目C</li></ul>', '箇条書き・入れ子・リンク');
+    has('<ol><li>手順一</li><li>手順二</li></ol>', '番号付き');
+    has('<table><thead><tr><th style="text-align:left">列A</th><th style="text-align:right">列B</th></tr></thead><tbody><tr><td style="text-align:left">1 | 2</td><td style="text-align:right">&lt;i&gt;x&lt;/i&gt;</td></tr></tbody></table>', '表');
+    has('<pre><code class="language-js">const a = 1 &lt; 2 &amp;&amp; &quot;x&quot;;</code></pre>', 'コードブロック');
+    has('<hr>', '区切り線');
+    has('&lt;script&gt;alert(1)&lt;/script&gt;', 'script をエスケープしない');
+    has('<!-- devlog-syndication: basis=S-20260903-x; route=actions -->', '印の行を素通ししない');
+    // 落ちる側: 生の HTML・http(s) 以外のリンク・画像・rel を通さない
+    assert(!/<script|<i>|<b>|<a href="https:\/\/evil|href="javascript:|<img/i.test(html), `**生の HTML か危ないリンクを通した**: ${html}`);
+    assert(html.includes('[危ない](javascript:alert(1))'), 'javascript: のリンクを文字のまま残していない');
+    assert(!/\brel=/.test(html), '自社リンクに rel を付けた（dofollow でなくなる）');
+    assert(!html.includes('<!-- devlog-syndication: basis=<b>'), '中に < > を含む印の行を素通しした');
+    // 題材の記録は <em> になり、readMarkers で読める（ライブドアの公開フィードの本文から題材を読むため）
+    const body = composeBody({ body_markdown: '本文。', basis: 'S-20260907-fixed-but-unconfirmed' }, 'livedoor', { runId: '1', at: 'T' });
+    const rendered = markdownToHtml(body);
+    assert(rendered.includes(`<p><em>${VISIBLE_BASIS_LABEL}: S-20260907-fixed-but-unconfirmed</em></p>`), `見える記録が <em> にならない: ${rendered}`);
+    const noComment = rendered.replace(/<!--[\s\S]*?-->/g, '');
+    assert(readMarkers(noComment).some((m) => m.basis === 'S-20260907-fixed-but-unconfirmed' && m.visible === 'yes'), 'コメントが消えても題材を読めない');
+    assert(rendered.includes('<hr>') && rendered.includes('<em>この記事は、シンプルメモの開発元が運営するブログの記事です。'), '開示文を HTML にしていない');
+    // 描いたリンクは、検証が拾ったリンクの部分集合（検証していない URL をリンクにしない）
+    const checked = new Set(extractLinks(md).map((l) => l.url));
+    for (const m of html.matchAll(/<a href="([^"]+)"/g)) assert(checked.has(decodeEntities(m[1])), `検証が見ていない URL をリンクにした: ${m[1]}`);
+  });
+
+  await t('ライブドアの entry: エスケープ・カテゴリ固定・draft no（読み戻すと元の題名と HTML）', () => {
+    const xml = livedoorEntryXml({ title: 'A&B <x> "q"', html: '<p>a &amp; b</p>', categories: PLATFORMS.livedoor.categories });
+    assert(xml.includes('<title>A&amp;B &lt;x&gt; &quot;q&quot;</title>'), `題名のエスケープ: ${xml}`);
+    assert(xml.includes('<content type="text/html">&lt;p&gt;a &amp;amp; b&lt;/p&gt;</content>'), `本文のエスケープ: ${xml}`);
+    assert(!/<p>/.test(xml), '**HTML をエスケープせずに XML へ入れた**');
+    assert((xml.match(/<category /g) || []).length === 1 && xml.includes('<category term="メモ術"/>'), `カテゴリが固定でない: ${xml}`);
+    assert(xml.includes('<app:control><app:draft>no</app:draft></app:control>') && xml.includes('xmlns:app="http://www.w3.org/2007/app"'), '下書きで出す形になっている');
+    const back = parseAtomFeed(`<feed>${xml.replace(/^<\?xml[^>]*>\s*/, '')}</feed>`);
+    assert(back.length === 1 && back[0].title === 'A&B <x> "q"' && back[0].content === '<p>a &amp; b</p>' && back[0].draft === false, JSON.stringify(back));
+  });
+
+  await t('ライブドアの公開フィード（Atom 0.3・issued・CDATA）を読み、はてなの読み方は変えない', () => {
+    // 2026-10-03 に https://captio.livedoor.blog/atom.xml で実測した形（本文は短くした）
+    const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<feed version="0.3" xmlns="http://purl.org/atom/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xml:lang="ja">
+<title>captio式シンプルメモ開発日誌</title>
+<link rel="alternate" type="text/html" href="https://captio.livedoor.blog/" />
+<modified>2026-10-03T14:19:04Z</modified>
+<entry>
+<title>メモの入り口は、増やすより減らすほうがいい</title>
+<link rel="alternate" type="text/html" href="https://captio.livedoor.blog/archives/17287077.html" />
+<modified>2026-09-22T09:55:24Z</modified>
+<issued>2026-09-22T18:55:24+09:00</issued>
+<id>tag:blog.livedoor.jp,2026:captio.17287077</id>
+<summary type="text/plain">先に結論を書く。</summary>
+<dc:subject>メモ術</dc:subject>
+<content type="text/html" mode="escaped" xml:lang="ja" xml:base="https://captio.livedoor.blog/archives/17287077.html">
+<![CDATA[<p>A &amp; B と <a href="https://simplememofast.com/obsidian/" target="_blank" rel="noopener">説明</a>。</p><p><em>題材の記録: S-20260907-fixed-but-unconfirmed</em></p>]]>
+</content>
+</entry>
+<entry>
+<title>声で書いたメモは、どこで文字に変わっているのか</title>
+<link rel="alternate" type="text/html" href="https://captio.livedoor.blog/archives/17242627.html" />
+<modified>2026-09-19T10:23:12Z</modified>
+<issued>2026-09-19T19:05:51+09:00</issued>
+<content type="text/html" mode="escaped"><![CDATA[<p>旧ローカルタスクの記事</p>]]></content>
+</entry>
+</feed>`;
+    const e = parseAtomFeed(feed);
+    assert(e.length === 2, `entry の数: ${e.length}（feed 直下の modified を entry と読んだ可能性）`);
+    assert(e[0].published_at === '2026-09-22T18:55:24+09:00' && e[1].published_at === '2026-09-19T19:05:51+09:00',
+      `issued を公開時刻にしていない（編集で動く modified を読んだ）: ${e.map((x) => x.published_at)}`);
+    assert(e[0].url === 'https://captio.livedoor.blog/archives/17287077.html' && e[0].title === 'メモの入り口は、増やすより減らすほうがいい', JSON.stringify(e[0]));
+    assert(e[0].content.startsWith('\n<p>A &amp; B') && !e[0].content.includes('CDATA'), `CDATA の剥がし方が違う（中の実体参照を解いた・残した）: ${e[0].content.slice(0, 80)}`);
+    assert(feedBases(e[0]).join() === 'S-20260907-fixed-but-unconfirmed' && feedBases(e[1]).length === 0, '本文の見える記録から題材を読めない');
+    assert(e[0].draft === null && e[0].summary === '先に結論を書く。', '公開フィードに無い下書き欄を読んだ');
+    assert(isPipelineFeedEntry(e[0]) === false && isPipelineFeedEntry({ content: OWNED_BLOG_FOOTER_JA }) === true, '開示文で経路を見分けられない');
+    const only = parseAtomFeed('<feed><entry><title>t</title><modified>2026-09-01T00:00:00Z</modified></entry></feed>');
+    assert(only[0].published_at === '2026-09-01T00:00:00Z', 'modified しか無い entry の日時を読めない');
+    assert(parseAtomFeed('<feed><entry><title>t</title></entry></feed>')[0].published_at === null, '日時の無い entry に日時を作った');
+    // はてな（Atom 1.0）は published が issued・updated より先。CDATA の無い本文は実体参照を解く（従来どおり）
+    const h = parseAtomFeed('<feed><entry><title>題 &amp; 名</title><published>2026-09-22T21:29:55+09:00</published><updated>2026-09-30T00:00:00+09:00</updated><content type="html">&lt;p&gt;A &amp;amp; B&lt;/p&gt;</content></entry></feed>');
+    assert(h[0].title === '題 & 名' && h[0].published_at === '2026-09-22T21:29:55+09:00' && h[0].content === '<p>A &amp; B</p>', JSON.stringify(h));
+    assert(parseAtomFeed('<feed><entry><title type="text">属性つき</title></entry></feed>')[0].title === '属性つき', '属性つきの題名を読めない（同題の判定が効かない）');
+  });
+
+  await t('ライブドアの公開URL: http→https にそろえ、無ければ edit の記事番号から組み立て、どちらも無ければ null', () => {
+    const cfg = PLATFORMS.livedoor;
+    assert(livedoorPublicUrl('<entry><link rel="alternate" type="text/html" href="http://captio.livedoor.blog/archives/17300000.html"/><link rel="edit" href="https://livedoor.blogcms.jp/atompub/captio/article/17300000"/></entry>', cfg)
+      === 'https://captio.livedoor.blog/archives/17300000.html', 'http の公開URLを https にしない');
+    assert(livedoorPublicUrl('<entry><link rel="edit" type="application/atom+xml;type=entry" href="https://livedoor.blogcms.jp/atompub/captio/article/17300001"/></entry>', cfg)
+      === 'https://captio.livedoor.blog/archives/17300001.html', 'edit の link から組み立てない');
+    assert(livedoorPublicUrl('<entry><link rel="edit" href="https://livedoor.blogcms.jp/atompub/captio/article/17300002/"/><link rel="enclosure" href="https://img.example/1.png" type="image/png"/></entry>', cfg)
+      === 'https://captio.livedoor.blog/archives/17300002.html', '末尾の / で読めない');
+    assert(livedoorPublicUrl('<entry><link rel="edit" href="https://livedoor.blogcms.jp/atompub/captio/category"/><link rel="enclosure" href="https://img.example/1.png" type="image/png"/></entry>', cfg) === null,
+      '**記事番号の無い edit・enclosure を公開URLにした**');
+    assert(livedoorPublicUrl('<entry></entry>', cfg) === null && livedoorPublicUrl('', cfg) === null, '何も無いのに URL を作った');
+    assert(normalizeLivedoorUrl('http://example.com/a', cfg) === 'http://example.com/a', '公開ホストでない URL を書き換えた');
+    assert(normalizeLivedoorUrl('https://captio.livedoor.blog/archives/1.html', cfg) === 'https://captio.livedoor.blog/archives/1.html', 'https をそのまま返さない');
+  });
+
+  await t('文脈: 姉妹ブログの題材を合流し、記事は sibling_posts に分け、読めない姉妹は記録して続ける', () => {
+    const own = { usedBases: ['S-A'] };
+    const m = mergeSiblingContext(own, [
+      { platform: 'hatenadiary', posts: [{ title: '題1', url: 'https://x/1', published_at: '2026-10-01T09:53:26+09:00', opening: '書き出し' }], usedBases: ['S-B', 'S-A', 'page:obsidian/index.html'] },
+      { platform: 'livedoor', error: 'HTTP 503' },
+    ]);
+    assert(m.used_bases.slice().sort().join() === 'S-A,S-B,page:obsidian/index.html' && m.sibling_bases_added === 2, JSON.stringify(m));
+    assert(m.sibling_posts.length === 1 && m.sibling_posts[0].platform === 'hatenadiary' && m.sibling_posts[0].opening === '書き出し', JSON.stringify(m.sibling_posts));
+    assert(m.sibling_read_errors.length === 1 && m.sibling_read_errors[0].platform === 'livedoor' && m.sibling_read_errors[0].error === 'HTTP 503', '読めない姉妹を記録しない');
+    const alone = mergeSiblingContext(own, []);
+    assert(alone.used_bases.join() === 'S-A' && alone.sibling_bases_added === 0 && !alone.sibling_posts.length, '姉妹が無いのに題材が増えた');
+    assert(mergeSiblingContext({ usedBases: [] }, [{ platform: 'hatena', error: 'x' }]).used_bases.length === 0, '読めない姉妹から題材を作った');
+  });
+
+  await t('記事の検査（日本語）: 姉妹ブログで使った題材・近い題名を落とし、ライブドアは tags が無くても通す', async () => {
+    const link = 'https://simplememofast.com/obsidian/';
+    const merged = mergeSiblingContext({ usedBases: [] }, [
+      { platform: 'hatenadiary', posts: [{ title: '自動でたまるメモは、日付ごとか一枚の受信箱か', url: 'https://x/1' }], usedBases: ['S-20260903-report-said-zero'] },
+    ]);
+    const ctx = {
+      platform: 'livedoor', used_bases: merged.used_bases, sibling_posts: merged.sibling_posts,
+      seeds_available: [{ id: 'S-20260903-issue-closed-same-day', claim: '閉じた条件', numbers: [], drafts: { note: '下書き' } }],
+      existing_posts: [{ title: 'メモの入り口は、増やすより減らすほうがいい' }],
+      allowed_site_links: [{ url: link, file: 'obsidian/index.html' }],
+    };
+    const para = 'メモは書いた直後に一つの受信箱へ集まり、あとで見返すときに迷わない形にしておくと続きやすい。';
+    const good = {
+      platform: 'livedoor', title: '受信箱を一つにすると、メモは見返される', basis: 'S-20260903-issue-closed-same-day',
+      sources: ['docs/story-seeds.md'],
+      body_markdown: `${para.repeat(14)}\n\n## なぜ受信箱を一つにするのか\n\n${para.repeat(16)}\n\n## 向かない場面\n\n${para.repeat(16)}\n\n## 確かめ方\n\n仕組みは[メモをObsidianへ送る仕組みの説明](${link})にまとめてある。${para.repeat(14)}`,
+    };
+    const readFile = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
+    const r = await validateArticle(good, ctx, { readFile });
+    assert(r.ok, `通るべき記事が落ちた: ${r.problems.join(' | ')}`);
+    const breakages = [
+      ['姉妹ブログで使った題材', (a) => { a.basis = 'S-20260903-report-said-zero'; }, /この媒体か日本語の姉妹ブログで使用済み/],
+      ['姉妹ブログの記事と同じ題名', (a) => { a.title = '自動でたまるメモは、日付ごとか一枚の受信箱か'; }, /姉妹ブログ（はてなブログ「メモの設計図」）の既存記事と題名が近い/],
+      ['自媒体の記事と同じ題名', (a) => { a.title = 'メモの入り口は、増やすより減らすほうがいい'; }, /既存記事と題名が近い/],
+      ['tags が多すぎる', (a) => { a.tags = ['a', 'b', 'c', 'd', 'e', 'f']; }, /tags は0〜5個/],
+      ['自社リンクが3本（ライブドアは2本まで）', (a) => { a.body_markdown += ` [一](${link}) と [二](${link})`; }, /自社サイトへのリンクが 3 本（1〜2本）/],
+    ];
+    for (const [name, mutate, expect] of breakages) {
+      const copy = JSON.parse(JSON.stringify(good)); mutate(copy);
+      const res = await validateArticle(copy, ctx, { readFile });
+      assert(res.ok === false && res.problems.some((p) => expect.test(p)), `「${name}」で期待した理由で落ちない: ${res.problems.join(' | ')}`);
+    }
+    // カテゴリを固定しない媒体（はてな）は、今までどおり tags が1つ以上要る
+    const hatena = await validateArticle({ ...good, platform: 'hatena' }, { ...ctx, platform: 'hatena' }, { readFile });
+    assert(hatena.ok === false && hatena.problems.some((p) => /tags は1〜5個（0個）/.test(p)), `はてなで tags なしを通した: ${hatena.problems.join(' | ')}`);
+  });
+
+  await t('投稿本文: 新しい2媒体は「開発元が運営するブログ」の開示文と見える題材の記録を付け、既存のはてなの開示文は変えない', () => {
+    for (const p of ['hatenadiary', 'livedoor']) {
+      const b = composeBody({ body_markdown: '本文', basis: 'S-20260903-x' }, p, { runId: '1', at: 'T' });
+      assert(b.includes('シンプルメモの開発元が運営するブログの記事です') && b.includes('AIエージェントが自動で執筆・公開しています'), `${p}: 開示文 ${b}`);
+      assert(b.includes(`\n*${VISIBLE_BASIS_LABEL}: S-20260903-x*\n`), `${p}: 見える題材の記録が無い`);
+      assert(readMarkers(b).filter((m) => m.basis === 'S-20260903-x').length === 2, `${p}: 印と見える記録の両方が無い`);
+      assert(isPipelineFeedEntry({ content: p === 'livedoor' ? markdownToHtml(b) : b }), `${p}: 見張りがこの経路の記事と見分けられない`);
+    }
+    const h = composeBody({ body_markdown: '本文', basis: 'S-X' }, 'hatena', { runId: '1', at: 'T' });
+    assert(h.includes('シンプルメモ開発の公開記録（リポジトリと運用ログ）をもとに') && !h.includes('開発元が運営するブログ'), '既存のはてなの開示文を変えた');
+  });
+
+  await t('公開確認: ライブドアは article-body-inner〜「/記事本文」を本文とし、サイドバーを数えない。終わりの印が無ければ範囲を取れない', () => {
+    const page = (rel, { robots = 'max-image-preview:large', end = '<!-- /記事本文 -->' } = {}) => `<html><head><meta name="robots" content="${robots}" /><title>題名の記事 : captio式シンプルメモ開発日誌</title><style>.article-body-inner{margin:0}</style></head><body><div class="article-body"><div class="article-body-inner"><p><a href="https://simplememofast.com/obsidian/" ${rel}>x</a></p></div></div>${end}<div class="sidebar"><a href="https://simplememofast.com/" rel="nofollow">side</a></div></body></html>`;
+    const ok = inspectPublished(page('target="_blank" rel="noopener"'), 'livedoor', { title: '題名の記事' });
+    assert(ok.ok === true && ok.siteLinks.length === 1 && ok.siteLinks[0].href === 'https://simplememofast.com/obsidian/', `dofollow を落とした・サイドバーを数えた: ${JSON.stringify(ok)}`);
+    assert(!inspectPublished(page('rel="nofollow"'), 'livedoor', { title: '題名の記事' }).ok, 'nofollow を通した');
+    assert(!inspectPublished(page('', { robots: 'noindex' }), 'livedoor', { title: '題名の記事' }).ok, 'noindex を通した');
+    const noEnd = inspectPublished(page('rel="noopener"', { end: '' }), 'livedoor', { title: '題名の記事' });
+    assert(noEnd.ok === false && noEnd.problems.some((p) => p.includes('本文の範囲')), `終わりの印が無いのにサイドバーまで本文にした: ${JSON.stringify(noEnd)}`);
+    assert(!inspectPublished(page('rel="noopener"'), 'livedoor', { title: '別の題名' }).ok, '題名の無いページを通した');
+  });
+
+  await t('公開面: はてな「メモの設計図」とライブドアも、キャッシュを通さずに自分のフィードを読む（空は読めない）', async () => {
+    const orig = globalThis.fetch;
+    const seen = [];
+    let body = '';
+    try {
+      globalThis.fetch = async (u) => { seen.push(String(u)); return new Response(body, { status: 200 }); };
+      body = '<feed><entry><title>t</title><link href="https://simplememofast.hatenadiary.jp/entry/1"/><published>2026-10-01T09:53:26+09:00</published></entry></feed>';
+      const hd = await publicPosts('hatenadiary');
+      assert(hd.length === 1 && seen.at(-1).startsWith(`${PLATFORMS.hatenadiary.feedUrl}?fresh=`), `メモの設計図のフィードを読まない: ${seen.at(-1)}`);
+      body = '<feed version="0.3" xmlns="http://purl.org/atom/ns#"><entry><title>t</title><link rel="alternate" type="text/html" href="https://captio.livedoor.blog/archives/1.html" /><issued>2026-09-22T18:55:24+09:00</issued></entry></feed>';
+      const ld = await publicPosts('livedoor');
+      assert(ld.length === 1 && ld[0].published_at === '2026-09-22T18:55:24+09:00' && seen.at(-1).startsWith(`${PLATFORMS.livedoor.feedUrl}?fresh=`), `ライブドアのフィードを読まない: ${seen.at(-1)}`);
+      body = '<feed version="0.3"></feed>';
+      let msg = null;
+      try { await publicPosts('livedoor'); } catch (e) { msg = e.message; }
+      assert(msg && msg.includes('entry が無い'), `**空のフィードを「投稿が無い」と読んだ**: ${msg}`);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  await t('投稿（はてな「メモの設計図」）: 自分の AtomPub の URL だけを使う（はてなブログ側へ出さない）', async () => {
+    const orig = globalThis.fetch;
+    const seen = [];
+    const art = { title: '今回の記事', tags: ['メモ術'] };
+    try {
+      globalThis.fetch = async (u, o) => {
+        seen.push({ u: String(u), method: o?.method || 'GET', auth: o?.headers?.authorization });
+        if (o?.method === 'POST') return new Response('<entry><link rel="alternate" type="text/html" href="https://simplememofast.hatenadiary.jp/entry/2026/10/04/120000"/></entry>', { status: 201 });
+        return new Response(`<feed><entry><title>前の記事</title><link rel="alternate" type="text/html" href="https://simplememofast.hatenadiary.jp/entry/1"/><published>${hoursAgo(70)}</published><app:control><app:draft>no</app:draft></app:control></entry></feed>`, { status: 200 });
+      };
+      const r = await publishHatena(PLATFORMS.hatenadiary, art, 'k', 'b', { now });
+      assert(r.url === 'https://simplememofast.hatenadiary.jp/entry/2026/10/04/120000' && r.reused === false, JSON.stringify(r));
+      assert(seen.length === 2 && seen.every((s) => s.u === PLATFORMS.hatenadiary.atomUrl), `別のブログの AtomPub へ出した: ${JSON.stringify(seen.map((s) => s.u))}`);
+      assert(seen.every((s) => s.auth === 'Basic ' + Buffer.from('simplememofast:k').toString('base64')), 'はてなID で認証していない');
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  await t('投稿（ライブドア）: 認証済みの一覧で同題・上限を確かめ直し、形が読めなければ公開フィードで確かめ、カテゴリ固定・作成は 5xx で送り直さない', async () => {
+    const orig = globalThis.fetch;
+    const cfg = PLATFORMS.livedoor;
+    const art = { title: '今回の記事', tags: ['iOS', 'PKM'] };
+    const body = composeBody({ body_markdown: '## 見出し\n\n本文と[仕組みの説明](https://simplememofast.com/obsidian/)。', basis: 'S-20260903-x' }, 'livedoor', { runId: '1', at: 'T' });
+    const list = (entries) => `<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.w3.org/2007/app">${entries.map((e) => `<entry><title type="text">${e.title}</title><link rel="alternate" type="text/html" href="${e.url ?? 'http://captio.livedoor.blog/archives/1.html'}"/>${e.published ? `<published>${e.published}</published>` : ''}${e.draft ? `<app:control><app:draft>${e.draft}</app:draft></app:control>` : ''}</entry>`).join('')}</feed>`;
+    const publicFeed = (entries) => `<feed version="0.3" xmlns="http://purl.org/atom/ns#">${entries.map((e) => `<entry><title>${e.title}</title><link rel="alternate" type="text/html" href="https://captio.livedoor.blog/archives/9.html" />${e.published ? `<issued>${e.published}</issued>` : ''}<content type="text/html" mode="escaped"><![CDATA[<p>x</p>]]></content></entry>`).join('')}</feed>`;
+    const created = '<entry xmlns="http://www.w3.org/2005/Atom"><link rel="alternate" type="text/html" href="http://captio.livedoor.blog/archives/17300000.html"/><link rel="edit" href="https://livedoor.blogcms.jp/atompub/captio/article/17300000"/></entry>';
+    let posts = [], gets = [], warnings = [];
+    const mock = ({ listXml = '', listStatus = 200, feedXml = null, postStatus = 201, postBody = created }) => async (u, o) => {
+      u = String(u);
+      if (o?.method === 'POST') { posts.push({ u, headers: o.headers, body: o.body }); return new Response(postBody, { status: postStatus }); }
+      gets.push({ u, auth: o?.headers?.authorization });
+      if (u === cfg.atomUrl) return new Response(listXml, { status: listStatus });
+      if (typeof feedXml === 'string' && u.startsWith(`${cfg.feedUrl}?fresh=`)) return new Response(feedXml, { status: 200 });
+      throw new Error(`想定外の取得: ${u}`);
+    };
+    const reset = (m) => { posts = []; gets = []; warnings = []; globalThis.fetch = mock(m); };
+    const run = (opts = {}) => publishLivedoor(cfg, art, 'k', body, { now, warn: (w) => warnings.push(w), ...opts });
+    const threw = async (fn) => { try { await fn(); return null; } catch (e) { return e.message; } };
+    const old = { title: '前の記事', published: hoursAgo(70), draft: 'no' };
+    try {
+      reset({ listXml: list([old]) });
+      const ok = await run();
+      assert(ok.url === 'https://captio.livedoor.blog/archives/17300000.html' && ok.reused === false && posts.length === 1, JSON.stringify(ok));
+      const sent = posts[0];
+      assert(sent.headers['content-type'] === 'application/atom+xml;type=entry', `送る形: ${sent.headers['content-type']}`);
+      assert(sent.u === 'https://livedoor.blogcms.jp/atompub/captio/article', `送り先: ${sent.u}`);
+      assert(sent.headers.authorization === 'Basic ' + Buffer.from('captio:k').toString('base64'), 'Basic 認証のユーザー名がライブドアID（captio）でない');
+      assert((sent.body.match(/<category /g) || []).length === 1 && sent.body.includes('<category term="メモ術"/>') && !/iOS|PKM/.test(sent.body),
+        `**カテゴリを固定していない（tags を送った）**: ${sent.body.slice(0, 300)}`);
+      assert(sent.body.includes('&lt;h2&gt;見出し&lt;/h2&gt;') && sent.body.includes('&lt;a href=&quot;https://simplememofast.com/obsidian/&quot;&gt;')
+        && sent.body.includes('<app:draft>no</app:draft>'), `本文を HTML にして送っていない: ${sent.body.slice(0, 400)}`);
+      assert(!warnings.length, `読める一覧なのに注意を出した: ${warnings}`);
+
+      reset({ listXml: list([{ title: '今回の記事', published: hoursAgo(2), draft: 'no', url: 'http://captio.livedoor.blog/archives/5.html' }]) });
+      const same = await run();
+      assert(same.reused === true && same.url === 'https://captio.livedoor.blog/archives/5.html' && posts.length === 0, `同題の採用が上限より先に効かない: ${JSON.stringify(same)}`);
+      reset({ listXml: list([{ title: '今回の記事', published: hoursAgo(2), draft: 'yes' }]) });
+      const draft = await threw(run);
+      assert(draft && draft.includes('下書き') && posts.length === 0, `**下書きの同題を採用した・出した**（${draft} / POST ${posts.length} 回）`);
+
+      reset({ listXml: list([{ title: '別の記事', published: hoursAgo(3) }]) });
+      const cap = await threw(() => run({ force: true }));
+      assert(cap && cap.includes('24時間') && posts.length === 0, `**app:draft の無い記事を数えずに連投した**（${cap} / POST ${posts.length} 回）`);
+      reset({ listXml: list([{ title: '別の記事', published: hoursAgo(30), draft: 'no' }]) });
+      const gap = await threw(run);
+      assert(gap && gap.includes('66 時間未満') && posts.length === 0, `間隔の足りない投稿を出した（${gap}）`);
+      assert((await run({ force: true })).reused === false && posts.length === 1, 'force で間隔を越えられない');
+
+      // 一覧の形が読めない → 公開フィードで確かめる（注意つき）。公開フィードに24時間以内があれば止める
+      reset({ listXml: '<html>ログイン</html>', feedXml: publicFeed([{ title: '別の記事', published: hoursAgo(3) }]) });
+      const viaFeed = await threw(run);
+      assert(viaFeed && viaFeed.includes('公開フィード') && viaFeed.includes('24時間') && posts.length === 0 && warnings.length === 1,
+        `**読めない一覧を「投稿が無い」と読んだ**（${viaFeed} / POST ${posts.length} 回 / 注意 ${warnings.length}）`);
+      reset({ listXml: list([{ title: '日付なし' }]), feedXml: publicFeed([old]) });
+      assert((await run()).reused === false && posts.length === 1 && warnings.length === 1 && gets.some((g) => g.u.startsWith(`${cfg.feedUrl}?fresh=`)),
+        '日付の読めない一覧で公開フィードに切り替えない');
+      reset({ listXml: '<feed></feed>', feedXml: publicFeed([{ title: '日付なし' }]) });
+      const undated = await threw(run);
+      assert(undated && undated.includes('日付') && posts.length === 0, `公開フィードでも日付を読めないのに出した（${undated}）`);
+
+      // 401: WSSE で1回送り直し、それでも通らなければ鍵の誤りとして止める（投稿しない）
+      reset({ listStatus: 401 });
+      const auth = await threw(run);
+      assert(auth && auth.includes('認証が通らない') && auth.includes('LIVEDOOR_API_KEY') && posts.length === 0
+        && gets.length === 2 && gets[0].auth.startsWith('Basic ') && gets[1].auth.startsWith('WSSE '), `401 の扱い: ${auth} / ${JSON.stringify(gets)}`);
+      reset({ listStatus: 403 });
+      const forbidden = await threw(run);
+      assert(forbidden && forbidden.includes('HTTP 403') && posts.length === 0 && gets.length === 1, `403 の扱い: ${forbidden}`);
+      // 作成の 5xx は送り直さない（作成済みかもしれない）。応答に公開URLが無ければ失敗
+      reset({ listXml: list([old]), postStatus: 502 });
+      const e5 = await threw(run);
+      assert(e5 && posts.length === 1, `**作成の 5xx を送り直した**（POST ${posts.length} 回 / ${e5}）`);
+      reset({ listXml: list([old]), postBody: '<entry></entry>' });
+      const noUrl = await threw(run);
+      assert(noUrl && noUrl.includes('公開URLが無い') && posts.length === 1, `公開URLの無い応答を成功にした（${noUrl}）`);
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
+
+  await t('見張り: 鍵待ちの判定（この経路の投稿が無く・鍵が未登録のときだけ。投稿が1本でもあれば通常の判定）', () => {
+    const ld = PLATFORMS.livedoor;
+    const old = [{ title: '旧', content: '<p>旧ローカルタスクの記事</p>' }];
+    const mine = [{ title: '新', content: `<p>本文</p>${OWNED_BLOG_FOOTER_JA}` }];
+    assert(keyPendingFor(ld, old, {}) === true, '鍵も投稿も無いのに鍵待ちにしない（クラウドの外の見張りは環境変数を持たない）');
+    assert(keyPendingFor(ld, old, { LIVEDOOR_KEY_SET: 'false' }) === true, '鍵が未登録なのに鍵待ちにしない');
+    assert(keyPendingFor(ld, old, { LIVEDOOR_KEY_SET: 'true' }) === false, '**鍵が登録されたのに鍵待ちのまま（止まっても alert にならない）**');
+    assert(keyPendingFor(ld, [...old, ...mine], {}) === false, '**この経路の投稿があるのに鍵待ちにした（止まっても alert にならない）**');
+    assert(keyPendingFor(ld, [{ title: 'x', fromRun: true }], {}) === false, 'この run の投稿があるのに鍵待ちにした');
+    assert(keyPendingFor(PLATFORMS.hatenadiary, old, {}) === false && keyPendingFor(PLATFORMS.devto, [], {}) === false, '鍵待ちでない媒体を鍵待ちにした');
+  });
+
+  await t('見張り: ライブドアは鍵の登録前なら alert でなく warn、登録後・この経路の投稿後は通常の判定（止まれば alert）', async () => {
+    const orig = globalThis.fetch;
+    let entries = [];
+    try {
+      globalThis.fetch = async (u, o) => {
+        assert(!o?.method || o.method === 'GET', '見張りが外部を書き換えた');
+        u = String(u);
+        if (u.startsWith(`${PLATFORMS.livedoor.feedUrl}?fresh=`)) {
+          return new Response(`<feed version="0.3" xmlns="http://purl.org/atom/ns#">${entries.map((e) => `<entry><title>${e.title}</title><link rel="alternate" type="text/html" href="${e.url}" /><issued>${e.published}</issued><content type="text/html" mode="escaped"><![CDATA[${e.html}]]></content></entry>`).join('')}</feed>`);
+        }
+        const p = entries.find((e) => e.url === u);
+        if (p) return new Response(`<html><head><meta name="robots" content="max-image-preview:large" /><title>${p.title} : 開発日誌</title></head><body><div class="article-body-inner">${p.html}</div><!-- /記事本文 --></body></html>`);
+        throw new Error(`想定外の取得: ${u}`);
+      };
+      const opts = { ...WATCH, wait: async () => {} };
+      const old = { title: '旧ローカルタスクの記事', url: 'https://captio.livedoor.blog/archives/1.html', published: hoursAgo(270),
+        html: '<p>旧</p><p><a href="https://simplememofast.com/" target="_blank" rel="noopener">x</a></p>' };
+      entries = [old];
+      const pending = await watchPlatform('livedoor', now, { ...opts, env: {} }, go);
+      assert(pending.status === 'warn' && pending.key_pending === true && pending.problems.some((p) => p.includes('LIVEDOOR_API_KEY') && p.includes('オーナー作業')),
+        `鍵の登録前を alert にした・理由が無い: ${JSON.stringify(pending)}`);
+      const keySet = await watchPlatform('livedoor', now, { ...opts, env: { LIVEDOOR_KEY_SET: 'true' } }, go);
+      assert(keySet.status === 'alert' && !keySet.key_pending, `**鍵を登録した後も止まっているのを隠した**: ${JSON.stringify(keySet)}`);
+      const md = composeBody({ body_markdown: '本文と[説明](https://simplememofast.com/obsidian/)。', basis: 'S-20260903-x' }, 'livedoor', { runId: '1', at: 'T' });
+      const mine = { title: 'この経路の記事', url: 'https://captio.livedoor.blog/archives/2.html', published: hoursAgo(20), html: markdownToHtml(md) };
+      entries = [mine, old];
+      const running = await watchPlatform('livedoor', now, { ...opts, env: {} }, go);
+      assert(running.status === 'ok' && running.pipeline_age_hours === 20 && running.key_pending !== true
+        && running.pipeline_latest?.site_links?.[0]?.rel === '', `この経路の投稿があるのに通常の判定にならない: ${JSON.stringify(running)}`);
+      entries = [{ ...mine, published: hoursAgo(300) }, old];
+      const stale = await watchPlatform('livedoor', now, { ...opts, env: {} }, go);
+      assert(stale.status === 'alert' && !stale.key_pending, `**この経路の投稿が止まっているのに鍵待ちで隠した**: ${JSON.stringify(stale)}`);
+    } finally {
+      globalThis.fetch = orig;
     }
   });
 
