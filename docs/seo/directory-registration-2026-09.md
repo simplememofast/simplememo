@@ -2520,7 +2520,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/4 01:37 | [#1944](https://github.com/simplememofast/simplememo/pull/1944) | `README.md`（`/README.md` でそのまま公開されている）：「No analytics/tracking」（本番のページは GA4 を読み込む）、「WCAG 2.1 Level AA compliant」（監査の記録が無い）、「/support はメールへ転送」（いまは 404）、「CSS 約12KB」「外部依存なし」、実在しないファイル構成と古い配色を、いまのサイトに合わせた。SNS の停止のメモとデプロイの節はそのまま |
 | 10/4 01:47 | [#1945](https://github.com/simplememofast/simplememo/pull/1945) | 第121弾（日本語16・英語15ページ＋サイトマップ）：「ウィジェットをタップすると声のメモが始まる」「iOS 18以降はコントロールセンターから1タップで音声メモ」に条件を書き足した（ウィジェットは iOS 17以降、コントロールは iOS 18以降。そのまま音声入力が始まるのは iOS 26以降の対応機種・言語だけで、それより前はメモの画面が開くだけ）。「ワンタップで自分のメールに届きます」「ワンタップでメール送信が完了」「One-tap email delivery」「Delivered to your inbox with one tap」→「送られます」「one-tap send」、比べた実測の無い「Craft を開いて AI 機能にたどり着く前に送信完了」「before you even open OneNote」、実測の無い「Zoomを閉じてから30秒以内に」（→「すぐに」）を外した。FAQ は見える答えと FAQPage の両方 |
 | 10/4 02:16 | [#1946](https://github.com/simplememofast/simplememo/pull/1946) | 第122弾（日本語8・英語12ページ＋サイトマップ）：設定画面の道順を今のアプリに合わせた。「設定 → 詳細設定」「Settings → Advanced settings」という欄は無く、「起動時に音声入力を自動オン」「高音質録音」「送信サウンド」は「音声入力とサウンド」（iOS 26 より前の端末では「サウンドと触覚」）、「Obsidian 連携」は「Obsidian」の欄にある。Obsidian の送り先の選択肢「Inboxノート」→ アプリの表示どおり「指定したノート」（既定のノート名は Inbox）。「プラグイン不要・アプリを開かずバックグラウンドで」に、保管庫のフォルダを選んでいるとき、という条件（`/guides/`・`/en/guides/`・`/en/`）。FAQPage を生成している3ページは `inject_faq_schema.py` で作り直した |
-| — | この PR | §5.51 の「この PR」の行、この §5.52、§7 #64、第119〜122弾の annotations の行 |
+| 10/4 02:40 | [#1947](https://github.com/simplememofast/simplememo/pull/1947) | §5.51 の「この PR」の行、この §5.52、§7 #64、第119〜122弾の annotations の行 |
 
 ### 見つけたこと
 
@@ -2544,6 +2544,41 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 11/12 以降：`/ai-tags/`・`/blog/fastest-memo-app-benchmark` の条件なしの0.4秒。11/13 以降：`/blog/business-memo-apps-2026`・`/blog/memo-app-hikaku-matome`・`/en/blog/offline-first-comparison`（§7 #61 の残り）。
 - 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。10/24 以降：`/note-to-email/`（日本語）の FAQ。11/12 以降：§5.50 の残り（`/obsidian/compare/logseq/` ほか、`/download/` の日本のストアの名前）。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
+- §7 #63・#64 をオーナーに聞く。
+
+## 5.53 2026-10-04 未明：認証の前の送信は予約（第123弾）、各言語のトップ（第124弾）、音声入力は iOS 26 以降（第125弾）、0.4秒は中央値（第126弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/4 02:49 | [#1948](https://github.com/simplememofast/simplememo/pull/1948) | 第123弾（日本語1・英語2ページ＋サイトマップ）：よくある質問（日英）の「認証が完了するまで、メモの送信はできません」→「認証が済むまで、メモはメールで送られません（『送信を予約しました』と表示されたメモは、端末に残り、認証が済むと送られます）」。宛先のクリアの答えも。`/en/ai-tags/` の「to-dos and ideas into your Inbox note, logs into your daily note」→ 設定の「送り先」で選んだノートに入る |
+| 10/4 03:08 | [#1949](https://github.com/simplememofast/simplememo/pull/1949) | 第124弾（各言語のトップ8ページ＋サイトマップ）：オフラインの答えを「オフラインで送ったメモ」に（中国語は「書いた」メモと書いていた）、AI タグの節の「端末内で文字起こし」に iOS 26 以降・対応言語の条件、中国語（簡体字・繁体字）の0.4秒の見出し・OG の説明に iPhone 16e、中央値を「0.4秒以内」と書いた3文を「タップから0.4秒で入力できる」に |
+| 10/4 03:17 | [#1950](https://github.com/simplememofast/simplememo/pull/1950) | 第125弾（英語4・日本語2ページ）：音声入力は iOS 26 以降の対応機種・言語で、という条件を英語のトップ（機能カード・AI タグの節・紹介文・音声入力の節・構造化データ）・`/en/ai-tags/`・使い方（日英）の Siri の「音声メモ」・ガイドの一覧（日英）のカードに足した。ガイドの一覧の「どのガイドも5分以内で読み終わる」「Each guide takes less than 5 minutes to read」を削除 |
+| 10/4 03:27 | [#1951](https://github.com/simplememofast/simplememo/pull/1951) | 第126弾（日本語3・英語4ページ＋`llms.txt`＋サイトマップ・開発記事の RSS）：メモのコツの記事（日英）の「起動が0.4秒以内のアプリを選ぶ」→「開いてすぐ書き始められるアプリを選ぶ」、`/en/vs/roam-research/` の「typing within 0.4 seconds」→ 中央値と書く。開発記事 `/devlog/uikit-vs-swiftui`（日英）の構造化データの `dependencies`「Xcode 16, Swift 6, iOS 17+」→「UIKit, Xcode Instruments (os_signpost)」。`llms.txt` のハンズフリーの行に iOS 26 の条件 |
+| — | この PR | §5.52 の「この PR」の行、この §5.53、第123〜126弾の annotations の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **認証の前に送信をタップしたときの説明**：よくある質問（日英）は「認証が完了するまで、メモの送信はできません」と書いていたが、今のアプリでは、宛先が未設定・未認証のまま送信をタップすると「送信を予約しました。宛先を確認したら届きます」と表示され、メモは端末に暗号化して残り、認証が済むと送られる | 第123弾 [#1948](https://github.com/simplememofast/simplememo/pull/1948)。予約の動きは今後の設定で変わることもあるので、答えは画面の表示に結びつけて書いた |
+| **AI タグの種別で送り先が変わる、という説明**：`/en/ai-tags/` が「やること・アイデアは Inbox、記録はデイリーノートへ」と書いていたが、アプリは種別を判定するだけで、追記先は設定の「送り先」で選んだノート | 第123弾 [#1948](https://github.com/simplememofast/simplememo/pull/1948)。日本語の `/ai-tags/` の同じ書き方は実行中の実験の対象なので 11/12 以降 |
+| **各言語のトップに、日本語・英語で直した食い違いが残っていた**：オフラインの答え（中国語は「書いた」メモが自動で送られると書いていた）、音声入力の条件なし、中国語の0.4秒に端末名が無い・中央値を「0.4秒以内」と書いた文 | 第124弾 [#1949](https://github.com/simplememofast/simplememo/pull/1949)。8言語の訳は、各言語の今の文の言い回し（送信待ちの呼び方など）を使って意味だけを変えた |
+| **音声入力の条件**：アプリの音声入力は iOS 26 以降の対応機種・言語でしか使えない（それより前はマイクのボタンが出ない）。英語のトップは「Auto-start on launch (iOS 26+)」と自動オンにだけ条件を付けていて、マイクをタップする音声入力は古い iOS でも使えるように読めた。Siri の「音声メモ」も、iOS 26 より前はメモの画面が開くだけ | 第125弾 [#1950](https://github.com/simplememofast/simplememo/pull/1950)。日本語のトップの同じ書き方（「✓ 起動時に自動オン（iOS 26+）」）は実験の評価日のあと（11/21 以降） |
+| **ガイドの一覧の「どのガイドも5分以内で読み終わる」**：一覧から行けるページの多くは5分を超える（Captio の2ページは約15〜24分、`/obsidian/` は約9〜13分） | 第125弾 [#1950](https://github.com/simplememofast/simplememo/pull/1950)（一文を削除）。用語集の「3分で読めます」（4ページ）は本文が約2〜3分で、そのまま |
+| **「0.4秒以内」**：0.4秒はウォーム起動5回の中央値（0.366〜0.433秒、`data/benchmark.json`）で、上限ではない。メモのコツの記事は、開発者の中央値を「アプリの選び方」の基準にしていた | 第126弾 [#1951](https://github.com/simplememofast/simplememo/pull/1951) |
+| **開発記事の構造化データの「Xcode 16, Swift 6, iOS 17+」**：本文にその前提は無く、アプリは iOS 16.0 から動く | 第126弾 [#1951](https://github.com/simplememofast/simplememo/pull/1951) |
+| **ストアの値**：10/4 03:00 に `check-store-facts.mjs --net` で実物と突き合わせた（評価 4.1・27件・公開版 5.9.12）。ずれなし | 変更なし |
+| **公開ロードマップの「送る入口を増やす（共有シート・Action Button・Mac）」**：アクションボタンへの「声でメモ」の割り当ては今でもできる。ロードマップの項目は「見ているものをそのまま送る」入口のことで、アンケートの選択肢にはそう書いてある | オーナーの予定の書き方なので変えていない |
+
+### 次にやること
+
+- 10/11 のあと：`/siri/`（日本語）の「コントロールセンターの1タップ音声メモはiOS 18以降」に iOS 26以降の対応機種・言語の条件、「高音質録音」の「設定 → 詳細設定」を「音声入力とサウンド」に。
+- 11/12 以降：日本語の `/ai-tags/` の「やること・アイデアはInboxへ、記録はデイリーノートへ」と条件なしの0.4秒、`/blog/fastest-memo-app-benchmark`。11/13 以降：§7 #61 の残り（`/blog/business-memo-apps-2026`・`/blog/memo-app-hikaku-matome`・`/en/blog/offline-first-comparison`）。
+- 11/21 以降：日本語のトップ（`/`）の音声入力の条件・「プラグイン不要・アプリを開かずバックグラウンドで」の条件・「圏外で書いたメモ」。
+- 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）。10/24 以降：`/note-to-email/`（日本語）の FAQ。11/12 以降：§5.50 の残り。
+- 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。毎晩の確認は 10/4 20:40 JST に予約済み。
 - §7 #63・#64 をオーナーに聞く。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
