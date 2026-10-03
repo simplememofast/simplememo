@@ -545,10 +545,16 @@
           ]
         },
         "reason": {
-          "const": "quota_exhausted"
+          "enum": [
+            "quota_exhausted",
+            "human_authorized_local_quality"
+          ]
         },
         "quota_recovered": {
-          "const": false
+          "enum": [
+            false,
+            null
+          ]
         },
         "raw_ref": {
           "type": "object",
@@ -617,7 +623,97 @@
             }
           }
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "reason": {
+                "const": "quota_exhausted"
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "properties": {
+              "quota_recovered": {
+                "const": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reason": {
+                "const": "human_authorized_local_quality"
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "required": [
+              "cancellation_cause",
+              "replaced_for_this_one_release",
+              "reason_ref"
+            ],
+            "properties": {
+              "conclusion": {
+                "const": "cancelled"
+              },
+              "quota_recovered": {
+                "const": null
+              },
+              "unverified_status_ids": {
+                "minItems": 1
+              },
+              "cancellation_cause": {
+                "const": "unknown"
+              },
+              "replaced_for_this_one_release": {
+                "const": true
+              },
+              "reason_ref": {
+                "type": "object",
+                "required": [
+                  "path",
+                  "sha256"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2048
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "quota_ref"
+                  ]
+                },
+                {
+                  "required": [
+                    "not_run_ref"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
     },
     "physical": {
       "type": "object",
