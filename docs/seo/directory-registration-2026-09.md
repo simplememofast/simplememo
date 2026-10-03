@@ -2340,7 +2340,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 時刻 | PR | 中身 |
 | --- | --- | --- |
 | 10/3 13:31 | [#1911](https://github.com/simplememofast/simplememo/pull/1911) | 第97弾（日本語11ページ・英語13ページ＋プライバシーポリシー 日英＋サイトマップ）：§7 #60 の「約束に読める所だけ直す」。シンプルメモについて「摩擦ゼロ」「ゼロフリクション」「frictionless」「zero-friction」「二度と埋もれさせない」と言い切っていた所のうち、題・説明・見出し・ボタンの文言・比較の言い切りを「手間の少ない」「low-friction」などに（同じカードの「実行率が劇的に向上」「探す手間ゼロ」なども）。プライバシーポリシー（日英）の 1(B) と 12 に、インストール識別子は端末のキーチェーンに保存すること、iOS の仕組み上アプリを削除しても残ることがあり、その場合は再インストール後も同じ識別子を使うこと（AppsFlyer の Customer User ID も同じ識別子）を書き足した（最終更新日 10/3） |
-| — | この PR | 第97弾の annotations の行、この §5.48、§5.47 の「この PR」の行、§7 #60・#47 |
+| 10/3 13:52 | [#1913](https://github.com/simplememofast/simplememo/pull/1913) | 第97弾の annotations の行、この §5.48、§5.47 の「この PR」の行、§7 #60・#47 |
 
 ### 見つけたこと
 
@@ -2353,6 +2353,47 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 ### 次にやること
 
 - 毎晩の確認は 10/3 20:40 JST に予約してある。10/08 まで毎日かけ直す。
+- 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
+- さくらのナレッジ：編集部の返事を待つ。
+
+## 5.49 2026-10-03 午後：「ゼロ」「取りこぼさない」の残りと設定・送り先の説明（第98弾）、下書きの自動保存をアプリの作りに（第99・100弾）、Captio の SMTP と「正統進化」・設定の「入力するだけ」・受信箱の整理ガイド（第100弾）、Obsidian の保管庫の場所と連携の条件（第101弾）、無料プランの機能と比較ページの「選ぶならこんな人」（第102弾）、比較の一覧の古いアプリ数とプライバシーの勧め（第103・104弾）
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/3 14:17 | [#1914](https://github.com/simplememofast/simplememo/pull/1914) | 第98弾（日本語22ページ・英語20ページ＋サイトマップ）：§7 #60 の続き。「ゼロ」「取りこぼさない」「漏れなく」の言い切りの残り（`/` の「追加料金なし・アプリ容量ゼロ」、「手間がゼロ」「キャプチャの摩擦を限りなくゼロに近づけます」「zero-miss」など）と、設定・送り先の説明（比較表の「設定不要」→「少ない（メールアドレスの登録と確認）」、Drafts との比較の送り先、Gmail のラベルは共有できず共有は Google グループ、など）。「ロック解除から0.4秒」→ アイコンのタップから0.4秒（ウォーム起動の実測） |
+| 10/3 14:43 | [#1915](https://github.com/simplememofast/simplememo/pull/1915) | 第99弾（日本語5ページ・英語9ページ＋サイトマップ）：下書きの自動保存の説明をアプリの作りに（入力が止まって約0.4秒後と背面に回るときに保存、落ちたときは最後に保存した時点まで、「重くなりません」を言い切らない）。公開ロードマップの「いまできること」に Obsidian・Notion 連携の条件。`/vs/google-keep/`（日英）の「受信トレイで即座に確認」。英語の言い切りの残り（LINE Keep・ひらめき・手書きとの比較・SMTP・Drafts） |
+| 10/3 15:21 | [#1916](https://github.com/simplememofast/simplememo/pull/1916) | 第100弾（日本語9ページ・英語9ページ＋llms.txt＋サイトマップ）：①下書きの説明の残り（「打つそばから保存」→「入力が止まると保存」、「iPhone の中だけ・クラウドには送らない」→ アプリが送ることはなく、iPhone のバックアップには暗号化されたまま含まれることがある）②Captio：`/glossary/smtp/`（日英）の「旧Captioはユーザーの SMTP サーバーに直接接続していた」と `/glossary/captio-method/`（日英）の「正統進化」「The True Evolution of Captio」「modern evolution」③「メールアドレスを入力するだけ」→「登録して確認すれば」④`/guides/inbox-memo-organization/`（日英。6月の本文のまま）の差出人の絞り込み・画像を送れる前提の `has:attachment`・iPhone のメールのルール・.mbox の取り込み・容量の数字・記録の無い「たびたびいただく質問」など |
+| 10/3 15:52 | [#1918](https://github.com/simplememofast/simplememo/pull/1918) | 第101弾（日本語8ページ・英語8ページ＋サイトマップ）：Obsidian 連携の説明で、保管庫の置き場所を「iCloud Drive の中」に限っていた所（`/hands-free/` の準備、`/apple-watch-obsidian/`・`/obsidian/daily-note/` の手順など）を「iCloud Drive か『このiPhone内』」に、連携の条件を書かずに「デイリーノートへ自動追記します」と言い切っていた所（`/obsidian/compare/`・`/obsidian/shortcuts-not-working/` など）に「連携をオンにしていれば」。`/en/blog/inbox-zero-workflow-tips-2026`（英語だけ、6月の本文）の「One tap, and it's in your inbox」と根拠のない数字 |
+| 10/3 16:29 | [#1919](https://github.com/simplememofast/simplememo/pull/1919) | 第102弾（日本語6ページ・英語10ページ＋サイトマップ）：`/vs/ticktick/`（日英）の「無料プランは機能面での制約は一切ありません」「zero feature restrictions」と `/vs/standard-notes/`（日英）の「無料で機能制限なく使いたい」（Obsidian だけに保存するモードは Premium）。比較ページの「選ぶならこんな人」の一覧の言い過ぎ：「サーバーに保存しない」の主語（→ アプリのサーバー）、「メモの暗号化」（→ 端末内）、`/vs/moca/`（日英）の「業務メモのセキュリティを重視する」「Handle sensitive or work-related memos」、`/vs/anytype/` の「メール経由で即座に共有」、英語の「Can't afford …」。`/en/blog/best-note-to-self-apps-2026` の「For sensitive content, look for on-device encryption + minimal-server architecture」。英語の「in your inbox」「land in your inbox」と、`/en/vs/anytype/`・`/en/vs/joplin/` の設定の説明 |
+| 10/3 17:12 | [#1920](https://github.com/simplememofast/simplememo/pull/1920) | 第103弾（本文は日本語4ページ・英語4ページ＋サイトマップ。英語の比較ページ36ページはパンくずの名前だけ）：`/vs/`（日英）の見出しの「16アプリ」「8つのメモアプリ」「16 Popular Apps」（一覧表は25アプリ、比較ページは38本）→ 数を書かない言い方に。英語の見出しから作られるパンくず（BreadcrumbList の2番目の名前）を `finalize_split_pages.py --apply` で39ページ更新。`/vs/apple-notes/` の「クラウドに頼らない設計」「No Cloud Dependency」、`/vs/day-one/` の「iCloudを使わず」「余計な情報を一切付けません」。`/blog/which-memo-app-flowchart`（日英）でプライバシー重視の人に E2E 暗号化のアプリと同じ並びで勧めていた所・早見表の ◎・「個人情報の登録も不要」・「ダウンロード後すぐに使えます」 |
+| 10/3 17:37 | [#1921](https://github.com/simplememofast/simplememo/pull/1921) | 第104弾（日本語2ページ・英語2ページ。4ページとも更新日はすでに 10/3 なので、更新日とサイトマップは変わらない）：`/vs/`（日英）の「『プライバシー』重視 → シンプルメモ（プライバシーファーストのアーキテクチャ）」→「Standard Notes / シンプルメモ」（読まれては困る内容の保管はエンドツーエンド暗号化のアプリ、シンプルメモはアプリのサーバーに本文を残さない設計でE2E暗号化ではない）。`/vs/standard-notes/`（日英）の「暗号化されたデータがサーバーに存在すること自体がリスク」（比べる相手のメールは、受信箱にメールサービスが読める形で残る）→ トレードオフはノートを読めるアプリが限られること、と送ったメモはメールサービスに残ること。日本語の比較表「無料プランの機能：制限なし（送信数のみ）」→「1日3通まで（『Obsidianのみに保存』はPremium）」 |
+| — | この PR | §5.48 の「この PR」の行、この §5.49、第98〜104弾の annotations の行、`/` の2つの実験（video-2026-08-11-five-clips・title-2026-08-20-home-grammar）と en-2026-08-11-native-rewrite の note、§7 #61・#62 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **Captio の送り方の誤り**：`/glossary/smtp/`（日英）が「旧Captioはユーザーのメールアカウントの SMTP サーバーに直接接続していた（サーバー名・ポート・アプリパスワードが必要だった）」と書いていた。Captio の App Store の説明文では、設定なしでは Amazon SES のメールサーバーから送り、IMAP を設定すれば受信箱へ直接入れる方式 | 第100弾 [#1916](https://github.com/simplememofast/simplememo/pull/1916) で Captio の名前を外し、「自分のメールアカウントから送る方式のアプリでは」に |
+| **Captio の後継に読める書き方の残り**：`/glossary/captio-method/` の CTA の題「Captioメソッドの正統進化」「The True Evolution of Captio」、英語の説明文（5か所）の「Simple Memo's modern evolution」 | 第100弾で「Captio のワークフローに着想を得た」に（Captio の書き方の決まり。§7 の「公式後継」「公認」を使わない、と同じ） |
+| **下書きは端末のバックアップに含まれる**：アプリの作りでは、下書きは暗号化したファイルとして端末に置かれ、バックアップの対象から外していない（鍵は「この端末だけ」の設定）。`/guides/draft-autosave/` の「iPhone の中だけ」「クラウドには送らない」は、iCloud バックアップを使う人には言い過ぎ | 第100弾で「アプリが送ることはない。バックアップには暗号化されたまま含まれることがあるが、ほかの端末では読めない」に（プライバシーポリシー・よくある質問の鍵の説明と同じ。アプリの動きは変えない） |
+| **`/guides/inbox-memo-organization/`（日英）が6月の本文のまま**：画像を送れる前提の説明、iPhone のメールでルールが作れる（iCloud メール用だけ）、Gmail に無いメニュー、.mbox を Obsidian・Notion に取り込める（どちらも .mbox に対応していない。10/3 に公式の一覧で確認） | 第100弾で直した |
+| **確認コードは6桁**（サイトの説明どおり）。設定の説明の「メールアドレスを入力するだけ」は確認の手順を落としていた | 第100弾で「登録して確認すれば」に。「設定するだけ」の言い方（約15か所）は、確認も含むと読めるので残した |
+| **Obsidian 連携の保管庫の場所**：アプリは iCloud Drive か「このiPhone内」にあり、ファイル App から開ける保管庫フォルダに書き込める（`/obsidian/` はそう書いている）。`/obsidian/sync/`（日英）は「Git や Syncthing だけで運用している保管庫は今は対象外」、`/hands-free/`（日英）の準備は「保管庫が iCloud Drive 上にある」と書いていて、できることを狭く書いている | 実験の対象でないページは第101弾 [#1918](https://github.com/simplememofast/simplememo/pull/1918) で直した。`/obsidian/sync/`・`/obsidian/plugins/`（日英）は internal-link-2026-09-02-003 の対象（評価 10/12）なので 10/13 以降に、`/obsidian/compare/logseq/`（日英）の同じ種類の文（「自動追記します」に連携の条件が無い）は aio-2026-08-12-logseq-answer-block の対象（評価 11/12）なので 11/13 以降に直す |
+| **条件なしの「0.4秒起動」「0.4s launch」**：ブログ・活用事例・比較ページなど約140ページ・約240か所に残る（§7 #31 は「主要ページに条件を添える」だった） | §7 #61 としてオーナーに聞く |
+| **「v3.9（2026年7月）で Apple Watch に対応」**（`/`・`/en/` の本文、`/` のレビュー紹介「この声を受けて、v3.9でApple Watchに対応しました」）：App Store Connect の配信の履歴では 3.4 が 6/10、3.9 が 7/4 に配信準備完了。Watch への対応がどの版で公開されたかで、書き方が変わる | §7 #62 としてオーナーに聞く（`/` は実験の対象なので、直すなら note を付ける） |
+| **無料プランを「機能の制限なし」と書いていた所**：`/vs/ticktick/`（日英）と `/vs/standard-notes/`（日英）。`/faq` のとおり、メールを送らず Obsidian だけに保存するモードは Premium の機能 | 第102弾 [#1919](https://github.com/simplememofast/simplememo/pull/1919) で「1日3通まで（Obsidian だけに保存するモードは Premium）」に |
+| **比較ページの「選ぶならこんな人」の一覧**（`/vs/` の日英 54ページ分を抜き出して読んだ）：「サーバーへのデータ保存を避けたい」「メモ本文をサーバーに保存させたくない」（送ったメモは受信箱、つまりメールサービスのサーバーに残る。英語はすでに「the memo app's own servers」）、「メモの暗号化が重要」（英語は on-device）、`/vs/moca/` の「業務メモのセキュリティを重視する」（サイト自身の案内は、機密性の高い内容はエンドツーエンド暗号化のアプリへ） | 第102弾で直した。「〜したい」の言い方で、できることを言い切っていない項目（「取りこぼしたくない」など）は残した |
+| **`/en/blog/offline-first-comparison` の「Privacy-Focused Capture … Best choice: Simple Memo … capture sensitive information without network transmission」**：メールで送るアプリを「通信せずに機密を書き留めたい人」に勧めていて、送信待ちはつながると自動で送られる（「送ると決めるまで端末に置く」ではない） | aio-2026-08-12-entity-attribution の対象（評価 11/12）なので 11/13 以降に直す |
+| **比較の一覧の見出しの古いアプリ数**：`/vs/` は「vs 16アプリ」と「8つのメモアプリ」、`/en/vs/` は「vs 16 Popular Apps」。一覧表は25アプリ、比較ページは38本。英語の見出しは `/en/vs/*` 全ページのパンくずの名前にもなっていた | 第103弾 [#1920](https://github.com/simplememofast/simplememo/pull/1920) で数を書かない言い方に。パンくずは自動で更新（en-2026-08-11-native-rewrite の対象 `/en/vs/google-keep-vs-apple-notes/` も名前だけ変わるので note を付けた） |
+| **プライバシー重視の人への勧め**：`/blog/which-memo-app-flowchart`（日英）が、機密情報・医療情報について「アプリのサーバーに本文を残さない設計か、エンドツーエンド暗号化かで選ぶ」と2つを同じ並びに置き、早見表でシンプルメモのプライバシーを E2E 暗号化のアプリと同じ ◎ にしていた。日本語は「個人情報の登録も不要」（送り先のメールアドレスは登録する） | 第103弾で直した。`/vs/`（日英）の「『プライバシー』重視 → シンプルメモ」と `/vs/standard-notes/` の「暗号化データがサーバーにあること自体がリスク」は第104弾 [#1921](https://github.com/simplememofast/simplememo/pull/1921)。同じ種類の勧めが `/en/blog/business-memo-apps-2026`（「Security first — Standard Notes or Simple Memo」）・`/blog/memo-app-hikaku-matome`（「多くのユーザーに支持されています」）にもあるが、aio-2026-08-11-answer-blocks・aio-2026-08-12-entity-attribution の対象（評価 11/11・11/12）なので評価のあとに直す |
+| **新しい実験 gsc-email-yourself-title-20261003**（`/blog/email-yourself-memo`、10/3 開始、評価 11/2） | 第98〜104弾はこのページを変えていない |
+
+### 次にやること
+
+- 毎晩の確認は 10/3 20:40 JST に予約してある。10/08 まで毎日かけ直す。
+- 10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）の保管庫の場所と連携の条件。11/12 以降：`/obsidian/compare/logseq/`、`/en/blog/offline-first-comparison` の「Privacy-Focused Capture」、`/en/blog/business-memo-apps-2026` の「Security first」、`/blog/memo-app-hikaku-matome` の「多くのユーザーに支持」（それぞれの実験の評価のあと）。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。
 - さくらのナレッジ：編集部の返事を待つ。
 
@@ -2613,3 +2654,5 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 58 | ~~**本文に残る「逃さない」**：`/blog/ai-information-workflow`・`/blog/business-memo-apps-2026`・`/blog/captio-discontinued`・`/methods/`・`/use-cases/`・`/use-cases/job-hunting/`・`/use-cases/writers/`・`/vs/bear/`・`/vs/craft/`・`/vs/day-one/`・`/vs/heptabase/` の本文（例：「考えを逃さないためのツール」「その瞬間を逃さないためのツールとしてCaptioは最適でした」「考えを逃さないことだけに最適化されています」）~~ → **2026-10-02 判断：② 約束に読める所だけ直す** → 第91弾 [#1884](https://github.com/simplememofast/simplememo/pull/1884)（10/2 16:49。5か所。§5.46。`/blog/captio-discontinued` の「最適でした」は Captio の説明で、シンプルメモの約束ではないので残した） | 題・説明・OG 画像の「逃さない」は直してある（第34・59・76・85弾）。本文は目的を言う書き方が多く、保証の言い切りとまでは言えない所もあるので、どこまで直すかの判断が要る | ① 本文も「その場で書き留める」などに直す ② 保証に読める所（「最適化されています」「最適でした」と組み合わさった所）だけ直す ③ このまま |
 | 59 | ~~**開発記事の「実機計測で 200〜300ms」**：`/devlog/uikit-vs-swiftui`（日英）の「Time-to-Text 500ms以下という非機能要件…実機計測で 200〜300ms を安定して達成」とよくある質問の「実機で200〜300ms台で安定」~~ → **2026-10-02 判断：② 数字を外して目標だけにする** → 第91弾 [#1884](https://github.com/simplememofast/simplememo/pull/1884)（10/2 16:49。`/devlog/day1` も。§5.46） | 台帳に計測の記録（日時・端末・回数・測った区間）の場所が無い。サイトの起動時間は、記録のある「0.4秒（ウォーム起動の実測）」にそろえてきた | ① 記録があれば、条件（端末・区間・回数）と一緒に残す ② 記録が無ければ数字を外し、目標（500ms以下）だけにする ③ このまま |
 | 60 | ~~**シンプルメモについての「摩擦ゼロ」「ゼロフリクション」「frictionless」**：`/use-cases/reading-notes/`「強みは『ゼロフリクションのキャプチャ』」、`/blog/memo-habit` の CTA「摩擦ゼロのメモ体験」、`/vs/evernote/`「キャプチャだけに特化することで摩擦をゼロにしています」、`/glossary/inbox-zero/`・`/glossary/kanban/`・`/glossary/gtd/`、`/methods/`・`/methods/gtd/` の見出し「ゼロフリクション・キャプチャ」、英語の同じページと `/en/methods/` の説明「Simple Memo strengthens your productivity system with frictionless capture」、`/en/vs/` のカード「zero-friction Simple Memo」など。`/guides/gmail-star-todo/` の「メモを、二度と埋もれさせない」も同じ種類~~ → **2026-10-03 判断：① 約束に読める所だけ直す** → 第97弾 [#1911](https://github.com/simplememofast/simplememo/pull/1911)（10/3 13:31。日本語11ページ・英語13ページ。§5.48）。方法の説明と、Captio を使っていたころの話は残した | 「逃さない」（#58）と同じく、計測や確認ができない言い切り。方法の説明（Zettelkasten の一時メモの原則「摩擦ゼロで書き留める」など）と、Captio を使っていたころの話は対象外 | ① 約束に読める所だけ「摩擦の少ない」などに直す ② 全部直す ③ このまま |
+| 61 | **条件なしの「0.4秒起動」「0.4s launch」「Launches in 0.4 seconds」**：ブログ・活用事例・比較ページ・CTA などに約140ページ・約240か所（2026-10-03 の数え）。計測（iPhone 16e・ウォーム起動・アイコンのタップから入力できるまでの中央値）は記録があるが、条件を書かずに「0.4秒で起動」と言うと、どの端末・冷えた状態からの起動でも0.4秒に読める（§5.49） | §7 #31 は「主要ページに条件を添える」で、残りは範囲の外として残してきた。数が多く、題・CTA にも入っているので判断が要る | ① 条件を添える（「タップから0.4秒で書き始められる（ウォーム起動の実測）」など） ② 数字を外して「すぐ書き始められる」などにする ③ このまま（主要ページだけ条件つき） |
+| 62 | **Apple Watch に対応した版**：`/` と `/en/` は「2026年7月のv3.9で Apple Watchに対応」、`/` のレビュー紹介は「この声を受けて（6月のレビュー）、v3.9でApple Watchに対応しました」。App Store Connect の配信の履歴では 3.4 が 6/10、3.9 が 7/4（§5.49） | どの版で Watch のアプリを公開し、どの版で Watch から送ったメモが Obsidian にも入るようになったかは、こちらでは公開の記録から確かめきれない | ① Watch の対応は 3.4（6月）、Obsidian への追記は 3.9（7月）と書き分ける ② いまの書き方のまま（3.9 で対応） ③ 版と月を書かない |
