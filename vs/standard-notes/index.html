@@ -256,7 +256,7 @@
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/standard-notes/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。"}},{"@type":"Question","name":"Standard Notesのアカウント作成なしでシンプルメモは使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワードの設定は不要です（送信先のメールアドレスは6桁の確認コードで確認します）。"}},{"@type":"Question","name":"Standard Notesの拡張エディタはシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 0.4秒・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？","acceptedAnswer":{"@type":"Answer","text":"用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。メモ本文をアプリのサーバーに恒常的に保存せず、すぐにメールで受け取りたいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/standard-notes/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。"}},{"@type":"Question","name":"Standard Notesのアカウント作成なしでシンプルメモは使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワードの設定は不要です（送信先のメールアドレスは6桁の確認コードで確認します）。"}},{"@type":"Question","name":"Standard Notesの拡張エディタはシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？","acceptedAnswer":{"@type":"Answer","text":"用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。メモ本文をアプリのサーバーに恒常的に保存せず、すぐにメールで受け取りたいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -350,7 +350,7 @@
               <tr><th scope="row">メモの出力先</th><td class="yes">メール受信トレイ</td><td class="no">Standard Notesアプリ内</td></tr>
               <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内Outbox）</td><td class="yes">XChaCha20-Poly1305（E2E）</td></tr>
               <tr><th scope="row">アカウント不要</th><td class="yes">既存メールのみ</td><td>同期にはアカウントが必要（アカウントなしで端末内だけで使うことも可）</td></tr>
-              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>ノート一覧読込あり</td></tr>
+              <tr><th scope="row">起動速度（iPhone 16e・ウォーム起動の実測）</th><td class="yes">0.4秒（即入力可）</td><td>ノート一覧読込あり</td></tr>
               <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td class="yes">オフライン編集・接続時同期</td></tr>
               <tr><th scope="row">サービス依存</th><td>開発元の送信中継（Relay API）とメール配信事業者</td><td class="no">Standard Notesサービス</td></tr>
               <tr><th scope="row">オープンソース</th><td class="no">非公開</td><td class="yes">あり（GitHub）</td></tr>
@@ -385,7 +385,7 @@
           <li>
             <span class="diff-num">3</span>
             <strong>エディタ拡張 vs 単一入力</strong><br>
-            Standard Notesは有料プランでMarkdownエディタ、スプレッドシート、コードエディタなど多彩な拡張エディタを利用できます。シンプルメモはプレーンテキストの単一入力フィールドのみで、あえて機能を絞ることで起動 0.4秒・ワンタップ送信という速度を実現しています。
+            Standard Notesは有料プランでMarkdownエディタ、スプレッドシート、コードエディタなど多彩な拡張エディタを利用できます。シンプルメモはプレーンテキストの単一入力フィールドのみで、あえて機能を絞ることで起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信という速度を実現しています。
           </li>
           <li>
             <span class="diff-num">4</span>
@@ -411,7 +411,7 @@
               <li>メモをメールで受け取りたい</li>
               <li>メモ本文をアプリのサーバーに残したくない</li>
               <li>無料で始めたい（1日3通まで）</li>
-              <li>0.4秒起動の速さを求める</li>
+              <li>0.4秒起動（iPhone 16e・ウォーム起動の実測）の速さを求める</li>
             </ul>
           </div>
           <div class="choose-card">
@@ -438,7 +438,7 @@
         <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？</summary><div class="faq-answer"><p>Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesのアカウント作成なしでシンプルメモは使えますか？</summary><div class="faq-answer"><p>はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワードの設定は不要です（送信先のメールアドレスは6桁の確認コードで確認します）。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesの拡張エディタはシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 0.4秒・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesの拡張エディタはシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？</summary><div class="faq-answer"><p>用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。メモ本文をアプリのサーバーに恒常的に保存せず、すぐにメールで受け取りたいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。</p></div></details></div>
         </div>
 
