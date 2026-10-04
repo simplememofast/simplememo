@@ -2630,7 +2630,7 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 | 10/4 07:58 | [#1965](https://github.com/simplememofast/simplememo/pull/1965) | 第135弾（各言語のトップ8ページ）：説明文（meta・OG・Twitter）の AI タグに「オンにしたとき（Obsidian 連携が必要）」の条件、中国語の説明文の音声入力に iOS 26 の条件、韓国語・アラビア語・ポルトガル語・トルコ語のオフラインの答えに再送の上限 |
 | 10/4 08:28 | [#1966](https://github.com/simplememofast/simplememo/pull/1966) | 第136弾（日本語5・英語6ページ＋サイトマップ）：見えない所（説明文・構造化データ・スクリプトのデータ）と FAQ の残り。`/vs/`（日英）の LINE Keep の答えの「恒久的な記録保存を実現」、`/vs/notion-vs-obsidian/`（日英）の「メールプロバイダーのバックアップインフラに守られ」「サービス終了リスクがゼロ」、`/en/blog/email-management-tips` の「forever」、`/hands-free/`（日英）の説明文に iOS 26 の条件と、計っていない「高精度」「Accurate」、`/en/ai-tags/` の構造化データの説明・プライバシーの FAQ・デモの「種別で送り先が変わる」見せ方、`/download/` の構造化データの Obsidian 連携の条件、`/devlog/outbox-architecture`（日英）の「回線が戻った瞬間に全未送信を再送」「何もしなくても」 |
 | 10/4 08:39 | [#1967](https://github.com/simplememofast/simplememo/pull/1967) | 第137弾（日本語6・英語7ページ＋サイトマップ）：説明文どうしの食い違いと言い過ぎ。`/comparison/`（日英）の「37記事」「37以上のアプリ」「37+ apps」（比較ページは38本、`/vs/` の一覧表は25アプリ）と「必ず見つかります」、`/blog/instant-capture-workflow`（日英）の「Works perfectly on subways and airplanes」、`/vs/google-keep/`（日英）の「どちらのメモも受信箱に集約」（Keep のメモは共有からメールで送る）、用語集 Outbox の「コア技術革新」「core technical innovation」、iCloud の設定ガイドの「Appleエコシステムと完全統合」「Seamless Apple ecosystem integration」、`/apple-watch-obsidian/` の OG・Twitter の「話すだけで」（iPhone 経由が抜けていた）、`/en/captio-alternative/` の古い構造化データの説明、`/en/vs/captioo/` の構造化データの 0.4秒の条件 |
-| — | この PR | §5.54 の「この PR」の行、この §5.55、第133〜137弾の annotations の行 |
+| 10/4 09:11 | [#1969](https://github.com/simplememofast/simplememo/pull/1969) | §5.54 の「この PR」の行、この §5.55、第133〜137弾の annotations の行 |
 
 ### 見つけたこと
 
@@ -2660,6 +2660,45 @@ iOS 開発者のニュースレター・一覧を調べた。受付の書き方�
 - 10/5 09:04：毎週の被リンクの確認（予約の一覧で、9/28 の実行は数秒で失敗していた）の結果を見る。
 - 10/15 の朝：利用規約の本文の改定（[#1840](https://github.com/simplememofast/simplememo/pull/1840) を今の main から出し直す。予約済み）。毎晩の確認は 10/4 20:40 JST に予約済み。
 - §7 #63・#64 をオーナーに聞く。
+
+## 5.56 2026-10-04 午前：説明文の日英の見直し（第138弾）、計っていない他社の起動の速さ（第139弾）、片方の言語にしかないページ（第140弾）、取り込みの失敗の分類、全PRが止まる期限
+
+### main に入ったもの（JST）
+
+| 時刻 | PR | 中身 |
+| --- | --- | --- |
+| 10/4 09:26 | [#1970](https://github.com/simplememofast/simplememo/pull/1970) | 第138弾（日本語10・英語13ページ＋サイトマップ）：`/comparison/` の構造化データの「（37アプリ）」、`/glossary/`（日英）の「10の重要用語」（一覧は20語）、`/use-cases/`（日英）の「11のシーン」（一覧は21）と「people use it every day」、`/methods/pomodoro/` の「3秒で」、`/glossary/captio-method/` の説明文の「Captio から…への進化」→「着想を得た」、`/captio-alternative/` の構造化データの「Captioと同じ操作感を再現」、`/en/blog/captio-discontinued` の題の「Its Best Alternative」、`/how-to/`（日英）の初めて使うときの流れ（宛先は初めて送るときに聞かれる）と再送の上限、`/en/obsidian/sync/` の取り違えた説明文、`/blog/benchmark-methodology` の0.4秒の条件、`/en/ai-tags/` の説明文の AI タグの条件、`/en/voice-input/` の題の iOS 26、英語4ページの説明文の末尾の「Guides」、`/vs/moca/`（日英）の「送信速度」 |
+| 10/4 10:08 | [#1972](https://github.com/simplememofast/simplememo/pull/1972) | 第139弾（比較ページ 日本語12・英語8）：他社の起動の速さを計っていないのに、説明文（meta・OG・Twitter・構造化データ）が「起動速度の観点で解説」「Compare speed」と書いていたページに「計測はシンプルメモのみ」「measured for Simple Memo only」。`/vs/note-to-self-mail/` の構造化データの「徹底比較」も外した。`/vs/anytype/`（日英）の本文の「プライバシーも確保」「大半のユーザーには十分」→ 暗号化の範囲（端末内の送信待ちと履歴）とメールの配送は E2E ではないこと |
+| 10/4 10:25 | [#1973](https://github.com/simplememofast/simplememo/pull/1973) | 第140弾（片方の言語にしかないページ 日本語7・英語5）：`/en/blog/captio-shutdown-alternatives` の初めての流れ、`/en/captio-migration-guide/` の「same speed」「Screenshots included」、`/en/send-email-to-yourself/` の「Best for: Speed」、`/captio/` の「書いて送るまで10秒」、`/line-keep/` の「さらに速い」、0.4秒の端末（3ページ）、アプリ内の音声入力の iOS 26、`/blog/obsidian-voice-fastest-route` の「操作2つ」の条件、`/blog/open-source-memo-apps` の暗号化の範囲、「取りこぼしがゼロ」「人気メモアプリ」「popular」、`/siri/iphone/` の題と H1。サイトマップは #1972 と同じ main の上に作り、両方の変更が入った |
+| 10/4 10:56 | [#1974](https://github.com/simplememofast/simplememo/pull/1974) | 運用：SEO Daily の取り込みの失敗の分類（`scripts/recover-ingest.mjs` の `classify()`）。下の「見つけたこと」 |
+| 10/4 11:25 | [#1976](https://github.com/simplememofast/simplememo/pull/1976) | `docs/codex-request-ci-deadlines-2026-10-04.md`：全PRの自動マージが止まる期限と、Mac 側でしか直せない3件の Codex への依頼 |
+| — | この PR | §5.55 の「この PR」の行、この §5.56、§7 #65〜#67、第138〜140弾の annotations の行 |
+
+### 見つけたこと
+
+| 見つけたこと | 対応 |
+| --- | --- |
+| **説明文の日英の見直し（7つめの見方）**：日本語と英語の同じページ196組の説明文（題・meta・OG・Twitter・構造化データ）を、アプリの事実の一覧と一緒に2つのサブエージェントに分けて読ませ、食い違い・条件抜け・言い過ぎの候補を出させた（25件）。候補は1件ずつ、同じページの本文・もう一方の言語・アプリの実装と突き合わせてから直した。言い回しの好みだけのもの（「best」「perfect」の一般的な使い方など）は直していない | 第138・139弾 |
+| **片方の言語にしかないページ（8つめの見方）**：日英の対で読む見直しでは、片方の言語にしかないページ58本（日本語44・英語14。実行中の実験の対象ページと `/en/blog/revenue-report-2025` の下書きは除く）が抜けていた。アプリに触れている文を、アプリの事実の一覧と1文ずつ照らした | 第140弾（12ページ）。`/en/captio-migration-guide/` の「within seconds」は §7 #41 で決めた言い方なので残した |
+| **一覧の数が古い**：`/comparison/` の「37」、`/glossary/` の「10」（いまは20語）、`/use-cases/` の「11」（いまは21）。ページを足したときに、説明文と見出しの数が残っていた | 数を書かない言い方に（第103弾の `/vs/` と同じ） |
+| **計っていない他社の起動の速さ**：ベンチマークで計ったのは8アプリ（シンプルメモ・Drafts・Apple Notes・Google Keep・Bear・Evernote・OneNote・Notion）。それ以外の比較ページの説明文が「起動速度の観点で解説」「Compare speed」と、比べたように書いていた（本文は「未計測」） | 第139弾で条件を添えた |
+| **SEO Daily の失敗（cron 監視の issue [#1971](https://github.com/simplememofast/simplememo/issues/1971)）**：10/4 08:33 JST の回が preflight で落ちた。BigQuery で確かめると、**2026-09-30 の行が site・url の両方の表に無い**（9/29 と 10/1 はある。落ちた試行の `temp_` 表も `ExportLog` の行も無い。10/1 は 10/3 22:11 JST に入った）。サチコの一括エクスポートはおよそ1週間再試行し、それを過ぎると遡らない（`growth/BIGQUERY_SETUP.md`）。このセッションのブラウザのアカウントでは、サチコの設定画面（一括データエクスポートのエラー表示）を開けない | 待つ（下の「次にやること」）。preflight が落ちている間は、その日の取り込みと週1回のスナップショット（月曜）が走らない |
+| **その失敗の分類の誤り**：復旧の段（`scripts/recover-ingest.mjs --record`）が、欠測を **auth_expired（資格情報の失効・人が要る）** と記録し、「再同意・鍵の再発行」の警告を出していた。preflight が毎回出す `Service account …@….iam.gserviceaccount.com` の `iam` に当たっていたため。サービスアカウントで動く CI では、**preflight のどの失敗も失効に分類される**状態だった（件数の `14030` や `553` も状態コードとして読まれうる。欠測の文は `partial_days` の言葉に無かった） | [#1974](https://github.com/simplememofast/simplememo/pull/1974) で、preflight 自身の判定の行を先に読み、資格情報・件数・✓ の行を外し、状態コードは数として照合する。直す前のコードでは、足した自己テスト8件のうち7件が落ちることを確かめた |
+| **Devlog Syndication の失敗（同じ issue）**：はてなの見張りの「この経路の停滞」（99時間）。§5.27 の 10/2 追記に書いた見込みどおり（旧タスクの 10/1 21:33 の投稿で、はてなの門が 10/4 15:33 JST まで閉じている）。ライブドアは鍵待ち | 記録のみ。10/4 の枠で投稿されれば解消する |
+| **全PRの自動マージが止まる期限（時計を進めて CI を流して見つけた）**：`seo-check` の各ステップを、libfaketime で時計だけ先へ進めて手元で流した。何もしなければ、**10/5 01:57 JST**（`Waiting progress`：売上の写しが 9/29 16:57Z のまま。隣のリポジトリの元の系列は 10/4 まで毎日更新されている）、**10/5 09:14 JST**（`Routine runs`：Mac の副系の観測係が 10/2 09:14 を最後に PR を出していない。登録済みの16本の状態は変わっていない）、10/9（ベンダーの運用審査の期限 10/8・PR⑦ の転記の期限 10/8・アプリ公開台帳の鮮度・サチコの週次の取り込み）、10/12（言及ウォッチ）、10/16（PR 配信の全件確認）から、中身と無関係に全PRで落ちる。セッションの `--sync` では副系の写しを作れない（登録外の139本まで入り、参照不可の6本の証跡も作れない。手元で試して戻した） | Codex への依頼（[#1976](https://github.com/simplememofast/simplememo/pull/1976)）。オーナーへは §7 #65〜#67 |
+| **自動の PR**：[#1968](https://github.com/simplememofast/simplememo/pull/1968)（10/4 09:00、`data/trend-radar.json` だけ）が第138弾の組み立て中に入ったので、第138弾をその後の main に載せ直し、CI と同じ手順をもう一度通した | 記録のみ |
+
+### 次にやること
+
+- **10/5 01:57 JST・09:14 JST の前**：§7 #65 の答えにそって、Codex への依頼か、売上の写しの「承認済みの停止」。
+- **10/8 ごろ**：2026-09-30 の欠測が埋まったかを BigQuery で見る（`searchdata_site_impression`・`searchdata_url_impression` の data_date）。埋まらなければ §7 #67。
+- **10/11 まで**：言及ウォッチ（`growth/data/mentions/`、固定クエリ。10/12 09:00 JST に上限10日を超える）。
+- 10/11 のあと：`/siri/`（日本語）の音声メモの条件と「詳細設定」。10/13 以降：`/obsidian/sync/`・`/obsidian/plugins/`（日英）。10/24 以降：`/note-to-email/`（日本語）の FAQ。
+- 11/03 以降：`/blog/email-yourself-memo`（日本語）の「テスト送信が必要」。
+- 11/12 以降：日本語の `/ai-tags/`（説明文の条件・「外部サーバー送信なし」・種別ごとの送り先とデモ）、`/blog/business-memo-apps-2026`、`/blog/fastest-memo-app-benchmark`（0.4秒の条件と「各5回」）、日本語の `/blog/digital-vs-handwritten-notes`、`/download/`（日英）の日本のストアの名前（§7 #47）。11/13 以降：`/blog/memo-app-hikaku-matome` と §7 #61 の残り。
+- 11/21 以降：日本語のトップ（`/`）の説明文と構造化データの AI タグ・音声入力の条件、そのほか §5.55 に書いたもの。
+- 10/5 09:04：毎週の被リンクの確認の結果を見る。10/15 の朝：利用規約の本文の改定（予約済み）。毎晩の確認は 10/4 20:40 JST に予約済み。
+- §7 #63〜#67 をオーナーに聞く。
 
 ## 6. 次に登録すべき候補（今回消化できなかったもの）
 
@@ -2922,3 +2961,6 @@ GitHub の表示名修正は副次的だが効く —— **本日出した aweso
 | 62 | ~~**Apple Watch に対応した版**：`/` と `/en/` は「2026年7月のv3.9で Apple Watchに対応」、`/` のレビュー紹介は「この声を受けて（6月のレビュー）、v3.9でApple Watchに対応しました」。App Store Connect の配信の履歴では 3.4 が 6/10、3.9 が 7/4（§5.49）~~ → **2026-10-03 判断：③ 版と月を書かない** → 第113弾 [#1933](https://github.com/simplememofast/simplememo/pull/1933)（10/3 22:08。日本語3ページ・英語2ページ＋`llms.txt`。§5.51） | どの版で Watch のアプリを公開し、どの版で Watch から送ったメモが Obsidian にも入るようになったかは、こちらでは公開の記録から確かめきれない | ① Watch の対応は 3.4（6月）、Obsidian への追記は 3.9（7月）と書き分ける ② いまの書き方のまま（3.9 で対応） ③ 版と月を書かない |
 | 63 | **下書きのまま公開されている `/en/blog/revenue-report-2025`**：数字が「[X,XXX]」「[XX%]」のままで、ページの上に「DRAFT: This article contains placeholder data」と出る。noindex・nofollow で、サイトマップにもサイト内のリンクにも無いが、URL を知っていれば開ける。「I'll update this table monthly」という約束もある（§5.51） | 売上・利用者数などの数字はオーナーしか持っていないので、仕上げるか、公開をやめるかはこちらでは決められない | ① このまま（下書きの表示・noindex のまま） ② 公開をやめる（ページを消して `/en/blog/` へ転送） ③ 実際の数字で仕上げる（数字はオーナーから） |
 | 64 | **サイトの Google アナリティクスがプライバシーポリシーに書かれていない**：本番の443ページで Google アナリティクス 4 を読み込んでいるが、プライバシーポリシー（日英）はアプリの説明で、サイトのアクセス解析・Cookie に触れていない（§5.52） | Google アナリティクスの利用規約は、使っていることと収集・処理の仕組みの開示、Cookie などの使用のプライバシーポリシーでの通知を求めている。ポリシーの文言を変えるので、P-10 と同じくオーナーの判断 | ① ポリシーに書き足す（サイトで Google アナリティクスを使っていること、Cookie で集める情報の種類、Google の説明ページへのリンク、オプトアウトの方法） ② このまま ③ サイトの Google アナリティクスをやめる |
+| 65 | **全PRの自動マージが止まる期限のうち、Mac でしか直せないもの**：売上の写し（10/5 01:57 JST）、副系の観測係（10/5 09:14 JST）、アプリ公開台帳（10/9 09:00 JST）。依頼文は `docs/codex-request-ci-deadlines-2026-10-04.md`（§5.56） | どれも両方のリポジトリと Mac の認証が揃った所でしか作れない。売上だけは、検査の仕組みどおり「承認済みの停止」（理由と見直しの期日）を書けば数日止めずに済むが、他の主体の台帳に書くことになる | ① Codex に依頼文を渡し、売上は 10/8 まで承認済みの停止を書く ② Codex に依頼文を渡すだけ ③ 何もしない |
+| 66 | **ベンダーの運用審査の期限（10/8、10/9 09:00 JST から全PRで落ちる）** | 9/8 の審査は Codex が包括委任のもとで行った。再審査（再審査条件の確認と継続の判断）の主体を決める必要がある | ① Cowork セッションが再審査する ② Codex に頼む ③ 何もしない |
+| 67 | **PR⑦（対話メモ）の転記の期限（10/8）と PR 配信の全件確認（10/16）、サチコの 9/30 の欠測** | 採点は人の仕事とされ、配信前採点が無い。欠測の扱いは測り方の方針 | PR⑦：① 期限を延ばす（理由を書く）② D+14 の数字で転記（数字はオーナー）。欠測：10/8 に埋まっていなければ改めて聞く |
