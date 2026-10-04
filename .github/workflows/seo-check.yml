@@ -909,12 +909,23 @@ jobs:
       # 流し直しでは27秒で通り、同じ時間帯の #1775・#1777・#1770 の検証も通っている。
       # 上限が無いとジョブの既定の360分まで待つので、「apt の不調で本番デプロイを止めない」が
       # 止まりのときには成り立たない。ふだんは約30秒なので10分で切り、失敗と同じ扱いで先へ進める。
+      #
+      # [2026-10-04] **Ubuntu 26.04 には `webkit2gtk-driver` が無い**（`webkitgtk-webdriver` が置き換える）。
+      # `ubuntu-latest` は 2026-10-19〜11-19 に 26.04 へ切り替わる（GitHub の注記と actions/runner-images#14748）。
+      # 切り替わる前に、この検証を `ubuntu-26.04` で流して確かめた（下書きの PR #1987）——
+      # 1回目は `E: Package 'webkit2gtk-driver' has no installation candidate` で入らず、
+      # 横漏れの検査が「WebKit — 測れなかった: WebKitWebDriver が無い」になった（門は緑のまま）。
+      # 先に `webkit2gtk-driver` を試し、無ければ `webkitgtk-webdriver` を入れる形にした2回目は、
+      # WebKit で 500 通りを実測できた（ドライバは今の探し方 `findWebKitDriver` のままで見つかった）。
+      # 24.04 では1つ目がそのまま通るので、今の動きは変わらない。
       - name: Install WebKit (WebKitGTK + WebDriver)
         continue-on-error: true
         timeout-minutes: 10
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
+          if ! sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils; then
+            sudo apt-get install -y --no-install-recommends webkitgtk-webdriver xvfb x11-utils
+          fi
 
       - name: WebKit transport failures retain evidence and bound cleanup
         run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs

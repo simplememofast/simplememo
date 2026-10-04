@@ -11,6 +11,7 @@
  * そのときは「この環境に WebKit は入らない」と結論した（`npx playwright install webkit` が
  * egress で 403）。**その結論は経路を1つしか試していなかった。**
  * `apt-get install webkit2gtk-driver` は通り、**WebKitGTK 2.52 + W3C WebDriver** が手に入る。
+ * （Ubuntu 26.04 では同じドライバが `webkitgtk-webdriver` という名前のパッケージになる。2026-10-04 に確認）
  * Safari と同じ WebKit コア（`AppleWebKit/605.1.15`）である。
  *
  * 【実測で確かめたこと】
@@ -243,7 +244,7 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
   const driver = findWebKitDriver();
   if (!driver) {
     return { measurable: false, engine: 'webkit',
-      why: 'WebKitWebDriver が無い（`apt-get install -y --no-install-recommends webkit2gtk-driver xvfb`）' };
+      why: 'WebKitWebDriver が無い（`apt-get install -y --no-install-recommends webkit2gtk-driver xvfb`。Ubuntu 26.04 では `webkitgtk-webdriver`）' };
   }
   const disp = await ensureDisplay();
   if (!disp) {
