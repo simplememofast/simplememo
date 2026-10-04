@@ -1,15 +1,15 @@
 {
   "schema": 1,
-  "id": "vendor-operating-decision-20260908",
+  "id": "vendor-operating-decision-20261004",
   "actor": "ai",
   "authority": "owner_delegation_2026_09_08",
   "scope": "dpa_data_use_sla_exit_operating_decision",
-  "reviewed_at": "2026-09-08T08:47:30.308Z",
-  "valid_until": "2026-10-08",
+  "reviewed_at": "2026-10-04T06:22:27.000Z",
+  "valid_until": "2026-11-04",
   "contract_approved": false,
   "payment_authorized": false,
   "historical_human_reviews_replaced": false,
-  "inventory_sha256": "951098cdc79eb41053b011c58bfeb83f3b292ba65fb4d3bb9d6d674c63c939c6",
+  "inventory_sha256": "dd55233e68604bdb3a5278d144520919db327ceb56df93f5c24b823105a232c8",
   "recheck_on": [
     "account_or_plan_change",
     "processing_change",
@@ -105,6 +105,10 @@
     {
       "path": "docs/additional-channel-vendor-operating-review-2026-10-02.md",
       "sha256": "7a07715f207aa98ef177355f8c654ceb256d1f45bc62569bbc8c204ec6d89a37"
+    },
+    {
+      "path": "docs/vendor-operating-review-renewal-2026-10-04.md",
+      "sha256": "788dbd911f6318d2335829f182e9077d975b6a166cd16f5813528daeda40863a"
     }
   ],
   "decisions": [
@@ -112,7 +116,7 @@
       "vendor_id": "apple",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "yellow",
-      "processing_scope": "App Store distribution, StoreKit billing and developer account administration; no raw app memo body is established in this flow.",
+      "processing_scope": "App Store distribution, StoreKit billing and developer account administration. Since 2026-09-09 the API also receives and verifies App Store server notifications and device-signed subscription transactions (stored in Cloudflare D1). No raw app memo body is established in this flow.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -122,8 +126,8 @@
         },
         "data_use": {
           "result": "conditional",
-          "assessment": "Store purchase/download records have independent purposes and long financial retention; owner review leaves provider-detail questions open.",
-          "action": "Do not promise deletion of Apple purchase records through a SimpleMemo account deletion."
+          "assessment": "Store purchase/download records have independent purposes and long financial retention. Since 2026-09-09 signed notifications and transactions are verified and recorded on our side under the disclosed 180/90-day deletion; owner review leaves provider-detail questions open.",
+          "action": "Do not promise deletion of Apple purchase records through a SimpleMemo account deletion. Keep signature verification and the disclosed retention limits."
         },
         "sla": {
           "result": "not_identified",
@@ -144,14 +148,15 @@
         "Developer-facing incident deadline, named processor scope and account-specific remedies remain unknown."
       ],
       "evidence": [
-        "docs/vendor-review-source-addendum-2026-09-08.md"
+        "docs/vendor-review-source-addendum-2026-09-08.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
       "vendor_id": "cloudflare",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "red",
-      "processing_scope": "Workers processes memo recipient, subject and body; D1 stores inquiry content; Pages, KV and the domain have distinct roles.",
+      "processing_scope": "Workers processes memo recipient, subject and body. D1 stores inquiry content, reminder consent hashes, usage events (90 days), App Store notification records (180 days) and subscription-state analysis (90 days; both since 2026-09-09). Pages, KV and the domain have distinct roles.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -161,8 +166,8 @@
         },
         "data_use": {
           "result": "risk",
-          "assessment": "Personal data is processed. D1 APAC placement does not establish Japan-only storage; service-specific subprocessors and purpose limits apply.",
-          "action": "Keep existing retention/access controls and narrowly scoped deployment credentials; review any new data destination."
+          "assessment": "Personal data is processed. D1 APAC placement does not establish Japan-only storage; service-specific subprocessors and purpose limits apply. Since 2026-09-09 D1 also holds Apple notification and subscription-state records; newer app versions start usage events only after in-app opt-in (disclosed 2026-09-28).",
+          "action": "Keep existing retention/access controls, the disclosed 180/90-day deletions and narrowly scoped deployment credentials; review any new data destination."
         },
         "sla": {
           "result": "risk",
@@ -185,14 +190,15 @@
       "evidence": [
         "docs/cloudflare-service-scope-2026-09-07.md",
         "docs/cloudflare-dpa-account-2026-09-08.md",
-        "docs/vendor-runtime-review-2026-09-07.md"
+        "docs/vendor-runtime-review-2026-09-07.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
       "vendor_id": "resend",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "yellow",
-      "processing_scope": "Memo, authentication and lifecycle email delivery; addresses, subject and body are processed.",
+      "processing_scope": "Memo, authentication and lifecycle email delivery, including (since 2026-10-02) a one-time reminder invitation to verified users without reminders enabled; addresses, subject and body are processed.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -225,7 +231,8 @@
       ],
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
-        "docs/resend-contract-review-2026-09-07.md"
+        "docs/resend-contract-review-2026-09-07.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -265,14 +272,15 @@
       ],
       "evidence": [
         "docs/vendor-runtime-review-2026-09-07.md",
-        "docs/execution-records-and-rd-20260908.md"
+        "docs/execution-records-and-rd-20260908.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
       "vendor_id": "google_cloud",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "yellow",
-      "processing_scope": "Observed BigQuery Search Console exports and aggregates; a customer-level app funnel warehouse is not established.",
+      "processing_scope": "Observed BigQuery Search Console exports and aggregates, plus the website GA4 daily event export (dataset created 2026-09-06; pseudonymous visitor events). Both datasets are in asia-northeast1. A customer-level app funnel warehouse is not established.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -282,8 +290,8 @@
         },
         "data_use": {
           "result": "risk",
-          "assessment": "Current evidence is search-export data. Export storage can grow indefinitely without partition expiration; actual expiration/region were not verified.",
-          "action": "Keep query scopes bounded and check expiration/region before collecting additional data classes."
+          "assessment": "Search-export data plus GA4 web events (pseudonymous browser identifiers, device, approximate location and pages). On 2026-10-04 neither dataset nor any table set an expiration, so storage grows indefinitely.",
+          "action": "Keep query scopes bounded. Do not join GA4 export rows with app, email or account records; obtain an owner retention decision for the GA4 export before collecting additional data classes."
         },
         "sla": {
           "result": "risk",
@@ -297,17 +305,19 @@
         }
       },
       "conditions": [
-        "Continue the observed search-export workload.",
-        "Do not describe this as completed app-level financial/cohort integration."
+        "Continue the observed search-export and GA4 web-export workloads.",
+        "Do not describe this as completed app-level financial/cohort integration.",
+        "Until a retention decision exists, do not join GA4 export rows with app, email or account records (comparing daily aggregates is outside this limit)."
       ],
       "unresolved": [
-        "Edition, accepted contract, region, retention settings and complete export/restore remain unverified."
+        "Edition, accepted contract, retention settings and complete export/restore remain unverified; GA4 export retention is undecided."
       ],
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
         "docs/firebase-service-scope-2026-09-07.md",
         "docs/firebase-subprocessor-sla-review-2026-09-07.md",
-        "docs/seo/audit-2026-09-05/gsc-bigquery.md"
+        "docs/seo/audit-2026-09-05/gsc-bigquery.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -329,7 +339,7 @@
         },
         "sla": {
           "result": "not_identified",
-          "assessment": "Setup timing and retry guidance do not create a contractual data-delivery SLA for Search Console.",
+          "assessment": "Setup timing and retry guidance do not create a contractual data-delivery SLA for Search Console. On 2026-10-04 the 2026-09-30 export day was still missing while 2026-10-01 had landed.",
           "action": "Represent late/missing data as missing and preserve last verified observations."
         },
         "exit": {
@@ -348,7 +358,8 @@
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
         "docs/clause-inspection-execution-2026-09-07.md",
-        "docs/seo/audit-2026-09-05/gsc-bigquery.md"
+        "docs/seo/audit-2026-09-05/gsc-bigquery.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -360,7 +371,7 @@
       "findings": {
         "dpa": {
           "result": "risk",
-          "assessment": "The Firebase service list places Auth/App Check under GCP terms; the Cloud DPA and appendices were read. Actual accepted version and overrides remain unresolved.",
+          "assessment": "The Firebase service list places Auth/App Check under GCP terms; the Cloud DPA and appendices were read. The list was revised 2026-09-24 (body fingerprint changed) and still places Auth/App Check under GCP terms, whose fingerprint is unchanged. Actual accepted version and overrides remain unresolved.",
           "action": "Continue existing authentication with the Cloud/Firebase scope recorded; do not infer acceptance from the Blaze label."
         },
         "data_use": {
@@ -381,7 +392,8 @@
       },
       "conditions": [
         "Continue existing Auth/App Check without bypassing verification.",
-        "Any new auth product, scopes or migration requires a fresh review."
+        "Any new auth product, scopes or migration requires a fresh review.",
+        "The 2026-09-24 terms revision resets the human clause cells in the weekly terms check; a human re-confirmation is needed within the 14-day grace."
       ],
       "unresolved": [
         "Actual DPA acceptance, Identity Platform upgrade, contacts, regional access, SCC and end-to-end migration are unresolved."
@@ -389,14 +401,15 @@
       "evidence": [
         "docs/firebase-service-scope-2026-09-07.md",
         "docs/firebase-subprocessor-sla-review-2026-09-07.md",
-        "docs/firebase-recovery-scope-2026-09-07.md"
+        "docs/firebase-recovery-scope-2026-09-07.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
       "vendor_id": "appsflyer",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "red",
-      "processing_scope": "SDK attribution, filtered custom events and a Keychain UUID customer identifier; automatic SDK fields were not network-audited.",
+      "processing_scope": "SDK attribution, filtered custom events and a Keychain UUID customer identifier in app versions without the analytics-choice screen; versions with that screen (disclosed 2026-09-28) stop the SDK until a separate choice exists. Automatic SDK fields were not network-audited.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -416,7 +429,7 @@
         },
         "exit": {
           "result": "risk",
-          "assessment": "The event flag does not stop SDK start. Keychain identifiers may persist; DPA bulk-deletion wording is at least ninety days, not a maximum guarantee.",
+          "assessment": "Newer versions stop the SDK, but installed older versions continue, so this is not an exit; there the event flag does not stop SDK start. Keychain identifiers may persist; DPA bulk-deletion wording is at least ninety days, not a maximum guarantee.",
           "action": "Before exit implement/verify SDK-wide stop, identifier deletion and export, retaining the legal deletion exceptions."
         }
       },
@@ -429,7 +442,8 @@
       ],
       "evidence": [
         "docs/appsflyer-runtime-review-2026-09-07.md",
-        "docs/vendor-plan-dates.md"
+        "docs/vendor-plan-dates.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -469,7 +483,8 @@
       ],
       "evidence": [
         "docs/github-plan-and-training-2026-09-08.md",
-        "docs/github-recovery-review-2026-09-07.md"
+        "docs/github-recovery-review-2026-09-07.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -502,14 +517,15 @@
       },
       "conditions": [
         "Retain the existing one-release budget gate and zero paid options.",
-        "Apply score, content, receipt and schedule gates at dispatch."
+        "Apply score, content, receipt and schedule gates at dispatch. The 2026-09-24 release has no recorded pre-distribution score; confirm the score record before the next dispatch."
       ],
       "unresolved": [
         "Individual applicable agreement, retention/deletion of account data and numerical service remedies are unverified."
       ],
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
-        "docs/vendor-operating-review-2026-09-08.md"
+        "docs/vendor-operating-review-2026-09-08.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -548,7 +564,8 @@
         "Full processing geography/list, deletion and notice terms, and transfer execution remain unverified."
       ],
       "evidence": [
-        "docs/vendor-review-source-addendum-2026-09-08.md"
+        "docs/vendor-review-source-addendum-2026-09-08.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -589,7 +606,8 @@
       ],
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
-        "docs/notion-dependency-review-2026-09-07.md"
+        "docs/notion-dependency-review-2026-09-07.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -630,7 +648,8 @@
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
         "docs/freee-dependency-review-2026-09-08.md",
-        "docs/freee-integration-plan.md"
+        "docs/freee-integration-plan.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -647,13 +666,13 @@
         },
         "data_use": {
           "result": "risk",
-          "assessment": "Individual terms allow improvement with opt-out; business terms differ. Actual Native Codex training/retention settings and request destinations are not verified.",
+          "assessment": "Individual terms allow improvement with opt-out; business terms differ. Actual Native Codex training/retention settings and request destinations are not verified. Service Terms were updated 2026-09-29: the Codex section still notes generated code may carry third-party licenses, and an agentic-features section places responsibility for agent actions and transactions on the user.",
           "action": "Use only task-necessary information, omit credentials and unnecessary personal records, and require re-review for new data purposes."
         },
         "sla": {
           "result": "not_identified",
-          "assessment": "No numerical availability commitment for this actual Native Codex account was established from the read agreements.",
-          "action": "Keep limits/failures visible and avoid planning around an assumed SLA."
+          "assessment": "No numerical availability commitment for this actual Native Codex account was established from the read agreements. On 2026-10-04 the Mac Codex app showed a usage limit until 2026-10-10 06:13 JST, and Mac-side tasks waited.",
+          "action": "Keep limits/failures visible and avoid planning around an assumed SLA; buying credits is an owner-only paid action."
         },
         "exit": {
           "result": "risk",
@@ -671,7 +690,8 @@
       "evidence": [
         "docs/vendor-review-source-addendum-2026-09-08.md",
         "docs/openai-dependency-review-2026-09-08.md",
-        "docs/execution-records-and-rd-20260908.md"
+        "docs/execution-records-and-rd-20260908.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -705,13 +725,14 @@
       "conditions": [
         "Continue only the existing authenticated connection and necessary metadata discovery; no additional purchase or contractual acceptance.",
         "Before selecting a new Environment confirm its explicit permission, beta/product and agreement scope, data/production suitability, consumer and exit path; this record grants no new secret or mount authority.",
-        "Keep the existing September8 judgments and October8 expiry. Reassess on account/plan, processing, terms/subprocessor, incident or termination changes."
+        "Keep the existing September8 and October2 judgments. Renewed 2026-10-04 until 2026-11-04 UTC; reassess on account/plan, processing, terms/subprocessor, incident or termination changes."
       ],
       "unresolved": [
         "Actual company contract, accepted DPA, plan, Developer Tools scope, beta designation, SLA, storage geography, diagnostic data, Environment migration/restoration and complete deletion remain unverified."
       ],
       "evidence": [
-        "docs/1password-developer-environments-operating-review-2026-10-02.md"
+        "docs/1password-developer-environments-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -745,13 +766,14 @@
       "conditions": [
         "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
         "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
-        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+        "Preserve all previous judgments and evidence. Renewed 2026-10-04 until 2026-11-04 UTC; reassess on actual account, processing, terms, incident or exit changes."
       ],
       "unresolved": [
         "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
       ],
       "evidence": [
-        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -785,13 +807,14 @@
       "conditions": [
         "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
         "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
-        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+        "Preserve all previous judgments and evidence. Renewed 2026-10-04 until 2026-11-04 UTC; reassess on actual account, processing, terms, incident or exit changes."
       ],
       "unresolved": [
         "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
       ],
       "evidence": [
-        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
@@ -825,20 +848,21 @@
       "conditions": [
         "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
         "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
-        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+        "Preserve all previous judgments and evidence. Renewed 2026-10-04 until 2026-11-04 UTC; reassess on actual account, processing, terms, incident or exit changes."
       ],
       "unresolved": [
         "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
       ],
       "evidence": [
-        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     },
     {
       "vendor_id": "hatena",
       "decision": "continue_existing_scope_with_conditions",
       "risk": "red",
-      "processing_scope": "Existing owned public-blog AtomPub consumer only; original gate, interval, validation, STOP and publishing-key separation remain unchanged. Local scheduled-off is not an Actions-off proof.",
+      "processing_scope": "Existing owned public-blog AtomPub consumer; since 2026-10-03 the same account key also posts to a second owned blog (simplememofast.hatenadiary.jp), moved from a local browser task by owner choice. Original gate, interval, validation, STOP and publishing-key separation remain unchanged. Local scheduled-off is not an Actions-off proof.",
       "account_applicability": "not_fully_verified",
       "findings": {
         "dpa": {
@@ -858,20 +882,140 @@
         },
         "exit": {
           "result": "risk",
-          "assessment": "MT export covers posts/comments but images need separate preservation. AtomPub deletion exists; full transfer, restoration and deletion are untested.",
+          "assessment": "MT export covers posts/comments but images need separate preservation, and two blogs now share the account key. AtomPub deletion exists; full transfer, restoration and deletion are untested.",
           "action": "Inventory all consumers sharing the key and preserve originals, IDs and images; validate replacement before separately authorized revocation/deletion."
         }
       },
       "conditions": [
         "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
         "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
-        "Preserve all previous judgments, original September8 record timestamp and October8 expiry. Reassess on actual account, processing, terms, incident or exit changes."
+        "Preserve all previous judgments and evidence. Renewed 2026-10-04 until 2026-11-04 UTC; reassess on actual account, processing, terms, incident or exit changes."
       ],
       "unresolved": [
         "Actual account, contract, accepted DPA, SLA and complete migration, restoration and deletion are unverified."
       ],
       "evidence": [
-        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
+      ]
+    },
+    {
+      "vendor_id": "livedoor",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Owned public blog (captio.livedoor.blog) AtomPub consumer since 2026-10-03, moved from a local browser task by owner choice; AI-written public development notes with disclosure; HTTPS Basic authentication with the AtomPub password held only as a repository secret.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "No DPA identified in official materials; the operator is livedoor Co., Ltd. (privacy policy revised 2025-07-31). Our acceptance and applicability are unverified.",
+          "action": "Verify account and agreement scope before any expansion; keep contract and payment approval false."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "Terms updated 2025-02-04 (section 1.3.1) grant the operator a non-exclusive license to use posts, including adaptation and authority to license designated third parties, with moral rights not asserted.",
+          "action": "Post only rights-cleared public articles; no secrets, customer data or material we cannot license."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "Terms allow suspension without notice (section 1.7.1) and do not guarantee storage (section 1.5.3); no uptime commitment was found.",
+          "action": "Keep failure evidence and STOP; keep originals outside the service."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "MT export covers posts and comments but not images; blog deletion is irreversible and the subdomain cannot be retaken. A share transfer of the operator to the SBI group is planned for late December 2026 (disclosed 2026-09-17).",
+          "action": "Retain originals, article IDs and images; reassess terms and privacy when the operator change completes; treat consumer stop, key revocation and deletion as separate steps."
+        }
+      },
+      "conditions": [
+        "Continue only the original permitted consumer scope and retain every suspension, activation gate, interval, verification and STOP. No new consent, purchase, contract, key, secret or personal-data scope is authorized.",
+        "Check the specific account, product, accepted conditions, consumer and exit before scope changes; unavailable or unverified is not success or verified empty data.",
+        "Preserve every original gate. Reviewed 2026-10-04 until 2026-11-04 UTC; reassess when the operator transfer completes or on account, processing, terms, incident or exit changes."
+      ],
+      "unresolved": [
+        "Actual account, accepted terms, DPA/SLA, post-transfer terms and complete migration, restoration and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
+      ]
+    },
+    {
+      "vendor_id": "google_analytics",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "red",
+      "processing_scope": "Website GA4 tag (gtag.js) on most site pages: page views and link impressions/clicks with placement attributes, first-party cookie identifiers; daily export to the google_cloud BigQuery project. No app memo or account data.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "risk",
+          "assessment": "GA terms (Japan, updated 2023-05-15; Google LLC) incorporate the Google Ads Data Processing Terms (v8.0) to the extent in scope; Google says pre-existing accounts outside the EEA, UK and Switzerland must accept them in Admin. Our acceptance is unverified.",
+          "action": "Check the account Data Processing Amendment status before any expansion; do not claim processor terms apply."
+        },
+        "data_use": {
+          "result": "risk",
+          "assessment": "Pseudonymous identifiers, pages, referrer, approximate location and device are processed; Google states GA4 does not log or store IP addresses. Data-sharing settings and GA retention were not inspected; the BigQuery copy has no expiration.",
+          "action": "Do not add user IDs, new event classes, advertising features or Google signals; keep the privacy policy disclosure current; do not join rows with app or email records."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "No SLA was found for standard Google Analytics; the published SLA covers Analytics 360.",
+          "action": "Treat missing analytics as missing; do not plan around GA availability."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "Removing the tag stops new collection; a deleted property is permanently removed 35 days after it is moved to trash; the BigQuery copy remains separately.",
+          "action": "Before exit preserve required aggregates, remove the tag, then handle property and BigQuery copy deletion as separate owner-approved steps."
+        }
+      },
+      "conditions": [
+        "Continue only the existing website measurement scope; no new identifiers, events, advertising or signals features.",
+        "Before expanding use, confirm the account data-processing acceptance, sharing settings and retention.",
+        "Until its retention is decided, do not join GA4 export rows with app, email or account records (comparing daily aggregates is outside this limit)."
+      ],
+      "unresolved": [
+        "Account owner, accepted Data Processing Amendment, data-sharing settings, GA retention, BigQuery export retention and complete deletion are unverified."
+      ],
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
+      ]
+    },
+    {
+      "vendor_id": "ahrefs",
+      "decision": "continue_existing_scope_with_conditions",
+      "risk": "yellow",
+      "processing_scope": "Ahrefs Web Analytics script on most site pages for page-view counts, and the Ahrefs account used for SEO and backlink observation through manual exports. Account owner and plan are unverified; a paid plan would be a payee outside the vendors allow-list.",
+      "account_applicability": "not_fully_verified",
+      "findings": {
+        "dpa": {
+          "result": "conditional",
+          "assessment": "Terms (updated 2026-09-14; Ahrefs Pte. Ltd., Singapore) bind users to the Data Processing Addendum (updated 2025-09-15). Whether it names Web Analytics was not confirmed.",
+          "action": "Do not claim signed coverage; check the DPA scope before adding personal data."
+        },
+        "data_use": {
+          "result": "conditional",
+          "assessment": "Ahrefs states Web Analytics uses no cookies and does not store raw IP addresses (a daily-salted hash of IP and user agent). Retention is not stated.",
+          "action": "Keep counting-only use; no identifiers, secrets or customer data."
+        },
+        "sla": {
+          "result": "not_identified",
+          "assessment": "Services are provided as is; no uptime commitment was found.",
+          "action": "Treat gaps as missing data."
+        },
+        "exit": {
+          "result": "risk",
+          "assessment": "Removing the script stops collection; account deletion is by support request; whether project deletion removes Web Analytics data is not stated.",
+          "action": "Before exit preserve needed reports, remove the script, then request deletion as a separate step."
+        }
+      },
+      "conditions": [
+        "Continue the existing page-view counting and SEO observation only.",
+        "Do not send identifiers, secrets or customer data; re-review before enabling new tracked events or integrations."
+      ],
+      "unresolved": [
+        "Account owner, plan, DPA scope for Web Analytics, retention and deletion are unverified."
+      ],
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ]
     }
   ]
