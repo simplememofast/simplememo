@@ -199,6 +199,7 @@ const RETIRED = {
   "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
   "/blog/memo-shuukan-tips": "/blog/memo-habit",
   "/devlog/captio-alternative": "/captio-alternative/",
+  "/en/blog/revenue-report-2025": "/en/blog/",
   "/en/blog/why-captio-died": "/en/captio-alternative/",
   "/privacy-policy": "/privacy",
   "/privacy-policy/": "/privacy",
