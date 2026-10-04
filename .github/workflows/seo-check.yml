@@ -914,7 +914,12 @@ jobs:
         timeout-minutes: 10
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
+          if ! sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils; then
+            sudo apt-get install -y --no-install-recommends webkitgtk-webdriver xvfb x11-utils
+          fi
+          echo "probe: $(command -v WebKitWebDriver || echo 'WebKitWebDriver not on PATH')"
+          dpkg -L webkitgtk-webdriver 2>/dev/null | grep -i webdriver || true
+          dpkg -L webkit2gtk-driver 2>/dev/null | grep -i webdriver || true
 
       - name: WebKit transport failures retain evidence and bound cleanup
         run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs
