@@ -251,7 +251,7 @@
     {
       "id": "google_cloud",
       "name": "Google Cloud（BigQuery）",
-      "used_for": "Search Consoleの検索実績をBigQueryへ保存・集計（実測済み）。アプリの顧客別ファネル倉庫は未確認",
+      "used_for": "Search Consoleの検索実績をBigQueryへ保存・集計（実測済み）。アプリの顧客別ファネル倉庫は未確認。サイトの GA4 の日次イベントの書き出し（2026-09-06 作成、asia-northeast1、保存期限なし）も同じプロジェクトにある（2026-10-04 に確認）",
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
@@ -498,7 +498,7 @@
         "事業者側の費用と利用者側のプランを分けた支払範囲",
         "公開DPA・SLAの実契約への適用、DPA 9.5の機微情報除外と自由記述メモの関係、実際の再委託先・保持削除・撤退条件"
       ],
-      "operating_review_id": "vendor-operating-decision-20260908"
+      "operating_review_id": "vendor-operating-decision-20261004"
     },
     {
       "id": "freee",
@@ -520,7 +520,7 @@
       "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908"
+      "operating_review_id": "vendor-operating-decision-20261004"
     },
     {
       "id": "openai",
@@ -541,7 +541,7 @@
       "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908"
+      "operating_review_id": "vendor-operating-decision-20261004"
     },
     {
       "id": "onepassword",
@@ -552,7 +552,7 @@
       "observation": "2026-10-02に専用local MCPの認証と既存Environment一覧取得が成功し一覧は空。秘密値、変数、Environment作成、local mountは未操作。運営アカウントと将来扱う秘密の取扱分類を保守的にpersonalとするもので、顧客メモや平文秘密を送ったという主張ではない。",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908",
+      "operating_review_id": "vendor-operating-decision-20261004",
       "evidence": [
         "docs/1password-developer-environments-operating-review-2026-10-02.md"
       ],
@@ -571,7 +571,7 @@
       "observation": "Declared hosted Postiz consumer; existing suspended SNS authority and disabled scheduled path remain in force. Current account, connections and contract are unverified. Conservative personal classification accounts for account/connection metadata, not a claim that customer notes or plaintext secrets were transmitted.",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908",
+      "operating_review_id": "vendor-operating-decision-20261004",
       "evidence": [
         "docs/additional-channel-vendor-operating-review-2026-10-02.md"
       ],
@@ -589,7 +589,7 @@
       "observation": "Original Bing Webmaster site-statistics reader only; read permission, first verification and BING_API_ENABLED conditions stay unchanged. Current configured connection is unverified. Conservative personal classification accounts for account/connection metadata, not a claim that customer notes or plaintext secrets were transmitted.",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908",
+      "operating_review_id": "vendor-operating-decision-20261004",
       "evidence": [
         "docs/additional-channel-vendor-operating-review-2026-10-02.md"
       ],
@@ -607,7 +607,7 @@
       "observation": "Existing owned public-article consumer only; original postgate, interval, validation, STOP and publishing-key separation remain unchanged. Current key and agreement are unverified. Conservative personal classification accounts for account/connection metadata, not a claim that customer notes or plaintext secrets were transmitted.",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908",
+      "operating_review_id": "vendor-operating-decision-20261004",
       "evidence": [
         "docs/additional-channel-vendor-operating-review-2026-10-02.md"
       ],
@@ -622,18 +622,76 @@
       "status": "account_verification_pending",
       "personal_data": "personal",
       "observed_at": "2026-10-02",
-      "observation": "Existing owned public-blog AtomPub consumer only; original gate, interval, validation, STOP and publishing-key separation remain unchanged. Local scheduled-off is not an Actions-off proof. Conservative personal classification accounts for account/connection metadata, not a claim that customer notes or plaintext secrets were transmitted.",
+      "observation": "Existing owned public-blog AtomPub consumer only; original gate, interval, validation, STOP and publishing-key separation remain unchanged. Local scheduled-off is not an Actions-off proof. Conservative personal classification accounts for account/connection metadata, not a claim that customer notes or plaintext secrets were transmitted. [2026-10-04] Since 2026-10-03 the same account key also posts to a second owned blog (simplememofast.hatenadiary.jp), moved from a local browser task by owner choice; reassessed in the 2026-10-04 renewal.",
       "contract_approved": false,
       "payment_authorized": false,
-      "operating_review_id": "vendor-operating-decision-20260908",
+      "operating_review_id": "vendor-operating-decision-20261004",
       "evidence": [
-        "docs/additional-channel-vendor-operating-review-2026-10-02.md"
+        "docs/additional-channel-vendor-operating-review-2026-10-02.md",
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
       ],
       "open_questions": [
         "Actual account, current connection, accepted terms, DPA/SLA and production applicability remain unknown.",
         "Complete migration, restoration, downstream copies and deletion remain untested; original gates and non-purchase boundaries remain."
       ]
+    },
+    {
+      "id": "livedoor",
+      "name": "ライブドアブログ（AtomPub）",
+      "status": "account_verification_pending",
+      "personal_data": "personal",
+      "observed_at": "2026-10-04",
+      "observation": "開発記録の公開記事を自社ブログ（captio.livedoor.blog）へ AtomPub で投稿する（2026-10-03 から。#1917 でローカルのブラウザ投稿から移した）。鍵はリポジトリの secret にだけ置く。personal はアカウント情報・接続の保守的な分類で、顧客のメモや秘密を送ったという意味ではない。",
+      "contract_approved": false,
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20261004",
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md",
+        "docs/syndication/RUNBOOK.md"
+      ],
+      "open_questions": [
+        "実アカウント・プラン・受諾した規約・DPA/SLA の適用",
+        "運営会社の株式譲渡（2026年12月下旬の予定）のあとの規約・プライバシーの変更",
+        "画像を含む移行・復元・削除の検証"
+      ]
+    },
+    {
+      "id": "google_analytics",
+      "name": "Google アナリティクス（サイトの GA4）",
+      "status": "account_verification_pending",
+      "personal_data": "pseudonymous",
+      "observed_at": "2026-10-04",
+      "observation": "サイトの大半のページが gtag.js（G-EPZVZKCVQG）を読み込み、閲覧とリンクの表示・クリックを送る。日次の書き出しは google_cloud の BigQuery（asia-northeast1、2026-09-06 作成、保存期限なし）に入る。2026-10-04 にプライバシーポリシーへの明記を出した（#1982）。",
+      "contract_approved": false,
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20261004",
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
+      ],
+      "open_questions": [
+        "アカウントの持ち主・データ処理規約の受諾・データ共有の設定・GA の保持期間",
+        "BigQuery の写しの保存期限（未設定）",
+        "削除・移行の手順の検証"
+      ]
+    },
+    {
+      "id": "ahrefs",
+      "name": "Ahrefs（Web Analytics とアカウント）",
+      "status": "account_verification_pending",
+      "personal_data": "pseudonymous",
+      "observed_at": "2026-10-04",
+      "observation": "サイトの大半のページが analytics.ahrefs.com の計測を読み込み、閲覧数を数える（Cookie を使わないと Ahrefs は説明している）。Ahrefs のアカウントは SEO・被リンクの観測（Site Explorer などの手動のエクスポート）にも使う。アカウントの持ち主・プランは未確認。",
+      "contract_approved": false,
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20261004",
+      "evidence": [
+        "docs/vendor-operating-review-renewal-2026-10-04.md"
+      ],
+      "open_questions": [
+        "アカウントの持ち主・プラン（有料なら支払の許可リスト vendors に無い支払先）・DPA が Web Analytics を含むか",
+        "保存期間と削除の手順"
+      ]
     }
   ],
-  "$operating_review": "2026-09-08: data/vendor-operating-review.json contains AI operating decisions for all 14 dependencies, covering DPA, data use, SLA and exit plans. Historical human dpa_reviewed dates are unchanged. account_verification_pending means the AI operating review is complete but actual agreement/account conditions remain unresolved; payment_authorized and contract_approved remain false."
+  "$operating_review": "2026-09-08: data/vendor-operating-review.json contains AI operating decisions for all 14 dependencies, covering DPA, data use, SLA and exit plans. Historical human dpa_reviewed dates are unchanged. account_verification_pending means the AI operating review is complete but actual agreement/account conditions remain unresolved; payment_authorized and contract_approved remain false.\n2026-10-04: Claude renewed the review at the owner's choice (「このセッションでやる」). All 22 dependencies (11 vendors + 11 discovered, including livedoor, google_analytics and ahrefs found on this date) were rechecked against the five triggers; see docs/vendor-operating-review-renewal-2026-10-04.md. Record id vendor-operating-decision-20261004, valid until 2026-11-04 UTC. Contract approval and payment authorization remain false."
 }
