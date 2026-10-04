@@ -766,7 +766,8 @@ if (isMain) {
       + '\n   2026-09-03 の校正で 実機41px に対しここは31px。**余裕は多めに見ること。**）');
     if (!wkN) {
       console.log('  （**WebKit を測っていない。**`apt-get install -y --no-install-recommends '
-        + 'webkit2gtk-driver xvfb` を入れると、Blink では出ない壊れ方も見る）');
+        + 'webkit2gtk-driver xvfb`（Ubuntu 26.04 では `webkitgtk-webdriver`）を入れると、'
+        + 'Blink では出ない壊れ方も見る）');
     }
   } else {
     console.log(`\n  **横スクロールが出る組み合わせが ${m.problems.length} 件。**`);
