@@ -173,3 +173,18 @@ anthropic・github・registrar・notion・freee は、契機に当たる記録�
 - 規約の指紋はこの環境から取った回で、CI の週次とは別。registrar は取れなかった。Notion は読めなかった。
 - 管理画面は Google Cloud のデータセットの設定しか見ていない。各社の受諾版・設定・請求は確かめていない。
 - 9/8 と 10/2 の判断の根拠（各社の原文の読み）は引き継いでいる。今回は全文を読み直していない。
+
+## 追記（2026-10-04 16時）：Google Cloud の Service Specific Terms
+
+更新のあとで、Firebase と BigQuery の契約に組み込まれる [Service Specific Terms](https://cloud.google.com/terms/service-terms) の改定日を確かめた。
+9/7 の審査（[記録](firebase-service-scope-2026-09-07.md)）が読んだのは 2026-07-29 版で、その後 **9/16・9/24・9/30 に改定**されていた
+（現行の表示は「Last modified September 30, 2026」）。Google が公開している旧版（[7/29 版](https://cloud.google.com/legal/archive/terms/service-terms/index-20260729)）と
+現行の本文を、文の単位で突き合わせた。
+
+- 変わったのは、Gemini Enterprise Agent Platform API の Gemini Cyber の節（新設）、Spanner Omni の節（新設）、AlloyDB Omni の言い回し、
+  節の番号（新設に合わせて2つずつ繰り下げ）。
+- 当社が使うものの節は、番号だけが変わり本文は同じ。「Firebase Authentication and Identity Platform」は §41 → §43
+  （Google Sign-In に API Services User Data Policy を適用する文を含む）。BigQuery に関わる文にも差分は無い。
+- Cloud の DPA（表示 2026-06-08）と GCP の規約（表示 2026-09-02）の日付は変わっていない。
+
+判断は変えない。firebase と google_cloud の評価に、この確認を書き足した（記録の日時と期限は同じ）。
