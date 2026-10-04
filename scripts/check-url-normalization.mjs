@@ -242,6 +242,8 @@ await redirects("/blog/memo-shuukan-tips", "/blog/memo-habit");
 await redirects("/blog/memo-shuukan-tips.html", "/blog/memo-habit");
 await redirects("/en/blog/why-captio-died", "/en/captio-alternative/");
 await redirects("/en/blog/why-captio-died.html", "/en/captio-alternative/");
+await redirects("/en/blog/revenue-report-2025", "/en/blog/");
+await redirects("/en/blog/revenue-report-2025.html", "/en/blog/");
 await redirects("/blog/memo-app-free-guide", "/blog/free-memo-apps-ranking");
 await redirects("/blog/memo-app-free-guide.html", "/blog/free-memo-apps-ranking");
 await redirects("/blog/memo-app-free-guide?lang=ja", "/blog/free-memo-apps-ranking");
