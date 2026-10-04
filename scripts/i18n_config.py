@@ -239,7 +239,6 @@ EN_ONLY_PAGES = [
     "/en/blog/how-to-email-yourself-note-iphone",
     "/en/blog/inbox-zero-workflow-tips-2026",
     "/en/blog/offline-first-comparison",
-    "/en/blog/revenue-report-2025",
     "/en/blog/ios26-speechanalyzer-live-mic",
 ]
 
