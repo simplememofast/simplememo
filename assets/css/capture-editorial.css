@@ -195,7 +195,8 @@ body.capture-editorial::after,body.capture-home::after{opacity:.45}
 .capture-home main .section-label{font-weight:600}
 .capture-home main .ce-home-paths small{font-size:12px}
 .capture-home main .hb-screens{gap:24px}
-.capture-home main .hb-screens img{border-width:8px;border-color:#1a1b26;border-radius:30px;box-shadow:0 30px 60px -24px rgba(139,92,246,.35)}
+/* Keep the declared image ratio on the content box while lazy images load. */
+.capture-home main .hb-screens img{box-sizing:content-box;width:calc(100% - 16px);border-width:8px;border-color:#1a1b26;border-radius:30px;box-shadow:0 30px 60px -24px rgba(139,92,246,.35)}
 .capture-home main .hb-screens figure:first-child{transform:rotate(-2deg)}
 .capture-home main .hb-screens figure:last-child{transform:translateY(20px) rotate(2deg)}
 @media(max-width:800px){
@@ -207,7 +208,7 @@ body.capture-editorial::after,body.capture-home::after{opacity:.45}
  .capture-editorial .ce-stage--phone .ce-stage-foot{margin-top:18px!important}
  .capture-editorial .ce-stage--journal .ce-note{font-size:17px;padding:22px 18px}
  .capture-home main .hb-screens{gap:16px;margin-bottom:20px}
- .capture-home main .hb-screens img{border-width:5px;border-radius:22px}
+ .capture-home main .hb-screens img{width:calc(100% - 10px);border-width:5px;border-radius:22px}
 }
 
 /* Header and footer share the landing page's palette and control states.

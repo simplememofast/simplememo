@@ -34,3 +34,7 @@ First review found inconsistent fonts, undersized diagram labels, blue legacy FA
 Acceptance requires readable layouts at 320–430px, tablet, and desktop widths; no horizontal page overflow; accurate app imagery; keyboard-operable navigation, disclosures, and demo tabs; no serious accessibility findings; and preserved metadata, FAQ schema, copy facts, and CTA tracking. Automated checks supplement visual review and do not establish award-winning quality or certify all assistive technologies.
 
 This is a shared, scoped design system, not a global stylesheet replacement. The other languages and pages outside this list are unchanged.
+
+## 遅延画像の位置安定性
+
+Firefox CIで主要機能への直接リンクに約19pxの位置差を検出。ホームのアプリ画面は太い枠と `border-box` の組み合わせで、画像の読み込み前後に高さが変化していました。画像を `content-box` にし、枠幅を除いた横幅を明示することで、完成時の見た目を保ちつつ未読み込み時も同じ高さを確保します。遅延読み込みを強制した検証では高さ390px→390px、スクロール位置の変化0pxを確認しました。CIの許容差や比較条件は変更していません。
