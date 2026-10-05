@@ -66,6 +66,26 @@ page LTV. This release does not restart, rename, or change campaign variants.
   native disclosure, keyboard scrolling of wide tables, and runtime errors.
 - A final pass on all ten pages confirmed visible inset focus outlines for
   contents/FAQ controls and visible comparison-table column headings.
+- An axe-core 4.10.3 pass at 412px found no WCAG A/AA violations on these ten
+  pages after the CI follow-up. The initial homepage target-size failure was
+  reproduced by forcing deferred reveal elements visible and disappeared when
+  the new override was removed, restoring the existing reveal behavior and
+  no-JavaScript fallback. Pricing cards, screenshots, and preformatted examples
+  also received labeled keyboard-scroll regions.
+- The section-rendering control removes only the new normal-navigation
+  deferral assignment and retains native fragment/focus escapes. The old control
+  retained four deferred sections from shared CSS but removed their fragment
+  escape. Both comparison pages now resolve actual fragment geometry; unit
+  tests enforce preservation of every other HTML/CSS byte and reject unexpected
+  assignment structures.
+- Firefox traces also showed Japanese web fonts changing preceding line wraps
+  after a native fragment jump. The homepage uses native system typography so
+  its text metrics no longer depend on a web-font download. Its photograph,
+  colors, spacing, content, and capture routes retain the redesigned treatment.
+  Native navigation and browser assertion thresholds/waits are unchanged.
+  A local Lighthouse 12.8.2 observation scored 100 in all four categories,
+  with LCP 1.73s, CLS 0, and no web-font requests. CI is the release gate;
+  this local measurement is not a field performance claim.
 - The existing homepage harness passed all 20 Japanese/English viewport,
   pixel-density, responsive-image, menu, and JavaScript scenarios.
 - Original H1 text, metadata/JSON-LD, navigation, footer, existing anchor IDs,
