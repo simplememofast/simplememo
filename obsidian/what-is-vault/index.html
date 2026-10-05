@@ -296,8 +296,10 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=be26d1b6a5">
 </head>
-<body>
+<body class="capture-editorial">
+  <a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
@@ -324,11 +326,12 @@
     </div>
   </nav>
 
-<main class="page-content">
+<main class="page-content" id="main-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
+<div class="ce-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">Obsidian入門 — 用語</span>
         </div>
@@ -341,12 +344,17 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-20">2026年8月20日</time>・ 実測: 2026年8月20日（Obsidian 1.13.7）・ 手順と説明を更新: <time datetime="2026-09-30">2026年9月30日</time></span>
         </p>
-      </div>
+      <a class="ce-read-link" href="#guide-section-1">本文を読む <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">YOUR NOTES, YOUR FOLDER</p><div class="ce-folder"><h2>Vault /</h2><div class="ce-note">ノート.md<br>添付ファイル /<br>.obsidian /</div></div><p>保管庫の実体は、選んだフォルダ。<br>ノートと設定を、同じ場所に。</p><p class="ce-stage-foot">構成イメージ</p></div>
+</div>
+<div class="ce-routes" aria-label="読みたい内容から選ぶ"><a class="ce-route" href="#guide-section-2"><span>01</span><b>場所と名前を確認</b></a><a class="ce-route" href="#guide-section-3"><span>02</span><b>既存フォルダを開く</b></a><a class="ce-route" href="#guide-section-4"><span>03</span><b>中身の実測を見る</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>このページの目次</summary><nav aria-label="ページ内の目次"><a href="#guide-section-1">01　Obsidianの保管庫（Vault）とは何ですか？</a><a href="#guide-section-2">02　保管庫の場所はどこ？ 名前は変えられる？</a><a href="#guide-section-3">03　既存のフォルダを保管庫として開くには？</a><a href="#guide-section-4">04　実測 — 空のフォルダを保管庫にすると何が作られるか</a><a href="#guide-section-5">05　ここから言えること — 削除・移動・同期</a><a href="#guide-section-6">06　core-plugins.json の中身 — 既定でOFFの10個</a><a href="#guide-section-7">07　フォルダだと分かった次の問題 — そこへ入れる速さ</a><a href="#guide-section-8">08　よくある質問</a><a href="#guide-section-9">09　関連ページ</a></nav></details>
+
 
       <!-- Answer block (AIO): the <h2> restates the canonical beginner question almost
            verbatim and the first paragraph answers it in two sentences. Keep above the fold. -->
       <section class="lp-section" data-answer-block="what-is-obsidian-vault" style="padding-top:1rem;">
-        <h2 class="lp-section__title"><span lang="ja">Obsidianの保管庫（Vault）とは何ですか？</span></h2>
+        <h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span lang="ja">Obsidianの保管庫（Vault）とは何ですか？</span></h2>
         <div lang="ja">
           <p><strong>あなたが選んだ普通のフォルダそのものです。</strong>ノートはMarkdownのテキストファイルで、添付ファイルや既定の設定フォルダ <code>.obsidian</code> も入ります。ノートを読むための独自データベースへの変換は不要です。</p>
           <p>2026年8月20日に空のフォルダをLinux版1.13.7で開いて数えたところ、作られたのは <code>.obsidian/</code> 直下のJSONファイル<strong>4つ・合計5,543バイト</strong>だけで、<strong>Markdownファイルは0件</strong>でした。</p>
@@ -362,7 +370,7 @@
       </p>
 
       <section class="lp-section" id="find-your-vault" style="scroll-margin-top:6rem">
-        <h2 class="lp-section__title"><span lang="ja">保管庫の場所はどこ？ 名前は変えられる？</span></h2>
+        <h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"><span lang="ja">保管庫の場所はどこ？ 名前は変えられる？</span></h2>
         <div lang="ja">
           <p>保管庫は作成時に選んだ場所にあります。名前はそのフォルダ名です。「Obsidian」という名前の共通フォルダを探すだけでは、目的の保管庫とは限りません。</p>
           <ul class="steps-list">
@@ -375,26 +383,26 @@
       </section>
 
       <section class="lp-section" id="open-existing-folder" style="scroll-margin-top:6rem">
-        <h2 class="lp-section__title"><span lang="ja">既存のフォルダを保管庫として開くには？</span></h2>
+        <h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"><span lang="ja">既存のフォルダを保管庫として開くには？</span></h2>
         <p lang="ja">PC版Obsidianの左下から保管庫の管理画面を開き、「Open folder as vault」の「Open」を選んで、ノートが入っているフォルダを指定します。<code>.obsidian</code>や個別のノートではなく、まとめて開きたいフォルダを選びます。画面例は<a href="/obsidian/getting-started/">保管庫の作成・初回設定ガイド</a>へ。</p>
 
       </section>
 
       <!-- Measurement -->
       <section class="lp-section" id="measured">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-4" data-ce-number="04">
           <span lang="ja">実測 — 空のフォルダを保管庫にすると何が作られるか</span>
         </h2>
         <p class="lp-section__lead">
           <span lang="ja">空のディレクトリを1つ用意し、Obsidian 1.13.7（Linux版）にそれを保管庫として開かせて、直後の中身を <code>find</code> で列挙しました。結果がこれです。</span>
         </p>
-        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;"><code>vault-demo/
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;" tabindex="0" role="region" aria-label="テキスト例（横にスクロールできます）"><code>vault-demo/
 └── .obsidian/
     ├── app.json
     ├── appearance.json
     ├── core-plugins.json
     └── workspace.json</code></pre>
-        <div style="overflow-x:auto;margin:1.5rem 0 1rem;">
+        <div style="overflow-x:auto;margin:1.5rem 0 1rem;" class="ce-table-scroll" role="region" tabindex="0" aria-label="比較表（横にスクロールできます）">
           <table style="width:100%;border-collapse:collapse;font-size:.95rem;min-width:30rem;">
             <thead>
               <tr>
@@ -419,7 +427,7 @@
 
       <!-- What that buys you -->
       <section class="lp-section" id="consequences">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-5" data-ce-number="05">
           <span lang="ja">ここから言えること — 削除・移動・同期</span>
         </h2>
         <div class="reason-cards">
@@ -444,13 +452,13 @@
 
       <!-- core-plugins -->
       <section class="lp-section" id="core-plugins">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-6" data-ce-number="06">
           <span lang="ja"><code>core-plugins.json</code> の中身 — 既定でOFFの10個</span>
         </h2>
         <p class="lp-section__lead">
           <span lang="ja">696バイトの正体は、Obsidianに最初から入っているコア機能のON/OFF表です。2026年8月20日のLinux版1.13.7では<strong>31個</strong>が並び、<strong>既定でON 21個・OFF 10個</strong>でした。追加インストールなしで設定から切り替えられるので、「その機能を探してプラグインを入れる」前にここを見る価値があります。OFFだったのは次の10個です。</span>
         </p>
-        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;"><code>footnotes          slash-command      markdown-importer
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;" tabindex="0" role="region" aria-label="テキスト例（横にスクロールできます）"><code>footnotes          slash-command      markdown-importer
 zk-prefixer        random-note        slides
 audio-recorder     workspaces         publish
 webviewer</code></pre>
@@ -460,7 +468,7 @@ webviewer</code></pre>
       </section>
 
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-7" data-ce-number="07">
           <span lang="ja">フォルダだと分かった次の問題 — そこへ入れる速さ</span>
         </h2>
         <p class="lp-section__lead">
@@ -482,7 +490,7 @@ webviewer</code></pre>
 
       <!-- FAQ -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-8" data-ce-number="08">
           <span lang="ja">よくある質問</span>
         </h2>
         <div class="faq-item">
@@ -527,7 +535,7 @@ webviewer</code></pre>
 
       <!-- Internal Links -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-9" data-ce-number="09">
           <span lang="ja">関連ページ</span>
         </h2>
         <div class="internal-links">
@@ -544,6 +552,7 @@ webviewer</code></pre>
       </section>
 
     </div>
+</div>
 
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <div class="container">

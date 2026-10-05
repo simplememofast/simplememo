@@ -297,8 +297,10 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/compare/logseq/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"ObsidianとLogseqは併用できますか？","acceptedAnswer":{"@type":"Answer","text":"できます。検証では、Obsidianは.obsidian、Logseqはlogseq・journals・pagesをそれぞれ作って共存し、互いの設定を壊しませんでした。Logseq（ファイル版）で入力したブロックは同じMarkdownファイルに「- 」形式で追記され、Obsidian側にも即座に表示されます。ただしLogseqはすべてを箇条書きブロックとして扱うため、長文の段落をLogseq側で編集すると構造が変わることがあります。書き込みは片方を主にしてください。"}},{"@type":"Question","name":"LogseqからObsidianへ移行できますか？","acceptedAnswer":{"@type":"Answer","text":"ファイル版Logseq（0.10系／Logseq OG）ならデータはMarkdownなので、そのフォルダをObsidianで開くだけで読めます。ただし全行が「- 」の箇条書きで、ジャーナルのファイル名が2026_08_11.md形式（アンダースコア）である点はObsidianの既定と異なります。移行後にデイリーノートの日付書式とフォルダを合わせてください。DB版（2.0）からはエクスポート機能を経由します。"}},{"@type":"Question","name":"Logseqは無料ですか？料金はかかりますか？","acceptedAnswer":{"@type":"Answer","text":"アプリ本体は無料で、AGPL-3.0のオープンソースです。必須の課金はありません。2026年8月時点では、DB版向けの公式同期（RTC）が招待制の有償アルファとして始まった段階で、ファイル版の同期はiCloud DriveやGitなどを自分で用意するのが主流です。Obsidianも本体無料で、有料なのは公式同期のObsidian Sync（Standard 月$4・年払い）などのサービスだけです。"}},{"@type":"Question","name":"Logseq 2.0（DB版）でMarkdownファイルはどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"2.0（ベータ）はノートの正本をローカルのデータベース（SQLite）に保存します。検証でも、DB版で入力したブロックはMarkdownファイルとしては生成されませんでした。従来のファイル版は「Logseq OG」として別リポジトリで継続されます。プレーンなMarkdownファイルでノートを持ち続けたい場合は、ObsidianまたはLogseq OGが該当します。"}},{"@type":"Question","name":"プラグインの数はどちらが多いですか？","acceptedAnswer":{"@type":"Answer","text":"2026年8月14日に公式レジストリを直接数えた結果（初回計測は2026年8月11日）、Obsidianはプラグイン6,638個・テーマ691種、Logseqはプラグイン546個・テーマ66種でした。約12倍の差があります。ただしLogseqはジャーナルやTODOなど中核機能が本体組み込みで、プラグインなしで完結する範囲は広めです。"}},{"@type":"Question","name":"iPhoneだけで使えますか？","acceptedAnswer":{"@type":"Answer","text":"どちらもiOSアプリがあります。Obsidianは保管庫をiCloud Driveに置けばiPhone単体で運用できます。Logseqはファイル版アプリに加え、DB版の新iOSアプリが2026年からアルファ提供中です。どちらの場合も、思いついた瞬間の1行にはアプリ起動と同期の待ちが挟まるため、デイリーノートへの追記を速くする方法を組み合わせる人が多いです。"}}]}</script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=be26d1b6a5">
 </head>
-<body>
+<body class="capture-editorial">
+  <a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
@@ -325,11 +327,12 @@
     </div>
   </nav>
 
-<main class="page-content">
+<main class="page-content" id="main-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
+<div class="ce-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">Obsidian vs Logseq 比較検証</span>
         </div>
@@ -342,7 +345,12 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-11">2026年8月11日</time>・ 検証日: 2026年8月11日・ プラグイン数更新: <time datetime="2026-08-14">2026年8月14日</time></span>
         </p>
-      </div>
+      <a class="ce-read-link" href="#guide-section-1">本文を読む <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">TWO WAYS TO THINK</p><div class="ce-chip-grid"><div class="ce-chip">Obsidian<br>ノートをつなぐ</div><div class="ce-chip">Logseq<br>ブロックで考える</div></div><div class="ce-connector">↓</div><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>選ぶための視点</span></div><div class="ce-stack"><div class="ce-stack-row"><b>01</b><span>書き方と保存形式</span></div><div class="ce-stack-row"><b>02</b><span>同期と料金</span></div><div class="ce-stack-row"><b>03</b><span>実際の検証結果</span></div></div></div><p class="ce-stage-foot">構成イメージ</p></div>
+</div>
+<div class="ce-routes" aria-label="読みたい内容から選ぶ"><a class="ce-route" href="#guide-section-3"><span>01</span><b>機能を比較</b></a><a class="ce-route" href="#guide-section-4"><span>02</span><b>同じフォルダで検証</b></a><a class="ce-route" href="#guide-section-8"><span>03</span><b>自分に合う方を選ぶ</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>このページの目次</summary><nav aria-label="ページ内の目次"><a href="#guide-section-1">01　LogseqとObsidianはどちらが良いですか？</a><a href="#guide-section-2">02　ObsidianとLogseqとは — 30秒でおさらい</a><a href="#guide-section-3">03　比較表 — 2026年8月時点</a><a href="#guide-section-4">04　検証: 同じフォルダを両方のアプリで開くとどうなるか</a><a href="#guide-section-5">05　書き味とグラフ — 同じ「つながるノート」でも思想が違う</a><a href="#guide-section-6">06　【2026年の重要変化】Logseq 2.0はMarkdownファイルをやめる</a><a href="#guide-section-7">07　料金 — 本体はどちらも無料。払うのは同期から</a><a href="#guide-section-8">08　結論 — こう選ぶ</a><a href="#guide-section-9">09　どちらを選んでも残る課題 — iPhoneでの「一瞬のメモ」</a><a href="#guide-section-10">10　よくある質問</a><a href="#guide-section-11">11　関連ページ</a></nav></details>
+
 
       <!-- Answer block (AIO): the <h2> restates the ranked fan-out query
            「logseqとobsidian どちらが 良い」(23 imp · pos 9.2 · GSC 2026-08-11) almost verbatim;
@@ -350,7 +358,7 @@
            which do not click — judge on position and AIO visibility, never CTR.
            Keep this above the fold. -->
       <section class="lp-section" data-answer-block="logseq-or-obsidian" style="padding-top:1rem;">
-        <h2 class="lp-section__title"><span lang="ja">LogseqとObsidianはどちらが良いですか？</span></h2>
+        <h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span lang="ja">LogseqとObsidianはどちらが良いですか？</span></h2>
         <div lang="ja">
           <p><strong>自由な形式のノート・長文・豊富なプラグイン（2026年8月14日の公式レジストリ実カウントで6,638個）を求めるならObsidian、すべてを箇条書きブロックとデイリージャーナル起点で書く運用が合うならLogseqが良い選択です。</strong>ただしLogseqは2.0（DB版）でノートの正本をMarkdownファイルからローカルデータベースへ移す移行期にあるため、「データをプレーンなMarkdownファイルとして持ち続けたい」を最優先する人の現時点の安全側はObsidian（または従来のファイル版Logseq OG）です。</p>
           <p>両者は同じフォルダで共存でき、このページの検証では相互の書き込みも成立しました。迷ったら、下の比較表と実験結果を見てから決めても遅くありません。</p>
@@ -360,7 +368,7 @@
 
       <!-- What they are -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-2" data-ce-number="02">
           <span lang="ja">ObsidianとLogseqとは — 30秒でおさらい</span>
         </h2>
         <div class="reason-cards">
@@ -377,13 +385,13 @@
 
       <!-- Comparison table -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-3" data-ce-number="03">
           <span lang="ja">比較表 — 2026年8月時点</span>
         </h2>
         <p class="lp-section__lead">
           <span lang="ja">プラグイン数とテーマ数は、2026年8月14日に両方の公式レジストリ（GitHub上の登録データ）をこちらで直接数えた値です（初回計測は2026年8月11日）。推定や引用ではありません。</span>
         </p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="比較表（横にスクロールできます）">
           <table class="rt-table">
           <thead>
             <tr>
@@ -446,7 +454,7 @@
 
       <!-- The experiment -->
       <section class="lp-section" id="experiment">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-4" data-ce-number="04">
           <span lang="ja">検証: 同じフォルダを両方のアプリで開くとどうなるか</span>
         </h2>
         <p class="lp-section__lead">
@@ -458,7 +466,7 @@
           <li><strong><span lang="ja">Logseq側から1行書き込む</span></strong><br><span lang="ja">ジャーナルに追加したブロックは、Logseq専用ファイルではなく<strong>Obsidianが作った <code>2026-08-11.md</code> そのものに「- 」形式で追記</strong>され、Obsidianを開き直すとそのまま表示されました。往復が成立します。</span></li>
         </ol>
 
-        <pre class="note-sample"><code># 検証フォルダの変化（実測・2026-08-11）
+        <pre class="note-sample" tabindex="0" role="region" aria-label="テキスト例（横にスクロールできます）"><code># 検証フォルダの変化（実測・2026-08-11）
 
 [1] 検証前
 pkm-vault/
@@ -511,7 +519,7 @@ pkm-vault/
 
       <!-- Writing feel & graph -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-5" data-ce-number="05">
           <span lang="ja">書き味とグラフ — 同じ「つながるノート」でも思想が違う</span>
         </h2>
         <p class="lp-section__lead">
@@ -537,7 +545,7 @@ pkm-vault/
 
       <!-- Logseq 2.0 -->
       <section class="lp-section" id="logseq-2">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-6" data-ce-number="06">
           <span lang="ja">【2026年の重要変化】Logseq 2.0はMarkdownファイルをやめる</span>
         </h2>
         <p class="lp-section__lead">
@@ -567,10 +575,10 @@ pkm-vault/
 
       <!-- Pricing -->
       <section class="lp-section" id="pricing">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-7" data-ce-number="07">
           <span lang="ja">料金 — 本体はどちらも無料。払うのは同期から</span>
         </h2>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="比較表（横にスクロールできます）">
           <table class="rt-table">
           <thead>
             <tr>
@@ -602,7 +610,7 @@ pkm-vault/
 
       <!-- How to choose -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-8" data-ce-number="08">
           <span lang="ja">結論 — こう選ぶ</span>
         </h2>
         <div class="reason-cards">
@@ -627,7 +635,7 @@ pkm-vault/
 
       <!-- Mobile capture context + CTA (MEDIUM: inline 1箇所) -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-9" data-ce-number="09">
           <span lang="ja">どちらを選んでも残る課題 — iPhoneでの「一瞬のメモ」</span>
         </h2>
         <p class="lp-section__lead">
@@ -649,7 +657,7 @@ pkm-vault/
 
       <!-- FAQ -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-10" data-ce-number="10">
           <span lang="ja">よくある質問</span>
         </h2>
         <div class="faq-item">
@@ -700,7 +708,7 @@ pkm-vault/
 
       <!-- Internal Links -->
       <section class="lp-section">
-        <h2 class="lp-section__title">
+        <h2 class="lp-section__title" id="guide-section-11" data-ce-number="11">
           <span lang="ja">関連ページ</span>
         </h2>
         <div class="internal-links">
@@ -717,6 +725,7 @@ pkm-vault/
       </section>
 
     </div>
+</div>
 
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
   <div class="container">
