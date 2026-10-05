@@ -303,33 +303,34 @@
     .lpr-hero-sub{font-size:16px;line-height:1.7;color:var(--lpr-ink-2);margin-bottom:28px;position:relative;z-index:2;max-width:360px}
     .lpr-hero-sub strong{color:var(--lpr-ink-0)}
 
-    .lpr-phone-stage{position:relative;margin:0 auto 24px;width:260px;height:360px;perspective:1200px;z-index:1}
+    .lpr-phone-stage{position:relative;margin:0 auto 32px;width:260px;aspect-ratio:1/2;perspective:1200px;z-index:1}
     .lpr-phone{position:relative;width:100%;height:100%;border-radius:34px;background:linear-gradient(145deg,#1a1b26,#0b0c13);border:1.5px solid rgba(255,255,255,.07);box-shadow:0 40px 80px -20px rgba(139,92,246,.35),0 20px 40px -15px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);padding:14px;transform:rotateX(8deg) rotateY(-8deg) rotateZ(2deg);transition:transform .6s cubic-bezier(.2,.9,.3,1.1)}
-    .lpr-phone-screen{width:100%;height:100%;border-radius:22px;background:linear-gradient(180deg,#0a0a12,#111224);position:relative;overflow:hidden}
-    .lpr-notch{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:72px;height:18px;background:#000;border-radius:20px;z-index:3}
-    .lpr-phone-content{padding:36px 14px 14px;height:100%;display:flex;flex-direction:column;position:relative}
-    .lpr-memo-input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;min-height:140px;font-size:12px;color:var(--lpr-ink-1)}
-    .lpr-typed{display:inline-block;min-height:1.4em}
-    .lpr-caret{display:inline-block;width:2px;height:1em;background:var(--lpr-accent-2);margin-left:1px;vertical-align:text-bottom;animation:lprCaret 1s infinite}
+    .lpr-phone-screen{width:100%;height:100%;border-radius:22px;background:#fff;color:#111;display:flex;flex-direction:column;position:relative;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+    .lpr-phone-status{height:32px;flex-shrink:0;padding:10px 16px 0;background:#000;color:#fff;display:flex;justify-content:space-between;font-size:9px;font-weight:600;line-height:1}
+    .lpr-phone-status svg{width:36px;height:10px}
+    .lpr-app-nav{display:grid;grid-template-columns:36px 1fr 40px;align-items:center;gap:6px;background:#000;color:#fff;padding:8px 10px 10px;flex-shrink:0}
+    .lpr-app-settings{width:28px;height:28px;border:1px solid #333;border-radius:50%;display:grid;place-items:center;background:#151515}
+    .lpr-app-settings svg{width:17px;height:17px}
+    .lpr-app-title{font-size:12px;font-weight:600;text-align:center;white-space:nowrap}
+    .lpr-app-send{background:#006cf1;color:#fff;border-radius:999px;padding:7px 0;font-size:11px;font-weight:600;text-align:center;line-height:1.2}
+    .lpr-phone-content{padding:12px 10px 10px;flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+    .lpr-memo-input{font-size:12px;line-height:1.65;color:#111;min-height:4em;overflow-wrap:anywhere}
+    .lpr-caret{display:inline-block;width:2px;height:1em;background:#0070fb;margin-left:1px;vertical-align:text-bottom;animation:lprCaret 1s infinite}
     @keyframes lprCaret{0%,49%{opacity:1}50%,100%{opacity:0}}
-    .lpr-wave{display:flex;align-items:center;justify-content:center;gap:3px;height:28px;margin:12px 0 10px}
-    .lpr-wave span{display:inline-block;width:3px;background:#f472b6;border-radius:2px;animation:lprWave 1.2s ease-in-out infinite;box-shadow:0 0 8px rgba(244,114,182,.4)}
-    .lpr-wave span:nth-child(1){height:8px;animation-delay:0s}
-    .lpr-wave span:nth-child(2){height:18px;animation-delay:.1s}
-    .lpr-wave span:nth-child(3){height:26px;animation-delay:.2s}
-    .lpr-wave span:nth-child(4){height:14px;animation-delay:.3s}
-    .lpr-wave span:nth-child(5){height:22px;animation-delay:.4s}
-    .lpr-wave span:nth-child(6){height:10px;animation-delay:.5s}
-    .lpr-wave span:nth-child(7){height:20px;animation-delay:.6s}
-    .lpr-wave span:nth-child(8){height:28px;animation-delay:.7s}
-    .lpr-wave span:nth-child(9){height:12px;animation-delay:.8s}
-    .lpr-wave span:nth-child(10){height:18px;animation-delay:.9s}
-    .lpr-wave span:nth-child(11){height:8px;animation-delay:1s}
-    @keyframes lprWave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1.2)}}
-    .lpr-send-btn{margin-top:auto;background:linear-gradient(135deg,var(--lpr-accent) 0%,#6d28d9 100%);color:#fff;font-size:12px;font-weight:700;text-align:center;padding:11px 0;border-radius:12px;letter-spacing:.08em;box-shadow:0 8px 20px -6px rgba(139,92,246,.6)}
-    .lpr-obs-badge{position:absolute;top:50%;right:-10px;transform:translateY(-50%) translateX(100%);background:#15131f;border:1px solid rgba(139,92,246,.35);padding:10px 12px;border-radius:12px;font-size:11px;color:var(--lpr-accent-3);display:flex;align-items:center;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.5);animation:lprFloat 2.2s ease-out .6s both}
+    .lpr-app-mic{margin-top:auto;align-self:flex-end;width:38px;height:38px;border-radius:50%;background:#0070fb;color:#fff;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.18);flex-shrink:0}
+    .lpr-app-mic svg{width:23px;height:23px}
+    .lpr-keyboard{background:#e2e3e8;padding:8px 5px 6px;flex-shrink:0;border-radius:14px 14px 0 0;color:#111}
+    .lpr-keyboard-suggestions{display:flex;justify-content:space-around;font-size:11px;padding:0 0 8px}
+    .lpr-keyboard-keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,29px);gap:4px}
+    .lpr-keyboard-keys span{display:grid;place-items:center;background:#fff;border-radius:6px;font-size:16px;line-height:1}
+    .lpr-keyboard-keys .small{font-size:10px}
+    .lpr-keyboard-keys .return{grid-column:5;grid-row:3/5;font-size:24px}
+    .lpr-keyboard-foot{display:flex;justify-content:space-between;padding:8px 9px 5px}
+    .lpr-keyboard-foot svg{width:17px;height:17px}
+    .lpr-home-indicator{height:3px;width:36%;margin:2px auto 0;border-radius:3px;background:#111}
+    .lpr-obs-badge{position:absolute;right:-10px;bottom:-14px;background:#15131f;border:1px solid rgba(139,92,246,.35);padding:10px 12px;border-radius:12px;font-size:11px;color:var(--lpr-accent-3);display:flex;align-items:center;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.5);animation:lprFloat 2.2s ease-out .6s both}
     .lpr-obs-mark{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#a78bfa,#5b21b6);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
-    @keyframes lprFloat{from{opacity:0;transform:translateY(-50%) translateX(120%)}to{opacity:1;transform:translateY(-50%) translateX(100%)}}
+    @keyframes lprFloat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
     .lpr-ctas{display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
     a.lpr-btn-primary{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#07070b;padding:16px 20px;border-radius:14px;font-weight:700;font-size:16px;box-shadow:0 10px 30px -8px rgba(255,255,255,.25);transition:transform .15s ease;position:relative;overflow:hidden}
@@ -476,8 +477,7 @@
       .lpr-eyebrow{grid-area:eyebrow;align-self:start}
       .lpr-hero-h{grid-area:title;font-size:clamp(52px,5.5vw,72px);line-height:1.08;margin-bottom:24px}
       .lpr-hero-sub{grid-area:copy;max-width:none;font-size:18px;margin-bottom:0}
-      .lpr-phone-stage{grid-area:phone;width:100%;max-width:300px;height:410px;margin:0;align-self:center;justify-self:center}
-      .lpr-obs-badge{top:auto;right:-16px;bottom:80px;transform:none;animation:none}
+      .lpr-phone-stage{grid-area:phone;width:100%;max-width:280px;margin:0;align-self:center;justify-self:center}
       .lpr-ctas{grid-area:ctas;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;width:100%;max-width:760px;margin:40px auto 0}
       .lpr-ctas > :not(.lpr-btn-primary):not(.lpr-btn-secondary){grid-column:1/-1}
       .lpr-ctas .lpr-note,.lpr-ctas .lpr-trust-row{margin-top:4px}
@@ -579,20 +579,38 @@
             プラグイン不要、ワンタップ送信。
           </p>
 
-          <!-- Phone stage with animated memo + Obsidian append badge -->
+          <!-- Decorative illustration of the compose screen; not interactive app controls. -->
           <div class="lpr-phone-stage" aria-hidden="true">
             <div class="lpr-phone" id="lprPhone">
               <div class="lpr-phone-screen">
-                <div class="lpr-notch"></div>
+                <div class="lpr-phone-status">
+                  <span>9:41</span>
+                  <svg viewBox="0 0 36 10" fill="currentColor"><path d="M0 7h2v3H0zm4-2h2v5H4zm4-2h2v7H8zm4-3h2v10h-2z"/><rect x="20" y="1" width="13" height="8" rx="2" fill="none" stroke="currentColor"/><rect x="22" y="3" width="9" height="4" rx="1"/><path d="M34 3h2v4h-2z"/></svg>
+                </div>
+                <div class="lpr-app-nav">
+                  <span class="lpr-app-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m9 3 1-2h4l1 2 2 1 2-1 3 3-1 2 1 2 2 1v4l-2 1-1 2 1 2-3 3-2-1-2 1-1 2h-4l-1-2-2-1-2 1-3-3 1-2-1-2-2-1v-4l2-1 1-2-1-2 3-3 2 1z" transform="translate(2 1) scale(.8)"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+                  <span class="lpr-app-title">新しいメモ</span>
+                  <span class="lpr-app-send">送信</span>
+                </div>
                 <div class="lpr-phone-content">
                   <div class="lpr-memo-input">
-                    <span class="lpr-typed" id="lprTyped"></span><span class="lpr-caret"></span>
+                    <span class="lpr-typed" id="lprTyped">買い物: コーヒー豆、牛乳</span><span class="lpr-caret"></span>
                   </div>
-                  <div class="lpr-wave">
-                    <span></span><span></span><span></span><span></span><span></span>
-                    <span></span><span></span><span></span><span></span><span></span><span></span>
+                  <span class="lpr-app-mic"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                </div>
+                <div class="lpr-keyboard">
+                  <div class="lpr-keyboard-suggestions"><span>こと</span><span>から</span><span>けど</span><span>かも</span><span>⌄</span></div>
+                  <div class="lpr-keyboard-keys">
+                    <span>→</span><span>あ</span><span>か</span><span>さ</span><span>⌫</span>
+                    <span>↶</span><span>た</span><span>な</span><span>は</span><span class="small">空白</span>
+                    <span class="small">ABC</span><span>ま</span><span>や</span><span>ら</span><span class="return">↵</span>
+                    <span>☺</span><span>^</span><span>わ</span><span class="small">、。?!</span>
                   </div>
-                  <div class="lpr-send-btn">送信 → OBSIDIAN</div>
+                  <div class="lpr-keyboard-foot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><path d="M2 12h20M4 6h16M4 18h16"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8"/></svg>
+                  </div>
+                  <div class="lpr-home-indicator"></div>
                 </div>
               </div>
             </div>
@@ -1096,7 +1114,7 @@
   (function(){
     // Typed hero text
     var el = document.getElementById('lprTyped');
-    if(el){
+    if(el && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
       var phrases = ["朝の散歩で思いついた記事タイトル","買い物: コーヒー豆、牛乳","打ち合わせでSarahが言ってた案","読んだ本の一節"];
       var i=0,j=0,forward=true;
       function tick(){
