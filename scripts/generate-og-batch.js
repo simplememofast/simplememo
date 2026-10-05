@@ -35,7 +35,7 @@ const IMAGES = [
   { file: 'obsidian-getting-started.png', title: 'Obsidianの始め方\n実画面でわかる入門', icon: '🚀' },
   { file: 'obsidian-compare.png', title: 'Obsidianは\n何と比較すればいい？', icon: '🧭' },
   { file: 'obsidian-what-is-vault.png', title: 'Obsidianの保管庫とは\n実体はただのフォルダ', icon: '📁' },
-  { file: 'obsidian-plugins.png', title: 'プラグイン6,812個から\n実測トップ10', icon: '🔌' },
+  { file: 'obsidian-plugins.png', title: 'プラグイン8,405個から\n実測トップ10', icon: '🔌' },
   { file: 'obsidian-plugins-dataview.png', title: 'Dataviewの使い方\nクエリ入門', icon: '🔍' },
   { file: 'obsidian-plugins-templater.png', title: 'Templaterの使い方\nデイリーノートの設定', icon: '📄' },
   { file: 'obsidian-plugins-quickadd.png', title: 'QuickAddの使い方\nInboxへ追記する設定', icon: '📝' },
