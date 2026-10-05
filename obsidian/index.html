@@ -463,6 +463,61 @@
     body.lpr-page main.page-content > .container{max-width:430px;padding:0}
     body.lpr-page .references, body.lpr-page .related-links{max-width:430px;margin-left:auto;margin-right:auto}
 
+    /* Wider screens use the available space while keeping mobile styles intact. */
+    @media (min-width:768px){
+      body.lpr-page main.page-content > .container{width:calc(100% - 48px);max-width:1120px}
+      .lpr{max-width:none}
+      .lpr section{padding:80px 40px}
+      .lpr-chapter{padding:0;margin-bottom:20px}
+      .lpr-section-h{font-size:clamp(36px,4vw,48px)}
+      .lpr-section-sub{max-width:42em;font-size:17px}
+
+      .lpr .lpr-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-areas:"eyebrow phone" "title phone" "copy phone" "ctas ctas";column-gap:40px;min-height:0;padding:64px 40px}
+      .lpr-eyebrow{grid-area:eyebrow;align-self:start}
+      .lpr-hero-h{grid-area:title;font-size:clamp(52px,5.5vw,72px);line-height:1.08;margin-bottom:24px}
+      .lpr-hero-sub{grid-area:copy;max-width:none;font-size:18px;margin-bottom:0}
+      .lpr-phone-stage{grid-area:phone;width:100%;max-width:300px;height:410px;margin:0;align-self:center;justify-self:center}
+      .lpr-obs-badge{top:auto;right:-16px;bottom:80px;transform:none;animation:none}
+      .lpr-ctas{grid-area:ctas;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;width:100%;max-width:760px;margin:40px auto 0}
+      .lpr-ctas > :not(.lpr-btn-primary):not(.lpr-btn-secondary){grid-column:1/-1}
+      .lpr-ctas .lpr-note,.lpr-ctas .lpr-trust-row{margin-top:4px}
+
+      .lpr-friction,.lpr-setup-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+      .lpr-friction-item,.lpr-setup-step{flex-direction:column;padding:24px}
+      .lpr-friction-item .t,.lpr-step-t,.lpr-flow-t{font-size:16px}
+      .lpr-friction-item .s,.lpr-step-s,.lpr-flow-s{font-size:14px}
+      .lpr-flow-visual{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) 20px minmax(0,1fr);gap:12px}
+      .lpr-flow-card{flex-direction:column;align-items:flex-start;padding:24px}
+      .lpr-flow-arrow-v{width:20px;height:1px;margin:auto 0;background:linear-gradient(90deg,var(--lpr-line-2),var(--lpr-accent-2))}
+      .lpr-demo-stage{max-width:840px;margin:32px auto;padding:28px}
+      .lpr-demo-tab{font-size:14px}
+      .lpr-demo-content{font-size:14px;min-height:240px;padding:24px}
+      .lpr-dialog{max-width:560px;margin-top:32px}
+      .lpr-bubble p{font-size:16px}
+      .lpr-compare-grid,.lpr-price-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-compare-col,.lpr-price-card{padding:28px}
+      .lpr-compare-h,.lpr-review-t{font-size:17px}
+      .lpr-compare-list,.lpr-review-q,.lpr-price-l,.lpr-price-f{font-size:15px}
+      .lpr-proof-stat{padding:24px}
+      .lpr-proof-stat .n{font-size:32px}
+      .lpr-proof-stat .l{font-size:12px}
+      .lpr-reviews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-review{padding:24px}
+      .lpr-price-v .n{font-size:40px}
+      .lpr-faq-list{max-width:860px;margin:32px auto 0}
+      .lpr-faq-q{padding:20px 24px;font-size:16px}
+      .lpr-faq-a{padding:0 24px 24px;font-size:15px}
+      .lpr-final-h{font-size:56px}
+      .lpr-final-sub{font-size:17px}
+      .lpr-final .lpr-btn-primary{max-width:360px}
+
+      body.lpr-page .lp-video{width:calc(100% - 80px);max-width:840px!important}
+      body.lpr-page .lp-section{padding-left:40px;padding-right:40px}
+      .lpr-sticky-cta{display:flex;align-items:center;justify-content:space-between;gap:24px;width:calc(100% - 48px);max-width:1120px;padding:14px 24px calc(14px + env(safe-area-inset-bottom))}
+      .lpr-sticky-cta .lpr-btn-primary{width:320px;flex-shrink:0}
+      .lpr-sticky-cta .meta{margin-top:0;font-size:12px;color:#9c9db0}
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- app-schema: managed by scripts/inject_app_schema.py -->
