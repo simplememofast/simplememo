@@ -101,3 +101,40 @@ page LTV. This release does not restart, rename, or change campaign variants.
 Browser checks are functional/local observations, not field Core Web Vitals or
 measured conversion improvement. Production deployment and CI outcomes are
 recorded on the release PR.
+
+
+## Brand completion: homepage plus ten other priority pages
+
+The follow-up includes the homepage and **ten other pages**. It adds the next
+eligible page, `/blog/captio-discontinued` (8 clicks / 71 impressions in the same
+verified window), to the original ten-page release. Selection remains a
+monetization-relevance and search-traffic proxy, not measured page LTV.
+
+- All eleven pages use the same two-line brand, dark/violet header, white
+  navigation CTA, language controls, focus states, and grouped footer as the
+  completed `/obsidian/` design. Existing navigation and footer destinations
+  remain; the homepage retains all ten language choices and social links.
+- Mobile navigation supports Enter, Space, Escape, focus return, outside click,
+  focus leaving the navigation, and viewport changes. A no-JavaScript fallback
+  keeps navigation links available. Journaling gains the same mobile menu while
+  retaining its smaller set of destinations.
+- Captio's article gains a two-column introduction, a decorative workflow
+  diagram, reading routes, a native expandable contents list, numbered sections,
+  and keyboard-scrollable comparison tables. Existing claims, source references,
+  qualifications, FAQ answers, and App Store tracking remain.
+- Journaling's introduction now uses the same 1160px desktop container as the
+  other guides; the article itself retains its readable 780px text column.
+- This follow-up uses the existing opt-in stylesheet and refreshes its content
+  hash. The homepage photograph, image selection, system typography, and native
+  fragment/focus rendering behavior remain.
+
+
+Follow-up validation includes the existing 20-scenario Japanese/English
+homepage harness, Chromium at nine widths from 320px through 1920px, Firefox
+at 375px and 1440px, and an axe-core 4.10.3 WCAG A/AA scan of all eleven pages.
+The scan uses normal scrolling to resolve the homepage's deferred sections;
+forcing reveal classes while leaving deferred placeholder geometry is not a
+valid final-rendering state. The no-JavaScript layout explicitly lets the
+navigation grow to its content height, so its expanded links do not overlap
+the article. Metadata, schemas, existing text, links, and CTA attributes were
+also compared against the base revision in adversarial review.
