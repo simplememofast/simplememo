@@ -86,6 +86,10 @@ page LTV. This release does not restart, rename, or change campaign variants.
   A local Lighthouse 12.8.2 observation scored 100 in all four categories,
   with LCP 1.73s, CLS 0, and no web-font requests. CI is the release gate;
   this local measurement is not a field performance claim.
+- While a homepage control has focus, screen sections use their actual geometry
+  so native focus scrolling cannot land against deferred placeholders. A 1440px
+  Chromium reproduction moved the focused CTA from y=1624 (outside the viewport)
+  to y=357 in both the control and candidate. Print and unfocused deferral remain.
 - The existing homepage harness passed all 20 Japanese/English viewport,
   pixel-density, responsive-image, menu, and JavaScript scenarios.
 - Original H1 text, metadata/JSON-LD, navigation, footer, existing anchor IDs,

@@ -97,6 +97,8 @@ body.capture-editorial,body.capture-home{--accent:#c4b5fd;--text:#f4f2ff;--text-
 
 /* Home keeps the responsive, preloaded photograph and existing capture routes. */
 .capture-home{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}
+/* Resolve preceding sections before the browser scrolls to a focused control. */
+@media screen{.capture-home:has(main :focus) main>section:not(.hero):not(.press-band){content-visibility:visible}}
 .capture-home main .hero{background:#07070b}
 .capture-home main .hero__shade{background:linear-gradient(90deg,#07070b 2%,#100c19e0 33%,#100c1920 73%),linear-gradient(0deg,#07070b,transparent 45%)}
 .capture-home main .hero__eyebrow{color:#ddc7ff;letter-spacing:.2em}
