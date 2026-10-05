@@ -805,7 +805,7 @@
             <div class="lpr-price-card lpr-reveal">
               <div class="lpr-price-name">Free</div>
               <div class="lpr-price-v"><span class="n">¥0</span><span class="u">/ ずっと</span></div>
-              <div class="lpr-price-l">1日3通まで。利用期間の制限なし。</div>
+              <div class="lpr-price-l">1日3通まで（利用期間の制限なし）</div>
               <div class="lpr-price-f">
                 <div><span class="k">✓</span>Obsidian連携 すべて使える</div>
                 <div><span class="k">✓</span>音声入力・AIタグ付け</div>
@@ -826,7 +826,7 @@
           </div>
         </section>
 
-        <!-- 08 FAQ (condensed) -->
+        <!-- 08 FAQ -->
         <section>
           <div class="lpr-chapter">
             <div class="lpr-chap-num">08 / FAQ</div>
@@ -834,11 +834,50 @@
           </div>
           <h2 class="lpr-section-h lpr-reveal"><span class="q">迷いやすい</span><br>ところ、全部。</h2>
           <div class="lpr-faq-list">
-            <details class="lpr-faq-item"><summary class="lpr-faq-q">Obsidianのプラグインは必要ですか？<span class="ic">+</span></summary><div class="lpr-faq-a">不要です。iCloud Driveまたは「このiPhone内」の保管庫フォルダへ直接書き込みます。Daily Notes機能の有効化も不要。</div></details>
-            <details class="lpr-faq-item"><summary class="lpr-faq-q">オフラインでも追記されますか？<span class="ic">+</span></summary><div class="lpr-faq-a">対象フォルダが端末にダウンロード済みなら、ネット接続なしでローカルファイルに追記できます。メールは接続復帰時にOutboxから自動送信。</div></details>
-            <details class="lpr-faq-item"><summary class="lpr-faq-q">Obsidian Syncだけで同期しています。使えますか？<span class="ic">+</span></summary><div class="lpr-faq-a">Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあります。その場合はURLスキーム方式（Obsidianが一瞬開いて追記）にフォールバックします。</div></details>
-            <details class="lpr-faq-item"><summary class="lpr-faq-q">AndroidやMacでは使えますか？<span class="ic">+</span></summary><div class="lpr-faq-a">現在はiPhone（iOS 16+）向けアプリです。追記先の保管庫をiCloud Drive等で同期しておけば、Mac・iPadのObsidianから同じノートを開けます。</div></details>
-            <details class="lpr-faq-item"><summary class="lpr-faq-q">メモの内容が外部に送られたりしませんか？<span class="ic">+</span></summary><div class="lpr-faq-a">Obsidianへの追記は端末内で完結するローカル処理です。メール本文は送信時の通過のみで、サーバに恒常的に保存しません。Outboxと送信履歴はAES-GCMで端末内暗号化。</div></details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Obsidianのプラグインは必要ですか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">フォルダへの直接書き込みにコミュニティプラグインは不要です。iCloud Driveまたは「このiPhone内」の選んだフォルダへ書き込みます。この方式ではDaily Notes機能の有効化も不要です。先に設定の「Obsidian書き込みテスト」で保存先を確認してください。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">メモを送るたびにObsidianが開きますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">選んだフォルダへの直接書き込みが成功すれば、Obsidianを開かずに追記できます。通常モードではフォルダが未選択の場合や直接書き込みに失敗した場合に、URLスキームでObsidianを開いて追記を試みることがあります。設定の書き込みテストはフォルダへの直接書き込みだけを確認します。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">どのノートに、どんな形で追記されますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">「デイリーノート」は選んだフォルダのその日の yyyy-MM-dd.md に、「指定したノート」は設定した名前のファイル（既定は Inbox.md）に追記します。既定の書式は - HH:mm メモ です。「追記の書式」でタイムスタンプや文頭・文末のテンプレートを変更でき、iPhoneとApple Watchで別々に設定できます。追記時に既存のノート内容は消しません。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Obsidian Syncだけで同期している場合も使えますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">対象フォルダがiCloud Driveまたは「このiPhone内」にあり、ファイルAppからアクセスできる必要があります。Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあり、その場合はURLスキーム方式にフォールバックします。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Androidやパソコンでも使えますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">連携を行うObsidian連携シンプルメモは現在iPhone（iOS 16以降）向けアプリです。追記先のObsidian保管庫をiCloud DriveやObsidian Syncで同期しておけば、Mac・iPad・他端末のObsidianからも同じノートを開けます。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">メモはサーバに保存されますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Obsidianへの追記は端末内で完結するローカル処理です。既存の送信・暗号化経路には一切変更を加えていません。メール本文は送信時の通過のみで、当社サーバに恒常的に保存しません。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">今までのメール送信はどうなりますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">通常モードではメールとObsidianの両方に残ります。圏外ではメールをOutboxに保存し、選択済みフォルダへの追記は端末内で行います。Premiumでは、設定で保管庫フォルダを選んで書き込みテストを済ませると「Obsidianのみに保存（メールを送らない）」をオンにできます。有効な間はメモをメールで送らず、保管庫だけに保存します。Premiumの期限が切れても、このモードは無料枠の1日3件で継続します。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">オフライン（圏外）でもObsidianに追記されますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">対象フォルダがiPhoneにダウンロード済みで、アプリから書き込める状態なら、インターネット接続なしでローカルファイルに追記できます。先に書き込みテストで確認してください。通常モードのメールはOutboxで待機し、他端末へのiCloud同期には通信の復帰が必要です。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">ObsidianのInboxノートにまとめて貯められますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">はい。「送り先」で「指定したノート」を選び、「ノート名」を設定します。空欄なら Inbox.md を使います。選んだフォルダの同じファイルへ追記するので、まず書き込みテストでファイル名と本文を確認してください。デイリーノートとの切り替えは設定で行えます。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Gmail・Outlook・iCloudのメールでもObsidianに残せますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">メールの宛先（Gmail / Outlook / iCloud など）に関係なくObsidian追記は動きます。Obsidianへの追記は端末内のローカル処理で、メール送信とは独立しているためです。通常モードではメールは普段の受信箱に届き、同じメモがObsidianにも残ります。「Obsidianのみに保存」が有効な間は、メモのメール送信を行いません。</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apple WatchからObsidianに送れますか？<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Apple Watchから自分宛にメモを送ると、iPhone側の連携処理を通じて同じメモがObsidianにも追記されます（追記はiPhoneが担当し、Watchが保管庫へ直接書き込むわけではありません）。詳しくはApple Watch対応ページをご覧ください。</div>
+            </details>
           </div>
           <p style="text-align:center;font-size:12px;color:var(--lpr-ink-3);margin-top:16px"><a href="/faq" style="color:var(--lpr-accent-3);text-decoration:underline">すべてのFAQを見る →</a></p>
         </section>
@@ -847,7 +886,7 @@
         <section class="lpr-final">
           <h2 class="lpr-final-h">思いつきを、<br><span class="em">保管庫</span>へ。</h2>
           <p class="lpr-final-sub">ダウンロードは無料。<br>最初のメモは、きっと3分後。</p>
-          <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="final" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Storeで無料ダウンロード">
+          <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Storeで無料ダウンロード">
             <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
             App Storeで無料ダウンロード
           </a>
@@ -990,7 +1029,7 @@
   </script>
   <!-- Sticky bottom CTA (LP redesign) -->
   <div class="lpr-sticky-cta" id="lprStickyCta" role="complementary" aria-label="固定CTA">
-    <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="sticky" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Storeで無料ダウンロード">
+    <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="App Storeで無料ダウンロード">
       <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
       無料で始める
     </a>
