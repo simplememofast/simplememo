@@ -18,8 +18,8 @@ PAGES = ('index.html', 'en/index.html')
 OUT = 'assets/home-perf'
 HERO = 'assets/img/voice-airpods-pro-bright-1536.webp'
 HERO_SIZES = '(max-width: 1023px) 100vw, 64vw'
-BANNER_SIZES = '(min-width: 1280px) 918px, (min-width: 1024px) 818px, (min-width: 768px) 618px, (min-width: 480px) 438px, calc(100vw - 42px)'
-BANNERS = ('siri', 'ai-tags', 'apple-watch', 'obsidian')
+BANNER_SIZES = '(min-width: 1280px) 505px, (min-width: 1024px) 450px, (min-width: 768px) 340px, (min-width: 480px) 438px, calc(100vw - 42px)'
+BANNERS = ('airpods', 'tags', 'watch', 'obsidian')
 
 
 def digest(data: bytes) -> str:
@@ -177,14 +177,14 @@ def build() -> dict[str, bytes]:
         assert count == 1
         if lang == 'ja':
             for banner in BANNERS:
-                source = f'assets/img/{banner}-banner-ja@2x.webp'
+                source = f'assets/img/home-banners/{banner}.webp'
                 manifest['inputs'][source] = digest((ROOT / source).read_bytes())
                 with Image.open(ROOT / source) as original:
                     widths = (600, 750, 900, 1200, original.width)
                 srcset = ', '.join(f'{image(source, w)} {w}w' for w in widths)
-                pattern = rf'(<source type="image/webp" srcset="/assets/img/{banner}-banner-ja\.webp[^>]*>)'
-                new = f'<source data-home-perf="image" type="image/avif" srcset="{srcset}" sizes="{BANNER_SIZES}">\n          '
-                html, count = re.subn(pattern, lambda m: new + m[0], html)
+                pattern = rf'(<picture class="hb-art" data-home-banner="{banner}">)'
+                new = f'\n          <source data-home-perf="image" type="image/avif" srcset="{srcset}" sizes="{BANNER_SIZES}">'
+                html, count = re.subn(pattern, lambda m: m[0] + new, html)
                 assert count == 1, f'Missing banner: {banner}'
         # Parse the copy before the photograph, matching the mobile visual order.
         # With early inline CSS, a preloaded photo can otherwise paint before the

@@ -36,6 +36,7 @@ const write = process.argv.includes('--write');
 const ASSETS = [
   'assets/css/capture-editorial.css',
   'assets/css/home-hero.css',
+  'assets/css/home-banners.css',
   'assets/css/editorial-resources.css',
   'js/obsidian-inbox-tool.js',
   'assets/css/style.min.css',
