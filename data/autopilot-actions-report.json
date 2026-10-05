@@ -1,14 +1,14 @@
 {
-  "as_of_jst": "2026-10-04",
-  "routine_snapshot_sha256": "8405e30fc72f4e57b8c541fc5fca94a3c632147b2849d012541867918dcf5dbc",
+  "as_of_jst": "2026-10-05",
+  "routine_snapshot_sha256": "b72ef203624d9370fc0b63ee0a433fa5b0cc7afc1ec9d1a03bd03c5614fa03b9",
   "viewport_measurement": {
-    "main_sha": "f72b395a3eec4507e1f6cb8ce6c434e76f94c9e1",
-    "head_sha": "825772ca047b968fdd92fd44cf786b95371aed90",
-    "run_id": 37171905279,
+    "main_sha": "e6c4629c34ce5e2410687fbf4cab39047dc58b7e",
+    "head_sha": "fed07d968aa899f9cfd7757d7a9f655500cd7f4d",
+    "run_id": 37279839618,
     "attempt": 1,
-    "started_at": "2026-10-04T02:43:04Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/37171905279/attempts/1",
-    "job_id": 111346391693,
+    "started_at": "2026-10-05T07:48:45Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/37279839618/attempts/1",
+    "job_id": 111665092990,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -22,15 +22,15 @@
           "complete": true
         },
         "blink_sweep": {
-          "expected": 1848,
-          "measured": 1848,
+          "expected": 1844,
+          "measured": 1844,
           "failures": 0,
           "problems": 0,
           "complete": true
         },
         "webkit": {
-          "expected": 501,
-          "measured": 501,
+          "expected": 500,
+          "measured": 500,
           "failures": 0,
           "problems": 0,
           "complete": true
@@ -60,9 +60,9 @@
   "acknowledged": 8,
   "closed_today": [
     {
-      "id": "act-ledger-sync",
-      "title": "運転台帳に載っていない Actions run が 1件",
-      "evidence": "Actions run 30件すべてが台帳にある"
+      "id": "act-cost-sync",
+      "title": "実費記録の同期が必要な run が 1件",
+      "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み（実行種別は導入前のため記録なし 2件: 32667079679, 32779337325。費用は取得済み）（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 27件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision, ap-20260906-owner-session-capacities-recovery, ap-20260908-actions-codex-01a07dad-42f9-72e2-897c-221062dc0f2b, ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b, ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b, ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a, ap-20260913-owner-session-company-os, ap-20260913-owner-session-billing-readiness, ap-20260913-owner-session-service-notice-readiness, ap-20260914-actions-codex-01a09c93-4c00-78c0-9d0f-f47136880182, ap-20260915-actions-codex-01a0a1b9-4982-70f3-b2d6-eed77be68e26, ap-20260916-actions-codex-01a0a6e0-4080-7ec0-953e-cff70fbeaa09, ap-20260916-owner-session-pagespeed, ap-20260917-owner-session-pagespeed-navigation, ap-20260917-owner-session-pagespeed-poster, ap-20260918-actions-codex-01a0b12d-3339-76f1-9627-c1add8c8dad1, ap-20260918-owner-session-pagespeed-density, ap-20260919-actions-codex-01a0b653-5750-7182-b69e-639d261ab1ac, ap-20260920-actions-codex-01a0bb78-4965-7242-bedf-29a93d1b0bf9, ap-20260922-owner-session-codex-01a0c887-1b38-7d33-8694-32aef889cdca-r2, ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562, ap-20261001-actions-codex-01a0f41e-d80a-7a70-b927-485e8385da0e, ap-20261001-owner-session-owner-backlog-recovery, ap-20261002-actions-codex-01a0f946-1d12-7883-aa89-0718772a5b85, ap-20261003-actions-codex-01a0fe6a-df2f-7403-a65a-d60d3297e89d, ap-20261004-actions-codex-01a10392-c32e-78e3-a7ca-fb2d158f0351）"
     },
     {
       "id": "act-selfheal-ap-20260830-actions",
@@ -105,29 +105,46 @@
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 4回着手し usage_limit の再発なし"
     },
     {
-      "id": "act-health-1902",
+      "id": "act-health-1940",
       "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "evidence": "https://github.com/simplememofast/simplememo/issues/1902 の state=closed をGitHub APIで確認"
-    }
-  ],
-  "human": [
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1940 の state=closed をGitHub APIで確認"
+    },
     {
       "id": "act-health-1971",
       "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "age_days": 0,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "#1971 がまだ open",
-      "not_before_jst": null
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1971 の state=closed をGitHub APIで確認"
     }
   ],
+  "human": [],
   "ai": [
     {
-      "id": "act-health-1940",
+      "id": "act-health-1991",
       "title": "【監視】autopilot監視: 当日分の実行記録がありません",
       "age_days": 0,
       "auto": null,
-      "evidence": "#1940 がまだ open"
+      "evidence": "#1991 がまだ open"
+    },
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "detail": "37249907984（2026-10-05 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "age_days": 0,
+      "auto": "reconcile-runs",
+      "evidence": "台帳に無い run が 1件: 37249907984"
     }
   ],
-  "executed": []
+  "executed": [
+    {
+      "handler": "reconcile-runs",
+      "ok": true,
+      "changed": 0,
+      "log": "37249907984: 成功回はPR特定が要るため自動追記しない"
+    },
+    {
+      "handler": "append-cost",
+      "ok": true,
+      "changed": 1,
+      "log": "actions-run-37249907984: appended 2026-10-05 actions $9.3338"
+    }
+  ]
 }
