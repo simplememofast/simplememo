@@ -282,434 +282,461 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/plugins/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidianのプラグインは何個ありますか？","acceptedAnswer":{"@type":"Answer","text":"2026年8月21日に公式レジストリ（GitHub上のcommunity-plugins.json）を直接取得して数えたところ6,812個でした。テーマは同じ日にcommunity-css-themes.jsonを数えて701種です。2026年8月11日の初回計測（6,571個）から10日で241個増えています。"}},{"@type":"Question","name":"最初に入れるべきプラグインはどれですか？","acceptedAnswer":{"@type":"Answer","text":"公式が公開するダウンロード数データ（community-plugin-stats.json）で並べ替えると、1位はExcalidraw（手書き図解・736万件）、2位はTemplater（テンプレート・533万件）、3位はDataview（横断検索・480万件）でした。ダウンロード数は人気の目安であり、自分の使い方に合うかは別に確認してください。"}},{"@type":"Question","name":"プラグインを入れなくても使える機能はありますか？","acceptedAnswer":{"@type":"Answer","text":"あります。実測では、Obsidian本体に最初から入っているコア機能が31個あり、既定でON 21個・OFF 10個でした（詳細は保管庫の実測ページ）。デイリーノートやグラフビューなど中核機能はコミュニティプラグインなしで動きます。"}},{"@type":"Question","name":"プラグインの登録数と実際の使われ方は一致しますか？","acceptedAnswer":{"@type":"Answer","text":"一致しません。登録数（6,812個）とダウンロード数データに実績がある件数（6,780個）はほぼ重なりますが、上位を独占しているのはごく一部です。1位のExcalidraw（736万件）は10位のIconize（218万件）の3倍以上で、分布は先頭に大きく偏っています。"}},{"@type":"Question","name":"プラグインはどこから入れますか？","acceptedAnswer":{"@type":"Answer","text":"設定の「コミュニティプラグイン」から検索して入れるのが公式の経路で、このページで数えたレジストリがその一覧の実体です。GitHubリポジトリを直接指定する手動インストールもできますが、公式レジストリの審査を経ていないため、素性が分かっているもの以外は避けるのが安全です。"}},{"@type":"Question","name":"Obsidianで「キャプチャ」に関係するプラグインはどれくらいありますか？","acceptedAnswer":{"@type":"Answer","text":"2026年8月27日に公式レジストリ6,982件の名前・説明文をキーワードで数えたところ、「capture」を名指しするものは82個（1.2%）でした。最多は「daily note」関連の133個（1.9%）です。文字列の部分一致による概算のため、正確な機能分類ではありません。"}},{"@type":"Question","name":"Obsidianのテーマはダーク/ライトどちらに対応していますか？","acceptedAnswer":{"@type":"Answer","text":"2026年9月4日に公式レジストリ（community-css-themes.json、729件）のmodesフィールドを集計したところ、両対応が491種（67.4%）で最多でした。ダーク限定は206種（28.3%）、ライト限定は32種（4.4%）にとどまります。旧形式（legacy）のまま登録されているテーマも17種（2.3%）残っています。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
 </head>
-<body>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third">
+<a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
-    <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
-        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
-        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
-        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
-      </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/obsidian/plugins/" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/obsidian/plugins/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">
-          <span lang="ja">ダウンロード</span>
-        </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
-      </div>
-    </div>
-  </nav>
+  <nav aria-label="メインナビゲーション" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/"><img alt="" height="36" loading="eager" src="/assets/img/app-icon-56.png" width="36"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+<li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+<li><a href="/vs/"><span lang="ja">比較</span></a></li>
+<li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+<li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+<li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+<li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+<li><a href="/about/"><span lang="ja">開発者</span></a></li>
+<li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a aria-current="page" aria-label="日本語" class="lang-switcher__btn active" href="/obsidian/plugins/" hreflang="ja" style="text-decoration:none">JA</a><a aria-label="Switch to English" class="lang-switcher__btn" href="/en/obsidian/plugins/" hreflang="en" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
+<span lang="ja">ダウンロード</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="メニュー" class="global-nav__hamburger" type="button">☰</button>
+</div>
+</div>
+</nav>
 
-<main class="page-content">
-    <div class="container">
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span lang="ja">Obsidian入門 — プラグイン</span>
+</div>
+<h1 class="lp-hero__title">
+<span lang="ja">Obsidianのプラグイン、まず何を入れる？</span>
+</h1>
+<p class="lp-hero__sub">
+<span lang="ja">「プラグインが多い」だけでは選べません。このページでは、Obsidian公式のプラグインレジストリと<strong>公式が公開しているダウンロード数データ</strong>をこちらで直接取得し、<strong>総数と実際に最も使われている10個を実カウント</strong>しました。あわせて、プラグインを入れなくても済む範囲も正直に書きます。</span>
+</p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+<span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-21">2026年8月21日</time>・ 検証日: 2026年8月21日（公式レジストリ実カウント）・更新: 2026年8月27日（キーワード分析を追加）・2026年9月4日（テーマの明暗内訳を追加）</span>
+</p>
+<a class="ce-read-link" href="#capture-section-1">本文を読む <span aria-hidden="true">↓</span></a></div><nav aria-label="読みたい内容から選ぶ" class="ce-routes"><a class="ce-route" href="#capture-section-2"><span>01</span><b>公式の実測データ</b></a><a class="ce-route" href="#capture-section-3"><span>02</span><b>トップ10を見る</b></a><a class="ce-route" href="#capture-section-6"><span>03</span><b>追加前に確認</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">BEFORE YOU ADD</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>公式データを読む</strong></div><div class="cn-concept-row"><span>02</span><strong>必要な機能を選ぶ</strong></div><div class="cn-concept-row"><span>03</span><strong>まず1行を残す</strong></div></div><figcaption class="ce-stage-foot">プラグインを選ぶ前に</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>このページの目次</summary><nav aria-label="目次"><a href="#capture-section-1">Obsidianのプラグインは何個ありますか？最初に入れるべきは？</a><a href="#capture-section-2">実測 — 公式レジストリの推移</a><a href="#capture-section-3">実測トップ10 — 公式ダウンロード数データで並べ替え</a><a href="#capture-section-4">実測 — 名前・説明文にキャプチャ系キーワードを含むプラグインの数</a><a href="#capture-section-5">実測 — テーマのダーク/ライト対応内訳</a><a href="#capture-section-6">入れる前に — プラグインなしで足りる範囲</a><a href="#capture-section-7">プラグインを探す前に、まず1行を残す場所を決める</a><a href="#capture-section-8">よくある質問</a><a href="#capture-section-9">関連ページ</a><a href="#capture-section-10">参考文献・データの出典</a></nav></details>
+<!-- Answer block (AIO) -->
+<section class="lp-section ce-chapter" data-answer-block="obsidian-plugins-how-many" style="padding-top:1rem;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"><span lang="ja">Obsidianのプラグインは何個ありますか？最初に入れるべきは？</span></h2></div><div class="ce-chapter__body">
 
-      <!-- Hero -->
-      <div class="lp-hero">
-        <div class="lp-hero__label">
-          <span lang="ja">Obsidian入門 — プラグイン</span>
-        </div>
-        <h1 class="lp-hero__title">
-          <span lang="ja">Obsidianのプラグイン、まず何を入れる？</span>
-        </h1>
-        <p class="lp-hero__sub">
-          <span lang="ja">「プラグインが多い」だけでは選べません。このページでは、Obsidian公式のプラグインレジストリと<strong>公式が公開しているダウンロード数データ</strong>をこちらで直接取得し、<strong>総数と実際に最も使われている10個を実カウント</strong>しました。あわせて、プラグインを入れなくても済む範囲も正直に書きます。</span>
-        </p>
-        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-21">2026年8月21日</time>・ 検証日: 2026年8月21日（公式レジストリ実カウント）・更新: 2026年8月27日（キーワード分析を追加）・2026年9月4日（テーマの明暗内訳を追加）</span>
-        </p>
-      </div>
-
-      <!-- Answer block (AIO) -->
-      <section class="lp-section" data-answer-block="obsidian-plugins-how-many" style="padding-top:1rem;">
-        <h2 class="lp-section__title"><span lang="ja">Obsidianのプラグインは何個ありますか？最初に入れるべきは？</span></h2>
-        <div lang="ja">
-          <p><strong>2026年8月21日に公式レジストリを直接数えたところ6,812個（テーマは701種）でした。</strong>公式が公開するダウンロード数データで並べ替えると、1位はExcalidraw（手書き図解・736万件）、2位はTemplater（テンプレート・533万件）、3位はDataview（ノート検索・480万件）です。</p>
-          <p>ただし数の多さは「入れるべき」の理由にはなりません。Obsidian本体には最初からコア機能が31個入っており、そこで足りる用途も少なくありません。下の実測データと、プラグインなしで足りる範囲の両方を見てから決めてください。</p>
-        </div>
-
-      </section>
-
-      <!-- Voice route — GROWTH_LTV_ENGAGEMENT_2026-09-01 §6 P1: every hub child points at the
+<div lang="ja">
+<p><strong>2026年8月21日に公式レジストリを直接数えたところ6,812個（テーマは701種）でした。</strong>公式が公開するダウンロード数データで並べ替えると、1位はExcalidraw（手書き図解・736万件）、2位はTemplater（テンプレート・533万件）、3位はDataview（ノート検索・480万件）です。</p>
+<p>ただし数の多さは「入れるべき」の理由にはなりません。Obsidian本体には最初からコア機能が31個入っており、そこで足りる用途も少なくありません。下の実測データと、プラグインなしで足りる範囲の両方を見てから決めてください。</p>
+</div>
+</div></section>
+<!-- Voice route — GROWTH_LTV_ENGAGEMENT_2026-09-01 §6 P1: every hub child points at the
            shortest iPhone→voice→vault path once, below the answer block so the answer stays first. -->
-      <p class="voice-route" style="margin:0 0 1.5rem;padding:.75rem 1rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.7;">
-        <span lang="ja">iPhoneから<strong>声で話してObsidianに残す</strong>最短の方法は、<a href="/blog/obsidian-voice-input">4方式の比較（プラグイン不要の手順つき）</a>にまとめています。</span>
+<p class="voice-route" style="margin:0 0 1.5rem;padding:.75rem 1rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.7;">
+<span lang="ja">iPhoneから<strong>声で話してObsidianに残す</strong>最短の方法は、<a href="/blog/obsidian-voice-input">4方式の比較（プラグイン不要の手順つき）</a>にまとめています。</span>
+</p>
+<!-- Registry recount over time -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="registry-count"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2">
+<span lang="ja">実測 — 公式レジストリの推移</span>
+</h2></div><div class="ce-chapter__body">
 
-      </p>
+<p class="lp-section__lead">
+<span lang="ja">Obsidian公式の配布元（GitHub: <code>obsidianmd/obsidian-releases</code>）が公開する <code>community-plugins.json</code> と <code>community-css-themes.json</code> を <code>raw.githubusercontent.com</code> 経由でそのつど直接取得し、配列の要素数を数えました。当サイトでの過去の計測と並べると、10日間で241個増えています。</span>
+</p>
+<div aria-labelledby="capture-section-2" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span lang="ja">計測日</span></th>
+<th scope="col"><span lang="ja">プラグイン数</span></th>
+<th scope="col"><span lang="ja">テーマ数</span></th>
+<th scope="col"><span lang="ja">出典</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th scope="row">2026-08-11</th>
+<td data-label="Plugins">6,571</td>
+<td data-label="Themes">—</td>
+<td data-label="Source"><span lang="ja">PR #470（初回計測）</span></td>
+</tr>
+<tr>
+<th scope="row">2026-08-14</th>
+<td data-label="Plugins">6,638</td>
+<td data-label="Themes">691</td>
+<td data-label="Source"><a href="/obsidian/compare/logseq/">/obsidian/compare/logseq/</a></td>
+</tr>
+<tr>
+<th scope="row">2026-08-19</th>
+<td data-label="Plugins">6,739</td>
+<td data-label="Themes">—</td>
+<td data-label="Source"><a href="/obsidian/what-is-vault/">/obsidian/what-is-vault/</a></td>
+</tr>
+<tr>
+<th scope="row">2026-08-21</th>
+<td data-label="Plugins">6,812</td>
+<td data-label="Themes">701</td>
+<td data-label="Source"><span lang="ja">本ページ（初回）</span></td>
+</tr>
+<tr>
+<th scope="row"><strong><span lang="ja">2026-09-04（今回）</span></strong></th>
+<td data-label="Plugins"><strong>7,242</strong></td>
+<td data-label="Themes"><strong>729</strong></td>
+<td data-label="Source"><span lang="ja">本ページ（テーマの明暗内訳を測った回）</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja">※ 「—」は当該日にテーマを計測していないことを示す（欠測を0として扱っていない）。プラグイン数は8月21日から14日間で430個（1日あたり約31個）増えています。</span></p>
+</div></section>
+<!-- Download ranking -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="top10"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3">
+<span lang="ja">実測トップ10 — 公式ダウンロード数データで並べ替え</span>
+</h2></div><div class="ce-chapter__body">
 
-      <!-- Registry recount over time -->
-      <section class="lp-section" id="registry-count">
-        <h2 class="lp-section__title">
-          <span lang="ja">実測 — 公式レジストリの推移</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">Obsidian公式の配布元（GitHub: <code>obsidianmd/obsidian-releases</code>）が公開する <code>community-plugins.json</code> と <code>community-css-themes.json</code> を <code>raw.githubusercontent.com</code> 経由でそのつど直接取得し、配列の要素数を数えました。当サイトでの過去の計測と並べると、10日間で241個増えています。</span>
-        </p>
-        <div style="overflow-x:auto">
-          <table class="rt-table">
-          <thead>
-            <tr>
-              <th scope="col"><span lang="ja">計測日</span></th>
-              <th scope="col"><span lang="ja">プラグイン数</span></th>
-              <th scope="col"><span lang="ja">テーマ数</span></th>
-              <th scope="col"><span lang="ja">出典</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">2026-08-11</th>
-              <td data-label="Plugins">6,571</td>
-              <td data-label="Themes">—</td>
-              <td data-label="Source"><span lang="ja">PR #470（初回計測）</span></td>
-            </tr>
-            <tr>
-              <th scope="row">2026-08-14</th>
-              <td data-label="Plugins">6,638</td>
-              <td data-label="Themes">691</td>
-              <td data-label="Source"><a href="/obsidian/compare/logseq/">/obsidian/compare/logseq/</a></td>
-            </tr>
-            <tr>
-              <th scope="row">2026-08-19</th>
-              <td data-label="Plugins">6,739</td>
-              <td data-label="Themes">—</td>
-              <td data-label="Source"><a href="/obsidian/what-is-vault/">/obsidian/what-is-vault/</a></td>
-            </tr>
-            <tr>
-              <th scope="row">2026-08-21</th>
-              <td data-label="Plugins">6,812</td>
-              <td data-label="Themes">701</td>
-              <td data-label="Source"><span lang="ja">本ページ（初回）</span></td>
-            </tr>
-            <tr>
-              <th scope="row"><strong><span lang="ja">2026-09-04（今回）</span></strong></th>
-              <td data-label="Plugins"><strong>7,242</strong></td>
-              <td data-label="Themes"><strong>729</strong></td>
-              <td data-label="Source"><span lang="ja">本ページ（テーマの明暗内訳を測った回）</span></td>
-            </tr>
-          </tbody>
-        </table>
-        </div>
-        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja">※ 「—」は当該日にテーマを計測していないことを示す（欠測を0として扱っていない）。プラグイン数は8月21日から14日間で430個（1日あたり約31個）増えています。</span></p>
-      </section>
+<p class="lp-section__lead">
+<span lang="ja">同じ配布元が公開する <code>community-plugin-stats.json</code>（ダウンロード数データ・6,780件収録）を取得し、<code>downloads</code> の値で並べ替えました。説明文はレジストリに登録されている公式の一行説明をそのまま引用しています。</span>
+</p>
+<div aria-labelledby="capture-section-3" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col">#</th>
+<th scope="col"><span lang="ja">プラグイン</span></th>
+<th scope="col"><span lang="ja">ダウンロード数</span></th>
+<th scope="col"><span lang="ja">公式の説明</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><th scope="row">1</th><td data-label="Plugin"><strong>Excalidraw</strong><br/><span style="color:var(--text-muted);font-size:.85em;">zsviczian</span></td><td data-label="Downloads">7,365,086</td><td data-label="Desc"><span lang="ja">手描きの図解ができるビジュアルPKMツール。Excalidrawの図を作成・編集</span></td></tr>
+<tr><th scope="row">2</th><td data-label="Plugin"><strong>Templater</strong><br/><span style="color:var(--text-muted);font-size:.85em;">silentvoid13</span></td><td data-label="Downloads">5,336,051</td><td data-label="Desc"><span lang="ja">動的なテンプレートを作成・利用する</span></td></tr>
+<tr><th scope="row">3</th><td data-label="Plugin"><strong><a href="/obsidian/plugins/dataview/">Dataview</a></strong><br/><span style="color:var(--text-muted);font-size:.85em;">blacksmithgu</span></td><td data-label="Downloads">4,805,635</td><td data-label="Desc"><span lang="ja">保管庫に対して高度なクエリを実行する（<a href="/obsidian/plugins/dataview/">使い方</a>）</span></td></tr>
+<tr><th scope="row">4</th><td data-label="Plugin"><strong>Tasks</strong><br/><span style="color:var(--text-muted);font-size:.85em;">obsidian-tasks-group</span></td><td data-label="Downloads">4,061,506</td><td data-label="Desc"><span lang="ja">保管庫全体のタスクを管理。期限・繰り返し・完了日・フィルタに対応</span></td></tr>
+<tr><th scope="row">5</th><td data-label="Plugin"><strong>Advanced Tables</strong><br/><span style="color:var(--text-muted);font-size:.85em;">Tony Grosinger</span></td><td data-label="Downloads">3,124,723</td><td data-label="Desc"><span lang="ja">表の移動・整形・操作を改善する</span></td></tr>
+<tr><th scope="row">6</th><td data-label="Plugin"><strong>Git</strong><br/><span style="color:var(--text-muted);font-size:.85em;">Vinzent</span></td><td data-label="Downloads">3,028,476</td><td data-label="Desc"><span lang="ja">自動バックアップ等を備えたGitバージョン管理を統合</span></td></tr>
+<tr><th scope="row">7</th><td data-label="Plugin"><strong>Calendar</strong><br/><span style="color:var(--text-muted);font-size:.85em;">Liam Cain</span></td><td data-label="Downloads">3,021,004</td><td data-label="Desc"><span lang="ja">デイリーノートをカレンダーから探索する</span></td></tr>
+<tr><th scope="row">8</th><td data-label="Plugin"><strong>Style Settings</strong><br/><span style="color:var(--text-muted);font-size:.85em;">Obsidian Community Archive</span></td><td data-label="Downloads">2,604,959</td><td data-label="Desc"><span lang="ja">テーマ・プラグイン・スニペットのCSS変数を調整する</span></td></tr>
+<tr><th scope="row">9</th><td data-label="Plugin"><strong>Kanban</strong><br/><span style="color:var(--text-muted);font-size:.85em;">Obsidian Community Archive</span></td><td data-label="Downloads">2,568,158</td><td data-label="Desc"><span lang="ja">Markdownベースのカンバンボードを作成する</span></td></tr>
+<tr><th scope="row">10</th><td data-label="Plugin"><strong>Iconize</strong><br/><span style="color:var(--text-muted);font-size:.85em;">florianwoelki</span></td><td data-label="Downloads">2,180,911</td><td data-label="Desc"><span lang="ja">ファイル・フォルダ・テキストなどにアイコンを追加する</span></td></tr>
+</tbody>
+</table>
+</div>
+<p>
+<span lang="ja">1位のExcalidraw（736万件）は10位のIconize（218万件）の3倍以上で、分布は先頭に大きく偏っています。<strong>登録数6,812個のほとんどは、上位10個ほどのダウンロード数には遠く及びません。</strong>「数が多い＝選びにくい」のではなく、実際に使われているものはかなり絞られている、というのがこの実測から言えることです。</span>
+</p>
+</div></section>
+<!-- Keyword sweep: capture-related plugin share -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="capture-keyword-share"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4">
+<span lang="ja">実測 — 名前・説明文にキャプチャ系キーワードを含むプラグインの数</span>
+</h2></div><div class="ce-chapter__body">
 
-      <!-- Download ranking -->
-      <section class="lp-section" id="top10">
-        <h2 class="lp-section__title">
-          <span lang="ja">実測トップ10 — 公式ダウンロード数データで並べ替え</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">同じ配布元が公開する <code>community-plugin-stats.json</code>（ダウンロード数データ・6,780件収録）を取得し、<code>downloads</code> の値で並べ替えました。説明文はレジストリに登録されている公式の一行説明をそのまま引用しています。</span>
-        </p>
-        <div style="overflow-x:auto">
-          <table class="rt-table">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col"><span lang="ja">プラグイン</span></th>
-              <th scope="col"><span lang="ja">ダウンロード数</span></th>
-              <th scope="col"><span lang="ja">公式の説明</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">1</th><td data-label="Plugin"><strong>Excalidraw</strong><br><span style="color:var(--text-muted);font-size:.85em;">zsviczian</span></td><td data-label="Downloads">7,365,086</td><td data-label="Desc"><span lang="ja">手描きの図解ができるビジュアルPKMツール。Excalidrawの図を作成・編集</span></td></tr>
-            <tr><th scope="row">2</th><td data-label="Plugin"><strong>Templater</strong><br><span style="color:var(--text-muted);font-size:.85em;">silentvoid13</span></td><td data-label="Downloads">5,336,051</td><td data-label="Desc"><span lang="ja">動的なテンプレートを作成・利用する</span></td></tr>
-            <tr><th scope="row">3</th><td data-label="Plugin"><strong><a href="/obsidian/plugins/dataview/">Dataview</a></strong><br><span style="color:var(--text-muted);font-size:.85em;">blacksmithgu</span></td><td data-label="Downloads">4,805,635</td><td data-label="Desc"><span lang="ja">保管庫に対して高度なクエリを実行する（<a href="/obsidian/plugins/dataview/">使い方</a>）</span></td></tr>
-            <tr><th scope="row">4</th><td data-label="Plugin"><strong>Tasks</strong><br><span style="color:var(--text-muted);font-size:.85em;">obsidian-tasks-group</span></td><td data-label="Downloads">4,061,506</td><td data-label="Desc"><span lang="ja">保管庫全体のタスクを管理。期限・繰り返し・完了日・フィルタに対応</span></td></tr>
-            <tr><th scope="row">5</th><td data-label="Plugin"><strong>Advanced Tables</strong><br><span style="color:var(--text-muted);font-size:.85em;">Tony Grosinger</span></td><td data-label="Downloads">3,124,723</td><td data-label="Desc"><span lang="ja">表の移動・整形・操作を改善する</span></td></tr>
-            <tr><th scope="row">6</th><td data-label="Plugin"><strong>Git</strong><br><span style="color:var(--text-muted);font-size:.85em;">Vinzent</span></td><td data-label="Downloads">3,028,476</td><td data-label="Desc"><span lang="ja">自動バックアップ等を備えたGitバージョン管理を統合</span></td></tr>
-            <tr><th scope="row">7</th><td data-label="Plugin"><strong>Calendar</strong><br><span style="color:var(--text-muted);font-size:.85em;">Liam Cain</span></td><td data-label="Downloads">3,021,004</td><td data-label="Desc"><span lang="ja">デイリーノートをカレンダーから探索する</span></td></tr>
-            <tr><th scope="row">8</th><td data-label="Plugin"><strong>Style Settings</strong><br><span style="color:var(--text-muted);font-size:.85em;">Obsidian Community Archive</span></td><td data-label="Downloads">2,604,959</td><td data-label="Desc"><span lang="ja">テーマ・プラグイン・スニペットのCSS変数を調整する</span></td></tr>
-            <tr><th scope="row">9</th><td data-label="Plugin"><strong>Kanban</strong><br><span style="color:var(--text-muted);font-size:.85em;">Obsidian Community Archive</span></td><td data-label="Downloads">2,568,158</td><td data-label="Desc"><span lang="ja">Markdownベースのカンバンボードを作成する</span></td></tr>
-            <tr><th scope="row">10</th><td data-label="Plugin"><strong>Iconize</strong><br><span style="color:var(--text-muted);font-size:.85em;">florianwoelki</span></td><td data-label="Downloads">2,180,911</td><td data-label="Desc"><span lang="ja">ファイル・フォルダ・テキストなどにアイコンを追加する</span></td></tr>
-          </tbody>
-        </table>
-        </div>
-        <p>
-          <span lang="ja">1位のExcalidraw（736万件）は10位のIconize（218万件）の3倍以上で、分布は先頭に大きく偏っています。<strong>登録数6,812個のほとんどは、上位10個ほどのダウンロード数には遠く及びません。</strong>「数が多い＝選びにくい」のではなく、実際に使われているものはかなり絞られている、というのがこの実測から言えることです。</span>
-        </p>
-      </section>
+<p class="lp-section__lead">
+<span lang="ja">2026年8月27日、同じ<code>community-plugins.json</code>（この日時点で6,982件）を取得し、各プラグインの<code>name</code>・<code>description</code>フィールドに対して英語キーワードの部分一致（大文字小文字を区別しない）を数えました。1個のプラグインが複数キーワードに一致することもあるため、内訳の合計は総数と一致しません。</span>
+</p>
+<div aria-labelledby="capture-section-4" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span lang="ja">キーワード</span></th>
+<th scope="col"><span lang="ja">該当数</span></th>
+<th scope="col"><span lang="ja">全体比</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><th scope="row">daily note</th><td data-label="Matches">133</td><td data-label="Share">1.9%</td></tr>
+<tr><th scope="row">template</th><td data-label="Matches">108</td><td data-label="Share">1.5%</td></tr>
+<tr><th scope="row">capture</th><td data-label="Matches">82</td><td data-label="Share">1.2%</td></tr>
+<tr><th scope="row">voice / dictation</th><td data-label="Matches">64</td><td data-label="Share">0.9%</td></tr>
+<tr><th scope="row">inbox</th><td data-label="Matches">40</td><td data-label="Share">0.6%</td></tr>
+<tr><th scope="row">clipper / web clip</th><td data-label="Matches">15</td><td data-label="Share">0.2%</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+<span lang="ja">6,982個のうち、名前や説明文で「capture」を名指しするプラグインは82個（1.2%）にとどまりました。最も多いのは「daily note」関連の133個（1.9%）で、キャプチャそのものより「捕まえた後どこに書くか」を扱うプラグインの方が多い、という分布です。<strong>この数え方は文字列の部分一致であり、機能の実態を厳密に分類したものではありません</strong>（説明文に「capture」とあっても中身が別機能のプラグインや、逆にキャプチャ機能を持ちながら別の語で説明しているプラグインは、どちらもこの表には正しく反映されません）。規模感の目安として扱ってください。</span>
+</p>
+</div></section>
+<!-- Theme dark/light mode split -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="theme-modes"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5">
+<span lang="ja">実測 — テーマのダーク/ライト対応内訳</span>
+</h2></div><div class="ce-chapter__body">
 
-      <!-- Keyword sweep: capture-related plugin share -->
-      <section class="lp-section" id="capture-keyword-share">
-        <h2 class="lp-section__title">
-          <span lang="ja">実測 — 名前・説明文にキャプチャ系キーワードを含むプラグインの数</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">2026年8月27日、同じ<code>community-plugins.json</code>（この日時点で6,982件）を取得し、各プラグインの<code>name</code>・<code>description</code>フィールドに対して英語キーワードの部分一致（大文字小文字を区別しない）を数えました。1個のプラグインが複数キーワードに一致することもあるため、内訳の合計は総数と一致しません。</span>
-        </p>
-        <div style="overflow-x:auto">
-          <table class="rt-table">
-          <thead>
-            <tr>
-              <th scope="col"><span lang="ja">キーワード</span></th>
-              <th scope="col"><span lang="ja">該当数</span></th>
-              <th scope="col"><span lang="ja">全体比</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">daily note</th><td data-label="Matches">133</td><td data-label="Share">1.9%</td></tr>
-            <tr><th scope="row">template</th><td data-label="Matches">108</td><td data-label="Share">1.5%</td></tr>
-            <tr><th scope="row">capture</th><td data-label="Matches">82</td><td data-label="Share">1.2%</td></tr>
-            <tr><th scope="row">voice / dictation</th><td data-label="Matches">64</td><td data-label="Share">0.9%</td></tr>
-            <tr><th scope="row">inbox</th><td data-label="Matches">40</td><td data-label="Share">0.6%</td></tr>
-            <tr><th scope="row">clipper / web clip</th><td data-label="Matches">15</td><td data-label="Share">0.2%</td></tr>
-          </tbody>
-        </table>
-        </div>
-        <p>
-          <span lang="ja">6,982個のうち、名前や説明文で「capture」を名指しするプラグインは82個（1.2%）にとどまりました。最も多いのは「daily note」関連の133個（1.9%）で、キャプチャそのものより「捕まえた後どこに書くか」を扱うプラグインの方が多い、という分布です。<strong>この数え方は文字列の部分一致であり、機能の実態を厳密に分類したものではありません</strong>（説明文に「capture」とあっても中身が別機能のプラグインや、逆にキャプチャ機能を持ちながら別の語で説明しているプラグインは、どちらもこの表には正しく反映されません）。規模感の目安として扱ってください。</span>
-        </p>
-      </section>
+<p class="lp-section__lead">
+<span lang="ja">2026年9月4日、同じ配布元の<code>community-css-themes.json</code>（729件）を取得し、各テーマが宣言する<code>modes</code>フィールド（<code>dark</code> / <code>light</code>）を集計しました。あわせて、旧形式のCSS変数のまま登録されている<code>legacy</code>テーマの件数も数えています。</span>
+</p>
+<div aria-labelledby="capture-section-5" class="ce-table-scroll" role="region" tabindex="0">
+<table class="rt-table">
+<thead>
+<tr>
+<th scope="col"><span lang="ja">対応モード</span></th>
+<th scope="col"><span lang="ja">テーマ数</span></th>
+<th scope="col"><span lang="ja">全体比</span></th>
+</tr>
+</thead>
+<tbody>
+<tr><th scope="row"><span lang="ja">ダーク＋ライト両対応</span></th><td data-label="Themes">491</td><td data-label="Share">67.4%</td></tr>
+<tr><th scope="row"><span lang="ja">ダーク限定</span></th><td data-label="Themes">206</td><td data-label="Share">28.3%</td></tr>
+<tr><th scope="row"><span lang="ja">ライト限定</span></th><td data-label="Themes">32</td><td data-label="Share">4.4%</td></tr>
+<tr><th scope="row"><span lang="ja">（内数）legacy形式</span></th><td data-label="Themes">17</td><td data-label="Share">2.3%</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+<span lang="ja">729種のうち3分の2（67.4%）はダーク・ライトの両方に対応しており、OS側のモード切り替えに追従します。単独対応はダーク限定が28.3%でライト限定（4.4%）の6倍以上あり、<strong>ライトモードだけを想定したテーマは少数派</strong>です。旧形式のまま残る17種（2.3%）は、動作はしますが最新のCSS変数セットには追随していません。</span>
+</p>
+</div></section>
+<!-- What core Obsidian already covers -->
+<section class="lp-section ce-chapter ce-chapter--wide" id="no-plugin-needed"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6">
+<span lang="ja">入れる前に — プラグインなしで足りる範囲</span>
+</h2></div><div class="ce-chapter__body">
 
-      <!-- Theme dark/light mode split -->
-      <section class="lp-section" id="theme-modes">
-        <h2 class="lp-section__title">
-          <span lang="ja">実測 — テーマのダーク/ライト対応内訳</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">2026年9月4日、同じ配布元の<code>community-css-themes.json</code>（729件）を取得し、各テーマが宣言する<code>modes</code>フィールド（<code>dark</code> / <code>light</code>）を集計しました。あわせて、旧形式のCSS変数のまま登録されている<code>legacy</code>テーマの件数も数えています。</span>
-        </p>
-        <div style="overflow-x:auto">
-          <table class="rt-table">
-          <thead>
-            <tr>
-              <th scope="col"><span lang="ja">対応モード</span></th>
-              <th scope="col"><span lang="ja">テーマ数</span></th>
-              <th scope="col"><span lang="ja">全体比</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row"><span lang="ja">ダーク＋ライト両対応</span></th><td data-label="Themes">491</td><td data-label="Share">67.4%</td></tr>
-            <tr><th scope="row"><span lang="ja">ダーク限定</span></th><td data-label="Themes">206</td><td data-label="Share">28.3%</td></tr>
-            <tr><th scope="row"><span lang="ja">ライト限定</span></th><td data-label="Themes">32</td><td data-label="Share">4.4%</td></tr>
-            <tr><th scope="row"><span lang="ja">（内数）legacy形式</span></th><td data-label="Themes">17</td><td data-label="Share">2.3%</td></tr>
-          </tbody>
-        </table>
-        </div>
-        <p>
-          <span lang="ja">729種のうち3分の2（67.4%）はダーク・ライトの両方に対応しており、OS側のモード切り替えに追従します。単独対応はダーク限定が28.3%でライト限定（4.4%）の6倍以上あり、<strong>ライトモードだけを想定したテーマは少数派</strong>です。旧形式のまま残る17種（2.3%）は、動作はしますが最新のCSS変数セットには追随していません。</span>
-        </p>
-      </section>
+<p class="lp-section__lead">
+<span lang="ja">Obsidianはコミュニティプラグインを1つも入れなくても、かなりの部分が動きます。空の保管庫を実測した<a href="/obsidian/what-is-vault/">別ページ</a>で確認したとおり、本体には<strong>コア機能が31個</strong>入っており、既定でON 21個・OFF 10個です。デイリーノート・グラフビュー・Markdown書式変換など中核部分はここに含まれます。</span>
+</p>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">デイリーノート・カレンダー的な使い方</span></div>
+<p class="reason-card__desc"><span lang="ja">コア機能の「デイリーノート」だけで日付ファイルの自動作成は動きます。7位のCalendarプラグインはそこに月表示のUIを足すもので、無くても運用は成立します。</span></p>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">表の編集</span></div>
+<p class="reason-card__desc"><span lang="ja">Markdownの表は素の記法でも書けます。5位のAdvanced Tablesは移動・整形を速くするもので、表そのものを可能にしているわけではありません。</span></p>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">バックアップ</span></div>
+<p class="reason-card__desc"><span lang="ja">保管庫は<a href="/obsidian/what-is-vault/">ただのフォルダ</a>なので、OS標準のバックアップやiCloud Driveの版履歴でも保護できます。6位のGitプラグインは差分管理という別の価値を足すものです。</span></p>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span lang="ja">見た目の調整</span></div>
+<p class="reason-card__desc"><span lang="ja">テーマの切り替え自体はコア機能で完結します。8位のStyle Settingsは、テーマ側が対応していればCSS変数をGUIで調整できるようにするもので、必須ではありません。</span></p>
+</div>
+</div>
+<p class="lp-section__lead" style="margin-top:.5rem;">
+<span lang="ja">一方で、手描き図解（Excalidraw）・テンプレート自動化（Templater）・横断検索（Dataview）・タスク集計（Tasks）・カンバン（Kanban）・ファイルアイコン（Iconize）はコアにない機能で、上位に来ているのはそれだけの理由があります。</span>
+</p>
+</div></section>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7">
+<span lang="ja">プラグインを探す前に、まず1行を残す場所を決める</span>
+</h2></div><div class="ce-chapter__body">
 
-      <!-- What core Obsidian already covers -->
-      <section class="lp-section" id="no-plugin-needed">
-        <h2 class="lp-section__title">
-          <span lang="ja">入れる前に — プラグインなしで足りる範囲</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">Obsidianはコミュニティプラグインを1つも入れなくても、かなりの部分が動きます。空の保管庫を実測した<a href="/obsidian/what-is-vault/">別ページ</a>で確認したとおり、本体には<strong>コア機能が31個</strong>入っており、既定でON 21個・OFF 10個です。デイリーノート・グラフビュー・Markdown書式変換など中核部分はここに含まれます。</span>
-        </p>
-        <div class="reason-cards">
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">デイリーノート・カレンダー的な使い方</span></div>
-            <p class="reason-card__desc"><span lang="ja">コア機能の「デイリーノート」だけで日付ファイルの自動作成は動きます。7位のCalendarプラグインはそこに月表示のUIを足すもので、無くても運用は成立します。</span></p>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">表の編集</span></div>
-            <p class="reason-card__desc"><span lang="ja">Markdownの表は素の記法でも書けます。5位のAdvanced Tablesは移動・整形を速くするもので、表そのものを可能にしているわけではありません。</span></p>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">バックアップ</span></div>
-            <p class="reason-card__desc"><span lang="ja">保管庫は<a href="/obsidian/what-is-vault/">ただのフォルダ</a>なので、OS標準のバックアップやiCloud Driveの版履歴でも保護できます。6位のGitプラグインは差分管理という別の価値を足すものです。</span></p>
-          </div>
-          <div class="reason-card">
-            <div class="reason-card__title"><span lang="ja">見た目の調整</span></div>
-            <p class="reason-card__desc"><span lang="ja">テーマの切り替え自体はコア機能で完結します。8位のStyle Settingsは、テーマ側が対応していればCSS変数をGUIで調整できるようにするもので、必須ではありません。</span></p>
-          </div>
-        </div>
-        <p class="lp-section__lead" style="margin-top:.5rem;">
-          <span lang="ja">一方で、手描き図解（Excalidraw）・テンプレート自動化（Templater）・横断検索（Dataview）・タスク集計（Tasks）・カンバン（Kanban）・ファイルアイコン（Iconize）はコアにない機能で、上位に来ているのはそれだけの理由があります。</span>
-        </p>
-      </section>
+<p class="lp-section__lead">
+<span lang="ja">プラグインは「保管庫の中でできること」を増やしますが、「保管庫にたどり着くまでの手間」は減らしません。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。SiriやApple Watchからも入り、書き込む先は<a href="/obsidian/what-is-vault/">ただのMarkdownファイル</a>です。</span>
+</p>
+<div class="cta-box">
+<div class="cta-box__title"><span lang="ja">保管庫までの入口を、いちばん短くする</span></div>
+<p class="cta-box__desc"><span lang="ja">思いついたら話すだけ。メールにもデイリーノートにも、同じ1行が残ります。ダウンロードは無料です。</span></p>
+<a aria-label="App Store からダウンロード" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
+<img alt="App Store からダウンロード" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-ja.svg" width="109"/>
+</a>
+<div class="cta-qr">
+<img alt="App StoreダウンロードQRコード" height="132" lang="ja" loading="lazy" src="/assets/img/qr-obsidian-plugins-ja.svg?v=604eeca3ee" width="132"/>
+<small><span lang="ja">PCの方はスマホで読み取り</span></small>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="08" id="capture-section-8">
+<span lang="ja">よくある質問</span>
+</h2></div><div class="ce-chapter__body">
 
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">プラグインを探す前に、まず1行を残す場所を決める</span>
-        </h2>
-        <p class="lp-section__lead">
-          <span lang="ja">プラグインは「保管庫の中でできること」を増やしますが、「保管庫にたどり着くまでの手間」は減らしません。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。SiriやApple Watchからも入り、書き込む先は<a href="/obsidian/what-is-vault/">ただのMarkdownファイル</a>です。</span>
-        </p>
-        <div class="cta-box">
-          <div class="cta-box__title"><span lang="ja">保管庫までの入口を、いちばん短くする</span></div>
-          <p class="cta-box__desc"><span lang="ja">思いついたら話すだけ。メールにもデイリーノートにも、同じ1行が残ります。ダウンロードは無料です。</span></p>
-          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
-            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
-          </a>
-          <div class="cta-qr">
-            <img src="/assets/img/qr-obsidian-plugins-ja.svg?v=604eeca3ee" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja">
-
-            <small><span lang="ja">PCの方はスマホで読み取り</span></small>
-          </div>
-        </div>
-      </section>
-
-      <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">よくある質問</span>
-        </h2>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">Obsidianのプラグインは何個ありますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">2026年8月21日に公式レジストリ（GitHub上の<code>community-plugins.json</code>）を直接取得して数えたところ<strong>6,812個</strong>でした。テーマは同じ日に<code>community-css-themes.json</code>を数えて<strong>701種</strong>です。2026年8月11日の初回計測（6,571個）から10日で241個増えています。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">最初に入れるべきプラグインはどれですか？</span></summary>
-            <div class="faq-answer"><span lang="ja">公式が公開するダウンロード数データ（<code>community-plugin-stats.json</code>）で並べ替えると、1位はExcalidraw（手書き図解・736万件）、2位はTemplater（テンプレート・533万件）、3位はDataview（横断検索・480万件）でした。ダウンロード数は人気の目安であり、自分の使い方に合うかは別に確認してください。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">プラグインを入れなくても使える機能はありますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">あります。実測では、Obsidian本体に最初から入っているコア機能が<strong>31個</strong>あり、既定でON 21個・OFF 10個でした（詳細は<a href="/obsidian/what-is-vault/">保管庫の実測ページ</a>）。デイリーノートやグラフビューなど中核機能はコミュニティプラグインなしで動きます。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">プラグインの登録数と実際の使われ方は一致しますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">一致しません。登録数（6,812個）とダウンロード数データに実績がある件数（6,780個）はほぼ重なりますが、上位を独占しているのはごく一部です。1位のExcalidraw（736万件）は10位のIconize（218万件）の3倍以上で、分布は先頭に大きく偏っています。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">プラグインはどこから入れますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">設定の「コミュニティプラグイン」から検索して入れるのが公式の経路で、このページで数えたレジストリがその一覧の実体です。GitHubリポジトリを直接指定する手動インストールもできますが、公式レジストリの審査を経ていないため、素性が分かっているもの以外は避けるのが安全です。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">Obsidianで「キャプチャ」に関係するプラグインはどれくらいありますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">2026年8月27日に公式レジストリ6,982件の名前・説明文をキーワードで数えたところ、「capture」を名指しするものは<strong>82個（1.2%）</strong>でした。最多は「daily note」関連の133個（1.9%）です。文字列の部分一致による概算のため、正確な機能分類ではありません。</span></div>
-          </details>
-        </div>
-        <div class="faq-item">
-          <details class="faq-details">
-            <summary class="faq-summary"><span lang="ja">Obsidianのテーマはダーク/ライトどちらに対応していますか？</span></summary>
-            <div class="faq-answer"><span lang="ja">2026年9月4日に公式レジストリ（<code>community-css-themes.json</code>、729件）の<code>modes</code>フィールドを集計したところ、<strong>両対応が491種（67.4%）</strong>で最多でした。ダーク限定は206種（28.3%）、ライト限定は32種（4.4%）にとどまります。旧形式（legacy）のまま登録されているテーマも17種（2.3%）残っています。</span></div>
-          </details>
-        </div>
-      </section>
-
-      <!-- Verification environment (§28) -->
-      <section class="lp-section" style="padding-top:1rem;">
-        <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
-          <div class="tip-box__title"><span lang="ja">検証環境と検証範囲</span></div>
-          <p style="margin:0;"><span lang="ja">計測日: 2026年8月21日（総数・トップ10）／2026年8月27日（キャプチャ系キーワード分析）／2026年9月4日（総数の再計測・テーマの明暗内訳）。<code>community-plugins.json</code>・<code>community-css-themes.json</code>・<code>community-plugin-stats.json</code> の3ファイルを、Obsidian公式の配布元リポジトリ（GitHub: <code>obsidianmd/obsidian-releases</code>）から<code>raw.githubusercontent.com</code>経由でこの環境に直接取得し、要素数のカウント・ダウンロード数での並べ替え・名前と説明文のキーワード部分一致・<code>modes</code>/<code>legacy</code>フィールドの集計をスクリプトで行いました。プラグイン名・作者・説明文はレジストリの登録データをそのまま引用しています。<strong>今回もプラグイン・テーマを実際にインストールして動かす検証は行っていません</strong>（保管庫の中身の実測は<a href="/obsidian/what-is-vault/">別ページ</a>で実施済み）。この環境ではObsidian公式サイト（obsidian.md）への外部アクセスが制限されており、価格ページなど当該ドメインの一次情報は本ページの根拠に含めていません。</span></p>
-        </div>
-      </section>
-
-      <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
-          <span lang="ja">関連ページ</span>
-        </h2>
-        <div class="internal-links">
-          <a href="/obsidian/what-is-vault/"><span lang="ja">保管庫（Vault）とは（コア機能31個の実測）</span></a>
-          <a href="/obsidian/getting-started/"><span lang="ja">Obsidianの始め方（実画面ガイド）</span></a>
-          <a href="/obsidian/compare/"><span lang="ja">Obsidian比較ハブ</span></a>
-          <a href="/obsidian/"><span lang="ja">Obsidian連携の詳細</span></a>
-          <a href="/obsidian/daily-note/"><span lang="ja">デイリーノートへ追記する方法</span></a>
-          <a href="/glossary/"><span lang="ja">用語集</span></a>
-          <a href="/faq"><span lang="ja">FAQ</span></a>
-        </div>
-      </section>
-
-    </div>
-
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <div class="container">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
-    <span lang="ja">参考文献・データの出典</span>
-  </h2>
-  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
-    <li><a href="https://github.com/obsidianmd/obsidian-releases" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="ja">Obsidian公式の配布元。本ページの <code>community-plugins.json</code>（6,812件）・<code>community-css-themes.json</code>（701件）・<code>community-plugin-stats.json</code>（6,780件・ダウンロード数）はすべてここから2026-08-21に直接取得。キャプチャ系キーワード分析は同ファイルを2026-08-27に再取得（6,982件）。テーマの明暗内訳は<code>community-css-themes.json</code>を2026-09-04に再取得（729件・<code>community-plugins.json</code>は同日7,242件）</span></li>
-    <li><a href="/obsidian/what-is-vault/" style="color:var(--accent);">保管庫（Vault）とは（当サイト）</a> — <span lang="ja">コア機能31個（既定ON 21・OFF 10）の実測記録（2026-08-20・Obsidian 1.13.7）</span></li>
-    <li><a href="/obsidian/compare/logseq/" style="color:var(--accent);">ObsidianとLogseqの比較（当サイト）</a> — <span lang="ja">2026-08-14時点のプラグイン数（6,638個）・テーマ数（691種）の実カウント</span></li>
-    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja">App Storeのダウンロードページ</span></li>
-  </ul>
-  <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="ja">ObsidianはDynalist Inc.の商標です。本サイトはObsidianプロジェクトと提携関係にない独立メディアで、Obsidian連携シンプルメモは株式会社ユリカが開発する独立アプリです。掲載したプラグイン名・作者名・説明文は各プラグインの公式レジストリ登録情報によるもので、各プラグインの開発者や権利者を保証・推奨するものではありません。</span></p>
-  </div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">Obsidianのプラグインは何個ありますか？</span></summary>
+<div class="faq-answer"><span lang="ja">2026年8月21日に公式レジストリ（GitHub上の<code>community-plugins.json</code>）を直接取得して数えたところ<strong>6,812個</strong>でした。テーマは同じ日に<code>community-css-themes.json</code>を数えて<strong>701種</strong>です。2026年8月11日の初回計測（6,571個）から10日で241個増えています。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">最初に入れるべきプラグインはどれですか？</span></summary>
+<div class="faq-answer"><span lang="ja">公式が公開するダウンロード数データ（<code>community-plugin-stats.json</code>）で並べ替えると、1位はExcalidraw（手書き図解・736万件）、2位はTemplater（テンプレート・533万件）、3位はDataview（横断検索・480万件）でした。ダウンロード数は人気の目安であり、自分の使い方に合うかは別に確認してください。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">プラグインを入れなくても使える機能はありますか？</span></summary>
+<div class="faq-answer"><span lang="ja">あります。実測では、Obsidian本体に最初から入っているコア機能が<strong>31個</strong>あり、既定でON 21個・OFF 10個でした（詳細は<a href="/obsidian/what-is-vault/">保管庫の実測ページ</a>）。デイリーノートやグラフビューなど中核機能はコミュニティプラグインなしで動きます。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">プラグインの登録数と実際の使われ方は一致しますか？</span></summary>
+<div class="faq-answer"><span lang="ja">一致しません。登録数（6,812個）とダウンロード数データに実績がある件数（6,780個）はほぼ重なりますが、上位を独占しているのはごく一部です。1位のExcalidraw（736万件）は10位のIconize（218万件）の3倍以上で、分布は先頭に大きく偏っています。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">プラグインはどこから入れますか？</span></summary>
+<div class="faq-answer"><span lang="ja">設定の「コミュニティプラグイン」から検索して入れるのが公式の経路で、このページで数えたレジストリがその一覧の実体です。GitHubリポジトリを直接指定する手動インストールもできますが、公式レジストリの審査を経ていないため、素性が分かっているもの以外は避けるのが安全です。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">Obsidianで「キャプチャ」に関係するプラグインはどれくらいありますか？</span></summary>
+<div class="faq-answer"><span lang="ja">2026年8月27日に公式レジストリ6,982件の名前・説明文をキーワードで数えたところ、「capture」を名指しするものは<strong>82個（1.2%）</strong>でした。最多は「daily note」関連の133個（1.9%）です。文字列の部分一致による概算のため、正確な機能分類ではありません。</span></div>
+</details>
+</div>
+<div class="faq-item">
+<details class="faq-details">
+<summary class="faq-summary"><span lang="ja">Obsidianのテーマはダーク/ライトどちらに対応していますか？</span></summary>
+<div class="faq-answer"><span lang="ja">2026年9月4日に公式レジストリ（<code>community-css-themes.json</code>、729件）の<code>modes</code>フィールドを集計したところ、<strong>両対応が491種（67.4%）</strong>で最多でした。ダーク限定は206種（28.3%）、ライト限定は32種（4.4%）にとどまります。旧形式（legacy）のまま登録されているテーマも17種（2.3%）残っています。</span></div>
+</details>
+</div>
+</div></section>
+<!-- Verification environment (§28) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
+<div class="tip-box__title"><span lang="ja">検証環境と検証範囲</span></div>
+<p style="margin:0;"><span lang="ja">計測日: 2026年8月21日（総数・トップ10）／2026年8月27日（キャプチャ系キーワード分析）／2026年9月4日（総数の再計測・テーマの明暗内訳）。<code>community-plugins.json</code>・<code>community-css-themes.json</code>・<code>community-plugin-stats.json</code> の3ファイルを、Obsidian公式の配布元リポジトリ（GitHub: <code>obsidianmd/obsidian-releases</code>）から<code>raw.githubusercontent.com</code>経由でこの環境に直接取得し、要素数のカウント・ダウンロード数での並べ替え・名前と説明文のキーワード部分一致・<code>modes</code>/<code>legacy</code>フィールドの集計をスクリプトで行いました。プラグイン名・作者・説明文はレジストリの登録データをそのまま引用しています。<strong>今回もプラグイン・テーマを実際にインストールして動かす検証は行っていません</strong>（保管庫の中身の実測は<a href="/obsidian/what-is-vault/">別ページ</a>で実施済み）。この環境ではObsidian公式サイト（obsidian.md）への外部アクセスが制限されており、価格ページなど当該ドメインの一次情報は本ページの根拠に含めていません。</span></p>
+</div>
 </section>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="09" id="capture-section-9">
+<span lang="ja">関連ページ</span>
+</h2></div><div class="ce-chapter__body">
 
-  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1. -->
-  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
-    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
-      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja">次に読む</span>
-      </span>
-      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
-      </span>
-      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
-      </span>
-    </a>
-  </aside>
+<div class="internal-links">
+<a href="/obsidian/what-is-vault/"><span lang="ja">保管庫（Vault）とは（コア機能31個の実測）</span></a>
+<a href="/obsidian/getting-started/"><span lang="ja">Obsidianの始め方（実画面ガイド）</span></a>
+<a href="/obsidian/compare/"><span lang="ja">Obsidian比較ハブ</span></a>
+<a href="/obsidian/"><span lang="ja">Obsidian連携の詳細</span></a>
+<a href="/obsidian/daily-note/"><span lang="ja">デイリーノートへ追記する方法</span></a>
+<a href="/glossary/"><span lang="ja">用語集</span></a>
+<a href="/faq"><span lang="ja">FAQ</span></a>
+</div>
+</div></section>
+<section class="references ce-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);"><div class="ce-chapter__head"><h2 data-ce-number="10" id="capture-section-10" style="font-size:1.1rem;margin-bottom:1rem;">
+<span lang="ja">参考文献・データの出典</span>
+</h2></div><div class="ce-chapter__body">
 
-<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
-  <div class="container">
-  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja">関連コンテンツ</span>
-  </h3>
-  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
-    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メソッド一覧</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
-  </ul>
-  </div>
-</section>
+
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://github.com/obsidianmd/obsidian-releases" rel="noopener" style="color:var(--accent);" target="_blank">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="ja">Obsidian公式の配布元。本ページの <code>community-plugins.json</code>（6,812件）・<code>community-css-themes.json</code>（701件）・<code>community-plugin-stats.json</code>（6,780件・ダウンロード数）はすべてここから2026-08-21に直接取得。キャプチャ系キーワード分析は同ファイルを2026-08-27に再取得（6,982件）。テーマの明暗内訳は<code>community-css-themes.json</code>を2026-09-04に再取得（729件・<code>community-plugins.json</code>は同日7,242件）</span></li>
+<li><a href="/obsidian/what-is-vault/" style="color:var(--accent);">保管庫（Vault）とは（当サイト）</a> — <span lang="ja">コア機能31個（既定ON 21・OFF 10）の実測記録（2026-08-20・Obsidian 1.13.7）</span></li>
+<li><a href="/obsidian/compare/logseq/" style="color:var(--accent);">ObsidianとLogseqの比較（当サイト）</a> — <span lang="ja">2026-08-14時点のプラグイン数（6,638個）・テーマ数（691種）の実カウント</span></li>
+<li><a data-cta-cluster="obsidian" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja">App Storeのダウンロードページ</span></li>
+</ul>
+<p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="ja">ObsidianはDynalist Inc.の商標です。本サイトはObsidianプロジェクトと提携関係にない独立メディアで、Obsidian連携シンプルメモは株式会社ユリカが開発する独立アプリです。掲載したプラグイン名・作者名・説明文は各プラグインの公式レジストリ登録情報によるもので、各プラグインの開発者や権利者を保証・推奨するものではありません。</span></p>
+
+</div></section><aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="ja">次に読む</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="ja">Obsidian連携で、メモを貯める場所を作る</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="ja">iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。</span>
+</span>
+</a>
+</aside><section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+<span lang="ja">関連コンテンツ</span>
+</h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
+<li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メソッド一覧</span></a></li>
+<li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ブログ記事一覧</span></a></li>
+<li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">よくあるご質問</span></a></li>
+</ul>
+
+</section></div></div>
+
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1. -->
+
+
 </main>
 
   <footer class="footer">
-    <div class="container">
-      <nav class="footer__nav" aria-label="Footer navigation">
-      <div class="footer__col">
-        <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
-        <a href="/apple-watch/" class="footer__link"><span lang="ja">Apple Watch対応</span></a>
-        <a href="/obsidian/" class="footer__link"><span lang="ja">Obsidian連携</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja">比較</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
-      </div>
-      </nav>
-      <p class="footer__copyright">
+<div class="container"><a class="capture-footer-brand" href="/"><img alt="" height="48" loading="lazy" src="/assets/img/app-icon-256.png" width="48"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<nav aria-label="Footer navigation" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">プロダクト</p>
+<a class="footer__link" href="/download/"><span lang="ja">ダウンロード</span></a>
+<a class="footer__link" href="/"><span lang="ja">ホーム</span></a>
+<a class="footer__link" href="/apple-watch/"><span lang="ja">Apple Watch対応</span></a>
+<a class="footer__link" href="/obsidian/"><span lang="ja">Obsidian連携</span></a>
+<a class="footer__link" href="/use-cases/"><span lang="ja">使い方</span></a>
+<a class="footer__link" href="/guides/"><span lang="ja">設定ガイド</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比較・乗り換え</p>
+<a class="footer__link" href="/note-to-email/"><span lang="ja">メモ→メール</span></a>
+<a class="footer__link" href="/vs/"><span lang="ja">比較</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">サポート</p>
+<a class="footer__link" href="/roadmap/"><span lang="ja">公開ロードマップ</span></a>
+<a class="footer__link" href="/devlog/"><span lang="ja">開発記録</span></a>
+<a class="footer__link" href="/about/"><span lang="ja">開発者について</span></a>
+<a class="footer__link" href="/faq"><span lang="ja">FAQ</span></a>
+<a class="footer__link" href="/privacy"><span lang="ja">プライバシー</span></a>
+<a class="footer__link" href="/contact"><span lang="ja">お問い合わせ</span></a>
+</div>
+</nav>
+<p class="footer__copyright">
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p>
-    </div>
-  </footer>
+</div>
+</footer>
 
   <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
+  // Disclosure navigation: keep the visual state and accessible state together.
+  (function(){
+    var nav = document.querySelector('.global-nav');
+    var menu = document.getElementById('navLinks');
+    var toggle = nav.querySelector('.global-nav__hamburger');
+    function setOpen(open){
+      menu.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニュー');
+    }
+    toggle.addEventListener('click', function(){
+      var open = !menu.classList.contains('open');
+      setOpen(open);
+      if(open) menu.querySelector('a').focus();
+    });
+    menu.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ setOpen(false); });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && menu.classList.contains('open')){
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!nav.contains(e.target)) setOpen(false);
+    });
+    nav.addEventListener('focusout', function(){
+      setTimeout(function(){ if(!nav.contains(document.activeElement)) setOpen(false); }, 0);
+    });
+    window.matchMedia('(min-width: 1200px)').addEventListener('change', function(e){
+      var menuHadFocus = menu.contains(document.activeElement);
+      setOpen(false);
+      if(!e.matches && menuHadFocus) toggle.focus();
+    });
+  })();
   </script>
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
