@@ -248,14 +248,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/use-cases/students/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can I use this app during lectures without being disruptive?","acceptedAnswer":{"@type":"Answer","text":"Yes. From launch to send takes only seconds, so you won't need to stare at your phone for long. Just type the key point and tap send."}},{"@type":"Question","name":"Does it work offline in areas with poor reception?","acceptedAnswer":{"@type":"Answer","text":"Yes. Memos you send while offline are stored locally with AES-GCM encryption and automatically sent once connectivity is restored. Notes you send from a basement lecture hall wait on your device until they can be sent."}},{"@type":"Question","name":"How do I organize notes from different subjects?","acceptedAnswer":{"@type":"Answer","text":"Add a subject tag at the start of each memo (e.g., [Math], [English], [Stats]). Your email's search function instantly filters by subject. You can also set up Gmail filters to auto-label or auto-folder incoming memos by keyword."}},{"@type":"Question","name":"Can I share notes with study group members?","acceptedAnswer":{"@type":"Answer","text":"Yes. Set a mailing list or Google Groups address as the destination email, and your memos can go to the whole study group. Memos come from noreply@mail.simplememofast.com, so the list has to accept email from non-members (in Google Groups, this depends on the \"Who can post\" setting). There is only one destination, so memos are no longer sent to your own address, and the list address has to receive the verification code. It doubles as a meeting minutes tool."}},{"@type":"Question","name":"Is the free plan enough for daily student use?","acceptedAnswer":{"@type":"Answer","text":"The free plan includes 3 sends per day, with no time limit. For students who capture only the most critical points (rather than transcribing everything), this is often sufficient. Premium unlocks unlimited sends for heavier days."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -271,7 +273,7 @@
 <a class="global-nav__cta" data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -503,7 +505,7 @@
 </ul>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
@@ -535,12 +537,7 @@
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

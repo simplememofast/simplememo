@@ -281,14 +281,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/sync/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Which one should I actually pick?","acceptedAnswer":{"@type":"Answer","text":"Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, no cloud vendor: Syncthing (Obsidian's help lists it as not officially supported on iPhone and iPad)."}},{"@type":"Question","name":"Can I sync across devices without Obsidian Sync?","acceptedAnswer":{"@type":"Answer","text":"Yes. A vault has no special format — it's just Markdown files — so OS-native sync (iCloud Drive, Dropbox, Google Drive) or general-purpose tools like Git and Syncthing all work as-is. Obsidian Sync is one option among several, not a requirement."}},{"@type":"Question","name":"What happens if I edit from two devices at once?","acceptedAnswer":{"@type":"Answer","text":"The failure mode differs by tool. We measured Git inserting conflict markers (&lt;&lt;&lt;&lt;&lt;&lt;&lt;) straight into the file, needing a manual resolve. Syncthing auto-picked one version and saved the other as a separate \"sync-conflict\" file — no data lost either way. iCloud Drive and Obsidian Sync couldn't be tested hands-on in this environment (Linux, no macOS/iOS)."}},{"@type":"Question","name":"Can I run more than one sync method at once?","acceptedAnswer":{"@type":"Answer","text":"Obsidian's own help says pairing Obsidian Sync with other cloud storage like Dropbox, Google Drive, or OneDrive can cause sync conflicts, and recommends backing up your vault. Stick to one sync method per vault rather than layering two onto the same folder."}},{"@type":"Question","name":"If Obsidian Sync overwrites something by mistake, can I undo it?","acceptedAnswer":{"@type":"Answer","text":"Per the official help, Version History lets you view and restore past versions of a note. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments (checked against the official help on August 26, 2026). Restore by selecting the file and choosing \"Open version history\"."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -304,7 +306,7 @@
 <a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -663,7 +665,7 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 </div>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
@@ -696,12 +698,7 @@ Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

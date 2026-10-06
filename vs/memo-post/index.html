@@ -257,14 +257,16 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/memo-post/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"メモポストのAI機能がなくても困りませんか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにも端末内AIがあり、Obsidian連携で「AIタグ自動追加」をオンにすると、送信時にタイトル・タグ・種別を付けます（既定はオフ。タグ付けのためにメモを外部へ送ることはありません）。メモから次の行動をAIが提案する機能はないため、AIの提案を使いたい方にはメモポストが合います。"}},{"@type":"Question","name":"メモポストはサーバーにメモを保存しますか？","acceptedAnswer":{"@type":"Answer","text":"公式サイトでは確認できませんでした（アカウント登録が必要で、AI提案はメモの内容をもとに作られます）。シンプルメモはCloudflare Workers経由で中継するだけで、メモ本文をSimple Memoのサーバーに保存し続けません。"}},{"@type":"Question","name":"メモポストとシンプルメモの料金体系の違いは？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモは1日3通まで無料で（「Obsidianのみに保存」はPremium）、利用期間の制限はありません。Premiumプランで送信無制限になります。メモポストの無料プランはメール月20件・AI提案月5回までで、有料のプロ（月額550円）とエキスパート（月額880円）があります（公式サイトの価格）。"}},{"@type":"Question","name":"メモポストからシンプルメモに送信先を引き継げますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモで同じメールアドレスを送信先に設定すれば、メモポストで送ったメモもシンプルメモで送ったメモも同じ受信箱に届きます。データ移行の手間は不要です。"}},{"@type":"Question","name":"デスクトップからもメモを送りたい場合は？","acceptedAnswer":{"@type":"Answer","text":"開発者によると、メモポストはMacでもApp Storeから入れられます。シンプルメモはiPhone（とApple Watch）向けです。パソコンではメールソフトで自分にメールする方法を併用するのも選択肢です。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
         <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
         <li><a href="/vs/"><span lang="ja">比較</span></a></li>
@@ -280,7 +282,7 @@
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -536,7 +538,7 @@
 
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -568,12 +570,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

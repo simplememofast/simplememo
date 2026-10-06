@@ -257,14 +257,16 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/joplin/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Joplinのセルフホストとシンプルメモの送信方式はどちらが安全ですか？","acceptedAnswer":{"@type":"Answer","text":"プライバシーの考え方が異なります（JoplinはE2E暗号化を選べ、シンプルメモのメールはE2E暗号化ではありませんが本文をサーバーに恒常的に保存しません）。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはメモ本文をサーバーに恒常的に保存しない設計で、メールとして送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。"}},{"@type":"Question","name":"Joplinのマークダウン機能はシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはマークダウン機能はありません。プレーンテキストのみに対応しています。構造化されたノートにはJoplin、瞬間的な思いつきの記録にはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"Joplinの同期設定が難しいのですが、シンプルメモは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはメールアドレスを1つ設定するだけで即使い始められます。Nextcloud、WebDAV、暗号化キーの設定といった技術的なセットアップは一切不要です。"}},{"@type":"Question","name":"Joplinユーザーがシンプルメモを追加するメリットは？","acceptedAnswer":{"@type":"Answer","text":"Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきをすぐにメールで送り、後でJoplinに整理するワークフローが可能になります。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
         <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
         <li><a href="/vs/"><span lang="ja">比較</span></a></li>
@@ -280,7 +282,7 @@
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -542,7 +544,7 @@
 
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -574,12 +576,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

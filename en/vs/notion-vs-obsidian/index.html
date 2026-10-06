@@ -164,14 +164,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/notion-vs-obsidian/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Local storage vs cloud storage — which is actually safer?","acceptedAnswer":{"@type":"Answer","text":"Each has trade-offs. Obsidian's local storage keeps your files on your device even if the service ends, but is vulnerable to device failure or backup neglect. Notion's cloud storage offers automatic backups but carries risks of service outages or account suspension. Memos you send with Simple Memo - for Obsidian arrive in your inbox as emails, so you can still read them there if your phone breaks (how long they stay, and whether they can be restored, depends on your email service)."}},{"@type":"Question","name":"Which is better for knowledge management, Notion or Obsidian? And how is \"capture\" different?","acceptedAnswer":{"@type":"Answer","text":"For knowledge management (structuring, linking, long-term storage), Obsidian's backlinks and graph view are powerful, and Notion's databases are equally useful. \"Capture,\" however, is about recording thoughts the instant they appear — no structure needed. Simple Memo - for Obsidian specializes in capture; Notion and Obsidian specialize in knowledge management. Separating these roles is the most efficient approach."}},{"@type":"Question","name":"Is Obsidian's plugin ecosystem really necessary? Isn't Notion enough on its own?","acceptedAnswer":{"@type":"Answer","text":"Notion's built-in features cover many needs. However, Obsidian plugins add extensions such as spaced repetition and Dataview queries that run on your local Markdown files. For those who want full control over their workflow, Obsidian's plugins are valuable. And in either case, instant input is most comfortable when delegated to Simple Memo - for Obsidian."}},{"@type":"Question","name":"What's the best workflow combining Notion, Obsidian, and Simple Memo - for Obsidian?","acceptedAnswer":{"@type":"Answer","text":"The recommended approach is a three-layer system: Simple Memo - for Obsidian for instant email capture (capture layer), Notion for project and team information management (collaboration layer), and Obsidian for building your personal knowledge graph (thinking layer). Each excels in a different area, complementing rather than competing with each other."}},{"@type":"Question","name":"Both Notion and Obsidian feel heavy. Is there a lighter way to take notes?","acceptedAnswer":{"@type":"Answer","text":"The steps before typing depend on your device, settings, and entry point. Obsidian also offers shortcuts and iOS 26 Quick Capture in early access. If you want the same memo in your inbox and Obsidian vault, you can write and send it with Simple Memo - for Obsidian. Our 0.4-second measurement covers the tap to ready-to-type on an iPhone 16e warm launch, not the time to send the memo."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span>Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span>Guides</span></a><a href="/en/use-cases/"><span>Use Cases</span></a><a href="/en/vs/"><span>Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span>Guides</span></a></li>
 <li><a href="/en/use-cases/"><span>Use Cases</span></a></li>
 <li><a href="/en/vs/"><span>Compare</span></a></li>
@@ -187,7 +189,7 @@
 <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" class="global-nav__cta" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <span>Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -449,7 +451,7 @@
 </ul>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -481,11 +483,7 @@
 </div>
 </footer>
 
-<script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

@@ -286,14 +286,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/compare/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Which apps get compared with Obsidian most?","acceptedAnswer":{"@type":"Answer","text":"This hub includes our Logseq tests and a Japanese comparison based on the Capacities Mac onboarding demo. Capacities sync and migration remain untested; official specifications are identified separately. A hands-on memos 0.30.0 comparison is now included; Notion remains untested."}},{"@type":"Question","name":"How hard is it to migrate off Obsidian?","acceptedAnswer":{"@type":"Answer","text":"It depends entirely on how the destination stores its source of truth. Between apps whose canonical copy is a plain Markdown file, you just open the folder — we confirmed this with file-version Logseq. Moving to an app that keeps notes in its own database means going through an export and a conversion. Almost all of the migration cost comes from that storage difference, not from features."}},{"@type":"Question","name":"Can Obsidian share a folder with another app?","acceptedAnswer":{"@type":"Answer","text":"Yes, when both keep plain Markdown files. In our test each app created its own directories (.obsidian versus logseq/journals/pages), coexisted, and showed each other's writes. Keep one app as the primary writer. With an app whose source of truth is a database, folder-level coexistence is not possible."}},{"@type":"Question","name":"Should plugin count decide it?","acceptedAnswer":{"@type":"Answer","text":"No. Counting Obsidian's official registry directly gives 6,571 on August 11, 2026, 6,638 on August 14 and 6,739 on August 19 — 168 added in eight days, about 21 a day — with themes going from 680 to 698. A choice made on today's larger number expires within months; a choice made on where the source of truth lives does not."}},{"@type":"Question","name":"How do I try Obsidian before comparing?","acceptedAnswer":{"@type":"Answer","text":"Install to first note needs no account and no email address; the screen-by-screen walkthrough is in getting started with Obsidian. A newly created vault holds only a .obsidian folder and the starter note, and everything you write lands as a plain Markdown file. Seeing that a vault is just a folder is what makes the rest of the comparison legible."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -309,7 +311,7 @@
 <a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -542,7 +544,7 @@
 </div>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
@@ -575,12 +577,7 @@
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

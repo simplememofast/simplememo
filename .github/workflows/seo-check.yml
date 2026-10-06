@@ -139,6 +139,11 @@ jobs:
       # still read ?v=20260529-titlefix, and _headers serves /*.js as
       # immutable/max-age=604800 — so returning visitors had been holding a
       # month-old lang.js. Only CSS was covered, so nothing could report it.
+      - name: Shared chrome rules fire (self-test)
+        run: python3 scripts/sync_shared_chrome.py --selftest
+      - name: Shared chrome matches maintained source
+        run: python3 scripts/sync_shared_chrome.py --check
+
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
 
