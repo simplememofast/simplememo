@@ -203,136 +203,137 @@
 
   <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#faq","mainEntity":[{"@type":"Question","name":"AES-256ならE2EEですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。AES-256は暗号と鍵長を表します。E2EEかどうかは、どこで暗号化・復号し、誰が鍵を使えるかで決まります。サーバーが鍵を管理するAES-256保存と、利用者の端末だけで復号する設計は異なります。"}},{"@type":"Question","name":"AES-GCMとAES-CBCは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"GCMは暗号化と認証を組み合わせます。CBCは暗号化だけでは改ざんを検知しないため、認証の仕組みを適切に組み合わせる必要があります。方式名だけでアプリ全体の安全性を順位付けすることはできません。"}},{"@type":"Question","name":"E2EEなら端末内のファイルも暗号化されますか？","acceptedAnswer":{"@type":"Answer","text":"必ずしもそうではありません。Obsidian SyncとJoplinの同期暗号化は、端末内のローカルファイルやデータベースを同じように暗号化するものではありません。端末のディスク暗号化、アプリのローカル保護、バックアップを別に確認してください。"}},{"@type":"Question","name":"Bearで画像やPDFを含むノートも暗号化できますか？","acceptedAnswer":{"@type":"Answer","text":"Bear 2.4以降はBear Proで添付を含む個別ノートを暗号化できます。対象ノートにパスワードを追加し、同期先のアプリも対応版に更新します。タイトル表示や、暗号化していないノートは別に確認が必要です。"}},{"@type":"Question","name":"Day Oneの古いジャーナルも自動でE2EEになっていますか？","acceptedAnswer":{"@type":"Answer","text":"新しいジャーナルは4.2以降E2EEが既定ですが、古いものは個別に確認が必要です。現在の公式FAQでは、標準暗号化のジャーナルを直接切り替える代わりに、新しいE2EEジャーナルへエントリをコピーする方法を案内しています。"}},{"@type":"Question","name":"シンプルメモから自分に送るメールはE2EEですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。Outboxと送信履歴の端末内暗号化と、メール配信は別です。本文は送信APIと外部配信基盤を通り、メールサービス側にもコピーが残ります。受信箱と連携先の保護・共有設定も確認してください。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
 </head>
-<body>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth">
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
-    <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
-        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
-        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
-        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
-      </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/blog/memo-app-encryption-comparison" hreflang="ja" aria-label="日本語" aria-current="page" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/blog/memo-app-encryption-comparison" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
-        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
-          <span lang="ja">ダウンロード</span>
-        </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
-      </div>
-    </div>
-  </nav>
+  <nav aria-label="メインナビゲーション" class="global-nav">
+<div class="global-nav__inner">
+<a class="global-nav__logo" href="/"><img alt="" height="36" loading="eager" src="/assets/img/app-icon-56.png" width="36"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<ul class="global-nav__links" id="navLinks">
+<li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+<li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+<li><a href="/vs/"><span lang="ja">比較</span></a></li>
+<li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+<li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+<li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+<li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+<li><a href="/about/"><span lang="ja">開発者</span></a></li>
+<li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
+</ul>
+<div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a aria-current="page" aria-label="日本語" class="lang-switcher__btn active" href="/blog/memo-app-encryption-comparison" hreflang="ja" style="text-decoration:none">JA</a><a aria-label="Switch to English" class="lang-switcher__btn" href="/en/blog/memo-app-encryption-comparison" hreflang="en" style="text-decoration:none">EN</a></div>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
+<span lang="ja">ダウンロード</span>
+</a>
+<button aria-controls="navLinks" aria-expanded="false" aria-label="メニュー" class="global-nav__hamburger" type="button">☰</button>
+</div>
+</div>
+</nav>
 
-<main class="page-content"><div class="container">
-    <div class="lp-hero"><div class="lp-hero__label"><span lang="ja">暗号化・セキュリティ</span></div><h1 class="lp-hero__title"><span lang="ja">メモアプリの暗号化比較<br>【2026年】</span></h1><p class="lp-hero__sub"><span lang="ja">「AES-256対応」と「運営者にも本文を読めない」は、別の条件です。10アプリの公式資料をもとに、どのコピーが暗号化され、誰が復号鍵を扱い、何を自分で有効にするのかを比較します。</span></p>
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label"><span lang="ja">暗号化・セキュリティ</span></div><h1 class="lp-hero__title"><span lang="ja">メモアプリの暗号化比較<br/>【2026年】</span></h1><p class="lp-hero__sub"><span lang="ja">「AES-256対応」と「運営者にも本文を読めない」は、別の条件です。10アプリの公式資料をもとに、どのコピーが暗号化され、誰が復号鍵を扱い、何を自分で有効にするのかを比較します。</span></p>
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-  <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-21">2026年03月21日</time></span>
+<span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-21">2026年03月21日</time></span>
+</p><a class="ce-read-link" href="#encryption-scopes">本文を読む <span aria-hidden="true">↓</span></a></div><nav aria-label="読みたい内容から選ぶ" class="ce-routes"><a class="ce-route" href="#heading-encryption-scopes"><span>01</span><b>保護範囲を知る</b></a><a class="ce-route" href="#heading-ten-apps"><span>02</span><b>10アプリを比較</b></a><a class="ce-route" href="#heading-check-your-copy"><span>03</span><b>設定を確認する</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">SECURITY / THREE LAYERS</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>通信中</strong></div><div class="cn-concept-row"><span>02</span><strong>保存時</strong></div><div class="cn-concept-row"><span>03</span><strong>E2EE</strong></div></div><figcaption class="ce-stage-foot">暗号化の保護範囲を分けて確認</figcaption></figure></header><div class="ce-article">
 
-</p></div>
-
-    <div class="tldr"><p><span lang="ja"><strong>先に確認すること：</strong>通信のTLS、端末やサーバーへの暗号化保存、E2EEは保護する場面が違います。同期がE2EEでも、端末のローカルファイルや書き出したPDFまで同じ暗号化が続くとは限りません。</span></p></div>
+<div class="tldr ce-lede"><p><span lang="ja"><strong>先に確認すること：</strong>通信のTLS、端末やサーバーへの暗号化保存、E2EEは保護する場面が違います。同期がE2EEでも、端末のローカルファイルや書き出したPDFまで同じ暗号化が続くとは限りません。</span></p></div>
 <p class="encryption-review"><span lang="ja">最終確認: <time datetime="2026-09-09">2026年9月9日</time>。筆者はシンプルメモの開発者です。他社製品は公式資料を比較しており、各アプリへの侵入試験や独立したセキュリティ監査を実施した結果ではありません。</span></p>
-<nav class="internal-links" aria-label="記事内の目次"><a href="#encryption-scopes"><span lang="ja">暗号化の範囲</span></a><a href="#ten-apps"><span lang="ja">10アプリ比較</span></a><a href="#check-your-copy"><span lang="ja">自分の設定を確認</span></a><a href="#simplememo-scope"><span lang="ja">シンプルメモの範囲</span></a></nav>
-<section class="lp-section" id="encryption-scopes"><h2 class="lp-section__title"><span lang="ja">TLS・保存時暗号化・E2EEは何が違う？</span></h2><div lang="ja"><div class="tip-card"><h3>通信中：接続先までの経路を守る</h3><p>TLSはアプリとサーバーなどの通信路を保護します。接続先が処理する本文まで、接続先から隠す仕組みではありません。HTTPSで送ったメモをサービスが検索・配信することと矛盾しません。</p></div>
+<nav aria-label="記事内の目次" class="internal-links"><a href="#encryption-scopes"><span lang="ja">暗号化の範囲</span></a><a href="#ten-apps"><span lang="ja">10アプリ比較</span></a><a href="#check-your-copy"><span lang="ja">自分の設定を確認</span></a><a href="#simplememo-scope"><span lang="ja">シンプルメモの範囲</span></a></nav>
+<section class="lp-section ce-chapter" id="encryption-scopes"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-encryption-scopes"><span lang="ja">TLS・保存時暗号化・E2EEは何が違う？</span></h2></div><div class="ce-chapter__body"><div lang="ja"><div class="tip-card"><h3>通信中：接続先までの経路を守る</h3><p>TLSはアプリとサーバーなどの通信路を保護します。接続先が処理する本文まで、接続先から隠す仕組みではありません。HTTPSで送ったメモをサービスが検索・配信することと矛盾しません。</p></div>
 <div class="tip-card"><h3>保存時：どのファイルを、誰の鍵で暗号化するか</h3><p>端末内のデータベース、同期サーバー、バックアップは別々のコピーです。サーバーのディスクが暗号化されていても、サービスが鍵を管理していれば、必要な処理の際に復号できます。端末全体の暗号化と、アプリがメモごとに暗号化する仕組みも区別します。</p></div>
-<div class="tip-card"><h3>E2EE：同期先に本文の復号鍵を渡さない</h3><p>エンドツーエンド暗号化では、対応する端末側で暗号化・復号します。ただし、タイトルや時刻などのメタデータ、公開リンク、AI機能への送信、復号後の書き出しは別に確認が必要です。アプリにE2EE機能があっても、自分のノートで有効とは限りません。</p></div></div></section>
-<section class="lp-section" id="cipher-and-keys"><h2 class="lp-section__title"><span lang="ja">AES-GCM・AES-CBC・ゼロナレッジを読み分ける</span></h2><div lang="ja"><p><strong>AES-GCM</strong>は暗号化と認証を組み合わせ、改ざん検知に使う認証タグを生成します。<strong>AES-CBC</strong>は秘匿性を提供するモードで、それだけでは改ざん検知を行いません。認証はMACなどの別の仕組みと適切に組み合わせる必要があります。CBCという名前だけで製品が破られているとは判断できません。<a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">NISTのGCM仕様</a>、<a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">CBCを含む暗号モード仕様</a>。</p><p>「256」は鍵長で、鍵を誰が持つかやバックアップの設定までは説明しません。AES-GCMを使うE2EEも、AES-GCMで端末内だけを保護する設計もあります。</p><p><strong>ゼロナレッジ</strong>はストレージ製品で「事業者が本文を復号できない」設計を説明する言葉として使われます。暗号方式の名前や、全データが一切収集されないという保証ではありません。暗号化された鍵をサーバーに保管する設計もあるため、「鍵がサーバーに存在しない」だけで判定せず、復号できる主体と対象データを確認します。</p></div></section>
-<section class="lp-section" id="ten-apps"><h2 class="lp-section__title"><span lang="ja">10アプリ：方式より先に、範囲と設定を比較</span></h2><div lang="ja"><p class="table-hint">横にスクロールして「条件」「別に確認するコピー」まで確認できます。表はキーボードでも横に移動できます。</p><div class="encryption-scroll" role="region" aria-label="10アプリの暗号化比較表" tabindex="0"><table class="encryption-table"><caption>公式資料の比較（2026年9月9日確認）</caption><thead><tr><th scope="col">アプリ</th><th scope="col">暗号化の範囲</th><th scope="col">有効化・確認条件</th><th scope="col">別に確認するコピー・権限</th><th scope="col">根拠</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>端末側で内容を暗号化して同期。公開仕様はXChaCha20-Poly1305。</td><td>アカウント利用時はローカルデータも暗号化。アカウントなしの利用ではパスコード等の保護を別途設定。</td><td>書き出したファイルや別アプリへコピーした文章は保存先の条件を確認。</td><td><a href="https://standardnotes.com/help/security/encryption">暗号化の範囲</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">方式</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>リモートVaultをE2EEで暗号化する設定が既定。AES-256-GCM。</td><td>標準暗号化を選んだリモートVaultではObsidian側が鍵を管理。設定と暗号化パスワードを確認。</td><td>ローカルVaultのMarkdownファイルはObsidian自体では暗号化されない。端末のディスク暗号化やバックアップは別。</td><td><a href="https://obsidian.md/help/sync/security">Syncのセキュリティ</a></td></tr><tr><th scope="row">Notion</th><td>通信はTLS 1.2以上、保存時はAES-256。</td><td>公式資料が説明するのはサービス側の暗号化。利用者だけが復号鍵を持つノート全体のE2EEとは区別。</td><td>公開ページ・ゲスト・連携サービスに渡す権限も確認。暗号化だけでは公開範囲を制限しない。</td><td><a href="https://www.notion.com/help/security-and-privacy">セキュリティ方針</a></td></tr><tr><th scope="row">Evernote</th><td>TLS通信とGoogle管理鍵によるAES-256保存。選択したテキストにはパスフレーズ暗号化もある。</td><td>選択テキストの公開方式はAES-128-CBC。ノート全体・添付ファイルを一括でE2EE化する機能とは異なる。</td><td>暗号化した範囲の外にある本文、タイトル、添付は同じパスフレーズ保護とは扱わない。</td><td><a href="https://evernote.com/en-us/security">保存と通信</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">テキスト暗号化</a></td></tr><tr><th scope="row">Appleメモ / Apple Notes</th><td>通常のiCloud保護は通信・保存時の暗号化。高度なデータ保護（ADP）でiCloudメモがE2EEの対象になる。</td><td>ADPの有効状態と復旧手段を確認。共有メモでADPのE2EEを維持するには参加者全員でADPが必要。</td><td>一部メタデータは標準保護。書き出したPDFやメール添付は元のiCloudメモとは別のコピー。</td><td><a href="https://support.apple.com/en-us/102651">iCloudの保護範囲</a></td></tr><tr><th scope="row">Google Keep</th><td>通信中と保存時に暗号化。検索などの機能を提供するため内容を処理する。</td><td>公式資料の保護を、利用者だけが鍵を持つE2EEと読み替えない。</td><td>共有相手とGoogleアカウントの保護を確認。広告に内容を使わない方針と、内容を処理しない設計は別。</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Keepのプライバシーと保護</a></td></tr><tr><th scope="row">Bear</th><td>Bear Proで個別ノートをパスワード暗号化。2.4以降は画像・PDFなどの添付も対象。</td><td>対象ノートにパスワードを追加し、同期する端末のアプリも更新。アプリ全体のロックとは区別。</td><td>タイトルはノート一覧に表示される。iCloudのADPにもタイトル・タグ等の範囲を含めて確認。</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">ノートの暗号化</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">2.4の添付対応</a> · <a href="https://bear.app/faq/syncing-privacy/">同期の範囲</a></td></tr><tr><th scope="row">Joplin</th><td>有効化した同期でE2EE。v3.2からの新しいネイティブ方式はAES-256-GCM。</td><td>一台で暗号化を有効化し、同期完了を待って他端末に鍵を設定する公式手順を使う。</td><td>ローカルデータはこの同期暗号化では保護されない。端末のディスク暗号化も確認。</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">設定手順</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">新方式</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">端末内データ</a></td></tr><tr><th scope="row">Day One</th><td>4.2以降に新しく作るジャーナルは既定でE2EE。文章とメディアが対象。</td><td>古いジャーナルは個別に状態を確認。現在の公式FAQでは標準暗号化からの直接切替はできず、新しいE2EEジャーナルへコピーする。</td><td>鍵の保管先も確認。iCloud KeychainはE2EEだが、Day One独自のiCloud鍵バックアップはADPを有効にしてもE2EEにならない。書き出した日記も別のコピー。</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">E2EEのFAQ</a></td></tr><tr><th scope="row">シンプルメモ / Simple Memo</th><td>端末内のOutbox・送信履歴をCryptoKitのAES-GCMで暗号化。新規鍵は256-bitでKeychainに保存。</td><td>メール送信はE2EEではない。送信API・外部配信基盤を通り、受信箱にコピーが残る。</td><td>端末内保護は、メールサービスや連携したObsidian Vaultの保管方法まで保証するものではない。</td><td><a href="/privacy#technical">技術説明</a></td></tr></tbody></table></div></div></section>
-<p class="encryption-callout"><span lang="ja">自分の受信箱へ短いメモを残す用途なら、<a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Obsidian連携シンプルメモ</a>も選択肢です。端末内の暗号化と、送信先メールの保管・共有設定をそれぞれ確認してください。</span></p>
-<section class="lp-section" id="check-your-copy"><h2 class="lp-section__title"><span lang="ja">使う前に、設定とコピーを5点確認</span></h2><div lang="ja"><ol class="encryption-steps"><li><strong>既存データの設定を開く。</strong>アプリ名だけで判断せず、使うVault・ジャーナル・共有ノートで暗号化が有効か確認します。新規データの既定値が、古いデータにも適用されたとは限りません。</li><li><strong>復旧方法を確保する。</strong>同期用パスワード、暗号化キー、復旧連絡先など、製品が案内する方法を確認します。鍵をなくした状態で端末を消去して試すことは避けてください。</li><li><strong>公開・共有・連携の範囲を確認する。</strong>公開リンクや外部サービスへの送信は、保存時暗号化とは別です。仕事の情報は所属先が認める保存先・共有範囲に合わせます。</li><li><strong>ダミーの1件で同期と添付を確認する。</strong>内容に機密情報を使わず、別端末で開けるか、添付がそろうか、暗号化の状態がどう表示されるかを確認します。これだけで暗号実装の安全性を証明したことにはなりません。</li><li><strong>書き出し先とバックアップを確認する。</strong>Markdown、PDF、メール、ダウンロードフォルダに作ったコピーは、元のアプリのE2EEの外に出る場合があります。移行確認が終わる前に元データを削除しないでください。</li></ol></div></section>
-<section class="lp-section" id="simplememo-scope"><h2 class="lp-section__title"><span lang="ja">シンプルメモが保護する範囲と、送信後に残るもの</span></h2><div lang="ja"><p>シンプルメモは、端末内の送信待ちメモ（Outbox）と送信履歴をAES-GCMで暗号化します。公開済みアプリの共通暗号器では、新しく作る鍵は256-bitでKeychainに保存し、CryptoKitで暗号化・復号しています。これは端末内の対象データを保護する実装です。</p><p><strong>メール経路全体のE2EEではありません。</strong>アプリから送信APIへHTTPSで送り、外部のメール配信基盤を経由して受信箱へ届きます。「端末内の未送信メモが暗号化されている」ことは、「配信処理で本文を扱わない」「外部サーバーを通らない」という意味ではありません。</p><p>送信済みになってOutboxの対象項目が除かれても、送信履歴や受信メール、連携先のノートまで消えるわけではありません。ファイルの削除操作を、記憶媒体の完全消去とも呼びません。保存先と保持期間は<a href="/privacy#technical">プライバシーポリシーの技術説明</a>と<a href="/privacy-architecture/">データの通り道</a>で確認できます。</p><p>Obsidianへの保存を使う場合も、ローカルVaultと同期・バックアップの保護は自分の設定に依存します。本文を事業者が復号できないことが必須の用途では、その条件に合うE2EEの保存先と運用を先に選んでください。</p></div></section>
-<section class="lp-section" id="encryption-faq"><h2 class="lp-section__title"><span lang="ja">よくある質問</span></h2><div lang="ja"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-256ならE2EEですか？</summary><div class="faq-answer"><p>いいえ。AES-256は暗号と鍵長を表します。E2EEかどうかは、どこで暗号化・復号し、誰が鍵を使えるかで決まります。サーバーが鍵を管理するAES-256保存と、利用者の端末だけで復号する設計は異なります。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCは何が違いますか？</summary><div class="faq-answer"><p>GCMは暗号化と認証を組み合わせます。CBCは暗号化だけでは改ざんを検知しないため、認証の仕組みを適切に組み合わせる必要があります。方式名だけでアプリ全体の安全性を順位付けすることはできません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EEなら端末内のファイルも暗号化されますか？</summary><div class="faq-answer"><p>必ずしもそうではありません。Obsidian SyncとJoplinの同期暗号化は、端末内のローカルファイルやデータベースを同じように暗号化するものではありません。端末のディスク暗号化、アプリのローカル保護、バックアップを別に確認してください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Bearで画像やPDFを含むノートも暗号化できますか？</summary><div class="faq-answer"><p>Bear 2.4以降はBear Proで添付を含む個別ノートを暗号化できます。対象ノートにパスワードを追加し、同期先のアプリも対応版に更新します。タイトル表示や、暗号化していないノートは別に確認が必要です。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Day Oneの古いジャーナルも自動でE2EEになっていますか？</summary><div class="faq-answer"><p>新しいジャーナルは4.2以降E2EEが既定ですが、古いものは個別に確認が必要です。現在の公式FAQでは、標準暗号化のジャーナルを直接切り替える代わりに、新しいE2EEジャーナルへエントリをコピーする方法を案内しています。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモから自分に送るメールはE2EEですか？</summary><div class="faq-answer"><p>いいえ。Outboxと送信履歴の端末内暗号化と、メール配信は別です。本文は送信APIと外部配信基盤を通り、メールサービス側にもコピーが残ります。受信箱と連携先の保護・共有設定も確認してください。</p></div></details></div></div></section>
+<div class="tip-card"><h3>E2EE：同期先に本文の復号鍵を渡さない</h3><p>エンドツーエンド暗号化では、対応する端末側で暗号化・復号します。ただし、タイトルや時刻などのメタデータ、公開リンク、AI機能への送信、復号後の書き出しは別に確認が必要です。アプリにE2EE機能があっても、自分のノートで有効とは限りません。</p></div></div></div></section>
+<section class="lp-section ce-chapter" id="cipher-and-keys"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-cipher-and-keys"><span lang="ja">AES-GCM・AES-CBC・ゼロナレッジを読み分ける</span></h2></div><div class="ce-chapter__body"><div lang="ja"><p><strong>AES-GCM</strong>は暗号化と認証を組み合わせ、改ざん検知に使う認証タグを生成します。<strong>AES-CBC</strong>は秘匿性を提供するモードで、それだけでは改ざん検知を行いません。認証はMACなどの別の仕組みと適切に組み合わせる必要があります。CBCという名前だけで製品が破られているとは判断できません。<a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">NISTのGCM仕様</a>、<a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">CBCを含む暗号モード仕様</a>。</p><p>「256」は鍵長で、鍵を誰が持つかやバックアップの設定までは説明しません。AES-GCMを使うE2EEも、AES-GCMで端末内だけを保護する設計もあります。</p><p><strong>ゼロナレッジ</strong>はストレージ製品で「事業者が本文を復号できない」設計を説明する言葉として使われます。暗号方式の名前や、全データが一切収集されないという保証ではありません。暗号化された鍵をサーバーに保管する設計もあるため、「鍵がサーバーに存在しない」だけで判定せず、復号できる主体と対象データを確認します。</p></div></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="ten-apps"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-ten-apps"><span lang="ja">10アプリ：方式より先に、範囲と設定を比較</span></h2></div><div class="ce-chapter__body"><div lang="ja"><p class="table-hint">横にスクロールして「条件」「別に確認するコピー」まで確認できます。表はキーボードでも横に移動できます。</p><div aria-labelledby="ten-apps" class="encryption-scroll ce-table-scroll" role="region" tabindex="0"><table class="encryption-table"><caption>公式資料の比較（2026年9月9日確認）</caption><thead><tr><th scope="col">アプリ</th><th scope="col">暗号化の範囲</th><th scope="col">有効化・確認条件</th><th scope="col">別に確認するコピー・権限</th><th scope="col">根拠</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>端末側で内容を暗号化して同期。公開仕様はXChaCha20-Poly1305。</td><td>アカウント利用時はローカルデータも暗号化。アカウントなしの利用ではパスコード等の保護を別途設定。</td><td>書き出したファイルや別アプリへコピーした文章は保存先の条件を確認。</td><td><a href="https://standardnotes.com/help/security/encryption">暗号化の範囲</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">方式</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>リモートVaultをE2EEで暗号化する設定が既定。AES-256-GCM。</td><td>標準暗号化を選んだリモートVaultではObsidian側が鍵を管理。設定と暗号化パスワードを確認。</td><td>ローカルVaultのMarkdownファイルはObsidian自体では暗号化されない。端末のディスク暗号化やバックアップは別。</td><td><a href="https://obsidian.md/help/sync/security">Syncのセキュリティ</a></td></tr><tr><th scope="row">Notion</th><td>通信はTLS 1.2以上、保存時はAES-256。</td><td>公式資料が説明するのはサービス側の暗号化。利用者だけが復号鍵を持つノート全体のE2EEとは区別。</td><td>公開ページ・ゲスト・連携サービスに渡す権限も確認。暗号化だけでは公開範囲を制限しない。</td><td><a href="https://www.notion.com/help/security-and-privacy">セキュリティ方針</a></td></tr><tr><th scope="row">Evernote</th><td>TLS通信とGoogle管理鍵によるAES-256保存。選択したテキストにはパスフレーズ暗号化もある。</td><td>選択テキストの公開方式はAES-128-CBC。ノート全体・添付ファイルを一括でE2EE化する機能とは異なる。</td><td>暗号化した範囲の外にある本文、タイトル、添付は同じパスフレーズ保護とは扱わない。</td><td><a href="https://evernote.com/en-us/security">保存と通信</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">テキスト暗号化</a></td></tr><tr><th scope="row">Appleメモ / Apple Notes</th><td>通常のiCloud保護は通信・保存時の暗号化。高度なデータ保護（ADP）でiCloudメモがE2EEの対象になる。</td><td>ADPの有効状態と復旧手段を確認。共有メモでADPのE2EEを維持するには参加者全員でADPが必要。</td><td>一部メタデータは標準保護。書き出したPDFやメール添付は元のiCloudメモとは別のコピー。</td><td><a href="https://support.apple.com/en-us/102651">iCloudの保護範囲</a></td></tr><tr><th scope="row">Google Keep</th><td>通信中と保存時に暗号化。検索などの機能を提供するため内容を処理する。</td><td>公式資料の保護を、利用者だけが鍵を持つE2EEと読み替えない。</td><td>共有相手とGoogleアカウントの保護を確認。広告に内容を使わない方針と、内容を処理しない設計は別。</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Keepのプライバシーと保護</a></td></tr><tr><th scope="row">Bear</th><td>Bear Proで個別ノートをパスワード暗号化。2.4以降は画像・PDFなどの添付も対象。</td><td>対象ノートにパスワードを追加し、同期する端末のアプリも更新。アプリ全体のロックとは区別。</td><td>タイトルはノート一覧に表示される。iCloudのADPにもタイトル・タグ等の範囲を含めて確認。</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">ノートの暗号化</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">2.4の添付対応</a> · <a href="https://bear.app/faq/syncing-privacy/">同期の範囲</a></td></tr><tr><th scope="row">Joplin</th><td>有効化した同期でE2EE。v3.2からの新しいネイティブ方式はAES-256-GCM。</td><td>一台で暗号化を有効化し、同期完了を待って他端末に鍵を設定する公式手順を使う。</td><td>ローカルデータはこの同期暗号化では保護されない。端末のディスク暗号化も確認。</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">設定手順</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">新方式</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">端末内データ</a></td></tr><tr><th scope="row">Day One</th><td>4.2以降に新しく作るジャーナルは既定でE2EE。文章とメディアが対象。</td><td>古いジャーナルは個別に状態を確認。現在の公式FAQでは標準暗号化からの直接切替はできず、新しいE2EEジャーナルへコピーする。</td><td>鍵の保管先も確認。iCloud KeychainはE2EEだが、Day One独自のiCloud鍵バックアップはADPを有効にしてもE2EEにならない。書き出した日記も別のコピー。</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">E2EEのFAQ</a></td></tr><tr><th scope="row">シンプルメモ / Simple Memo</th><td>端末内のOutbox・送信履歴をCryptoKitのAES-GCMで暗号化。新規鍵は256-bitでKeychainに保存。</td><td>メール送信はE2EEではない。送信API・外部配信基盤を通り、受信箱にコピーが残る。</td><td>端末内保護は、メールサービスや連携したObsidian Vaultの保管方法まで保証するものではない。</td><td><a href="/privacy#technical">技術説明</a></td></tr></tbody></table></div></div></div></section>
+<p class="encryption-callout"><span lang="ja">自分の受信箱へ短いメモを残す用途なら、<a data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Obsidian連携シンプルメモ</a>も選択肢です。端末内の暗号化と、送信先メールの保管・共有設定をそれぞれ確認してください。</span></p>
+<section class="lp-section ce-chapter" id="check-your-copy"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-check-your-copy"><span lang="ja">使う前に、設定とコピーを5点確認</span></h2></div><div class="ce-chapter__body"><div lang="ja"><ol class="encryption-steps"><li><strong>既存データの設定を開く。</strong>アプリ名だけで判断せず、使うVault・ジャーナル・共有ノートで暗号化が有効か確認します。新規データの既定値が、古いデータにも適用されたとは限りません。</li><li><strong>復旧方法を確保する。</strong>同期用パスワード、暗号化キー、復旧連絡先など、製品が案内する方法を確認します。鍵をなくした状態で端末を消去して試すことは避けてください。</li><li><strong>公開・共有・連携の範囲を確認する。</strong>公開リンクや外部サービスへの送信は、保存時暗号化とは別です。仕事の情報は所属先が認める保存先・共有範囲に合わせます。</li><li><strong>ダミーの1件で同期と添付を確認する。</strong>内容に機密情報を使わず、別端末で開けるか、添付がそろうか、暗号化の状態がどう表示されるかを確認します。これだけで暗号実装の安全性を証明したことにはなりません。</li><li><strong>書き出し先とバックアップを確認する。</strong>Markdown、PDF、メール、ダウンロードフォルダに作ったコピーは、元のアプリのE2EEの外に出る場合があります。移行確認が終わる前に元データを削除しないでください。</li></ol></div></div></section>
+<section class="lp-section ce-chapter" id="simplememo-scope"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-simplememo-scope"><span lang="ja">シンプルメモが保護する範囲と、送信後に残るもの</span></h2></div><div class="ce-chapter__body"><div lang="ja"><p>シンプルメモは、端末内の送信待ちメモ（Outbox）と送信履歴をAES-GCMで暗号化します。公開済みアプリの共通暗号器では、新しく作る鍵は256-bitでKeychainに保存し、CryptoKitで暗号化・復号しています。これは端末内の対象データを保護する実装です。</p><p><strong>メール経路全体のE2EEではありません。</strong>アプリから送信APIへHTTPSで送り、外部のメール配信基盤を経由して受信箱へ届きます。「端末内の未送信メモが暗号化されている」ことは、「配信処理で本文を扱わない」「外部サーバーを通らない」という意味ではありません。</p><p>送信済みになってOutboxの対象項目が除かれても、送信履歴や受信メール、連携先のノートまで消えるわけではありません。ファイルの削除操作を、記憶媒体の完全消去とも呼びません。保存先と保持期間は<a href="/privacy#technical">プライバシーポリシーの技術説明</a>と<a href="/privacy-architecture/">データの通り道</a>で確認できます。</p><p>Obsidianへの保存を使う場合も、ローカルVaultと同期・バックアップの保護は自分の設定に依存します。本文を事業者が復号できないことが必須の用途では、その条件に合うE2EEの保存先と運用を先に選んでください。</p></div></div></section>
+<section class="lp-section ce-chapter" id="encryption-faq"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-encryption-faq"><span lang="ja">よくある質問</span></h2></div><div class="ce-chapter__body"><div lang="ja"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-256ならE2EEですか？</summary><div class="faq-answer"><p>いいえ。AES-256は暗号と鍵長を表します。E2EEかどうかは、どこで暗号化・復号し、誰が鍵を使えるかで決まります。サーバーが鍵を管理するAES-256保存と、利用者の端末だけで復号する設計は異なります。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCは何が違いますか？</summary><div class="faq-answer"><p>GCMは暗号化と認証を組み合わせます。CBCは暗号化だけでは改ざんを検知しないため、認証の仕組みを適切に組み合わせる必要があります。方式名だけでアプリ全体の安全性を順位付けすることはできません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EEなら端末内のファイルも暗号化されますか？</summary><div class="faq-answer"><p>必ずしもそうではありません。Obsidian SyncとJoplinの同期暗号化は、端末内のローカルファイルやデータベースを同じように暗号化するものではありません。端末のディスク暗号化、アプリのローカル保護、バックアップを別に確認してください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Bearで画像やPDFを含むノートも暗号化できますか？</summary><div class="faq-answer"><p>Bear 2.4以降はBear Proで添付を含む個別ノートを暗号化できます。対象ノートにパスワードを追加し、同期先のアプリも対応版に更新します。タイトル表示や、暗号化していないノートは別に確認が必要です。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Day Oneの古いジャーナルも自動でE2EEになっていますか？</summary><div class="faq-answer"><p>新しいジャーナルは4.2以降E2EEが既定ですが、古いものは個別に確認が必要です。現在の公式FAQでは、標準暗号化のジャーナルを直接切り替える代わりに、新しいE2EEジャーナルへエントリをコピーする方法を案内しています。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモから自分に送るメールはE2EEですか？</summary><div class="faq-answer"><p>いいえ。Outboxと送信履歴の端末内暗号化と、メール配信は別です。本文は送信APIと外部配信基盤を通り、メールサービス側にもコピーが残ります。受信箱と連携先の保護・共有設定も確認してください。</p></div></details></div></div></div></section>
 <!-- Related Articles -->
-    <section class="lp-section">
-  <h2 class="lp-section__title">
-    <span lang="ja">関連記事</span>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="chapter-7">
+<span lang="ja">関連記事</span>
+</h2></div><div class="ce-chapter__body">
 
-  </h2>
-  <div class="internal-links">
-    <a href="/blog/memo-app-security-comparison">
-      <span lang="ja">メモアプリのセキュリティ比較</span>
+<div class="internal-links">
+<a href="/blog/memo-app-security-comparison">
+<span lang="ja">メモアプリのセキュリティ比較</span>
+</a>
+<a href="/blog/memo-app-privacy">
+<span lang="ja">メモアプリのプライバシー比較</span>
+</a>
+<a href="/vs/standard-notes/">
+<span lang="ja">Obsidian連携シンプルメモ vs Standard Notes</span>
+</a>
+<a href="/vs/obsidian/">
+<span lang="ja">Obsidian連携シンプルメモ vs Obsidian</span>
+</a>
+<a href="/vs/notion/">
+<span lang="ja">Obsidian連携シンプルメモ vs Notion</span>
+</a>
+<a href="/vs/evernote/">
+<span lang="ja">Obsidian連携シンプルメモ vs Evernote</span>
+</a>
+</div>
+</div></section>
+<div class="cta-box"><div class="cta-box__title"><span lang="ja">受信箱へメモを残す</span></div><div class="cta-box__desc"><span lang="ja">端末内のOutboxと送信履歴を暗号化。メール経路と保存先の保護範囲も確認して使えます。</span></div><a aria-label="App Store からダウンロード" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" lang="ja"><img alt="App Store からダウンロード" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-ja.svg" width="109"/></a></div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="chapter-8"><span lang="ja">関連ページ</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/blog/free-memo-apps-ranking"><span lang="ja">無料メモアプリランキング</span></a><a href="/blog/offline-memo-apps"><span lang="ja">オフラインメモアプリ</span></a><a href="/blog/memo-taking-tips"><span lang="ja">メモの取り方コツ10選</span></a><a href="/blog/best-memo-apps-2026"><span lang="ja">おすすめメモアプリ20選</span></a><a href="/blog/business-memo-apps-2026"><span lang="ja">ビジネスメモアプリ7選</span></a><a href="/glossary/e2e-encryption/"><span lang="ja">用語: E2E暗号化</span></a><a href="/glossary/aes-gcm/"><span lang="ja">用語: AES-GCM</span></a><a href="/blog/"><span lang="ja">ブログ一覧</span></a></div></div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+<span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+<span lang="ja">次に読む</span>
+</span>
+<span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+<span lang="ja">比較の次は、実測値を見る</span>
+</span>
+<span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+<span lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span>
+</span>
+</a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="chapter-9">
+<span lang="ja">関連コンテンツ</span>
+</h2></div><div class="ce-chapter__body">
 
-    </a>
-    <a href="/blog/memo-app-privacy">
-      <span lang="ja">メモアプリのプライバシー比較</span>
-
-    </a>
-    <a href="/vs/standard-notes/">
-      <span lang="ja">Obsidian連携シンプルメモ vs Standard Notes</span>
-
-    </a>
-    <a href="/vs/obsidian/">
-      <span lang="ja">Obsidian連携シンプルメモ vs Obsidian</span>
-
-    </a>
-    <a href="/vs/notion/">
-      <span lang="ja">Obsidian連携シンプルメモ vs Notion</span>
-
-    </a>
-    <a href="/vs/evernote/">
-      <span lang="ja">Obsidian連携シンプルメモ vs Evernote</span>
-
-    </a>
-  </div>
-</section>
-
-<div class="cta-box"><div class="cta-box__title"><span lang="ja">受信箱へメモを残す</span></div><div class="cta-box__desc"><span lang="ja">端末内のOutboxと送信履歴を暗号化。メール経路と保存先の保護範囲も確認して使えます。</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a></div>
-
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja">関連ページ</span></h2><div class="internal-links"><a href="/blog/free-memo-apps-ranking"><span lang="ja">無料メモアプリランキング</span></a><a href="/blog/offline-memo-apps"><span lang="ja">オフラインメモアプリ</span></a><a href="/blog/memo-taking-tips"><span lang="ja">メモの取り方コツ10選</span></a><a href="/blog/best-memo-apps-2026"><span lang="ja">おすすめメモアプリ20選</span></a><a href="/blog/business-memo-apps-2026"><span lang="ja">ビジネスメモアプリ7選</span></a><a href="/glossary/e2e-encryption/"><span lang="ja">用語: E2E暗号化</span></a><a href="/glossary/aes-gcm/"><span lang="ja">用語: AES-GCM</span></a><a href="/blog/"><span lang="ja">ブログ一覧</span></a></div></section>
-  </div>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
+<li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">自分にメール送信する方法</span></a></li>
+<li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
+<li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">使い方ガイド</span></a></li>
+<li><a href="/comparison/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">比較ガイド総合</span></a></li>
+<li><a href="/blog/business-memo-apps-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ビジネス向けメモアプリ2026</span></a></li>
+</ul>
+</div></section><aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - for Obsidian" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span lang="ja">Obsidian連携シンプルメモの開発者。iPhoneから、設定したメールアドレスや連携先のノートに文章を残すアプリを開発しています。</span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X / Twitter</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside></div></div>
 <!-- SEO: Auto-generated related content links -->
-  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page
        already offers dozens of links and none of them gets clicked. -->
-  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
-    <a data-next-step="compare" href="/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
-      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja">次に読む</span>
-      </span>
-      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja">比較の次は、実測値を見る</span>
-      </span>
-      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span>
-      </span>
-    </a>
-  </aside>
 
-<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
-  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span lang="ja">関連コンテンツ</span>
 
-  </h3>
-  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">Captio代替アプリ比較</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">自分にメール送信する方法</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">メモアプリ比較一覧</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">使い方ガイド</span></a></li>
-    <li><a href="/comparison/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">比較ガイド総合</span></a></li>
-    <li><a href="/blog/business-memo-apps-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja">ビジネス向けメモアプリ2026</span></a></li>
-  </ul>
-</section>
 <!-- Author Bio -->
-<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
-  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
-  <div>
-    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
-    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span lang="ja">Obsidian連携シンプルメモの開発者。iPhoneから、設定したメールアドレスや連携先のノートに文章を残すアプリを開発しています。</span></p>
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
-      <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
-      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>
-      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
-    </div>
-  </div>
-</aside>
+
 </main>
 
       <section lang="ja" class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
@@ -345,42 +346,74 @@
         </ul>
       </section>
 
-    <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
-      <div class="footer__col">
-        <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">活用事例</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">読みもの</p>
-        <a href="/blog/" class="footer__link"><span lang="ja">ブログ</span></a>
-      </div>
-      <div class="footer__col">
-        <p class="footer__col-title">サポート</p>
-        <a href="/roadmap/" class="footer__link"><span lang="ja">公開ロードマップ</span></a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
-      </div>
-      </nav><p class="footer__copyright">
+    <footer class="footer"><div class="container"><a class="capture-footer-brand" href="/"><img alt="" height="48" loading="lazy" src="/assets/img/app-icon-256.png" width="48"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><nav aria-label="Footer navigation" class="footer__nav capture-footer-wide">
+<div class="footer__col">
+<p class="footer__col-title">プロダクト</p>
+<a class="footer__link" href="/download/"><span lang="ja">ダウンロード</span></a>
+<a class="footer__link" href="/"><span lang="ja">ホーム</span></a>
+<a class="footer__link" href="/use-cases/"><span lang="ja">活用事例</span></a>
+<a class="footer__link" href="/guides/"><span lang="ja">設定ガイド</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比較・乗り換え</p>
+<a class="footer__link" href="/captio-alternative/"><span lang="ja">Captio代替</span></a>
+<a class="footer__link" href="/note-to-email/"><span lang="ja">メモ→メール</span></a>
+<a class="footer__link" href="/vs/"><span lang="ja">アプリ比較</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">読みもの</p>
+<a class="footer__link" href="/blog/"><span lang="ja">ブログ</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">サポート</p>
+<a class="footer__link" href="/roadmap/"><span lang="ja">公開ロードマップ</span></a>
+<a class="footer__link" href="/devlog/"><span lang="ja">開発記録</span></a>
+<a class="footer__link" href="/about/"><span lang="ja">開発者について</span></a>
+<a class="footer__link" href="/faq"><span lang="ja">FAQ</span></a>
+<a class="footer__link" href="/privacy"><span lang="ja">プライバシー</span></a>
+<a class="footer__link" href="/contact"><span lang="ja">お問い合わせ</span></a>
+</div>
+</nav><p class="footer__copyright">
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p></div></footer>
 
   <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
+  // Disclosure navigation: keep the visual state and accessible state together.
+  (function(){
+    var nav = document.querySelector('.global-nav');
+    var menu = document.getElementById('navLinks');
+    var toggle = nav.querySelector('.global-nav__hamburger');
+    function setOpen(open){
+      menu.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      toggle.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニュー');
+    }
+    toggle.addEventListener('click', function(){
+      var open = !menu.classList.contains('open');
+      setOpen(open);
+      if(open) menu.querySelector('a').focus();
+    });
+    menu.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ setOpen(false); });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && menu.classList.contains('open')){
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+    document.addEventListener('click', function(e){
+      if(!nav.contains(e.target)) setOpen(false);
+    });
+    nav.addEventListener('focusout', function(){
+      setTimeout(function(){ if(!nav.contains(document.activeElement)) setOpen(false); }, 0);
+    });
+    window.matchMedia('(min-width: 1200px)').addEventListener('change', function(e){
+      var menuHadFocus = menu.contains(document.activeElement);
+      setOpen(false);
+      if(!e.matches && menuHadFocus) toggle.focus();
+    });
+  })();
   </script>
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body></html>

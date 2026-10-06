@@ -38,10 +38,12 @@ const ASSETS = [
   'assets/css/capture-content.css',
   'assets/css/capture-next.css',
   'assets/css/capture-third.css',
+  'assets/css/capture-fourth.css',
   'assets/css/home-hero.css',
   'assets/css/home-banners.css',
   'assets/css/editorial-resources.css',
   'js/obsidian-inbox-tool.js',
+  'js/meeting-template-tools.js',
   'assets/css/style.min.css',
   // 共有CSSを読まない17面のための「網」。immutable で配るので ?v= が要る。
   'assets/css/safety-net.css',
