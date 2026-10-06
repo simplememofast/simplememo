@@ -277,7 +277,7 @@
       "script": "scripts/autopilot-diagnostics.mjs",
       "state": "demonstrated",
       "at": "2026-10-06",
-      "broke": "限定診断の32項目を実測。コピーした実装からtool_nameの許可リストを外すと自己テストが失敗することを確認。両モデル結果を対象にする条件、固定GITHUB_SHA、限定uploadディレクトリ、savedガードの4配線変異も拒否する。実CLIとworkflow内の実費抽出Pythonをfixtureで実行し、raw denial配列と旧count形式、欠損、秘密除外、symlink・過大入力・既存出力ディレクトリ拒否を確認。課金実行やremote workflowは起動していない。"
+      "broke": "限定診断の34項目を実測。コピーした実装からtool_nameの許可リストを外すと自己テストが失敗することを確認。両モデル結果を対象にする条件、固定GITHUB_SHA、限定uploadディレクトリ、savedガード、非致命的uploadの5配線変異を拒否する。実際のinterpretRunでupload失敗がverifiedをno_artifactへ誤分類する負例と、非致命的step結論ならshippedを保持する回帰を確認。実CLIとworkflow内の実費抽出Pythonをfixtureで実行し、raw denial配列と旧count形式、欠損、秘密除外、symlink・過大入力・既存出力ディレクトリ拒否を確認。自己テストは課金実行やremote workflowを起動しない。"
     },
     {
       "script": "scripts/autopilot-drill.mjs",

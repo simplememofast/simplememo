@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { modelSummary, receipt, save, checkWiring } from './autopilot-diagnostics.mjs';
+import { interpretRun } from './autopilot-act.mjs';
 
 export async function selftest() {
   let tests = 0;
@@ -61,7 +62,25 @@ export async function selftest() {
     ['diagnostic-tools" "$GITHUB_SHA"', 'diagnostic-tools" "HEAD"'],
     ['path: ${{ runner.temp }}/autopilot-diagnostic', 'path: ${{ runner.temp }}'],
     ["steps.diagnostics.outputs.saved == 'true'", 'true'],
+    ["steps.diagnostics.outputs.saved == 'true'\n        continue-on-error: true", "steps.diagnostics.outputs.saved == 'true'"],
   ]) test('broken diagnostic wiring is rejected', () => assert.throws(() => checkWiring(workflow.replace(from, to))));
+
+  test('optional diagnostic upload cannot reclassify verified output as no_artifact', () => {
+    const steps = [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'success' },
+      { name: '成果物の実行IDを照合', conclusion: 'success' },
+      { name: '成果物判定: verified', conclusion: 'success' },
+      { name: 'Preserve bounded execution diagnostics', conclusion: 'success' },
+    ];
+    const run = { status: 'completed', conclusion: 'success', steps };
+    assert.equal(interpretRun(run).outcome, 'shipped');
+    assert.equal(interpretRun({ ...run, conclusion: 'failure', steps: [...steps,
+      { name: 'Upload bounded execution diagnostics', conclusion: 'failure' }] }).outcome, 'no_artifact');
+    // GitHub applies continue-on-error to the step conclusion and keeps the job successful.
+    // checkWiring above requires that policy on the actual upload step.
+    assert.equal(interpretRun({ ...run, steps: [...steps,
+      { name: 'Upload bounded execution diagnostics', outcome: 'failure', conclusion: 'success' }] }).outcome, 'shipped');
+  });
 
   const temp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'autopilot-diagnostic-test-')));
   try {

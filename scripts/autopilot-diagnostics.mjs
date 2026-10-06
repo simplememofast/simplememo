@@ -129,6 +129,7 @@ export function checkWiring(source) {
   const upload = source.split('      - name: Upload bounded execution diagnostics\n')[1]?.split('\n  #')[0];
   assert(upload, 'diagnostic upload must be wired');
   assert.match(upload, /if: always\(\) && steps.diagnostics.outputs.saved == 'true'/);
+  assert.match(upload, /\n        continue-on-error: true\n/, 'diagnostic upload must not change the execution verdict');
   assert.match(upload, /uses: actions\/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02/);
   assert.match(upload, /path: \$\{\{ runner.temp \}\}\/autopilot-diagnostic\n/);
   assert.match(upload, /retention-days: 7\n/);
