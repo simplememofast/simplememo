@@ -223,6 +223,7 @@
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/captio-discontinued#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Captioのデータは移行できる？","acceptedAnswer":{"@type":"Answer","text":"Captioで送信したメモは、メールとして受信箱に届いています。そのため、データの「移行」作業は不要です。シンプルメモをインストールして同じメールアドレスを設定すれば、Captio時代のメモとシンプルメモのメモが同じ受信箱に共存します。Captioの優れた設計思想の一つは「メモをアプリに閉じ込めない」ことでした。その恩恵で、サービスが終わった後も、受信箱から消していないメモはそのまま残っています。"}},{"@type":"Question","name":"件名は入れられる？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモでは、メモの1行目がそのままメールの件名になります（設定で件名テンプレートを先頭に付けることもできます）。Captioも1行目を件名にして、接頭語を設定できました。GTDワークフローで「プロジェクト名を件名に入れる」使い方は、1行目にプロジェクト名を書けば同じようにできます。"}},{"@type":"Question","name":"複数の宛先に送れる？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモは現在、1つの送信先メールアドレスに対応しています。「自分自身にメモを送る」用途に絞った設計です。送信先は設定画面から変更でき、新しいアドレスは認証を済ませてから使えます。"}},{"@type":"Question","name":"GmailでもiCloudメールでも使える？","acceptedAnswer":{"@type":"Answer","text":"はい、シンプルメモはメールサービスを問わず利用できます。Gmail、iCloudメール、Outlook、Yahoo!メール、会社の独自メールサーバーなど、有効なメールアドレスであればどのサービスでも送信先として設定できます。Captioと同じく、受信側のメールサービスに依存しない設計です。"}},{"@type":"Question","name":"無料でどこまで使える？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモの無料プランでは、1日3通までメモを送信できます。「1日に数回、思いついたことをメモする」程度の使い方であれば、無料プランで十分です。無料プランは1日3通まで、利用期間の制限なく無料で使えます。さらに有料プラン（月額¥500）にアップグレードすると送信が無制限になります。Captioの買い切りモデルとは異なりますが、無料でも基本的なワークフローは実現できます。"}},{"@type":"Question","name":"Android版はある？","acceptedAnswer":{"@type":"Answer","text":"現在、シンプルメモはiOS版のみで、Android版はありません。CaptioもiOS専用でした。Androidユーザーの方は、Email Me AppやMail to Selfなどの代替アプリをご検討ください。"}},{"@type":"Question","name":"Captioの操作感を完全に再現できる？","acceptedAnswer":{"@type":"Answer","text":"Captioの核心的な操作感 --「アプリを開いて即座に書き始め、ワンタップで送信する」-- は、シンプルメモでも同じようにできます。起動は0.4秒（iPhone 16e・ウォーム起動の実測）で、送信もワンタップで完了します。UIの見た目は異なりますが（モダンなデザインに更新）、操作の流れは同じです。"}},{"@type":"Question","name":"Captioはなぜ使えなくなったのですか？","acceptedAnswer":{"@type":"Answer","text":"開発元は captio.co でクラウドサービスの終了（2024年10月1日）を告知しています。告知によると、Captio はその約2年前に App Store から撤退しており、終了の理由として、アプリの安定性と安全性を保つための手間をかけ続けられなくなったことを挙げています。"}},{"@type":"Question","name":"Captioで送ったメモはどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"Captioで送信済みのメモは、メールとして受信箱に届いています。Captioはメモをアプリの中にためるのではなく、メールとして送る設計だったため、アプリが使えなくなっても、受信箱から消していないメモはそのまま残っています。これはCaptioの優れた設計思想の一つでした。"}},{"@type":"Question","name":"シンプルメモはCaptioとどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"基本コンセプト（メモを自分のメールに送る）は同じです。シンプルメモの特徴は次の3つです。(1) Outbox -- 圏外でもメモを端末のキューに残し、通信が戻ると自動で再送。(2) AES-GCM暗号化 -- 端末内のキューデータを暗号化して保護。(3) メモ本文をサーバーに恒常的に保存しない設計（送信時に Cloudflare Workers と Resend を通過します）。また、起動は0.4秒（iPhone 16e・ウォーム起動の実測）です。詳しくはCaptio代替ページをご覧ください。"}},{"@type":"Question","name":"シンプルメモの料金はいくらですか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモは無料プラン（1日3通まで、利用期間の制限なし）と有料プラン（月額¥500、送信無制限）があります。無料プランでも、Captioのような「書いてすぐ送る」流れを試せます。"}}]}</script>
   <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=4689b86ef9">
   <noscript><style>
     @media(max-width:1199px){
       .capture-brand .global-nav{position:relative}
@@ -234,7 +235,7 @@
     }
   </style></noscript>
 </head>
-<body class="capture-editorial capture-brand">
+<body class="capture-editorial capture-brand capture-full">
 <a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
@@ -289,8 +290,8 @@
     </div>
 
     <!-- Section 1: What Was Captio? -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span lang="ja">Captioとは何だったのか</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span lang="ja">Captioとは何だったのか</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -303,11 +304,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 2: Why Captio Disappeared -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"><span lang="ja">なぜCaptioは使えなくなったのか</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"><span lang="ja">なぜCaptioは使えなくなったのか</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -319,11 +320,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 3: What Captio Users Lost -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"><span lang="ja">Captioユーザーが失ったもの</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"><span lang="ja">Captioユーザーが失ったもの</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -335,11 +336,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 4: Simple Memo as an alternative -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"><span lang="ja">Obsidian連携シンプルメモ — Captioのワークフローに着想を得た代替アプリ</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"><span lang="ja">Obsidian連携シンプルメモ — Captioのワークフローに着想を得た代替アプリ</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -354,11 +355,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 5: Captio vs Simple Memo Comparison -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"><span lang="ja">Captio vs シンプルメモ比較</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"><span lang="ja">Captio vs シンプルメモ比較</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="ce-table-scroll" role="region" aria-label="比較表（横にスクロールできます）" tabindex="0">
@@ -429,11 +430,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 6: How to Switch -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"><span lang="ja">移行方法</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"><span lang="ja">移行方法</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -452,11 +453,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 7: Feature Mapping Table -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"><span lang="ja">Captio → シンプルメモ 機能マッピングテーブル</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"><span lang="ja">Captio → シンプルメモ 機能マッピングテーブル</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -561,11 +562,11 @@
         <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.8;margin-top:1rem;">上記の通り、Captioでよく使われた「書いてすぐ自分に送る」流れは、シンプルメモでも同じようにできます。加えて、端末内の暗号化・ウィジェット・メモ本文をサーバーに恒常的に保存しない設計といった機能があります。料金の仕組みはCaptioと異なりますが、無料プランでも1日3通まで送れるため、ライトユーザーには十分です。他のメモアプリとの詳しい比較は<a href="/vs/email-me-app/" style="color:var(--accent)">Email Me App比較ページ</a>や<a href="/vs/mail-to-self/" style="color:var(--accent)">Mail to Self比較ページ</a>もご覧ください。</p>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 8: Step-by-Step Migration Guide -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-8" data-ce-number="08"><span lang="ja">移行ステップガイド</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-8" data-ce-number="08"><span lang="ja">移行ステップガイド</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -634,11 +635,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 9: Honest Comparison for Captio Users -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-9" data-ce-number="09"><span lang="ja">Captioユーザーが感じる違い</span></h2>
+    <section class="lp-section ce-chapter ce-chapter--wide">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-9" data-ce-number="09"><span lang="ja">Captioユーザーが感じる違い</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="app-card">
@@ -676,11 +677,11 @@
         </div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 10: Migration FAQ -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-10" data-ce-number="10"><span lang="ja">よくある質問（移行FAQ）</span></h2>
+    <section class="lp-section ce-chapter">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-10" data-ce-number="10"><span lang="ja">よくある質問（移行FAQ）</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Captioのデータは移行できる？</summary><div class="faq-answer"><p>Captioで送信したメモは、メールとして受信箱に届いています。そのため、データの「移行」作業は不要です。シンプルメモをインストールして同じメールアドレスを設定すれば、Captio時代のメモとシンプルメモのメモが同じ受信箱に共存します。Captioの優れた設計思想の一つは「メモをアプリに閉じ込めない」ことでした。その恩恵で、サービスが終わった後も、受信箱から消していないメモはそのまま残っています。</p></div></details></div>
@@ -698,11 +699,11 @@
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Captioの操作感を完全に再現できる？</summary><div class="faq-answer"><p>Captioの核心的な操作感 --「アプリを開いて即座に書き始め、ワンタップで送信する」-- は、シンプルメモでも同じようにできます。起動は0.4秒（iPhone 16e・ウォーム起動の実測）で、送信もワンタップで完了します。UIの見た目は異なりますが（モダンなデザインに更新）、操作の流れは同じです。</p></div></details></div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Section 11: General FAQ -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-11" data-ce-number="11"><span lang="ja">よくある質問</span></h2>
+    <section class="lp-section ce-chapter">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-11" data-ce-number="11"><span lang="ja">よくある質問</span></h2></header><div class="ce-chapter__body">
 
       <div lang="ja">
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Captioはなぜ使えなくなったのですか？</summary><div class="faq-answer"><p>開発元は captio.co でクラウドサービスの終了（2024年10月1日）を告知しています。告知によると、Captio はその約2年前に App Store から撤退しており、終了の理由として、アプリの安定性と安全性を保つための手間をかけ続けられなくなったことを挙げています。</p></div></details></div>
@@ -711,7 +712,7 @@
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモの料金はいくらですか？</summary><div class="faq-answer"><p>シンプルメモは無料プラン（1日3通まで、利用期間の制限なし）と有料プラン（月額¥500、送信無制限）があります。無料プランでも、Captioのような「書いてすぐ送る」流れを試せます。</p></div></details></div>
       </div>
 
-    </section>
+    </div></section>
 
     <!-- Citation Notice -->
     <div class="citation-notice">
@@ -728,8 +729,8 @@
     </div>
 
     <!-- Author Bio + Non-affiliation Notice (E-E-A-T) -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-12" data-ce-number="12"><span lang="ja">著者について</span></h2>
+    <section class="lp-section ce-chapter">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-12" data-ce-number="12"><span lang="ja">著者について</span></h2></header><div class="ce-chapter__body">
       <div style="display:flex;gap:1.5rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin:1rem 0;flex-wrap:wrap;">
         <div lang="ja" style="flex:1;min-width:min(280px,100%);">
           <h3 style="font-size:1rem;margin:0 0 .5rem;">AI ATAKA — Obsidian連携シンプルメモ 開発者・元Captioユーザー</h3>
@@ -740,11 +741,11 @@
         </div>
 
       </div>
-    </section>
+    </div></section>
 
     <!-- Related Articles -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-13" data-ce-number="13"><span lang="ja">関連記事</span></h2>
+    <section class="lp-section ce-chapter">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-13" data-ce-number="13"><span lang="ja">関連記事</span></h2></header><div class="ce-chapter__body">
       <div class="internal-links">
         <a href="/captio-alternative/">
           <span lang="ja">Captio代替サービス完全比較2026</span>
@@ -759,11 +760,11 @@
 
         </a>
       </div>
-    </section>
+    </div></section>
 
     <!-- Related Pages -->
-    <section class="lp-section">
-      <h2 class="lp-section__title" id="guide-section-14" data-ce-number="14"><span lang="ja">関連ページ</span></h2>
+    <section class="lp-section ce-chapter">
+      <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-14" data-ce-number="14"><span lang="ja">関連ページ</span></h2></header><div class="ce-chapter__body">
       <div class="internal-links">
         <a href="/captio-alternative/"><span lang="ja">Captio代替</span></a>
         <a href="/vs/drafts/"><span lang="ja">vs Drafts</span></a>
@@ -775,7 +776,7 @@
         <a href="/about/"><span lang="ja">開発者について</span></a>
         <a href="/blog/"><span lang="ja">ブログ一覧</span></a>
       </div>
-    </section>
+    </div></section>
 
   </div>
   </div>

@@ -249,6 +249,7 @@
       border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000;}
 </style>
   <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=4689b86ef9">
   <noscript><style>
     @media(max-width:1199px){
       .capture-brand .global-nav{position:relative}
@@ -260,7 +261,7 @@
     }
   </style></noscript>
 </head>
-<body class="capture-editorial capture-brand">
+<body class="capture-editorial capture-brand capture-full">
   <a class="ce-skip" href="#main-content">本文へスキップ</a>
 <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
@@ -299,14 +300,15 @@
 
       <div class="page-content__body article-body">
 
-        <div class="callout">
+        <div class="callout ce-lede">
           <strong>結論。</strong>iPhoneでObsidianに声のメモを残す入口は、<strong>①モバイル版＋iOSの音声入力</strong>、<strong>②音声入力ショートカット＋公式CaptureまたはURI</strong>、<strong>③録音を文字起こしするプラグイン</strong>、<strong>④SimpleMemoから設定済みの保管庫へ追記</strong>の4つに分けられます。追加アプリなしで試すなら①か②、録音済みファイルの処理なら③。入力画面と保存先を決めて反復利用したい場合は④も候補です。SimpleMemoのアプリ内音声入力はiOS 26以降が対象で、権限・対応言語・保存先の準備が必要です。
         </div>
 
-        <h2 id="guide-section-1" data-ce-number="01">入力中の音声認識と、録音ファイルの文字起こしを分ける</h2>
+        <section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-1" data-ce-number="01">入力中の音声認識と、録音ファイルの文字起こしを分ける</h2></header><div class="ce-chapter__body">
         <p>Obsidianには録音用のコアプラグイン「Audio recorder」がありますが、できるのは音声ファイルの保存とノートへの埋め込みまでで、文字起こしは行いません。モバイル版で「音声で書く」場合は、iOSキーボードのマイク（音声入力）を使うことになります。つまりObsidianで音声メモを実現するには、<strong>入力の入口と保存先をどう組み合わせるか</strong>を決めます。以下、4つの方法を紹介します。</p>
 
-        <h2 id="guide-section-2" data-ce-number="02">方法1：Obsidianモバイル＋iOSの音声入力（無料・すぐ試せる）</h2>
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-2" data-ce-number="02">方法1：Obsidianモバイル＋iOSの音声入力（無料・すぐ試せる）</h2></header><div class="ce-chapter__body">
         <ol>
           <li>Obsidianモバイルでノートを開く（デイリーノートを起点にすると迷いません）</li>
           <li>キーボードのマイクアイコンをタップ</li>
@@ -314,22 +316,25 @@
         </ol>
         <p>追加ツールなしで今日から使えるのが利点。弱点は<strong>手数</strong>です。アプリを起動し、保管庫が読み込まれ、ノートを開いてマイクをタップ——ここまでに数タップかかるため、歩行中の思いつきは途中で消えがちです。腰を据えた追記には十分実用的です。</p>
 
-        <h2 id="guide-section-3" data-ce-number="03">方法2：ショートカット（公式CaptureまたはObsidian URI）</h2>
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-3" data-ce-number="03">方法2：ショートカット（公式CaptureまたはObsidian URI）</h2></header><div class="ce-chapter__body">
         <p>ショートカットの「テキストを音声入力」で文字にしてから、Obsidianへ渡します。<a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener">モバイル版1.11からの公式Captureアクション</a>なら、Obsidianアプリを開かずノートの先頭・末尾へ追記できます。ショートカット内で保存先を設定し、短いテキストが意図したノートに入るか確認してください。</p>
         <p><a href="https://obsidian.md/help/uri" target="_blank" rel="noopener">Obsidian URI</a>（<code>obsidian://new</code>）は別の受け渡し方です。保管庫・ファイル・追記指定とパラメータのエンコードを組み立てます。公式CaptureとURIを混同せず、使うルートの設定、音声入力が中断した場合の扱い、端末・言語に応じた通信条件を確認します。</p>
 
-        <h2 id="guide-section-4" data-ce-number="04">方法3：Whisper系プラグイン（録音の文字起こしに強い）</h2>
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-4" data-ce-number="04">方法3：Whisper系プラグイン（録音の文字起こしに強い）</h2></header><div class="ce-chapter__body">
         <p>コミュニティプラグインには、録音した音声をWhisper系の音声認識で文字起こししてノート化するものがあります。会議・講義・長い独り言など、<strong>まとまった録音をテキスト資産に変える</strong>用途に向いた構成です。</p>
         <p>一方で、APIキーの取得や利用料、プラグインの設定といった導入コストがかかり、クラウドAPI型はオフラインでは使えません。「毎日の短いメモ」よりも「録音アーカイブの処理」向けです。</p>
 
-        <h2 id="guide-section-5" data-ce-number="05">方法4：SimpleMemoから設定済みの保管庫へ追記（プラグイン不要）</h2>
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-5" data-ce-number="05">方法4：SimpleMemoから設定済みの保管庫へ追記（プラグイン不要）</h2></header><div class="ce-chapter__body">
         <p>「思いついた瞬間に話して、あとはObsidianに残っていてほしい」——この用途に特化しているのが<a href="/obsidian/">Obsidian連携シンプルメモ</a>です。</p>
-        <ul>
-          <li>「起動時に音声入力を自動オン」を有効にすると、起動時にアプリ内の音声入力を開始できます。iOS 26以降・対応言語が対象で、マイクと音声認識の許可が必要です。認識は端末内で処理しますが、初回の言語モデル取得には通信と準備時間が必要な場合があります</li>
-          <li>送信時に、フォルダ指定でアクセスを許可した保管庫の<strong>Inboxノートまたはデイリーノートへタイムスタンプ付きで直接追記</strong>します。メールの到着を待って取り込む仕組みではありません</li>
-          <li>フォルダへ直接追記する方式は、対象ファイルがiPhoneで利用可能ならオフラインでも保存できます。メールは通信が戻るまで送信待ちになり、他端末への同期は別です。Obsidianだけに保存するモード（Premium）も選べます</li>
-          <li><strong>約0.4秒はウォーム起動から本文へ入力できるまでの測定値</strong>です。8月11日の5回測定の中央値で、音声認識の開始・メール配送・保管庫への保存完了までの時間ではありません。<a href="/blog/benchmark-methodology">測定条件</a>を併記しています</li>
-          <li>Freeは1日3通まで（利用期間の制限なし）。継続利用の条件は<a href="/faq#pricing-ja">料金・プランの説明</a>で確認できます</li>
+        <ul class="ce-benefits">
+          <li><h3>音声で入力する</h3>「起動時に音声入力を自動オン」を有効にすると、起動時にアプリ内の音声入力を開始できます。iOS 26以降・対応言語が対象で、マイクと音声認識の許可が必要です。認識は端末内で処理しますが、初回の言語モデル取得には通信と準備時間が必要な場合があります</li>
+          <li><h3>保管庫へ直接追記</h3>送信時に、フォルダ指定でアクセスを許可した保管庫の<strong>Inboxノートまたはデイリーノートへタイムスタンプ付きで直接追記</strong>します。メールの到着を待って取り込む仕組みではありません</li>
+          <li><h3>通信がないとき</h3>フォルダへ直接追記する方式は、対象ファイルがiPhoneで利用可能ならオフラインでも保存できます。メールは通信が戻るまで送信待ちになり、他端末への同期は別です。Obsidianだけに保存するモード（Premium）も選べます</li>
+          <li><h3>起動時間の測定</h3><strong>約0.4秒はウォーム起動から本文へ入力できるまでの測定値</strong>です。8月11日の5回測定の中央値で、音声認識の開始・メール配送・保管庫への保存完了までの時間ではありません。<a href="/blog/benchmark-methodology">測定条件</a>を併記しています</li>
+          <li><h3>無料で使う範囲</h3>Freeは1日3通まで（利用期間の制限なし）。継続利用の条件は<a href="/faq#pricing-ja">料金・プランの説明</a>で確認できます</li>
         </ul>
         <pre tabindex="0" role="region" aria-label="テキスト例（横にスクロールできます）"><code>- 09:14 会議メモ：見積もりは金曜まで
 - 09:31 音声で：帰りに電池を買う
@@ -337,14 +342,15 @@
         <p>最初に音声入力の権限と準備状態を確認し、メールを使う場合は宛先を登録します。続いてObsidian連携で保管庫フォルダと保存先を指定し、短いメモが追記されたか確かめてください。フォルダへの直接アクセスが使えずURIへ切り替わる場合は、動作と設定条件が異なります。<a href="/obsidian/getting-started/">設定と初回の追記確認</a>、<a href="/voice-input/">音声入力の機能ページ</a>、<a href="/blog/email-to-obsidian">メール×Obsidian連携の解説</a>に手順をまとめています。</p>
 
         <p>画面例は、作成画面・メール設定・Obsidian連携設定の3つです。メール設定はメールも使う場合に必要です（横にスクロールできます）。</p>
-        <div class="shot-strip" role="region" tabindex="0" aria-label="画面例（横にスクロールできます）">
-          <img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの作成画面。「次回の企画会議で音声入力フローを改善する」と入力された状態で、右下に音声入力ボタン、右上に送信ボタンが表示されている">
-          <img src="/assets/img/obsidian-voice-input/02-settings.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの設定画面の上部。言語、メールの宛先・件名・署名、テスト送信、プレミアムプランの項目が並んでいる">
-          <img src="/assets/img/obsidian-voice-input/03-obsidian-settings.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの設定画面の詳細設定。Obsidian連携がオンで、フォルダに QAObsidianVault、送り先にデイリーノート、タイムスタンプを付けて追記がオンになっている">
+        <div class="shot-strip ce-screen-gallery" role="region" tabindex="0" aria-label="シンプルメモの画面例（横にスクロールできます）">
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの作成画面。「次回の企画会議で音声入力フローを改善する」と入力された状態で、右下に音声入力ボタン、右上に送信ボタンが表示されている"></div><figcaption><span>01</span> 作成画面</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/02-settings.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの設定画面の上部。言語、メールの宛先・件名・署名、テスト送信、プレミアムプランの項目が並んでいる"></div><figcaption><span>02</span> メール設定</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/03-obsidian-settings.webp" width="640" height="1389" loading="lazy" alt="シンプルメモの設定画面の詳細設定。Obsidian連携がオンで、フォルダに QAObsidianVault、送り先にデイリーノート、タイムスタンプを付けて追記がオンになっている"></div><figcaption><span>03</span> Obsidian連携</figcaption></figure>
         </div>
 
         <p style="margin:1.75rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.95rem;line-height:1.85;">方法4を実際に試すなら、<a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Obsidian連携シンプルメモ</a>は、設定後に音声で入力したメモを保管庫へ直接追記できます。Freeは1日3通まで（利用期間の制限なし）。約0.4秒はウォーム起動から本文入力が可能になるまでの測定で、音声認識の開始や保存完了までの時間ではありません。</p>
-        <h2 id="voice-methods-table" data-ce-number="06">4つの方法を比較</h2>
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="voice-methods-table" data-ce-number="06">4つの方法を比較</h2></header><div class="ce-chapter__body">
         <p class="voice-table-hint" id="voice-table-hint">表は横にスクロールできます。右側で通信条件と費用を確認してください。</p>
         <div class="voice-table-wrap ce-table-scroll" tabindex="0" role="region" aria-labelledby="voice-methods-table" aria-describedby="voice-table-hint">
           <table>
@@ -356,7 +362,8 @@
         </table>
         </div>
 
-        <h2 id="guide-section-7" data-ce-number="07">使い分けの目安</h2>
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-7" data-ce-number="07">使い分けの目安</h2></header><div class="ce-chapter__body">
         <ul>
           <li><strong>今すぐ無料で試したい</strong> → 方法1</li>
           <li><strong>ホーム画面ワンタップで、自作も楽しみたい</strong> → 方法2</li>
@@ -366,7 +373,8 @@
         <p><strong>方法4を選ぶなら、入口も先に決めておく</strong>と手数がさらに減ります。Apple Watchに話す → <a href="/apple-watch-obsidian/">Watch×Obsidianの手順</a>、AirPodsで画面を見ずに → <a href="/siri/">SiriでObsidianへ送る</a>、アクションボタンから開く → <a href="/fastest-voice-memo/">入口の設定</a>、移動中に開くだけで録音（自動オンの設定時） → <a href="/hands-free/">ハンズフリー</a>。入口によって操作と通信条件が異なります。選んだ経路で、意図した保存先へ届くか一度確認してください。</p>
         <p>なお「キャプチャ（捕まえる）」と「ライティング（育てる）」を分けるのがObsidian運用のコツです。捕まえ方の全体像は<a href="/blog/obsidian-iphone-memo">iPhoneからObsidianにメモを送る方法6選</a>、走り書きの処理術は<a href="/blog/fleeting-notes">フリーティングノートの書き方</a>をどうぞ。</p>
 
-        <h2 id="guide-section-8" data-ce-number="08">FAQ</h2>
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-8" data-ce-number="08">FAQ</h2></header><div class="ce-chapter__body">
         <div class="faq-item"><details class="faq-details"><summary class="faq-question">Obsidianだけで音声入力はできますか？</summary><div class="faq-answer">モバイル版ならiOSキーボードの音声入力がそのまま使えます。ただし「録音を自動で文字起こしする」機能はObsidian本体にはなく、コアプラグインのAudio recorderも録音ファイルの保存・埋め込みまでです。</div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-question">録音データを文字起こししてObsidianに入れるには？</summary><div class="faq-answer">Whisper系のコミュニティプラグインや外部の文字起こしツールを併用します。会議や講義など長時間の録音にはこの構成が向きます。「話しながらその場でテキスト化」したいだけなら、方法1か方法4のほうが手軽です。</div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-question">プラグインなしで「話す→Obsidianに残る」を自動化できますか？</summary><div class="faq-answer">できます。ショートカットの音声入力とObsidianの公式Captureを組み合わせる方法があります。SimpleMemoでも、iOS 26以降で音声自動入力を設定し、アクセスを許可した保管庫へ直接追記できます。いずれも保存先の設定と初回の保存確認が必要で、音声入力の権限・対応言語・準備状態によって動作が変わります。</div></details></div>
@@ -374,7 +382,8 @@
 
         <p style="margin-top:2rem;">方法4を実装しているのが<a href="/obsidian/">Obsidian連携シンプルメモ</a>です。Apple Watchからの音声キャプチャは<a href="/apple-watch-obsidian/">Watch×Obsidianの解説ページ</a>で紹介しています。</p>
 
-      </div>
+      </div></section>
+</div>
     </div>
 </div>
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
