@@ -274,6 +274,12 @@
       "broke": "実際のワークフローからGCP資格情報の接続を外す変異で --check が非0終了。欠損日・重複日・古い/未来の観測・別プロパティ・取得失敗・タイムアウト・秘密情報混入を自己テストで拒否。取得失敗時は0件や取得成功にしない。"
     },
     {
+      "script": "scripts/autopilot-diagnostics.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-06",
+      "broke": "限定診断の34項目を実測。コピーした実装からtool_nameの許可リストを外すと自己テストが失敗することを確認。両モデル結果を対象にする条件、固定GITHUB_SHA、限定uploadディレクトリ、savedガード、非致命的uploadの5配線変異を拒否する。実際のinterpretRunでupload失敗がverifiedをno_artifactへ誤分類する負例と、非致命的step結論ならshippedを保持する回帰を確認。実CLIとworkflow内の実費抽出Pythonをfixtureで実行し、raw denial配列と旧count形式、欠損、秘密除外、symlink・過大入力・既存出力ディレクトリ拒否を確認。自己テストは課金実行やremote workflowを起動しない。"
+    },
+    {
       "script": "scripts/autopilot-drill.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",

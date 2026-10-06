@@ -364,11 +364,23 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
 
 ### 主系が途中で失敗した場合の作業保存
 
-失敗時は `autopilot-work-<GitHub run ID>-<attempt>` というActions artifactを7日間残す。
+モデルstepの失敗時、またはモデルstepが成功しても成果物照合が missing / unknown で
+失敗したときは、`autopilot-work-<GitHub run ID>-<attempt>` の保存を試す（保存期間7日）。
 対象は、先にpush済みの有効な価値契約で宣言したHTML・画像の未公開差分だけ。
 環境全体、会話ログ、認証情報、取得した検索データ、運転台帳は含めない。
 保存器はモデルが編集した作業ツリーではなく、workflow起動時のコミットから実行する。
 宣言が無い、差分が無い、範囲・容量・通常ファイルの条件が合わない場合は保存しない。
+
+別に `autopilot-diagnostic-<GitHub run ID>-<attempt>` の限定診断を7日間残す。
+実行ID、終了状態、拒否されたツールの種類別件数、成果物判定の理由コード、保存結果、
+元execution fileのSHA256だけを記録し、生コマンド・ツール入力・会話・認証情報は含めない。
+`no_matching_pr` は当日headのPR不在、`no_current_run_record` は検査したPR HEADに
+今回のexternal_refが無いこと、`invalid_or_stale_record` は不適格・古い記録を示す。
+`unknown_*` は取得・証跡・同時更新等の確認不能で、成果物ゼロを意味しない。
+台帳件数は検査したPR HEADでの観測数であり、別々の実行数ではない。未取得はnullで残す。
+checkpointの失敗や差分なしと、診断ファイル自体の取得不能も区別する。
+診断artifactはページ保存の成功に依存せず、キャンセル後はどちらの保存処理も開始しない。
+診断の生成・upload失敗は元の成果物判定を変更せず、任意の診断だけでrunを失敗にしない。
 
 **保存物は未検証の下書き。出荷や復旧成功の証拠ではない。**
 中断したrunのログとartifact一覧を確認し、実在する名前で `gh run download` を使う。

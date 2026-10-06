@@ -606,7 +606,7 @@ function appendRepairActions(ctx, runs, out) {
       // 上限に達した種別。**直すのをやめて人に上げる**（self_repair.stop_note）。
       out.push({
         id: `act-selfheal-escalated-${t.failure_class}`,
-        title: `${t.failure_class} を上限回数（${t.repair_attempts_for_class}回）直しても再発している`,
+        title: `${t.failure_class} が再発（修理カウント${t.repair_attempts_for_class}／設定上限${ctx.selfheal.limit ?? '未確認'}）`,
         detail: `対象 ${t.run_id}（${t.date_jst} / ${t.route}）。self_repair.stop_after_failed_repairs に達したため、`
           + `修理をやめて人間に上げる。同時に該当経路の封じ込め（--contain）を実行する。`,
         source: 'selfheal',
@@ -4393,6 +4393,14 @@ async function selftest() {
   t('上限に達した故障は今までどおり封じ込める', escRow?.auto === 'contain');
   t('上限に達した故障は owner_routed より優先される',
     escRow?.id === 'act-selfheal-escalated-usage_limit');
+  t('設定上限を取得できなければ修理カウントで補わない', escRow.title.includes('修理カウント3／設定上限未確認'));
+  const countedTarget = shTarget({ failure_class: 'no_artifact', escalate: true, repair_attempts_for_class: 5 });
+  const countedRow = derive({ today: '2026-10-06', runsDoc: { runs: shRuns },
+    selfheal: { targets: [countedTarget], limit: 3 } }).find(d => d.source === 'selfheal');
+  t('修理カウント5と設定上限3を別々に表示する', countedRow.title === 'no_artifact が再発（修理カウント5／設定上限3）');
+  t('表示の補正で停止の担当・handler・閉じ条件を変えない', countedRow.force_owner === 'human'
+    && countedRow.auto === 'contain' && countedRow.close_check.kind === 'run_repaired'
+    && countedRow.close_check.params.run_id === countedTarget.run_id);
 
   // 導出D7: 主系を止めている未レビュー超過を起票する
   const ovDerive = derive({

@@ -842,6 +842,7 @@
     "growth/scripts/ingest-bigquery.mjs",
     "growth/scripts/seal-daily-gsc.mjs",
     "growth/scripts/search-intent.mjs",
+    "scripts/autopilot-diagnostics.mjs",
     "scripts/autopilot-drill.mjs",
     "scripts/autopilot-gate.mjs",
     "scripts/bing-capture.mjs",
@@ -872,7 +873,8 @@
       "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
       "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。",
       "growth/scripts/collect-bing.mjs": "Official Bing API reader through lib/bing-webmaster.mjs; no local ledger reads. Validates runtime and encryption before refresh; tests cover missing credentials, source/date/schema failures, bounded retries and redaction.",
-      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence."
+      "scripts/bing-capture.mjs": "Private capture state is read and validated in lib/company-bing.mjs. This thin CLI has no local ledger binding; module tests reject missing, stale, tampered, concurrent and mismatched attempt evidence.",
+      "scripts/autopilot-diagnostics.mjs": "2026-10-06: 公開判定の正となる台帳を読まない診断投影器。読むのは固定名の一時SDK execution JSONと検査時のworkflowで、readExecutionはJSON.parseをオブジェクト内の式で返すため現走査の束縛追跡には現れない。実行データの未取得・不正・容量超過はnullと固定unknown理由に残し、verdictや権限の判定に使わない。入力本文・任意文字列を除外し、34自己テストで欠損、壊れたJSON、symlink、容量超過、限定出力を確認。scannerや母数上限は変更しない。"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
@@ -1204,6 +1206,12 @@
       "expr": "rows",
       "disposition": "安全側へ倒れる",
       "note": "2026-10-02: selectCurrent(pagePath, rows) の rows == null は欠測snapshot（null/undefined）を status:hold・current:null・reason_code:snapshot_unavailable・matching_rows:null と明示する。currentFor は counts/null 互換を保ち、実CLIの evaluateCurrent は current_selection の欠測理由を保持した hold を返す。欠測をゼロcounts、continue、検査の空集合、自律revertへ補完しない。私有原CLIの33自己検査（旧16＋新17）のうち欠測snapshot両型・currentFor null・実consumer hold/reasonのnamed caseは通過済み。通常PR初回はこの未登録keyで前段Guard51が失敗しMarketing110はskippedであり、通常CI実行済みとは扱わない。元threshold/targets/権限・scanner・既存guard50行・known/no_ledger_binding・計測metadata/予算を変更せず、この既存安全側分岐の読みを登録するだけ。"
+    },
+    {
+      "file": "scripts/autopilot-diagnostics.mjs",
+      "expr": "value",
+      "disposition": "報告のみ",
+      "note": "2026-10-06: receiptのObject.entries(result).filter(([, value]) => value === null)は、既にnullとして保持した未観測項目名をobservations_unknownへ列挙する表示処理。値を0や成功に補完せず、元の出力verdict・exit code・公開判定を変更しない。34自己テストの欠測・不正型・壊れたJSON・モデル検証skip・checkpoint失敗でnullと固定理由の保持を確認。"
     }
   ]
 }
