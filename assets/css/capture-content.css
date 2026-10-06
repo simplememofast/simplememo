@@ -195,11 +195,15 @@
 .capture-home.capture-full main .stat-item__icon { color:var(--reading-accent);border-color:var(--reading-line);background:transparent; }
 .capture-home.capture-full main .stat-item__value { background:none;-webkit-text-fill-color:currentColor;color:#fff;font-size:30px;font-weight:800; }
 .capture-home.capture-full main .stat-item__label { font-size:13px;color:var(--reading-muted);line-height:1.8;margin-top:12px; }
-.capture-home.capture-full main .pricing-cards { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;overflow:visible; }
-.capture-home.capture-full main .pricing-card { background:var(--reading-panel);border:1px solid var(--reading-line);border-radius:20px;padding:32px;text-align:left;box-shadow:none; }
+.capture-home.capture-full main .pricing-cards { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;overflow:visible;padding:0;scroll-snap-type:none; }
+.capture-home.capture-full main .pricing-card { width:100%;min-width:0;max-width:none;background:var(--reading-panel);border:1px solid var(--reading-line);border-radius:20px;padding:32px;text-align:left;box-shadow:none; }
 .capture-home.capture-full main .pricing-card--premium { border-color:rgba(167,139,250,.4);background:linear-gradient(150deg,rgba(139,92,246,.08),transparent),#0d0e14; }
 .capture-home.capture-full main .pricing-card__name { font-size:14px;color:var(--reading-accent);line-height:1.7;margin-bottom:24px; }
 .capture-home.capture-full main :is(.pricing-card__price,.pricing-card__price-row) { color:#fff;font-size:30px;font-weight:800;line-height:1.5;background:none;-webkit-text-fill-color:currentColor; }
+.capture-home.capture-full main .pricing-card::before,.capture-home.capture-full main .pricing-card::after { display:none; }
+.capture-home.capture-full main .pricing-card__price-row { display:flex;flex-wrap:wrap;align-items:baseline;gap:0 6px;white-space:normal; }
+.capture-home.capture-full main .ce-price-amount { font-size:36px;line-height:1.4;letter-spacing:-.03em;white-space:nowrap; }
+.capture-home.capture-full main .ce-price-unit { font-size:15px;font-weight:500;line-height:1.8;white-space:nowrap;color:var(--reading-muted); }
 .capture-home.capture-full main .pricing-card__limit { font-size:15px;color:var(--reading-muted);margin-top:20px;line-height:1.8; }
 .capture-home.capture-full main .plan-summary { max-width:none;padding:0;margin-top:40px; }
 .capture-home.capture-full main .plan-summary__plan { border-color:var(--reading-line);background:transparent;border-radius:16px;padding:24px; }
