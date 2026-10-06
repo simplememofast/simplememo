@@ -9,6 +9,7 @@ import csv
 import hashlib
 import io
 import json
+import re
 import tempfile
 from collections import Counter
 from datetime import date
@@ -48,6 +49,36 @@ def table(headers, records):
 
 def links(items):
     return '<div class="actions">' + "".join(f'<a class="button secondary" href="{e(url)}">{e(label)}</a>' for url, label in items) + "</div>"
+
+
+def capture_inbox_page(html, body, copyright_line):
+    """Apply the Japanese tool's maintained shell to generated source content."""
+    shell = (ROOT / "scripts/templates/obsidian-inbox-capture-ja.html.tmpl").read_text()
+    shell = re.sub(r"\{\{asset:([^}]+)\}\}", lambda m: asset(m[1]), shell)
+    head, shell_body = shell.split("</head>\n", 1)
+    extra_head = head.removeprefix("<head>\n")
+    hero_match = re.match(r'<p class="eyebrow">(.*?)</p><h1>(.*?)</h1><p class="lead">(.*?)</p>', body, re.S)
+    if not hero_match:
+        raise ValueError("Inbox source must start with its label, heading and introduction")
+    label, title, intro = hero_match.groups()
+    title = title.replace("思いつきを、", '<span class="cs-phrase">思いつきを、</span>').replace("使いやすい", '<span class="cs-phrase">使いやすい</span>').replace("Inboxの形に。", '<span class="cs-phrase">Inboxの形に。</span>')
+    rest = body[hero_match.end():]
+    tool_end = rest.index("</noscript>") + len("</noscript>")
+    tool, rest = rest[:tool_end], rest[tool_end:]
+    tool = tool.replace("<pre>", '<pre tabindex="0" role="region" aria-label="テキスト例">')
+    parts = re.split(r"<h2>(.*?)</h2>", rest, flags=re.S)
+    if parts[0].strip() or len(parts) % 2 != 1:
+        raise ValueError("Inbox instructions must be top-level heading/content pairs")
+    chapters = [("Markdownを作る", tool)] + list(zip(parts[1::2], parts[2::2]))
+    routes = ''.join(f'<a class="ce-route" href="#chapter-{i}"><span>{i:02d}</span><b>{heading}</b></a>' for i, (heading, _) in enumerate(chapters[:3], 1))
+    content = ''.join(f'<section class="lp-section ce-chapter{" ce-chapter--wide" if i == 1 else ""}"><div class="ce-chapter__head"><h2 id="chapter-{i}" data-ce-number="{i:02d}">{heading}</h2></div><div class="ce-chapter__body">{text}</div></section>' for i, (heading, text) in enumerate(chapters, 1))
+    concept = '<figure class="ce-stage cn-concept" aria-hidden="true"><p class="ce-stage-label">MARKDOWN / WORKSPACE</p><div class="cn-concept-list">' + ''.join(f'<div class="cn-concept-row"><span>{i:02d}</span><strong>{text}</strong></div>' for i, text in enumerate(["例文を編集", "形式を選ぶ", "コピー・保存"], 1)) + '</div><figcaption class="ce-stage-foot">このページの使い方</figcaption></figure>'
+    hero = f'<header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><p class="lp-hero__label">{label}</p><h1 class="lp-hero__title">{title}</h1><p class="lp-hero__sub">{intro}</p><a class="ce-read-link" href="#chapter-1">本文を読む <span aria-hidden="true">↓</span></a></div><nav class="ce-routes" aria-label="読みたい内容から選ぶ">{routes}</nav>{concept}</header>'
+    main = f'<main id="main" class="resource-main cs-workspace"><div class="container">{hero}<div class="ce-article">{content}</div></div></main>'
+    shell_body = shell_body.replace("{{main}}", main).replace("{{copyright}}", e(copyright_line))
+    if "{{" in shell_body or "{{" in extra_head:
+        raise ValueError("Unresolved capture shell placeholder")
+    return html[:html.index("</head>")] + extra_head + "</head>\n" + shell_body
 
 
 def page(path, title, description, body, ja, en, lang, tool=False):
@@ -108,6 +139,8 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 <a href="{prefix}/autopilot/">{'Operations research' if english else '運営の実測値'}</a>
 </nav><p>{e(copyright_line)}</p></div></footer>
 </body></html>"""
+    if tool and lang == "ja":
+        html = capture_inbox_page(html, body, copyright_line)
     return replace_i18n_lines(html, build_block(lang, BASE + path, [("ja", BASE + ja), ("en", BASE + en)], BASE + ja))
 
 
@@ -308,7 +341,15 @@ def selftest():
         (root / "report.html").write_text(expected["report.html"])
         (root / "runs.csv").write_text("attempted,shipped\n28,20\n")
         assert output_differences(root, expected) == ["runs.csv"], "changed downloaded data must fail"
-    print("Citation selftest: missing outputs, matching outputs, changed page, and changed CSV verified.")
+    source_body = '<p class="eyebrow">Example</p><h1>Updated heading</h1><p class="lead">Updated intro</p><div class="tool-grid"><input id="memo"></div><noscript>Static download</noscript><h2>Updated instructions</h2><p>Source content marker</p>'
+    rendered = capture_inbox_page('<html><head><title>Kept</title></head><body>Old</body></html>', source_body, 'Example & Company')
+    assert '<title>Kept</title>' in rendered and 'Updated heading</h1>' in rendered
+    assert rendered.count('Source content marker') == 1 and 'Updated instructions' in rendered
+    assert 'id="memo"' in rendered and 'Static download' in rendered
+    assert 'Example &amp; Company' in rendered and '{{' not in rendered
+    assert 'button{display:none!important}' in rendered
+    assert asset('assets/css/capture-sixth.css') in rendered
+    print("Citation selftest: output drift, source propagation, tool IDs, no-JavaScript fallback, and asset versions verified.")
 
 
 if __name__ == "__main__":
