@@ -41,6 +41,7 @@ const ASSETS = [
   'assets/css/capture-fourth.css',
   'assets/css/capture-fifth.css',
   'assets/css/capture-sixth.css',
+  'assets/css/capture-seventh.css',
   'assets/css/home-hero.css',
   'assets/css/home-banners.css',
   'assets/css/editorial-resources.css',
