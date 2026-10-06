@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial} from './company-acquisition.mjs';
+import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,ownedLinkPeriodRate} from './company-acquisition.mjs';
 import {collectAsc,connectionView,currentSiteAcquisition} from './company-data.mjs';
 
 const date='2026-10-03';
@@ -112,4 +112,30 @@ test('Apple period observations replace corrections without adding grains or rev
 test('fresh status without retained sources does not crash or claim acquisition',()=>{
   const s=currentSiteAcquisition({stateRoot:'/nonexistent-company-acquisition-state'});
   assert.equal(s.state,'retained_sources_unavailable_or_invalid');assert.equal(s.ga4.observed_store_click_session_rate,null);
+});
+
+
+test('OneLink and Store sessions use the SQL union and never double count',()=>{
+  const report={file:'ga4-funnel.sql',result:[{landing_scope:'production',observed_started_sessions:10,
+    sessions_with_own_app_click_24h:4,sessions_with_onelink_click_24h:3,sessions_with_any_app_route_click_24h:5}]};
+  const connection={ga4:{status:'CONNECTED',reports:[report]}};
+  assert.equal(siteAcquisition(connection).ga4.observed_any_app_route_click_session_rate,.5);
+  delete report.result[0].sessions_with_any_app_route_click_24h;
+  assert.equal(siteAcquisition(connection).ga4.observed_any_app_route_click_session_rate,null);
+});
+test('only a complete exact-pilot report produces a labeled within-provider period ratio',()=>{
+  const connection={status:'CONNECTED',quality:{missing_dates:[],missing_metric_columns:[]},
+    site_acquisition:summarizeAppsFlyerAcquisition(header+'2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n'+
+      '2026-10-01,None,seo_aio_qa,obsidian_bridge_qa_20260907,90,100\n')};
+  const r=ownedLinkPeriodRate(connection);
+  assert.equal(r.value,.3); assert.equal(r.installs,3);assert.equal(r.matched_cohort,false);
+  for(const quality of [undefined,{}, {missing_dates:['2026-10-02'],missing_metric_columns:[]},
+    {missing_dates:[],missing_metric_columns:['Clicks']}]) assert.equal(ownedLinkPeriodRate({...connection,quality}).value,null);
+  assert.equal(ownedLinkPeriodRate({...connection,status:'PARTIAL'}).value,null);
+  assert.equal(ownedLinkPeriodRate({...connection,status:'BLOCKED'}).installs,null);
+  connection.site_acquisition.by_category.owned_web_pilot.clicks=0;
+  assert.equal(ownedLinkPeriodRate(connection).state,'no_click_denominator');
+  connection.site_acquisition.by_category.owned_web_pilot.clicks=1;
+  assert.equal(ownedLinkPeriodRate(connection).value,3); // lagged installs are not clamped into a fake CVR
+  assert.equal(siteAcquisition({appsflyer:connection}).website_install_cvr.value,null);
 });
