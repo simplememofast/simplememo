@@ -280,6 +280,12 @@
       "broke": "8通りで落ちることを観測。**被覆の穴を1つ見つけて塞いだ** —— gate は15コードを出しうるのに、ドリルが期待に使っていたのは14で、`skip_run_cap`（1回あたりの上限）は一度も演習されていなかった。例ベースのドリルはシナリオを消しても `passed === total` が成り立つので、**2件のドリルも26件のドリルも同じ「全シナリオが期待どおり」を出す。**数ではなく被覆で判定するようにし、1回上限の3シナリオ（主系は止まる／force でも越えない／副系は動く）を足した。演習を消すと exit 1 になることを確かめた。自己テストは本番の run() にシナリオを渡す形にしてある（並行実装を持たない） [2026-09-05] 代替モデルがある場合にもAPI不能（forceを含む）、占有、本番/mainの出荷済み、当日PR、主系実行中で止まる7シナリオを追加。旧decideはこの組み合わせでdegrade_model/run=trueとなることを再現した。"
     },
     {
+      "script": "scripts/autopilot-diagnostics.mjs",
+      "state": "demonstrated",
+      "at": "2026-10-06",
+      "broke": "限定診断の32項目を実測。コピーした実装からtool_nameの許可リストを外すと自己テストが失敗することを確認。両モデル結果を対象にする条件、固定GITHUB_SHA、限定uploadディレクトリ、savedガードの4配線変異も拒否する。実CLIとworkflow内の実費抽出Pythonをfixtureで実行し、raw denial配列と旧count形式、欠損、秘密除外、symlink・過大入力・既存出力ディレクトリ拒否を確認。課金実行やremote workflowは起動していない。"
+    },
+    {
       "script": "scripts/autopilot-output.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",
