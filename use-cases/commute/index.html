@@ -277,13 +277,16 @@
   </style></noscript>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/use-cases/commute/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"電車の中でもすぐにメモできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。起動0.4秒（iPhone 16e・ウォーム起動の実測）で即入力できるため、つり革につかまりながら片手でメモできます。長い文章を書く必要はなく、1〜2行のキーワードだけで十分です。"}},{"@type":"Question","name":"地下鉄でオフラインの場合はどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"オフラインでもメモは端末にAES-GCM暗号化して保存されます。ネットワークが戻ると自動で再送を試みます（アプリが閉じているときは、次に開いたときかバックグラウンドで）。届いたかは受信箱で確かめてください。"}},{"@type":"Question","name":"歩きながらでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。起動が速く、1〜2行入力してワンタップ送信するだけなので、信号待ちや駅のホームで立ち止まった数秒間で完了します。歩きスマホは推奨しませんが、立ち止まって数秒あれば十分です。"}},{"@type":"Question","name":"通勤中に何件もメモを送れますか？","acceptedAnswer":{"@type":"Answer","text":"無料プランは1日3通まで（利用期間の制限なし）です。プレミアムプランなら無制限に送信可能です。通勤中に次々とアイデアを送り続けられます。"}},{"@type":"Question","name":"車通勤の場合は使えますか？","acceptedAnswer":{"@type":"Answer","text":"運転中のスマホ操作は危険ですのでお控えください。駐車場に停めた後や、信号待ちで安全に停車している間に、思いついたことをすぐにメモ→送信するのがおすすめです。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-seventh">
   <!-- Global Navigation -->
-  <nav aria-label="メインナビゲーション" class="global-nav">
+  <nav aria-label="メインナビゲーション" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/"><img alt="" height="36" loading="eager" src="/assets/img/app-icon-56.png" width="36"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
 <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
 <li><a href="/vs/"><span lang="ja">比較</span></a></li>
@@ -299,7 +302,7 @@
 <a class="global-nav__cta" data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="ja">ダウンロード</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="メニュー" class="global-nav__hamburger" type="button">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -492,8 +495,8 @@
 
 </main>
 
-  <footer class="footer">
-<div class="container"><a class="capture-footer-brand" href="/"><img alt="" height="48" loading="lazy" src="/assets/img/app-icon-256.png" width="48"/><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">プロダクト</p>
@@ -524,44 +527,7 @@
 </div>
 </footer>
 
-  <script>
-  // Disclosure navigation: keep the visual state and accessible state together.
-  (function(){
-    var nav = document.querySelector('.global-nav');
-    var menu = document.getElementById('navLinks');
-    var toggle = nav.querySelector('.global-nav__hamburger');
-    function setOpen(open){
-      menu.classList.toggle('open', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニュー');
-    }
-    toggle.addEventListener('click', function(){
-      var open = !menu.classList.contains('open');
-      setOpen(open);
-      if(open) menu.querySelector('a').focus();
-    });
-    menu.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click', function(){ setOpen(false); });
-    });
-    document.addEventListener('keydown', function(e){
-      if(e.key === 'Escape' && menu.classList.contains('open')){
-        setOpen(false);
-        toggle.focus();
-      }
-    });
-    document.addEventListener('click', function(e){
-      if(!nav.contains(e.target)) setOpen(false);
-    });
-    nav.addEventListener('focusout', function(){
-      setTimeout(function(){ if(!nav.contains(document.activeElement)) setOpen(false); }, 0);
-    });
-    window.matchMedia('(min-width: 1200px)').addEventListener('change', function(e){
-      var menuHadFocus = menu.contains(document.activeElement);
-      setOpen(false);
-      if(!e.matches && menuHadFocus) toggle.focus();
-    });
-  })();
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

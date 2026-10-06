@@ -153,6 +153,14 @@
         "data/decision-review.json"
       ],
       "why": "決済済み契約から成熟判定と探索状態を導く。CIの隔離コピーで実際に書いて整合を確認する。"
+    },
+    {
+      "cmd": "scripts/sync-shared-chrome.mjs --write",
+      "writes": [
+        "*.html"
+      ],
+      "why": "Preserve shared navigation and footer branding across static pages; citation page generation uses the same transformer.",
+      "deterministic_why": "Reads only tracked HTML and content-hashed local CSS/JS. No network, clock or credentials."
     }
   ],
   "never_run": [

@@ -258,14 +258,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/ios-reminders/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is it wrong to use Reminders for notes?","acceptedAnswer":{"@type":"Answer","text":"No. If its notes field, lists, tags and search let you find what you captured, you can start there. Choose based on alerts, completion tracking and whether you prefer reviewing email."}},{"@type":"Question","name":"Does checking an item off delete its content?","acceptedAnswer":{"@type":"Answer","text":"Completed items are hidden in the normal list view; completion is not deletion. Use Show Completed from the list menu to display them again."}},{"@type":"Question","name":"Why might Smart Lists be unavailable?","acceptedAnswer":{"@type":"Answer","text":"Apple documents them for updated iCloud Reminders. Some features are unavailable with other accounts, so check the account storing the items and list."}},{"@type":"Question","name":"Can Siri send an email to myself?","acceptedAnswer":{"@type":"Answer","text":"Siri supports email actions in Mail. That is a separate action from adding a reminder. Check language, region and Mail setup, and verify the recipient and text."}},{"@type":"Question","name":"Does sharing a list give everyone my alerts?","acceptedAnswer":{"@type":"Answer","text":"Your reminder notification settings are not automatically shared with all participants. Check list membership, assignments and each required alert."}},{"@type":"Question","name":"Do I need to move everything into Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"No. You can keep alerts and shared tasks in Reminders and use Simple Memo for short records you prefer to review in email. Another app is optional if your current workflow works."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -281,7 +283,7 @@
 <a class="global-nav__cta" data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -435,7 +437,7 @@
 <section class="lp-section" id="reminders-sources"><h2 class="lp-section__title"><span lang="en">Official sources checked</span></h2>
 <ul><li><a href="https://support.apple.com/en-us/102484" rel="noopener" target="_blank">Apple: Use Reminders</a></li><li><a href="https://support.apple.com/en-us/119953" rel="noopener" target="_blank">Apple: Organize reminders</a></li><li><a href="https://support.apple.com/guide/iphone/use-smart-lists-iphe882772ed/ios" rel="noopener" target="_blank">Apple: Smart Lists</a></li><li><a href="https://support.apple.com/guide/iphone/complete-items-iph3fb74d597/ios" rel="noopener" target="_blank">Apple: Complete items</a></li><li><a href="https://support.apple.com/guide/iphone/search-your-lists-iphd82e33605/ios" rel="noopener" target="_blank">Apple: Search through all lists</a></li><li><a href="https://support.apple.com/en-us/105124" rel="noopener" target="_blank">Apple: Share and assign reminders</a></li><li><a href="https://support.apple.com/guide/iphone/call-text-and-email-with-siri-iph80059011d/ios" rel="noopener" target="_blank">Apple: Email with Siri</a></li></ul></section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
@@ -467,12 +469,7 @@
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

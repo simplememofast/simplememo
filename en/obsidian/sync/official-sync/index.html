@@ -281,14 +281,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/sync/official-sync/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How much does Obsidian Sync Plus cost?","acceptedAnswer":{"@type":"Answer","text":"Plus is $8 per user per month billed annually ($96 a year), or $10 billed monthly. Standard is $4 billed annually ($48 a year), or $5 monthly (obsidian.md/sync, checked September 26, 2026). These are USD prices; the final amount depends on currency and tax at checkout."}},{"@type":"Question","name":"What's the difference between Standard and Plus?","acceptedAnswer":{"@type":"Answer","text":"Per the official help (checked September 26, 2026), Standard syncs 1 vault with 1 GB in total, files up to 5 MB and 1 month of note history; Plus syncs up to 10 vaults with 10 GB (expandable to 100 GB), files up to 200 MB and 12 months of note history. Attachments keep older versions for 2 weeks on both. Sync, end-to-end encryption and shared vaults work on both."}},{"@type":"Question","name":"Who does Standard work for?","acceptedAnswer":{"@type":"Answer","text":"Anyone syncing one vault that stays under 1 GB, with no files over 5 MB, who would notice an accidental overwrite or deletion within about a month. Check your vault folder's size before choosing."}},{"@type":"Question","name":"Who needs Plus?","acceptedAnswer":{"@type":"Answer","text":"Anyone who syncs more than one vault, needs more than 1 GB, keeps files larger than 5 MB (PDFs, audio, video), or keeps important records — meeting notes, research logs, contract drafts — that they only revisit every few months to a year. The 12-month history matters if you might not notice a bad edit until more than a month has passed."}},{"@type":"Question","name":"Can I get something like version history for free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Managing your vault as a Git repository gives you unlimited change history per commit, for free. Resolving a conflict does require knowing Git, though — see the hands-on Git section on /obsidian/sync/ for what that looks like in practice."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -304,7 +306,7 @@
 <a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -563,7 +565,7 @@
 </div>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
@@ -596,12 +598,7 @@
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

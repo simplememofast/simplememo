@@ -191,14 +191,16 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/drafts/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Draftsのアクション機能でメール送信するのとシンプルメモは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"Draftsのメールアクションは、テキストを書いた後にアクションを選択・実行する手順が必要です。シンプルメモは送信ボタンをタップするだけで完了。アクションを選ぶ手順が無いので、1日に何度もメモを送る場合は、その分の手間が減ります。"}},{"@type":"Question","name":"Draftsのワークスペース機能は必要ですか？","acceptedAnswer":{"@type":"Answer","text":"Draftsのワークスペースは、タグやフィルターでテキストを整理する強力な機能ですが、Pro版（月額200円・年額2,200円）が必要です。メール送信が目的なら、送信したら完了のシンプルメモの方が整理の手間自体が不要です。テキストを分類して管理したいならDrafts、送って忘れたいならシンプルメモが向いています。"}},{"@type":"Question","name":"Draftsのメールアクションを使えばシンプルメモは不要では？","acceptedAnswer":{"@type":"Answer","text":"DraftsにはデフォルトでMail Actionがありますが、実行にはアクションの選択が必要です。またオフライン時はDraftsのインボックスにテキストが溜まり、手動でアクションを再実行する必要があります。シンプルメモはOutboxアーキテクチャで自動再送するため、オフラインでも安心です。"}},{"@type":"Question","name":"DraftsからシンプルメモへのCaptio移行は簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはCaptioと同じ「書いたらワンタップで送信」の設計です。Draftsでメールアクションを手動実行していた方は、シンプルメモに切り替えるだけでワンタップ送信になります。メールアドレスを設定するだけで移行完了です。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span>使い方</span></a><a href="/use-cases/"><span>活用事例</span></a><a href="/vs/"><span>比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/"><span>使い方</span></a></li>
         <li><a href="/use-cases/"><span>活用事例</span></a></li>
         <li><a href="/vs/"><span>比較</span></a></li>
@@ -214,7 +216,7 @@
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span>ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -408,7 +410,7 @@
 
 </main>
 
-  <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
         <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
@@ -435,12 +437,7 @@
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p></div></footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

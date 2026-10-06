@@ -230,14 +230,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/use-cases/teachers/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can teachers use this during class?","acceptedAnswer":{"@type":"Answer","text":"Yes. Only seconds from launch to send. No prolonged phone use in front of students."}},{"@type":"Question","name":"Is student information secure?","acceptedAnswer":{"@type":"Answer","text":"Memos waiting to send are AES-GCM encrypted on your device and sent only to the address you set. Memo bodies pass through Cloudflare and Resend at send time and are not persistently stored on our servers. Ordinary email is not end-to-end encrypted."}},{"@type":"Question","name":"Can I organize notes by class?","acceptedAnswer":{"@type":"Answer","text":"Prefix memos with class tags like [3-A]. Email search instantly filters by class. Gmail filters can auto-label too."}},{"@type":"Question","name":"Is there a free plan?","acceptedAnswer":{"@type":"Answer","text":"The free plan offers 3 sends per day, with no time limit. Enough for key teaching notes."}},{"@type":"Question","name":"Can I share notes with other teachers?","acceptedAnswer":{"@type":"Answer","text":"Forward the emails to your grade team's mailing list. You can also set the list as the destination, but there is only one destination, so memos go to the list's address rather than your own (the list address has to receive the verification code, and the list has to accept email from non-members)."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -253,7 +255,7 @@
 <a class="global-nav__cta" data-cta-cluster="use-case" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -384,7 +386,7 @@
 </ul>
 </section>
 </main>
-<footer class="footer"><div class="container"><nav aria-label="Footer navigation" class="footer__nav">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">Product</p>
 <a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
@@ -415,12 +417,7 @@
         © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p></div></footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body>
 </html>

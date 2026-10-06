@@ -261,14 +261,16 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/use-cases/work-tasks/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"会議中にメモを取るのに適していますか？","acceptedAnswer":{"@type":"Answer","text":"はい。起動0.4秒（iPhone 16e・ウォーム起動の実測）で即入力できるため、会議の流れを止めずにアクションアイテムを素早くメモできます。ワンタップ送信で自分のメールに届くので、会議後に確認できます。"}},{"@type":"Question","name":"複数のプロジェクトのタスクを管理できますか？","acceptedAnswer":{"@type":"Answer","text":"はい。1行目がそのままメールの件名になるので、1行目の先頭に「[プロジェクトA]」「[プロジェクトB]」などを付ければ、メール側でフィルタリングしてプロジェクト別に管理できます。"}},{"@type":"Question","name":"タスクアプリとの違いは？","acceptedAnswer":{"@type":"Answer","text":"専用タスクアプリはアプリを開かないと確認できませんが、Obsidian連携シンプルメモはメールに送るので、毎日使う受信トレイでタスクを自然に目にします。追加ツールの習慣化が不要です。"}},{"@type":"Question","name":"締め切りのリマインダーを送ることはできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。「〇〇 締め切り: 3/15」のようにメモしてメール送信しておけば、メールクライアントのリマインダー機能と組み合わせて活用できます。Gmailなら「スヌーズ」機能で指定日に再表示も可能です。"}},{"@type":"Question","name":"チームメンバーにタスクを共有できますか？","acceptedAnswer":{"@type":"Answer","text":"メモをメールで受け取った後、そのメールをチームメンバーに転送するだけで共有できます。宛先は1つだけなので、複数のアドレスに同時に送ることはできません。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
         <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
         <li><a href="/vs/"><span lang="ja">比較</span></a></li>
@@ -284,7 +286,7 @@
         <a data-cta-variant="v1" data-cta-cluster="use-case" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -523,7 +525,7 @@
 </section>
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -555,12 +557,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

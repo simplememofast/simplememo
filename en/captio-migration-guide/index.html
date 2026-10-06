@@ -252,16 +252,16 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/captio-migration-guide/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can I get a refund for my Captio purchase?","acceptedAnswer":{"@type":"Answer","text":"If you purchased Captio and it no longer works, you may be eligible for a refund from Apple. Go to reportaproblem.apple.com, sign in with your Apple ID, find the Captio purchase in your history, and select \"I'd like to request a refund.\" Apple reviews refund requests case by case, and older purchases may not be eligible. Refunds are handled by Apple, not by us."}},{"@type":"Question","name":"What about my Captio data on other devices?","acceptedAnswer":{"@type":"Answer","text":"If you used Captio on multiple devices (iPhone, iPad, etc.), the same principle applies: your memos were delivered to your email inbox, not kept on the devices. Each memo was sent as an email when you tapped Send. As long as you have access to the email account you used with Captio, you can find the memos you sent from any of those devices."}},{"@type":"Question","name":"Does Simple Memo work with Gmail, Outlook, and iCloud?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo works with any email address. You can set Gmail, Outlook (Hotmail), Yahoo Mail, iCloud Mail, corporate email addresses, or any other email provider as your destination. Simple Memo sends through Cloudflare Workers and the Resend API, so it does not need OAuth access to your mailbox; you enter your email address and verify it with a code. Delivery still depends on the recipient provider's filtering and availability."}},{"@type":"Question","name":"Can I use Simple Memo offline?","acceptedAnswer":{"@type":"Answer","text":"Yes. When you send a memo without an internet connection, Simple Memo encrypts it with AES-GCM and stores it in a local Outbox on your device. When your device reconnects, Simple Memo retries automatically, either the next time you open the app or in the background. Open the app to check anything still pending. This means you can capture thoughts in the subway, on a plane, or in any area with poor reception and send them once you are back online."}},{"@type":"Question","name":"Is there an Android alternative to Captio?","acceptedAnswer":{"@type":"Answer","text":"This guide focuses on iOS because Captio was an iOS-only app. For Android users looking for a similar send-to-email experience, there are some options available on the Google Play Store (such as \"Email Me\" or \"Note to Self\"). However, Simple Memo is currently iOS-only. If you are an Android user, we recommend searching the Play Store for \"email to self\" or \"send to email\" apps and reading recent reviews to find one that is actively maintained."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use Cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
         <li><a href="/en/use-cases/">Use Cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
@@ -277,7 +277,7 @@
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           Download
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -612,7 +612,7 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -648,11 +648,7 @@
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

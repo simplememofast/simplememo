@@ -34,6 +34,8 @@ const write = process.argv.includes('--write');
 
 /** Every asset served with an immutable cache header and referenced with ?v=. */
 const ASSETS = [
+  'assets/css/site-chrome.css',
+  'js/site-chrome.js',
   'assets/css/capture-editorial.css',
   'assets/css/capture-content.css',
   'assets/css/capture-next.css',

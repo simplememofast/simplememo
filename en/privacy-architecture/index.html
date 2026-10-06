@@ -146,14 +146,16 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/privacy-architecture/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is any external server involved in the Obsidian vault append?","acceptedAnswer":{"@type":"Answer","text":"No. The append is a direct file write into the vault folder on your device (URI fallback when direct access isn't available), with no plugin and no network involved. Local draft saves that don't involve sending an email also stay entirely on-device."}},{"@type":"Question","name":"Does AI tagging send my memo to Apple or anyone else's servers?","acceptedAnswer":{"@type":"Answer","text":"No. Tagging runs on-device via Apple Foundation Models with no network calls, and memos are not sent to an external server for tagging. On devices without Apple Intelligence, it falls back to on-device lightweight formatting — still with nothing sent externally. Details on the AI auto-tagging page."}},{"@type":"Question","name":"Why not make it E2EE?","acceptedAnswer":{"@type":"Answer","text":"Because the destination is your everyday email inbox. If your mail server can show you the memo, it can decrypt it — so E2EE is structurally impossible here. Choosing E2EE would require a dedicated client and give up the \"readable on any device, in any mail app\" property this app exists for. For E2EE-first needs we genuinely recommend Standard Notes and similar apps."}},{"@type":"Question","name":"How does this page relate to the Privacy Policy?","acceptedAnswer":{"@type":"Answer","text":"The legally binding text is the Privacy Policy (especially §12, \"Technical notes on encryption\"). This page rearranges the same facts as a route map, organized around what Obsidian users ask most — whether things stay local. If they ever disagree, the Privacy Policy wins."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Simple Memo - for Obsidian</span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span>Guides</span></a><a href="/en/use-cases/"><span>Use Cases</span></a><a href="/en/vs/"><span>Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/"><span>Guides</span></a></li>
         <li><a href="/en/use-cases/"><span>Use Cases</span></a></li>
         <li><a href="/en/vs/"><span>Compare</span></a></li>
@@ -169,7 +171,7 @@
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span>Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -328,7 +330,7 @@
 
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -360,12 +362,7 @@
     </div>
   </footer>
 
-  <script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

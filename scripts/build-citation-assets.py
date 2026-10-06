@@ -40,6 +40,9 @@ def asset(path):
 
 
 def put(path, text):
+    if path.endswith(".html"):
+        from sync_shared_chrome import transform
+        text = transform(text, path)
     outputs[path] = text.rstrip() + "\n"
 
 

@@ -254,14 +254,16 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/email-me-app/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What are the benefits of switching from Email Me App to Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Email Me App can send more kinds of content (audio notes, images, multiple recipients); Simple Memo focuses on text memos. Reasons to switch are appending to your Obsidian vault, on-device AI titles and tags, and an Outbox and history encrypted on the device."}},{"@type":"Question","name":"Can I migrate my Email Me App data to Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Direct import is not available, but memos previously sent via Email Me App remain in your email inbox. Simple Memo sends to the same address, so new memos appear alongside your existing ones."}},{"@type":"Question","name":"Can I use Email Me App and Simple Memo simultaneously?","acceptedAnswer":{"@type":"Answer","text":"Yes, both can be installed and used at the same time. Try both and keep the one that fits how you capture."}},{"@type":"Question","name":"What exactly does Simple Memo encrypt?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo stores its Outbox and send history on the device with AES-GCM (Galois/Counter Mode) authenticated encryption. The emails it sends are not end-to-end encrypted. We could not find public information on Email Me App's on-device encryption."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span>Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span>Guides</span></a><a href="/en/use-cases/"><span>Use Cases</span></a><a href="/en/vs/"><span>Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span>Guides</span></a></li>
 <li><a href="/en/use-cases/"><span>Use Cases</span></a></li>
 <li><a href="/en/vs/"><span>Compare</span></a></li>
@@ -277,7 +279,7 @@
 <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" class="global-nav__cta" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span>Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -543,7 +545,7 @@
 </ul>
 </section>
 </main>
-<footer class="footer">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
 <div class="container">
 <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -575,12 +577,7 @@
 </div>
 </footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

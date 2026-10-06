@@ -193,14 +193,16 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/blog/memo-app-security-comparison#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can I compare note app security by encryption alone?","acceptedAnswer":{"@type":"Answer","text":"No. Check recipients and permissions, account access, device and note locks, recovery, and exported copies too. A cipher name does not establish protection against accidental sharing or data loss."}},{"@type":"Question","name":"Can E2EE support real-time collaboration?","acceptedAnswer":{"@type":"Answer","text":"CryptPad supports E2EE document collaboration. Review view/edit rights, ownership, links, and access lists. E2EE cannot recall every copy made by an authorized recipient."}},{"@type":"Question","name":"Can I keep an Apple note locked while collaborating?","acceptedAnswer":{"@type":"Answer","text":"A note with a lock setting cannot be used for collaboration. Remove that lock setting through the note’s menu before sharing; temporarily opening it with Face ID is different. Check iCloud Advanced Data Protection and sharing conditions separately."}},{"@type":"Question","name":"Why can someone edit a Notion page after I gave them view access?","acceptedAnswer":{"@type":"Answer","text":"They may receive broader rights through another route. Notion applies the broadest applicable access, so check workspace, parent-page, group, and other permissions."}},{"@type":"Question","name":"Will a password reset restore my encrypted notes?","acceptedAnswer":{"@type":"Answer","text":"It depends on the product and key management. Resetting a custom Apple Notes password does not unlock older notes. Microsoft cannot remove a lost OneNote section password. Check the product’s recovery options in advance."}},{"@type":"Question","name":"What should I check before replacing my device?","acceptedAnswer":{"@type":"Answer","text":"Finish syncing, open the text and attachments on the new device, and keep required keys and recovery methods available. Inspect exported content and its protection. Do not erase an old device that holds the only data or key copy."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
 <!-- Global Navigation -->
-<nav aria-label="Main navigation" class="global-nav">
+<nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
-<a class="global-nav__logo" href="/en/">
-<img alt="Simple Memo - for Obsidian" height="28" loading="eager" src="/assets/img/app-icon-56.png" width="28"/><span lang="en">Simple Memo - for Obsidian</span></a>
-<ul class="global-nav__links" id="navLinks">
+<a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/"><span lang="en">Guides</span></a><a href="/en/use-cases/"><span lang="en">Use Cases</span></a><a href="/en/vs/"><span lang="en">Compare</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
 <li><a href="/en/guides/"><span lang="en">Guides</span></a></li>
 <li><a href="/en/use-cases/"><span lang="en">Use Cases</span></a></li>
 <li><a href="/en/vs/"><span lang="en">Compare</span></a></li>
@@ -216,7 +218,7 @@
 <a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">
 <span lang="en">Download</span>
 </a>
-<button aria-controls="navLinks" aria-expanded="false" aria-label="Menu" class="global-nav__hamburger" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
 </div>
 </div>
 </nav>
@@ -310,7 +312,7 @@
 <li><a href="https://www.rfc-editor.org/rfc/rfc8446" rel="noopener" target="_blank">Rescorla, E. (2018). RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3. IETF.</a></li>
 </ul>
 </section>
-<footer class="footer"><div class="container"><nav aria-label="Footer navigation" class="footer__nav">
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Footer navigation" class="footer__nav">
 <div class="footer__col">
 <p class="footer__col-title">Product</p>
 <a class="footer__link" href="/en/download/"><span lang="en">Download</span></a>
@@ -341,11 +343,6 @@
         © 2026 Simple Memo - for Obsidian / YURIKA, K.K.
       </p></div></footer>
 
-<script>
-  // Close mobile nav when clicking a link
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
 <script defer="" src="/js/app-store-tracking.js?v=fd48cabcf6"></script>
 </body></html>

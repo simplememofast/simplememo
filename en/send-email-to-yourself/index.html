@@ -340,16 +340,16 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/send-email-to-yourself/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What is the fastest app to email yourself on iPhone?","acceptedAnswer":{"@type":"Answer","text":"We have not timed these apps under the same conditions. In the developer benchmark of August 11, 2026 (iPhone 16e, warm launch, from tap until the note accepts typing), Simple Memo - for Obsidian was ready in 0.4s, Drafts in 0.9s (its fastest of five runs; median 1.45s) and Apple Notes in 1.7s. Boomerang, Note To Self Mail, Email Me and Pigeon were not in that benchmark, and send times were not measured. The March 2026 timings in the earlier version of this page are withdrawn."}},{"@type":"Question","name":"Can I email myself notes for free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Most email-yourself apps offer free tiers. Simple Memo - for Obsidian allows 3 free sends per day. Boomerang is free to download, with an in-app purchase for a second address. Note To Self Mail is free with a pro upgrade for power features. You can also use the built-in iOS Shortcuts app to create a free send-to-self workflow with zero cost."}},{"@type":"Question","name":"What happened to the Captio app?","acceptedAnswer":{"@type":"Answer","text":"Captio's cloud service ended on October 1, 2024, about two years after the app left the App Store. The developer said he could no longer dedicate the resources needed to keep it stable and secure. Simple Memo - for Obsidian, Note To Self Mail, and Email Me are replacements that offer the same core function."}},{"@type":"Question","name":"Which email-yourself app works offline?","acceptedAnswer":{"@type":"Answer","text":"Sending always needs a connection, but several apps keep notes written offline. Simple Memo - for Obsidian stores memos you send while offline in an encrypted outbox (AES-GCM) and sends them when connectivity returns; Drafts keeps drafts in the app; Note To Self Mail and Pigeon list offline queuing or an offline mode, and Email Me queues notes written on the Apple Watch."}},{"@type":"Question","name":"Is emailing yourself notes better than using a note app?","acceptedAnswer":{"@type":"Answer","text":"It depends on your workflow. If you already check email daily and want zero extra apps to manage, emailing yourself is simpler and puts notes where you already look. Notes land in your inbox alongside to-dos and messages. If you need rich formatting, notebooks, or collaboration, a dedicated note app like Notion or Apple Notes is better."}},{"@type":"Question","name":"Do these apps work with Gmail, Outlook, and other providers?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo - for Obsidian, Boomerang, Email Me, and Pigeon send to the address you choose, so they work with providers such as Gmail, Outlook, Yahoo Mail and iCloud Mail (a corporate mail filter can hold or block messages from outside senders). Note To Self Mail can also send through your own email account and works with SMTP-compatible providers."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="Main navigation">
+  <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
-        Simple Memo - for Obsidian
-      </a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use Cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/en/guides/">Guides</a></li>
         <li><a href="/en/use-cases/">Use Cases</a></li>
         <li><a href="/en/vs/">Compare</a></li>
@@ -363,7 +363,7 @@
       </ul>
       <div class="global-nav__actions">
         <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Download</a>
-        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -753,7 +753,7 @@
 
   </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
@@ -789,11 +789,7 @@
     </div>
   </footer>
 
-  <script>
-  document.querySelectorAll('#navLinks a').forEach(function(a){
-    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
-  });
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>

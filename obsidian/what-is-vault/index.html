@@ -308,14 +308,17 @@
       .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
     }
   </style></noscript>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
+<script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body class="capture-editorial capture-brand capture-full">
   <a class="ce-skip" href="#main-content">本文へスキップ</a>
   <!-- Global Navigation -->
-  <nav class="global-nav" aria-label="メインナビゲーション">
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
-      <a href="/" class="global-nav__logo"><img src="/assets/img/app-icon-56.png" alt="" width="36" height="36" loading="eager"><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
-      <ul class="global-nav__links" id="navLinks">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
         <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
         <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
         <li><a href="/vs/"><span lang="ja">比較</span></a></li>
@@ -331,7 +334,7 @@
         <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
-        <button class="global-nav__hamburger" type="button" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
       </div>
     </div>
   </nav>
@@ -613,9 +616,9 @@ webviewer</code></pre>
 </section>
 </main>
 
-  <footer class="footer">
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
     <div class="container">
-      <a href="/" class="capture-footer-brand"><img src="/assets/img/app-icon-256.png" alt="" width="48" height="48" loading="lazy"><span class="capture-brand-name"><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
@@ -647,44 +650,7 @@ webviewer</code></pre>
     </div>
   </footer>
 
-    <script>
-  // Disclosure navigation: keep the visual state and accessible state together.
-  (function(){
-    var nav = document.querySelector('.global-nav');
-    var menu = document.getElementById('navLinks');
-    var toggle = nav.querySelector('.global-nav__hamburger');
-    function setOpen(open){
-      menu.classList.toggle('open', open);
-      toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニュー');
-    }
-    toggle.addEventListener('click', function(){
-      var open = !menu.classList.contains('open');
-      setOpen(open);
-      if(open) menu.querySelector('a').focus();
-    });
-    menu.querySelectorAll('a').forEach(function(a){
-      a.addEventListener('click', function(){ setOpen(false); });
-    });
-    document.addEventListener('keydown', function(e){
-      if(e.key === 'Escape' && menu.classList.contains('open')){
-        setOpen(false);
-        toggle.focus();
-      }
-    });
-    document.addEventListener('click', function(e){
-      if(!nav.contains(e.target)) setOpen(false);
-    });
-    nav.addEventListener('focusout', function(){
-      setTimeout(function(){ if(!nav.contains(document.activeElement)) setOpen(false); }, 0);
-    });
-    window.matchMedia('(min-width: 1200px)').addEventListener('change', function(e){
-      var menuHadFocus = menu.contains(document.activeElement);
-      setOpen(false);
-      if(!e.matches && menuHadFocus) toggle.focus();
-    });
-  })();
-  </script>
+
   <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>
