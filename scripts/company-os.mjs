@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_STATE, observe, auditObservation, persistRun } from '../growth/lib/company-loop.mjs';
 import { compareMetrics } from '../growth/lib/company-metrics.mjs';
-import { collectData } from '../growth/lib/company-data.mjs';
+import { collectData,currentSiteAcquisition } from '../growth/lib/company-data.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
@@ -95,6 +95,8 @@ if(command==='record-apple-ads-observation') {
   result = await finish({ stateRoot, id: option('run'), evidenceFile });
 } else if (command === 'collect') {
   result = await collectData({ stateRoot, analytics: args.includes('--analytics') });
+} else if (command === 'acquisition-status') {
+  result=currentSiteAcquisition({stateRoot});
 } else if (['run', 'autonomy-lift', 'growth-autopilot'].includes(command)) {
   result = persistRun({ stateRoot, cadence: option('cadence', 'daily'), origin: option('origin', 'manual') });
 } else {
@@ -109,7 +111,7 @@ if(command==='record-apple-ads-observation') {
       stage_observability:observabilityStatus({stateRoot}), source_failures: o.failures };
   } else if (['autonomy-audit', 'growth-audit'].includes(command)) result = auditObservation(o);
   else if (command === 'review') result = saveReview(o, { stateRoot, cadence: option('cadence', 'daily') });
-  else if (command === 'growth-status') result = args.includes('--full') ? { ...o.growth, pipeline_health: o.automation, source_failures: o.failures } : compactGrowth(o);
+  else if (command === 'growth-status') result = args.includes('--full') ? { ...o.growth, site_acquisition:currentSiteAcquisition({stateRoot}), pipeline_health: o.automation, source_failures: o.failures } : compactGrowth(o,{stateRoot});
   else if (command === 'content-gap') result = o.growth.content_gaps;
   else if (command === 'aio-audit') result = o.growth.aio;
   else throw new Error('Unknown company command');

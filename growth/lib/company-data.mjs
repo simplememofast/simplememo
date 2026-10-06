@@ -13,9 +13,10 @@ import { appsflyerConsumerEvidence } from './company-native-evidence.mjs';
 import { appleAdsConnection } from './company-connection-evidence.mjs';
 import { collectDailyGsc } from './company-daily-gsc.mjs';
 import { retainedDaily } from './daily-gsc-handoff.mjs';
-import { retainCtaMeasurement } from './company-cta-measurement.mjs';
+import { retainCtaMeasurement, companyCtaMeasurement } from './company-cta-measurement.mjs';
 import { collectBingHandoff } from './company-bing.mjs';
 import { collectNativeResources } from './company-resource-usage.mjs';
+import { summarizeAscAcquisition, summarizeAscPeriods, summarizeAppsFlyerAcquisition, siteAcquisition } from './company-acquisition.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -105,6 +106,56 @@ export function collectAsc({ stateRoot, iosRepo = path.join(os.homedir(), 'simpl
     atomicJson(path.join(dir, path.basename(file)), value);
     return { path: file, sha256: hash(raw), observed_at: value.fetched_at ?? value.generated_at ?? null };
   });
+  // Reuse the original Apple producer's actual acquisition rows, not just its
+  // success/status flag. Optional reports never prevent revenue/crash ingestion.
+  const status = read(path.join(dir, 'status.json'));
+  const acquisition = { schema_version: 1, commit: sha, observed_at: status.fetched_at ?? null,
+    collected_at: now.toISOString(), state: 'observed_reports', reports: {}, artifacts: [], failures: [] };
+  for (const slug of ['app-downloads-standard', 'app-downloads-detailed']) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(status.date ?? '')) {
+      acquisition.failures.push({ report: slug, reason: 'invalid_report_date' }); continue;
+    }
+    const file = `data/asc/${status.date}/${slug}.json`;
+    try {
+      const raw = run('git', ['show', sha + ':' + file], { cwd: iosRepo });
+      const value = JSON.parse(raw);
+      const expected = slug === 'app-downloads-standard' ? 'App Downloads Standard' : 'App Downloads Detailed';
+      if (value.report !== expected) throw new Error('Wrong acquisition report');
+      const destination = `acquisition-${slug}.json`;
+      atomicJson(path.join(dir, destination), value);
+      const summary = summarizeAscAcquisition(value);
+      acquisition.reports[slug] = summary;
+      acquisition.artifacts.push({ path: file, local_file: destination,
+        sha256: hash(fs.readFileSync(path.join(dir, destination))), source_sha256: hash(raw) });
+      if (summary.state !== 'observed_rows') acquisition.failures.push({ report: slug, reason: summary.state });
+    } catch { acquisition.failures.push({ report: slug, reason: 'report_unavailable_or_invalid' }); }
+  }
+  for(const granularity of ['WEEKLY','MONTHLY']) {
+    const key=`app-downloads-detailed-${granularity.toLowerCase()}`;
+    const prefix='data/aso/product-pages/app-downloads-detailed'+(granularity==='MONTHLY'?'/monthly':'');
+    try {
+      const retrieval=JSON.parse(run('git',['show',`${sha}:${prefix}/retrieval.json`],{cwd:iosRepo}));
+      const ids=retrieval.instance_ids;
+      if(!Array.isArray(ids) || ids.length>32 || new Set(ids).size!==ids.length
+        || ids.some(id=>typeof id!=='string'||!/^[0-9a-f-]{36}$/i.test(id))
+        || retrieval.instance_count!==ids.length)throw new Error('Period manifest unavailable');
+      const instances=ids.map(id=>{
+        const value=JSON.parse(run('git',['show',`${sha}:${prefix}/instances/${id}.json`],{cwd:iosRepo}));
+        if(value.instance_id!==id)throw new Error('Period instance mismatch');
+        return value;
+      });
+      const destination=`acquisition-${key}.json`;
+      const bundle={retrieval,instances};
+      atomicJson(path.join(dir,destination),bundle);
+      const summary=summarizeAscPeriods(bundle,granularity);
+      acquisition.reports[key]=summary;
+      acquisition.artifacts.push({path:prefix,local_file:destination,sha256:hash(fs.readFileSync(path.join(dir,destination)))});
+      if(summary.state!=='observed_rows')acquisition.failures.push({report:key,reason:summary.state});
+    }catch {acquisition.failures.push({report:key,reason:'period_manifest_unavailable_or_invalid'});}
+  }
+  if (acquisition.failures.length) acquisition.state = 'partial';
+  atomicJson(path.join(dir, 'site-acquisition.json'), acquisition);
+  artifacts.push({path:'site-acquisition.json',sha256:hash(fs.readFileSync(path.join(dir,'site-acquisition.json'))),observed_at:acquisition.observed_at});
   const receipt = { source: 'app_store_connect', collected_at: now.toISOString(), commit: sha, artifacts,
     status: 'reused_existing_outputs', note: 'Provider absence and report maturity retain their original state; no new ASC fetch.' };
   atomicJson(path.join(dir, 'receipt.json'), receipt);
@@ -191,14 +242,32 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
   if (af.evidence) {
     try {
       const result = verifyAppsFlyer(af.evidence); af.quality = result.quality; af.population = result.population;
+      af.site_acquisition = summarizeAppsFlyerAcquisition(fs.readFileSync(path.join(af.evidence,'report.csv'),'utf8'));
       if (result.quality.missing_dates.length || result.quality.missing_metric_columns.length) af.status = 'PARTIAL';
     } catch {af.status='BLOCKED';af.reason='retained_aggregate_integrity_failed';}
   }
   const ga = connection('ga4-funnel');
-  if (ga.evidence) {try {const p = read(ga.evidence); ga.reports = p.queries.map(q => ({ file: q.file, result: q.result.rows })); ga.interpretation = p.interpretation;}catch{ga.status='BLOCKED';ga.reason='retained_report_unavailable';}}
+  if (ga.evidence) {try {
+    const bytes=fs.readFileSync(ga.evidence);
+    if(hash(bytes)!==ga.collection.sha256)throw new Error('GA4 report integrity failed');
+    const p=JSON.parse(bytes); ga.reports=p.queries.map(q=>({file:q.file,result:q.result.rows})); ga.interpretation=p.interpretation;
+  }catch{ga.status='BLOCKED';ga.reason='retained_report_unavailable_or_invalid';}}
   const optional = file => { try { return read(path.join(data, file)); } catch { return null; } };
   const ascStatus = optional('asc/status.json');
   const ascReceipt = optional('asc/receipt.json');
+  let siteAcquisition = { state: 'not_collected', reports: {} };
+  try {
+    const file=path.join(data,'asc/site-acquisition.json'), bytes=fs.readFileSync(file), value=JSON.parse(bytes);
+    const artifact=ascReceipt?.artifacts?.find(a=>a.path==='site-acquisition.json');
+    if(ascReceipt.status!=='reused_existing_outputs' || value.commit!==ascReceipt.commit
+      || hash(bytes)!==artifact?.sha256)throw new Error('Acquisition receipt mismatch');
+    for(const a of value.artifacts) {
+      if(!['acquisition-app-downloads-standard.json','acquisition-app-downloads-detailed.json','acquisition-app-downloads-detailed-weekly.json','acquisition-app-downloads-detailed-monthly.json'].includes(a.local_file)
+        || hash(fs.readFileSync(path.join(data,'asc',a.local_file)))!==a.sha256)throw new Error('Acquisition source mismatch');
+    }
+    siteAcquisition=value;
+  } catch {if(ascReceipt?.artifacts?.some(a=>a.path==='site-acquisition.json') || ascReceipt?.status==='stale')
+    siteAcquisition={state:'unavailable',reason:'acquisition_receipt_unavailable_or_invalid',reports:{}};}
   const revenue = optional('asc/latest.json');
   const preflight = fs.readdirSync(data).filter(n => /^preflight-\d+\.json$/.test(n)).sort().at(-1);
   const bq = preflight ? read(path.join(data, preflight)) : null;
@@ -218,6 +287,7 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
     app_store_connect: { status: ascStatus?.state === 'complete' && ascReceipt?.status !== 'stale' ? 'CONNECTED' : 'PARTIAL', observed_at: ascStatus?.fetched_at ?? null,
       collection_state:ascReceipt?.status??'unknown',
       evidence: path.join(data, 'asc/receipt.json'), report_status: ascStatus, revenue,
+      site_acquisition: siteAcquisition,
       crash_performance: optional('asc/app-crashes.json'), note: 'Missing ASC reports remain missing; App Store proceeds and AppsFlyer LTV are different series' },
     apple_search_ads: appleAdsConnection(optional('apple-ads-configuration.json'), now) };
 }
@@ -260,4 +330,18 @@ export async function collectData({ stateRoot, now = new Date(), analytics = fal
     atomicJson(path.join(events,crypto.randomUUID()+'.json'),receipt);
     return receipt;
   } finally { release(); }
+}
+
+// Display uses current retained bytes/receipts, not a cached connections view.
+// No provider request, workflow dispatch or observation refresh happens here.
+export function currentSiteAcquisition({stateRoot,now=new Date(),readThread}={}) {
+  try {
+    const connections=connectionView({stateRoot,now,readThread});
+    const cta=companyCtaMeasurement({stateRoot,now,connection:connections.ga4});
+    return siteAcquisition(connections,cta);
+  } catch {
+    const unavailable=siteAcquisition();
+    unavailable.state='retained_sources_unavailable_or_invalid';
+    return unavailable;
+  }
 }
