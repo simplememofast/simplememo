@@ -37,6 +37,7 @@ const ASSETS = [
   'assets/css/capture-editorial.css',
   'assets/css/capture-content.css',
   'assets/css/capture-next.css',
+  'assets/css/capture-third.css',
   'assets/css/home-hero.css',
   'assets/css/home-banners.css',
   'assets/css/editorial-resources.css',
