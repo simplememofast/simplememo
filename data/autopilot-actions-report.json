@@ -2,14 +2,14 @@
   "as_of_jst": "2026-10-07",
   "routine_snapshot_sha256": "6cb24923a477f976d3e0d16e6acd8dcebe4b241f8b730f16207eba313f56fc05",
   "viewport_measurement": {
-    "main_sha": "44e242177be593b68a943cabd7635cacad4912a0",
-    "head_sha": "ad44ea73d6f80154cb39193134a96fb9a2356fe3",
-    "run_id": 37553524774,
+    "main_sha": "9ef50d3fb99faeb258c9e2d03ba96e53c215f451",
+    "head_sha": "4a75fcb19034cab1973d307d0d9ec953cd9ecd78",
+    "run_id": 37561152195,
     "attempt": 1,
-    "started_at": "2026-10-07T00:44:16Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/37553524774/attempts/1",
-    "job_id": 112574331364,
-    "state": "healthy",
+    "started_at": "2026-10-07T02:15:57Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/37561152195/attempts/1",
+    "job_id": 112598464288,
+    "state": "overflow",
     "report": {
       "version": 1,
       "static_problems": 0,
@@ -25,20 +25,20 @@
           "expected": 1844,
           "measured": 1844,
           "failures": 0,
-          "problems": 0,
+          "problems": 1,
           "complete": true
         },
         "webkit": {
           "expected": 500,
           "measured": 500,
           "failures": 0,
-          "problems": 0,
+          "problems": 1,
           "complete": true
         }
       }
     }
   },
-  "open_total": 6,
+  "open_total": 7,
   "deferred": [],
   "pending_pr": [
     {
@@ -150,6 +150,14 @@
       "age_days": 0,
       "auto": null,
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1"
+    },
+    {
+      "id": "act-viewport-measurement",
+      "title": "描画検査の未測定・横はみ出しを解消する",
+      "detail": "最新mainの描画検査: overflow (overflow)。https://github.com/simplememofast/simplememo/actions/runs/37561152195/attempts/1。Blink深い面・全面とWebKitの全対象を実測し、新しい横はみ出しゼロを確認する。CI全体の成功だけで閉じない。",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "描画の全範囲実測は未確認 (overflow)"
     }
   ],
   "executed": [
