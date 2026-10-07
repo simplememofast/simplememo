@@ -257,11 +257,14 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/mail-to-self/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動（iPhone 16e・ウォーム起動の実測）で2ステップ送信を実現しています。"}},{"@type":"Question","name":"メーラーのSMTP設定なしで自分にメールできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを登録して確認すれば、すぐにメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。"}},{"@type":"Question","name":"電波の悪い場所で自分にメールしたメモが消えることはありますか？","acceptedAnswer":{"@type":"Answer","text":"メーラー経由の場合、通信エラーの時にどうなるか（送信トレイに残るか、下書きに戻るかなど）は、メールアプリしだいです。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。"}},{"@type":"Question","name":"Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -293,7 +296,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>メモアプリ比較</span>
 
@@ -310,27 +313,27 @@
           <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Mail to Selfアプリとは</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>比較表：シンプルメモ vs 他のMail to Selfアプリ</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>3つのメール自分送信の違い</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Entity Definition -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>Mail to Selfアプリとは</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>「Mail to Self」（自分にメールを送る）アプリは、素早くメモを取って自分のメールアドレスに送信するためのアプリの総称です。EmailMe、Note To Self Mail、MeMail、Captio（2024年10月廃止）などが代表的です。SMTP設定（メールサーバーのアドレス・ポート番号・パスワード）が必要なアプリは、技術的な知識がないユーザーにはハードルが高くなります。オフライン対応や端末内暗号化の有無もアプリによって違います（ここでは各アプリについて確かめていません）。Obsidian連携シンプルメモは、Cloudflare Workersリレー・AES-GCM暗号化・Outboxアーキテクチャで、設定の手間を省き、圏外で書いたメモも端末に残します。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>比較表：シンプルメモ vs 他のMail to Selfアプリ</span>
 
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">一般的なMail to Selfアプリ</th></tr></thead>
             <tbody>
@@ -347,14 +350,14 @@
           </table>
 
         </div>
-      </section>
+      </div></section>
 
       <!-- 5 Key Differences -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>3つのメール自分送信の違い</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
@@ -373,26 +376,26 @@
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- The Problem with Emailing Yourself -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>メーラーで自分にメール送信する手順の問題点</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>標準のメールアプリで自分にメモを送る手順を確認しましょう。メールアプリを開く → 新規作成をタップ → 宛先に自分のアドレスを入力 → 件名を入力 → 本文にメモを入力 → 送信をタップ。合計6ステップです。しかもメーラーを開いた瞬間、他のメールが目に入り注意が逸れることも。Obsidian連携シンプルメモなら：アプリを開く → メモを入力 → 送信をタップ。3ステップで済みます。宛先の入力は不要で、件名はメモの1行目から自動設定されます。毎日何度もメモを送る人にとって、このステップ数の差は小さくありません。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>どちらを選ぶべきか</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
@@ -418,14 +421,14 @@
           </div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>よくある質問</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？</summary><div class="faq-answer"><p>メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.4秒起動（iPhone 16e・ウォーム起動の実測）で2ステップ送信を実現しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メーラーのSMTP設定なしで自分にメールできますか？</summary><div class="faq-answer"><p>はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを登録して確認すれば、すぐにメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。</p></div></details></div>
@@ -433,7 +436,7 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？</summary><div class="faq-answer"><p>はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -452,11 +455,11 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span>関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/">
             <span>メモアプリ比較一覧</span>
@@ -491,7 +494,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

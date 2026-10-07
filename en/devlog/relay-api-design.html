@@ -480,11 +480,14 @@
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -515,7 +518,7 @@
 <!-- Content -->
 <main class="page-content">
 <div class="container">
-<h1 class="page-content__title">
+<h1 class="page-content__title sd-title">
 
 <span lang="en">Relay API Design: Building Email Infrastructure on Cloudflare Workers</span>
 </h1>
@@ -525,14 +528,14 @@
 <div class="" lang="en">
 <p class="article-meta">Published February 13, 2026</p>
 <div class="page-content__body">
-<h2>1. Why We Didn't Use a Major Provider's Email API</h2>
+<h2 id="reading-01">1. Why We Didn't Use a Major Provider's Email API</h2>
 <p>When building an app that sends memos via email, a major mail provider's sending API is the first thing that comes to mind. However, for indie developers, the Google OAuth verification process presents a formidable barrier.</p>
 <p>Apps that haven't passed Google OAuth verification display a warning screen: "This app isn't verified by Google." For a memo app, this warning is devastating. Users send their personal thoughts and private information as memos. If "unverified" appears during their very first experience, who would trust this app?</p>
 <p>The Google OAuth verification process is a steep climb for solo developers. Preparing a privacy policy, justifying scope requirements, undergoing security assessments -- for a team at a large company, this is routine. But for a solo-developed app, the cost of going through all this just for a single email-sending feature is disproportionately high.</p>
 <p>What we needed was a solution that could send emails without compromising user trust and without the complexity of OAuth verification. The answer was building our own Relay API.</p>
-<h2>2. Cloudflare Workers + Resend API Architecture</h2>
+<h2 id="reading-02">2. Cloudflare Workers + Resend API Architecture</h2>
 <p>The Relay API architecture is simple yet robust. It receives requests from the iOS app and relays them to an email delivery service -- a design focused on doing exactly one thing well.</p>
-<div class="arch-diagram">
+<div class="arch-diagram" tabindex="0">
 <span class="node">iOS App</span>
 <span class="arrow"> → </span>
 <span class="node">Relay API (Cloudflare Workers)</span>
@@ -544,7 +547,7 @@
 <p><strong>Cloudflare Workers</strong> is a serverless platform that executes TypeScript code at edge locations around the world. According to Cloudflare, Workers runs code in lightweight isolates, which removes the cold starts of virtual-machine-based serverless platforms.</p>
 <p><strong>Resend API</strong> is a modern email delivery service. It makes SPF/DKIM/DMARC configuration straightforward, and its API is simple to call from TypeScript.</p>
 <p>On cost, the Cloudflare Workers Free plan allows 100,000 requests a day, and the Resend Free plan allows 100 emails a day and 3,000 a month (each provider's pricing page, October 2026). You can start small and move to a paid plan as sending grows.</p>
-<h2>3. Email Address Verification (6-Digit Code)</h2>
+<h2 id="reading-03">3. Email Address Verification (6-Digit Code)</h2>
 <p>The Relay API only sends memos to verified email addresses. This is the most fundamental layer of abuse prevention.</p>
 <p>Before any memos can be sent, the destination email address must go through a verification flow:</p>
 <ul>
@@ -555,9 +558,9 @@
 </ul>
 <p>This mechanism prevents unauthorized sending to other people's email addresses. The code goes to that address's inbox, so someone who cannot read the inbox cannot verify the address as a destination.</p>
 <p>Verification is a one-time process per email address. Once verified, users can continue sending memos without re-entering any code.</p>
-<h2>4. Multi-Layer Rate Limiting</h2>
+<h2 id="reading-04">4. Multi-Layer Rate Limiting</h2>
 <p>To prevent abuse of the email sending API, we implement rate limiting across multiple layers.</p>
-<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+<pre tabindex="0"><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
   <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
   <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
   <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
@@ -584,7 +587,7 @@
 <div class="info-card__desc">The per-device limits and the global daily cap were removed in June 2026. The sending limit in place now is the per-IP hourly cap.</div>
 </div>
 <p>Counters are stored in Cloudflare KV and reset per time window. This lets normal sending through while limiting abusive traffic.</p>
-<h2>5. Idempotency: Avoiding Duplicate Memos</h2>
+<h2 id="reading-05">5. Idempotency: Avoiding Duplicate Memos</h2>
 <p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
 <p>Idempotency handles this case:</p>
 <ul>
@@ -594,7 +597,7 @@
 <li>The app gets a success response (the same response as the first time)</li>
 </ul>
 <p>With this design, retries caused by an unstable network do not send the same memo twice within those 24 hours (the period Resend keeps the key). A resend after that cannot be recognized as a duplicate, so duplicates are prevented only within that window.</p>
-<h2>6. The Edge Computing Advantage</h2>
+<h2 id="reading-06">6. The Edge Computing Advantage</h2>
 <p>The primary reason for choosing Cloudflare Workers as our email infrastructure is the fundamental advantages of edge computing.</p>
 <div class="info-card">
 <div class="info-card__label">Latency</div>
@@ -622,7 +625,7 @@
 
 <div lang="en">
 <div class="page-content__body cross-links">
-<h2>Frequently Asked Questions</h2>
+<h2 id="reading-07" data-ce-number="07">Frequently Asked Questions</h2>
 <h3>Q. Why Cloudflare Workers?</h3>
 <p>It avoids virtual-machine cold starts, handles requests near the user, and can start on a free plan at a small scale.</p>
 <h3>Q. What's the email delivery rate?</h3>
@@ -637,7 +640,7 @@
 
 <div lang="en">
 <div class="cross-links">
-<h2>Related Articles</h2>
+<h2 id="reading-08" data-ce-number="08">Related Articles</h2>
 <div class="cross-links__grid">
 <a class="cross-links__item" href="/en/devlog/day1">
 <div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
@@ -663,11 +666,11 @@
 </div>
 </div>
 </div>
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://developers.cloudflare.com/workers/" rel="noopener" style="color:var(--accent);" target="_blank">Cloudflare Workers Documentation</a> — <span lang="en">Serverless execution platform for the relay API, processing requests at the edge</span></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc5321" rel="noopener" style="color:var(--accent);" target="_blank">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="en">Core email transmission protocol specification that the relay API adheres to</span></li>
@@ -675,7 +678,7 @@
 <li><a href="https://www.rfc-editor.org/rfc/rfc7208" rel="noopener" style="color:var(--accent);" target="_blank">RFC 7208 — Sender Policy Framework (SPF)</a> — <span lang="en">Sender domain authentication verifying email is sent from authorized IP addresses</span></li>
 <li><a href="https://resend.com/docs/introduction" rel="noopener" style="color:var(--accent);" target="_blank">Resend API Documentation</a> — <span lang="en">Email sending API provider called from Cloudflare Workers for mail delivery</span></li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page

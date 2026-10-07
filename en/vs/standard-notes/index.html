@@ -257,11 +257,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/standard-notes/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How does Standard Notes' E2E encryption differ from Simple Memo's AES-GCM?","acceptedAnswer":{"@type":"Answer","text":"Standard Notes encrypts data with XChaCha20-Poly1305 and stores it in the cloud (E2EE — even the server can't read it). Simple Memo encrypts the on-device Outbox and send history with AES-GCM-256, but email delivery itself goes through standard SMTP, so it is not end-to-end encrypted. The privacy posture is data minimization instead: memo bodies are not persistently stored on our servers (transit only during send). \"Encrypted server storage\" vs \"don't keep the body on the server\" — different design philosophies, both privacy-focused."}},{"@type":"Question","name":"Can I use Simple Memo without creating an account?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo requires no account creation — just enter your existing email address and start sending. No password to create; you confirm your recipient address with a 6-digit code."}},{"@type":"Question","name":"Does Simple Memo have extended editors like Standard Notes?","acceptedAnswer":{"@type":"Answer","text":"No. Simple Memo has no Markdown, spreadsheet, or code editors. It focuses on a single plain-text input to achieve 0.4s launch (warm, iPhone 16e) and one-tap send. For structured notes, Standard Notes excels. For instant capture, Simple Memo is purpose-built."}},{"@type":"Question","name":"For privacy, should I choose Standard Notes or Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"It depends on your use case. For encrypted long-term cloud storage of notes, Standard Notes. For quick memo capture sent to your email, without memo bodies being stored persistently on the relay, Simple Memo. Using both together — Simple Memo for capture, Standard Notes for archival — gives you the best of both privacy-first approaches."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -291,7 +294,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span lang="en">Memo App Comparison</span>
@@ -312,35 +315,35 @@
 
 <span lang="en">Standard Notes' E2E encryption is solid — the server itself can't read your content. Simple Memo takes a different approach: it encrypts the on-device Outbox and send history with AES-GCM-256, and does not persistently store memo bodies on its servers (they only transit during send). Memo delivery itself goes through standard SMTP, so this is not E2E encryption — it's a different privacy posture aimed at minimizing what the server ever holds.</span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>What is Standard Notes?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Encrypted Note Apps Compared: Standard Notes vs Simple Memo - for Obsidian</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Comparison Table: Simple Memo vs Standard Notes</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Entity Definition -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span lang="en">What is Standard Notes?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">Standard Notes is a privacy-first note-taking app with end-to-end encryption (XChaCha20-Poly1305) at its core. It runs on iOS, Android, Windows, Mac, and Linux, syncing notes to the cloud in encrypted form. As an open-source project, it supports extended editors (markdown, spreadsheets, code), tags, file attachments, and version history. The free plan covers basics; advanced features require a paid subscription. It appeals to users who want a full-featured note app without sacrificing privacy, particularly those who've moved away from services that monetize user data.</span>
 </p>
-</section>
-<section class="lp-section">
-<h2 class="lp-section__title">
+</div></section>
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span lang="en">Encrypted Note Apps Compared: Standard Notes vs Simple Memo - for Obsidian</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">Standard Notes and Simple Memo - for Obsidian both prioritize privacy, but their encryption approaches are fundamentally different. Standard Notes uses XChaCha20-Poly1305 end-to-end encryption. Notes are encrypted on-device and stored on Standard Notes' cloud servers in encrypted form. Since the server cannot read note contents, the security level is very high. The tradeoff is that your notes are readable only in the Standard Notes apps. Simple Memo - for Obsidian takes a different approach. The on-device Outbox and send history are encrypted with AES-GCM-256, but the email send itself goes through standard SMTP, so it is not end-to-end encrypted (so that you, the recipient, can read it in your normal mail client). The privacy posture is instead about data minimization: memo bodies are not persistently stored on our servers (transit only). Sent memos are kept by your mail service as emails in your inbox. It's "encrypt-then-store-in-cloud (E2EE)" vs "don't keep the body on the server (data minimization)." That said, Standard Notes excels in other areas as a full-featured note app — tag management, extended editors (markdown, code, spreadsheets), version history, and file attachments. Simple Memo - for Obsidian is capture-only — no manual organizing or editing (with Obsidian set up and AI Auto-Tagging on, on-device AI adds a title, tags and a type). The security model choice depends on your threat model. If "encrypted server storage, readable only in the Standard Notes app" is your requirement, Standard Notes. If "I want memos to land in my normal email inbox, but I don't want the sending infrastructure to keep them" is your model, Simple Memo - for Obsidian.</span>
 </p>
-</section>
+</div></section>
 <!-- Comparison Table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span lang="en">Comparison Table: Simple Memo vs Standard Notes</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 
 <table class="compare-table" lang="en">
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Standard Notes</th></tr></thead>
@@ -360,13 +363,13 @@
 </tbody>
 </table>
 </div>
-</section>
+</div></section>
 <!-- 5 Key Differences -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span lang="en">4 Differences Between Privacy-First Apps</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ul class="diff-list" lang="en">
 <li>
@@ -390,13 +393,13 @@
             Standard Notes' free plan covers basics only; extended editors need Productivity ($90/year) or higher, and file attachments need Professional ($120/year). Simple Memo's free plan allows 3 sends a day (saving to Obsidian only is Premium). Premium is $2.99/month or $29.99/year (¥500/month or ¥5,000/year in Japan) — significantly more affordable.
           </li>
 </ul>
-</section>
+</div></section>
 <!-- Who Should Choose Which -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span lang="en">Who Should Choose Which?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div class="choose-grid" lang="en">
 <div class="choose-card">
@@ -422,13 +425,13 @@
 </ul>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Standard Notes' E2E encryption differ from Simple Memo's AES-GCM?</summary><div class="faq-answer"><p>Standard Notes encrypts data with XChaCha20-Poly1305 and stores it in the cloud (E2EE — even the server can't read it). Simple Memo encrypts the on-device Outbox and send history with AES-GCM-256, but email delivery itself goes through standard SMTP, so it is not end-to-end encrypted. The privacy posture is data minimization instead: memo bodies are not persistently stored on our servers (transit only during send). "Encrypted server storage" vs "don't keep the body on the server" — different design philosophies, both privacy-focused.</p></div></details></div>
@@ -436,7 +439,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have extended editors like Standard Notes?</summary><div class="faq-answer"><p>No. Simple Memo has no Markdown, spreadsheet, or code editors. It focuses on a single plain-text input to achieve 0.4s launch (warm, iPhone 16e) and one-tap send. For structured notes, Standard Notes excels. For instant capture, Simple Memo is purpose-built.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">For privacy, should I choose Standard Notes or Simple Memo?</summary><div class="faq-answer"><p>It depends on your use case. For encrypted long-term cloud storage of notes, Standard Notes. For quick memo capture sent to your email, without memo bodies being stored persistently on the relay, Simple Memo. Using both together — Simple Memo for capture, Standard Notes for archival — gives you the best of both privacy-first approaches.</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -453,11 +456,11 @@
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 
 <span lang="en">Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/vs/">
 
@@ -488,7 +491,7 @@
 <span lang="en">FAQ</span>
 </a>
 </div>
-</section>
+</div></section>
 </div>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

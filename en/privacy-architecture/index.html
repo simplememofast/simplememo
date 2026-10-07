@@ -146,11 +146,14 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/privacy-architecture/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is any external server involved in the Obsidian vault append?","acceptedAnswer":{"@type":"Answer","text":"No. The append is a direct file write into the vault folder on your device (URI fallback when direct access isn't available), with no plugin and no network involved. Local draft saves that don't involve sending an email also stay entirely on-device."}},{"@type":"Question","name":"Does AI tagging send my memo to Apple or anyone else's servers?","acceptedAnswer":{"@type":"Answer","text":"No. Tagging runs on-device via Apple Foundation Models with no network calls, and memos are not sent to an external server for tagging. On devices without Apple Intelligence, it falls back to on-device lightweight formatting — still with nothing sent externally. Details on the AI auto-tagging page."}},{"@type":"Question","name":"Why not make it E2EE?","acceptedAnswer":{"@type":"Answer","text":"Because the destination is your everyday email inbox. If your mail server can show you the memo, it can decrypt it — so E2EE is structurally impossible here. Choosing E2EE would require a dedicated client and give up the \"readable on any device, in any mail app\" property this app exists for. For E2EE-first needs we genuinely recommend Standard Notes and similar apps."}},{"@type":"Question","name":"How does this page relate to the Privacy Policy?","acceptedAnswer":{"@type":"Answer","text":"The legally binding text is the Privacy Policy (especially §12, \"Technical notes on encryption\"). This page rearranges the same facts as a route map, organized around what Obsidian users ask most — whether things stay local. If they ever disagree, the Privacy Policy wins."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
@@ -180,7 +183,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>Privacy Architecture</span>
         </div>
@@ -193,13 +196,13 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span>Author: <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-08-11">August 11, 2026</time> · Analytics conditions checked: <time datetime="2026-09-30">September 30, 2026</time></span>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>The data path of a single memo</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>What stays on a server — and what never does</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Memo protection and usage analytics</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Data path -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>The data path of a single memo</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ol class="flow-steps">
           <li><span class="flow-step__title">Created on your device — protected with AES-GCM-256</span>A memo first enters the on-device Outbox (the unsent queue). Simple Memo - for Obsidian encrypts the on-device Outbox queue and send history with <strong>AES-GCM-256</strong> via Apple's CryptoKit. The 256-bit symmetric key is stored in Apple Keychain with protection against migration to another device; the app reads it for encryption and decryption. Backup copies of the key also cannot be used on another device. Before changing devices, confirm that important memos have reached their destination. <a href="/en/privacy">Key management details and Apple's explanation</a>. Offline, the memo waits here and auto-resends when the connection returns.</li>
           <li><span class="flow-step__title">Append to your Obsidian vault — entirely local</span>With the Obsidian integration enabled, the append is a <strong>direct file write into the vault folder on your device</strong> (with a URI fallback when direct access isn't possible). No plugin, no external server — the network never appears in this path.</li>
@@ -207,14 +210,14 @@
           <li><span class="flow-step__title">Email send — passes through over TLS, not persistently stored</span>Only at send time does the body <strong>pass through</strong> our relay API (Cloudflare Workers) and the delivery provider (Resend), over TLS. Memo bodies are not persistently stored on our servers, and they are not written to logs. The client uses <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
           <li><span class="flow-step__title">Into your own inbox — delivered over standard SMTP (= not E2EE)</span>Final delivery is standard SMTP. That is exactly why you can read your memos in your regular mail client — and also why Simple Memo - for Obsidian is <strong>not end-to-end encrypted</strong>. See "Stated plainly" below for the reasoning behind this trade-off.</li>
         </ol>
-      </section>
+      </div></section>
 
       <!-- What stays / what doesn't -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>What stays on a server — and what never does</span>
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table class="compare-table">
             <thead><tr><th scope="col">Data</th><th scope="col">Where</th><th scope="col">Retained?</th></tr></thead>
             <tbody>
@@ -228,13 +231,13 @@
             </tbody>
           </table>
         </div>
-      </section>
+      </div></section>
 
       <!-- Memo protection and analytics -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>Memo protection and usage analytics</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. GoogleSignIn and Firebase Authentication support optional email auto-fill; Firebase App Check protects backend access. <strong>First-party usage analytics and AppsFlyer handling depend on app version and analytics choices.</strong></span>
           </p>
@@ -242,32 +245,32 @@
             <span>In versions with a Usage analytics choice, first-party usage events and device-originated subscription analytics are off by default and begin after agreement. These versions keep the AppsFlyer SDK stopped until a separate acquisition choice is available. Since the September 28 server update, versions without the choice do not create new first-party usage or device-originated subscription analytics records; older AppsFlyer measurement may continue.</span>
           <span>Consented first-party analytics in supported versions record installation and session identifiers, usage events, and send outcomes. Older versions send AppsFlyer events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases. The same installation identifier is set as its Customer User ID. Event fields set by the app exclude raw email addresses, memo text, and verification codes, but first-party send IDs can link to recipient hashes, and acquisition and usage records can be connected. This analytics is not fully anonymous. See <a href="/en/privacy">policy 1(E)</a> for consent withdrawal and version conditions and the <a href="/en/privacy#technical">technical policy</a> for data fields.</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- Honest limitations -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>Stated plainly — this is not E2EE</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="honest-box">
           <p style="margin-bottom:.75rem;"><strong>Simple Memo - for Obsidian is not end-to-end encrypted — emails are delivered over standard SMTP.</strong> "Readable in your regular mail client" and "only you hold the decryption key at every hop" cannot both be true; we chose the former, by design.</p>
           <p style="margin-bottom:.75rem;">The on-device Outbox queue and send history are encrypted with AES-GCM-256, but that is <strong>on-device protection</strong>, not a substitute for E2EE (<a href="/en/glossary/e2e-encryption/" style="color:var(--accent);">what E2EE is, and why this app doesn't qualify</a>).</p>
           <p>If E2EE is a hard requirement for you, an E2EE-designed notes app such as Standard Notes is the better fit. With that stated, our commitments are: memo bodies not persistently stored on our servers, tagging completed on-device, and vault appends performed locally.</p>
         </div>
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>Frequently asked questions</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is any external server involved in the Obsidian vault append?</summary><div class="faq-answer"><p>No. The append is a direct file write into the vault folder on your device (URI fallback when direct access isn't available), with no plugin and no network involved. Local draft saves that don't involve sending an email also stay entirely on-device.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does AI tagging send my memo to Apple or anyone else's servers?</summary><div class="faq-answer"><p>No. Tagging runs on-device via Apple Foundation Models with no network calls, and memos are not sent to an external server for tagging. On devices without Apple Intelligence, it falls back to on-device lightweight formatting — still with nothing sent externally. Details on the <a href="/en/ai-tags/" style="color:var(--accent);">AI auto-tagging page</a>.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Why not make it E2EE?</summary><div class="faq-answer"><p>Because the destination is your everyday email inbox. If your mail server can show you the memo, it can decrypt it — so E2EE is structurally impossible here. Choosing E2EE would require a dedicated client and give up the "readable on any device, in any mail app" property this app exists for. For E2EE-first needs we genuinely recommend Standard Notes and similar apps.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does this page relate to the Privacy Policy?</summary><div class="faq-answer"><p>The legally binding text is the <a href="/en/privacy" style="color:var(--accent);">Privacy Policy</a> (especially §12, "Technical notes on encryption"). This page rearranges the same facts as a route map, organized around what Obsidian users ask most — whether things stay local. If they ever disagree, the Privacy Policy wins.</p></div></details></div>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -277,16 +280,16 @@
         <div class="cta-box__desc">
           <span>Free for 3 sends/day. Vault appends stay local; memo bodies never stay on our servers.</span>
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store" data-cta-position="mid">
           <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
         </a>
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>Related pages</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/en/privacy"><span>Privacy Policy (the binding text)</span></a>
           <a href="/en/devlog/privacy-first-design"><span>Dev log: privacy-first design</span></a>
@@ -297,7 +300,7 @@
           <a href="/en/vs/obsidian-share-sheet/"><span>Obsidian share sheet — honest comparison</span></a>
           <a href="/en/faq"><span>FAQ</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

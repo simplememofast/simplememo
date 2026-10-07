@@ -157,11 +157,14 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/obsidian-share-sheet/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian公式1.13の共有シートがあれば、シンプルメモは不要では？","acceptedAnswer":{"@type":"Answer","text":"共有シートからテキストやURLをVaultへ送るだけなら不要です。シンプルメモが価値を持つのは、共有元のない「思いつき」をウォーム起動の実測中央値0.4秒で書き始めたいとき、Apple Watchで音声入力しペアのiPhone経由で届けたいとき、音声の自動録音・AIタグ付与・メールへの二重化が欲しいときです。該当しなければ公式で十分です。"}},{"@type":"Question","name":"ショートカットの公式アクションとURLスキームはどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"モバイル1.11以降の公式ショートカットアクションはObsidianを開かずに追記できます。旧来の obsidian:// URLスキームは必ずObsidianを前面に起動し、本文切れ・ノート二重作成・別Vaultへの書き込みなどの失敗が起きやすい経路です。症状別の切り分けガイドにまとめています。"}},{"@type":"Question","name":"シンプルメモのVault追記にプラグインは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"不要です。Vaultフォルダへのファイル直接追記を基本とし、開けない場合はURIフォールバックで追記します。QuickAddのようなVault内テンプレート制御はできない代わりに、Obsidian側の設定はゼロです。仕組みはObsidian連携の解説ページをご覧ください。"}},{"@type":"Question","name":"メモの本文はどこかのサーバーに保存されますか？","acceptedAnswer":{"@type":"Answer","text":"恒常的な保存はされません。本文は送信の通過時のみサーバーを経由し、AIタグ付けはオンデバイス（Apple Foundation Models）で行われるため外部サーバーへ送られません。ただしメール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。プライバシー設計の全体像で通り道を図解しています。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -191,7 +194,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>メモアプリ比較</span>
         </div>
@@ -204,24 +207,24 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-08-11">2026年08月11日</time></span>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>前提: 4つのルートはどれも「正解」になり得る</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>比較表: 4ルートの得意・不得意</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>シンプルメモが負けるところ（正直に）</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Premise -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>前提: 4つのルートはどれも「正解」になり得る</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>iPhoneからObsidianのVaultにメモを入れる主なルートを4つ比べます。①<strong>公式1.13の共有シート</strong>（他アプリの「共有」からVaultのノートへ送る）、②<strong>ショートカット</strong>（モバイル1.11以降の公式アクションはアプリを開かず追記でき、旧来の obsidian:// URLスキームはObsidianを前面に起動する）、③<strong><a href="/obsidian/plugins/quickadd/">QuickAdd</a>などのコミュニティプラグイン</strong>（Vault内のテンプレート挿入・追記先を細かく制御）、④<strong>Obsidian連携シンプルメモ</strong>（ウォーム起動時のタップ→入力可能までの実測中央値が0.4秒で、送信後はメールとVaultの両方へ）。どれが合うかは「何を・どこから・どんな状況で」キャプチャするかで決まります。なお、<a href="https://obsidian.md/changelog/2026-09-02-mobile-v1.14.0/">モバイル1.14の先行提供版</a>には、iOS 26向けの公式Quick Captureも加わりました。ロック画面・コントロールセンター・ショートカットから保管庫の読み込みを待たずに入力できる、表の4ルートとは別の入口です。一般公開版での提供状況は利用前に確認してください。</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>比較表: 4ルートの得意・不得意</span>
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">公式共有シート（1.13）</th><th scope="col">ショートカット</th><th scope="col">QuickAdd</th><th scope="col">シンプルメモ</th></tr></thead>
             <tbody>
@@ -239,13 +242,13 @@
           </table>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;">シンプルメモの起動0.4秒は、タップ→キーボード入力可能までのウォーム起動・5回計測の中央値（2026-08-11実測・<a href="/blog/benchmark-methodology" style="color:var(--accent);">計測方法を公開</a>）。ショートカットの失敗モードは<a href="/obsidian/shortcuts-not-working/" style="color:var(--accent);">症状別トラブルシューティング</a>に詳述。</p>
-      </section>
+      </div></section>
 
       <!-- Where we lose (honest) -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>シンプルメモが負けるところ（正直に）</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="lose-card">
           <ul>
             <li><strong>Safariの記事URLや他アプリからの「共有」起点</strong>は公式共有シートの勝ちです。シンプルメモは共有シート拡張を持たないアプリ起動型なので、「見ているものを送る」用途では公式が自然です。</li>
@@ -255,13 +258,13 @@
             <li>すでに<strong>Obsidianを1日中開いて暮らしている人</strong>には、外部アプリを足す理由自体が薄いはずです。それは健全な結論です。</li>
           </ul>
         </div>
-      </section>
+      </div></section>
 
       <!-- Where we win -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>それでもシンプルメモを使う理由が残る4場面</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
@@ -284,13 +287,13 @@
             通常モードでは、送ったメモはVaultへの追記とは別の経路で、自分のメール受信箱にも届きます（「Obsidianのみに保存」の間はメールを送りません）。送信済みのメモなら、Vaultの同期事故やスマホの紛失があっても、メールというアプリに依存しない場所に控えが残ります（送信待ちのメモは端末内だけにあります）。
           </li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>どれを選ぶべきか</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">公式共有シート / ショートカット / QuickAdd向き</div>
@@ -316,20 +319,20 @@
         <p class="lp-section__lead" style="margin-top:1rem;">
           <span>併用が最も現実的です。「見ているものを送る」は公式共有シート、「頭に浮かんだものを送る」はシンプルメモ、「Vault内の定型作業」はQuickAdd——起点が違う道具は競合しません。</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>よくある質問</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian公式1.13の共有シートがあれば、シンプルメモは不要では？</summary><div class="faq-answer"><p>共有シートからテキストやURLをVaultへ送るだけなら不要です。シンプルメモが価値を持つのは、共有元のない「思いつき」をウォーム起動の実測中央値0.4秒で書き始めたいとき、Apple Watchで音声入力しペアのiPhone経由で届けたいとき、音声の自動録音・AIタグ付与・メールへの二重化が欲しいときです。該当しなければ公式で十分です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットの公式アクションとURLスキームはどう違いますか？</summary><div class="faq-answer"><p>モバイル1.11以降の公式ショートカットアクションはObsidianを開かずに追記できます。旧来の obsidian:// URLスキームは必ずObsidianを前面に起動し、本文切れ・ノート二重作成・別Vaultへの書き込みなどの失敗が起きやすい経路です。<a href="/obsidian/shortcuts-not-working/" style="color:var(--accent);">症状別の切り分けガイド</a>にまとめています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのVault追記にプラグインは必要ですか？</summary><div class="faq-answer"><p>不要です。Vaultフォルダへのファイル直接追記を基本とし、開けない場合はURIフォールバックで追記します。QuickAddのようなVault内テンプレート制御はできない代わりに、Obsidian側の設定はゼロです。仕組みは<a href="/obsidian/" style="color:var(--accent);">Obsidian連携の解説ページ</a>をご覧ください。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモの本文はどこかのサーバーに保存されますか？</summary><div class="faq-answer"><p>恒常的な保存はされません。本文は送信の通過時のみサーバーを経由し、AIタグ付けはオンデバイス（Apple Foundation Models）で行われるため外部サーバーへ送られません。ただしメール配送は標準SMTPを使うためE2EE（エンドツーエンド暗号化）ではありません。<a href="/privacy-architecture/" style="color:var(--accent);">プライバシー設計の全体像</a>で通り道を図解しています。</p></div></details></div>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -345,10 +348,10 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span>関連ページ</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/"><span>メモアプリ比較一覧</span></a>
           <a href="/vs/obsidian/"><span>vs Obsidian（アプリ全体の比較）</span></a>
@@ -360,7 +363,7 @@
           <a href="/privacy-architecture/"><span>プライバシー設計（データの通り道）</span></a>
           <a href="/faq"><span>よくあるご質問</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

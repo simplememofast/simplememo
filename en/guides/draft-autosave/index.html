@@ -256,11 +256,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/guides/draft-autosave/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Where is the save button for drafts?","acceptedAnswer":{"@type":"Answer","text":"There isn't one — saving is automatic. Your draft is saved automatically when you pause typing, so there's nothing to tap. Close the app and your in-progress text is still there next time."}},{"@type":"Question","name":"If the app crashes, do I lose my unfinished memo?","acceptedAnswer":{"@type":"Answer","text":"Your text is saved on-device about 0.4 seconds after you stop typing, and once more when the app goes to the background. After a crash or OS termination, you resume from the last save on the next launch (the last few characters typed just before a crash may not be kept)."}},{"@type":"Question","name":"Where are drafts stored? Are they sent to the cloud?","acceptedAnswer":{"@type":"Answer","text":"Drafts are stored on your iPhone, encrypted with AES-GCM. The app never sends them to the cloud or our servers (an iPhone backup may include them, still encrypted, but the key does not move to another device through a backup, so they cannot be read on another device). The encryption key is managed in Apple Keychain."}},{"@type":"Question","name":"When does it restore, and could it overwrite what I typed?","acceptedAnswer":{"@type":"Answer","text":"Restore happens on app launch, and only when the input field is empty — so if you've already started writing, it won't overwrite you."}},{"@type":"Question","name":"Does the draft stay after I send?","acceptedAnswer":{"@type":"Answer","text":"No. Sending a memo discards the draft immediately, so you start from a blank screen next time."}},{"@type":"Question","name":"Does auto-save slow the app down?","acceptedAnswer":{"@type":"Answer","text":"It is designed not to. Saving runs on a separate background path; launching, typing and sending do not write the file themselves (the write happens about 0.4 seconds after you stop typing)."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -290,7 +293,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span lang="en">Guide · Draft Auto-save</span>
@@ -307,7 +310,7 @@
 
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Sound familiar?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>How it works — three safety nets</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Privacy &amp; security</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="font-size:.95rem;">
@@ -317,11 +320,11 @@
 </div>
 </section>
 <!-- Problem -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span lang="en">Sound familiar?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">The most frustrating thing about a memo app is losing what you were writing. You tapped a notification mid-sentence, the battery died, iOS killed the app in the background — that "wait, what was I writing?" moment is over.</span>
@@ -340,38 +343,38 @@
 <div class="reason-card__desc"><span lang="en">No need to wonder "did I save?" Just focus on writing.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- How it works -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span lang="en">How it works — three safety nets</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ol class="steps-list" lang="en">
 <li><strong>Auto-saves when you pause</strong><br/>About 0.4 seconds after you stop typing, your draft is saved automatically. The interval accounts for IME composition (e.g., Japanese input), and there is nothing to tap to save.</li>
 <li><strong>A final save right before the app closes</strong><br/>When the app moves to the background — going home, switching apps — it saves once more. So if the OS later terminates the app in the background, the content up to that point is kept.</li>
 <li><strong>Restores on launch, only when empty</strong><br/>The next time you open the app, your draft is restored automatically if the input is empty. If you've already started typing, it won't overwrite you. And <strong>the moment you send, the draft is discarded</strong>, so you start fresh next time.</li>
 </ol>
-</section>
+</div></section>
 <!-- Privacy -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span lang="en">Privacy &amp; security</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="tip-box">
 <div class="tip-box__title"><span lang="en">On-device only, encrypted</span></div>
 
 <p lang="en">Drafts live <strong>on your iPhone</strong> — the app never sends them to the cloud or our servers. They're encrypted with <strong>AES-GCM</strong>, the key is held in Apple Keychain, and file protection means the data is readable only after the device is first unlocked. An iPhone backup (such as iCloud Backup) may include the draft, still encrypted, but the key does not move to another device through a backup, so the draft cannot be read on another device. This follows the same privacy-first design as the <a href="/en/blog/memo-app-privacy" style="color:var(--accent);">offline Outbox queue and send history</a>.</p>
 </div>
-</section>
+</div></section>
 <!-- Try it -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span lang="en">Try it yourself</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ol class="steps-list" lang="en">
 <li>On the memo screen, type a few characters (don't send yet).</li>
@@ -379,13 +382,13 @@
 <li>Open Simple Memo again — your unfinished text is still there.</li>
 <li>Tap Send, and the draft is cleared; next time you start from a blank screen.</li>
 </ol>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Where is the save button for drafts?</summary><div class="faq-answer"><p>There isn't one — saving is automatic. Your draft is saved automatically when you pause typing, so there's nothing to tap. Close the app and your in-progress text is still there next time.</p></div></details></div>
@@ -395,7 +398,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does the draft stay after I send?</summary><div class="faq-answer"><p>No. Sending a memo discards the draft immediately, so you start from a blank screen next time.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does auto-save slow the app down?</summary><div class="faq-answer"><p>It is designed not to. Saving runs on a separate background path; launching, typing and sending do not write the file themselves (the write happens about 0.4 seconds after you stop typing).</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -412,11 +415,11 @@
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span lang="en">Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/guides/"><span lang="en">All Setup Guides</span></a>
 <a href="/en/obsidian/"><span lang="en">Obsidian Integration</span></a>
@@ -425,7 +428,7 @@
 <a href="/en/blog/offline-memo-apps"><span lang="en">Offline Memo Apps</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

@@ -294,11 +294,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/shortcuts-not-working/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Should I use the built-in actions or the URL scheme?","acceptedAnswer":{"@type":"Answer","text":"If you can run 1.11 or later, prefer the built-in actions. Removing the URL construction step structurally eliminates the three most common failures: truncated bodies, wrong vaults and mismatched paths. The URL scheme still earns its place for operations the built-in actions don't cover, or on older versions."}},{"@type":"Question","name":"Can I just tell Siri to note something in Obsidian?","acceptedAnswer":{"@type":"Answer","text":"Obsidian 1.11 added Siri-triggered capture, so supported phrases work. If Siri doesn't respond, first check that Siri is enabled for that shortcut in the Shortcuts app. Be aware that phrasing like \"note this in…\" is easily interpreted as a command for the built-in Notes app and can land somewhere you didn't intend."}},{"@type":"Question","name":"How do I know for sure whether a shortcut failed?","acceptedAnswer":{"@type":"Answer","text":"Adding a \"Show Notification\" action at the end is the simplest option, but it only tells you the shortcut ran to completion. A write to the wrong path still reports success, so periodically search the vault for notes appearing where you didn't expect. An app whose destination is fixed by configuration removes the need for that audit entirely."}},{"@type":"Question","name":"My automation keeps asking for confirmation","acceptedAnswer":{"@type":"Answer","text":"Automations have a setting for whether to ask before running. When it's on, every run needs a tap. Whether you can turn it off depends on the trigger type, so choose a trigger that permits unattended runs, such as a time of day or start of charging. Note that anything requiring the app to come forward still won't complete while locked, even with confirmation disabled."}},{"@type":"Question","name":"Does Simple Memo need me to build a shortcut?","acceptedAnswer":{"@type":"Answer","text":"No. Turn on Obsidian integration in the app's settings, pick your vault folder once, and every note you send is appended to your daily note or a fixed inbox note from then on. No URL to assemble, no date format to match, no vault name to specify. The Obsidian integration page walks through the setup."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -326,7 +329,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Obsidian × Shortcuts troubleshooting</span>
 </div>
@@ -339,7 +342,7 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-11">August 11, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Step one: which route are you on?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Fixes by symptom</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Three limits neither route removes</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first (AIO) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="font-size:.95rem;">
@@ -348,14 +351,14 @@
 </div>
 </section>
 <!-- Route split -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 <span lang="en">Step one: which route are you on?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Open your shortcut and look at the actions inside. <strong>An action carrying the Obsidian icon means route 1</strong>; <strong>an "Open URL" action holding a <code>obsidian://…</code> string means route 2</strong>. Most tutorials online predate 1.11 and describe route 2, which is why the steps you find often don't match what you see on screen.</span>
 </p>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -402,7 +405,7 @@
 <div class="tip-box__title"><span lang="en">CHECK THIS FIRST</span></div>
 <p><span lang="en">If the built-in actions are missing, an outdated Obsidian is usually the whole story. Update it in the App Store, then launch Obsidian once and open your vault. This single step resolves the most common case on this page.</span></p>
 </div>
-</section>
+</div></section>
 <!-- TOC -->
 <section class="lp-section" style="padding-top:0;">
 <div class="toc">
@@ -420,10 +423,10 @@
 </div>
 </section>
 <!-- Symptoms -->
-<section class="lp-section" style="padding-top:0;">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" style="padding-top:0;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">Fixes by symptom</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="sx" id="sx1">
 <div class="sx__route"><span lang="en">ROUTE 1 · BUILT-IN ACTIONS</span></div>
 <h3 class="sx__q"><span lang="en">No Obsidian actions show up in the Shortcuts app</span></h3>
@@ -495,12 +498,12 @@
 <li><span lang="en">Add a notification or sound at the end of the shortcut so failures don't pass unnoticed.</span></li>
 </ol>
 </div>
-</section>
+</div></section>
 <!-- Honest limits -->
-<section class="lp-section" id="limits">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="limits">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Three limits neither route removes</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">The fixes above resolve most cases. But "send to Obsidian via a Shortcut" carries three weaknesses no setting removes. Decide knowingly whether to live with them or change the design.</span>
 </p>
@@ -522,12 +525,12 @@
 <div class="reason-card__desc"><span lang="en">Renaming a vault, reshuffling folders, an OS update — each can break the shortcut quietly. What you build, you maintain.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Alternative design -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">A different design: let an app own the delivery</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">If those limits matter to you, there's an alternative: stop hand-building the delivery and <strong>make it the app's job</strong>. Simple Memo sends each note to your own inbox by email and, with the Obsidian integration on, appends it on a separate path to your vault folder as <code>- HH:mm note</code>. <strong>No community plugin, no shortcut to maintain.</strong></span>
 </p>
@@ -560,12 +563,12 @@
 <img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/>
 </a>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">Should I use the built-in actions or the URL scheme?</span></summary>
@@ -596,12 +599,12 @@
 <div class="faq-answer"><span lang="en">No. Turn on Obsidian integration in the app's settings, pick your vault folder once, and every note you send is appended to your daily note or a fixed inbox note from then on. No URL to assemble, no date format to match, no vault name to specify. The Obsidian integration page walks through the setup.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/"><span lang="en">Obsidian integration</span></a>
 <a href="/en/obsidian/daily-note/"><span lang="en">Append to your daily note</span></a>
@@ -612,13 +615,13 @@
 <a href="/en/vs/ios-shortcuts/"><span lang="en">Compared with iOS Shortcuts</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-07" data-ce-number="07">
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://help.obsidian.md/Extending+Obsidian/Obsidian+URI" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Obsidian URI</a> — <span lang="en">Official documentation for the obsidian:// actions and parameters</span></li>
 <li><a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian 1.11 Mobile changelog</a> — <span lang="en">The release that added built-in Shortcuts actions (open note, open daily note, capture to a note)</span></li>
@@ -626,7 +629,7 @@
 <li><a href="https://help.obsidian.md/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help</a> — <span lang="en">Vault behaviour, including daily note date formats and locations</span></li>
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

@@ -256,11 +256,14 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/outbox-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Outboxアーキテクチャとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。"}},{"@type":"Question","name":"シンプルメモのOutboxはどう動きますか？","acceptedAnswer":{"@type":"Answer","text":"メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続が戻ると、アプリが動いていればすぐに、閉じていればiOSのバックグラウンド更新か次にアプリを開いたときに、Cloudflare Workers経由でResend APIに送信。送信が済んだらOutboxから消します。"}},{"@type":"Question","name":"Outboxのメモは安全ですか？","acceptedAnswer":{"@type":"Answer","text":"端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。バックアップと鍵管理の詳細も確認してください。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -290,7 +293,7 @@
 <main class="page-content">
     <div class="container">
 
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label"><span lang="ja">用語集 — 技術</span></div>
         <h1 class="lp-hero__title"><span lang="ja">Outboxアーキテクチャとは</span></h1>
         <p class="lp-hero__sub">
@@ -301,32 +304,32 @@
           <span lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Outboxパターンの3つの要素</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>シンプルメモのOutbox実装</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>実例：地下鉄でのメモ送信</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <div lang="ja" class="definition-block">
         <div class="definition-block__label">定義</div>
         <p><strong>Outboxアーキテクチャ</strong>は、分散システムにおけるメッセージ配信保証パターンです。送信者はメッセージをまずローカルのOutbox（送信箱）に永続化し、バックグラウンドプロセスがOutboxを監視して、ネットワーク接続時に順次送信します。送信成功を確認後、Outboxからメッセージを削除します。これにより「ネットワーク障害時のデータ損失」を防ぎます。応答だけが失われたメッセージは送り直されるので、同じメッセージが重ねて届かないようにするには、受け取る側の重複防止（冪等キーなど）と組み合わせます。シンプルメモでは、メモごとのメッセージIDをメール送信サービスへの冪等キーとして渡し、24時間のうちの重複を防いでいます。モバイルアプリではオフラインファースト設計の基盤技術です。</p>
       </div>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja">Outboxパターンの3つの要素</span></h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span lang="ja">Outboxパターンの3つの要素</span></h2></div><div class="ce-chapter__body">
         <div class="reason-cards">
           <div class="reason-card"><div class="reason-card__title"><span lang="ja">ローカル永続化</span></div><div class="reason-card__desc"><span lang="ja">メモはまずデバイス上のストレージに保存されます。ネットワークの状態に関係なく、ユーザーの操作は即座に完了します。シンプルメモではAES-256-GCMで暗号化して保存します。</span></div></div>
           <div class="reason-card"><div class="reason-card__title"><span lang="ja">接続が戻ったら再送</span></div><div class="reason-card__desc"><span lang="ja">アプリが動いているあいだは、NWPathMonitor（ネットワーク状態監視API）で接続の回復を検出して再送します。アプリを閉じているあいだは、iOSのバックグラウンド更新（実行のタイミングはiOSが決めます）か、次にアプリを開いたときに再送を試みます。</span></div></div>
           <div class="reason-card"><div class="reason-card__title"><span lang="ja">確認付き削除</span></div><div class="reason-card__desc"><span lang="ja">当社のRelay API（Cloudflare Workers）から送信成功の応答を受けた後にだけ、Outboxからそのメモを消します。エラーのときは自動で再送します（1件につき最大5回。止まったメモは履歴画面から手動で再送信できます）。</span></div></div>
         </div>
-      </section>
+      </div></section>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja">シンプルメモのOutbox実装</span></h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span lang="ja">シンプルメモのOutbox実装</span></h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span lang="ja">Obsidian連携シンプルメモのOutboxは、単なるオフラインキューではなく、セキュリティとUXを両立させた設計です。メモの保存時にAES-256-GCMで暗号化し、送信時にのみ復号。送信が済んだメモはOutboxから消します。オフラインで送信ボタンを押したときは「オフライン - 接続時に送信します」と表示して、メモをOutboxに残します。</span>
 
         </p>
-      </section>
+      </div></section>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja">実例：地下鉄でのメモ送信</span></h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span lang="ja">実例：地下鉄でのメモ送信</span></h2></div><div class="ce-chapter__body">
         <div lang="ja" class="definition-block">
           <div class="definition-block__label">シナリオ</div>
           <p><strong>1.</strong> 地下鉄の車内でアイデアをメモに入力し、送信ボタンをタップ</p>
@@ -338,17 +341,17 @@
           <p><strong>7.</strong> そのメモをOutboxから消す</p>
         </div>
 
-      </section>
+      </div></section>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja">よくある質問（Outboxアーキテクチャ）</span></h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span lang="ja">よくある質問（Outboxアーキテクチャ）</span></h2></div><div class="ce-chapter__body">
         <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxアーキテクチャとは何ですか？</summary><div class="faq-answer"><p>メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフラインのあいだも送信待ちとして端末に残し、接続が戻ったら送信を再開します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのOutboxはどう動きますか？</summary><div class="faq-answer"><p>メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続が戻ると、アプリが動いていればすぐに、閉じていればiOSのバックグラウンド更新か次にアプリを開いたときに、Cloudflare Workers経由でResend APIに送信。送信が済んだらOutboxから消します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxのメモは安全ですか？</summary><div class="faq-answer"><p>端末内に保存するOutboxはAES-256-GCMで暗号化します。暗号鍵はiOSのKeychainに保管し、アプリが暗号化・復号時に読み出します。鍵は別の端末へ移行しない設定です。メール配送はエンドツーエンド暗号化ではありません。<a href="/privacy">バックアップと鍵管理の詳細</a>も確認してください。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <section lang="ja" class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
         <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献・外部リンク</h3>
@@ -365,8 +368,8 @@
 
       </div>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title"><span lang="ja">関連ページ</span></h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span lang="ja">関連ページ</span></h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/glossary/"><span lang="ja">用語集トップ</span></a>
           <a href="/glossary/aes-gcm/"><span lang="ja">AES-GCM暗号化とは</span></a>
@@ -374,7 +377,7 @@
           <a href="/glossary/smtp/"><span lang="ja">SMTP/IMAPとは</span></a>
           <a href="/devlog/outbox-architecture"><span lang="ja">Outboxアーキテクチャ開発記</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

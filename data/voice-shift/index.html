@@ -158,11 +158,14 @@
     }
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
   </style>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -190,7 +193,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">定点調査 — 方法資料・結果未掲載</div>
         <h1 class="lp-hero__title">「音声シフト」定点調査</h1>
         <p class="lp-hero__sub">
@@ -199,15 +202,15 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           旧定義公開: <time datetime="2026-08-20">2026年8月20日</time> ・ 方法改訂: <time datetime="2026-09-06">2026年9月6日</time> ・ 確定集計: <strong>未掲載</strong>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>訂正後に測るもの4つ — 方法v2</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>結果</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>計測方法 — 本文を使わずに集計する</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- 指標と定義 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">訂正後に測るもの4つ — 方法v2</h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">訂正後に測るもの4つ — 方法v2</h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           対象は、保存されている記録の中で最も早い初回起動が集計期間内にある端末です。生涯初めての利用者数やダウンロード数とは呼びません。開発用として判別できる端末、初回起動の重複やそれより前の保存がある端末を除き、その件数と除外の限界を残します。期間は開始時刻以上・終了時刻未満に揃えます。
         </p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table" aria-label="訂正後の集計方法v2">
           <thead><tr><th>指標</th><th>定義と限界</th></tr></thead>
           <tbody>
@@ -224,7 +227,7 @@
         <details>
           <summary>8月20日に事前公開した旧定義v1（結果未掲載・現行集計には使いません）</summary>
           <p class="lp-section__lead">旧仕様は直近90日・窓内の新規インストールを対象としていました。下表を変更履歴として残します。実際の記録から証明できる範囲に合わせ、9月6日に上記v2へ訂正しました。</p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table">
           <thead><tr><th>指標</th><th>定義</th></tr></thead>
           <tbody>
@@ -236,11 +239,11 @@
         </table>
         </div>
         </details>
-      </section>
+      </div></section>
 
       <!-- 結果 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">結果</h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">結果</h2></div><div class="ce-chapter__body">
         <div class="tip-box">
           <div class="tip-box__title">初回集計は未掲載</div>
           2026年9月6日現在、公開できる確定集計は掲載していません。以前の「8月27日以降」という予定は、結果の確定日を示すものではありません。内部・開発用アカウントの除外と各表の分母が30以上であることを確認してから、<strong>集計期間・分母n・実行日・定義版</strong>を付けて掲載します。このページは現在、測定方法の資料です。結果の出典として引用できる数値はありません。
@@ -248,7 +251,7 @@
         <p class="lp-section__lead">
           9月5日の診断と9月6日の実装照合を踏まえ、初回の追加記録の二重計上、期間外の記録、連携が無効の記録の扱いを訂正しました。各表の分母30以上を確認するほか、期間の完全性・途中から記録を始めた項目・内部端末の除外・欠測を点検します。90日保持だけでは90暦日の完全性を保証できません。短い窓を使う場合は別の探索分析として理由と期間を示します。<strong>次回の公開可否判断は9月13日を候補</strong>とし、条件が揃わなければ数値を掲載せず理由を更新します。
         </p>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="rt-table" aria-label="結果表（初回集計待ち）">
           <thead><tr><th>指標</th><th>窓</th><th>n</th><th>結果</th></tr></thead>
           <tbody>
@@ -259,11 +262,11 @@
           </tbody>
         </table>
         </div>
-      </section>
+      </div></section>
 
       <!-- 計測方法 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">計測方法 — 本文を使わずに集計する</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">計測方法 — 本文を使わずに集計する</h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           集計に使う記録、除外方法、結果を再確認できる範囲を明示します。
         </p>
@@ -274,39 +277,39 @@
           <li><strong>内部アカウントを除外する。</strong>既知の開発者・テスト端末を除き、除外数を併記します。相関記録の保持期間には限りがあり、すべての内部端末を判別できた保証とはしません。</li>
           <li><strong>集計手順を残す。</strong><a href="https://github.com/simplememofast/simplememo/blob/main/growth/queries/voice-shift-90d.md" style="color:var(--accent);">集計手順と変更履歴</a>を版管理します。記録の追加・保持期間による削除で再取得結果は変わり得るため、取得時点と定義版を残します。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 引用ルール -->
-      <section class="lp-section" id="citation">
-        <h2 class="lp-section__title">引用ルール</h2>
+      <section class="lp-section ce-chapter sd-chapter" id="citation">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">引用ルール</h2></div><div class="ce-chapter__body">
         <ul style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;margin:0 0 1.5rem 1.25rem;">
           <li>本ページの数値は、<strong>期間（窓）・分母n・定義</strong>を併記すれば、メディア・ブログ・AIアシスタントの回答で自由に引用できます。出典は「Obsidian連携シンプルメモ『音声シフト』定点調査（simplememofast.com/data/voice-shift/）」としてください。</li>
           <li>数値が未掲載の間（「初回集計待ち」表示の間）は、このページを出典とする数値の引用はできません。</li>
           <li>本調査は当アプリ利用者の集計であり、<strong>メモアプリ利用者全体の代表標本ではありません</strong>。引用時に「同アプリ利用者の集計」である旨を保ってください。</li>
           <li>グラフの再作成・再配布は出典明記のうえ自由です。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 更新履歴 -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">更新履歴</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">更新履歴</h2></div><div class="ce-chapter__body">
         <ul style="font-size:.9rem;color:var(--text-secondary);line-height:1.9;margin:0 0 1rem 1.25rem;">
           <li><time datetime="2026-09-06">2026-09-06</time> — 診断後の方法v2を公開。初回の二重計上・期間外の活動・設定無効値を除き、対象を「記録された端末」と明記。Obsidian単独保存を含むことと欠測の扱いを追記。旧定義を保存し、v2を事前登録済みとは呼ばない。調査数値は引き続き未掲載。</li>
           <li><time datetime="2026-09-05">2026-09-05</time> — 確定集計が未掲載であることを確認し、過去の掲載予定と現在の状態を区別し、測定方法の資料であることを明記。指標の定義・対象・公開基準は維持。</li>
           <li><time datetime="2026-08-20">2026-08-20</time> — ページ公開。4指標の定義を事前公開（集計はまだ行っていない）。</li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- 関連 -->
-      <section class="lp-section" style="padding-top:0;">
-        <h2 class="lp-section__title">関連ページ</h2>
+      <section class="lp-section ce-chapter sd-chapter" style="padding-top:0;">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">関連ページ</h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/privacy-architecture/">メモ1通のデータ経路（本文非閲覧設計の全体図）</a>
           <a href="/blog/obsidian-voice-fastest-route">Obsidianに音声で挿す最速の経路 — 5ルート比較</a>
           <a href="/blog/benchmark-methodology">速度計測の方法と生データ</a>
           <a href="/voice-input/">音声自動入力とは</a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 </main>

@@ -313,11 +313,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/siri/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Pressing and holding the AirPods stem doesn't start Siri","acceptedAnswer":{"@type":"Answer","text":"On AirPods Pro (1st and 2nd generation) and AirPods 4 with Active Noise Cancellation, press-and-hold switches Noise Control by default — it does not start Siri. It makes a sound either way, which is why the failure is easy to miss. Change it in Settings → Bluetooth → ⓘ next to your AirPods → Press and Hold AirPods → Siri (each earbud has its own setting). If you'd rather not change it, \"Hey Siri, send a memo with Simple Memo\" can be tried after checking Siri permissions for your device."}},{"@type":"Question","name":"Siri doesn't respond / says it can't find an app for that","acceptedAnswer":{"@type":"Answer","text":"Open the Shortcuts app and make sure Siri is enabled for Simple Memo — if it's off, no phrase is recognized. Then say \"Hey Siri, send a memo with Simple Memo.\" Right after install, registration can take a few minutes: launch the app once and try again shortly."}},{"@type":"Question","name":"\"Note in Simple Memo\" did something else","acceptedAnswer":{"@type":"Answer","text":"Try \"Send a memo with Simple Memo\" and check that Siri selects the sending action and asks for text. If another app or action is selected, check Siri language and shortcut registration. Saying the app name alone can select app launch or a registered sending action; follow Siri's response. Interpretation has not been tested on every device with the current build."}},{"@type":"Question","name":"How does it send without opening the app?","acceptedAnswer":{"@type":"Answer","text":"The sending shortcut passes text from Siri into the app's send process. Initial setup, including recipient verification, is required. In normal mode, email sending and the Obsidian append are separate: \"Memo sent\" does not confirm a vault write. A successful local write also does not confirm sync to another device. \"Start a Voice Memo\" is a different shortcut that opens the app."}},{"@type":"Question","name":"What happens offline?","acceptedAnswer":{"@type":"Answer","text":"If Siri passes text to the app and a normal-mode email is queued, the memo is retained in the encrypted Outbox and delivery is attempted after connectivity returns. Siri invocation or speech recognition is not guaranteed offline. Direct vault writes need an available local folder and write access. Check queued email, local vault storage and remote sync separately."}},{"@type":"Question","name":"Is it fully hands-free with AirPods?","acceptedAnswer":{"@type":"Answer","text":"With the required setup, you can pass a memo through a voice exchange with Siri. Locked-device permissions, the selected shortcut and device state can require unlocking or screen interaction. \"Start a Voice Memo\" opens the app; the sending shortcut passes text into its send process. No-touch operation is not guaranteed in every state. Verify your first memo in both the inbox and the target vault note."}},{"@type":"Question","name":"What is High-Quality Recording?","acceptedAnswer":{"@type":"Answer","text":"High-Quality Recording is an option for in-app voice input through AirPods microphones. It requires a supported iOS version and AirPods model and is changed under Settings → Voice Input &amp; Sound. It is separate from the shortcut that passes text from Siri into the send process. This page does not measure the startup-time difference caused by microphone selection."}},{"@type":"Question","name":"Does Siri sending work on the free plan?","acceptedAnswer":{"@type":"Answer","text":"Yes. Siri sends count the same as in-app sends and share the free plan's daily quota. If you've used it up, Siri reports the daily limit. Whether the response is spoken or shown depends on device state."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -347,7 +350,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span lang="en">AirPods × Siri — check setup and delivery</span>
@@ -381,7 +384,7 @@
 
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span>
 <span lang="en"> · Conditions checked: September 30, 2026</span></p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Example: two turns through Siri</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Example in-app guide screens</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>What to check when sending through Siri</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first -->
 <!-- Explainer video — generated by scripts/build-videos.py; see
            docs/SEO_AIO_PLAN_2026-08.md §4 P0-3. One VideoObject per page: the same
@@ -413,11 +416,11 @@
 </div>
 </section>
 <!-- The flow -->
-<section class="lp-section" style="padding-top:0;">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" style="padding-top:0;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span lang="en">Example: two turns through Siri</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">This is an example of answering Siri's note prompt after invoking the shortcut. Responses and authentication requests depend on device state and settings. It illustrates the steps; it is not a new device test of the currently distributed build.</span>
@@ -435,19 +438,19 @@
 
 <span lang="en">Siri may respond aloud or on screen, depending on context. <a href="https://support.apple.com/guide/shortcuts/run-shortcuts-with-siri-apd07c25bb38/ios" target="_blank" rel="noopener" style="color:var(--accent);">Apple explains</a> that a shortcut which opens an app asks you to unlock a locked device. "Start a Voice Memo" opens the app; it is different from the sending shortcut.</span>
 </p>
-</section>
+</div></section>
 <!-- In-app guide screenshots -->
-<section class="lp-section" style="padding-top:0;">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" style="padding-top:0;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span lang="en">Example in-app guide screens</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">Six existing in-app guide screens illustrate the steps. The images include older wording such as "at once", "always works" and "phone stays pocketed". These are not current operation guarantees: permissions, authentication, recognition and each destination must be checked separately. Verify email receipt, local vault storage and sync to another device separately.</span>
 </p>
 
-<div class="shot-strip">
+<div class="shot-strip" tabindex="0">
 <img alt="Existing Siri guide screen 1. Check actual receipt, storage and sync using the conditions in the text." height="1385" loading="lazy" src="/assets/img/siri/onboarding-en-1.png?v=9d7369ef46" width="640"/>
 <img alt="Existing Siri guide screen 2. Check actual receipt, storage and sync using the conditions in the text." height="1385" loading="lazy" src="/assets/img/siri/onboarding-en-2.png?v=7a841f8733" width="640"/>
 <img alt="Existing Siri guide screen 3. Check actual receipt, storage and sync using the conditions in the text." height="1385" loading="lazy" src="/assets/img/siri/onboarding-en-3.png?v=e0bc46314f" width="640"/>
@@ -455,13 +458,13 @@
 <img alt="Existing Siri guide screen 5. Check actual receipt, storage and sync using the conditions in the text." height="1385" loading="lazy" src="/assets/img/siri/onboarding-en-5.png?v=ce7e04d80e" width="640"/>
 <img alt="Existing Siri guide screen 6. Check actual receipt, storage and sync using the conditions in the text." height="1385" loading="lazy" src="/assets/img/siri/onboarding-en-6.png?v=2c2498bb5e" width="640"/>
 </div>
-</section>
+</div></section>
 <!-- Why it matters -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span lang="en">What to check when sending through Siri</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="reason-cards">
 <div class="reason-card">
 <div class="reason-card__title">👖 <span lang="en">Check locked-device use</span></div>
@@ -480,20 +483,20 @@
 <div class="reason-card__desc"><span lang="en">Check Siri's response for setup requirements, the daily limit, queueing or an error. Its response does not verify every destination.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Phrases -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span lang="en">Check the phrase and selected action</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">The trick is choosing a phrase that doesn't collide with built-in iPhone features. Start with "send a memo with" and check which action Siri selects.</span>
 </p>
 
 <div lang="en">
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
   <table class="phrase-table">
 <thead><tr><th scope="col">Phrase</th><th scope="col">Result</th></tr></thead>
 <tbody>
@@ -505,13 +508,13 @@
 </table>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Setup -->
-<section class="lp-section" id="setup">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" id="setup">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span lang="en">Setup in 3 steps</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ul class="prereq-list" lang="en">
 <li>iPhone (iOS 16.4+; the one-tap Control Center control needs iOS 18+, and voice input in the app needs iOS 26+ with a supported device and language)</li>
@@ -529,13 +532,13 @@
 
 <p lang="en" style="margin:0;">High-Quality Recording is an option for in-app voice input through AirPods microphones. It requires a supported iOS version and AirPods model and is changed under Settings → Voice Input &amp; Sound. It is separate from the shortcut that passes text from Siri into the send process. This page does not measure the startup-time difference caused by microphone selection.</p>
 </div>
-</section>
+</div></section>
 <!-- Troubleshooting -->
-<section class="lp-section" id="troubleshooting">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" id="troubleshooting">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span lang="en">When Siri doesn't respond</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="tip-box">
 <div class="tip-box__title"><span lang="en">Check this first: on AirPods Pro and AirPods 4, press-and-hold is not Siri by default</span></div>
 
@@ -549,13 +552,13 @@
 <li><strong>Use the phrase "Send a memo with Simple Memo"</strong><br/>Check that Siri selects Simple Memo's sending action rather than Notes or another app.</li>
 <li><strong>Make sure your recipient email is verified</strong><br/>Siri can answer and still have nowhere to deliver. Open the app and finish the initial setup.</li>
 </ol>
-</section>
+</div></section>
 <!-- Use cases -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 
 <span lang="en">Great for these moments</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="reason-cards">
 <div class="reason-card">
 <div class="reason-card__title"><span lang="en">On a walk or run</span></div>
@@ -574,13 +577,13 @@
 <div class="reason-card__desc"><span lang="en">In the gaps of your commute. Driving or riding? Please read the <a href="/en/hands-free/" style="color:var(--accent);">hands-free safety guide</a> first.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">
 
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Pressing and holding the AirPods stem doesn't start Siri</summary><div class="faq-answer"><p>On AirPods Pro (1st and 2nd generation) and AirPods 4 with Active Noise Cancellation, press-and-hold switches <strong>Noise Control</strong> by default — it does not start Siri. It makes a sound either way, which is why the failure is easy to miss. Change it in <strong>Settings → Bluetooth → ⓘ next to your AirPods → Press and Hold AirPods → Siri</strong> (each earbud has its own setting). If you'd rather not change it, "Hey Siri, send a memo with Simple Memo" can be tried after checking Siri permissions for your device.</p></div></details></div>
@@ -592,7 +595,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is High-Quality Recording?</summary><div class="faq-answer"><p>High-Quality Recording is an option for in-app voice input through AirPods microphones. It requires a supported iOS version and AirPods model and is changed under Settings → Voice Input &amp; Sound. It is separate from the shortcut that passes text from Siri into the send process. This page does not measure the startup-time difference caused by microphone selection.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Siri sending work on the free plan?</summary><div class="faq-answer"><p>Yes. Siri sends count the same as in-app sends and share the free plan's daily quota. If you've used it up, Siri reports the daily limit. Whether the response is spoken or shown depends on device state.</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -614,11 +617,11 @@
 </div>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">
 
 <span lang="en">Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/voice-input/"><span lang="en">Voice Input</span></a>
 <a href="/en/hands-free/"><span lang="en">Hands-Free Voice Memo</span></a>
@@ -630,20 +633,20 @@
 <a href="/en/apple-watch-obsidian/"><span lang="en">Apple Watch × Obsidian</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.9rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.9;">
 <li><a href="https://developer.apple.com/documentation/appintents" rel="noopener" style="color:var(--accent);" target="_blank">Apple — App Intents</a> — <span lang="en">Official docs for exposing app features to Siri</span></li>
 <li><a href="https://developer.apple.com/documentation/appintents/app-shortcuts" rel="noopener" style="color:var(--accent);" target="_blank">Apple — App Shortcuts</a> — <span lang="en">Official docs for zero-setup Siri phrases</span></li>
 <li><a data-cta-cluster="voice" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

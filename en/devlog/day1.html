@@ -236,11 +236,14 @@
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -277,7 +280,7 @@
 <!-- ENGLISH VERSION          -->
 <!-- ======================== -->
 <div lang="en">
-<h1 class="page-content__title">[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience</h1>
+<h1 class="page-content__title sd-title">[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience</h1>
 <div class="article-meta">February 13, 2026</div>
 <!-- Table of Contents -->
 <nav class="article-toc">
@@ -310,8 +313,8 @@
 <p>This is Day 1 of the "Simple Memo (Captio-style)" development diary. In this article, I'll deconstruct the Captio experience and document every technical decision made to recreate it with a modern tech stack.</p>
 </section>
 <!-- Section 1 -->
-<section id="en-section1">
-<h2>1. What Made Captio So Good -- Deconstructing the Experience</h2>
+<section id="en-section1" class="ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 id="reading-01">1. What Made Captio So Good -- Deconstructing the Experience</h2></div><div class="ce-chapter__body">
 <p>To articulate the Captio experience, I broke it down into three elements.</p>
 <h3>Element 1: Instant Launch-to-Input</h3>
 <p>When you launched Captio, the keyboard appeared instantly and text input was ready. There was no splash screen followed by a home screen where you then tap a "compose" button. Launch equals input. We call the time from launch to text input readiness <strong>Time-to-Text</strong>. Captio's felt like under 0.5 seconds.</p>
@@ -320,15 +323,15 @@
 <h3>Element 3: Nothing Unnecessary</h3>
 <p>Folders, tags, rich text, markdown support -- Captio had none of these. Just a text field and a send button. This decisiveness brought cognitive load close to zero. An app where you never have to think about "what should I do." That was Captio.</p>
 <p>Recreating these three elements with modern iOS development. That's the mission of "Simple Memo (Captio-style)."</p>
-</section>
+</div></section>
 <!-- Section 2 -->
-<section id="en-section2">
-<h2>2. Architecture: Why UIKit Instead of SwiftUI</h2>
+<section id="en-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-02">2. Architecture: Why UIKit Instead of SwiftUI</h2></div><div class="ce-chapter__body">
 <p>Choosing UIKit over SwiftUI in 2026 iOS development might seem unorthodox. But our top priority was clear -- <strong>Time-to-Text under 500ms</strong>.</p>
 <p>SwiftUI's `body` re-evaluation, `StateObject` initialization, `@Environment` resolution -- these overheads are negligible in typical app development, but not when you need "instant launch-to-input." We wanted to focus the text field even 1ms faster.</p>
 <p>So we adopted <strong>direct UIKit construction without Storyboard</strong>.</p>
 <p>We create the window in SceneDelegate and set ComposeViewController directly as the rootViewController. We even skip Storyboard parsing.</p>
-<pre><code>// SceneDelegate.swift
+<pre tabindex="0"><code>// SceneDelegate.swift
 func scene(_ scene: UIScene,
            willConnectTo session: UISceneSession,
            options connectionOptions: UIScene.ConnectionOptions) {
@@ -339,7 +342,7 @@ func scene(_ scene: UIScene,
     self.window = window
 }</code></pre>
 <p>Then in ComposeViewController's `viewDidAppear`, we immediately focus the text view.</p>
-<pre><code>// ComposeViewController.swift
+<pre tabindex="0"><code>// ComposeViewController.swift
 override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     textView.becomeFirstResponder()
@@ -347,10 +350,10 @@ override func viewDidAppear(_ animated: Bool) {
 <p>These two pieces of code alone create the shortest path from launch to keyboard display.</p>
 <p>Our target was under 500ms. A later screen-recording measurement (August 11, 2026, iPhone 16e, warm launch) recorded 0.4 seconds from the icon tap to the keyboard being fully up. With SwiftUI, `@FocusState` and body re-evaluation timing are harder to control precisely, so we judged this path harder to tighten (we did not measure both under the same conditions).</p>
 <p>UIKit may be "old." But it's "fast." On this single point, UIKit remains the best choice.</p>
-</section>
+</div></section>
 <!-- Section 3 -->
-<section id="en-section3">
-<h2>3. Achieving "Send and Clear" in a Single Tap</h2>
+<section id="en-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-03">3. Achieving "Send and Clear" in a Single Tap</h2></div><div class="ce-chapter__body">
 <p>To recreate Captio's "send and it's gone" experience, the most critical design decision was to <strong>completely decouple the send animation and UI clear from the network response</strong>.</p>
 <p>A typical app's send flow looks like this:</p>
 <ol>
@@ -366,7 +369,7 @@ override func viewDidAppear(_ animated: Bool) {
 <li>Send via network in the background</li>
 <li>Success: silently remove from Outbox / Failure: retry in background</li>
 </ol>
-<pre><code>// ComposeViewController.swift
+<pre tabindex="0"><code>// ComposeViewController.swift
 private func performSendAnimation() {
     UIView.animate(withDuration: 0.25,
                    delay: 0,
@@ -383,10 +386,10 @@ private func performSendAnimation() {
 }</code></pre>
 <p>For the user, the moment they tap send, the memo "vanishes" and they're ready to write the next one. Network success or failure is handled invisibly in the background.</p>
 <p>"But what if the send fails?" -- that question is answered by the Outbox architecture in the next section.</p>
-</section>
+</div></section>
 <!-- Section 4 -->
-<section id="en-section4">
-<h2>4. Designing Against Message Loss: The Outbox Architecture</h2>
+<section id="en-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-04">4. Designing Against Message Loss: The Outbox Architecture</h2></div><div class="ce-chapter__body">
 <p>Decoupling the send UI from the network response means that "the UI cleared but the email actually failed to send" could happen. This is absolutely unacceptable. A user thinking they sent a memo that was never actually delivered -- this is a fatal loss of trust for a memo app.</p>
 <p>That's why we adopted the <strong>Outbox pattern</strong>.</p>
 <p>The message send flow works as follows:</p>
@@ -400,7 +403,7 @@ private func performSendAnimation() {
 </ol>
 <p>The critical point is that <strong>the message is saved to the Outbox before the network send</strong>. This means even if the app crashes suddenly or the device loses power, the message is still in the Outbox.</p>
 <p>Messages stored in the Outbox are protected with AES-GCM encryption using CryptoKit. Encryption keys are stored in the Keychain, inaccessible from outside the app's sandbox.</p>
-<pre><code>// OutboxManager.swift
+<pre tabindex="0"><code>// OutboxManager.swift
 func enqueue(message: OutboxMessage) throws {
     let key = try KeychainHelper.getOrCreateSymmetricKey()
     let sealedBox = try AES.GCM.seal(
@@ -416,10 +419,10 @@ func enqueue(message: OutboxMessage) throws {
     try persistenceStore.save(encrypted)
 }</code></pre>
 <p>Furthermore, everything is implemented in-house, resulting in <strong>zero external library dependencies</strong>. CryptoKit, NWPathMonitor, URLSession -- all Apple-native frameworks. Being free from third-party library version management and security audits is a significant advantage for a small team.</p>
-</section>
+</div></section>
 <!-- Section 5 -->
-<section id="en-section5">
-<h2>5. Relay API: Sending Without Mailbox OAuth</h2>
+<section id="en-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-05">5. Relay API: Sending Without Mailbox OAuth</h2></div><div class="ce-chapter__body">
 <p>Captio's sending mechanism was never officially documented. The developer's shutdown notice attributes the closure to the resources needed to keep the app stable and secure; it does not name the sending method as a reason. As a general point, sending that relies on an external email API is exposed to the provider's requirement changes and access restrictions.</p>
 <p>We chose a <strong>Cloudflare Workers + Resend API</strong> architecture.</p>
 <p>Cloudflare Workers is an edge computing platform where code runs at the data center closest to each user. Requests from Japan are processed at Japan's edge, requests from the US at the US edge. This virtually eliminates the cold start problem compared to traditional serverless platforms (AWS Lambda, etc.).</p>
@@ -428,7 +431,7 @@ func enqueue(message: OutboxMessage) throws {
 <p>When users set their destination email address, a 6-digit verification code is sent for email verification. This prevents unauthorized sending to third-party email addresses.</p>
 <h3>Multi-Layer Rate Limiting</h3>
 <p>To prevent abuse, we implement multi-layer rate limiting.</p>
-<pre><code>// Cloudflare Worker - Rate Limit Configuration
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
 const RATE_LIMITS = {
   devicePerMinute: 30,    // 30 per minute per device
   devicePerDay: 200,      // 200 per day per device
@@ -440,10 +443,10 @@ const RATE_LIMITS = {
 <h3>Idempotency Guarantee</h3>
 <p>To prevent duplicate sends due to network instability, each message is assigned a UUID, and the Relay API performs duplicate checking. If the same UUID is resent, subsequent attempts return a success response without actually sending the email. Combined with the Outbox pattern's retry mechanism, this keeps users from receiving the same memo twice.</p>
 <p><strong>Update, 2026-10:</strong> The current relay server does not run its own duplicate check. It passes the message ID to Resend as the request's Idempotency-Key; Resend remembers the key for 24 hours and returns the same response to a repeated request with the same content. So within 24 hours, the same memo is not sent twice (details in <a href="/en/devlog/relay-api-design">the Relay API design</a>).</p>
-</section>
+</div></section>
 <!-- Section 6 -->
-<section id="en-section6">
-<h2>6. Today's Work: Eliminating Small Annoyances One by One</h2>
+<section id="en-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-06">6. Today's Work: Eliminating Small Annoyances One by One</h2></div><div class="ce-chapter__body">
 <p>Much of Day 1's implementation work was spent redesigning the star rating dialog. App Store ratings are an app's lifeline, but you shouldn't ask for ratings in a way that damages the user experience.</p>
 <h3>Redesigned Display Conditions</h3>
 <p>The star rating dialog display conditions were set as follows:</p>
@@ -454,7 +457,7 @@ const RATE_LIMITS = {
 </ul>
 <h3>Star Icon Tap Area Fix</h3>
 <p>Apple's Human Interface Guidelines recommend a minimum touch target size of 44x44pt. The star icon tap areas didn't meet this standard, so we fixed it.</p>
-<pre><code>// StarRatingView.swift
+<pre tabindex="0"><code>// StarRatingView.swift
 private func createStarButton() -&gt; UIButton {
     let button = UIButton(type: .custom)
     button.translatesAutoresizingMaskIntoConstraints = false
@@ -471,14 +474,14 @@ private func createStarButton() -&gt; UIButton {
 <li><strong>5 stars</strong>: Navigate to the App Store review screen (`SKStoreReviewController`)</li>
 <li><strong>4 stars and below</strong>: Quietly display a "Thank you" toast and close. Don't funnel negative reviews to the App Store.</li>
 </ul>
-</section>
+</div></section>
 <!-- Section 7 -->
-<section id="en-section7">
-<h2>7. Fixing History Status Display Inconsistencies</h2>
+<section id="en-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-07">7. Fixing History Status Display Inconsistencies</h2></div><div class="ce-chapter__body">
 <p>In the send history screen (History), I noticed a bug. Some messages showed "sending" status indefinitely even though delivery had already completed.</p>
 <p>After investigating, I found the issue in the status update logic. The previous implementation used the message's text content as the key for status updates. However, when the same memo content is sent multiple times, text-based lookup can't identify the correct message.</p>
 <p>The fix was straightforward. We changed from text-based lookup to <strong>ID-based status updates</strong>. Since each message is assigned a UUID when saved to the Outbox, we use this ID to update History status.</p>
-<pre><code>// HistoryManager.swift
+<pre tabindex="0"><code>// HistoryManager.swift
 // Before: Text-based lookup (cause of the bug)
 // func updateStatus(forText text: String, status: SendStatus)
 
@@ -491,10 +494,10 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
     persistEntries()
 }</code></pre>
 <p>With this fix, even when sending the same memo content multiple times, each message's status is displayed correctly.</p>
-</section>
+</div></section>
 <!-- Section 8 -->
-<section id="en-section8">
-<h2>8. An Obsessive Commitment to Privacy</h2>
+<section id="en-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-08">8. An Obsessive Commitment to Privacy</h2></div><div class="ce-chapter__body">
 <p>Private information gets written into memo apps. Passwords, personal concerns, business ideas -- we can't predict what users will write. That's exactly why privacy protection should be not just "adequate" but "excessive" -- that level is just right.</p>
 <h3>Privacy Overlay in App Switcher</h3>
 <p>iOS's app switcher shows app screens as thumbnails. So that memo content is not visible in the app switcher, we display a privacy overlay when the app transitions to the background.</p>
@@ -508,24 +511,24 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
 <li>Error logs use <strong>only `type(of: error)`</strong>, never `localizedDescription`</li>
 <li>Reason: `localizedDescription` may contain user input</li>
 </ul>
-<pre><code>// NetworkManager.swift
+<pre tabindex="0"><code>// NetworkManager.swift
 // BAD: Logging error details
 // Logger.error("Send failed: \(error.localizedDescription)")
 
 // GOOD: Logging only the error type
 Logger.error("Send failed: \(type(of: error))")</code></pre>
 <p>It might seem paranoid. But to earn users' trust in a memo app, we believe this level of paranoia is necessary.</p>
-</section>
+</div></section>
 <!-- Section 9 -->
-<section id="en-section9">
-<h2>9. 10 Languages: Reaching Captio Users Worldwide</h2>
+<section id="en-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 id="reading-09">9. 10 Languages: Reaching Captio Users Worldwide</h2></div><div class="ce-chapter__body">
 <p>Captio had users worldwide, centered around English-speaking countries. To reach those former users with "Simple Memo (Captio-style)," we supported 10 languages from the initial release.</p>
 <p>Supported languages: Japanese, English, Spanish, French, German, Italian, Portuguese, Korean, Chinese (Simplified), and Arabic.</p>
 <p><strong>Update, 2026-09:</strong> The current App Store listing shows 10 languages: Japanese, English, Spanish, French, German, Portuguese, Russian, Chinese (Simplified), Chinese (Traditional), and Arabic. Italian and Korean, listed above, are not in the current listing.</p>
 <p>The technical challenge of <strong>Arabic RTL (Right-to-Left) support</strong> was particularly notable. Not just text direction, but the entire UI layout needs to be mirrored. By consistently using `leading`/`trailing` constraints in Auto Layout, we achieve a natural layout in RTL environments.</p>
 <h3>In-App Language Switching</h3>
 <p>In addition to iOS 16+'s built-in per-app language settings, we implemented our own language switching mechanism. When the language changes, the ViewController is replaced with a `cross-dissolve` transition for a smooth switching experience.</p>
-<pre><code>// LanguageManager.swift
+<pre tabindex="0"><code>// LanguageManager.swift
 func applyLanguageChange() {
     guard let window = UIApplication.shared.connectedScenes
         .compactMap({ $0 as? UIWindowScene })
@@ -540,10 +543,10 @@ func applyLanguageChange() {
         window.rootViewController = newVC
     })
 }</code></pre>
-</section>
+</div></section>
 <!-- Section 10 -->
-<section id="en-section10">
-<h2>10. Today's Lesson: Product Design Is About Trust</h2>
+<section id="en-section10" class="ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 id="reading-10">10. Today's Lesson: Product Design Is About Trust</h2></div><div class="ce-chapter__body">
 <p>Finishing Day 1, what strikes me is that the essence of this product is designing for trust.</p>
 <p>Let me summarize the technical metrics:</p>
 <ul>
@@ -559,10 +562,10 @@ func applyLanguageChange() {
             Designing against message loss: the trust that an unsent note is kept and retried, not silently dropped.<br/>
             Encryption: the trust that "nobody can see it."</p>
 <p>Captio wasn't loved because its features were superior. It was loved because it had meticulously polished an experience you could use with complete trust. That's what we want to carry forward.</p>
-</section>
+</div></section>
 <!-- Section 11 -->
-<section id="en-section11">
-<h2>11. Day 2 Preview</h2>
+<section id="en-section11" class="ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 id="reading-11">11. Day 2 Preview</h2></div><div class="ce-chapter__body">
 <p>In Day 2, we plan to tackle the following themes:</p>
 <ul>
 <li><strong>Send animation refinement</strong>: Moving beyond the current 0.25s fade-out to a more pleasant animation</li>
@@ -570,14 +573,14 @@ func applyLanguageChange() {
 <li><strong>Is the success toast even needed?</strong>: Considering the option of "not showing" any send success feedback</li>
 </ul>
 <p>Aiming for Captio's "nothing there" decisiveness. On to Day 2.</p>
-</section>
+</div></section>
 </div>
 </div>
 <!-- ======================== -->
 <!-- RELATED TOPICS (shared)  -->
 <!-- ======================== -->
 <div class="related-topics">
-<h2>
+<h2 id="reading-12" data-ce-number="12">
 
 <span lang="en">Related Deep Dives</span>
 </h2>
@@ -645,11 +648,11 @@ func applyLanguageChange() {
 </div>
 </div>
 </div>
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://developer.apple.com/documentation/uikit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — UIKit Documentation</a> — <span lang="en">Official UIKit framework reference used for building Simple Memo - for Obsidian's UI</span></li>
 <li><a href="https://developer.apple.com/documentation/cryptokit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — CryptoKit Documentation</a> — <span lang="en">Used for implementing AES-GCM encryption to protect Outbox data</span></li>
@@ -657,7 +660,7 @@ func applyLanguageChange() {
 <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span lang="en">The pattern of writing a message to an outbox first and letting a separate process send it. Simple Memo applies the same idea on the device</span></li>
 <li><a href="https://www.rfc-editor.org/rfc/rfc5321" rel="noopener" style="color:var(--accent);" target="_blank">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="en">Standard specification for email transmission protocol</span></li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page

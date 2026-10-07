@@ -271,11 +271,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/plugins/dataview/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"What does Dataview do?","acceptedAnswer":{"@type":"Answer","text":"It queries notes and metadata in your vault. The four modes are DQL, inline expressions, DataviewJS and inline JS expressions. LIST, TABLE, TASK and CALENDAR are output types within DQL, not four modes including JavaScript."}},{"@type":"Question","name":"How widely used is Dataview?","acceptedAnswer":{"@type":"Answer","text":"Fetching the official download-count data directly on August 22, 2026 gave 4,805,635 downloads — #3 within that data (behind Excalidraw and Templater). The often-quoted \"6,840 plugins\" is the registry listing, which is a separate file from the download-count data the ranking is computed over."}},{"@type":"Question","name":"Is Dataview still being developed?","acceptedAnswer":{"@type":"Answer","text":"The statistics and versions retrieved on August 22, 2026 do not establish current development status. A statistics timestamp is separate from code updates. Check official releases and changes, then try the plugin with your Obsidian version. We did not install and test the current version for this correction."}},{"@type":"Question","name":"What's the basic syntax?","acceptedAnswer":{"@type":"Answer","text":"Tag metadata using a note's YAML frontmatter, or inline as Field:: Value in the body. Then specify an output type and conditions inside a dataview code block. For example, LIST and TABLE display notes; TASK displays tasks from notes."}},{"@type":"Question","name":"Is DataviewJS safe to use?","acceptedAnswer":{"@type":"Answer","text":"Per the official README, DataviewJS runs at the same permission level as any Obsidian plugin, so it can rewrite or delete files and make network calls. The README recommends writing your own code or only using trusted scripts. Regular DQL queries are sandboxed and cannot write to your vault."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -303,7 +306,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Obsidian plugin guide — Dataview</span>
 </div>
@@ -316,25 +319,25 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-22">August 22, 2026</time> · Explanation corrected <time datetime="2026-09-30">September 30, 2026</time>; statistics remain the August 22 retrieval</span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>What does the Dataview plugin do?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>August 22, 2026 retrieval: downloads and releases</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Four query modes — from the official README</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer block (AIO) -->
-<section class="lp-section" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;">
-<h2 class="lp-section__title"><span lang="en">What does the Dataview plugin do?</span></h2>
+<section class="lp-section ce-chapter sd-chapter" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span lang="en">What does the Dataview plugin do?</span></h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <p><strong>Dataview turns your vault into something you can query like a database.</strong> You can use four query modes: DQL, inline expressions, DataviewJS and inline JS expressions. LIST, TABLE, TASK and CALENDAR are output types within DQL, a separate classification. Per the official download-count data (fetched August 22, 2026), it has 4,805,635 downloads and ranks #3 within that data (the registry itself lists 6,840 plugins, but that is a separate file from the one the ranking is computed over).</p>
 <p>A download-statistics timestamp does not establish whether development has continued or stopped, or whether a current version works. The counts and versions below are records retrieved on August 22, 2026, not current values.</p>
 </div>
-</section>
+</div></section>
 <!-- Measured: downloads, rank, release status -->
-<section class="lp-section" id="measured">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="measured">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">August 22, 2026 retrieval: downloads and releases</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">We fetched <code>community-plugin-stats.json</code> from Obsidian's official distribution (GitHub: <code>obsidianmd/obsidian-releases</code>) and <code>manifest.json</code> from Dataview's own repository (GitHub: <code>blacksmithgu/obsidian-dataview</code>) directly into this environment via <code>raw.githubusercontent.com</code>.</span>
 </p>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -381,67 +384,67 @@
 <span lang="en">The retrieved master version was 0.5.68 and the release tag was 0.5.70, marked beta. These two numbers and the statistics timestamp do not establish development status, stability or current compatibility. Check the <a href="https://github.com/blacksmithgu/obsidian-dataview/releases" target="_blank" rel="noopener">official releases</a> for current versions and changes.</span>
 </p>
 
-</section>
+</div></section>
 <!-- Four query modes -->
-<section class="lp-section" id="query-modes">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="query-modes">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Four query modes — from the official README</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead"><span lang="en">The official README distinguishes DQL, inline expressions, DataviewJS and inline JS expressions. Within DQL, <a href="https://blacksmithgu.github.io/obsidian-dataview/queries/query-types/" target="_blank" rel="noopener">output types</a> are LIST, TABLE, TASK and CALENDAR. We have not run the README examples below on a device for this correction.</span></p>
 <div class="reason-cards" style="grid-template-columns:1fr;">
 <div class="reason-card">
 <div class="reason-card__title">1. <span lang="en">DQL (Dataview Query Language)</span></div>
 <p class="reason-card__desc"><span lang="en">A dedicated, SQL-like syntax for common cases.</span></p>
-<pre class="note-sample"><code>```dataview
+<pre class="note-sample" tabindex="0"><code>```dataview
 TABLE file.name AS "File", rating AS "Rating" FROM #book
 ```</code></pre>
 </div>
 <div class="reason-card">
 <div class="reason-card__title">2. <span lang="en">Inline expressions</span></div>
 <p class="reason-card__desc"><span lang="en">Embedded directly in a note and evaluated in preview mode.</span></p>
-<pre class="note-sample"><code>We are on page `= this.file.name`.</code></pre>
+<pre class="note-sample" tabindex="0"><code>We are on page `= this.file.name`.</code></pre>
 </div>
 <div class="reason-card">
 <div class="reason-card__title">3. DataviewJS</div>
 <p class="reason-card__desc"><span lang="en">The most powerful mode, with full access to the JavaScript API.</span></p>
-<pre class="note-sample"><code>```dataviewjs
+<pre class="note-sample" tabindex="0"><code>```dataviewjs
 dv.taskList(dv.pages().file.tasks.where(t =&gt; !t.completed));
 ```</code></pre>
 </div>
 <div class="reason-card">
 <div class="reason-card__title">4. <span lang="en">Inline JS expressions</span></div>
 <p class="reason-card__desc"><span lang="en">The JavaScript equivalent of inline expressions — run arbitrary JS inline.</span></p>
-<pre class="note-sample"><code>This page was last modified at `$= dv.current().file.mtime`.</code></pre>
+<pre class="note-sample" tabindex="0"><code>This page was last modified at `$= dv.current().file.mtime`.</code></pre>
 </div>
 </div>
 <p class="lp-section__lead" style="margin-top:1rem;">
 <span lang="en">There are two ways to feed it data: YAML frontmatter at the top of a note (fenced by <code>---</code>), or inline fields written as <code>Field:: Value</code> in the body — both are indexed and become queryable.</span>
 </p>
-<pre class="note-sample"><code>---
+<pre class="note-sample" tabindex="0"><code>---
 alias: "document"
 last-reviewed: 2021-08-17
 thoughts:
   rating: 8
   reviewable: false
 ---</code></pre>
-<pre class="note-sample"><code>Basic Field:: Value
+<pre class="note-sample" tabindex="0"><code>Basic Field:: Value
 **Bold Field**:: Nice!
 You can also write [field:: inline fields]; multiple [field2:: on the same line].</code></pre>
-</section>
+</div></section>
 <!-- Security note -->
-<section class="lp-section" id="security">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" id="security">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">A security note on DataviewJS</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="tip-box">
 <div class="tip-box__title"><span lang="en">FROM THE OFFICIAL README</span></div>
 <p style="margin:0;"><span lang="en">DataviewJS is powerful because it runs at the same permission level as any other Obsidian plugin — meaning it can rewrite, create, or delete files, and make network calls. The README recommends writing your own JS, or only using scripts you understand and trust. Regular DQL queries, by contrast, are sandboxed and cannot make changes to your vault — in exchange for being more limited.</span></p>
 </div>
-</section>
-<section class="lp-section">
-<h2 class="lp-section__title">
+</div></section>
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">Before you write your first query, decide where the first line lands</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Dataview queries notes and metadata in your vault. To save a note from Simple Memo, enable the integration, select an accessible folder and destination, and check the write test. You can choose a daily note or a fixed Inbox. Confirm email delivery and note storage separately; this does not automatically generate Dataview fields.</span>
 </p>
@@ -457,12 +460,12 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <small><span lang="en">On desktop? Scan with your phone</span></small>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">What does Dataview do?</span></summary>
@@ -493,7 +496,7 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <div class="faq-answer"><span lang="en">Per the official README, DataviewJS runs at the same permission level as any Obsidian plugin, so it can rewrite or delete files and make network calls. The README recommends writing your own code or only using trusted scripts. Regular DQL queries are sandboxed and cannot write to your vault.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Verification environment (§28) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
@@ -502,10 +505,10 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 </div>
 </section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/plugins/"><span lang="en">Plugins guide (measured top 10)</span></a>
 <a href="/en/obsidian/what-is-vault/"><span lang="en">What is a vault (measured)</span></a>
@@ -514,13 +517,13 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <a href="/en/glossary/"><span lang="en">Glossary</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08">
 <span lang="en">References &amp; data sources</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://github.com/blacksmithgu/obsidian-dataview" rel="noopener" style="color:var(--accent);" target="_blank">blacksmithgu/obsidian-dataview（GitHub）</a> — <span lang="en">Dataview's official repository. README.md and manifest.json fetched directly via <code>raw.githubusercontent.com</code> on 2026-08-22</span></li>
 <li><a href="https://github.com/obsidianmd/obsidian-releases" rel="noopener" style="color:var(--accent);" target="_blank">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="en">Obsidian's official distribution. <code>community-plugin-stats.json</code> (downloads) and <code>community-plugins.json</code> (registry, 6,840 entries) fetched directly on 2026-08-22</span></li>
@@ -529,7 +532,7 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
 <li><a data-cta-position="bottom" data-cta-cluster="obsidian" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
 <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="en">Obsidian is a trademark of Dynalist Inc. This site is independent of the Obsidian project; Simple Memo - for Obsidian is an independent app by YURIKA, K.K. Dataview is a third-party plugin developed by blacksmithgu (Michael Brenan); this page does not constitute an endorsement of its developer or rights holder.</span></p>
-</div>
+</div></div>
 </section>
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1. -->
 <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">

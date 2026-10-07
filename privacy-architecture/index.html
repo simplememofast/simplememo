@@ -144,11 +144,14 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/privacy-architecture/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian Vaultへの追記に外部サーバーは関与しますか？","acceptedAnswer":{"@type":"Answer","text":"関与しません。Vault追記は端末内のVaultフォルダへのファイル直接書き込み（不可の場合はURIフォールバック）で、プラグインもネットワークも使いません。メール送信を伴わない下書きのローカル保存も端末内で完結します。"}},{"@type":"Question","name":"AIタグ付けでメモの内容がAppleや外部のサーバーに送られませんか？","acceptedAnswer":{"@type":"Answer","text":"送られません。タグ付けはApple Foundation ModelsによるオンデバイスAIがiPhoneの中だけで行い、ネットワーク通信を伴いません。Apple Intelligence非対応機種では端末内の軽量整形に自動フォールバックし、その場合も外部送信はありません。詳細はAIタグ自動追加の解説をご覧ください。"}},{"@type":"Question","name":"なぜE2EEにしないのですか？","acceptedAnswer":{"@type":"Answer","text":"メモの届け先を「普段のメール受信箱」にしているからです。受信箱で読める＝受信サーバが復号できる、なのでE2EEは構造的に成立しません。E2EEを優先する場合は専用クライアントが必須になり、「どの端末のメールアプリでも読める」という本アプリの価値と交換になります。E2EEが必須の用途にはStandard Notes等をおすすめします。"}},{"@type":"Question","name":"この内容はプライバシーポリシーとどう違うのですか？","acceptedAnswer":{"@type":"Answer","text":"法的な取り扱いの全文はプライバシーポリシー（特に§12「暗号化に関する技術的な情報」）にあります。このページはその技術的な中身を、Obsidianユーザーの関心（ローカル完結かどうか）に沿って経路図として再構成したものです。矛盾がある場合はプライバシーポリシーが優先します。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -178,7 +181,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>プライバシー設計</span>
         </div>
@@ -191,13 +194,13 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-08-11">2026年08月11日</time> · 解析条件確認: <time datetime="2026-09-30">2026年09月30日</time></span>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>メモ1通のデータの通り道</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>サーバに残るもの・残らないもの</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>メモ本文の保護と利用解析</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Data path -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>メモ1通のデータの通り道</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ol class="flow-steps">
           <li><span class="flow-step__title">端末内で作成 — AES-GCM-256で保護</span>書いたメモはまず端末内のOutbox（未送信キュー）に入ります。Outboxと送信履歴はApple純正CryptoKitによる<strong>AES-GCM-256</strong>で暗号化され、256-bit対称鍵はApple Keychainに保管されます。鍵は他端末へ移行しない設定で、アプリが暗号化・復号時に読み出します。バックアップに含まれる鍵のコピーも別の端末では使えません。機種変更前には、必要なメモが保存先に届いていることを確認してください。<a href="/privacy">鍵管理の詳細とAppleの説明</a>。オフラインならここで待機し、回線復帰後に自動再送されます。</li>
           <li><span class="flow-step__title">Obsidian Vaultへの追記 — ここは完全ローカル</span>Obsidian連携を有効にしている場合、Vaultへの追記は<strong>端末内のVaultフォルダへのファイル直接書き込み</strong>（開けない場合はURIフォールバック）で行われ、プラグインも外部サーバーも使いません。Vault追記の経路にネットワークは登場しません。</li>
@@ -205,14 +208,14 @@
           <li><span class="flow-step__title">メール送信 — TLSで通過、恒常保存なし</span>送信時のみ、本文はTLS（HTTPS）で当社のRelay API（Cloudflare Workers）と外部送信基盤（Resend）を<strong>通過</strong>します。恒常的な保存は行わず、ログにも記録しません。クライアントは <code>URLSessionConfiguration.ephemeral</code> を使い、Cookie・キャッシュを残しません。</li>
           <li><span class="flow-step__title">自分の受信箱へ — 標準SMTPで配達（＝E2EEではない）</span>最終配達は標準SMTPです。だからこそ普段のメールアプリでそのまま読めるのですが、<strong>エンドツーエンド暗号化（E2EE）ではありません</strong>。この設計判断については下の「正直に書いておくこと」をご覧ください。</li>
         </ol>
-      </section>
+      </div></section>
 
       <!-- What stays / what doesn't -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>サーバに残るもの・残らないもの</span>
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="compare-table">
             <thead><tr><th scope="col">データ</th><th scope="col">どこに</th><th scope="col">残るか</th></tr></thead>
             <tbody>
@@ -226,13 +229,13 @@
             </tbody>
           </table>
         </div>
-      </section>
+      </div></section>
 
       <!-- Memo protection and analytics -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>メモ本文の保護と利用解析</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>iOSアプリ内では、メモ本文の暗号化にCryptoKit、鍵保管にKeychain、本文の送信にURLSessionを使います。GoogleSignInとFirebase Authenticationは任意のメール自動入力に、Firebase App CheckはバックエンドAPIの保護に使います。<strong>自社の利用解析とAppsFlyerは、アプリ版と解析の選択によって扱いが異なります。</strong></span>
           </p>
@@ -240,32 +243,32 @@
             <span>「利用状況の分析」の選択がある版では、自社の利用イベントと端末由来の購読状態分析は既定で無効で、同意後に開始します。これらの版のAppsFlyer SDKは、別の獲得計測用の選択が用意されるまで停止します。選択のない旧版では、9月28日のサーバー更新後、自社の利用イベントと端末由来の購読状態分析を新規保存しませんが、旧AppsFlyerの計測が続く場合があります。</span>
           <span>有効な同意がある対応版の自社解析は、インストール・セッションの識別子や利用イベント、送信結果などを扱います。旧版のAppsFlyerには初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功を送信し、同じインストール識別子をCustomer User IDに設定します。アプリから設定するイベント項目にメールアドレス・メモ本文・認証コードは直接含めませんが、自社の送信IDは宛先ハッシュと紐付き、獲得情報と利用記録も関連付けられます。完全に匿名の解析ではありません。同意の撤回と版による条件は<a href="/privacy">ポリシー1(E)</a>、項目の詳細は<a href="/privacy#technical">プライバシーポリシー</a>をご覧ください。</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- Honest limitations -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>正直に書いておくこと — E2EEではありません</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="honest-box">
           <p style="margin-bottom:.75rem;"><strong>Obsidian連携シンプルメモはエンドツーエンド暗号化（E2EE）ではありません。</strong>メール本文は標準SMTPであなたの受信箱へ配達されます。「普段のメールアプリでそのまま読める」ことと「経路の末端まで暗号鍵を自分だけが持つ」ことは両立しないため、前者を選んだ設計です。</p>
           <p style="margin-bottom:.75rem;">端末内のOutboxと送信履歴はAES-GCM-256で暗号化していますが、これは<strong>端末内保護</strong>であって、E2EEの代わりにはなりません（<a href="/glossary/e2e-encryption/" style="color:var(--accent);">E2EEとは何か・なぜ本アプリは該当しないか</a>）。</p>
           <p>機密性が最優先で、E2EEが必須の方には、Standard NotesのようなE2EE設計のノートアプリのほうが適しています。それを明記した上で、「本文をサーバに残さない」「タグ付けを端末内で完結させる」「Vault追記をローカルで行う」が本アプリの守備範囲です。</p>
         </div>
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>よくある質問</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian Vaultへの追記に外部サーバーは関与しますか？</summary><div class="faq-answer"><p>関与しません。Vault追記は端末内のVaultフォルダへのファイル直接書き込み（不可の場合はURIフォールバック）で、プラグインもネットワークも使いません。メール送信を伴わない下書きのローカル保存も端末内で完結します。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AIタグ付けでメモの内容がAppleや外部のサーバーに送られませんか？</summary><div class="faq-answer"><p>送られません。タグ付けはApple Foundation ModelsによるオンデバイスAIがiPhoneの中だけで行い、ネットワーク通信を伴いません。Apple Intelligence非対応機種では端末内の軽量整形に自動フォールバックし、その場合も外部送信はありません。詳細は<a href="/ai-tags/" style="color:var(--accent);">AIタグ自動追加の解説</a>をご覧ください。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">なぜE2EEにしないのですか？</summary><div class="faq-answer"><p>メモの届け先を「普段のメール受信箱」にしているからです。受信箱で読める＝受信サーバが復号できる、なのでE2EEは構造的に成立しません。E2EEを優先する場合は専用クライアントが必須になり、「どの端末のメールアプリでも読める」という本アプリの価値と交換になります。E2EEが必須の用途にはStandard Notes等をおすすめします。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">この内容はプライバシーポリシーとどう違うのですか？</summary><div class="faq-answer"><p>法的な取り扱いの全文は<a href="/privacy" style="color:var(--accent);">プライバシーポリシー</a>（特に§12「暗号化に関する技術的な情報」）にあります。このページはその技術的な中身を、Obsidianユーザーの関心（ローカル完結かどうか）に沿って経路図として再構成したものです。矛盾がある場合はプライバシーポリシーが優先します。</p></div></details></div>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -281,10 +284,10 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>関連ページ</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/privacy"><span>プライバシーポリシー（正文）</span></a>
           <a href="/devlog/privacy-first-design"><span>開発記録: プライバシーファースト設計</span></a>
@@ -295,7 +298,7 @@
           <a href="/vs/obsidian-share-sheet/"><span>Obsidian共有シートとの誠実比較</span></a>
           <a href="/faq"><span>よくあるご質問</span></a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

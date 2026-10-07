@@ -215,11 +215,14 @@
     .article-body th{color:var(--text-muted);font-weight:700;}
     .table-scroll{overflow-x:auto;background:linear-gradient(90deg,#070b14 33%,rgba(7,11,20,0)) left/48px 100%,linear-gradient(270deg,#070b14 33%,rgba(7,11,20,0)) right/48px 100%,radial-gradient(farthest-side at 0 50%,rgba(120,170,255,.30),transparent) left/16px 100%,radial-gradient(farthest-side at 100% 50%,rgba(120,170,255,.30),transparent) right/16px 100%;background-repeat:no-repeat;background-attachment:local,local,scroll,scroll;}
   </style>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
       <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
@@ -246,7 +249,7 @@
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">オープンソースのメモアプリおすすめ6選【2026】選び方と注意点</h1>
+      <h1 class="page-content__title sd-title">オープンソースのメモアプリおすすめ6選【2026】選び方と注意点</h1>
 
       <p class="article-meta">
         著者: <a href="/about/">AI ATAKA</a> ・ 公開: <time datetime="2026-07-02">2026年7月2日</time> ・ 読了：約7分
@@ -258,7 +261,7 @@
           <strong>結論（先に要点）。</strong>実用レベルで定評のあるオープンソースのメモアプリは <strong>Joplin・Logseq・Standard Notes・Memos・Simplenote（クライアント）・Zettlr</strong> の6つが代表格です。人気のObsidianは<strong>無料で使えますがオープンソースではありません</strong>。選ぶ基準は、①ライセンスと開発の活発さ、②E2EE（エンドツーエンド暗号化）の有無、③同期手段の3点です。
         </div>
 
-        <h2>オープンソースのメモアプリとは？</h2>
+        <h2 id="reading-01" data-ce-number="01">オープンソースのメモアプリとは？</h2>
         <p>オープンソース（OSS）のメモアプリとは、<strong>ソースコードが公開され、誰でも中身を検証・改変・再配布できるライセンス</strong>（GPL、AGPL、MITなど）で開発されているメモアプリのことです。実用上のメリットは3つあります。</p>
         <ul>
           <li><strong>検証可能性</strong> — 「本当に暗号化されているか」「余計な通信をしていないか」を第三者がコードで確認できます。</li>
@@ -267,9 +270,9 @@
         </ul>
         <p>注意点として、<strong>「オープンソース＝無料」とは限りません</strong>。アプリ本体はOSSでも、公式の同期サービスが有料というモデル（Joplin Cloud、Standard Notesの上位プランなど）は一般的です。</p>
 
-        <h2>比較表：主要オープンソースメモアプリ6選</h2>
+        <h2 id="reading-02" data-ce-number="02">比較表：主要オープンソースメモアプリ6選</h2>
         <div class="table-scroll">
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table>
           <thead><tr><th scope="col">アプリ</th><th scope="col">ライセンス</th><th scope="col">最終リリース</th><th scope="col">対応環境</th><th scope="col">同期</th><th scope="col">特徴</th></tr></thead>
           <tbody>
@@ -291,7 +294,7 @@
           <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
         </div>
 
-        <h2>各アプリの特徴と向き不向き</h2>
+        <h2 id="reading-03" data-ce-number="03">各アプリの特徴と向き不向き</h2>
 
         <h3>Joplin — 「OSS版Evernote」が欲しい人へ</h3>
         <p>ノートブック・タグ・Webクリッパー・E2EE対応の同期と、機能の網羅性ではOSSメモの筆頭です。Evernoteからのインポートにも対応。反面、UIはやや無骨で、同期先の設定（Joplin Cloud／Dropbox／自前WebDAV等）を自分で選ぶ必要があります。</p>
@@ -311,18 +314,18 @@
         <h3>Zettlr — デスクトップで論文・長文を書く人へ</h3>
         <p>Zotero連携や引用管理を備えた、執筆・学術用途向けのMarkdownエディタです。モバイルアプリはないため、スマホでのメモ取りには別の入口が必要になります。</p>
 
-        <h2>ObsidianとAnytypeはオープンソース？</h2>
+        <h2 id="reading-04" data-ce-number="04">ObsidianとAnytypeはオープンソース？</h2>
         <p>この文脈で最も多い誤解が<strong>「Obsidian＝オープンソース」</strong>です。Obsidian本体は<strong>プロプライエタリ（非OSS）</strong>で、個人利用が無料というモデルです。ただし、データを端末内のMarkdownファイルとして保存するため、<strong>「データの持ち出しやすさ」というOSS的な美点</strong>は備えています。コードの検証可能性より「ファイルが自分の手元にあること」を重視するなら、Obsidianは現実的な選択肢です（<a href="/vs/obsidian/">Obsidianとの比較</a>）。</p>
         <p>Anytypeも「オープンソース」と紹介されることがありますが、正確にはコードは公開されているものの、OSI認定ライセンスではない<strong>ソースアベイラブル</strong>（Any Source Available License）です。細部が気になる方はライセンス原文を確認してください（<a href="/vs/anytype/">Anytypeとの比較</a>）。</p>
 
-        <h2>オープンソースメモアプリの選び方と注意点</h2>
+        <h2 id="reading-05" data-ce-number="05">オープンソースメモアプリの選び方と注意点</h2>
         <ol>
           <li><strong>開発が活発かを見る。</strong>OSSは「作者が去っても続けられる」のが強みですが、実際に引き継がれるかはコミュニティ次第です。リポジトリの最終更新日・リリース頻度・Issueへの反応を確認しましょう。</li>
           <li><strong>「OSS＝安全」と自動で考えない。</strong>コードが公開されていることと、暗号化が有効なことは別問題です。E2EEの有無（JoplinとStandard Notesは対応、Simplenoteは非対応）と、鍵の管理方法を仕様で確認しましょう（<a href="/blog/memo-app-security-comparison">メモアプリのセキュリティ比較</a>）。</li>
           <li><strong>同期の手間とコストを見積もる。</strong>自前同期（iCloud・Dropbox・Git・WebDAV）は無料ですが設定と保守が要ります。公式同期は手軽ですが多くは有料です。「無料で使いたい」が動機なら、同期まで含めた総コストで比較しましょう（<a href="/blog/free-memo-apps-ranking">無料メモアプリランキング</a>）。</li>
         </ol>
 
-        <h2>Obsidian連携シンプルメモはオープンソース？（正直な回答）</h2>
+        <h2 id="reading-06" data-ce-number="06">Obsidian連携シンプルメモはオープンソース？（正直な回答）</h2>
         <p>いいえ、<a href="/">Obsidian連携シンプルメモ</a>のソースコードは非公開です。そのうえで、OSSを検討する方が重視する「検証可能性」に対しては、次の形で応えています。</p>
         <ul>
           <li><strong>メモの保存先が「あなたのメール受信箱」</strong> — 独自フォーマットではなく、普通のメールとして届きます。アプリを削除しても、届いたメモは受信箱に残ります。</li>
@@ -337,7 +340,7 @@
           <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
         </div>
 
-        <h2>FAQ</h2>
+        <h2 id="reading-07" data-ce-number="07">FAQ</h2>
         <p><strong>オープンソースのメモアプリでおすすめは？</strong><br>定番はJoplin（多機能・全プラットフォーム対応）、Logseq（アウトライナー型・ローカルファースト）、Standard Notes（E2EE標準）の3つです。セルフホストで軽量に使いたいならMemos、とにかくシンプルに使いたいならSimplenote（クライアントがOSS）、デスクトップでの執筆用途ならZettlrが候補になります。</p>
         <p><strong>Obsidianはオープンソースですか？</strong><br>いいえ、Obsidian本体はオープンソースではありません（個人利用は無料のプロプライエタリソフトです）。ただしデータは端末内のMarkdownファイルとして保存されるため、アプリを乗り換えてもデータを持ち出しやすいという意味では、OSSに期待される「ロックインの少なさ」を備えています。</p>
         <p><strong>Obsidian連携シンプルメモはオープンソースですか？</strong><br>いいえ、本アプリのソースコードは非公開です。その代わりに、端末内の送信待ち・履歴・下書きはAES-GCM-256で暗号化しシンプルメモのサーバーにメモ本文を保存しないこと、起動速度の計測方法を公開していること、メモの保存先が特定アプリではなく「あなたのメール受信箱」という開かれた場所であることなど、検証可能な形での透明性を重視しています。</p>

@@ -235,11 +235,14 @@
 </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
       <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
@@ -266,7 +269,7 @@
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">Voice Notes in Obsidian: 4 Ways to Dictate on iPhone</h1>
+      <h1 class="page-content__title sd-title">Voice Notes in Obsidian: 4 Ways to Dictate on iPhone</h1>
 
       <p class="article-meta">
         By <a href="/en/about/">AI ATAKA</a> &middot; Updated: October 4, 2026 &middot; Reading time: ~6 minutes
@@ -278,10 +281,10 @@
           <strong>Short answer.</strong> On iPhone, voice notes reach Obsidian by four routes: <strong>(1) Obsidian mobile + iOS keyboard dictation</strong>, <strong>(2) a dictation shortcut + the official Capture action or Obsidian URI</strong>, <strong>(3) a plugin that transcribes recordings</strong>, and <strong>(4) appending from Simple Memo to a vault you've set up</strong>. To try it without another app, use 1 or 2; to process recordings you already have, use 3. If you want one input screen and destination you reuse, 4 is also an option. Simple Memo's in-app dictation requires iOS 26 or later, microphone and speech permissions, a supported language, and a destination set up.
         </div>
 
-        <h2>Live dictation vs. transcribing recordings</h2>
+        <h2 id="reading-01" data-ce-number="01">Live dictation vs. transcribing recordings</h2>
         <p>Obsidian ships a core <strong>Audio recorder</strong> plugin, but it stops at saving and embedding the audio file — there is no built-in speech-to-text. Dictating in the mobile app really means using the iOS keyboard microphone. So "voice notes in Obsidian" comes down to <strong>which input route you pair with which destination</strong>. Here are the four options.</p>
 
-        <h2>Method 1: Obsidian mobile + iOS dictation (free, right now)</h2>
+        <h2 id="reading-02" data-ce-number="02">Method 1: Obsidian mobile + iOS dictation (free, right now)</h2>
         <ol>
           <li>Open a note in Obsidian mobile (a daily note works well as the default target).</li>
           <li>Tap the microphone on the keyboard.</li>
@@ -289,15 +292,15 @@
         </ol>
         <p>No extra tools needed. The weakness is <strong>friction</strong>: launch the app, wait for the vault, open a note, tap the mic. That is several taps, and mid-walk ideas often evaporate on the way. For seated writing sessions it is perfectly fine.</p>
 
-        <h2>Method 2: Shortcuts (official Capture action or Obsidian URI)</h2>
+        <h2 id="reading-03" data-ce-number="03">Method 2: Shortcuts (official Capture action or Obsidian URI)</h2>
         <p>Use the Shortcuts "Dictate Text" action to turn speech into text, then hand it to Obsidian. With the <a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener">official Capture action, available since Obsidian mobile 1.11</a>, the text is appended or prepended to a note without opening the Obsidian app. Set the destination inside the shortcut, and check that a short test lands in the note you intended. The same release also added Siri phrases such as "Capture to Obsidian". You can run a shortcut from a Home Screen icon, Back Tap, or the Action button.</p>
         <p><a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener">Obsidian URI</a> (<code>obsidian://new</code>) is a different hand-off: you assemble the vault, file and append parameters and encode them yourself. Don't mix up the two routes. For whichever you use, check its settings, <strong>what happens when dictation cuts out</strong>, and whether dictation needs a connection on your device and language.</p>
 
-        <h2>Method 3: Whisper-style plugins (strong at transcribing recordings)</h2>
+        <h2 id="reading-04" data-ce-number="04">Method 3: Whisper-style plugins (strong at transcribing recordings)</h2>
         <p>Community plugins can run recordings through Whisper-class speech recognition and turn them into notes. For meetings, lectures, or long voice memos, this setup suits <strong>turning longer recordings into text</strong>.</p>
         <p>The cost is setup: API keys, usage fees, plugin configuration — and cloud-API variants do not work offline. Think "processing an audio archive," not "capturing ten quick thoughts a day."</p>
 
-        <h2>Method 4: Append from Simple Memo to a vault you've set up (no plugin)</h2>
+        <h2 id="reading-05" data-ce-number="05">Method 4: Append from Simple Memo to a vault you've set up (no plugin)</h2>
         <p>If the goal is "speak the moment an idea appears, and have it waiting in Obsidian," that is exactly what <a href="/en/obsidian/">Simple Memo - for Obsidian</a> is built for.</p>
         <ul>
           <li>Turn on <strong>Auto-start voice input on launch</strong> (Settings → Voice Input &amp; Sound) to start the in-app dictation when the app opens. It requires iOS 26 or later, a supported language, and microphone and speech recognition permission. Recognition runs on the device, but the first download of the language model may need a connection and some preparation time</li>
@@ -306,13 +309,13 @@
           <li><strong>About 0.4 seconds is measured from a warm launch to the moment you can type</strong>: the median of 5 runs on August 11. It is not the time to start recognition, deliver the email, or finish saving to the vault. The <a href="/en/blog/benchmark-methodology">measurement conditions</a> are published</li>
           <li>Free: up to 3 sends a day. See <a href="/en/faq#pricing-en">pricing and plans</a> for ongoing use</li>
         </ul>
-        <pre><code>- 09:14 Meeting note: quote due Friday
+        <pre tabindex="0"><code>- 09:14 Meeting note: quote due Friday
 - 09:31 Voice: buy batteries on the way home
 - 12:05 Idea: cut onboarding to 3 screens</code></pre>
         <p>First check dictation permissions and readiness, and register a destination address if you'll also use email. Then choose the vault folder and destination in the Obsidian integration, and confirm that a short memo was appended. If direct folder access isn't available and the app switches to the URI route, the behavior and setup differ. The steps are in <a href="/en/obsidian/getting-started/">setup and first-append check</a>, the <a href="/en/voice-input/">voice input page</a>, and the <a href="/en/blog/email-to-obsidian">email-to-Obsidian guide</a>.</p>
 
-        <h2>The four methods compared</h2>
-        <div style="overflow-x:auto">
+        <h2 id="reading-06" data-ce-number="06">The four methods compared</h2>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table>
           <tr><th scope="col">Method</th><th scope="col">Steps from idea to saved</th><th scope="col">Best for</th><th scope="col">Offline</th><th scope="col">Extra cost</th></tr>
           <tr><th scope="row">1. Mobile + iOS dictation</th><td>Several taps (launch, note, mic)</td><td>Seated writing</td><td>Partial (device/language dependent)</td><td>None</td></tr>
@@ -322,7 +325,7 @@
         </table>
         </div>
 
-        <h2>Which one should you pick?</h2>
+        <h2 id="reading-07" data-ce-number="07">Which one should you pick?</h2>
         <ul>
           <li><strong>Free and immediate</strong> → Method 1</li>
           <li><strong>One-tap trigger, enjoy tinkering</strong> → Method 2</li>
@@ -331,7 +334,7 @@
         </ul>
         <p>A useful mental model: separate <strong>capture</strong> from <strong>writing</strong>. For the full menu of capture routes see <a href="/en/blog/obsidian-iphone-memo">6 ways to capture notes in Obsidian from iPhone</a>, and for what to do with those scraps afterwards, read the <a href="/en/blog/fleeting-notes">fleeting notes guide</a>.</p>
 
-        <h2>FAQ</h2>
+        <h2 id="reading-08" data-ce-number="08">FAQ</h2>
         <p><strong>Can Obsidian do voice input by itself?</strong><br>On mobile you can use the iOS keyboard dictation inside any note. But Obsidian has no built-in transcription: the core Audio recorder plugin saves and embeds a recording without converting it to text.</p>
         <p><strong>How do I transcribe recordings into Obsidian?</strong><br>Use a Whisper-style community plugin or an external transcription tool. That is the right setup for meetings and lectures. If you just want to speak and see text immediately, methods 1 or 4 are simpler.</p>
         <p><strong>Can I automate "speak, then it lands in Obsidian" without a plugin?</strong><br>Yes. You can combine Shortcuts dictation with Obsidian's official Capture action. Simple Memo can do it too: on iOS 26 or later, set up voice auto-input and each sent memo is appended directly to the vault folder you granted access to. Either way, set the destination and check the first save; dictation depends on permissions, a supported language and whether the language model is ready.</p>

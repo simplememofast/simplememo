@@ -258,11 +258,14 @@
 
   <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/apple-notes/#faq","mainEntity":[{"@type":"Question","name":"Apple Notesのクイックメモ機能とシンプルメモの違いは？","acceptedAnswer":{"@type":"Answer","text":"iPhoneのクイックメモはコントロールセンターから呼び出せますが、Apple Notesアプリ内に保存されるだけでメール送信はされません。シンプルメモは書いた瞬間にワンタップでメール送信。メモの「出口」が根本的に異なります。"}},{"@type":"Question","name":"Apple Notesの共有メモとシンプルメモのメール送信は何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"Apple Notesの共有はiCloud経由で特定の相手とノートを共同編集する機能です。シンプルメモのメール送信は自分宛てに一方向で即座に送信するもの。共同編集ではなく、個人の瞬間的な思考記録に最適化されています。"}},{"@type":"Question","name":"Apple NotesからSimple Memoに乗り換える必要がありますか？","acceptedAnswer":{"@type":"Answer","text":"乗り換えではなく併用がおすすめです。Apple Notesは長文の整理・議事録・リスト管理に最適。シンプルメモは「今この瞬間の一言をメールに残す」ための専用ツールです。用途が異なるので共存できます。"}},{"@type":"Question","name":"Apple Notesにロック機能がありますが、シンプルメモのセキュリティは？","acceptedAnswer":{"@type":"Answer","text":"Apple NotesはFace ID/Touch IDでノート単位のロックが可能です。シンプルメモは送信待ち（Outbox）と送信履歴を端末内でAES-GCMにより暗号化して保存します。メモ本文はサーバーに恒常的には保存されませんが、E2E暗号化ではなく、送信メールは配送基盤を通ります。"}},{"@type":"Question","name":"Apple Notesのウィジェットとシンプルメモ、どちらが便利ですか？","acceptedAnswer":{"@type":"Answer","text":"Apple Notesのウィジェットは、最近のメモを見返す入口です。シンプルメモにもホーム画面とロック画面のウィジェット（iOS 17以降）があり、タップするとアプリが開きます（iOS 26以降の対応機種・言語なら、そのまま声のメモを始められます）。文字で書くときは、アプリを開けばすぐ入力欄が使えます（タップから入力できるまで0.4秒、開発者の計測・ウォーム起動）。見返すならApple Notes、書いてすぐ送るならシンプルメモ、という使い分けです。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -294,7 +297,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>メモアプリ比較</span>
 
@@ -311,7 +314,7 @@
           <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-05">2026年03月05日</time></span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Apple Notesとは</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>瞬間メモでApple Notesに生じうる摩擦</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>比較表：シンプルメモ vs Apple Notes</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <p class="lp-section__lead" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;margin-bottom:2rem;font-size:.95rem;line-height:1.8;">
         <span>この比較はシンプルメモの開発元による、公開仕様と開発者の起動時間の計測（iPhone 16e・ウォーム起動）に基づく整理です。利用期間の記録は公開していないため、実体験レビューとしての評価は示していません。Apple Notesは長いメモの整理に、シンプルメモは思いついたことを自分宛てに送ることに向いています。</span>
@@ -319,23 +322,23 @@
       </p>
 
       <!-- Entity Definition -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>Apple Notesとは</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>Apple Notesは、iPhoneに標準搭載されたメモアプリです。フォルダ、タグ、チェックリスト、手書き入力、PDF添付、共有ノートなど多彩な機能を持ち、iCloud経由でMac・iPad間でも同期されます。長文の記録、レシピ管理、会議メモなど、幅広いユースケースに対応しています。一方、当サイトの計測（iPhone 16e・ウォーム起動）ではタップから入力できるまで1.7秒（中央値）かかり、瞬間的なアイデア捕捉には必ずしも最適ではありません。無料で使えるのは大きなメリットです。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Why iPhone Users Switch -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>瞬間メモでApple Notesに生じうる摩擦</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>Apple Notesは無料で多機能な優秀アプリですが、「思いついた瞬間にメモする」という用途においては、意外な摩擦が存在します。その摩擦を挙げます（利用者への調査に基づくものではありません）。</span>
 
@@ -353,15 +356,15 @@
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>比較表：シンプルメモ vs Apple Notes</span>
 
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Apple Notes</th></tr></thead>
             <tbody>
@@ -380,14 +383,14 @@
           </table>
 
         </div>
-      </section>
+      </div></section>
 
       <!-- 5 Key Differences -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>4つの見落としがちな違い</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
@@ -411,14 +414,14 @@
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>どちらを選ぶべきか</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
@@ -444,14 +447,14 @@
           </div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>よくある質問</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Notesのクイックメモ機能とシンプルメモの違いは？</summary><div class="faq-answer"><p>iPhoneのクイックメモはコントロールセンターから呼び出せますが、Apple Notesアプリ内に保存されるだけでメール送信はされません。シンプルメモは書いた瞬間にワンタップでメール送信。メモの「出口」が根本的に異なります。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Notesの共有メモとシンプルメモのメール送信は何が違いますか？</summary><div class="faq-answer"><p>Apple Notesの共有はiCloud経由で特定の相手とノートを共同編集する機能です。シンプルメモのメール送信は自分宛てに一方向で即座に送信するもの。共同編集ではなく、個人の瞬間的な思考記録に最適化されています。</p></div></details></div>
@@ -460,7 +463,7 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Notesのウィジェットとシンプルメモ、どちらが便利ですか？</summary><div class="faq-answer"><p>Apple Notesのウィジェットは、最近のメモを見返す入口です。シンプルメモにもホーム画面とロック画面のウィジェット（iOS 17以降）があり、タップするとアプリが開きます（iOS 26以降の対応機種・言語なら、そのまま声のメモを始められます）。文字で書くときは、アプリを開けばすぐ入力欄が使えます（タップから入力できるまで0.4秒、開発者の計測・ウォーム起動）。見返すならApple Notes、書いてすぐ送るならシンプルメモ、という使い分けです。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -479,11 +482,11 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span>関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/">
             <span>メモアプリ比較一覧</span>
@@ -514,7 +517,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

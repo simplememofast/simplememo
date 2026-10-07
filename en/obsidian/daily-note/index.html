@@ -297,11 +297,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/daily-note/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"I appended, but nothing appeared in the note","acceptedAnswer":{"@type":"Answer","text":"Usually the write succeeded — into a file you aren't looking at. Nearly always a mismatched date format or folder. Check Settings → Daily notes in Obsidian for the format and the new file location, and match the sending side exactly. Searching the whole vault for the filename will reveal strays created in the wrong place."}},{"@type":"Question","name":"What happens if today's note doesn't exist yet?","acceptedAnswer":{"@type":"Answer","text":"It depends on the route. One that creates the file before appending will make today's note with your first capture. One that only appends to an existing note either fails or creates a file somewhere you didn't intend. Also note that an auto-created note may not get your template applied."}},{"@type":"Question","name":"Daily note or inbox note — which should I use?","acceptedAnswer":{"@type":"Answer","text":"Daily notes suit a chronological log of your day; a fixed inbox note suits a bucket you triage later. Until your workflow settles, the inbox note is safer — it doesn't depend on the date, so a format mismatch can't misplace anything. Switching to daily notes later loses nothing you've already captured."}},{"@type":"Question","name":"Can I control where in the note it lands?","acceptedAnswer":{"@type":"Answer","text":"It depends. Choosing between appending at the end and prepending at the top is common; inserting under a specific heading needs a dedicated Shortcuts action or a community plugin that supports it. For most uses, stacking timestamped lines at the end and organising later inside Obsidian holds up better."}},{"@type":"Question","name":"It appended but doesn't show on my other devices","acceptedAnswer":{"@type":"Answer","text":"With iCloud Drive the write is immediate, but propagation can take seconds to tens of seconds. Open the note in Obsidian on the iPhone first: visible there but not elsewhere means sync lag; not visible there either means the destination itself is wrong. This lag is a different phenomenon from a conflict caused by editing on two devices at once — see the sync methods comparison for how iCloud Drive stacks up against the alternatives."}},{"@type":"Question","name":"Can I append without installing a plugin?","acceptedAnswer":{"@type":"Answer","text":"Yes. None of the three routes here require a community plugin. With Simple Memo, your vault is treated as an ordinary folder (on iCloud Drive or On My iPhone) and the app writes Markdown into it directly — no changes needed on the Obsidian side."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -329,7 +332,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Obsidian daily note × quick capture</span>
 </div>
@@ -342,7 +345,7 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-11">August 11, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>&quot;Without opening your iPhone&quot; has three levels</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>The three routes compared</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Why the append goes missing — the three big causes</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first (AIO) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="font-size:.95rem;">
@@ -351,10 +354,10 @@
 </div>
 </section>
 <!-- Define "without opening" -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 <span lang="en">"Without opening your iPhone" has three levels</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Different writers mean different things by it. Decide which level you actually want and the route follows. Most tutorials mean level 1 — which still leaves <strong>taking the phone out of your pocket</strong> in the loop.</span>
 </p>
@@ -379,13 +382,13 @@
 <p class="lv__d"><span lang="en">You capture by voice (Siri, AirPods) or from an Apple Watch, phone still in your pocket. This is the only level that works <strong>when you can't look at a screen at all</strong> — walking, cooking, before bed. Reaching it changes not how fast you capture but how many moments you can capture in.</span></p>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Route comparison -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">The three routes compared</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -459,12 +462,12 @@
 <div class="reason-card__desc"><span lang="en">If most of your capturing happens at a desk, route 1 is plenty. The more your ideas arrive while moving or with your hands busy, the more route 3 is what actually catches them. Treat route 2 as the answer when route 1 genuinely can't do what you need.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Why appends go missing -->
-<section class="lp-section" id="missing">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter" id="missing">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Why the append goes missing — the three big causes</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Every route trips on this, and the cruel part is that <strong>the write usually succeeded</strong> — just into a file you aren't looking at. Nothing errors, so people often notice weeks later.</span>
 </p>
@@ -494,16 +497,16 @@
 <div class="tip-box__title"><span lang="en">WHEN IN DOUBT, START WITH AN INBOX NOTE</span></div>
 <p><span lang="en">Until your workflow settles, collecting into <strong>one fixed file</strong> beats targeting daily notes. It depends on neither the date format nor the folder setting, so all three causes above become impossible. Switch to daily notes later if you want a chronological log — nothing captured so far is lost.</span></p>
 </div>
-</section>
+</div></section>
 <!-- Reaching Lv3 -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">Reaching level 3 — from your voice and your wrist</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Simple Memo is a route 3 app. Each note you send arrives in your own inbox by email and, with the Obsidian integration on, is appended, one line at a time, to the daily note in your vault folder — <strong>without opening Obsidian</strong>. <strong>No community plugin, no shortcut to build</strong>; setup is picking the vault folder once.</span>
 </p>
-<pre class="note-sample"><code># 2026-08-11
+<pre class="note-sample" tabindex="0"><code># 2026-08-11
 
 - 09:14 駅で思いついた記事の見出し案
 - 12:38 ランチで聞いた競合の新機能をあとで調べる
@@ -543,12 +546,12 @@
 <img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/>
 </a>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">I appended, but nothing appeared in the note</span></summary>
@@ -585,12 +588,12 @@
 <div class="faq-answer"><span lang="en">Yes. None of the three routes here require a community plugin. With Simple Memo, your vault is treated as an ordinary folder (on iCloud Drive or On My iPhone) and the app writes Markdown into it directly — no changes needed on the Obsidian side.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/"><span lang="en">Obsidian integration</span></a>
 <a href="/en/obsidian/sync/"><span lang="en">Sync methods compared</span></a>
@@ -605,13 +608,13 @@
 <a href="/en/methods/second-brain/"><span lang="en">Second brain</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-07" data-ce-number="07">
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://help.obsidian.md/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help</a> — <span lang="en">Official help for daily note date formats, locations and templates</span></li>
 <li><a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian 1.11 Mobile changelog</a> — <span lang="en">The release that added Shortcuts actions able to append without opening the app</span></li>
@@ -619,7 +622,7 @@
 <li><a href="https://support.apple.com/ja-jp/guide/shortcuts/welcome/ios" rel="noopener" style="color:var(--accent);" target="_blank">Shortcuts User Guide (Apple)</a> — <span lang="en">Apple's official guide to actions, automations and date formatting</span></li>
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

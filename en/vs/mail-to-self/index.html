@@ -258,11 +258,14 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/mail-to-self/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How is a Mail to Self app different from just emailing myself?","acceptedAnswer":{"@type":"Answer","text":"Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.4 seconds (warm launch, iPhone 16e), type, and tap send. No inbox distractions, no wasted steps."}},{"@type":"Question","name":"Can I send memos to myself without SMTP configuration?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required."}},{"@type":"Question","name":"Will I lose a memo if I send it with poor connectivity?","acceptedAnswer":{"@type":"Answer","text":"With a regular email client, what happens on a connectivity error depends on the mail app. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns."}},{"@type":"Question","name":"Is switching from another Mail to Self app to Simple Memo easy?","acceptedAnswer":{"@type":"Answer","text":"Yes. Download from the App Store, then set and verify your email address. All memos sent by your previous app remain in your email inbox. No data migration needed."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -292,7 +295,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span>Memo App Comparison</span>
@@ -309,25 +312,25 @@
 
 <span>By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: March 6, 2026</span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>What are Mail to Self Apps?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Comparison: Simple Memo vs Other Mail to Self Apps</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>3 Differences in Self-Email Methods</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Entity Definition -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span>What are Mail to Self Apps?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span>"Mail to Self" apps are a category of tools designed for one purpose: quickly capturing a thought and emailing it to your own address. Popular examples include EmailMe, Note To Self Mail, MeMail, and the now-discontinued Captio. Apps that need SMTP configuration (server address, port, password) create a technical barrier for non-technical users, and offline support and on-device encryption vary by app (not verified here for each one). Simple Memo uses a Cloudflare Workers relay (no SMTP needed), AES-GCM encryption, and an Outbox architecture.</span>
 </p>
-</section>
+</div></section>
 <!-- Comparison Table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span>Comparison: Simple Memo vs Other Mail to Self Apps</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 
 <table class="compare-table">
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Typical Mail to Self Apps</th></tr></thead>
@@ -344,13 +347,13 @@
 </tbody>
 </table>
 </div>
-</section>
+</div></section>
 <!-- 5 Key Differences -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span>3 Differences in Self-Email Methods</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ul class="diff-list">
 <li>
@@ -369,24 +372,24 @@
             When you use a mail client for self-email, what happens on a connectivity error (the message stays in the outbox, goes back to drafts, and so on) depends on the mail app. Simple Memo's Outbox architecture safely stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns.
           </li>
 </ul>
-</section>
+</div></section>
 <!-- The Problem with Emailing Yourself -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span>The Problem with Emailing Yourself via Mail App</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span>Let's walk through the steps of manually emailing yourself via the Mail app: open Mail → tap compose → type your email address in the To field → type a subject → type the memo body → tap send. That's 6 steps. And the moment you open your mail client, other emails compete for your attention. With Simple Memo - for Obsidian: open the app → type your memo → tap send. Just 3 steps. No need to type a recipient address, and the subject line is auto-generated from the first line of your memo. For anyone who sends memos to themselves multiple times a day, this step reduction adds up.</span>
 </p>
-</section>
+</div></section>
 <!-- Who Should Choose Which -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span>Who Should Choose Which?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div class="choose-grid">
 <div class="choose-card">
@@ -412,13 +415,13 @@
 </ul>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span>FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is a Mail to Self app different from just emailing myself?</summary><div class="faq-answer"><p>Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.4 seconds (warm launch, iPhone 16e), type, and tap send. No inbox distractions, no wasted steps.</p></div></details></div>
@@ -426,7 +429,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will I lose a memo if I send it with poor connectivity?</summary><div class="faq-answer"><p>With a regular email client, what happens on a connectivity error depends on the mail app. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is switching from another Mail to Self app to Simple Memo easy?</summary><div class="faq-answer"><p>Yes. Download from the App Store, then set and verify your email address. All memos sent by your previous app remain in your email inbox. No data migration needed.</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -443,11 +446,11 @@
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 
 <span>Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/vs/">
 
@@ -482,7 +485,7 @@
 <span>FAQ</span>
 </a>
 </div>
-</section>
+</div></section>
 </div>
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

@@ -63,11 +63,14 @@
   <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -102,16 +105,16 @@
       <a href="/">ホーム</a> ／ <span aria-current="page">Notion連携</span>
     </nav>
 
-    <h1>Notion連携</h1>
+    <h1 class="sd-title">Notion連携</h1>
     <p class="lead">
       思いついたことを書く（話す）と、<strong>メール送信に加えて</strong>、
       Notionの「SimpleMemo Inbox」に1件1ページで残ります。
       Notionを開かなくても追記でき、iPhoneの文字・音声、Siri、Apple Watch が同じ経路を通ります。
     </p>
 
-    <h2>流れ</h2>
+    <h2 id="reading-01" data-ce-number="01">流れ</h2>
     <div style="overflow-x:auto">
-      <pre style="line-height:1.7"><code>書く / 話す（文字・音声・Siri・Apple Watch）
+      <pre style="line-height:1.7" tabindex="0"><code>書く / 話す（文字・音声・Siri・Apple Watch）
       ↓
   端末に保管   ← ここで完了。すぐ次のメモを書ける
       ↓
@@ -124,8 +127,8 @@
       まだ保存できていないメモは端末に残り、履歴から送り直せます。
     </p>
 
-    <h2>できること</h2>
-    <table>
+    <h2 id="reading-02" data-ce-number="02">できること</h2>
+    <div class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表"><table>
       <thead><tr><th>できること</th><th>補足</th></tr></thead>
       <tbody>
         <tr><td>メモをNotionの「SimpleMemo Inbox」へ保存</td><td>1件が1ページ。最初の空でない行がタイトル、本文が本文、取得時刻がCaptured</td></tr>
@@ -136,11 +139,11 @@
         <tr><td>未保存メモの再送</td><td>履歴から。元のID・取得日時・接続を使うので無料枠を二重に消費しない</td></tr>
         <tr><td>接続の解除</td><td>保存済みのNotionページも、端末の未保存メモも残る</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
-    <h2>できないこと</h2>
+    <h2 id="reading-03" data-ce-number="03">できないこと</h2>
     <p>ここは<strong>誇張しないために書いています</strong>。以下は現時点で実装していません。</p>
-    <table>
+    <div class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表"><table>
       <thead><tr><th>できないこと</th><th>状態</th></tr></thead>
       <tbody>
         <tr><td>Notion側の変更をアプリに取り込む（双方向同期）</td><td><strong>ありません。</strong>役割はNotionへの一方向の保存だけです</td></tr>
@@ -150,16 +153,16 @@
         <tr><td>メールを使わずに始める</td><td><strong>できません。</strong>メールの宛先設定が前提です。外せるのはプレミアムの「Notionのみに保存」だけです</td></tr>
         <tr><td>初回設定の画面でNotionを選ぶ</td><td><strong>できません。</strong>初回はメールの宛先だけを決めます。Notionは<strong>設定画面から接続</strong>します</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
-    <h2>持っていないもの</h2>
+    <h2 id="reading-04" data-ce-number="04">持っていないもの</h2>
     <p>
       アプリの中に <strong>Notionのビューアも編集画面も作っていません。</strong>
       Notionは保存先であって、このアプリは<strong>そこへ書き込むだけ</strong>です。
       整理する画面を増やさないのは、このアプリの方針です。
     </p>
 
-    <h2>プライバシー</h2>
+    <h2 id="reading-05" data-ce-number="05">プライバシー</h2>
     <ul>
       <li>Notionのアクセストークンは<strong>端末に返しません。</strong>サーバ側で暗号化して保管します。</li>
       <li>送信の記録に残るのは<strong>メタデータだけ</strong>で、メモ本文を保持する列はありません。</li>
@@ -167,7 +170,7 @@
       <li>アカウント削除の操作では、保存済み・解除済みの各Notion接続のサーバー側データ削除を先に実行します。<strong>Notionの中のページは消しません。</strong></li>
     </ul>
 
-    <h2>始め方</h2>
+    <h2 id="reading-06" data-ce-number="06">始め方</h2>
     <ol>
       <li>アプリの<strong>設定</strong>を開く</li>
       <li><strong>Notion</strong> の「Notion 連携」をONにする</li>
@@ -178,7 +181,7 @@
       メールを送らずNotionだけにしたい場合は、同じ画面の「Notion のみに保存」を使います（プレミアム）。
     </p>
 
-    <h2>よくある質問</h2>
+    <h2 id="reading-07" data-ce-number="07">よくある質問</h2>
     <h3>Obsidian連携と一緒に使えますか</h3>
     <p>使えます。両方をONにしていれば、メール・Notion・Obsidianの3つに出ます。ただし「Notionのみに保存」をONにすると、Obsidianへの追記は止まります。</p>
     <h3>先に他のアプリでも同じことができますか</h3>

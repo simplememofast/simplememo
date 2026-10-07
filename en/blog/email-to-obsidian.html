@@ -236,11 +236,14 @@
 </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
       <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
@@ -267,50 +270,50 @@
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">Email to Obsidian: iPhone Capture and Received-Mail Workflows</h1>
+      <h1 class="page-content__title sd-title">Email to Obsidian: iPhone Capture and Received-Mail Workflows</h1>
 
       <p class="article-meta">By <a href="/en/about/">AI ATAKA</a> · Updated: <time datetime="2026-09-09">September 9, 2026</time></p>
 
       <div class="page-content__body article-body">
-<section id="email-vault-answer"><h2>Start with the material you want to save</h2>
+<section id="email-vault-answer" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-01" data-ce-number="01">Start with the material you want to save</h2></div><div class="ce-chapter__body">
 <p><strong>Saving a new iPhone note is different from importing a received email.</strong> Simple Memo’s integration writes from iPhone to a note in the folder you configure. It does not automatically collect forwarded messages from an email inbox.</p>
-</section>
-<section id="email-vault-routes"><h2>Choose an entry point</h2>
-<div class="email-vault-scroll" tabindex="0" role="region" aria-labelledby="email-vault-caption"><table><caption id="email-vault-caption">Choose by intent. Scroll horizontally to compare columns.</caption><thead><tr><th scope="col">Intent</th><th scope="col">First step</th><th scope="col">Entry point</th></tr></thead><tbody><tr><th scope="row">Capture a new note on iPhone</th><td>Choose a destination folder and note, then start with a write test.</td><td>Simple Memo or direct entry in Obsidian.</td></tr><tr><th scope="row">Keep received email as reference</th><td>Start with a small manual sample; verify text, date, attachments and the original.</td><td>The received-email workflow below.</td></tr><tr><th scope="row">Automatically ingest many emails</th><td>Define scope, duplicate handling, attachments, permissions and failures first.</td><td>Evaluate a separate importer or automation.</td></tr></tbody></table></div><p>This is not a measurement showing one route to be fastest or best for everyone. Verify saving and retrieval with a small sample first.</p>
-</section>
-<section id="email-vault-setup"><h2>Five steps for new iPhone notes</h2>
+</div></section>
+<section id="email-vault-routes" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-02" data-ce-number="02">Choose an entry point</h2></div><div class="ce-chapter__body">
+<div class="email-vault-scroll sd-table" tabindex="0" role="region" aria-labelledby="email-vault-caption"><table><caption id="email-vault-caption">Choose by intent. Scroll horizontally to compare columns.</caption><thead><tr><th scope="col">Intent</th><th scope="col">First step</th><th scope="col">Entry point</th></tr></thead><tbody><tr><th scope="row">Capture a new note on iPhone</th><td>Choose a destination folder and note, then start with a write test.</td><td>Simple Memo or direct entry in Obsidian.</td></tr><tr><th scope="row">Keep received email as reference</th><td>Start with a small manual sample; verify text, date, attachments and the original.</td><td>The received-email workflow below.</td></tr><tr><th scope="row">Automatically ingest many emails</th><td>Define scope, duplicate handling, attachments, permissions and failures first.</td><td>Evaluate a separate importer or automation.</td></tr></tbody></table></div><p>This is not a measurement showing one route to be fastest or best for everyone. Verify saving and retrieval with a small sample first.</p>
+</div></section>
+<section id="email-vault-setup" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-03" data-ce-number="03">Five steps for new iPhone notes</h2></div><div class="ce-chapter__body">
 <ol class="email-vault-steps"><li>Open your vault in Obsidian on the same iPhone. Check that Files can access the destination folder and that required iCloud files are downloaded.</li><li>In Simple Memo settings, enable the Obsidian integration and choose the destination in Folder. If daily notes live in a subfolder, select that subfolder.</li><li>Choose a Daily note destination or a fixed Custom note. A blank custom-note name uses Inbox.md.</li><li>Run Test Obsidian write. This test sends no email. Note the filename in its result, then find the test text in Obsidian on iPhone.</li><li>Send one short memo and check the same note. If the selected mode also sends email, check the inbox separately; verify another device’s sync as a further step.</li></ol><p>The <a href="/en/obsidian/getting-started/">first-note guide</a> includes setup screens and failure checks. Simple Memo and Obsidian Sync have separate costs.</p>
-</section>
-<section id="email-vault-target"><h2>Daily and fixed-note destinations</h2>
+</div></section>
+<section id="email-vault-target" class="ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="reading-04" data-ce-number="04">Daily and fixed-note destinations</h2></div><div class="ce-chapter__body">
 <p>Direct writing uses <code>yyyy-MM-dd.md</code> in the selected folder for a daily note. It does not automatically read Obsidian’s chosen daily-note folder or date format. For a fixed note, match its name and folder and first verify one saved item.</p>
 <p>This fictional example illustrates a possible format. Actual output depends on the selected template and formatting settings.</p>
-<pre><code>- 09:14 Review the draft diagram after the meeting</code></pre></section>
-<section id="email-vault-only"><h2>If you want to save without email</h2>
+<pre tabindex="0"><code>- 09:14 Review the draft diagram after the meeting</code></pre></div></section>
+<section id="email-vault-only" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-05" data-ce-number="05">If you want to save without email</h2></div><div class="ce-chapter__body">
 <p>The supported Obsidian-only mode makes Obsidian the memo destination. <strong>Enabling it requires Premium, the integration enabled, a selected folder and a successful write test.</strong> Read the conditions and confirmation in settings before switching. You do not need to accumulate unwanted copies in an unmonitored mailbox.</p>
 <p>In this mode, an unsuccessful file write is handled as pending. If you choose email rescue, recognize it as a separate send. An already-enabled mode does not switch to email solely because Premium ends; the usage allowance changes to the free allowance. <a href="/en/faq#pricing-en">Pricing and free allowance</a></p>
-</section>
-<section id="email-vault-checks"><h2>Four checks when the result is missing</h2>
+</div></section>
+<section id="email-vault-checks" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-06" data-ce-number="06">Four checks when the result is missing</h2></div><div class="ce-chapter__body">
 <ul class="email-vault-checks"><li>The write test fails: open the folder in Files, confirm required downloads and select the destination again. Keep the original notes.</li><li>Email arrives but the note is absent: check the iPhone folder, destination type and filename. Treat inbox success and file saving as separate checks.</li><li>The note exists on iPhone but not Mac: confirm that both devices use the same vault and a working, supported sync method.</li><li>Pending items remain: reconnect, open Simple Memo, and inspect retry status and the target note. Keep the pending inventory until you have checked it.</li></ul><p>Local writing can fail because of folder access or download state. In the normal email-plus-integration route, a failed direct write may fall back to an Obsidian URI that opens Obsidian. Remaining in the background and saving while offline are not unconditional guarantees.</p>
-</section>
-<section id="email-vault-received"><h2>Four steps for keeping received email as reference</h2>
+</div></section>
+<section id="email-vault-received" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-07" data-ce-number="07">Four steps for keeping received email as reference</h2></div><div class="ce-chapter__body">
 <ol class="email-vault-mail-steps"><li>Choose one email and record its subject, sender, date and relevant text in a new Markdown note. Make clear whether the text is a copy or your summary.</li><li>Save needed PDFs/images in supported formats and link or embed them in the note. Do not depend solely on remote image URLs used in the original email.</li><li>Add a link back to the original when your mail app provides a usable one. It may require the same mail account; try it on the other device you intend to use.</li><li>Verify the note’s text, attachments, date and searchability. Keep the original email until checks and any required retention period are complete.</li></ol><p><a href="https://obsidian.md/help/attachments" target="_blank" rel="noopener">Obsidian: attachments</a>. Before automating a larger import, inspect mailbox permissions, attachments, duplicates, failure reporting and what will enter a shared vault. This page does not test or endorse a specific email-ingestion service.</p>
-</section>
-<section id="email-vault-alternatives"><h2>URI, Watch and sync conditions</h2>
+</div></section>
+<section id="email-vault-alternatives" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-08" data-ce-number="08">URI, Watch and sync conditions</h2></div><div class="ce-chapter__body">
 <p>Obsidian URI is a built-in route for opening, creating and appending notes from another app. Its <code>daily</code> action requires the built-in Daily Notes feature; <strong>that is separate from direct folder writing</strong>. If you build a Shortcuts workflow, test it with a limited target note first. <a href="https://obsidian.md/help/Extending%2BObsidian/Obsidian%2BURI" target="_blank" rel="noopener">Official Obsidian URI specification</a></p>
 <p><a href="/en/apple-watch/">Apple Watch capture</a> passes the memo to the paired iPhone, where writing is performed. Check the resulting iPhone note separately from the fact that input was captured on Watch.</p>
 <p>Use a sync method that supports the devices involved; iCloud does not work identically across every OS. Neither sync nor self-email replaces a backup of the whole vault. <a href="https://obsidian.md/help/sync-notes" target="_blank" rel="noopener">Cross-device sync</a> / <a href="https://obsidian.md/help/backup" target="_blank" rel="noopener">Independent backup</a></p>
-</section>
-<section id="email-vault-faq"><h2>Frequently asked questions</h2>
+</div></section>
+<section id="email-vault-faq" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-09" data-ce-number="09">Frequently asked questions</h2></div><div class="ce-chapter__body">
 <details class="faq-details"><summary class="faq-summary">Will forwarding an email automatically put it in Obsidian?</summary><div class="faq-answer">The Simple Memo integration described here writes notes captured on iPhone to a configured destination. It is not an importer for received email and does not create an email-address inbox for your vault.</div></details>
 <details class="faq-details"><summary class="faq-summary">Can I save only to Obsidian without sending email?</summary><div class="faq-answer">A supported Obsidian-only mode is available. Enabling it requires Premium, the integration turned on, a selected folder and a successful write test. Check the conditions and confirmation shown in settings before switching.</div></details>
 <details class="faq-details"><summary class="faq-summary">Is offline saving guaranteed?</summary><div class="faq-answer">No. The folder and target file must be available on the device with valid write access. Distinguish pending from saved status and check the intended iPhone note after reconnecting.</div></details>
 <details class="faq-details"><summary class="faq-summary">Why is the email delivered but the Obsidian note missing?</summary><div class="faq-answer">Email arrival does not confirm the file write. Check the selected folder, destination type, note name and iCloud download status, then run the write test first.</div></details>
 <details class="faq-details"><summary class="faq-summary">Do I need an Obsidian plugin?</summary><div class="faq-answer">Direct folder writing needs no community plugin. A separate route using the Obsidian URI daily action requires Obsidian’s built-in Daily Notes feature to be enabled.</div></details>
 <details class="faq-details"><summary class="faq-summary">Can I read the same notes on Android or desktop?</summary><div class="faq-answer">Set up a separate sync method that supports your operating systems, then open the synced notes in Obsidian. Do not assume iCloud alone supports every OS; consult the official cross-device guide.</div></details>
-</section>
-<section id="email-vault-scope"><h2>Scope</h2>
+</div></section>
+<section id="email-vault-scope" class="ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-10" data-ce-number="10">Scope</h2></div><div class="ce-chapter__body">
 <p>Updated September 9, 2026 after checking official Obsidian documentation and the supported Simple Memo implementation. Examples are fictional. This update does not report new physical-device tests for every mail provider, storage location, airplane-mode case or Watch workflow. The author develops Simple Memo, an independent app.</p>
-</section>
+</div></section>
 
       </div>
     </div>

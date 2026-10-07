@@ -268,11 +268,14 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Simple Memo - for Obsidian","alternateName":["Obsidian連携シンプルメモ","Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo"],"url":"https://simplememofast.com/","image":"https://simplememofast.com/assets/img/app-icon-256.png","applicationCategory":"UtilitiesApplication","operatingSystem":"iOS 16.0+, watchOS","softwareVersion":"5.9.12","isAccessibleForFree":true,"inLanguage":"en","downloadUrl":"https://apps.apple.com/us/app/id6758438948","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD","description":"Up to 3 sends a day, with no time limit","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Monthly","price":"2.99","priceCurrency":"USD","description":"$2.99 a month, unlimited sends","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Yearly","price":"29.99","priceCurrency":"USD","description":"$29.99 a year, unlimited sends","availability":"https://schema.org/InStock"}],"author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI ATAKA","url":"https://simplememofast.com/about/"}}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=63be7e71e9">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
@@ -302,7 +305,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">Obsidian integration for iPhone</div>
         <h1 class="lp-hero__title">Write on iPhone. Find it in your chosen Obsidian note.</h1>
         <p class="lp-hero__sub">Choose a folder in your Obsidian vault, run the write test, then save a short memo from iPhone. <strong>Successful direct writes append without opening Obsidian.</strong> Check the note on iPhone first; email delivery and sync to another device are separate results.</p>
@@ -318,13 +321,13 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
           By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Updated <time datetime="2026-09-30">September 30, 2026</time>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>A consistent destination for your next note</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>How saving works</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Setup: check your first saved memo</span><span aria-hidden="true">↗</span></a></nav></div>
 
-<section class="lp-section" id="integration-summary"><h2 class="lp-section__title">A consistent destination for your next note</h2><p>Simple Memo can append text to a daily note or a fixed inbox in the folder you select on iPhone. Enable the integration, choose the target and verify a write first. Direct writes need no community plugin; the folder and file must remain available with permission to write.</p><div class="reason-cards"><div class="reason-card"><div class="reason-card__title">Choose a destination once</div><div class="reason-card__desc">Set the folder and filename in advance, then use the same destination for short memos. Find the first saved text before relying on the workflow.</div></div><div class="reason-card"><div class="reason-card__title">Review and add context</div><div class="reason-card__desc">Capture a useful point on iPhone, then add links or context in Obsidian. A <a href="/en/methods/second-brain/">second brain workflow</a> depends on returning to notes and using them.</div></div><div class="reason-card"><div class="reason-card__title">Choose whether to also email</div><div class="reason-card__desc">Normal mode also sends to your configured address. Obsidian-only mode has its own activation conditions below. An email copy does not replace a backup of your whole vault.</div></div></div></section>
-<section class="lp-section" id="integration-behavior"><h2 class="lp-section__title">How saving works</h2><p>With the integration enabled, the iPhone attempts to append to your selected note. In normal mode, a missing folder or failed direct write may fall back to an Obsidian URI that opens the app. Verify the saved text in the target note.</p><div class="flow-card"><div class="flow-row"><span class="flow-chip">Write a memo</span><span class="flow-arrow">→</span><span class="flow-chip">Use the selected destination</span><span class="flow-arrow">→</span><span class="flow-chip">Check the saved note</span></div><p>Fictional formatting example. Output depends on the append template you select.</p><div class="note-preview" aria-label="Illustrative note preview"><div class="nt-h"># 2026-09-09</div><div>- <span class="nt-time">09:14</span> Ask which draft needs a diagram</div></div></div><div class="reason-cards"><div class="reason-card"><div class="reason-card__title">Daily note or fixed inbox</div><div class="reason-card__desc">Daily notes use <code>yyyy-MM-dd.md</code> in the selected folder. Custom notes use the filename you choose, with <code>Inbox.md</code> as the blank-name default. Simple Memo does not read Obsidian's Daily Notes folder or date format automatically.</div></div><div class="reason-card"><div class="reason-card__title">Folder access before automation</div><div class="reason-card__desc">Select a vault folder accessible through Files, grant access and run the write test. Direct folder writes need no community plugin.</div></div><div class="reason-card"><div class="reason-card__title">Prepare files for offline use</div><div class="reason-card__desc">Direct writes can work offline when the folder and target file are downloaded and writable. Keep pending memos until saving is confirmed. Email and remote sync need connectivity.</div></div></div><div class="tip-box"><div class="tip-box__title">Where the text goes</div><p>The direct file append runs on iPhone. If email is enabled, its body passes through the Relay API and delivery provider. AES-GCM protects the app's on-device queue and history; it does not make an ordinary email or exported Markdown file end-to-end encrypted. See the <a href="/en/privacy">Privacy Policy</a> for processing and storage details.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="integration-summary"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">A consistent destination for your next note</h2></div><div class="ce-chapter__body"><p>Simple Memo can append text to a daily note or a fixed inbox in the folder you select on iPhone. Enable the integration, choose the target and verify a write first. Direct writes need no community plugin; the folder and file must remain available with permission to write.</p><div class="reason-cards"><div class="reason-card"><div class="reason-card__title">Choose a destination once</div><div class="reason-card__desc">Set the folder and filename in advance, then use the same destination for short memos. Find the first saved text before relying on the workflow.</div></div><div class="reason-card"><div class="reason-card__title">Review and add context</div><div class="reason-card__desc">Capture a useful point on iPhone, then add links or context in Obsidian. A <a href="/en/methods/second-brain/">second brain workflow</a> depends on returning to notes and using them.</div></div><div class="reason-card"><div class="reason-card__title">Choose whether to also email</div><div class="reason-card__desc">Normal mode also sends to your configured address. Obsidian-only mode has its own activation conditions below. An email copy does not replace a backup of your whole vault.</div></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="integration-behavior"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">How saving works</h2></div><div class="ce-chapter__body"><p>With the integration enabled, the iPhone attempts to append to your selected note. In normal mode, a missing folder or failed direct write may fall back to an Obsidian URI that opens the app. Verify the saved text in the target note.</p><div class="flow-card"><div class="flow-row"><span class="flow-chip">Write a memo</span><span class="flow-arrow">→</span><span class="flow-chip">Use the selected destination</span><span class="flow-arrow">→</span><span class="flow-chip">Check the saved note</span></div><p>Fictional formatting example. Output depends on the append template you select.</p><div class="note-preview" aria-label="Illustrative note preview"><div class="nt-h"># 2026-09-09</div><div>- <span class="nt-time">09:14</span> Ask which draft needs a diagram</div></div></div><div class="reason-cards"><div class="reason-card"><div class="reason-card__title">Daily note or fixed inbox</div><div class="reason-card__desc">Daily notes use <code>yyyy-MM-dd.md</code> in the selected folder. Custom notes use the filename you choose, with <code>Inbox.md</code> as the blank-name default. Simple Memo does not read Obsidian's Daily Notes folder or date format automatically.</div></div><div class="reason-card"><div class="reason-card__title">Folder access before automation</div><div class="reason-card__desc">Select a vault folder accessible through Files, grant access and run the write test. Direct folder writes need no community plugin.</div></div><div class="reason-card"><div class="reason-card__title">Prepare files for offline use</div><div class="reason-card__desc">Direct writes can work offline when the folder and target file are downloaded and writable. Keep pending memos until saving is confirmed. Email and remote sync need connectivity.</div></div></div><div class="tip-box"><div class="tip-box__title">Where the text goes</div><p>The direct file append runs on iPhone. If email is enabled, its body passes through the Relay API and delivery provider. AES-GCM protects the app's on-device queue and history; it does not make an ordinary email or exported Markdown file end-to-end encrypted. See the <a href="/en/privacy">Privacy Policy</a> for processing and storage details.</p></div></div></section>
       <!-- Setup -->
-      <section class="lp-section" id="setup">
-        <h2 class="lp-section__title">Setup: check your first saved memo</h2>
+      <section class="lp-section ce-chapter sd-chapter" id="setup">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Setup: check your first saved memo</h2></div><div class="ce-chapter__body">
         <ul class="prereq-list">
           <li>Simple Memo installed on iPhone (iOS 16.0 or later)</li>
           <li>Obsidian installed on the same iPhone</li>
@@ -342,13 +345,13 @@
           <p>If you see "Couldn’t write," check that the folder opens in Files and is downloaded to your iPhone. Select it again under <strong>Settings → Obsidian → Folder</strong>, then rerun the write test first. If the test succeeds but the note is missing on another device, check that both devices use the same vault and that sync is working. iCloud sync time varies with connection conditions.</p>
           <p>If you skipped this during onboarding, start from the Obsidian section in Settings whenever you are ready.</p>
         </div>
-      </section>
+      </div></section>
 
-<section id="save-checks" class="lp-section"><h2 class="lp-section__title">Check saving, email and sync separately</h2><div class="save-scroll" tabindex="0" role="region" aria-labelledby="save-checks-caption"><table><caption id="save-checks-caption">Three results to check. Scroll horizontally.</caption><thead><tr><th scope="col">Result</th><th scope="col">What confirms it</th><th scope="col">If it is missing</th></tr></thead><tbody><tr><th scope="row">Saved on iPhone</th><td>Open the filename from the write-test result and find the text.</td><td>Check Files access, downloads, folder and destination name; rerun the test.</td></tr><tr><th scope="row">Email delivered</th><td>Find the memo in the configured inbox when email is enabled.</td><td>Check pending sends, the recipient address and the receiving mailbox.</td></tr><tr><th scope="row">Available on another device</th><td>Open the same vault and note on that device.</td><td>Check sync after confirming the local write.</td></tr></tbody></table></div><p>The <a href="/en/blog/email-to-obsidian">email and Obsidian workflow guide</a> also distinguishes new iPhone memos from importing received mail.</p></section>
-<section id="obsidian-only" class="lp-section"><h2 class="lp-section__title">Save to Obsidian without sending email</h2><p>Enabling Obsidian-only mode requires Premium, the integration switched on, a selected folder and a successful write test. Review the confirmation in Settings before switching. While active, this mode saves to the vault without emailing the memo; failed saves remain pending.</p><p>An already active mode continues if Premium expires, with the free allowance of three saves per day. If you choose email rescue for a pending memo, that is a separate send. See the <a href="/en/faq#pricing-en">pricing FAQ</a> for plan conditions.</p></section>
+<section id="save-checks" class="lp-section ce-chapter sd-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Check saving, email and sync separately</h2></div><div class="ce-chapter__body"><div class="save-scroll sd-table" tabindex="0" role="region" aria-labelledby="save-checks-caption"><table><caption id="save-checks-caption">Three results to check. Scroll horizontally.</caption><thead><tr><th scope="col">Result</th><th scope="col">What confirms it</th><th scope="col">If it is missing</th></tr></thead><tbody><tr><th scope="row">Saved on iPhone</th><td>Open the filename from the write-test result and find the text.</td><td>Check Files access, downloads, folder and destination name; rerun the test.</td></tr><tr><th scope="row">Email delivered</th><td>Find the memo in the configured inbox when email is enabled.</td><td>Check pending sends, the recipient address and the receiving mailbox.</td></tr><tr><th scope="row">Available on another device</th><td>Open the same vault and note on that device.</td><td>Check sync after confirming the local write.</td></tr></tbody></table></div><p>The <a href="/en/blog/email-to-obsidian">email and Obsidian workflow guide</a> also distinguishes new iPhone memos from importing received mail.</p></div></section>
+<section id="obsidian-only" class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Save to Obsidian without sending email</h2></div><div class="ce-chapter__body"><p>Enabling Obsidian-only mode requires Premium, the integration switched on, a selected folder and a successful write test. Review the confirmation in Settings before switching. While active, this mode saves to the vault without emailing the memo; failed saves remain pending.</p><p>An already active mode continues if Premium expires, with the free allowance of three saves per day. If you choose email rescue for a pending memo, that is a separate send. See the <a href="/en/faq#pricing-en">pricing FAQ</a> for plan conditions.</p></div></section>
       <!-- Use cases -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">Ways to use it</h2>
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Ways to use it</h2></div><div class="ce-chapter__body">
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">Capture-first</div>
@@ -367,11 +370,11 @@
             <div class="reason-card__desc">Record the source, page or URL and your own takeaway. See <a href="/en/use-cases/reading-notes/" style="color:var(--accent);">reading-note workflows</a> for ways to revisit the material.</div>
           </div>
         </div>
-      </section>
+      </div></section>
 
       <!-- Constraints (honest) -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">Requirements &amp; caveats</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Requirements &amp; caveats</h2></div><div class="ce-chapter__body">
         <div>
           <div class="trouble-item">
             <div class="trouble-item__q">The target folder must be accessible and writable</div>
@@ -386,11 +389,11 @@
             <div class="trouble-item__a"><p>A successful write test confirms that Simple Memo wrote to the file in your selected folder. Other devices still need to sync. Check the note on your iPhone first, then check sync on your Mac or other device.</p></div>
           </div>
         </div>
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">FAQ</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">FAQ</h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need an Obsidian plugin?</summary><div class="faq-answer"><p>No community plugin is needed for direct folder writes. Simple Memo writes to your selected folder on iCloud Drive or "On My iPhone." This method does not require the Daily Notes feature to be enabled. Use "Test Obsidian write" in Settings to check your destination first.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Obsidian open every time I send a memo?</summary><div class="faq-answer"><p>A successful direct folder write appends without opening Obsidian. In normal mode, if no folder is selected or a direct write fails, the app may open Obsidian through its URL scheme to attempt the append. The write test in Settings checks direct folder writes only.</p></div></details></div>
@@ -404,7 +407,7 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does it work with Gmail, Outlook, or iCloud Mail into Obsidian?</summary><div class="faq-answer"><p>Email delivery and direct folder writes are separate paths. A working Gmail, Outlook or iCloud inbox does not verify the file destination. In normal mode, check both results. While Obsidian-only mode is active, the memo is saved without being emailed.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I send to Obsidian from Apple Watch?</summary><div class="faq-answer"><p>Watch input is handed to the paired iPhone, which performs the Obsidian write. Check that handoff completes and the memo appears in the selected note. Input on Watch alone does not confirm a vault save. See the <a href="/en/apple-watch/">Apple Watch page</a> for the workflow.</p></div></details></div>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -415,8 +418,8 @@
         </a>
       </div>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title">Explore Obsidian after your first save</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">Explore Obsidian after your first save</h2></div><div class="ce-chapter__body">
         <p>Once the note appears on your iPhone, choose how to sync your vault, decide whether you need plugins, and compare the tools that fit your workflow.</p>
         <div class="internal-links">
           <a href="/en/obsidian/sync/">Compare vault sync methods</a>
@@ -426,11 +429,11 @@
           <a href="/en/obsidian/pricing/">Check Obsidian pricing</a>
           <a href="/en/obsidian/compare/logseq/">Compare Obsidian and Logseq</a>
         </div>
-      </section>
+      </div></section>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">Related Pages</h2>
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">Related Pages</h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/en/apple-watch-obsidian/">Apple Watch × Obsidian Integration</a>
           <a href="/en/guides/">All Setup Guides</a>
@@ -443,20 +446,20 @@
           <a href="/en/privacy-architecture/">Privacy Architecture</a>
           <a href="/en/note-to-email/">Note to Email</a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <div class="container">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">References</h2>
+  <div class="container ce-chapter sd-chapter">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-11" data-ce-number="11">References</h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://obsidian.md/help/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — Official Obsidian Help for vault, daily notes, and sync behavior</li>
     <li><a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian URI</a> — Official docs for the standard obsidian:// URI used in the fallback path</li>
     <li><a href="https://support.apple.com/icloud" target="_blank" rel="noopener" style="color:var(--accent);">Apple — iCloud</a> — Official support for file sync via iCloud Drive</li>
     <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/us/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Simple Memo - for Obsidian — App Store</a> — App Store download page</li>
   </ul>
-  </div>
+  </div></div>
 </section>
 
 <!-- SEO: Auto-generated related content links -->
