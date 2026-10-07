@@ -257,11 +257,14 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/standard-notes/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？","acceptedAnswer":{"@type":"Answer","text":"Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。"}},{"@type":"Question","name":"Standard Notesのアカウント作成なしでシンプルメモは使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワードの設定は不要です（送信先のメールアドレスは6桁の確認コードで確認します）。"}},{"@type":"Question","name":"Standard Notesの拡張エディタはシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 0.4秒（iPhone 16e・ウォーム起動の実測）・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？","acceptedAnswer":{"@type":"Answer","text":"用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。メモ本文をアプリのサーバーに恒常的に保存せず、すぐにメールで受け取りたいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。"}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -293,7 +296,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span lang="ja">メモアプリ比較</span>
 
@@ -314,38 +317,38 @@
           <span lang="ja">Standard Notes の E2E 暗号化は堅牢で、サーバー側でも本文を読めません。一方シンプルメモは別アプローチで、オフライン送信待ちの Outbox と送信履歴を端末内で AES-GCM-256 暗号化し、メール本文をサーバに恒常的に保存しません（送信処理時のみ通過します）。メール送信そのものは標準 SMTP のため E2E 暗号化ではありませんが、プライバシーへのアプローチが根本的に異なります。</span>
 
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="このページの内容"><p>このページの内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Standard Notesとは</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>暗号化メモアプリの比較：Standard Notes vs Obsidian連携シンプルメモ</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>比較表：シンプルメモ vs Standard Notes</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Entity Definition -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span lang="ja">Standard Notesとは</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span lang="ja">Standard Notesは、エンドツーエンド暗号化（XChaCha20-Poly1305）を核心に持つプライバシー重視のメモアプリです。iOS・Android・Windows・Mac・Linuxで動作し、暗号化された状態でクラウドにノートを同期します。オープンソースプロジェクトとして開発されており、拡張エディタ（マークダウン、スプレッドシートなど）・タグ・ファイル添付・バージョン履歴を備えています。無料プランは基本機能のみで、多くの高度な機能は有料プランが必要です。プライバシーを最優先にしながらも、フル機能のノートアプリを求めるユーザーに支持されています。</span>
 
         </p>
-      </section>
+      </div></section>
 
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span lang="ja">暗号化メモアプリの比較：Standard Notes vs Obsidian連携シンプルメモ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span lang="ja">Standard NotesとObsidian連携シンプルメモは、どちらもプライバシーを重視するメモアプリですが、暗号化のアプローチが根本的に異なります。Standard Notesは、XChaCha20-Poly1305によるエンドツーエンド暗号化を採用しています。ノートはデバイス上で暗号化され、暗号化された状態でStandard Notesのクラウドサーバーに保存・同期されます。サーバー側でもノートの内容を読むことができないため、セキュリティレベルは非常に高いと言えます。トレードオフは、ノートを読めるのがStandard Notesのアプリに限られることです。Obsidian連携シンプルメモは別のアプローチを取ります。オフライン送信待ちの Outbox と送信履歴は端末内で AES-GCM-256 暗号化されますが、メール送信自体は標準 SMTP のため E2E 暗号化ではありません（受信者であるユーザー自身が普段使いのメールアプリで読めるようにするため）。代わりに、メール本文を当社サーバに恒常的に保存しません（送信処理時にのみ通過）。送ったメモは、メールとして受信箱（メールサービスのサーバー）に残ります。「暗号化してクラウド保存（E2E）」vs「本文をサーバに残さない（データ最小化）」というモデルの違いです。一方で、Standard Notesはフル機能のノートアプリとして、タグ管理、拡張エディタ、バージョン履歴、ファイル添付など豊富な機能を持ちます。Obsidian連携シンプルメモはキャプチャ専用で、手動で整理・編集する機能はありません（Obsidian連携で「AIタグ自動追加」をオンにすれば、端末内AIがタイトルとタグを付けます）。セキュリティモデルの選択は、あなたの脅威モデルによります。「サーバーに暗号文で残しても OK、ただし本文を読めるアプリは Standard Notes だけにしたい」なら Standard Notes。「メモを普段のメール受信箱で読みたい、ただし送信基盤側に本文を残してほしくない」なら Obsidian連携シンプルメモ。</span>
 
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span lang="ja">比較表：シンプルメモ vs Standard Notes</span>
 
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="横にスクロールできる表">
           <table lang="ja" class="compare-table">
             <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Standard Notes</th></tr></thead>
             <tbody>
@@ -365,14 +368,14 @@
           </table>
 
         </div>
-      </section>
+      </div></section>
 
       <!-- 5 Key Differences -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span lang="ja">4つのプライバシー重視アプリの違い</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul lang="ja" class="diff-list">
           <li>
             <span class="diff-num">1</span>
@@ -396,14 +399,14 @@
           </li>
         </ul>
 
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span lang="ja">どちらを選ぶべきか</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja" class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
@@ -429,14 +432,14 @@
           </div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span lang="ja">よくある質問</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？</summary><div class="faq-answer"><p>Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesのアカウント作成なしでシンプルメモは使えますか？</summary><div class="faq-answer"><p>はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワードの設定は不要です（送信先のメールアドレスは6桁の確認コードで確認します）。</p></div></details></div>
@@ -444,7 +447,7 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？</summary><div class="faq-answer"><p>用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。メモ本文をアプリのサーバーに恒常的に保存せず、すぐにメールで受け取りたいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。</p></div></details></div>
         </div>
 
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
@@ -463,11 +466,11 @@
       </div>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span lang="ja">関連ページ</span>
 
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/vs/">
             <span lang="ja">メモアプリ比較一覧</span>
@@ -498,7 +501,7 @@
 
           </a>
         </div>
-      </section>
+      </div></section>
 
     </div>
 

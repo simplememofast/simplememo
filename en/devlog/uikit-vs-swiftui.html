@@ -386,11 +386,14 @@
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -419,7 +422,7 @@
 
 <main class="page-content">
 <div class="container">
-<h1 class="page-content__title">
+<h1 class="page-content__title sd-title">
 
 <span lang="en">UIKit vs SwiftUI: Why We Chose UIKit for Launch Speed</span>
 </h1>
@@ -432,7 +435,7 @@
 <!-- English Content -->
 <div class="" lang="en">
 <div class="article-body">
-<h2>1. Why UIKit in 2026</h2>
+<h2 id="reading-01">1. Why UIKit in 2026</h2>
 <p>Apple emphasizes SwiftUI's evolution at every WWDC, and the convenience of declarative UI is beyond question.</p>
 <p>However, this app has a <strong>non-negotiable requirement</strong>: <strong>Time-to-Text (the time from launch to text input readiness) must be under 500ms</strong>.</p>
 <p>SwiftUI introduces overhead inherent to declarative UI frameworks: <code>@StateObject</code> initialization, <code>body</code> re-evaluation, and <code>.onAppear</code> timing control. While negligible for most apps, these become significant when optimizing at the millisecond level.</p>
@@ -440,7 +443,7 @@
 <div class="metric-highlight">
 <strong>Design Decision:</strong> UIKit was chosen to meet the non-functional requirement of Time-to-Text under 500ms.
           </div>
-<h2>2. Why We Completely Eliminated Storyboard</h2>
+<h2 id="reading-02">2. Why We Completely Eliminated Storyboard</h2>
 <p>Choosing UIKit alone wasn't enough. Storyboards also introduce overhead that impacts launch performance.</p>
 <ul>
 <li><strong>XML Parsing Cost:</strong> Storyboards are XML files internally, requiring parsing at launch time</li>
@@ -448,7 +451,7 @@
 <li><strong>Unnecessary Complexity:</strong> A simple memo app doesn't need Storyboard's visual design tools</li>
 </ul>
 <p>Instead, we instantiate ViewControllers directly in <code>SceneDelegate</code>.</p>
-<pre><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+<pre tabindex="0"><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
            options connectionOptions: UIScene.ConnectionOptions) {
     PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
     guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -460,9 +463,9 @@
     PerformanceLogger.shared.signpostEnd(name: "SceneConnect")
 }</code></pre>
 <p>This approach achieves <strong>zero Storyboard parse time and zero segue resolution</strong>. By instantiating ComposeViewController directly from SceneDelegate, all unnecessary processing is eliminated from the launch path.</p>
-<h2>3. One Line in viewDidAppear Completes Everything</h2>
+<h2 id="reading-03">3. One Line in viewDidAppear Completes Everything</h2>
 <p>UIKit's greatest strength is its explicitly defined ViewController lifecycle. When <code>viewDidAppear(_:)</code> is called, the view is fully rendered on screen. Calling <code>becomeFirstResponder()</code> at this precise timing minimizes the delay to keyboard display.</p>
-<pre><code>override func viewDidAppear(_ animated: Bool) {
+<pre tabindex="0"><code>override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     activateTextInput()
 }
@@ -475,7 +478,7 @@ private func activateTextInput() {
 <div class="metric-highlight">
 <strong>Measurement Results:</strong> The target is 500ms or less. In a screen-recording measurement (August 11, 2026, iPhone 16e, warm launch), the text field had focus 0.17 seconds after the tap and the keyboard was fully up at 0.4 seconds.
           </div>
-<h2>4. Performance Measurement Infrastructure</h2>
+<h2 id="reading-04">4. Performance Measurement Infrastructure</h2>
 <p>Design decisions are based on quantitative data, not subjective impressions of "feeling fast."</p>
 <ul>
 <li><strong>PerformanceLogger:</strong> A custom logger wrapping <code>os_signpost</code>, measuring each phase of launch, send, and UI updates</li>
@@ -484,7 +487,7 @@ private func activateTextInput() {
 <li><strong>Continuous Monitoring:</strong> Performance measurement on every development build for immediate regression detection</li>
 </ul>
 <p>Performance is a feature. Users don't explicitly demand "speed," but they unconsciously stop using slow apps. That's why continuously managing performance through numbers matters.</p>
-<h2>5. Are There Cases for Using SwiftUI?</h2>
+<h2 id="reading-05">5. Are There Cases for Using SwiftUI?</h2>
 <p>It's not UIKit-or-nothing. There are areas within the app where SwiftUI could be appropriate.</p>
 <ul>
 <li><strong>Settings Screens:</strong> Non-critical screens that don't affect launch speed could benefit from SwiftUI's declarative productivity</li>
@@ -495,7 +498,7 @@ private func activateTextInput() {
 <p>If SwiftUI's performance improves further in the future, there's room for re-evaluation. But UIKit on the critical path is the policy for the foreseeable future.</p>
 <!-- FAQ Section -->
 <div class="faq-section">
-<h2>Frequently Asked Questions</h2>
+<h2 id="reading-06" data-ce-number="06">Frequently Asked Questions</h2>
 <div class="faq-item">
 <div class="faq-item__question">Q. Can't SwiftUI achieve sub-500ms launch?</div>
 <div class="faq-item__answer">It's not impossible. But SwiftUI adds work for <code>@StateObject</code> initialization and <code>body</code> re-evaluation, so this app, which aims for the fastest launch, chose UIKit for its tightly controllable lifecycle (this is not a same-conditions measurement of the two).</div>
@@ -515,7 +518,7 @@ private func activateTextInput() {
 </div>
 <!-- Related Articles -->
 <div class="related-section">
-<h2 class="related-section__title">Related Articles</h2>
+<h2 class="related-section__title" id="reading-07" data-ce-number="07">Related Articles</h2>
 <div class="related-grid">
 <a class="related-card" href="/en/devlog/day1">
 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
@@ -538,18 +541,18 @@ private func activateTextInput() {
 </div>
 </div>
 </div>
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://developer.apple.com/documentation/uikit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — UIKit Documentation</a> — <span lang="en">Official reference for the framework chosen to build Simple Memo - for Obsidian's UI</span></li>
 <li><a href="https://developer.apple.com/documentation/swiftui" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — SwiftUI Documentation</a> — <span lang="en">Declarative UI framework evaluated as an alternative and measured for performance</span></li>
 <li><a href="https://developer.apple.com/documentation/os/ossignposter" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — os_signpost / OSSignposter</a> — <span lang="en">Performance measurement API integrated with Instruments, used for Time-to-Text measurement</span></li>
 <li><a href="https://developer.apple.com/videos/play/wwdc2023/10160/" rel="noopener" style="color:var(--accent);" target="_blank">WWDC 2023 — Analyze hangs with Instruments</a> — <span lang="en">WWDC session referenced for UI responsiveness optimization</span></li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page

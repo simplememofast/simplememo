@@ -257,11 +257,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/ios-shortcuts/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"How do I set up an email-to-self shortcut?","acceptedAnswer":{"@type":"Answer","text":"Open Shortcuts app, tap \"+\", add \"Send Email\" action, set recipient to yourself, add \"Ask for Input\" before it, then add it to the Home Screen and send a test to confirm it arrives. With Simple Memo there is no shortcut to build — set and confirm your recipient address and you're ready."}},{"@type":"Question","name":"My shortcut broke after an iOS update. Is Simple Memo more stable?","acceptedAnswer":{"@type":"Answer","text":"After a major iOS update, run a test send to confirm your shortcut still works as expected. Simple Memo doesn't depend on Shortcuts; support for new iOS versions comes through app updates."}},{"@type":"Question","name":"Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?","acceptedAnswer":{"@type":"Answer","text":"Turn off Show Compose Sheet in the Send Email action's options to request sending without the compose preview; permissions, account setup or a locked device can still interrupt the run. Simple Memo sends from its own screen with one tap."}},{"@type":"Question","name":"Is there a reason to use both Shortcuts and Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for \"email memo to self\" specifically, Simple Memo shows the send status in the app and resends memos saved while offline. Check that they arrive before you choose."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -291,7 +294,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span lang="en">Email-to-Self Workflow Comparison</span>
@@ -308,23 +311,23 @@
 
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: March 7, 2026</span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>What Is the iOS Shortcuts Email-to-Self Workflow?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>What to Check After an iOS Update</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Comparison Table: Simple Memo vs iOS Shortcuts</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Entity Definition -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span lang="en">What Is the iOS Shortcuts Email-to-Self Workflow?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">iOS Shortcuts (formerly Workflow) is Apple's built-in automation app for iPhone. By creating a shortcut with a "Send Email" action, setting the recipient to your own address, and adding it to your home screen, you can approximate a "one-tap email to self" workflow. However, there are limitations: with Show Compose Sheet on, a compose screen opens before each send; the shortcut has no retry queue of its own (what happens offline depends on Mail and the account), and it keeps no send history — you check Mail's Sent and Outbox instead. You can combine actions freely, but you set up and check the input and send conditions yourself. After major iOS updates, it is worth re-checking that the shortcut still works. The key advantage is that it is free and uses Apple's native framework, but it is a DIY setup you build and maintain yourself.</span>
 </p>
-</section>
-<section class="lp-section">
-<h2 class="lp-section__title">
+</div></section>
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span lang="en">What to Check After an iOS Update</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span lang="en">After updating iOS, send a short test memo without sensitive information with either method. For Shortcuts, check the Show Compose Sheet setting, any permission prompts, and Mail's Sent and Outbox. For Simple Memo, check the send status in the app and your inbox. Whether you need to redo any setup depends on what you see on your device.</span>
@@ -337,14 +340,14 @@
 
 <span lang="en">How you check the send status also differs. The shortcut itself does not show whether the send completed — you check Mail's Sent and Outbox. What happens offline depends on Mail and the account; the shortcut has no retry logic of its own. Simple Memo uses an Outbox architecture that keeps memos on the device offline and sends them automatically when connectivity returns. Pending and failed sends are shown in the app, and arrival is confirmed in your inbox.</span>
 </p>
-</section>
+</div></section>
 <!-- Comparison Table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span lang="en">Comparison Table: Simple Memo vs iOS Shortcuts</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 
 <table class="compare-table" lang="en">
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">iOS Shortcuts</th></tr></thead>
@@ -362,13 +365,13 @@
 </tbody>
 </table>
 </div>
-</section>
+</div></section>
 <!-- 5 Key Differences -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span lang="en">4 Differences Between Automation and a Dedicated App</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ul class="diff-list" lang="en">
 <li>
@@ -392,13 +395,13 @@
             After an iOS update, send a test memo with either and check that it arrives. For Shortcuts, check the actions and permissions you set up; for Simple Memo, check the pending and failed status and whether the app is up to date.
           </li>
 </ul>
-</section>
+</div></section>
 <!-- Who Should Choose Which -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span lang="en">Who Should Choose Which?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div class="choose-grid" lang="en">
 <div class="choose-card">
@@ -424,13 +427,13 @@
 </ul>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I set up an email-to-self shortcut?</summary><div class="faq-answer"><p>Open Shortcuts app, tap "+", add "Send Email" action, set recipient to yourself, add "Ask for Input" before it, then add it to the Home Screen and send a test to confirm it arrives. With Simple Memo there is no shortcut to build — set and confirm your recipient address and you're ready.</p></div></details></div>
@@ -438,7 +441,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?</summary><div class="faq-answer"><p>Turn off Show Compose Sheet in the Send Email action's options to request sending without the compose preview; permissions, account setup or a locked device can still interrupt the run. Simple Memo sends from its own screen with one tap.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a reason to use both Shortcuts and Simple Memo?</summary><div class="faq-answer"><p>Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for "email memo to self" specifically, Simple Memo shows the send status in the app and resends memos saved while offline. Check that they arrive before you choose.</p></div></details></div>
 </div>
-</section>
+</div></section>
 <!-- CTA -->
 <div class="cta-box">
 <div class="cta-box__title">
@@ -455,11 +458,11 @@
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 
 <span lang="en">Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/vs/">
 
@@ -486,7 +489,7 @@
 <span lang="en">FAQ</span>
 </a>
 </div>
-</section>
+</div></section>
 </div>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

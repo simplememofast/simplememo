@@ -398,11 +398,14 @@
   }
   </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -432,7 +435,7 @@
 
 <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span lang="ja">UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由</span>
 
       </h1>
@@ -446,7 +449,7 @@
       <div lang="ja" class="">
         <div class="article-body">
 
-          <h2>1. なぜ2026年にUIKitなのか</h2>
+          <h2 id="reading-01">1. なぜ2026年にUIKitなのか</h2>
           <p>Appleは毎年のWWDCでSwiftUIの進化を強調しており、宣言的UIの利便性はもはや疑いようがない。</p>
           <p>しかし、このアプリには<strong>譲れない要件</strong>がある。それは<strong>Time-to-Text（起動からテキスト入力可能になるまでの時間）を500ms以下にすること</strong>だ。</p>
           <p>SwiftUIでは、<code>@StateObject</code>の初期化、<code>body</code>の再評価、<code>.onAppear</code>のタイミング制御など、宣言的UIフレームワーク固有のオーバーヘッドが存在する。これらは一般的なアプリでは無視できる程度だが、ミリ秒単位の最適化を追求する場面では無視できない。</p>
@@ -455,7 +458,7 @@
             <strong>設計判断：</strong>Time-to-Text 500ms以下という非機能要件を満たすため、UIKitを採用。
           </div>
 
-          <h2>2. Storyboardを完全に排除した理由</h2>
+          <h2 id="reading-02">2. Storyboardを完全に排除した理由</h2>
           <p>UIKitを選んだだけでは不十分だ。Storyboardにも起動パフォーマンスに影響するオーバーヘッドがある。</p>
           <ul>
             <li><strong>XML解析コスト：</strong>Storyboardは内部的にXMLファイルであり、起動時にパースが必要</li>
@@ -463,7 +466,7 @@
             <li><strong>不必要な複雑性：</strong>シンプルなメモアプリにStoryboardの視覚的設計ツールは過剰</li>
           </ul>
           <p>代わりに、<code>SceneDelegate</code>で直接ViewControllerを生成する方式を採用した。</p>
-          <pre><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+          <pre tabindex="0"><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
            options connectionOptions: UIScene.ConnectionOptions) {
     PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
     guard let windowScene = (scene as? UIWindowScene) else { return }
@@ -476,9 +479,9 @@
 }</code></pre>
           <p>このアプローチにより、<strong>Storyboardのパース時間ゼロ、Segue解決時間ゼロ</strong>を実現している。SceneDelegateから直接ComposeViewControllerを生成することで、起動パスから不要な処理を完全に排除した。</p>
 
-          <h2>3. viewDidAppearの1行がすべてを完結させる</h2>
+          <h2 id="reading-03">3. viewDidAppearの1行がすべてを完結させる</h2>
           <p>UIKitの最大の強みは、ViewControllerのライフサイクルが明確に定義されていることだ。<code>viewDidAppear(_:)</code>が呼ばれた時点で、ビューは完全に画面に表示されている。この確実なタイミングで<code>becomeFirstResponder()</code>を呼ぶことで、キーボード表示までの遅延を最小化できる。</p>
-          <pre><code>override func viewDidAppear(_ animated: Bool) {
+          <pre tabindex="0"><code>override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     activateTextInput()
 }
@@ -492,7 +495,7 @@ private func activateTextInput() {
             <strong>計測結果：</strong>目標は500ms以下。アイコンのタップからの様子を画面録画で測った記録（2026年8月11日、iPhone 16e・ウォーム起動）では、入力欄へのフォーカスが0.17秒、キーボードの表示完了が0.4秒でした。
           </div>
 
-          <h2>4. パフォーマンス計測の仕組み</h2>
+          <h2 id="reading-04">4. パフォーマンス計測の仕組み</h2>
           <p>「速い」という感覚的な判断ではなく、定量的なデータに基づいて設計判断を行っている。</p>
           <ul>
             <li><strong>PerformanceLogger：</strong><code>os_signpost</code>をラップしたカスタムロガー。起動・送信・UI更新の各フェーズを計測</li>
@@ -502,7 +505,7 @@ private func activateTextInput() {
           </ul>
           <p>パフォーマンスは機能である。ユーザーは「速さ」を明示的に要求しなくても、遅いアプリは無意識のうちに使わなくなる。だからこそ、パフォーマンスを数値で管理し続けることが重要だ。</p>
 
-          <h2>5. SwiftUIを使う場面はあるか</h2>
+          <h2 id="reading-05">5. SwiftUIを使う場面はあるか</h2>
           <p>UIKit一択というわけではない。アプリ内には、SwiftUIが適している場面もある。</p>
           <ul>
             <li><strong>設定画面：</strong>起動速度に影響しない非クリティカルな画面ではSwiftUIの宣言的UIが生産性を高める</li>
@@ -514,7 +517,7 @@ private func activateTextInput() {
 
           <!-- FAQ Section -->
           <div class="faq-section">
-            <h2>よくある質問</h2>
+            <h2 id="reading-06" data-ce-number="06">よくある質問</h2>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. SwiftUIでは500ms以下の起動は無理ですか？</div>
@@ -539,7 +542,7 @@ private func activateTextInput() {
 
           <!-- Related Articles -->
           <div class="related-section">
-            <h2 class="related-section__title">関連記事</h2>
+            <h2 class="related-section__title" id="reading-07" data-ce-number="07">関連記事</h2>
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
@@ -566,18 +569,18 @@ private func activateTextInput() {
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — UIKit Documentation</a> — <span lang="ja">Obsidian連携シンプルメモのUI構築に採用したフレームワークの公式リファレンス</span></li>
     <li><a href="https://developer.apple.com/documentation/swiftui" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — SwiftUI Documentation</a> — <span lang="ja">比較検討した宣言的UIフレームワーク。パフォーマンス測定の対象</span></li>
     <li><a href="https://developer.apple.com/documentation/os/ossignposter" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — os_signpost / OSSignposter</a> — <span lang="ja">Time-to-Text計測に使用したInstruments連携のパフォーマンス測定API</span></li>
     <li><a href="https://developer.apple.com/videos/play/wwdc2023/10160/" target="_blank" rel="noopener" style="color:var(--accent);">WWDC 2023 — Analyze hangs with Instruments</a> — <span lang="ja">UIレスポンス最適化の参考にしたWWDCセッション</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

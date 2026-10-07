@@ -496,11 +496,14 @@
   </style>
 
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -532,7 +535,7 @@
 <!-- Content -->
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span lang="ja">Relay API設計：Cloudflare Workersでメール送信基盤を構築</span>
 
       </h1>
@@ -542,16 +545,16 @@
         <p class="article-meta">2026年2月13日 公開</p>
         <div class="page-content__body">
 
-          <h2>1. なぜ外部メールプロバイダのAPIを使わなかったのか</h2>
+          <h2 id="reading-01">1. なぜ外部メールプロバイダのAPIを使わなかったのか</h2>
           <p>メモをメールで送信するアプリを作るとき、最初に思い浮かぶのは大手メールプロバイダの送信APIです。しかし、個人開発者にとってGoogle OAuth審査のハードルは極めて高いものでした。</p>
           <p>Google OAuth審査を通過していないアプリには、「このアプリはGoogleで確認されていません」という警告画面が表示されます。メモアプリにとって、この警告は致命的です。ユーザーは自分の考えや個人的な情報をメモとして送信します。その最初の体験で「検証されていません」と表示されたら、誰がこのアプリを信頼するでしょうか。</p>
           <p>Google OAuth審査の申請プロセスは、個人開発者にとって険しい道のりです。プライバシーポリシーの準備、スコープの正当性説明、セキュリティ評価——大企業のチームならともかく、一人で開発しているアプリにとっては、メール送信という単一機能のために払うコストとしてはあまりにも大きすぎます。</p>
           <p>必要だったのは、OAuth審査の複雑さなしに、ユーザーの信頼を損なわずメールを送信できるソリューションでした。その答えが、自前のRelay APIです。</p>
 
-          <h2>2. Cloudflare Workers + Resend APIアーキテクチャ</h2>
+          <h2 id="reading-02">2. Cloudflare Workers + Resend APIアーキテクチャ</h2>
           <p>Relay APIのアーキテクチャは、シンプルかつ堅牢です。iOSアプリからのリクエストを受け取り、メール送信サービスに中継する——それだけに特化した設計です。</p>
 
-          <div class="arch-diagram">
+          <div class="arch-diagram" tabindex="0">
             <span class="node">iOS App</span>
             <span class="arrow"> &rarr; </span>
             <span class="node">Relay API (Cloudflare Workers)</span>
@@ -565,7 +568,7 @@
           <p><strong>Resend API</strong>は、モダンなメール送信サービスです。SPF/DKIM/DMARCを設定しやすく、TypeScriptから簡単に呼び出せます。</p>
           <p>費用の面では、Cloudflare Workersの無料プランは1日10万リクエストまで、Resendの無料プランは1日100通・月3,000通まで使えます（2026年10月時点の各社の料金ページ）。小さく始めて、送る量に合わせて有料のプランに移れる構成です。</p>
 
-          <h2>3. メールアドレス検証（6桁コード方式）</h2>
+          <h2 id="reading-03">3. メールアドレス検証（6桁コード方式）</h2>
           <p>Relay APIは、検証済みのメールアドレスにのみメモを送信します。これは悪用防止の最も基本的な防御層です。</p>
           <p>メモ送信を開始する前に、送信先のメールアドレスを検証するフローが必要です。</p>
           <ul>
@@ -577,10 +580,10 @@
           <p>この仕組みにより、他人のメールアドレスに無断でメモが送信されることを防ぎます。検証コードはそのアドレスの受信箱に届くので、受信箱を見られない人は、そのアドレスを送信先として確認できません。</p>
           <p>検証はメールアドレスごとに一度だけ。一度検証が完了すれば、以降はコード入力なしでメモを送信し続けられます。</p>
 
-          <h2>4. 多層レート制限の実装</h2>
+          <h2 id="reading-04">4. 多層レート制限の実装</h2>
           <p>メール送信APIの悪用を防ぐため、複数のレイヤーでレート制限を実装しています。</p>
 
-<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+<pre tabindex="0"><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
   <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
   <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
   <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
@@ -613,7 +616,7 @@
 
           <p>カウンターはCloudflare KVに保存され、各時間ウィンドウごとにリセットされます。通常の送信は通しつつ、不正な大量アクセスを抑えます。</p>
 
-          <h2>5. 冪等性：同じメモを二重に送らないための設計</h2>
+          <h2 id="reading-05">5. 冪等性：同じメモを二重に送らないための設計</h2>
           <p>ネットワーク通信には不確実性がつきものです。送信ボタンを押してから応答が返るまでの間に、通信が途切れることがあります。アプリはタイムアウトと判断して再送信を試みますが、実は最初のリクエストはサーバーに届いていた——よくあるシナリオです。</p>
           <p>この場面には、冪等性（idempotency）で備えます。</p>
           <ul>
@@ -624,7 +627,7 @@
           </ul>
           <p>この設計により、ネットワークが不安定でリトライが起きても、24時間のうちは同じメモが重ねて送られません（Resendがキーを覚えている期間）。それより後の送り直しは見分けられないので、重複を止められるのはこの期間の中です。</p>
 
-          <h2>6. エッジコンピューティングの利点</h2>
+          <h2 id="reading-06">6. エッジコンピューティングの利点</h2>
           <p>Cloudflare Workersをメール送信基盤に採用した最大の理由は、エッジコンピューティングの本質的な利点にあります。</p>
 
           <div class="info-card">
@@ -660,7 +663,7 @@
       <!-- FAQ Section (visible, mirrors JSON-LD) -->
       <div lang="ja">
         <div class="page-content__body cross-links">
-          <h2>よくある質問</h2>
+          <h2 id="reading-07" data-ce-number="07">よくある質問</h2>
 
           <h3>Q. なぜCloudflare Workersを選んだのですか？</h3>
           <p>仮想マシン型のコールドスタートが無く、利用者に近い拠点で処理でき、小さな規模なら無料プランから始められるからです。</p>
@@ -679,7 +682,7 @@
       <!-- Cross Links -->
       <div lang="ja">
         <div class="cross-links">
-          <h2>関連記事</h2>
+          <h2 id="reading-08" data-ce-number="08">関連記事</h2>
           <div class="cross-links__grid">
             <a href="/devlog/day1" class="cross-links__item">
               <div class="cross-links__item-title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
@@ -707,11 +710,11 @@
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span lang="ja">リレーAPIのサーバーレス実行基盤。エッジでのリクエスト処理に使用</span></li>
     <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="ja">メール送信の基本プロトコル仕様。リレーAPIが準拠するSMTP標準</span></li>
@@ -719,7 +722,7 @@
     <li><a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener" style="color:var(--accent);">RFC 7208 — Sender Policy Framework (SPF)</a> — <span lang="ja">送信ドメイン認証。許可されたIPアドレスからのメール送信を検証</span></li>
     <li><a href="https://resend.com/docs/introduction" target="_blank" rel="noopener" style="color:var(--accent);">Resend API Documentation</a> — <span lang="ja">メール送信APIプロバイダー。Cloudflare Workersから呼び出すメール配信サービス</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

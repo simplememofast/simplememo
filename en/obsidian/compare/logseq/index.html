@@ -286,11 +286,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/compare/logseq/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can Obsidian and Logseq share a vault?","acceptedAnswer":{"@type":"Answer","text":"Yes. In our test each app created its own directories (.obsidian vs logseq/journals/pages) and broke nothing. A block typed in file-version Logseq was appended to the same Markdown file as a \"- \" line and appeared in Obsidian immediately. But Logseq treats everything as blocks, so edit long paragraphs on the Obsidian side and keep writing to one app."}},{"@type":"Question","name":"Can I migrate from Logseq to Obsidian?","acceptedAnswer":{"@type":"Answer","text":"From file-version Logseq (0.10.x / OG), just open the folder as a vault — it's Markdown. Expect every line bulleted and journals named 2026_08_11.md (underscores), unlike Obsidian's default; align the date format after moving. From the DB version, go through its export."}},{"@type":"Question","name":"Is Logseq free? What costs money?","acceptedAnswer":{"@type":"Answer","text":"The app is free, open source under AGPL-3.0, with no required payment. As of August 2026, official sync (RTC) for the DB version is a paid invite-only alpha; file-version users mostly sync via iCloud Drive or Git. Obsidian is likewise free, charging only for services such as Obsidian Sync (Standard $4/mo billed annually)."}},{"@type":"Question","name":"What happens to Markdown files in Logseq 2.0 (DB)?","acceptedAnswer":{"@type":"Answer","text":"2.0 (beta) keeps the canonical copy in a local SQLite database — in our test, typed blocks produced no Markdown files. The file-based app continues as \"Logseq OG\". If plain Markdown files are the requirement, that points to Obsidian or Logseq OG."}},{"@type":"Question","name":"Which has more plugins?","acceptedAnswer":{"@type":"Answer","text":"Counting both official registries on August 14, 2026 (first counted August 11, 2026): Obsidian 6,638 plugins / 691 themes; Logseq 546 plugins / 66 themes — roughly a 12× gap. Logseq does ship more core features (journal, TODOs) built in."}},{"@type":"Question","name":"Can I run either on just an iPhone?","acceptedAnswer":{"@type":"Answer","text":"Both have iOS apps. Obsidian works standalone with an iCloud vault; Logseq has its file-version app plus a new DB-version iOS app in alpha since 2026. Either way, capturing a fleeting line still costs an app launch — see faster ways into a daily note."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -318,7 +321,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Obsidian vs Logseq, hands-on</span>
 </div>
@@ -331,25 +334,25 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-11">August 11, 2026</time> · Tested August 11, 2026 · Plugin counts refreshed <time datetime="2026-08-14">August 14, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Logseq or Obsidian — which is better?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Obsidian and Logseq in 30 seconds</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Side by side — as of August 2026</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer block (AIO): the <h2> restates the ranked fan-out query
            「logseqとobsidian どちらが 良い」(23 imp · pos 9.2 · GSC 2026-08-11) almost verbatim;
            the first paragraph answers it in two sentences. These queries are issued by AI models,
            which do not click — judge on position and AIO visibility, never CTR.
            Keep this above the fold. -->
-<section class="lp-section" data-answer-block="logseq-or-obsidian" style="padding-top:1rem;">
-<h2 class="lp-section__title"><span lang="en">Logseq or Obsidian — which is better?</span></h2>
+<section class="lp-section ce-chapter sd-chapter" data-answer-block="logseq-or-obsidian" style="padding-top:1rem;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span lang="en">Logseq or Obsidian — which is better?</span></h2></div><div class="ce-chapter__body">
 
 <div lang="en">
 <p><strong>Pick Obsidian for free-form notes, long-form writing and a deep plugin ecosystem (6,638 plugins by our official-registry count on August 14, 2026); pick Logseq if writing everything as outliner blocks anchored to a daily journal fits how you think.</strong> Because Logseq 2.0 (the DB version) is moving the source of truth from Markdown files into a local database, the safe pick today for anyone who must keep plain Markdown files is Obsidian (or the file-based Logseq OG).</p>
 <p>The two can share one folder — our experiment had them reading and writing the same files. If you are undecided, the comparison table and test results below will settle it.</p>
 </div>
-</section>
+</div></section>
 <!-- What they are -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">Obsidian and Logseq in 30 seconds</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="reason-cards">
 <div class="reason-card">
 <div class="reason-card__title">🪨 Obsidian</div>
@@ -360,16 +363,16 @@
 <div class="reason-card__desc"><span lang="en">An outliner built around writing blocks into today's journal and letting structure emerge. Open source (AGPL-3.0), free. Historically stored as Markdown/Org files; since the 2.0 beta of July 2026 the project is shifting to a database-backed version.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Comparison table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Side by side — as of August 2026</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Plugin and theme counts were taken by us directly from both official registries on GitHub on August 14, 2026 (first counted August 11, 2026) — not estimated, not quoted from elsewhere.</span>
 </p>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -428,12 +431,12 @@
 </table>
 </div>
 <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="en">Versions tested: Obsidian 1.13.6 / Logseq 0.10.15 (file) / Logseq 2.0.1 (DB beta). Prices are official USD figures as of August 2026.</span></p>
-</section>
+</div></section>
 <!-- The experiment -->
-<section class="lp-section" id="experiment">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="experiment">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">The experiment: one folder, both apps</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">"Obsidian and Logseq can share one Markdown folder" is often claimed and rarely demonstrated. So we made a folder with three notes, opened it in Obsidian and then in Logseq (file version), and wrote from both sides.</span>
 </p>
@@ -442,7 +445,7 @@
 <li><strong><span lang="en">Open the same folder in Logseq</span></strong><br/><span lang="en">Logseq added three directories — <code>logseq/</code>, <code>journals/</code>, <code>pages/</code> — deleted or converted nothing, and <strong>automatically surfaced the date-named file at the root as that day's journal</strong>.</span></li>
 <li><strong><span lang="en">Write one line from Logseq</span></strong><br/><span lang="en">The new block was appended — as a "- " line — <strong>into the very <code>2026-08-11.md</code> Obsidian had created</strong>, and showed up in Obsidian on reopen. The round trip holds.</span></li>
 </ol>
-<pre class="note-sample"><code># 検証フォルダの変化（実測・2026-08-11）
+<pre class="note-sample" tabindex="0"><code># 検証フォルダの変化（実測・2026-08-11）
 
 [1] 検証前
 pkm-vault/
@@ -489,12 +492,12 @@ pkm-vault/
 <div class="tip-box__title"><span lang="en">IF YOU RUN BOTH</span></div>
 <p><span lang="en">They coexist; their philosophies don't merge. Logseq treats <strong>every line as a block</strong>, so paragraphs edited on the Logseq side can get restructured into bullets. New journal days are created as <code>journals/2026_08_11.md</code> — underscores — which clashes with Obsidian's <code>2026-08-11.md</code> default. Safest rule: <strong>read in both, write in one.</strong></span></p>
 </div>
-</section>
+</div></section>
 <!-- Writing feel & graph -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">Writing feel and graphs — two philosophies of "linked notes"</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">The deepest split is <strong>paragraphs versus blocks</strong>. Obsidian writes like a document, linked exactly as much as you link it. In Logseq everything is a block, and tags and page references become a network automatically. The graphs show it: for the same three-note folder, Obsidian drew 3 notes and 1 link, while Logseq drew <strong>six nodes — the #tags became nodes too</strong>.</span>
 </p>
@@ -514,12 +517,12 @@ pkm-vault/
 <figcaption><span lang="en">Logseq's graph of the same folder: tags become nodes, links multiply on their own.</span></figcaption>
 </figure>
 </div>
-</section>
+</div></section>
 <!-- Logseq 2.0 -->
-<section class="lp-section" id="logseq-2">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="logseq-2">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">The big 2026 change: Logseq 2.0 moves off Markdown files</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">On July 13, 2026 Logseq shipped its <strong>2.0 beta — the DB version</strong>. The source of truth moves from Markdown files to a <strong>local SQLite database</strong>, and the file-based app continues separately as <strong>Logseq OG</strong>. We ran the 2.0.1 build to see it first-hand.</span>
 </p>
@@ -543,13 +546,13 @@ pkm-vault/
 <p class="lp-section__lead" style="margin-top:1rem;">
 <span lang="en">What it means for the choice: <strong>if you're comparing these two because you want notes that any text editor can still open in ten years, the options that keep meeting that bar are Obsidian and Logseq OG.</strong> If typed properties, tags-as-classes and real-time collaboration excite you, Logseq DB is worth following — priced as a beta.</span>
 </p>
-</section>
+</div></section>
 <!-- Pricing -->
-<section class="lp-section" id="pricing">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="pricing">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 <span lang="en">Pricing — both apps are free; sync is where money starts</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -577,12 +580,12 @@ pkm-vault/
 </tbody>
 </table>
 </div>
-</section>
+</div></section>
 <!-- How to choose -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">
 <span lang="en">The verdict — how to choose</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="reason-cards">
 <div class="reason-card">
 <div class="reason-card__title">🪨 <span lang="en">Choose Obsidian if…</span></div>
@@ -601,12 +604,12 @@ pkm-vault/
 <div class="reason-card__desc"><span lang="en">Both are free: point them at the same folder and live a week in each. As the experiment shows, <strong>trying costs you almost nothing</strong> — just write from one at a time.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Mobile capture context + CTA (MEDIUM: inline 1箇所) -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">
 <span lang="en">The gap both leave open: split-second capture on iPhone</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Both apps live for organising and connecting what's already written; <strong>capturing one line mid-walk</strong> is neither's core. If that's most of your note-taking, add a lightweight capture app that appends straight into the vault folder in iCloud Drive. Simple Memo emails each note to you and <strong>appends it to your Obsidian daily note</strong>, including from Siri and Apple Watch. It writes Obsidian-style files (<code>YYYY-MM-DD.md</code>) — <strong>it does not target Logseq's <code>journals/</code> naming or block format</strong>. If you picked Logseq, see our <a href="/en/vs/logseq/">Simple Memo vs Logseq comparison</a>.</span>
 </p>
@@ -622,12 +625,12 @@ pkm-vault/
 <small><span lang="en">On desktop? Scan with your phone</span></small>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">Can Obsidian and Logseq share a vault?</span></summary>
@@ -664,7 +667,7 @@ pkm-vault/
 <div class="faq-answer"><span lang="en">Both have iOS apps. Obsidian works standalone with an iCloud vault; Logseq has its file-version app plus a new DB-version iOS app in alpha since 2026. Either way, capturing a fleeting line still costs an app launch — see <a href="/en/obsidian/daily-note/">faster ways into a daily note</a>.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Verification environment (§30) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
@@ -673,10 +676,10 @@ pkm-vault/
 </div>
 </section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-11" data-ce-number="11">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/compare/"><span lang="en">Obsidian comparison hub</span></a>
 <a href="/en/obsidian/"><span lang="en">Obsidian integration</span></a>
@@ -688,13 +691,13 @@ pkm-vault/
 <a href="/en/methods/second-brain/"><span lang="en">Second brain</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-12" data-ce-number="12">
 <span lang="en">References &amp; data sources</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://github.com/obsidianmd/obsidian-releases" rel="noopener" style="color:var(--accent);" target="_blank">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="en">Official release and community-plugin registry; our 6,638/691 counts are from its JSON files as of 2026-08-14 (first counted 2026-08-11 at 6,571/680)</span></li>
 <li><a href="https://github.com/logseq/marketplace" rel="noopener" style="color:var(--accent);" target="_blank">logseq/marketplace（GitHub）</a> — <span lang="en">Official marketplace registry; 546/66 counted from <code>packages/</code> as of 2026-08-14 (unchanged from 2026-08-11)</span></li>
@@ -705,7 +708,7 @@ pkm-vault/
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
 <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="en">Obsidian is a trademark of Dynalist Inc. Logseq is the name of the Logseq project. This site is independent of both projects; Simple Memo - for Obsidian is an independent app by YURIKA, K.K.</span></p>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

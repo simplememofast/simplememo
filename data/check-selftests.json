@@ -886,6 +886,12 @@
       "broke": "壊し2通りで落ちることを観測。**(1) `(?!\"@type\":\"SoftwareApplication\")` のガードを外す**と2件 —— 自社ノードに評価が無いページで、隣の他社ノードへ回り込んで **競合の 4.9/206 を自社の値へ書き換える。**これは実際に起きかけた事故（/en/send-email-to-yourself/ の Boomerang）で、**検出器が他人の構造化データを編集するのは、検出器が無いより悪い。****(2) stampDate を『一番新しい日付』に変える**と2件 —— llms.txt が 「リリースの13日前に 5.8.1 が現行」と名乗った、権威ありげな誤情報そのもの。自己テストは12件。**検体を1桁で書いて規則（\\d{3}）を空振りさせた誤りを自己テスト自身が捕まえた**ので、検体が台帳の値と別物であることを固定する行を足してある。\n\n**[2026-09-03 追記] 規則を単体で当てるだけでは、ループ側の門を1つも通っていなかった。**上の観測は `apply(ruleName, html)` で RULES を1本ずつ当てたもので、**自社ページ限定（`scope === 'own'`）・料金ゾーン限定（`scope === 'pricing'`）・og:site_name・llms.txt の4つの門をどれも通らない。**隔離した写しで潰して確かめたら、4つとも **12件中0件失敗**（緑のまま）だった。判定を `scanHtml` / `scanLlms` へ切り出し、面ごと通す検体を12件足して 24 件に。壊し6通りで落ちるのを観測: **(1) 自社ページ限定を外す**と1件 —— 外すと比較ページに載っている**競合の評価を自社の値へ書き換えにいく**。**(2) 料金ゾーン限定を外す**と1件（本文中の編集上の価格まで直す）。**(3) og:site_name の判定を殺す**と1件。**(4) llms.txt の「当たらない規則」を合格にする**と1件 ——文面が変わればこの値は誰にも管理されなくなる。**(5) 食い違いの報告を丸ごと殺す**と2件。**(6) --write が書き換えないようにする**と1件。切り出しが挙動を変えていないことは、`--check` と `--write` の出力がバイト単位で一致することで確認（食い違いのある木で 348 行のログ / 3,884 行の書き換え、両モードとも一致）。"
     },
     {
+      "script": "scripts/sync_page_design.py",
+      "state": "demonstrated",
+      "at": "2026-10-07",
+      "broke": "2026-10-07: seven self-tests pass. In an isolated fixture repository, --check exits 1 for an unmigrated page and for an outdated stylesheet hash; after --write it exits 0. Reversing document-language detection makes --selftest exit 1. Tests preserve copy, scripts and campaign attributes, exclude private pages, avoid nested chapter grids and duplicate authored numbering, and verify idempotence."
+    },
+    {
       "script": "scripts/sync_shared_chrome.py",
       "state": "demonstrated",
       "at": "2026-10-07",

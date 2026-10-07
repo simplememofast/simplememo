@@ -386,11 +386,14 @@
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -419,7 +422,7 @@
 
 <main class="page-content">
 <div class="container">
-<h1 class="page-content__title">
+<h1 class="page-content__title sd-title">
 
 <span lang="en">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
 </h1>
@@ -432,21 +435,21 @@
 <!-- English Content -->
 <div class="" lang="en">
 <div class="article-body">
-<h2>1. Why Privacy Matters for a Memo App</h2>
+<h2 id="reading-01">1. Why Privacy Matters for a Memo App</h2>
 <p>Work ideas, personal drafts, and daily notes often contain information that is not ready to share. Fast capture should come with a clear explanation of where that information is stored and sent.</p>
 <p>This article separates on-device encryption, session storage, screen visibility, diagnostic logs, and usage analytics. Protection in one area does not guarantee protection in another.</p>
 <div class="philosophy-highlight">
 <strong>Updated September 6, 2026:</strong> We checked the source for version 5.8.17, matching the public app’s version, and corrected the explanations of screen protection, logs, and analytics. The descriptions include their limits.
           </div>
-<h2>2. Automatic Hiding in the App Switcher Is Not Enabled</h2>
+<h2 id="reading-02">2. Automatic Hiding in the App Switcher Is Not Enabled</h2>
 <p>iOS takes a snapshot after an app moves to the background. Apple advises removing sensitive information from the interface during that transition.</p>
 <p>In the checked source for version 5.8.17, <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code> save the draft without calling the privacy overlay. The old overlay functions remain in the source, but are not an active protection path.</p>
 <p><strong>Visible memo text may remain in the app-switcher snapshot.</strong> Encrypting the Outbox does not hide a screen image. This corrects the earlier article’s claim that the overlay always hides memo content.</p>
-<h2>3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
+<h2 id="reading-03">3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
 <p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
 <p>Communication cache persisting on the device means traces of which URLs were accessed and when exist on disk. Cookies being stored means session information remains on the device.</p>
 <p>This app uses <code>URLSessionConfiguration.ephemeral</code>.</p>
-<pre><code>private let session: URLSession = {
+<pre tabindex="0"><code>private let session: URLSession = {
     let config = URLSessionConfiguration.ephemeral
     config.httpCookieAcceptPolicy = .never
     config.httpShouldSetCookies = false
@@ -460,27 +463,27 @@
 <li><strong>No persistent session storage:</strong> URLSession session data is not stored on disk</li>
 </ul>
 <p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
-<h2>4. The Scope of Performance Logging</h2>
+<h2 id="reading-04">4. The Scope of Performance Logging</h2>
 <p>Logging in <code>PerformanceLogger</code> is guarded by <code>#if DEBUG</code>. Builds without DEBUG defined do not include this logger’s logging operations.</p>
 <p>Its <code>logError</code> records the error type, such as <code>URLError</code>, instead of the detailed <code>localizedDescription</code>, which may contain a file path or user input.</p>
 <p>This does not automatically sanitize every event name or additional string passed to <code>logEvent</code>. Callers must avoid passing email addresses, memo text, and authentication information.</p>
 <p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> First-party usage events and AppsFlyer remain separate, enabled systems. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
-<h2>5. What the AES-GCM Encrypted Outbox Protects</h2>
+<h2 id="reading-05">5. What the AES-GCM Encrypted Outbox Protects</h2>
 <p>Pending memos are managed in an on-device queue called the Outbox. The app uses Apple’s CryptoKit to encrypt saved data with AES-GCM. Newly generated encryption keys are 256 bits.</p>
 <p>Keys are stored in Keychain with <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. This allows access after the first unlock following a restart, until the next restart, and prevents migration through a backup restored to another device. The app reads the key for encryption and decryption.</p>
 <p>This protects stored data. It does not hide the visible screen or guarantee safety against every form of device compromise. Before changing devices, confirm that important memos have reached their destination.</p>
 <p>When email sending is used, memo bodies are processed by our Relay API and delivery infrastructure, and remain as email in the recipient’s mailbox. <strong>On-device encryption does not mean email delivery is end-to-end encrypted (E2EE).</strong> See our <a href="/en/privacy#technical">Privacy Policy</a> and <a href="/en/privacy-architecture/">data route explanation</a>.</p>
 <p>For the pending-send queue, see the <a href="/en/devlog/outbox-architecture">Outbox architecture article</a>.</p>
-<h2>6. Memo Protection and External SDKs</h2>
+<h2 id="reading-06">6. Memo Protection and External SDKs</h2>
 <p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
 <p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill from a Google account. Firebase App Check initializes at launch to protect backend access. AppsFlyer supports acquisition and usage analytics, with the same installation identifier used for first-party analytics.</p>
 <p>Keeping memo text out of event fields does not remove links through identifiers and delivery records. Analytics, including SDK behavior, needs to be considered separately from memo encryption. Our <a href="/en/privacy#technical">Privacy Policy</a> describes the fields and purposes.</p>
-<h2>7. Explain the Scope of Each Protection</h2>
+<h2 id="reading-07">7. Explain the Scope of Each Protection</h2>
 <p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not mean the app collects no usage events.</p>
 <p>Fast capture should come with an understandable explanation of collected data. We describe analytics destinations, identifiers, and how records can be linked, and review these explanations as the app changes.</p>
 <!-- FAQ Section -->
 <div class="faq-section">
-<h2>Frequently Asked Questions</h2>
+<h2 id="reading-08" data-ce-number="08">Frequently Asked Questions</h2>
 <div class="faq-item">
 <div class="faq-item__question">Q. Is memo content stored on servers?</div>
 <div class="faq-item__answer">When you send email, the body passes through our Relay API and delivery infrastructure. Our Relay API does not permanently store memo bodies except where required by law or for legitimate operational needs such as incident response. This is separate from storage in the recipient’s mailbox. See the <a href="/en/privacy-architecture/">privacy architecture</a> for the destination-specific explanation.</div>
@@ -504,7 +507,7 @@
 </div>
 <!-- Related Articles -->
 <div class="related-section">
-<h2 class="related-section__title">Related Articles</h2>
+<h2 class="related-section__title" id="reading-09" data-ce-number="09">Related Articles</h2>
 <div class="related-grid">
 <a class="related-card" href="/en/devlog/day1">
 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
@@ -527,11 +530,11 @@
 </div>
 </div>
 </div>
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://developer.apple.com/documentation/cryptokit" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — CryptoKit Documentation</a> — <span lang="en">Used for implementing AES-GCM encryption to protect Outbox data at rest</span></li>
 <li><a href="https://developer.apple.com/documentation/foundation/urlsession" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — URLSession Documentation</a> — <span lang="en">Ephemeral session configuration for privacy-preserving network communication</span></li>
@@ -540,7 +543,7 @@
 <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="en">App-switcher snapshots and visible information</span></li>
 <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="en">Key access conditions and migration restrictions</span></li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page

@@ -251,11 +251,14 @@
   </style>
 
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -290,7 +293,7 @@
       <!-- JAPANESE VERSION         -->
       <!-- ======================== -->
       <div lang="ja">
-        <h1 class="page-content__title">【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</h1>
+        <h1 class="page-content__title sd-title">【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</h1>
         <div class="article-meta">2026年2月13日</div>
 
         <!-- Table of Contents -->
@@ -327,8 +330,8 @@
           </section>
 
           <!-- Section 1 -->
-          <section id="ja-section1">
-            <h2>1. Captioの「何」が良かったのか——体験を分解してみた</h2>
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1. Captioの「何」が良かったのか——体験を分解してみた</h2></div><div class="ce-chapter__body">
             <p>Captioの体験を言語化するために、3つの要素に分解してみた。</p>
 
             <h3>要素1：起動即入力（Instant Launch-to-Input）</h3>
@@ -341,11 +344,11 @@
             <p>フォルダ機能、タグ機能、リッチテキスト、マークダウン対応——Captioにはそのどれもなかった。あるのはテキスト入力欄と送信ボタンだけ。この潔さが、認知負荷をゼロに近づけていた。「何をすべきか」を考える必要がないアプリ。それがCaptioだった。</p>
 
             <p>この3つの要素を、現代のiOS開発で再現する。それが「Obsidian連携シンプルメモ」のミッションだ。</p>
-          </section>
+          </div></section>
 
           <!-- Section 2 -->
-          <section id="ja-section2">
-            <h2>2. アーキテクチャ：なぜSwiftUI「ではなく」UIKitなのか</h2>
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. アーキテクチャ：なぜSwiftUI「ではなく」UIKitなのか</h2></div><div class="ce-chapter__body">
             <p>2026年のiOS開発で、SwiftUIではなくUIKitを選ぶのは異端に見えるかもしれない。しかし、私たちの最優先目標は明確だった——<strong>Time-to-Text 500ms以下</strong>。</p>
 
             <p>SwiftUIの`body`再評価、`StateObject`の初期化、`@Environment`の解決——これらのオーバーヘッドは通常のアプリ開発では無視できる範囲だが、「起動即入力」を実現するには無視できない。1msでも速く、テキストフィールドにフォーカスを当てたい。</p>
@@ -354,7 +357,7 @@
 
             <p>SceneDelegateでwindowを生成し、rootViewControllerに直接ComposeViewControllerを設定する。Storyboardのパース処理すらスキップする。</p>
 
-<pre><code>// SceneDelegate.swift
+<pre tabindex="0"><code>// SceneDelegate.swift
 func scene(_ scene: UIScene,
            willConnectTo session: UISceneSession,
            options connectionOptions: UIScene.ConnectionOptions) {
@@ -367,7 +370,7 @@ func scene(_ scene: UIScene,
 
             <p>そしてComposeViewControllerの`viewDidAppear`で、即座にテキストビューにフォーカスを当てる。</p>
 
-<pre><code>// ComposeViewController.swift
+<pre tabindex="0"><code>// ComposeViewController.swift
 override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
     textView.becomeFirstResponder()
@@ -378,11 +381,11 @@ override func viewDidAppear(_ animated: Bool) {
             <p>目標は500ms以下。のちに画面録画で測った記録（2026年8月11日、iPhone 16e・ウォーム起動）では、アイコンのタップからキーボードの表示完了まで0.4秒だった。SwiftUIでは`@FocusState`やbodyの再評価のタイミングを細かく制御しにくく、この経路を詰めるのは難しいと判断した（両者を同じ条件で計測して比べたわけではない）。</p>
 
             <p>UIKitは「古い」かもしれない。しかし「速い」。この1点において、UIKitは今でも最良の選択肢だ。</p>
-          </section>
+          </div></section>
 
           <!-- Section 3 -->
-          <section id="ja-section3">
-            <h2>3. 「送ったら消える」をワンタップで実現する設計</h2>
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. 「送ったら消える」をワンタップで実現する設計</h2></div><div class="ce-chapter__body">
             <p>Captioの「送ったら消える」体験を再現するために、最も重要な設計判断がある。それは、<strong>送信アニメーションとUIクリアを、ネットワークレスポンスから完全に分離する</strong>ことだ。</p>
 
             <p>一般的なアプリの送信フローはこうだ：</p>
@@ -401,7 +404,7 @@ override func viewDidAppear(_ animated: Bool) {
               <li>成功→静かにOutboxから削除 / 失敗→バックグラウンドでリトライ</li>
             </ol>
 
-<pre><code>// ComposeViewController.swift
+<pre tabindex="0"><code>// ComposeViewController.swift
 private func performSendAnimation() {
     UIView.animate(withDuration: 0.25,
                    delay: 0,
@@ -420,11 +423,11 @@ private func performSendAnimation() {
             <p>ユーザーにとっては、送信ボタンを押した瞬間にメモが「消えて」、次のメモを書ける状態になる。ネットワークの成功・失敗は、ユーザーの目に見えないところで処理される。</p>
 
             <p>「でも、送信に失敗したらどうするの？」——その疑問に答えるのが、次のセクションのOutboxアーキテクチャだ。</p>
-          </section>
+          </div></section>
 
           <!-- Section 4 -->
-          <section id="ja-section4">
-            <h2>4. 取りこぼしを防ぐOutboxアーキテクチャ</h2>
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4. 取りこぼしを防ぐOutboxアーキテクチャ</h2></div><div class="ce-chapter__body">
             <p>送信UIをネットワークレスポンスから分離するということは、「UIはクリアされたけど、実はメール送信に失敗していた」という状況が起こり得るということだ。これは絶対に許容できない。ユーザーが「送った」と思ったメモが、実は送られていなかった——これはメモアプリにとって致命的な信頼の喪失だ。</p>
 
             <p>そこで採用したのが<strong>Outboxパターン</strong>だ。</p>
@@ -443,7 +446,7 @@ private func performSendAnimation() {
 
             <p>Outboxに保存されるメッセージは、CryptoKitを使ったAES-GCM暗号化で保護される。暗号化キーはKeychainに保存され、アプリのサンドボックス外からはアクセスできない。</p>
 
-<pre><code>// OutboxManager.swift
+<pre tabindex="0"><code>// OutboxManager.swift
 func enqueue(message: OutboxMessage) throws {
     let key = try KeychainHelper.getOrCreateSymmetricKey()
     let sealedBox = try AES.GCM.seal(
@@ -460,11 +463,11 @@ func enqueue(message: OutboxMessage) throws {
 }</code></pre>
 
             <p>また、すべてを自前で実装しているため、<strong>外部ライブラリへの依存はゼロ</strong>だ。CryptoKit、NWPathMonitor、URLSession——すべてApple純正のフレームワークで完結する。サードパーティライブラリのバージョン管理やセキュリティ監査から解放されるのは、小規模チームにとって大きなメリットだ。</p>
-          </section>
+          </div></section>
 
           <!-- Section 5 -->
-          <section id="ja-section5">
-            <h2>5. Relay API：メールボックスの OAuth 連携に頼らない送信</h2>
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5. Relay API：メールボックスの OAuth 連携に頼らない送信</h2></div><div class="ce-chapter__body">
             <p>Captioの送信の仕組みは公式には公開されていない。開発元の終了告知が挙げた理由は、アプリの安定性と安全性を保つための手間をかけ続けられなくなったことで、送信の方式は理由に挙げられていない。ただ一般論として、外部のメールAPIに頼る送信は、提供元の要件の変更やアクセス制限の影響を受けやすい。</p>
 
             <p>私たちは<strong>Cloudflare Workers + Resend API</strong>という構成を選んだ。</p>
@@ -479,7 +482,7 @@ func enqueue(message: OutboxMessage) throws {
             <h3>多層レート制限</h3>
             <p>不正利用を防ぐために、多層のレート制限を実装している。</p>
 
-<pre><code>// Cloudflare Worker - Rate Limit Configuration
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
 const RATE_LIMITS = {
   devicePerMinute: 30,    // 1デバイスあたり1分30回
   devicePerDay: 200,      // 1デバイスあたり1日200回
@@ -495,11 +498,11 @@ const RATE_LIMITS = {
             <p>ネットワークの不安定さによる重複送信を防ぐため、各メッセージにUUIDを割り当て、Relay API側で重複チェックを行う。同じUUIDのメッセージが再送された場合、2回目以降はメール送信を行わずに成功レスポンスを返す。これにより、Outboxパターンのリトライ機構と組み合わせても、ユーザーが同じメモを二重に受信することはない。</p>
 
             <p><strong>2026-10 追記：</strong>いまの送信用サーバーは、重複の確認を自分では行っていません。メッセージIDを Resend への要求の冪等キー（Idempotency-Key）として渡し、Resend が同じキーを24時間覚えていて、同じ内容の要求には前と同じ応答を返します。そのため、24時間のうちは同じメモが重ねて送られません（詳しくは<a href="/devlog/relay-api-design">Relay APIの設計</a>）。</p>
-          </section>
+          </div></section>
 
           <!-- Section 6 -->
-          <section id="ja-section6">
-            <h2>6. 今日やったこと：小さな違和感を、ひとつずつ消す</h2>
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. 今日やったこと：小さな違和感を、ひとつずつ消す</h2></div><div class="ce-chapter__body">
             <p>Day1の実装作業の多くは、星評価ダイアログの見直しに費やした。App Storeの評価はアプリの生命線だが、ユーザー体験を損なう形で評価を求めてはいけない。</p>
 
             <h3>表示条件の再設計</h3>
@@ -513,7 +516,7 @@ const RATE_LIMITS = {
             <h3>星アイコンのタップ領域修正</h3>
             <p>Apple Human Interface Guidelinesでは、タッチターゲットのサイズは最低44x44ptが推奨されている。星アイコンのタップ領域がこの基準を満たしていなかったため修正した。</p>
 
-<pre><code>// StarRatingView.swift
+<pre tabindex="0"><code>// StarRatingView.swift
 private func createStarButton() -> UIButton {
     let button = UIButton(type: .custom)
     button.translatesAutoresizingMaskIntoConstraints = false
@@ -532,18 +535,18 @@ private func createStarButton() -> UIButton {
               <li><strong>5つ星</strong>：App Storeのレビュー画面に遷移（`SKStoreReviewController`）</li>
               <li><strong>4つ星以下</strong>：「ありがとうございます」のトーストを静かに表示して終了。ネガティブなレビューをApp Storeに誘導しない。</li>
             </ul>
-          </section>
+          </div></section>
 
           <!-- Section 7 -->
-          <section id="ja-section7">
-            <h2>7. Historyの表示ステータス不整合を解消した</h2>
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7. Historyの表示ステータス不整合を解消した</h2></div><div class="ce-chapter__body">
             <p>送信履歴画面（History）で、あるバグに気づいた。送信が完了しているにも関わらず、ステータスが「送信中」のまま変わらないメッセージがあった。</p>
 
             <p>原因を調査した結果、ステータス更新のロジックに問題があることが判明した。従来の実装では、メッセージのテキスト内容をキーにしてステータスを更新していた。しかし、同じ内容のメモを複数回送信した場合、テキストベースの検索では正しいメッセージを特定できない。</p>
 
             <p>修正は単純明快だった。テキストベースの検索を<strong>IDベースのステータス更新</strong>に変更した。各メッセージにはOutbox保存時にUUIDが割り当てられているため、このIDを使ってHistoryのステータスを更新する。</p>
 
-<pre><code>// HistoryManager.swift
+<pre tabindex="0"><code>// HistoryManager.swift
 // Before: テキストベースの検索（バグの原因）
 // func updateStatus(forText text: String, status: SendStatus)
 
@@ -557,11 +560,11 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
 }</code></pre>
 
             <p>この修正により、同じ内容のメモを何度送っても、それぞれのステータスが正しく表示されるようになった。</p>
-          </section>
+          </div></section>
 
           <!-- Section 8 -->
-          <section id="ja-section8">
-            <h2>8. プライバシーへの偏執的なこだわり</h2>
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. プライバシーへの偏執的なこだわり</h2></div><div class="ce-chapter__body">
             <p>メモアプリにはプライベートな情報が書き込まれる。パスワード、個人的な悩み、ビジネスアイデア——ユーザーが何を書くかは予測できない。だからこそ、プライバシー保護は「十分」ではなく「過剰」なくらいがちょうどいい。</p>
 
             <h3>アプリスイッチャーでのプライバシーオーバーレイ</h3>
@@ -580,7 +583,7 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
               <li>理由：`localizedDescription`にはユーザー入力が含まれる可能性があるため</li>
             </ul>
 
-<pre><code>// NetworkManager.swift
+<pre tabindex="0"><code>// NetworkManager.swift
 // BAD: エラーの詳細をログに出力
 // Logger.error("Send failed: \(error.localizedDescription)")
 
@@ -588,11 +591,11 @@ func updateStatus(forMessageId id: UUID, status: SendStatus) {
 Logger.error("Send failed: \(type(of: error))")</code></pre>
 
             <p>偏執的に見えるかもしれない。しかし、メモアプリを信頼して使ってもらうためには、この程度の偏執さが必要だと考えている。</p>
-          </section>
+          </div></section>
 
           <!-- Section 9 -->
-          <section id="ja-section9">
-            <h2>9. 10言語対応：世界中のCaptioユーザーに届けたい</h2>
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. 10言語対応：世界中のCaptioユーザーに届けたい</h2></div><div class="ce-chapter__body">
             <p>Captioは英語圏を中心に世界中にユーザーがいた。その元ユーザーたちに「Obsidian連携シンプルメモ」を届けるために、初回リリースから10言語に対応した。</p>
 
             <p>対応言語：日本語、英語、スペイン語、フランス語、ドイツ語、イタリア語、ポルトガル語、韓国語、中国語（簡体字）、アラビア語。</p>
@@ -604,7 +607,7 @@ Logger.error("Send failed: \(type(of: error))")</code></pre>
             <h3>アプリ内言語切り替え</h3>
             <p>iOS 16以降のアプリ内言語切り替えに加え、独自の言語切り替えメカニズムも実装している。言語が切り替わった際は、ViewControllerを`cross-dissolve`トランジションで差し替えることで、スムーズな切り替え体験を提供する。</p>
 
-<pre><code>// LanguageManager.swift
+<pre tabindex="0"><code>// LanguageManager.swift
 func applyLanguageChange() {
     guard let window = UIApplication.shared.connectedScenes
         .compactMap({ $0 as? UIWindowScene })
@@ -619,11 +622,11 @@ func applyLanguageChange() {
         window.rootViewController = newVC
     })
 }</code></pre>
-          </section>
+          </div></section>
 
           <!-- Section 10 -->
-          <section id="ja-section10">
-            <h2>10. 今日の学び：プロダクトは「安心感」の設計</h2>
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. 今日の学び：プロダクトは「安心感」の設計</h2></div><div class="ce-chapter__body">
             <p>Day1を終えて思うのは、このプロダクトの本質は「安心感」の設計だということだ。</p>
 
             <p>技術的な数値をまとめてみる：</p>
@@ -643,11 +646,11 @@ func applyLanguageChange() {
             暗号化→「誰にも見られない」安心感。</p>
 
             <p>Captioが愛されたのは、機能が優れていたからではない。「安心して使える」体験を、徹底的に磨き上げていたからだ。それを引き継ぎたい。</p>
-          </section>
+          </div></section>
 
           <!-- Section 11 -->
-          <section id="ja-section11">
-            <h2>11. 次回（Day2）予告</h2>
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11. 次回（Day2）予告</h2></div><div class="ce-chapter__body">
             <p>Day2では、以下のテーマに取り組む予定だ：</p>
             <ul>
               <li><strong>送信アニメーションの洗練</strong>：現在の0.25秒フェードアウトから、より心地よいアニメーションへ</li>
@@ -655,7 +658,7 @@ func applyLanguageChange() {
               <li><strong>成功トーストは本当に必要か？</strong>：送信成功のフィードバックについて、「表示しない」という選択肢の検討</li>
             </ul>
             <p>Captioの「何もない」潔さを目指して、Day2へ続く。</p>
-          </section>
+          </div></section>
 
         </div>
       </div>
@@ -668,7 +671,7 @@ func applyLanguageChange() {
       <!-- RELATED TOPICS (shared)  -->
       <!-- ======================== -->
       <div class="related-topics">
-        <h2>
+        <h2 id="reading-12" data-ce-number="12">
           <span lang="ja">関連トピック深掘り</span>
 
         </h2>
@@ -738,11 +741,11 @@ func applyLanguageChange() {
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — UIKit Documentation</a> — <span lang="ja">UIKitフレームワークの公式リファレンス。Obsidian連携シンプルメモのUI構築に使用</span></li>
     <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span></li>
@@ -750,7 +753,7 @@ func applyLanguageChange() {
     <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span lang="ja">送るメッセージをまず送信待ちの表（Outbox）に書き、別の処理が送り出す設計パターン。シンプルメモは同じ考え方を端末の中で使っている</span></li>
     <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span lang="ja">メール送信プロトコルの標準仕様</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

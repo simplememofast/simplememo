@@ -65,11 +65,14 @@
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
@@ -104,16 +107,16 @@
       <a href="/en/">Home</a> / <span aria-current="page">Notion integration</span>
     </nav>
 
-    <h1>Notion integration</h1>
+    <h1 class="sd-title">Notion integration</h1>
     <p class="lead">
       Write or speak a thought and, <strong>in addition to sending the email</strong>,
       it is saved as one page in a “SimpleMemo Inbox” in Notion.
       You never have to open Notion to add to it, and typing, voice, Siri and Apple Watch all take the same path.
     </p>
 
-    <h2>How it flows</h2>
+    <h2 id="reading-01" data-ce-number="01">How it flows</h2>
     <div style="overflow-x:auto">
-      <pre style="line-height:1.7"><code>Write / speak (typing, voice, Siri, Apple Watch)
+      <pre style="line-height:1.7" tabindex="0"><code>Write / speak (typing, voice, Siri, Apple Watch)
       ↓
   Held on device   ← done here. You can write the next memo already
       ↓
@@ -126,8 +129,8 @@
       Anything not saved yet stays on the device and can be retried from History.
     </p>
 
-    <h2>What it does</h2>
-    <table>
+    <h2 id="reading-02" data-ce-number="02">What it does</h2>
+    <div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
       <thead><tr><th>What it does</th><th>Notes</th></tr></thead>
       <tbody>
         <tr><td>Saves each memo to a “SimpleMemo Inbox” in Notion</td><td>One memo, one page. First non-empty line is the title, the text is the body, the capture time is Captured</td></tr>
@@ -138,11 +141,11 @@
         <tr><td>Retry of unsaved memos</td><td>From History. It reuses the original ID, capture time and connection, so it does not spend the daily free allowance twice</td></tr>
         <tr><td>Disconnecting</td><td>Pages already in Notion, and unsaved memos on the device, both stay</td></tr>
       </tbody>
-    </table>
+    </table></div>
 
-    <h2>What it does not do</h2>
+    <h2 id="reading-03" data-ce-number="03">What it does not do</h2>
     <p>This section exists <strong>so that nothing here is overstated</strong>. None of the following is implemented.</p>
-    <table>
+    <div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table>
       <thead><tr><th>Not available</th><th>State</th></tr></thead>
       <tbody>
         <tr><td>Bringing changes from Notion back into the app (two-way sync)</td><td><strong>Not available.</strong> The role is one-way saving to Notion only</td></tr>
@@ -152,16 +155,16 @@
         <tr><td>Starting without email</td><td><strong>Not possible.</strong> An email destination is a prerequisite. Only the Premium “Save to Notion only” setting removes it</td></tr>
         <tr><td>Choosing Notion during first-run setup</td><td><strong>Not possible.</strong> First run only sets the email destination. Notion is connected <strong>from Settings</strong></td></tr>
       </tbody>
-    </table>
+    </table></div>
 
-    <h2>What we deliberately do not own</h2>
+    <h2 id="reading-04" data-ce-number="04">What we deliberately do not own</h2>
     <p>
       There is <strong>no Notion viewer and no Notion editor inside the app.</strong>
       Notion is a destination; this app only <strong>writes to it</strong>.
       Not adding more screens to organise things in is a deliberate choice.
     </p>
 
-    <h2>Privacy</h2>
+    <h2 id="reading-05" data-ce-number="05">Privacy</h2>
     <ul>
       <li>Your Notion access token is <strong>never returned to the device.</strong> It is encrypted and held server-side.</li>
       <li>Delivery records keep <strong>metadata only</strong> — there is no column that holds the memo text.</li>
@@ -169,7 +172,7 @@
       <li>Account deletion removes the server-side data for each stored and disconnected Notion connection first. <strong>Pages inside Notion are not deleted.</strong></li>
     </ul>
 
-    <h2>Getting started</h2>
+    <h2 id="reading-06" data-ce-number="06">Getting started</h2>
     <ol>
       <li>Open <strong>Settings</strong> in the app</li>
       <li>Turn on <strong>Notion</strong> → “Notion integration”</li>
@@ -180,7 +183,7 @@
       To stop sending email and use Notion alone, use “Save to Notion only” on the same screen (Premium).
     </p>
 
-    <h2>FAQ</h2>
+    <h2 id="reading-07" data-ce-number="07">FAQ</h2>
     <h3>Can I use it together with the Obsidian integration?</h3>
     <p>Yes. With both on, a memo goes to email, Notion and Obsidian. Turning on “Save to Notion only” stops the Obsidian append.</p>
     <h3>Do other apps already do this?</h3>

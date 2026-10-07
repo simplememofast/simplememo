@@ -288,11 +288,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/apple-watch-not-working/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Why can't I install Obsidian on my Apple Watch?","acceptedAnswer":{"@type":"Answer","text":"Because Obsidian doesn't ship a watchOS app. Its absence from the list in your iPhone's Watch app isn't a device or pairing fault — there is no watchOS build. Apple Watch support has been requested on Obsidian's forum for a long time, but it remains a feature request."}},{"@type":"Question","name":"Won't my nearby iPhone run the shortcut for me?","acceptedAnswer":{"@type":"Answer","text":"No. A shortcut launched on Apple Watch runs on the watch. If an action belongs to an app that isn't installed there, it fails at that point regardless of how close your iPhone is. Reaching iPhone-side processing only works when the app itself provides watch support and implements the handoff."}},{"@type":"Question","name":"Can a watch shortcut open an obsidian:// URL?","acceptedAnswer":{"@type":"Answer","text":"No. A URL scheme presumes an app on the same device can handle it. With no Obsidian on the watch, nothing can receive an obsidian:// URL and the step fails. This isn't about how the URL is written or encoded, so rewriting it won't help."}},{"@type":"Question","name":"Does Obsidian Sync enable Apple Watch access?","acceptedAnswer":{"@type":"Answer","text":"It does not. Obsidian Sync synchronises a vault across devices; it doesn't create an entry point on a device without an app. Whatever your subscription state, no app on the watch can read or write the vault, so no input path appears."}},{"@type":"Question","name":"What if I capture on the watch with no iPhone nearby?","acceptedAnswer":{"@type":"Answer","text":"With Simple Memo, once your dictation reaches the iPhone, an offline send waits in an encrypted outbox and goes out when connectivity returns (automatic retries have a limit; after that, you resend it from History). The vault append is a local folder write and happens without internet, though it shows up in Obsidian on other devices only after iCloud syncs."}},{"@type":"Question","name":"What if Obsidian adds Apple Watch support later?","acceptedAnswer":{"@type":"Answer","text":"Then the premises behind reasons 1–3 change and a direct path opens up; this page will be rewritten when it does. What can be verified today is only that Apple Watch support exists as a feature request on the official forum — there's no announced timeline. And if you take workaround C in the meantime, your notes remain in portable forms (email plus Markdown files in your vault), so switching later costs you nothing."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -320,7 +323,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Apple Watch × Obsidian troubleshooting</span>
 </div>
@@ -333,7 +336,7 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-11">August 11, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Why it fails — three structural reasons</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Common assumptions worth ruling out first</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Three workarounds that exist today</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer-first (AIO) -->
 <section class="lp-section" style="padding-top:1rem;">
 <div class="tip-box" style="font-size:.95rem;">
@@ -342,10 +345,10 @@
 </div>
 </section>
 <!-- Why -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 <span lang="en">Why it fails — three structural reasons</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">People burn hours assuming they misconfigured something, so let's be explicit. All three of these are preconditions you cannot change from your side.</span>
 </p>
@@ -364,12 +367,12 @@
 <h3 class="why__t"><span lang="en">Shortcuts and URL schemes both assume a locally installed app</span></h3>
 <p class="why__d"><span lang="en">A shortcut launched on Apple Watch runs on the watch. Actions vended by an app can be neither picked nor run unless that app is installed there. The same goes for <code>obsidian://</code>: with no app on the watch able to receive the URL, it can't be opened. <strong>That's why no amount of rewriting the URL helps.</strong></span></p>
 </div>
-</section>
+</div></section>
 <!-- Myths -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 <span lang="en">Common assumptions worth ruling out first</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Several ideas that surface in search results look like they should work. Before you spend an evening on them, here's what doesn't.</span>
 </p>
@@ -389,16 +392,16 @@
 <p class="myth__claim"><span lang="en">"Dictate to Voice Memos or Reminders and it'll land in Obsidian"</span></p>
 <p class="myth__truth"><span lang="en">Those land in Apple's own services and are not connected to your vault. Getting them into Obsidian means transcribing them by hand later, or building an importer.</span></p>
 </div>
-</section>
+</div></section>
 <!-- Workarounds -->
-<section class="lp-section" id="workarounds">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="workarounds">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 <span lang="en">Three workarounds that exist today</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Since writing to Obsidian from the watch alone is off the table, the choice is really <strong>where to accept the cost</strong>: in manual effort, or in changing the route.</span>
 </p>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -448,12 +451,12 @@
 <div class="reason-card__desc"><span lang="en">When even tapping the watch is too much, talk to your AirPods and let the iPhone send it. No wrist involved, which suits walking or cooking.</span></div>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Route C detail -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 <span lang="en">Workaround C in practice: speak on the wrist, the iPhone writes</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Simple Memo is built in exactly this shape. Open the Apple Watch app, speak, send — the text is sent to your own inbox by email, and, with the Obsidian integration on, <strong>the paired iPhone appends it to your vault folder</strong>. Anything the iPhone can't write right away is appended the next time you open the app on the iPhone. The iPhone always performs the write; the watch never touches the vault. <strong>No community plugin required.</strong></span>
 </p>
@@ -474,12 +477,12 @@
 <img alt="Download on the App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/>
 </a>
 </div>
-</section>
+</div></section>
 <!-- If the app is installed but still failing -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">If a watch app is installed but still won't send</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">From here on, this is for when you're using a capture app that does have a watch app and it still isn't arriving. At this stage the causes are usually ordinary configuration issues, not the structural limits above.</span>
 </p>
@@ -504,12 +507,12 @@
 <p class="lp-section__lead" style="margin-bottom:0;">
 <span lang="en">For shortcut-side symptoms — truncated bodies, unexpected new notes and the rest — see <a href="/en/obsidian/shortcuts-not-working/" style="color:var(--accent);">fixes by symptom when Shortcuts won't write to Obsidian</a>.</span>
 </p>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">Why can't I install Obsidian on my Apple Watch?</span></summary>
@@ -546,12 +549,12 @@
 <div class="faq-answer"><span lang="en">Then the premises behind reasons 1–3 change and a direct path opens up; this page will be rewritten when it does. What can be verified today is only that Apple Watch support exists as a feature request on the official forum — there's no announced timeline. And if you take workaround C in the meantime, your notes remain in portable forms (email plus Markdown files in your vault), so switching later costs you nothing.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/apple-watch-obsidian/"><span lang="en">Apple Watch × Obsidian</span></a>
 <a href="/en/apple-watch/"><span lang="en">Apple Watch support</span></a>
@@ -562,13 +565,13 @@
 <a href="/en/hands-free/"><span lang="en">Hands-free capture</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08">
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://forum.obsidian.md/t/feature-apple-watch-app/17820" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Forum — Apple Watch app feature request</a> — <span lang="en">Confirms that no watchOS app exists and that the request is still open</span></li>
 <li><a href="https://support.apple.com/ja-jp/guide/watch/welcome/watchos" rel="noopener" style="color:var(--accent);" target="_blank">Apple Watch User Guide</a> — <span lang="en">Apple's official guide to the apps and features available on watchOS</span></li>
@@ -576,7 +579,7 @@
 <li><a href="https://obsidian.md/help/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help</a> — <span lang="en">Vault, sync and daily note behaviour</span></li>
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

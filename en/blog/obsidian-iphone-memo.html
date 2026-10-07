@@ -250,11 +250,14 @@
 </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
       <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
@@ -281,7 +284,7 @@
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">How to Capture Notes in Obsidian from iPhone: 6 Ways</h1>
+      <h1 class="page-content__title sd-title">How to Capture Notes in Obsidian from iPhone: 6 Ways</h1>
 
       <p class="article-meta">
         By <a href="/en/about/">AI ATAKA</a> &middot; Updated: October 4, 2026 &middot; Reading time: ~7 minutes
@@ -293,25 +296,25 @@
           <strong>Short answer.</strong> Use Obsidian mobile for writing and organizing, or its built-in Capture actions to append text from Shortcuts without opening the app. <strong>SimpleMemo (Simple Memo - for Obsidian) is an option when you want a dedicated capture screen, a configured vault destination, and an email copy.</strong> Its folder-direct append writes locally when the vault file is available on your iPhone; email delivery needs a connection. Choose the route that fits your destination and setup.
         </div>
 
-        <h2>Choose a capture route for the situation</h2>
+        <h2 id="reading-01" data-ce-number="01">Choose a capture route for the situation</h2>
         <p>Writing a long note and saving a passing thought are different tasks. Opening a vault and choosing a note may suit the first; a preconfigured destination may suit the second. The six approaches below include two different Shortcut routes, which have different setup and app-opening behavior.</p>
 
-        <h2>Method 1: Type directly in Obsidian mobile</h2>
+        <h2 id="reading-02" data-ce-number="02">Method 1: Type directly in Obsidian mobile</h2>
         <p>Open your vault in the official app and write. This is a useful starting point for linking, tagging, and editing longer notes. Obsidian is <a href="https://obsidian.md/pricing" target="_blank" rel="noopener">free for personal and commercial use</a>; Sync and Publish are optional paid services. Your capture time depends on the vault, device, and navigation you need.</p>
 
-        <h2>Method 2: Shortcuts — built-in Capture actions or an Obsidian URI</h2>
+        <h2 id="reading-03" data-ce-number="03">Method 2: Shortcuts — built-in Capture actions or an Obsidian URI</h2>
         <h3>2a. Obsidian's built-in Capture actions</h3>
         <p>Since <a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener">Obsidian 1.11 for mobile</a>, Capture shortcuts can append or prepend text to a note <strong>without opening the Obsidian app</strong>. Select an Obsidian Capture action in Shortcuts, configure its destination, and try it with a short test line. This is an option to check before building a URI-based workflow.</p>
         <h3>2b. Shortcuts with obsidian://new</h3>
         <p>The <a href="https://obsidian.md/help/uri" target="_blank" rel="noopener">Obsidian URI protocol</a> can create a note or append to an existing one. It is a separate route that invokes Obsidian through a URL: configure the vault, file, content, and append behavior, and encode parameter values correctly. A <code>silent</code> parameter controls opening the new note; it is not the built-in Capture action. For voice input options, see <a href="/en/blog/obsidian-voice-input">4 ways to dictate into Obsidian</a>.</p>
 
-        <h2>Method 3: Write a Markdown file into an accessible vault folder</h2>
+        <h2 id="reading-04" data-ce-number="04">Method 3: Write a Markdown file into an accessible vault folder</h2>
         <p>An Obsidian vault contains Markdown files. A file action or compatible editor can create or append a .md file in a vault folder accessible on your iPhone, such as an iCloud Drive folder. Folder access and local file availability matter: a cloud-only file may need to download first. Check that your test note appears in the intended vault.</p>
 
-        <h2>Method 4: Capture in Drafts, then choose an action</h2>
+        <h2 id="reading-05" data-ce-number="05">Method 4: Capture in Drafts, then choose an action</h2>
         <p>Drafts lets you write first and route the text later. Its <a href="https://docs.getdrafts.com/actions/" target="_blank" rel="noopener">actions guide</a> includes built-in and installable actions; you do not have to build every action from scratch. An Obsidian workflow still needs the right action and destination settings. We compare this category in the <a href="/en/blog/ios-quick-capture-comparison">iOS quick-capture comparison</a>.</p>
 
-        <h2>Method 5: SimpleMemo — an email copy plus direct vault append</h2>
+        <h2 id="reading-06" data-ce-number="06">Method 5: SimpleMemo — an email copy plus direct vault append</h2>
         <p><a href="/en/obsidian/">SimpleMemo (Simple Memo - for Obsidian)</a> can send a memo to your email and append it with a timestamp to a configured Inbox note or daily note. The vault append is a separate local operation: it does not wait for an email to arrive or require a mail-import plugin.</p>
         <ul>
           <li>Open the capture screen, write or <a href="/en/blog/obsidian-voice-input">dictate</a>, then send. The published <strong>0.4-second figure measures warm launch to input readiness</strong>, not time to email delivery or a saved vault note. See the <a href="/en/blog/benchmark-methodology">August 11 measurement conditions</a>.</li>
@@ -320,12 +323,12 @@
         </ul>
         <p>Start with the <a href="/en/obsidian/">vault setup and mode guide</a>. Mail-provider details are in <a href="/en/blog/email-to-obsidian">email to Obsidian</a>. Email passes through the delivery service and is not end-to-end encrypted; the <a href="/en/privacy-architecture/">privacy architecture</a> explains the route.</p>
 
-        <h2>Method 6: Capture with SimpleMemo on Apple Watch</h2>
+        <h2 id="reading-07" data-ce-number="07">Method 6: Capture with SimpleMemo on Apple Watch</h2>
         <p>When your iPhone is in your pocket, dictate on the Watch and confirm the memo. Vault append uses the paired iPhone and its configured destination; it is not a direct write into a vault stored on the Watch. Email delivery needs connectivity. See <a href="/en/apple-watch-obsidian/">Apple Watch voice memos to Obsidian</a> for setup and delivery conditions.</p>
 
-        <h2>The six approaches compared</h2>
+        <h2 id="reading-08" data-ce-number="08">The six approaches compared</h2>
         <p class="capture-table-hint">Scroll the table sideways to read the setup and connection requirements.</p>
-        <div class="capture-table-wrap" role="region" aria-label="Capture workflow comparison" tabindex="0">
+        <div class="capture-table-wrap sd-table" role="region" aria-label="Capture workflow comparison" tabindex="0">
           <table>
           <caption>Method 2 has two Shortcut routes. This is a workflow comparison, not an end-to-end speed ranking.</caption>
           <tr><th scope="col">Method</th><th scope="col">Capture route</th><th scope="col">Best suited to</th><th scope="col">Connection and setup</th></tr>
@@ -339,10 +342,10 @@
         </table>
         </div>
 
-        <h2>The habit that makes it work: one entrance</h2>
+        <h2 id="reading-09" data-ce-number="09">The habit that makes it work: one entrance</h2>
         <p>Multiple entrances scatter your notes and add a "where did I write that?" tax. The reliable pattern is <strong>one capture entrance → everything collects in a vault Inbox note → process inside Obsidian</strong>. How to handle those raw scraps is exactly what the <a href="/en/blog/fleeting-notes">fleeting notes guide</a> covers.</p>
 
-        <h2>FAQ</h2>
+        <h2 id="reading-10" data-ce-number="10">FAQ</h2>
         <p><strong>Is the Obsidian mobile app free?</strong><br>Yes. Obsidian is free for personal and commercial use. Sync and Publish are optional paid services. Local note editing does not require a Sync subscription.</p>
         <p><strong>Do I need plugins for iPhone capture?</strong><br>Obsidian&#x27;s built-in Capture actions, basic obsidian://new links, and SimpleMemo&#x27;s direct vault append do not require a community plugin. Daily-note workflows may require the built-in Daily Notes plugin to be enabled. Third-party actions depend on their own setup.</p>
         <p><strong>Which method is fastest?</strong><br>This guide does not establish a fastest route from idea to a saved Obsidian note. SimpleMemo&#x27;s reported 0.4 seconds measures warm launch to input readiness under the linked test conditions. It does not measure dictation, email delivery, or vault append. Compare complete workflows on your own device and vault.</p>

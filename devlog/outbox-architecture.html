@@ -244,11 +244,14 @@
   }
   </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -280,7 +283,7 @@
 <!-- Content -->
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span lang="ja">Outboxアーキテクチャ：メッセージを取りこぼさないための設計</span>
 
       </h1>
@@ -297,13 +300,13 @@
         <div class="page-content__body">
 
           <!-- Section 1 -->
-          <h2>課題：送信即クリアでも、メッセージを取りこぼさないには</h2>
+          <h2 id="reading-01" data-ce-number="01">課題：送信即クリアでも、メッセージを取りこぼさないには</h2>
           <p>Obsidian連携シンプルメモでは、ユーザーが送信ボタンをタップした瞬間にUIがクリアされ、すぐに次のメモを書き始められる。これがCaptioスタイルの根幹をなすUXだ。</p>
           <p>しかし現実のネットワークは300ms〜2秒のレイテンシがあり、失敗もするし、そもそもオフラインかもしれない。多くのアプリはネットワーク応答を待ってからUIをクリアする。安全だが、UXは悪い。逆に即座にクリアすると、メッセージを失うリスクがある。</p>
           <p><strong>Outboxパターン</strong>は、この相反する要件を同時に解決する。送信タップの瞬間にメッセージをローカルの暗号化ストレージ（Outbox）に永続保存し、UIを即座にクリアし、バックグラウンドでネットワーク送信を行う。送信に成功したらOutboxから削除し、失敗したら自動リトライする。これにより<strong>未送信のメッセージを端末に残して再送</strong>しつつ、体感レイテンシはゼロに近づく。</p>
 
           <!-- Section 2 -->
-          <h2>Outboxパターンの設計フロー</h2>
+          <h2 id="reading-02" data-ce-number="02">Outboxパターンの設計フロー</h2>
           <p>以下が、送信ボタンをタップしてからメッセージが送信されるまでの全フローだ。</p>
           <ol class="flow-list">
             <li><strong>送信タップ → まずOutboxにAES-GCM暗号化して永続保存</strong><br>ユーザーが送信ボタンをタップした瞬間、メッセージはAES-GCM 256bitで暗号化され、デバイスのローカルストレージに永続保存される。このステップが完了するまで、UIクリアは行わない。つまり、Outbox保存が取りこぼしを防ぐ最初の防波堤になる。</li>
@@ -315,9 +318,9 @@
           </ol>
 
           <!-- Section 3 -->
-          <h2>SendManagerのコード</h2>
+          <h2 id="reading-03" data-ce-number="03">SendManagerのコード</h2>
           <p>SendManagerの<code>send()</code>関数は、Outboxパターンのエントリーポイントだ。まずOutboxに保存し、ネットワーク接続がなければキューイングし、接続があれば即座に送信を実行する。</p>
-<pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
     // まずOutboxに保存（クラッシュや圏外で失わないように）
     let outboxMessage: OutboxMessage
     do {
@@ -340,14 +343,14 @@
           <p>重要なポイントは、<code>OutboxManager.shared.add(body:)</code>が同期的に永続ストレージに書き込むこと。この呼び出しが成功した時点で、メッセージは端末に安全に保存されている。ネットワーク送信がどのような結果になっても、メッセージはOutboxに残り続ける。</p>
 
           <!-- Section 4 -->
-          <h2>AES-GCM暗号化の実装</h2>
+          <h2 id="reading-04" data-ce-number="04">AES-GCM暗号化の実装</h2>
           <p>Outbox に保存されるメッセージは、ユーザーのプライベートなメモだ。ローカルストレージとはいえ、平文で保存するわけにはいかない。Apple CryptoKit の AES-GCM を使い、暗号化に関しては外部 SDK を一切介さない実装にしている。</p>
           <ul>
             <li><strong>Apple CryptoKit</strong> — iOS 13以降で利用可能。暗号化処理に外部 SDK を介さない（Apple 純正のみ）。</li>
             <li><strong>256-bit対称鍵</strong> — Keychainに保存する。</li>
             <li><strong>認証付き暗号化</strong> — AES-GCMはデータの機密性と完全性を同時に保証。改ざんされたデータは復号時に検知される。</li>
           </ul>
-<pre><code>enum OutboxEncryption {
+<pre tabindex="0"><code>enum OutboxEncryption {
     private static var encryptionKey: SymmetricKey {
         if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
             return SymmetricKey(data: existingKey)
@@ -372,7 +375,7 @@
           <p>鍵は初めて必要になったときに自動で作られ、Keychainに保存される。保存の設定は「この端末だけ・最初のロック解除のあとから読める」（kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly）で、ほかのアプリからは読めず、バックアップから別の端末へ移ることもない。再起動のあと一度ロックを解除すれば、ロック中のバックグラウンド処理からも読める。なお、上のコード例は記事を書いた時点の簡略版で、今のコードでは、キーチェーンの読み取りに失敗したときに「鍵が無い」と扱って新しい鍵を作ることはしない。</p>
 
           <!-- Section 5 -->
-          <h2>データパスを Apple 純正のみで構成する意味</h2>
+          <h2 id="reading-05" data-ce-number="05">データパスを Apple 純正のみで構成する意味</h2>
           <p>Outboxアーキテクチャで使用しているフレームワークはすべてAppleネイティブだ。</p>
           <ul>
             <li><strong>CryptoKit</strong> — AES-GCM暗号化。サードパーティの暗号化ライブラリは不要。</li>
@@ -387,9 +390,9 @@
           <p>なお、アプリ全体では外部のSDK（Googleサインイン、Firebase、AppsFlyer）も使っている（<a href="/devlog/privacy-first-design">プライバシーファースト設計</a>を参照）。ここで言う「Apple純正のみ」は、送信待ちのデータの経路の話だ。</p>
 
           <!-- Section 6 -->
-          <h2>UIクリアとネットワーク送信の分離</h2>
+          <h2 id="reading-06" data-ce-number="06">UIクリアとネットワーク送信の分離</h2>
           <p>Outboxパターンの真の価値は、UIレイヤーとネットワークレイヤーの完全な分離にある。送信ボタンのタップハンドラを見てみよう。</p>
-<pre><code>@objc private func sendButtonTapped() {
+<pre tabindex="0"><code>@objc private func sendButtonTapped() {
     PerformanceLogger.shared.beginSendToReset()
     let message = textView.text ?? ""
     isSending = true
@@ -419,7 +422,7 @@
           <p>Send-to-Resetの目標は<strong>待ちを感じない短さ</strong>。アニメーション込みでも0.25秒。ユーザーは送信ボタンをタップした直後に、次のメモを書き始められる。これがCaptioスタイルのUXだ。</p>
 
           <!-- FAQ -->
-          <h2>よくある質問</h2>
+          <h2 id="reading-07" data-ce-number="07">よくある質問</h2>
 
           <h3>Q. オフラインで送信したメモはどうなりますか？</h3>
           <p>Outboxに暗号化して保存され、回線の復帰（NWPathMonitorで検知）・アプリを開いたとき・バックグラウンドの処理をきっかけに、自動で送り直します。自動の再送には回数の上限があり、上限に達したメモは「履歴」で長押しして「再送信」を選びます。</p>
@@ -434,7 +437,7 @@
           <p>自動で送り直します。きっかけは、回線が戻ったとき、アプリを開いたとき、バックグラウンドの処理（BGTaskScheduler。実行の時刻は iOS が決める）です。送れなかったメモは送信待ちから消さずに送り直しますが、自動の再送には回数の上限があります。</p>
 
           <!-- Related Articles -->
-          <h2>関連記事</h2>
+          <h2 id="reading-08" data-ce-number="08">関連記事</h2>
           <div class="related-grid">
             <a href="/devlog/day1" class="related-card">
               <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
@@ -466,18 +469,18 @@
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — AES.GCM (CryptoKit)</a> — <span lang="ja">Outboxデータの暗号化に使用したAES-GCM認証付き暗号化の公式リファレンス</span></li>
     <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — NWPathMonitor (Network Framework)</a> — <span lang="ja">オフライン検知とネットワーク状態監視に使用</span></li>
     <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — BGTaskScheduler</a> — <span lang="ja">バックグラウンドでの再送処理スケジューリングに使用</span></li>
     <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span lang="ja">トランザクショナルOutboxパターンの解説（送るメッセージを同じ処理の中で送信待ちの表に書き、別の処理が送り出す）</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

@@ -258,11 +258,14 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/evernote/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can I import my Evernote legacy data into Simple Memo?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo is not a replacement for Evernote — it's a fast capture complement. There's no need to migrate existing data. Use Simple Memo for instant capture, receive memos via email, and move important ones into Evernote. This workflow enhances Evernote rather than replacing it."}},{"@type":"Question","name":"Evernote's pricing keeps increasing. Is Simple Memo cheaper?","acceptedAnswer":{"@type":"Answer","text":"Evernote has repeatedly tightened free tier limits and raised paid plan prices. Simple Memo's free plan allows 3 sends a day (saving to Obsidian only is Premium), and Premium is $2.99/month. For quick capture alone, the free plan is often sufficient — you can keep Evernote for archiving without upgrading."}},{"@type":"Question","name":"Why has Evernote become so slow?","acceptedAnswer":{"@type":"Answer","text":"Evernote's 2020 v10 rewrite (Electron-based on desktop) increased launch time and memory usage. Users with many notebooks and notes feel this most acutely. Simple Memo is a native app that opens straight into its input screen — ready to type 0.4 seconds after the tap (warm launch, iPhone 16e), with no web engine in between."}},{"@type":"Question","name":"Can I automate Simple Memo emails into Evernote?","acceptedAnswer":{"@type":"Answer","text":"Yes, by forwarding. Evernote has an email-to-note feature (check Evernote's own plan information for availability): an email forwarded to your Evernote address becomes a note. Forward the memo emails you receive from Simple Memo there, by hand or with a forwarding rule in your mail service. Setting the Evernote address directly as Simple Memo's recipient has not been tested, including the address verification step."}},{"@type":"Question","name":"Is Simple Memo better than Evernote for quick notes?","acceptedAnswer":{"@type":"Answer","text":"For quick capture specifically, yes — dramatically so. In our measurement (iPhone 16e, warm launch, median) Simple Memo was ready to type in 0.4s vs Evernote's 2.5s, and it sends with one tap vs Evernote's multi-step flow. But Evernote excels at long-term organization, search, and knowledge management. The best approach is using both together."}}]}</script>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -292,7 +295,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 
 <span>Memo App Comparison</span>
@@ -309,29 +312,29 @@
 
 <span>By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: March 5, 2026</span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>What is Evernote?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Comparison Table: Simple Memo vs Evernote</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>6 Differences: A Deep Analysis</span><span aria-hidden="true">↗</span></a></nav></div>
 <p class="lp-section__lead" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;margin-bottom:2rem;font-size:.95rem;line-height:1.8;">
 
 <span>This comparison is written by Simple Memo's developer using published product information and the developer's launch-time measurements (iPhone 16e, warm launch). We have not published a usage log, so this is not a hands-on review. Evernote is built for storing and finding knowledge; Simple Memo is built for sending one line to yourself right now.</span>
 </p>
 <!-- Entity Definition -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
 
 <span>What is Evernote?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span>Evernote is a comprehensive knowledge management platform featuring notebooks, tags, full-text search, Web Clipper, PDF annotation, and shared notebooks. For years it was the go-to digital note tool, but since 2023 its increasingly restrictive free tier has pushed many users to seek alternatives. Evernote excels at long-form writing, project management, and research organization — but its complexity makes it too slow for quick thought capture. A 2.5-second wait before typing (our measurement, median) and multi-step workflows are its core limitation for quick use.</span>
 </p>
-</section>
+</div></section>
 <!-- Comparison Table -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
 
 <span>Comparison Table: Simple Memo vs Evernote</span>
-</h2>
-<div style="overflow-x:auto">
+</h2></div><div class="ce-chapter__body">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 
 <table class="compare-table">
 <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Evernote</th></tr></thead>
@@ -350,13 +353,13 @@
 </tbody>
 </table>
 </div>
-</section>
+</div></section>
 <!-- 5 Key Differences -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
 
 <span>6 Differences: A Deep Analysis</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <ul class="diff-list">
 <li>
@@ -390,13 +393,13 @@
             You can combine both apps: capture quickly with Simple Memo on the go, receive memos by email, then keep only the important ones in Evernote. This separates a fast inbox from a long-term archive.
           </li>
 </ul>
-</section>
+</div></section>
 <!-- Who Should Choose Which -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
 
 <span>Who Should Choose Which?</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div class="choose-grid">
 <div class="choose-card">
@@ -422,13 +425,13 @@
 </ul>
 </div>
 </div>
-</section>
+</div></section>
 <!-- Migration Guide -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 
 <span>Migration Guide from Evernote</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 
 <span>A "full migration" from Evernote to Simple Memo - for Obsidian is not necessary. Simple Memo - for Obsidian is not an Evernote replacement — it is a complementary quick-capture tool. Here is how to transition your daily capture workflow to Simple Memo - for Obsidian while keeping Evernote for what it does best: knowledge management.</span>
@@ -451,13 +454,13 @@
             For the first week, keep both apps on your home screen. Use Simple Memo - for Obsidian when you think "I need to note this NOW" and Evernote when you need to search past notes. A common split is Simple Memo - for Obsidian for capture and Evernote for organization.
           </li>
 </ul>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 
 <span>FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 
 <div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I import my Evernote legacy data into Simple Memo?</summary><div class="faq-answer"><p>Simple Memo is not a replacement for Evernote — it's a fast capture complement. There's no need to migrate existing data. Use Simple Memo for instant capture, receive memos via email, and move important ones into Evernote. This workflow enhances Evernote rather than replacing it.</p></div></details></div>
@@ -466,7 +469,7 @@
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I automate Simple Memo emails into Evernote?</summary><div class="faq-answer"><p>Yes, by forwarding. Evernote has an email-to-note feature (check Evernote's own plan information for availability): an email forwarded to your Evernote address becomes a note. Forward the memo emails you receive from Simple Memo there, by hand or with a forwarding rule in your mail service. Setting the Evernote address directly as Simple Memo's recipient has not been tested, including the address verification step.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo better than Evernote for quick notes?</summary><div class="faq-answer"><p>For quick capture specifically, yes — dramatically so. In our measurement (iPhone 16e, warm launch, median) Simple Memo was ready to type in 0.4s vs Evernote's 2.5s, and it sends with one tap vs Evernote's multi-step flow. But Evernote excels at long-term organization, search, and knowledge management. The best approach is using both together.</p></div></details></div>
 </div>
-</section></div>
+</div></section></div>
 
 <!-- CTA -->
 <div class="cta-box">
@@ -484,11 +487,11 @@
 </a>
 </div>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
 
 <span>Related Pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/vs/">
 
@@ -519,7 +522,7 @@
 <span>FAQ</span>
 </a>
 </div>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

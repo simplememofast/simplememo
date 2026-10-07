@@ -220,11 +220,14 @@
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture">
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -255,7 +258,7 @@
 <!-- Content -->
 <main class="page-content">
 <div class="container">
-<h1 class="page-content__title">
+<h1 class="page-content__title sd-title">
 
 <span lang="en">Outbox Architecture: Designing Against Message Loss</span>
 </h1>
@@ -274,12 +277,12 @@
 <p class="page-content__date">February 13, 2026</p>
 <div class="page-content__body">
 <!-- Section 1 -->
-<h2>The Challenge: Instant UI Clear Without Losing Messages</h2>
+<h2 id="reading-01" data-ce-number="01">The Challenge: Instant UI Clear Without Losing Messages</h2>
 <p>In Simple Memo (Captio-style), the UI clears the instant you tap send, letting you immediately start writing your next memo. This is the core of the Captio-style UX.</p>
 <p>But real-world networks have 300ms-2s latency. They fail. They go offline entirely. Most apps wait for a network response before clearing the UI. Safe, but terrible UX. Clear immediately? You risk losing the message.</p>
 <p>The <strong>Outbox pattern</strong> solves both simultaneously. The moment you tap send, the message is persisted to encrypted local storage (the Outbox), the UI clears instantly, and background network delivery begins. On success, the message is removed from the Outbox. On failure, automatic retry kicks in. The result: <strong>unsent messages are kept and retried</strong>, with near-zero perceived latency.</p>
 <!-- Section 2 -->
-<h2>Outbox Pattern Design Flow</h2>
+<h2 id="reading-02" data-ce-number="02">Outbox Pattern Design Flow</h2>
 <p>Here is the complete flow from tapping send to confirmed delivery.</p>
 <ol class="flow-list">
 <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br/>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense against message loss.</li>
@@ -290,9 +293,9 @@
 <li><strong>If Offline: NWPathMonitor Detects Connectivity and Auto-Resends</strong><br/>If the device is offline at send time, Network.framework's NWPathMonitor watches for connectivity changes; when it detects that Wi-Fi or cellular is back, the unsent messages in the Outbox are sent again automatically (as in step 5, automatic retries have a limit).</li>
 </ol>
 <!-- Section 3 -->
-<h2>SendManager Code</h2>
+<h2 id="reading-03" data-ce-number="03">SendManager Code</h2>
 <p>The SendManager's <code>send()</code> function is the entry point for the Outbox pattern. It persists to the Outbox first, queues if offline, and sends immediately if connected.</p>
-<pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
     // Persist to Outbox first (so a crash or lost connection does not drop it)
     let outboxMessage: OutboxMessage
     do {
@@ -314,14 +317,14 @@
 }</code></pre>
 <p>The critical point: <code>OutboxManager.shared.add(body:)</code> writes synchronously to persistent storage. Once this call succeeds, the message is safely stored on the device. Regardless of what happens with the network send, the message remains in the Outbox until explicitly deleted after confirmed delivery.</p>
 <!-- Section 4 -->
-<h2>AES-GCM Encryption Implementation</h2>
+<h2 id="reading-04" data-ce-number="04">AES-GCM Encryption Implementation</h2>
 <p>Messages stored in the Outbox are private user memos. Even on local storage, plaintext is unacceptable. We implemented encryption using Apple CryptoKit's AES-GCM, with no third-party SDK in the encryption path.</p>
 <ul>
 <li><strong>Apple CryptoKit</strong> — Available from iOS 13+. No external dependencies.</li>
 <li><strong>256-bit Symmetric Key</strong> — Stored in Keychain.</li>
 <li><strong>Authenticated Encryption</strong> — AES-GCM guarantees both confidentiality and integrity. Tampered data is detected on decryption.</li>
 </ul>
-<pre><code>enum OutboxEncryption {
+<pre tabindex="0"><code>enum OutboxEncryption {
     private static var encryptionKey: SymmetricKey {
         if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
             return SymmetricKey(data: existingKey)
@@ -345,7 +348,7 @@
 }</code></pre>
 <p>The key is generated automatically the first time it is needed and stored in Keychain with kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly: other apps cannot read it, it does not move to another device through a backup, and background tasks can read it once the device has been unlocked after a restart. The code above is a simplified version from when this article was written; the current code does not treat a failed Keychain read as a missing key, so it never creates a new key in that case.</p>
 <!-- Section 5 -->
-<h2>Keeping the Data Path Free of External SDKs</h2>
+<h2 id="reading-05" data-ce-number="05">Keeping the Data Path Free of External SDKs</h2>
 <p>Every framework used in the Outbox architecture is Apple-native.</p>
 <ul>
 <li><strong>CryptoKit</strong> — AES-GCM encryption. No third-party crypto libraries needed.</li>
@@ -359,9 +362,9 @@
 </ul>
 <p>The app as a whole does use third-party SDKs (Google Sign-In, Firebase and AppsFlyer; see <a href="/en/devlog/privacy-first-design">Privacy-First Design</a>). “Apple-native only” here refers to the Outbox data path.</p>
 <!-- Section 6 -->
-<h2>Decoupling UI Clear from Network Send</h2>
+<h2 id="reading-06" data-ce-number="06">Decoupling UI Clear from Network Send</h2>
 <p>The true value of the Outbox pattern is the complete separation of the UI layer and the network layer. Let's look at the send button tap handler.</p>
-<pre><code>@objc private func sendButtonTapped() {
+<pre tabindex="0"><code>@objc private func sendButtonTapped() {
     PerformanceLogger.shared.beginSendToReset()
     let message = textView.text ?? ""
     isSending = true
@@ -390,7 +393,7 @@
 <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
 <p>Send-to-Reset target: <strong>no noticeable wait</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
 <!-- FAQ -->
-<h2>FAQ</h2>
+<h2 id="reading-07" data-ce-number="07">FAQ</h2>
 <h3>Q. What happens to memos sent offline?</h3>
 <p>They are encrypted and stored in the Outbox, and sent again automatically when connectivity returns (detected by NWPathMonitor), when you open the app, or from a background task. Automatic retries have a limit; for a memo that reaches it, long-press it in History and choose Resend.</p>
 <h3>Q. Are memos lost if I close the app?</h3>
@@ -400,7 +403,7 @@
 <h3>Q. How many retries on failure?</h3>
 <p>The app sends it again automatically when the connection returns, when you open the app, or from a background task (BGTaskScheduler; iOS decides when it runs). A failed send stays in the Outbox instead of being dropped, but automatic retries have a limit.</p>
 <!-- Related Articles -->
-<h2>Related Articles</h2>
+<h2 id="reading-08" data-ce-number="08">Related Articles</h2>
 <div class="related-grid">
 <a class="related-card" href="/en/devlog/day1">
 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
@@ -426,18 +429,18 @@
 </div>
 </div>
 </div>
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09">
 
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — AES.GCM (CryptoKit)</a> — <span lang="en">Official reference for AES-GCM authenticated encryption used to protect Outbox data</span></li>
 <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — NWPathMonitor (Network Framework)</a> — <span lang="en">Used for offline detection and network status monitoring</span></li>
 <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" rel="noopener" style="color:var(--accent);" target="_blank">Apple Developer — BGTaskScheduler</a> — <span lang="en">Used for scheduling background retry processing</span></li>
 <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span lang="en">Explanation of the transactional outbox pattern (write the message to an outbox in the same transaction, then relay it)</span></li>
 </ul>
-</section>
+</div></section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
        Exactly one destination per page. Adding a second defeats the purpose: the page

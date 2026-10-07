@@ -65,34 +65,37 @@
   </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <nav class="global-nav" aria-label="Main navigation" data-site-header=""><div class="global-nav__inner">
 <a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a>
 <!-- site-chrome:quick --><div class="site-quick-links"><a href="/en/guides/">Guides</a><a href="/en/use-cases/">Use Cases</a><a href="/en/vs/">Compare</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/en/guides/">Guides</a></li><li><a href="/en/use-cases/">Use Cases</a></li><li><a href="/en/vs/">Compare</a></li><li><a href="/en/methods/">Methods</a></li><li><a href="/en/blog/">Blog</a></li><li><a href="/en/glossary/">Glossary</a></li><li><a href="/en/faq">FAQ</a></li><li><a href="/en/about/">About</a></li><li><a href="/en/devlog/">Dev Log</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Download</a></li></ul>
 <div class="global-nav__actions"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Download</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Explore"><span>Explore</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div>
 </div></nav>
 <main class="page-content"><div class="container">
-<h1 class="page-content__title">iOS 26 didn't kill custom vocabulary — you're adding it to the wrong module</h1>
+<h1 class="page-content__title sd-title">iOS 26 didn't kill custom vocabulary — you're adding it to the wrong module</h1>
 <p class="article-meta">By <a href="/en/about/">AI ATAKA</a> &middot; Published: September 18, 2026</p>
 <div class="page-content__body article-body">
 <p><strong>Custom vocabulary did not disappear from Apple's new SpeechAnalyzer stack.</strong> The important detail is module choice. Apple documents <code>AnalysisContext.contextualStrings</code> specifically with <code>DictationTranscriber</code>. If you are building around <code>SpeechTranscriber</code>, do not assume that attaching the same context gives you the same vocabulary behavior.</p>
 <div class="callout"><p><strong>Short version:</strong> choose <code>DictationTranscriber</code> when contextual phrases are part of your recognition design. Keep the list short, keep phrases brief, and treat them as biasing hints rather than guaranteed replacements.</p></div>
 
-<h2>There are two transcription modules — and they are not interchangeable</h2>
+<h2 id="reading-01" data-ce-number="01">There are two transcription modules — and they are not interchangeable</h2>
 <p>iOS 26's Speech framework makes transcription modular. <code>SpeechTranscriber</code> is Apple's general-purpose transcriber for normal conversation. <code>DictationTranscriber</code> is closer to system dictation and exposes additional accuracy controls.</p>
-<table><thead><tr><th>Need</th><th>Module to evaluate first</th><th>Why</th></tr></thead><tbody>
+<div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table><thead><tr><th>Need</th><th>Module to evaluate first</th><th>Why</th></tr></thead><tbody>
 <tr><td>General conversation / long-form transcription</td><td><code>SpeechTranscriber</code></td><td>Apple describes it as the general-purpose speech-to-text module.</td></tr>
 <tr><td>Short dictation with app-specific names or terms</td><td><code>DictationTranscriber</code></td><td>Apple explicitly documents <code>AnalysisContext.contextualStrings</code> with this module.</td></tr>
 <tr><td>Custom pronunciation / language model</td><td><code>DictationTranscriber</code></td><td>It also exposes a customized-language content hint backed by <code>SFSpeechLanguageModel</code>.</td></tr>
-</tbody></table>
+</tbody></table></div>
 
-<h2>How contextualStrings actually works</h2>
+<h2 id="reading-02" data-ce-number="02">How contextualStrings actually works</h2>
 <p><code>AnalysisContext.contextualStrings</code> is a dictionary grouped by contextual-string tags. Apple says these words or phrases can be used with <code>DictationTranscriber</code> to improve the likelihood that app-specific names, products, places, domain terminology, or unusual words are recognized.</p>
-<pre><code>let context = AnalysisContext()
+<pre tabindex="0"><code>let context = AnalysisContext()
 context.contextualStrings[.general] = [
     "Simple Memo",
     "Obsidian",
@@ -107,18 +110,18 @@ try await analyzer.setContext(context)</code></pre>
 <li><strong>These are hints, not guarantees.</strong> The API biases recognition; it does not promise an exact transcription.</li>
 </ul>
 
-<h2>setContext replaces the context — it does not append</h2>
+<h2 id="reading-03" data-ce-number="03">setContext replaces the context — it does not append</h2>
 <p><code>SpeechAnalyzer.setContext(_:)</code> replaces the analyzer's current context object. If you want to preserve earlier phrases while adding a new group, construct the complete new context you want to use and set that.</p>
-<pre><code>let next = AnalysisContext()
+<pre tabindex="0"><code>let next = AnalysisContext()
 next.contextualStrings[.general] = baseTerms + currentScreenTerms
 try await analyzer.setContext(next)</code></pre>
 <p>This also makes tags useful: you can maintain categories in your own state and rebuild the context deliberately rather than treating repeated <code>setContext</code> calls as incremental additions.</p>
 
-<h2>What about SpeechTranscriber?</h2>
+<h2 id="reading-04" data-ce-number="04">What about SpeechTranscriber?</h2>
 <p>Apple's current documentation for <code>SpeechTranscriber</code> does not document <code>contextualStrings</code> as one of that module's accuracy controls. By contrast, the <code>DictationTranscriber</code> documentation explicitly tells developers to create an <code>AnalysisContext</code> and add words to <code>contextualStrings</code>.</p>
 <p>That distinction is the safe implementation boundary: <strong>do not design a <code>SpeechTranscriber</code> pipeline around contextual vocabulary unless you have independently verified the exact behavior you need on your target OS, locale, and device.</strong></p>
 
-<h2>If you need vocabulary in long-form speech today</h2>
+<h2 id="reading-05" data-ce-number="05">If you need vocabulary in long-form speech today</h2>
 <p>There is no universal migration rule. If your existing <code>SFSpeechRecognizer</code> path already depends on <code>contextualStrings</code>, moving to iOS 26 should be treated as a module-selection and regression-testing exercise rather than a mechanical API rename.</p>
 <ol>
 <li>Test whether <code>DictationTranscriber</code> fits the duration, latency, locale, and device range you need.</li>
@@ -126,13 +129,13 @@ try await analyzer.setContext(next)</code></pre>
 <li>If neither new-module path preserves the behavior your product depends on, keep the proven <code>SFSpeechRecognizer</code> path for that use case while you migrate other paths separately.</li>
 </ol>
 
-<h2>Minimal decision rule</h2>
+<h2 id="reading-06" data-ce-number="06">Minimal decision rule</h2>
 <div class="callout"><p><strong>Conversation-first:</strong> start with <code>SpeechTranscriber</code>. <strong>Vocabulary-first:</strong> start by evaluating <code>DictationTranscriber</code>. If vocabulary is critical, measure recognition on the actual words and locales you ship instead of assuming parity between modules.</p></div>
 
-<h2>Related implementation guide</h2>
+<h2 id="reading-07" data-ce-number="07">Related implementation guide</h2>
 <p>For the live microphone pipeline — model assets, PCM conversion, volatile vs final results, stop/finalization behavior, and Swift 6 concurrency — see <a href="/en/blog/ios26-speechanalyzer-live-mic">the full iOS 26 SpeechAnalyzer live-mic guide</a>. The runnable sample is on <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub (MIT)</a>.</p>
 
-<h2>Primary sources</h2>
+<h2 id="reading-08" data-ce-number="08">Primary sources</h2>
 <ul>
 <li><a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener noreferrer">Apple: AnalysisContext.contextualStrings</a></li>
 <li><a href="https://developer.apple.com/documentation/speech/dictationtranscriber" rel="noopener noreferrer">Apple: DictationTranscriber</a></li>

@@ -281,11 +281,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/sync/icloud/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Where in iCloud Drive should the vault live?","acceptedAnswer":{"@type":"Answer","text":"Not at the top level of iCloud Drive — inside the \"Obsidian\" folder within it. The official documentation spells out iCloud Drive/Obsidian/[Your Vault Name], tells you to use the folder carrying the Obsidian app icon, and warns against the plain folder without it. Check in the Files app: Browse → iCloud Drive, and confirm your vault is inside the Obsidian folder."}},{"@type":"Question","name":"Notes look empty or stale on my iPhone","acceptedAnswer":{"@type":"Answer","text":"Check the account, vault location and iCloud Drive state as well as whether files are downloaded. Obsidian’s guide explains that offloading can cause sync issues. On Mac, check Keep Downloaded on macOS 15 or later, or Optimize Mac Storage on macOS 14 or earlier. A Mac setting change alone does not guarantee that an iPhone issue is resolved."}},{"@type":"Question","name":"Can I run iCloud and Obsidian Sync together?","acceptedAnswer":{"@type":"Answer","text":"The official documentation says to avoid mixing sync services, naming Obsidian Sync plus iCloud as the example, to prevent data conflicts and corruption. Keep one sync method per vault. For a comparison of the methods themselves, see our sync methods overview."}},{"@type":"Question","name":"Does iCloud Drive on Windows work?","acceptedAnswer":{"@type":"Answer","text":"The official documentation lists iCloud's recommended systems as macOS, iOS, and iPadOS, and states that iCloud Drive on Windows may lead to file duplication or corruption. If Windows or Android needs to be in the loop, pick a different sync method."}},{"@type":"Question","name":"Can Simple Memo write into an iCloud vault?","acceptedAnswer":{"@type":"Answer","text":"Vault access, Obsidian integration and a destination are required. When direct folder access works, the app can append without opening Obsidian. First run the Obsidian write test and check the destination text; then open the same note on another device to check iCloud sync. Write success, sync time and concurrent editing are not guaranteed in all conditions."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
 <!-- Global Navigation -->
 <nav aria-label="Main navigation" class="global-nav" data-site-header="">
 <div class="global-nav__inner">
@@ -313,7 +316,7 @@
 <main class="page-content">
 <div class="container">
 <!-- Hero -->
-<div class="lp-hero">
+<div class="lp-hero sd-hero"><div class="sd-hero-copy">
 <div class="lp-hero__label">
 <span lang="en">Setting up Obsidian with iCloud</span>
 </div>
@@ -326,22 +329,22 @@
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
 <span lang="en">By <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published <time datetime="2026-08-27">August 27, 2026</time></span>
 </p>
-</div>
+</div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>How do I sync Obsidian with iCloud?</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Step 1: Turn on iCloud Drive</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Step 2: Create the vault inside iCloud</span><span aria-hidden="true">↗</span></a></nav></div>
 <!-- Answer block (AIO) -->
-<section class="lp-section" data-answer-block="obsidian-icloud-sync" style="padding-top:1rem;">
-<h2 class="lp-section__title"><span lang="en">How do I sync Obsidian with iCloud?</span></h2>
+<section class="lp-section ce-chapter sd-chapter" data-answer-block="obsidian-icloud-sync" style="padding-top:1rem;">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span lang="en">How do I sync Obsidian with iCloud?</span></h2></div><div class="ce-chapter__body">
 
 <div class="tip-box" lang="en">
 <div class="tip-box__title">SHORT ANSWER</div>
 <p style="margin:0 0 .6rem;"><strong>Turn on iCloud Drive, then create the vault inside the "Obsidian" folder in iCloud Drive.</strong> On iPhone that means toggling "Store in iCloud" while creating the vault; on Mac it means picking the Obsidian folder inside iCloud Drive in the file picker.</p>
 <p style="margin:0;">On the second device, choose "Open folder as vault" and point it at the same folder. Obsidian's documentation warns about <strong>the location</strong>: a vault outside <code>iCloud Drive/Obsidian/[Your Vault Name]</code> may have syncing issues.</p>
 </div>
-</section>
+</div></section>
 <!-- Step 0: enable iCloud Drive -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02">
 <span lang="en">Step 1: Turn on iCloud Drive</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Sign in to the same Apple Account on the devices you want to sync and enable iCloud Drive. Setting names vary by OS version; refer to <a href="https://support.apple.com/en-us/118443" target="_blank" rel="noopener">Apple’s setup guide</a>.</span>
 </p>
@@ -349,12 +352,12 @@
 <li><strong><span lang="en">iPhone / iPad</span></strong><br/><span lang="en">Open Settings → your account → iCloud → Drive and turn on Sync this iPhone or Sync this iPad.</span></li>
 <li><strong><span lang="en">Mac</span></strong><br/><span lang="en">Open System Settings → your account → iCloud → Drive and turn on Sync this Mac.</span></li>
 </ol>
-</section>
+</div></section>
 <!-- Step: create vault -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">
 <span lang="en">Step 2: Create the vault inside iCloud</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Do this once, on your first device. Either platform works, but <strong>the flow differs</strong>: iPhone gives you a toggle, Mac makes you pick the folder yourself.</span>
 </p>
@@ -376,12 +379,12 @@
 <div class="tip-box__title"><span lang="en">WHY INSIDE THE "OBSIDIAN" FOLDER</span></div>
 <p style="margin:0;"><span lang="en">iCloud Drive gives apps their own area. The "Obsidian" folder carrying the app's icon is that area, and it is where Obsidian on iOS reads and writes. A plain folder you created yourself with the same name is a different thing — Obsidian's documentation says in so many words: <strong>do not use the plain folder without the app icon</strong>.</span></p>
 </div>
-</section>
+</div></section>
 <!-- Step: open on second device -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">
 <span lang="en">Step 3: Open the same vault on your second device</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">On the second device you <strong>do not create a vault</strong> — you open the existing folder. Creating one here leaves you with two vaults of the same name sitting side by side.</span>
 </p>
@@ -390,12 +393,12 @@
 <li><span lang="en">Open the vault switcher and choose <strong>Open folder as vault</strong>.</span></li>
 <li><span lang="en">Navigate to <strong>iCloud Drive → Obsidian</strong> and select the vault folder you created on the first device.</span></li>
 </ol>
-</section>
+</div></section>
 <!-- Pitfalls -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
 <span lang="en">Three checks from the official guide</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">The official guide calls out <strong>vault location, file offloading and mixed sync services</strong>. Check these items, then use the same note to verify the result.</span>
 </p>
@@ -413,7 +416,7 @@
 <div class="cz__n"><span lang="en">TRAP 2</span></div>
 <p class="cz__t"><span lang="en">iCloud has offloaded the files</span></p>
 <p><span lang="en">iCloud can push the contents of unused files off the device and keep them only in the cloud. <strong>Obsidian reads the vault's files directly, so when the contents aren't there, the files read as missing.</strong> The official FAQ states plainly that this offloading causes sync issues. The fix depends on your macOS version.</span></p>
-<div style="overflow-x:auto">
+<div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
 <table class="rt-table">
 <thead>
 <tr>
@@ -444,25 +447,25 @@
 <p><span lang="en">Obsidian's documentation has a dedicated note — <strong>avoid mixing sync services</strong> — telling you not to sync one vault through several services at once, giving Obsidian Sync plus iCloud as the example. The reason is data conflicts and corruption. If you're on iCloud and want to try the official Sync, <strong>move to one or the other</strong> rather than running both.</span></p>
 <p><span lang="en">For the same reason, <strong>skip iCloud Drive on Windows</strong>. The documentation lists iCloud's recommended systems as macOS, iOS, and iPadOS, and states that iCloud Drive on Windows <strong>may lead to file duplication or corruption</strong>. If Windows or Android is in your mix, iCloud isn't the method to pick.</span></p>
 </div>
-</section>
+</div></section>
 <!-- What actually syncs -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
 <span lang="en">iCloud carries the whole folder, settings included</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">A vault is <a href="/en/obsidian/what-is-vault/">just a folder</a>, and alongside your Markdown files it holds a <code>.obsidian</code> folder with your settings. iCloud Drive syncs at the folder level, so <strong>your settings ride along with your notes</strong>. For most people that's the convenient default — same theme, same hotkeys, both devices.</span>
 </p>
 <p class="lp-section__lead">
 <span lang="en">If you'd rather keep settings separate per device, the documentation points to a <strong>per-device configuration folder</strong> feature. (The Syncthing section says to exclude <code>.obsidian</code> from syncing when you want separate settings — which is also confirmation that settings live inside the vault.) iCloud has no exclude list, so on iCloud that feature is the way to do it.</span>
 </p>
-</section>
-<section class="lp-section"><h2 class="lp-section__title"><span lang="en">Official sources and the limits of this check</span></h2><p><span lang="en">We reread Obsidian’s English and Japanese sync guides on September 30, 2026, for their guidance on vault location, downloaded files and mixing sync services. Translations may have different update dates; check the English guide if the steps differ. <strong>Reading documentation or source code is separate from confirming sync between devices.</strong> This update did not measure iCloud sync time or concurrent editing on physical devices.</span></p></section>
+</div></section>
+<section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span lang="en">Official sources and the limits of this check</span></h2></div><div class="ce-chapter__body"><p><span lang="en">We reread Obsidian’s English and Japanese sync guides on September 30, 2026, for their guidance on vault location, downloaded files and mixing sync services. Translations may have different update dates; check the English guide if the steps differ. <strong>Reading documentation or source code is separate from confirming sync between devices.</strong> This update did not measure iCloud sync time or concurrent editing on physical devices.</span></p></div></section>
 <!-- SimpleMemo tie-in -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">
 <span lang="en">Writing into an iCloud vault from outside Obsidian</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <p class="lp-section__lead">
 <span lang="en">Simple Memo can append directly to a vault folder you have allowed it to access. Writing on iPhone and syncing through iCloud to another device are separate stages. Check the destination file first, then open the same note on your Mac or another device.</span>
 </p>
@@ -496,12 +499,12 @@
 <small><span lang="en">On desktop? Scan with your phone</span></small>
 </div>
 </div>
-</section>
+</div></section>
 <!-- FAQ -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">
 <span lang="en">FAQ</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="faq-item">
 <details class="faq-details">
 <summary class="faq-summary"><span lang="en">Where in iCloud Drive should the vault live?</span></summary>
@@ -532,7 +535,7 @@
 <div class="faq-answer"><span lang="en">Vault access, Obsidian integration and a destination are required. When direct folder access works, the app can append without opening Obsidian. First run the Obsidian write test and check the destination text; then open the same note on another device to check iCloud sync. Write success, sync time and concurrent editing are not guaranteed in all conditions.</span></div>
 </details>
 </div>
-</section>
+</div></section>
 <!-- Verification scope -->
 <section class="lp-section">
 <div class="tip-box">
@@ -541,10 +544,10 @@
 </div>
 </section>
 <!-- Internal Links -->
-<section class="lp-section">
-<h2 class="lp-section__title">
+<section class="lp-section ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">
 <span lang="en">Related pages</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <div class="internal-links">
 <a href="/en/obsidian/sync/official-sync/"><span lang="en">Setting up Obsidian Sync</span></a>
 <a href="/en/obsidian/sync/"><span lang="en">Sync methods compared</span></a>
@@ -555,13 +558,13 @@
 <a href="/en/obsidian/pricing/"><span lang="en">Obsidian pricing</span></a>
 <a href="/en/faq"><span lang="en">FAQ</span></a>
 </div>
-</section>
+</div></section>
 </div>
 <section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-<div class="container">
-<h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<div class="container ce-chapter sd-chapter">
+<div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-11" data-ce-number="11">
 <span lang="en">References</span>
-</h2>
+</h2></div><div class="ce-chapter__body">
 <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
 <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Getting%20started/Sync%20your%20notes%20across%20devices.md" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Sync your notes across devices (original English source)</a> — <span lang="en">Official documentation source, reread on September 30, 2026. Published at help.obsidian.md/sync-notes</span></li>
 <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/ja/%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB/%E3%83%87%E3%83%90%E3%82%A4%E3%82%B9%E9%96%93%E3%81%A7%E3%83%8E%E3%83%BC%E3%83%88%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%99%E3%82%8B.md" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help — Sync notes between devices (Japanese version)</a> — <span lang="en">The Japanese locale of the same document, used for the parity comparison</span></li>
@@ -569,7 +572,7 @@
 <li><a href="/en/obsidian/sync/" style="color:var(--accent);"><span lang="en">Obsidian sync methods compared (this site)</span></a> — <span lang="en">Where we measured how Git and Syncthing break on conflict, and where iCloud sits among the options</span></li>
 <li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/us/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">Simple Memo - for Obsidian — App Store</a> — <span lang="en">App Store download page</span></li>
 </ul>
-</div>
+</div></div>
 </section>
 <!-- SEO: Auto-generated related content links -->
 <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

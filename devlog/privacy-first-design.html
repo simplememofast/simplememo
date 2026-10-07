@@ -389,11 +389,14 @@
   </style>
 
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
@@ -423,7 +426,7 @@
 
 <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">
+      <h1 class="page-content__title sd-title">
         <span lang="ja">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
 
       </h1>
@@ -437,23 +440,23 @@
       <div lang="ja" class="">
         <div class="article-body">
 
-          <h2>1. なぜメモアプリにプライバシーが重要なのか</h2>
+          <h2 id="reading-01">1. なぜメモアプリにプライバシーが重要なのか</h2>
           <p>仕事のアイデア、個人的な下書き、日々の記録。メモアプリには、人に見せる前の情報が集まる。素早く書けることと同じくらい、どこに保存され、どこへ送られるかを理解できることが大切だ。</p>
           <p>この記事では、端末内の暗号化、通信キャッシュ、画面表示、診断ログと利用解析を分けて説明する。ひとつの保護が、ほかの経路の保護も保証するわけではない。</p>
           <div class="philosophy-highlight">
             <strong>2026年9月6日更新：</strong>公開版と同じバージョン（5.8.17）のソースを照合し、画面保護・ログ・利用解析の説明を訂正した。できることと制限の両方を記す。
           </div>
 
-          <h2>2. アプリスイッチャーでメモを自動的に隠す機能は有効ではない</h2>
+          <h2 id="reading-02">2. アプリスイッチャーでメモを自動的に隠す機能は有効ではない</h2>
           <p>iOSは、アプリがバックグラウンドへ移った後の画面をスナップショットとして使う。Appleは、画面に機密情報がある場合は背景へ移る際に取り除くよう案内している。</p>
           <p>確認した5.8.17のソースでは、<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>はドラフト保存を行い、プライバシーオーバーレイの表示処理を呼ばない。以前の表示用関数は残っているが、有効な保護として動作する経路ではない。</p>
           <p><strong>表示中のメモがアプリスイッチャーの画像に残る可能性がある。</strong>Outboxを暗号化していても、画面画像が隠れるわけではない。この記事の旧版にあった「常にメモ内容を隠す」という説明を訂正する。</p>
 
-          <h2>3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
+          <h2 id="reading-03">3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
           <p>標準の<code>URLSession</code>は、キャッシュ、Cookie、認証情報をディスクに保存する。一般的なアプリではこれは便利な機能だが、メモアプリでは不要であり、リスクになりうる。</p>
           <p>通信キャッシュが端末に残るということは、どのURLにいつアクセスしたかの痕跡がディスク上に存在するということだ。Cookieが保存されるということは、セッション情報が端末に残るということだ。</p>
           <p>このアプリでは、<code>URLSessionConfiguration.ephemeral</code>を使用する。</p>
-          <pre><code>private let session: URLSession = {
+          <pre tabindex="0"><code>private let session: URLSession = {
     let config = URLSessionConfiguration.ephemeral
     config.httpCookieAcceptPolicy = .never
     config.httpShouldSetCookies = false
@@ -468,31 +471,31 @@
           </ul>
           <p>これはURLSessionのキャッシュなどに関する保護であり、アプリが別途保存・送信する利用イベントや、サーバー側の送信記録をなくす機能ではない。利用解析の識別子による関連付けも、この設定とは別に行われる。</p>
 
-          <h2>4. 性能計測ログの出力範囲</h2>
+          <h2 id="reading-04">4. 性能計測ログの出力範囲</h2>
           <p><code>PerformanceLogger</code>のログ出力は、<code>#if DEBUG</code>で囲まれている。DEBUGが定義されないビルドでは、このロガーのログ出力処理は含まれない。</p>
           <p>このロガーの<code>logError</code>は、エラーの詳細文ではなく型を記録する。たとえば<code>URLError</code>という種類を使い、ファイルパスやユーザー入力を含む可能性のある<code>localizedDescription</code>をそのまま出さない。</p>
           <p>一方、<code>logEvent</code>に渡すイベント名や追加文字列を自動ですべて無害化する仕組みではない。呼び出し元でメールアドレス・メモ本文・認証情報を渡さないことが必要になる。</p>
           <p><strong>この説明を、アプリ・外部SDK・OS全体の「ログゼロ」という保証には広げない。</strong>自社の利用イベント送信とAppsFlyerは別の仕組みとして有効になっている。取得範囲は本記事の利用解析FAQと<a href="/privacy#technical">プライバシーポリシー</a>で説明する。</p>
 
-          <h2>5. AES-GCM暗号化Outboxの保護範囲</h2>
+          <h2 id="reading-05">5. AES-GCM暗号化Outboxの保護範囲</h2>
           <p>送信待ちのメモは、端末内のOutboxというキューで管理する。保存時にはAppleのCryptoKitを使ってAES-GCMで暗号化する。新しい暗号鍵は256ビットで生成する。</p>
           <p>鍵はKeychainに保管し、<code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>を使う。この設定では、再起動後の初回ロック解除から次の再起動までアクセスでき、別の端末へのバックアップ復元では鍵が移行しない。アプリは暗号化・復号のために鍵を読み出す。</p>
           <p>これは保存データの保護であり、表示中の画面を隠したり、あらゆる端末侵害からの安全を保証したりするものではない。機種変更前には、必要なメモが保存先に届いていることを確認してほしい。</p>
           <p>メール送信を使う場合、本文は当社のRelay APIと配送基盤で処理され、受信箱にはメールとして残る。<strong>端末内の暗号化は、メール配送のエンドツーエンド暗号化（E2EE）を意味しない。</strong>詳細は<a href="/privacy#technical">プライバシーポリシー</a>と<a href="/privacy-architecture/">データの通り道</a>で説明している。</p>
           <p>送信待ちキューについては、<a href="/devlog/outbox-architecture">Outboxアーキテクチャの解説</a>を参照。</p>
 
-          <h2>6. メモ本文の保護と外部SDKの役割</h2>
+          <h2 id="reading-06">6. メモ本文の保護と外部SDKの役割</h2>
           <p>iOSアプリ内では、メモ本文の暗号化にCryptoKit、鍵保管にKeychain、本文の送信にURLSessionを使う。Network.frameworkは接続状態の監視、BackgroundTasksはバックグラウンド送信のスケジューリングを担う。</p>
           <p>一方、アプリは外部SDKも使う。GoogleSignInとFirebase AuthenticationはGoogleアカウントによる任意のメール自動入力に使い、Firebase App Checkは起動時に初期化してバックエンドAPIを保護する。AppsFlyerは獲得・利用解析に使い、自社解析と共通のインストール識別子を設定する。</p>
           <p>メモ本文をイベント項目に含めない設計でも、識別子や送信記録の関連付けは残る。SDKを含む利用解析の範囲は、本文の暗号化とは別に確認する必要がある。項目と用途は<a href="/privacy#technical">プライバシーポリシー</a>で説明している。</p>
 
-          <h2>7. 保護の範囲を明示する</h2>
+          <h2 id="reading-07">7. 保護の範囲を明示する</h2>
           <p>端末内の暗号化、通信キャッシュの扱い、利用解析は、それぞれ異なる役割を持つ。Outboxの暗号化やephemeral URLSessionがあっても、利用イベントの収集がなくなるわけではない。</p>
           <p>メモを素早く残せることと、取得する情報を理解できることの両方を大切にする。利用解析の送信先、識別子、関連付けの範囲を説明し、アプリの変更に合わせて見直す。</p>
 
           <!-- FAQ Section -->
           <div class="faq-section">
-            <h2>よくある質問</h2>
+            <h2 id="reading-08" data-ce-number="08">よくある質問</h2>
 
             <div class="faq-item">
               <div class="faq-item__question">Q. メモの内容はサーバーに保存されますか？</div>
@@ -522,7 +525,7 @@
 
           <!-- Related Articles -->
           <div class="related-section">
-            <h2 class="related-section__title">関連記事</h2>
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">関連記事</h2>
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
@@ -549,11 +552,11 @@
 
     </div>
 
-<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
-  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10">
     <span lang="ja">参考文献</span>
 
-  </h2>
+  </h2></div><div class="ce-chapter__body">
   <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
     <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span></li>
     <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span></li>
@@ -562,7 +565,7 @@
     <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="ja">アプリスイッチャー用スナップショットと画面上の情報</span></li>
     <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="ja">鍵のアクセス条件と他端末への移行制限</span></li>
   </ul>
-</section>
+</div></section>
 
 <!-- SEO: Auto-generated related content links -->
   <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.

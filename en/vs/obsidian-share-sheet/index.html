@@ -159,11 +159,14 @@
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/vs/obsidian-share-sheet/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Doesn't Obsidian 1.13's share sheet make Simple Memo unnecessary?","acceptedAnswer":{"@type":"Answer","text":"For sending text or URLs from the share sheet into your vault — yes, the official route is enough. Simple Memo earns its place when you want a measured 0.4-second warm launch from tap to typing for thoughts with no source app, voice input on Apple Watch delivered through a paired iPhone, auto-recorded voice, on-device AI tagging, or the email redundancy. If none of those apply, use the official route."}},{"@type":"Question","name":"What's the difference between the official Shortcuts actions and the URL scheme?","acceptedAnswer":{"@type":"Answer","text":"The official Shortcuts actions (mobile 1.11+) append without opening Obsidian. The older obsidian:// URL scheme always foregrounds the app and is the route where truncated bodies, duplicate notes, and wrong-vault writes happen. We keep a symptom-by-symptom guide."}},{"@type":"Question","name":"Does Simple Memo's vault append need a plugin?","acceptedAnswer":{"@type":"Answer","text":"No. It writes directly to the vault folder, with a URI fallback when direct file access isn't available. You give up QuickAdd-style template control; in exchange, there is zero setup on the Obsidian side. Details on the Obsidian integration page."}},{"@type":"Question","name":"Is my memo body stored on a server somewhere?","acceptedAnswer":{"@type":"Answer","text":"Not persistently. Memo bodies pass through the delivery path only during send, and AI tagging runs on-device (Apple Foundation Models) — memos are not sent to an external server for tagging. Note that Simple Memo - for Obsidian is not end-to-end encrypted — emails are delivered over standard SMTP. The complete data path is documented in Privacy Architecture."}}]}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=29e6dae231">
 <script src="/js/site-chrome.js?v=03951330b7" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
-<body>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="Main navigation" data-site-header="">
     <div class="global-nav__inner">
@@ -193,7 +196,7 @@
     <div class="container">
 
       <!-- Hero -->
-      <div class="lp-hero">
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
         <div class="lp-hero__label">
           <span>Memo App Comparison</span>
         </div>
@@ -206,24 +209,24 @@
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span>Author: <a href="/en/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Published: <time datetime="2026-08-11">August 11, 2026</time></span>
         </p>
-      </div>
+      </div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Premise: all four routes can be the right answer</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Comparison: strengths and weaknesses of the 4 routes</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Where Simple Memo loses (honestly)</span><span aria-hidden="true">↗</span></a></nav></div>
 
       <!-- Premise -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">
           <span>Premise: all four routes can be the right answer</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <p class="lp-section__lead">
           <span>Here are four common ways to get a note into an Obsidian vault from an iPhone. ① The <strong>official 1.13 share sheet</strong> (send a URL or selected text from another app into a vault note). ② <strong>Shortcuts</strong> (the official actions in mobile 1.11+ append without opening the app, while the older obsidian:// URL scheme brings Obsidian to the foreground). ③ <strong>QuickAdd and similar community plugins</strong> (fine-grained control over templates and destinations inside the vault). ④ <strong>Simple Memo - for Obsidian</strong> (a dedicated capture app with a measured 0.4-second warm-launch median from tap to keyboard-ready; sent memos then reach email and the vault). Which one fits depends on what you capture, from where, and in what situation. Note: <a href="https://obsidian.md/changelog/2026-09-02-mobile-v1.14.0/">Obsidian Mobile 1.14 early access</a> also introduced native Quick Capture on iOS 26. It opens from the Lock Screen, Control Center or Shortcuts without waiting for the vault to load. This is another route beyond the four in the table; check its public-release availability before relying on it.</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">
           <span>Comparison: strengths and weaknesses of the 4 routes</span>
-        </h2>
-        <div style="overflow-x:auto">
+        </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Scrollable table">
           <table class="compare-table">
             <thead><tr><th scope="col">Criteria</th><th scope="col">Official share sheet (1.13)</th><th scope="col">Shortcuts</th><th scope="col">QuickAdd</th><th scope="col">Simple Memo</th></tr></thead>
             <tbody>
@@ -241,13 +244,13 @@
           </table>
         </div>
         <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;">Simple Memo's 0.4s figure is tap → keyboard-ready, warm launch, median of 5 runs (measured 2026-08-11 — <a href="/en/blog/benchmark-methodology" style="color:var(--accent);">methodology published here</a>). Shortcut failure modes are detailed in the <a href="/en/obsidian/shortcuts-not-working/" style="color:var(--accent);">symptom-by-symptom troubleshooting guide</a>.</p>
-      </section>
+      </div></section>
 
       <!-- Where we lose (honest) -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">
           <span>Where Simple Memo loses (honestly)</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="lose-card">
           <ul>
             <li><strong>Sharing a Safari article or anything from another app</strong> — the official share sheet wins. Simple Memo has no share-sheet extension; it is a launch-first app, so "send what I'm looking at" belongs to the official route.</li>
@@ -257,13 +260,13 @@
             <li>If you <strong>already live inside Obsidian all day</strong>, there may simply be no reason to add another app. That is a perfectly sound conclusion.</li>
           </ul>
         </div>
-      </section>
+      </div></section>
 
       <!-- Where we win -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">
           <span>The 4 situations where Simple Memo still earns its place</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
@@ -286,13 +289,13 @@
             In normal mode, each sent memo also goes to your email inbox, on a separate path from the vault append (no email is sent while Obsidian-only saving is on). For memos that have been sent, a copy stays in email even if a sync accident hits your vault or you lose the phone (memos still waiting in the Outbox exist only on the device).
           </li>
         </ul>
-      </section>
+      </div></section>
 
       <!-- Who Should Choose Which -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">
           <span>Which should you choose?</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Official share sheet / Shortcuts / QuickAdd</div>
@@ -318,26 +321,26 @@
         <p class="lp-section__lead" style="margin-top:1rem;">
           <span>Using both is the most realistic setup. "Send what I'm looking at" → official share sheet. "Send what just crossed my mind" → Simple Memo. "Structured work inside the vault" → QuickAdd. Tools with different starting points don't compete.</span>
         </p>
-      </section>
+      </div></section>
 
       <!-- FAQ -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">
           <span>Frequently asked questions</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Doesn't Obsidian 1.13's share sheet make Simple Memo unnecessary?</summary><div class="faq-answer"><p>For sending text or URLs from the share sheet into your vault — yes, the official route is enough. Simple Memo earns its place when you want a measured 0.4-second warm launch from tap to typing for thoughts with no source app, voice input on Apple Watch delivered through a paired iPhone, auto-recorded voice, on-device AI tagging, or the email redundancy. If none of those apply, use the official route.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What's the difference between the official Shortcuts actions and the URL scheme?</summary><div class="faq-answer"><p>The official Shortcuts actions (mobile 1.11+) append without opening Obsidian. The older obsidian:// URL scheme always foregrounds the app and is the route where truncated bodies, duplicate notes, and wrong-vault writes happen. We keep a <a href="/en/obsidian/shortcuts-not-working/" style="color:var(--accent);">symptom-by-symptom guide</a>.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo's vault append need a plugin?</summary><div class="faq-answer"><p>No. It writes directly to the vault folder, with a URI fallback when direct file access isn't available. You give up QuickAdd-style template control; in exchange, there is zero setup on the Obsidian side. Details on the <a href="/en/obsidian/" style="color:var(--accent);">Obsidian integration page</a>.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is my memo body stored on a server somewhere?</summary><div class="faq-answer"><p>Not persistently. Memo bodies pass through the delivery path only during send, and AI tagging runs on-device (Apple Foundation Models) — memos are not sent to an external server for tagging. Note that Simple Memo - for Obsidian is not end-to-end encrypted — emails are delivered over standard SMTP. The complete data path is documented in <a href="/en/privacy-architecture/" style="color:var(--accent);">Privacy Architecture</a>.</p></div></details></div>
         </div>
-      </section>
+      </div></section>
 
       <!-- Internal Links -->
-      <section class="lp-section">
-        <h2 class="lp-section__title">
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">
           <span>Related pages</span>
-        </h2>
+        </h2></div><div class="ce-chapter__body">
         <div class="internal-links">
           <a href="/en/vs/"><span>All comparisons</span></a>
           <a href="/en/vs/obsidian/"><span>vs Obsidian (the app itself)</span></a>
@@ -348,7 +351,7 @@
           <a href="/en/privacy-architecture/"><span>Privacy architecture (the data path)</span></a>
           <a href="/en/faq"><span>FAQ</span></a>
         </div>
-      </section>
+      </div></section>
 
       <!-- CTA -->
       <div class="cta-box">
