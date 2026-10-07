@@ -1,8 +1,38 @@
 /* Progressive disclosure: all routes remain visible when JavaScript is absent. */
 (function () {
   'use strict';
-  var nav = document.querySelector('[data-site-header].global-nav');
+  var nav = document.querySelector('[data-site-header]');
   if (!nav) return;
+  var language = nav.querySelector('.site-languages');
+  if (language) {
+    var summary = language.querySelector('summary');
+    var panel = language.querySelector('.site-language-panel');
+    function closeLanguage(returnFocus) {
+      language.open = false;
+      if (returnFocus) summary.focus();
+    }
+    function fitLanguage() {
+      if (!language.open) return;
+      var room = window.innerHeight - panel.getBoundingClientRect().top - 16;
+      panel.style.setProperty('--site-language-room', Math.max(80, room) + 'px');
+    }
+    language.addEventListener('toggle', fitLanguage);
+    window.addEventListener('resize', fitLanguage);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && language.open) {
+        event.preventDefault();
+        closeLanguage(true);
+      }
+    });
+    document.addEventListener('click', function (event) {
+      if (!language.contains(event.target)) closeLanguage(false);
+    });
+    language.addEventListener('focusout', function () {
+      setTimeout(function () {
+        if (!language.contains(document.activeElement)) closeLanguage(false);
+      }, 0);
+    });
+  }
   var menu = nav.querySelector('#navLinks');
   var toggle = nav.querySelector('.global-nav__hamburger');
   if (!menu || !toggle) return;
@@ -16,7 +46,6 @@
     menu.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', String(open));
     if (open) {
-      var language = nav.querySelector('.lang-dropdown');
       if (language) language.open = false;
       var first = menu.querySelector('a');
       if (first) first.focus();
@@ -39,8 +68,6 @@
       if (!nav.contains(document.activeElement)) close(false);
     }, 0);
   });
-  nav.querySelectorAll('.lang-dropdown summary').forEach(function (summary) {
-    summary.addEventListener('click', function () { close(false); });
-  });
+  if (language) summary.addEventListener('click', function () { close(false); });
   nav.setAttribute('data-site-ready', '');
 })();
