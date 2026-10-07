@@ -13,3 +13,7 @@ The Obsidian landing page establishes the shared palette, typography and real pr
 Administration pages, internal documentation and test fixtures are outside the public-page migration. The offline Memo Inbox and transactional screens retain their original controls and behavior.
 
 The citation-assets generator applies the page design before shared chrome, so regenerating its reports, media kit or Markdown tools preserves this design without a second manual pass. Headings that already contain authored step numbers do not receive an additional decorative number.
+
+The separately reviewed noindex URI results HTML is also pinned in `data/full-public-assets-manifest.json`. After changing its final source, refresh only that secondary entry's `sourceBytes` and `sourceSha256` from the file bytes. Preserve the raw evidence entries, title, canonical and noindex policy. Verify with `node --test scripts/full-public-assets-rate-limit.test.mjs` and `node scripts/gsc-crawled-indexing.mjs`.
+
+Keep the home review and FAQ sections fully laid out. Their interactive descendants must remain within resolved section bounds even before scrolling; a short intrinsic placeholder can otherwise overlap downstream controls during accessibility navigation and measurement.
