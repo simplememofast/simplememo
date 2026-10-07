@@ -17,3 +17,19 @@ The citation-assets generator applies the page design before shared chrome, so r
 The separately reviewed noindex URI results HTML is also pinned in `data/full-public-assets-manifest.json`. After changing its final source, refresh only that secondary entry's `sourceBytes` and `sourceSha256` from the file bytes. Preserve the raw evidence entries, title, canonical and noindex policy. Verify with `node --test scripts/full-public-assets-rate-limit.test.mjs` and `node scripts/gsc-crawled-indexing.mjs`.
 
 Keep the home review and FAQ sections fully laid out. Their interactive descendants must remain within resolved section bounds even before scrolling; a short intrinsic placeholder can otherwise overlap downstream controls during accessibility navigation and measurement.
+
+### Language navigation
+
+Every public page uses the same native `details` disclosure, including tools and
+utility routes. `scripts/site_locales.py` owns native language names and shared
+UI copy; `i18n_config.py` remains the source of truth for published translation
+pairs. `sync_shared_chrome.py --write` updates the navigation and asset hashes.
+
+The panel distinguishes translations of the current page from other-language
+homepages. Never create a same-page link or SEO alternate for an untranslated
+page. The current language is a non-navigating status item, so verification
+parameters and unsaved tool input survive opening the menu. Languages are not
+changed automatically based on a saved preference. Native disclosure and plain
+links remain usable without JavaScript; enhancement adds Escape, outside-click,
+focus-leave dismissal and viewport-height fitting. New locales must include
+native names, shared UI labels, direction and real destination checks.

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Maintain the shared site chrome without rewriting page content.
 
-Run --write after adding pages, or --check in CI. Existing destinations,
-locale controls, analytics identities and footer link groups remain intact.
-The standalone Memo Inbox app and transactional/error pages are excluded.
+Run --write after adding pages, or --check in CI. Page links, analytics
+identities and footer link groups remain intact. Language navigation is
+generated from the same translation registry as the SEO alternates.
 """
 from pathlib import Path
 from html.parser import HTMLParser
@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import re
 import subprocess
+from site_locales import language_menu, LABELS, CHROME
 
 ROOT = Path(__file__).resolve().parent.parent
 LEGACY_NAV_HASHES = {'819e1ccab4904eec4087983fd8c627ae6697a5c4d8be7e37e51d2a832d2b5d47', '6964d51af27f64b1c9e550081764a9b45be93aaf11c65c0090452fef09dcbe1b', 'e0b42976d9f50f5556a7e736778a8045cdb4c51e1d23da48f990775143aac214', 'fbee48f90f2ab147491909454cbbf56a7af5ce4b02d05f006f53cb13ada361ed', '1378be4ab4d6fdfd34e55913673b57ff15f255d7b293652df1fb852048d26681'}
@@ -27,7 +28,7 @@ class Elements(HTMLParser):
         self.feed(source)
     def handle_starttag(self, tag, attrs):
         start = self.offsets[self.getpos()[0]-1] + self.getpos()[1]
-        if tag in {"head", "body", "nav", "header", "footer", "a", "button", "script", "ul"}:
+        if tag in {"html", "head", "body", "nav", "header", "footer", "a", "button", "script", "ul", "div", "details"}:
             self.stack.append((tag, dict(attrs), start, start+len(self.get_starttag_text())))
     def handle_endtag(self, tag):
         end = self.offsets[self.getpos()[0]-1] + self.getpos()[1] + len(tag)+3
@@ -39,22 +40,56 @@ class Elements(HTMLParser):
 def has(el, cls): return cls in el[1].get("class", "").split()
 def asset(path):
     return "/"+path+"?v="+hashlib.sha256((ROOT/path).read_bytes()).hexdigest()[:10]
-def brand(home, ja, footer=False):
-    name, sub = ("シンプルメモ", "Obsidian連携") if ja else ("Simple Memo", "for Obsidian")
+def brand(home, locale, footer=False):
+    name = "シンプルメモ" if locale == "ja" else "Simple Memo"
+    sub = CHROME[locale][0]
     size = 48 if footer else 36
     return f'<a class="site-brand" href="{home}"><img src="/assets/img/app-icon-56.png" width="{size}" height="{size}" alt="" loading="{"lazy" if footer else "eager"}"><span><small>{sub}</small><strong>{name}</strong></span></a>'
-def intro(home, ja):
-    heading = "思いついたことを、次の一歩へ。" if ja else "A small note. A next step."
-    copy = "Obsidianとメールに、メモを送るiPhoneアプリ。" if ja else "Send notes from your iPhone to Obsidian and email."
-    return f'<div class="site-footer-intro" lang="{"ja" if ja else "en"}" dir="ltr">{brand(home,ja,True)}<div><p class="site-footer-title">{heading}</p><p class="site-footer-description">{copy}</p></div></div>'
+def intro(home, locale):
+    _, heading, copy, _ = CHROME[locale]
+    return f'<div class="site-footer-intro" lang="{locale}" dir="{"rtl" if locale == "ar" else "ltr"}">{brand(home,locale,True)}<div><p class="site-footer-title">{heading}</p><p class="site-footer-description">{copy}</p></div></div>'
 
 def before_close(source, tag, snippet):
     element=next(e for e in Elements(source).elements if e[0]==tag)
     pos=element[4]-len(tag)-3
     return source[:pos].rstrip()+"\n"+snippet+"\n"+source[pos:]
 
+def sync_languages(source, rel):
+    els = Elements(source).elements
+    html = next(e for e in els if e[0] == "html")
+    locale = html[1].get("lang", "ja")
+    if locale not in LABELS: raise ValueError(f"Unknown page language: {rel}")
+    snippet = language_menu(rel, locale)
+    header = next((e for e in els if "data-site-header" in e[1]), None)
+    if header is None:
+        # Utility routes get the same language navigation without changing
+        # their forms, note storage, app links, or verification parameters.
+        old = next((e for e in els if e[0] == "header"), None)
+        if old:
+            inside = source[old[3]:old[4]-9]
+            new = '<header data-site-header=""><div class="site-language-utility">'+inside+snippet+'</div></header>'
+            return source[:old[2]] + new + source[old[4]:]
+        body = next(e for e in els if e[0] == "body")
+        home = "/" if locale == "ja" else "/en/"
+        new = '<header data-site-header=""><div class="site-language-utility">'+brand(home,locale)+snippet+'</div></header>'
+        return source[:body[3]]+new+source[body[3]:]
+    controls = sorted((e for e in els if header[2]<e[2]<header[4] and any(has(e,c) for c in ("site-languages","lang-dropdown","lang-switcher","languages"))),key=lambda e:e[2])
+    # Replace only the outer control, not its descendants.
+    controls = [e for e in controls if not any(p[2]<e[2]<p[4] for p in controls)]
+    if controls:
+        for index, e in reversed(list(enumerate(controls))):
+            source = source[:e[2]] + (snippet if index == 0 else "") + source[e[4]:]
+        return source
+    actions = next((e for e in els if header[2]<e[2]<header[4] and has(e,"global-nav__actions")), None)
+    if actions: pos = actions[3]
+    else:
+        row = next((e for e in sorted(els,key=lambda e:e[2]) if header[2]<e[2]<header[4] and (has(e,"global-nav__inner") or e[0] in ("nav","div"))),None)
+        pos = row[4]-len(row[0])-3 if row else header[4]-len(header[0])-3
+    return source[:pos] + snippet + source[pos:]
+
 def transform(source, rel):
-    if rel.startswith(("memo-inbox/", "fixtures/", "admin/", "docs/")): return source
+    if rel.startswith(("fixtures/", "admin/", "docs/")): return source
+    utility = rel in ("404.html", "compose.html", "verify.html", "memo-inbox/index.html", "memo-inbox/guide.html")
     # Rebuild managed pieces so later design updates have one source of truth.
     source = re.sub(r'<!-- site-chrome:bootstrap -->.*?<!-- /site-chrome:bootstrap -->', '', source, flags=re.S)
     source = re.sub(r'<!-- site-chrome:quick -->.*?<!-- /site-chrome:quick -->', '', source, flags=re.S)
@@ -64,9 +99,10 @@ def transform(source, rel):
     els = Elements(source).elements
     nav = next((e for e in els if has(e,"global-nav")), None)
     header = nav or next((e for e in els if e[0]=="header" and (has(e,"resource-nav") or rel.startswith("obsidian/"))), None)
-    footer = next((e for e in els if e[0]=="footer"),None)
-    if not header and not footer: return source
-    ja = bool(re.search(r'<html[^>]*lang="ja"',source))
+    footer = None if utility else next((e for e in els if e[0]=="footer"),None)
+    if not header and not footer and not utility: return source
+    locale = next(e for e in els if e[0]=="html")[1].get("lang", "ja")
+    ja = locale == "ja"
     home = "/" if ja else "/en/"
     changes=[]
     if header:
@@ -78,7 +114,11 @@ def transform(source, rel):
             home=logo[1].get("href",home)
             # Keep the legacy selector for existing layout hooks.
             cls='global-nav__logo site-brand' if nav else 'site-brand'
-            changes.append((logo[2],logo[4],brand(home,ja).replace('class="site-brand"',f'class="{cls}"')))
+            changes.append((logo[2],logo[4],brand(home,locale).replace('class="site-brand"',f'class="{cls}"')))
+        if locale not in ("ja", "en"):
+            for e in els:
+                if header[2]<e[2]<header[4] and has(e,"global-nav__cta"):
+                    changes.append((e[3],e[4]-len(e[0])-3,CHROME[locale][3]))
     if nav:
         menu = next((e for e in els if e[1].get("id")=="navLinks"),None)
         toggle = next((e for e in els if has(e,"global-nav__hamburger")),None)
@@ -102,10 +142,11 @@ def transform(source, rel):
         changes.append((footer[2],footer[3],re.sub(r' data-site-footer=""','',source[footer[2]:footer[3]])[:-1]+' data-site-footer="">'))
         for e in els:
             if (has(e,"capture-footer-brand") or has(e,"lpr-footer-brand")) and footer[2]<e[2]<footer[4]: changes.append((e[2],e[4],""))
-        changes.append((footer[3],footer[3],'<!-- site-chrome:intro -->'+intro(home,ja)+'<!-- /site-chrome:intro -->'))
+        changes.append((footer[3],footer[3],'<!-- site-chrome:intro -->'+intro(home,locale)+'<!-- /site-chrome:intro -->'))
     for start,end,value in sorted(changes,reverse=True): source=source[:start]+value+source[end:]
+    source = sync_languages(source, rel)
     assets=f'<link rel="stylesheet" href="{asset(CSS)}">'
-    if nav:
+    if header or utility:
         bootstrap="<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->"
         fallback="document.documentElement.classList.remove('site-chrome-js')"
         assets=bootstrap+"\n"+assets+f'\n<script src="{asset(JS)}" defer onerror="{fallback}"></script>'
@@ -147,10 +188,37 @@ def selftest():
             self.assertEqual(after.count('site-chrome:intro -->'),2)
         def test_locale_and_excluded_app(self):
             before=self.fixture()
-            self.assertEqual(before,transform(before,"memo-inbox/index.html"))
+            self.assertEqual(before,transform(before,"fixtures/index.html"))
             en=transform(before.replace('lang="ja"','lang="en"'),"en/index.html")
             self.assertIn('A small note. A next step.',en)
             self.assertNotIn('思いついたこと',en)
+        def test_language_pairs_and_homes(self):
+            after=transform(self.fixture(),"guides/index.html")
+            self.assertIn('href="/en/guides/" hreflang="en"',after)
+            self.assertIn('他の言語のトップページ',after)
+            self.assertIn('href="/ar/" hreflang="ar"',after)
+            self.assertNotIn('data-lang="ar"',after)
+        def test_untranslated_page_does_not_invent_pair(self):
+            after=transform(self.fixture(),"blog/business-memo-kakikata.html")
+            self.assertNotIn('/en/blog/business-memo-kakikata',after)
+            self.assertIn('href="/en/" hreflang="en"',after)
+        def test_language_control_replaced_once(self):
+            before=self.fixture().replace('<ul id=', '<div class="lang-switcher"><button data-lang-btn="ja">JA</button><button data-lang-btn="en">EN</button></div><ul id=')
+            after=transform(before,"index.html")
+            self.assertEqual(after.count('<details class="site-languages">'),1)
+            self.assertNotIn('data-lang-btn',after)
+            self.assertEqual(after,transform(after,"index.html"))
+        def test_utility_preserves_app(self):
+            before='<html lang="en"><head></head><body><header><a href="/memo-inbox/">Memo Inbox</a></header><main><input id="note"><button id="save">Save</button></main></body></html>'
+            after=transform(before,"memo-inbox/index.html")
+            self.assertIn('<main><input id="note"><button id="save">Save</button></main>',after)
+            self.assertIn('Memo Inbox</a>',after)
+            self.assertEqual(after,transform(after,"memo-inbox/index.html"))
+        def test_current_language_does_not_reload_utility(self):
+            from site_locales import language_menu
+            menu=language_menu("verify.html","ja")
+            self.assertIn('<span class="site-language-current" data-site-locale="ja" aria-current="page">',menu)
+            self.assertNotIn('href="/verify"',menu)
         def test_unrelated_script_kept(self):
             before=self.fixture().replace('</script></body>', 'window.paymentFormReady = true;</script></body>')
             with self.assertRaisesRegex(ValueError, 'Unrecognized navigation script'):
