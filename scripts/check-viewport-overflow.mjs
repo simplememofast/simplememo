@@ -55,6 +55,7 @@ import { fileURLToPath } from 'node:url';
 import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
 import { MARKER, measurementGroup } from './lib/viewport-health.mjs';
 import { hasCurrentInlineSharedCss } from './perf/inline_styles.mjs';
+import { measureViewportJobs } from './lib/viewport-pool.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -383,7 +384,7 @@ export const PROBE = () => {
  */
 export const CONCURRENCY = 6;
 
-export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CONCURRENCY } = {}) {
+export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CONCURRENCY, progress = false } = {}) {
   const chromium = await loadChromium();
   const exe = findChromium();
   if (!chromium || !exe) {
@@ -395,25 +396,15 @@ export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CO
   const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
   const jobs = [];
   for (const page of pages) for (const width of widths) jobs.push({ page, width });
-  const results = [];
-  const failures = [];
-  let next = 0;
-  const worker = async () => {
-    for (let i = next++; i < jobs.length; i = next++) {
-      const { page, width } = jobs[i];
-      const p = await browser.newPage({ viewport: { width, height: 800 } });
-      try {
-        await p.goto(`http://127.0.0.1:${port}${page}`, { waitUntil: 'domcontentloaded' });
-        await p.waitForTimeout(250);
-        results.push({ page, width, ...(await p.evaluate(PROBE)) });
-      } catch (e) {
-        // **測れなかったことを、漏れが無かったことにしない。**
-        failures.push({ page, width, why: String(e.message || e).split('\n')[0].slice(0, 120) });
-      } finally { await p.close().catch(() => {}); }
-    }
-  };
+  let results, failures;
   try {
-    await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker));
+    ({ results, failures } = await measureViewportJobs({ browser, jobs,
+      origin: `http://127.0.0.1:${port}`, probe: PROBE, concurrency,
+      onProgress: ({ completed, total, failed }) => {
+        if (progress && (completed % 100 === 0 || completed === total)) {
+          console.log(`Chromium viewport progress: ${completed}/${total}; failed=${failed}`);
+        }
+      } }));
   } finally {
     await browser.close();
     srv.close();
@@ -668,11 +659,12 @@ if (isMain) {
   // 面を絞る側（3面）と幅を絞る側（全面）を両方持つ。片方だけだと、
   // 2026-09-03 に実際そうなったように「見ていない面」か「見ていない幅」が残る。
   const sweep = argv.includes('--no-sweep') ? null
-    : await measure({ pages: allPages(), widths: SWEEP_WIDTHS });
-  const m = await measure();
+    : await measure({ pages: allPages(), widths: SWEEP_WIDTHS, progress: true });
+  const m = await measure({ progress: true });
   // **もう一方のエンジン。**Blink とは行分割の判断が違い、実機（iOS）はこちら側。
   //   深い3面 × 14幅（約16秒）＋ 全269面 × 320px（約1.7分）。
   //   全面 × 4幅まで広げると 6.8 分で、CIに載らない＝結局また測らなくなる。
+  if (!argv.includes('--no-webkit')) console.log(`WebKit viewport sweep: ${allPages().length} pages plus deep landing checks`);
   const wk = argv.includes('--no-webkit') ? null
     : await measureWk({
         pages: [...new Set([...PAGES, ...allPages()])],

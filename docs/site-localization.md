@@ -114,3 +114,18 @@ no credentials, private paths, personal records or review screenshots. The
 site middleware does not serve `/data/i18n/`; browsers receive generated HTML
 and interface scripts instead. Keep translation engine logs and private review
 artifacts outside the repository.
+
+The Japanese URI results page is also pinned as secondary HTML in
+`data/full-public-assets-manifest.json`. When shared navigation or language
+metadata changes it, review that its evidence body, title, canonical and
+`noindex,follow` remain intact before updating its source byte count and hash.
+Keep the original raw-asset pins unchanged. The existing controlled-request
+asset regressions run in SEO Validation and local preflight without HTTP.
+
+The viewport sweep still covers every page at all existing widths in Chromium
+and WebKit. Chromium reuses a bounded pool of renderers, clearing cookies,
+origin storage and session storage before each measurement. Failed renderers
+are replaced and their failed measurements remain in the report. A required
+CI browser integration test checks that the pool actually measures every
+requested combination before the report-only sweep begins. The enlarged sweep
+has a 60-minute ceiling and emits progress so incomplete runs remain visible.
