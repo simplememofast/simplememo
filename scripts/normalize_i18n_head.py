@@ -29,6 +29,8 @@ from typing import Iterable
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+from localization_registry import published_groups, page_url
+
 from i18n_config import (  # noqa: E402
     TOP_CLUSTER,
     TOP_CLUSTER_XDEFAULT,
@@ -113,7 +115,14 @@ def build_plan() -> list[tuple[Path, str, str, list[tuple[str, str]], str | None
             continue
         plan.append((f, "ja", absolute_url(ja_path), [], None))
 
-    return plan
+    by_file = {entry[0]: entry for entry in plan}
+    for group, pages in published_groups():
+        alternates = [(locale, absolute_url(page_url(file))) for locale, file in pages.items()]
+        default = absolute_url(page_url(pages.get('ja', group['source'])))
+        for locale, file in pages.items():
+            path = REPO_ROOT / file
+            by_file[path] = (path, locale, absolute_url(page_url(file)), alternates, default)
+    return list(by_file.values())
 
 
 # ---------------------------------------------------------------------------

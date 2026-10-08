@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Desain Privasi Pertama: Komitmen Paranoid terhadap Aplikasi Memo | Buku Harian Pengembangan SimpleMemo</title>
+  <meta name="description" content="Penjelasan tentang desain privasi iPhone versi SimpleMemo. Saya akan menjelaskan ruang lingkup enkripsi in-terminal, cache komunikasi, log diagnostik, dan analisis penggunaan AES-GCM, serta spesifikasi saat ini dan pembatasan pengiriman surat yang tidak menyembunyikan catatan dengan pengalih aplikasi. Manajemen kunci gantungan kunci, informasi yang tersisa di tujuan penyimpanan, dan asosiasi antara AppsFlyer dan pengidentifikasi analisis kami sendiri juga ditentukan.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Desain Privasi Pertama: Komitmen Paranoid untuk Aplikasi Memo">
+  <meta property="og:description" content="Penjelasan tentang desain privasi iPhone versi SimpleMemo. Saya akan menjelaskan ruang lingkup enkripsi in-terminal, cache komunikasi, log diagnostik, dan analisis penggunaan AES-GCM, serta spesifikasi saat ini dan pembatasan pengiriman surat yang tidak menyembunyikan catatan dengan pengalih aplikasi. Manajemen kunci gantungan kunci, informasi yang tersisa di tujuan penyimpanan, dan asosiasi antara AppsFlyer dan pengidentifikasi analisis kami sendiri juga ditentukan.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/devlog/privacy-first-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Desain Privasi Pertama: Komitmen Paranoid untuk Aplikasi Memo">
+  <meta name="twitter:description" content="Penjelasan tentang desain privasi iPhone versi SimpleMemo. Saya akan menjelaskan ruang lingkup enkripsi in-terminal, cache komunikasi, log diagnostik, dan analisis penggunaan AES-GCM, serta spesifikasi saat ini dan pembatasan pengiriman surat yang tidak menyembunyikan catatan dengan pengalih aplikasi. Manajemen kunci gantungan kunci, informasi yang tersisa di tujuan penyimpanan, dan asosiasi antara AppsFlyer dan pengidentifikasi analisis kami sendiri juga ditentukan.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/id/devlog/privacy-first-design#article",
+  "headline": "Desain Privasi Pertama: Komitmen Paranoid untuk Aplikasi Memo",
+  "description": "Penjelasan tentang desain privasi iPhone versi SimpleMemo. Saya akan menjelaskan ruang lingkup enkripsi in-terminal, cache komunikasi, log diagnostik, dan analisis penggunaan AES-GCM, serta spesifikasi saat ini dan pembatasan pengiriman surat yang tidak menyembunyikan catatan dengan pengalih aplikasi. Manajemen kunci gantungan kunci, informasi yang tersisa di tujuan penyimpanan, dan asosiasi antara AppsFlyer dan pengidentifikasi analisis kami sendiri juga ditentukan.",
+  "url": "https://simplememofast.com/id/devlog/privacy-first-design",
+  "inLanguage": "id",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-09-24",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/devlog/privacy-first-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Buku Harian Pengembangan",
+      "item": "https://simplememofast.com/id/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Desain Privasi Pertama",
+      "item": "https://simplememofast.com/id/devlog/privacy-first-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/devlog/privacy-first-design#webpage",
+  "inLanguage": "id",
+  "name": "Desain Privasi Pertama: Komitmen Paranoid",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/devlog/privacy-first-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/devlog/privacy-first-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/privacy-first-design" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/privacy-first-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/privacy-first-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/devlog/privacy-first-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Desain Privasi Utama: Komitmen Paranoid di Aplikasi Memo</span> </h1>
+
+      <div class="article-meta">
+        <span>2026 tahun 2 bulan 13 hari rilis ・ Pembaruan penjelasan analisis perlindungan dan pemanfaatan: 2026 tahun 9 bulan 6 hari</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1 Mengapa privasi penting dalam aplikasi memo</h2>
+          <p>Ide kerja, draf pribadi, catatan harian. Aplikasi memo mengumpulkan informasi sebelum menunjukkannya kepada orang lain. Sama pentingnya dengan mampu menulis dengan cepat, penting untuk memahami di mana itu disimpan dan ke mana itu dikirim.</p>
+          <p>Dalam artikel ini, kami akan menjelaskan enkripsi, cache komunikasi, tampilan layar, log diagnostik, dan analisis penggunaan di terminal secara terpisah. Satu perlindungan tidak menjamin perlindungan rute lainnya.</p>
+          <div class="philosophy-highlight">
+            <strong>2026 tahun 9 bulan 6 pembaruan:</strong>Sumber versi yang sama (5.8.17) sebagai versi publik dibandingkan, dan penjelasan perlindungan layar, log, dan analisis penggunaan dikoreksi. Tuliskan apa yang dapat Anda lakukan dan apa yang Anda batasi. </div>
+
+          <h2 id="reading-02">2 Fungsi menyembunyikan catatan secara otomatis di pengalih aplikasi tidak diaktifkan</h2>
+          <p>iOS menggunakan layar setelah aplikasi berpindah ke latar belakang sebagai snapshot. Apple memandu Anda untuk menghapus informasi rahasia di layar saat berpindah ke latar belakang.</p>
+          <p>Dalam sumber 5.8.17 dikonfirmasi, <code>sceneWillResignActive</code> dan <code>sceneDidEnterBackground</code> menyimpan draf dan tidak memanggil proses tampilan overlay privasi. Fungsi tampilan sebelumnya tetap ada, tetapi itu bukan jalur yang berfungsi sebagai perlindungan yang valid.</p>
+          <p><strong>Ada kemungkinan bahwa catatan yang ditampilkan akan tetap berada di gambar pengalih aplikasi. </strong>Mengenkripsi Outbox tidak menyembunyikan gambar layar. Perbaiki penjelasan "selalu sembunyikan isi memo" di versi lama artikel ini.</p>
+
+          <h2 id="reading-03">3. ephemeral URLSession: Kurangi penyimpanan disk dalam cache komunikasi</h2>
+          <p><code>URLSession</code> standar menyimpan cache, cookie, dan informasi otentikasi di disk. Ini adalah fitur yang berguna untuk aplikasi umum, tetapi tidak diperlukan untuk aplikasi memo dan dapat menjadi risiko.</p>
+          <p>Jika cache komunikasi tetap ada di terminal, itu berarti ada jejak pada disk yang URL diakses dan kapan. Jika cookie disimpan, itu berarti bahwa informasi sesi akan tetap ada di terminal.</p>
+          <p>Gunakan <code>URLSessionConfiguration.ephemeral</code> di aplikasi ini.</p>
+          <pre tabindex="0"><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>Tidak ada cache disk:</strong>Jangan menyimpan cache Sesi URL ini ke disk</li>
+            <li><strong>Nonaktifkan penggunaan cookie:</strong>Sesi URL ini tidak menerima cookie dan tidak mengatur permintaan</li>
+            <li><strong>Pengabsahan cache URL:</strong>Atur penyimpanan cache itu sendiri ke <code>nil</code></li>
+            <li><strong>Konfigurasi yang tidak menggunakan penyimpanan persisten: </strong>Jangan menyimpan informasi sesi URLSession di disk</li>
+          </ul>
+          <p>Ini adalah perlindungan yang terkait dengan cache URLSession, dll., dan bukan fungsi yang menghilangkan peristiwa penggunaan yang disimpan aplikasi dan ditransmisikan secara terpisah atau catatan transmisi di sisi server. Asosiasi dengan pengidentifikasi analisis penggunaan juga dilakukan secara terpisah dari pengaturan ini.</p>
+
+          <h2 id="reading-04">4. Rentang keluaran log pengukuran kinerja</h2>
+          <p>Keluaran log dari <code>PerformanceLogger</code> dikelilingi oleh <code>#if DEBUG</code>. Dalam build di mana DEBUG tidak ditentukan, pemrosesan keluaran log dari logger ini tidak disertakan.</p>
+          <p><code>logError</code> pencatat ini mencatat jenisnya, bukan pernyataan terperinci dari kesalahan tersebut. Misalnya, gunakan tipe <code>URLError</code> dan jangan lepaskan <code>localizedDescription</code> apa adanya, yang mungkin berisi jalur file dan input pengguna.</p>
+          <p>Di sisi lain, ini bukan mekanisme yang secara otomatis membahayakan semua nama acara dan string tambahan yang diteruskan ke <code>logEvent</code>. Penting untuk tidak memberikan alamat email, badan memo, atau informasi otentikasi kepada penelepon.</p>
+          <p><strong> Penjelasan ini tidak akan diperluas ke jaminan "nol log" untuk seluruh aplikasi, SDK eksternal, dan OS. </strong>Transmisi acara penggunaan internal dan AppsFlyer diaktifkan sebagai mekanisme terpisah. Ruang lingkup akuisisi akan dijelaskan dalam FAQ analisis penggunaan artikel ini dan <a href="/id/privacy#technical"> Kebijakan Privasi</a>.</p>
+
+          <h2 id="reading-05">5. AES-GCM Enkripsi Outbox Jangkauan Perlindungan</h2>
+          <p>Memo yang menunggu untuk dikirim dikelola dalam antrian yang disebut Outbox di terminal. Saat menyimpan, gunakan CryptoKit Apple untuk mengenkripsi dengan AES-GCM. Kunci enkripsi baru dihasilkan dengan bit 256.</p>
+          <p>Kunci disimpan di Keychain dengan <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. Pengaturan ini memungkinkan akses setelah perangkat pertama kali dibuka kuncinya seusai dimulai ulang, hingga perangkat dimulai ulang lagi. Pemulihan cadangan ke perangkat lain tidak memindahkan kunci tersebut. Aplikasi membaca kunci untuk melakukan enkripsi dan dekripsi.</p>
+          <p>Ini adalah perlindungan data yang disimpan, bukan untuk menyembunyikan layar yang ditampilkan atau memastikan keamanan dari semua pelanggaran terminal. Sebelum mengubah model, harap pastikan bahwa catatan yang diperlukan telah mencapai alamat penyimpanan.</p>
+          <p>Saat menggunakan transmisi email, teks diproses oleh Relay API kami dan platform pengiriman, dan tetap sebagai email di kotak masuk. <strong>Enkripsi di terminal tidak berarti enkripsi ujung ke ujung (E2EE) untuk pengiriman surat. </strong>Detail dijelaskan dalam <a href="/id/privacy#technical"> Kebijakan Privasi</a> dan <a href="/id/privacy-architecture/">Jalur Data</a>.</p>
+          <p>Mengirim antrian, lihat <a href="/id/devlog/outbox-architecture">Penjelasan arsitektur Outbox</a>.</p>
+
+          <h2 id="reading-06">6. Perlindungan isi memo dan peran SDK eksternal</h2>
+          <p>Di aplikasi iOS, gunakan CryptoKit untuk mengenkripsi isi memo, Keychain untuk penyimpanan kunci, dan URLSession untuk mengirimkan teks. Network.framework memantau status koneksi, dan BackgroundTasks bertanggung jawab untuk menjadwalkan transmisi latar belakang.</p>
+          <p>Di sisi lain, aplikasi ini juga menggunakan SDK eksternal. GoogleSignIn dan Firebase Authentication digunakan untuk secara otomatis memasukkan email sewenang-wenang dengan akun Google, dan Pemeriksaan Aplikasi Firebase diinisialisasi saat startup untuk melindungi backend API. AppsFlyer digunakan untuk akuisisi dan analisis penggunaan, dan menetapkan pengidentifikasi instalasi yang umum untuk analisis Anda sendiri.</p>
+          <p>Meskipun desainnya tidak menyertakan badan memo dalam item acara, asosiasi pengidentifikasi dan catatan transmisi tetap ada. Ruang lingkup analisis penggunaan, termasuk SDK, perlu dikonfirmasi secara terpisah dari enkripsi teks. Item dan penggunaan dijelaskan dalam <a href="/id/privacy#technical"> Kebijakan Privasi</a>.</p>
+
+          <h2 id="reading-07">7. Tentukan cakupan perlindungan</h2>
+          <p>Enkripsi di terminal, penanganan cache komunikasi, dan analisis pemanfaatan masing-masing memiliki peran yang berbeda. Bahkan dengan enkripsi Outbox dan URLSession fana, kumpulan acara penggunaan tidak hilang.</p>
+          <p>Hargai kemampuan untuk meninggalkan catatan dengan cepat dan kemampuan untuk memahami informasi yang Anda peroleh. Jelaskan tujuan, pengidentifikasi, dan cakupan asosiasi analisis penggunaan, dan tinjau sesuai dengan perubahan di aplikasi.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-08" data-ce-number="08">Pertanyaan umum</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Apakah isi memo akan disimpan di server?</div>
+              <div class="faq-item__answer">Saat mengirim email, teks akan melewati Relay API kami dan platform pengiriman. Relay API kami tidak menyimpan teks secara permanen kecuali ada kebutuhan yang sah untuk kepatuhan hukum atau respons kegagalan. Ini berbeda dengan menyimpan di kotak surat tujuan pengiriman. Deskripsi dari setiap tujuan penyimpanan adalah<a href="/id/privacy-architecture/">Desain privasi</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Apakah aplikasi tersebut mengenkripsi komunikasi?</div>
+              <div class="faq-item__answer">Ya. HTTPS digunakan untuk komunikasi API. Sesi URL Ephemeral adalah konfigurasi yang tidak menyimpan cache, cookie, dan informasi otentikasi sesi secara permanen di disk. Itu tidak menghilangkan analisis penggunaan dan catatan sisi server yang dilakukan secara terpisah.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Jika saya kehilangan terminal saya, apakah memo itu aman?</div>
+              <div class="faq-item__answer">Outbox dienkripsi dengan AES-GCM sebelum disimpan, dan kunci baru dibuat dengan panjang 256 bit. Kunci menggunakan kelas perlindungan Keychain yang mencegahnya dipindahkan ke perangkat lain. Namun, perlindungan ini tidak mencakup isi yang sedang ditampilkan di layar atau email di tujuan pengiriman. Enkripsi pada perangkat saja tidak menjamin keamanan seluruh informasi jika perangkat hilang.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Apakah ada analisis atau pelacakan?</div>
+              <div class="faq-item__answer">Ya. Kami menggunakan analisis penggunaan kami sendiri dan AppsFlyer SDK. Pengidentifikasi instalasi acak, pengidentifikasi sesi, jenis dan waktu acara, versi aplikasi, hasil transmisi, dll. akan dikirim ke analisis kami sendiri. AppsFlyer mengirimkan acara seperti transmisi memo awal yang berhasil, otentikasi yang berhasil, tampilan layar penagihan, pemilihan paket, dan keberhasilan pembelian, dan jumlah, mata uang, periode, dll. dapat ditambahkan pada saat pembelian. Pengidentifikasi instalasi yang sama juga ditetapkan untuk ID Pengguna Pelanggan AppsFlyer, sehingga informasi akuisisi dan acara penggunaan dapat dikaitkan. Item acara yang ditetapkan dari aplikasi tidak secara langsung menyertakan alamat email, badan memo, atau kode otentikasi, tetapi ID pengirim dari analisis internal ditautkan ke hash alamat email tujuan, jadi itu bukan informasi yang sepenuhnya anonim. Untuk detailnya<a href="/id/privacy#technical">Langkah-langkah teknis untuk kebijakan privasi</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Bagaimana Anda menggunakan kerangka kerja asli Apple dan SDK eksternal secara terpisah?</div>
+              <div class="faq-item__answer">iOS Gunakan CryptoKit dan Keychain untuk mengenkripsi dan menyimpan teks memo di aplikasi, dan mengirim teks melalui URLSession. Di sisi lain, SDK eksternal digunakan untuk masuk Google, perlindungan back-end oleh Firebase, dan analisis akuisisi dan penggunaan oleh AppsFlyer. Perlindungan teks dan analisis penggunaan dengan pengidentifikasi dijelaskan secara terpisah.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">Artikel terkait</h2>
+            <div class="related-grid">
+              <a href="/id/devlog/day1" class="related-card">
+                <div class="related-card__title">[Day1] Saya sangat menyukai Captio sehingga saya ingin membuat "pengalaman itu" lagi</div>
+                <div class="related-card__desc">Catatan penilaian teknis pada saat pengembangan pertama untuk mereproduksi pengalaman Captio.</div>
+              </a>
+              <a href="/id/devlog/" class="related-card">
+                <div class="related-card__title">Daftar Buku Harian Pengembangan</div>
+                <div class="related-card__desc">Catatan pengambilan keputusan teknis SimpleMemo.</div>
+              </a>
+              <a href="/id/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Arsitektur Outbox: Desain untuk mencegah tumpahan</div>
+                <div class="related-card__desc">Penjelasan tentang antrian yang mengelola catatan tunggu untuk transmisi dan desain Outbox yang dienkripsi dengan AES-GCM.</div>
+              </a>
+              <a href="/id/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API: Membangun basis transmisi email dengan Pekerja Cloudflare</div>
+                <div class="related-card__desc">Penjelasan platform transmisi email menggunakan Pekerja Cloudflare dan desain yang menyampaikan teks.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10"> <span>Referensi</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Dokumentasi CryptoKit</a> — <span>AES-GCM Digunakan untuk mengimplementasikan perlindungan data Outbox dengan enkripsi</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Dokumentasi URLSession</a> — <span>Privasi aman dengan komunikasi jaringan melalui sesi sementara (sementara)</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Mencegah Koneksi Jaringan yang Tidak Aman (Keamanan Transportasi Aplikasi)</a> — <span>TLS Memastikan keamanan selama transfer data dengan memaksa komunikasi</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Menghasilkan Pesan Log dari Kode Anda</a> — <span>Rentang penyimpanan log dan penanganan informasi rahasia</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Pengembang Apple — Mempersiapkan UI Anda untuk Berjalan di Latar Belakang</a> — <span>Jepretan dan informasi di layar untuk pengalih aplikasi</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span>Syarat akses kunci dan pembatasan pemindahan ke perangkat lain</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Berikutnya</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Buat tempat untuk menyimpan catatan dengan integrasi Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Obsidian Aktifkan tautan dan periksa langkah-langkah untuk mengatur tujuan penyimpanan. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+    <li><a href="/id/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar artikel blog</span></a></li>
+    <li><a href="/id/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar Perbandingan Aplikasi Memo</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/how-to/" class="footer__link"><span>Panduan</span> </a>
+        <a href="/id/templates/" class="footer__link"><span>Templat</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/captio/" class="footer__link"><span>Metode Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bacaan</p>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/terms" class="footer__link"><span>Ketentuan penggunaan</span> </a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -5,6 +5,19 @@
   if (!nav) return;
   var language = nav.querySelector('.site-languages');
   if (language) {
+    // Language changes on app-link pages retain their payload only on the
+    // same first-party utility route. Homepage links never inherit codes.
+    var utilityRoute = /^(?:\/(?:en|zh|zh-Hant|ko|es|pt-BR|id|ar|tr))?\/(verify|compose)(?:\.html)?\/?$/;
+    var currentUtility = window.location.pathname.match(utilityRoute);
+    if (currentUtility) language.querySelectorAll('a[data-site-locale]').forEach(function (link) {
+      var destination = new URL(link.href, window.location.origin);
+      var targetUtility = destination.pathname.match(utilityRoute);
+      if (destination.origin === window.location.origin && targetUtility && targetUtility[1] === currentUtility[1]) {
+        destination.search = window.location.search;
+        destination.hash = window.location.hash;
+        link.href = destination.href;
+      }
+    });
     var summary = language.querySelector('summary');
     var panel = language.querySelector('.site-language-panel');
     function closeLanguage(returnFocus) {

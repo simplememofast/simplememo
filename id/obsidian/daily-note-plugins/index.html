@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="id"><head>
+<script src="/js/i18n/id/messages.5a1bc321b521.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note-plugins/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Periodik | SimpleMemo</title>
+  <meta name="description" content="Cara membuat buku harian atau majalah mingguan yang diatur dalam Catatan Periodik dari tanggal dan nomor minggu Kalender. Periksa pembuatan, refleksi templat, penyimpanan, dan pembukaan kembali versi harian dan mingguan di versi Linux Obsidian. Nilai pengaturan, layar asli, input Markdown dan contoh penyimpanan yang sebenarnya akan diposting.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Periodik | SimpleMemo">
+  <meta property="og:description" content="Cara membuat buku harian atau majalah mingguan yang diatur dalam Catatan Periodik dari tanggal dan nomor minggu Kalender. Periksa pembuatan, refleksi templat, penyimpanan, dan pembukaan kembali versi harian dan mingguan di versi Linux Obsidian. Nilai pengaturan, layar asli, input Markdown dan contoh penyimpanan yang sebenarnya akan diposting.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Periodik | SimpleMemo">
+  <meta name="twitter:description" content="Cara membuat buku harian atau majalah mingguan yang diatur dalam Catatan Periodik dari tanggal dan nomor minggu Kalender. Periksa pembuatan, refleksi templat, penyimpanan, dan pembukaan kembali versi harian dan mingguan di versi Linux Obsidian. Nilai pengaturan, layar asli, input Markdown dan contoh penyimpanan yang sebenarnya akan diposting.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/id/obsidian/daily-note-plugins/#article",
+  "headline": "Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Berkala",
+  "description": "Cara membuat buku harian atau majalah mingguan yang diatur dalam Catatan Periodik dari tanggal dan nomor minggu Kalender. Periksa pembuatan, refleksi templat, penyimpanan, dan pembukaan kembali versi harian dan mingguan di versi Linux Obsidian. Nilai pengaturan, layar asli, input Markdown dan contoh penyimpanan yang sebenarnya akan diposting.",
+  "url": "https://simplememofast.com/id/obsidian/daily-note-plugins/",
+  "mainEntityOfPage": "https://simplememofast.com/id/obsidian/daily-note-plugins/",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png",
+  "inLanguage": "id",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    }
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Catatan harian",
+      "item": "https://simplememofast.com/id/obsidian/daily-note/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Kalender/Catatan Periodik",
+      "item": "https://simplememofast.com/id/obsidian/daily-note-plugins/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apakah saya memerlukan Kalender dan Catatan Berkala?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gunakan dua contoh ini saat Anda ingin menggabungkan entri pemilihan tanggal dan pengaturan catatan harian dan mingguan. Kalender adalah pintu masuk ke kalender, dan Catatan Periodik adalah salah satu yang mengatur folder, format, dan template untuk Harian/Mingguan. Jika Anda ingin mengetahui pengaturan standar harian, Anda dapat memulai dengan penjelasan catatan harian dari artikel induk."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana jika nomor minggu tidak ditampilkan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dalam Kalender ini1.5.10, ketika Tampilkan nomor minggu di Kalender Pengaturan dinyalakan, kolom nomor minggu ditampilkan di ujung kiri. Pilih tab Kalender karena tab lain seperti Tautan Balik dapat dipilih hanya dengan membuka bilah sisi kanan."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana jika saya mengklik tanggal dan saya tidak dapat beralih ke teks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kali ini, konfirmasi pembuatan Catatan Harian Baru dan Catatan Mingguan Baru ditampilkan di jendela terpisah Pengaturan yang terbuka, bukan di layar utama. Lihat kedua layar, konfirmasikan nama file target, dan pilih Buat di layar konfirmasi. Hasil dari menekan tanggal yang sama berkali-kali sebelum konfirmasi belum diverifikasi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Manakah format mingguan YYYY atau gggg?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nilai yang digunakan dalam contoh tetap ini adalah gggg-[W]ww, dan 2026-W40 dibuat di lingkungan 2026-09-30. Format yang mewakili tahun minggu dan tahun tanggal mungkin tidak cocok di batas, jadi jangan mencampur format, dan juga periksa tanggal mulai minggu dan lokal aplikasi. Hasil dari semua batas tahun, lokasi, dan zona waktu belum diverifikasi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah Anda juga menggunakan variabel template dan Templater?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saya menggunakan {{date:YYYY-MM-DD}} asli dari Obsidian untuk input harian, dan mengkonfirmasi penggantian ke 2026-09-30 dalam pembuatan yang sebenarnya. Teks mingguan adalah teks statis penulis. Eksekusi Templater, JavaScript, variabel sewenang-wenang dan semua token format tidak termasuk dalam contoh ini."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah iPhone, SimpleMemo, dan sinkron bekerja dengan cara yang sama?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Penulis Vault dari versi Linux dari Obsidian1.13.7 mengkonfirmasi operasi yang sebenarnya. iOS, Android, OS lainnya, kerja sama dengan Obsidian Sync, SimpleMemo, sinkronisasi antar-terminal, kecepatan, produktivitas, dan efek aliran masuk tidak diverifikasi dalam catatan ini. Untuk rute yang akan ditambahkan ke buku harian dari iPhone, silakan merujuk ke artikel catatan harian lainnya."
+      }
+    }
+  ],
+  "inLanguage": "id",
+  "@id": "https://simplememofast.com/id/obsidian/daily-note-plugins/#faq"
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/obsidian/daily-note-plugins/#webpage",
+  "name": "Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Berkala",
+  "url": "https://simplememofast.com/id/obsidian/daily-note-plugins/",
+  "inLanguage": "id",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/obsidian/daily-note-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note-plugins/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/daily-note-plugins/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/daily-note-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/daily-note-plugins/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/daily-note-plugins/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/daily-note-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/obsidian/daily-note-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/daily-note-plugins/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · Catatan harian dan mingguan</p><h1 class="lp-hero__title">Plug-in untuk meningkatkan catatan harian — Kalender/Catatan Berkala</h1><p class="lp-hero__sub">Siapkan pintu masuk untuk membuka buku catatan yang ingin Anda lihat kembali dari tanggal dan nomor minggu. Ini adalah contoh menggabungkan Kalender dan Catatan Periodik, membuat dan menyimpan buku harian dan jurnal mingguan, dan membukanya lagi di aplikasi yang sama.</p><p>Tanggal verifikasi: 2026 tahun 9 bulan 30 (UTC) · Versi Linux Obsidian 1.13.7</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-daily-note-plugins.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="Peta panduan dari tanggal kalender ke buku harian dan nomor minggu ke majalah mingguan. Layar GUI asli diposting pada setiap langkah"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Jika Anda memisahkan dua peran, mudah untuk mengatur</h2></div><div class="ce-chapter__body"><p class="plugin-answer"><strong>Kalender adalah pintu masuk ke "kapan membuka buku catatan", dan Catatan Periodik adalah pengaturan "di mana membuatnya, dengan nama dan teks apa". </strong> Kali ini, saya membuat 2026-09-30 harian dan mingguan 2026-W40, dan menambahkan konfirmasi penulis ke badan templat dan menyimpannya.</p><p>Obsidian catatan harian standar dan rute untuk menambahkan catatan dari iPhone ke buku harian ditangani dalam <a href="/id/obsidian/daily-note/">artikel induk Catatan Harian</a>. Artikel ini mempersempit operasi kalender desktop dan pengaturan harian dan mingguan.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal"><table class="plugin-table"><thead><tr><th>Fungsi</th><th>Peran</th><th>Rentang yang dikonfirmasi dalam contoh ini</th></tr></thead><tbody>
+<tr><th scope="row">Catatan Harian Inti</th><td data-label="Peran">Obsidian fungsi catatan harian standar.</td><td data-label="Rentang yang dikonfirmasi">Diaktifkan dengan GUI yang sebenarnya. Dua hal berikut digabungkan, dipisahkan dari penciptaan harian hanya menggunakan fungsi standar.</td></tr>
+<tr><th scope="row">Kalender 1.5.10</th><td data-label="Peran">Bar samping yang mengarah ke buku catatan dari tanggal dan nomor minggu.</td><td data-label="Rentang yang dikonfirmasi">Tanggal 30, nomor minggu 40, konfirmasi pembuatan, transfer bulan sebelumnya dan bulan berjalan.</td></tr>
+<tr><th scope="row">Catatan Berkala 0.0.17</th><td data-label="Peran">Tujuan, format, dan templat penyimpanan harian/mingguan.</td><td data-label="Rentang yang dikonfirmasi">Pengaturan buku harian dan majalah mingguan, teks pembuatan yang sebenarnya, penyimpanan, pembukaan kembali di aplikasi yang sama.</td></tr></tbody></table></div>
+<p class="scope-note">Versi yang digunakan di sini adalah Kalender 1.5.10 dan Catatan Periodik 0.0.17 yang dipilih dari tag non-beta resmi. Ini bukan catatan yang menjamin hasil yang sama dalam versi terbaru dan saat ini yang direkomendasikan dan versi lainnya. Versi UI yang dioperasikan juga diperiksa pada layar asli di bawah ini.</p>
+<nav class="toc-links" aria-label="Daftar isi artikel ini"><a href="#setup">versi dan aktivasi</a><a href="#settings">Mengatur nilai</a><a href="#daily">Buat buku harian</a><a href="#weekly">Buat majalah mingguan</a><a href="#faq">Tersandung dan FAQ</a><a href="#next">Langkah selanjutnya</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Persiapkan dan aktifkan versi terverifikasi</h2></div><div class="ce-chapter__body"><p>Dalam contoh ini, file yang dirilis secara resmi ditempatkan secara manual di penulis yang terisolasi Vault, dan kemudian diaktifkan dan dioperasikan dari GUI. Ini bukan verifikasi yang diperkenalkan dengan mengklik Browse → Install di plugin Community.</p><ol class="steps-list"><li>Siapkan folder kosong <strong translate="no">日誌</strong>, <strong translate="no">週誌</strong>, dan <strong translate="no">テンプレート</strong> di Vault untuk latihan. Masukan dari contoh ini menggunakan Markdown di bawah ini.</li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/releases/tag/1.5.10" target="_blank" rel="noopener">Rilis resmi Kalender 1.5.10</a> dan <a href="https://github.com/liamcain/obsidian-periodic-notes/releases/tag/0.0.17" target="_blank" rel="noopener">Catatan Periodik 0.0.17 rilis resmi</a>. Konfigurasi penempatan manual ditunjukkan di bawah ini.</li><li>Nyalakan catatan harian dengan pengaturan → plugin Core. Dalam operasi ini, palet Perintah juga AKTIF, dan Pengalih Cepat memeriksa status AKTIF.</li><li>Setelah mengonfirmasi Kepercayaan Vault yang Anda siapkan sendiri, nyalakan Catatan Berkala dan Kalender di Pengaturan → Plugin Komunitas. Layar asli di bawah ini adalah tampilan setelah keduanya benar-benar diaktifkan.</li><li>Buka bilah sisi kanan dan pilih <strong>tab Kalender</strong>. Jika Anda meninggalkannya di tab terpisah seperti Backlink, Anda tidak akan dapat melihat layar tanggal.</li></ol>
+<pre class="capture-code" tabindex="0"><code>.obsidian/plugins/calendar/
+  manifest.json
+  main.js
+.obsidian/plugins/periodic-notes/
+  manifest.json
+  main.js
+  styles.css</code></pre><p>Dalam rilis Kalender ini, gaya disertakan dalam main.js, dan tidak ada styles.css lain yang diperoleh. Di atas adalah konfigurasi dari file yang sebenarnya. Plug-in itu sendiri tidak termasuk dalam distribusi ZIP halaman ini.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener" aria-label="Buka tampilan versi sebenarnya dari Kalender dan Catatan Periodik dan layar pengaturan AKTIF dalam ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/plugins.png" width="900" height="700" loading="lazy" decoding="async" alt="Tampilan versi aktual Kalender dan Catatan Periodik dan layar pengaturan AKTIF"></a><figcaption>Layar sebenarnya diaktifkan oleh penulis baru Vault. Kalender v1.5.10, Catatan Berkala v0.0.17 ditampilkan dan AKTIF diamati. <a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Sejajarkan log dan tujuan penyimpanan jurnal mingguan terlebih dahulu</h2></div><div class="ce-chapter__body"><p>Pengaturan → Nyalakan Catatan Harian dan Catatan Mingguan di Catatan Periodik dan masukkan nilai berikut. Folder dan templat akan disiapkan di Vault terlebih dahulu. Masukan pengaturan ini dicocokkan dengan tampilan GUI yang sebenarnya dan JSON yang disimpan.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal"><table class="plugin-table"><thead><tr><th>Pengaturan</th><th>Catatan Harian</th><th>Catatan Mingguan</th></tr></thead><tbody>
+<tr><th scope="row">Format</th><td data-label="Catatan Harian"><code>YYYY-MM-DD</code></td><td data-label="Catatan Mingguan"><code>gggg-[W]ww</code></td></tr>
+<tr><th scope="row">Folder Catatan</th><td data-label="Catatan Harian"><code>日誌</code></td><td data-label="Catatan Mingguan"><code>週誌</code></td></tr>
+<tr><th scope="row">Templat Catatan</th><td data-label="Catatan Harian"><code>テンプレート/日</code></td><td data-label="Catatan Mingguan"><code>テンプレート/週</code></td></tr></tbody></table></div>
+<p>Pengaturan → Kalender dinyalakan <strong>Tampilkan nomor minggu</strong> dan <strong>Konfirmasi sebelum membuat catatan baru</strong>. Tanggal mulai minggu ini adalah Default Lokal (Minggu), lokal aplikasi adalah en, dan zona waktu lingkungan adalah UTC. Ini bukan hasil dari verifikasi semua batasan mingguan dan kombinasi lokal.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener" aria-label="Pengaturan GUI nyata Catatan Periodik, templat format folder Harian dan Mingguan terbuka dalam ukuran asli"><img src="/assets/img/obsidian-daily-note-plugins/settings.png" width="900" height="700" loading="lazy" decoding="async" alt="Catatan Berkala pengaturan GUI nyata, templat format folder Harian dan Mingguan"></a><figcaption>Layar asli dari upaya independen sebelum memasukkan nilai tetap dari GUI yang sebenarnya dengan harian dan mingguan aktif. Saya mengambil alih JSON yang disimpan ini dengan byte yang sama untuk verifikasi pembuatan baru. <a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure><details class="proof-details"><summary>Layar asli pengaturan nomor mingguan Kalender</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener" aria-label="Buka GUI asli dengan Kalender Tampilkan nomor minggu AKTIF dalam ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/week-number.png" width="900" height="700" loading="lazy" decoding="async" alt="GUI Asli dengan nomor minggu Pertunjukan Kalender dinyalakan"></a><figcaption>Layar asli dengan nomor minggu Pertunjukan dihidupkan dengan GUI asli. Kami mengambil alih pengaturan penyimpanan yang sama dalam upaya pembuatan. <a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Buat buku harian dan buka kembali dari tanggal 30</h2></div><div class="ce-chapter__body"><p>Simpan masukan harian ke <strong>テンプレート/日.md</strong>. Variabel tanggal yang digunakan di sini adalah format asli Obsidian.</p><div class="code-heading"><strong>Teks lengkap dari input template harian</strong><button type="button" class="copy-button" data-copy="daily-template">Salin isi</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-template"># {{date:YYYY-MM-DD}}
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="daily-template" href="/assets/downloads/obsidian-daily-note-plugins/daily-template.md" download="daily-template.md">Dapatkan Markdown (byte 170)</a></div><ol class="steps-list"><li>Pilih 2026 tahun 9 bulan 30 dari Kalender. Kali ini, layar konfirmasi muncul di jendela Pengaturan lain yang terbuka.</li><li>Periksa target 2026-09-30 di <strong>Catatan Harian Baru</strong> dan pilih <strong>Buat</strong> di layar itu. 日誌/2026-09-30.md telah dibuka untuk editor di layar utama.</li><li>Sebuah baris konfirmasi ditambahkan ke teks di mana judul diganti dengan 2026-09-30 dan disimpan dengan Ctrl+S.</li><li>Pilih indeks dan pindah ke teks lain, dan pilih kembali 日誌/2026-09-30.md dari daftar file di sebelah kiri. Teks byte 235 yang disimpan cocok bahkan setelah dibuka kembali.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener" aria-label="Buka layar yang sebenarnya dalam ukuran aslinya setelah membuka kembali buku harian yang dibuat dari tanggal kalender"><img src="/assets/img/obsidian-daily-note-plugins/daily.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Layar nyata setelah membuka kembali buku harian yang dibuat dari tanggal Kalender"></a><figcaption>Buat dari klik tanggal, simpan konfirmasi penulis, dan buka catatan yang sama lagi dari daftar file. Judul tanggal dan teks telah dicocokkan dengan file yang disimpan. <a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure><details class="proof-details"><summary>Teks lengkap dari buku harian dan layar konfirmasi pembuatan</summary><div class="code-heading"><strong>Teks lengkap dari teks harian disimpan di GUI dan dibuka kembali</strong><button type="button" class="copy-button" data-copy="daily-saved">Salin isi</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-saved"># 2026-09-30
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+
+著者確認: Calendarの日付クリックで開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="daily-saved" href="/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" download="daily-saved.md">Dapatkan Markdown (byte 235)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener" aria-label="Buka layar konfirmasi yang sebenarnya untuk membuat 2026-09-30 di New Daily Note pada ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Layar konfirmasi aktual untuk membuat 2026-09-30 dengan New Daily Note"></a><figcaption>Konfirmasi pembuatan yang sebenarnya ditampilkan di jendela Pengaturan, yang berbeda dari yang utama. Saya memilih Create itu dan membuat buku harian. <a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="weekly"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Dari nomor minggu 40, buat majalah mingguan dan buka kembali</h2></div><div class="ce-chapter__body"><p>input mingguan ke <strong>テンプレート/週.md</strong>. Teks minggu ini adalah templat penulis statis. Itu tidak diperlakukan sebagai contoh penggantian variabel mingguan yang sewenang-wenang.</p><div class="code-heading"><strong>Teks lengkap dari input template mingguan</strong><button type="button" class="copy-button" data-copy="weekly-template">Salin isi</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-template"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="weekly-template" href="/assets/downloads/obsidian-daily-note-plugins/weekly-template.md" download="weekly-template.md">Dapatkan Markdown (byte 151)</a></div><ol class="steps-list"><li>Pilih <strong>40</strong> di Kalender yang menampilkan kolom nomor minggu. Dalam lingkungan ini, nama targetnya adalah 2026-W40.</li><li>Periksa 2026-W40 dari <strong>Catatan Mingguan Baru</strong> di jendela lain di Pengaturan dan pilih <strong>Buat</strong> yang sebenarnya.</li><li>Saya menambahkan kalimat konfirmasi ke teks yang dibuka di 週誌/2026-W40.md dan menyimpannya dengan Ctrl+S. Ini adalah hasil dari menambahkan baris ini ke templat mingguan statis asli.</li><li>dan memilih kembali 週誌/2026-W40.md dari daftar file di sebelah kiri. Teks byte 219 yang disimpan cocok bahkan setelah membukanya lagi.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener" aria-label="Buka layar yang sebenarnya dalam ukuran aslinya setelah membuka kembali majalah mingguan yang dibuat dari nomor minggu kalender 40"><img src="/assets/img/obsidian-daily-note-plugins/weekly.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Layar nyata setelah membuka kembali majalah mingguan yang dibuat dari nomor minggu 40 Kalender"></a><figcaption>Buat dari nomor minggu, simpan konfirmasi penulis, dan buka layar asli lagi dari daftar file. Nomor minggu 40 dan teks statis dan teks konfirmasi yang ditambahkan diamati. <a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure><details class="proof-details"><summary>Teks lengkap majalah mingguan dan layar konfirmasi pembuatan</summary><div class="code-heading"><strong>Teks lengkap dari teks mingguan disimpan di GUI dan dibuka kembali</strong><button type="button" class="copy-button" data-copy="weekly-saved">Salin isi</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-saved"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+
+著者確認: Calendarの週番号から開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="weekly-saved" href="/assets/downloads/obsidian-daily-note-plugins/weekly-saved.md" download="weekly-saved.md">Dapatkan Markdown (byte 219)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener" aria-label="Buka layar konfirmasi yang sebenarnya untuk membuat 2026-W40 di Catatan Mingguan Baru pada ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Layar konfirmasi aktual untuk membuat 2026-W40 di New Weekly Note"></a><figcaption>Konfirmasi pembuatan mingguan yang keluar dengan satu klik aktual berbeda dari harian. Targetnya adalah 2026-W40. <a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></details>
+<details class="proof-details"><summary>Dipindahkan ke bulan sebelumnya dan kembali ke layar asli bulan berjalan</summary><p>Dalam upaya tetap lainnya, saya memilih Bulan Kalender Sebelumnya sekali untuk pindah dari September 2026 ke Agustus 2026, dan memilih Bulan Berikutnya sekali untuk kembali ke September 2026. Itu bukan hasil dari konfirmasi operasi semua batas bulan dan tahun.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener" aria-label="Buka layar asli yang menampilkan bulan sebelumnya 2026 tahun bulan 8 di Kalender pada ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/august.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Layar asli menampilkan bulan sebelumnya 2026 tahun 8 bulan di Kalender"></a><figcaption>Judul layar sebenarnya yang telah dipindahkan sekali ke bulan sebelumnya adalah Agustus 2026. <a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener" aria-label="Buka layar asli yang telah kembali ke bulan ini 2026 tahun 9 di Kalender pada ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/september.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Layar asli yang kembali ke bulan ini tahun 2026 bulan 9 di Kalender"></a><figcaption>Judul layar asli yang saya pindahkan sekali ke bulan depan dan kembalikan adalah Sep 2026. <a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Dapatkan masukan untuk latihan dan contoh yang disimpan secara aktual</h2></div><div class="ce-chapter__body"><p>Indeks input, template 3, dan contoh yang disimpan 2 yang dibuat dengan GUI dipisahkan. Badan plug-in dan pengaturan JSON tidak disertakan. Ini adalah konfigurasi yang menempatkan input pada latihan Anda Vault agar tidak menimpa buku catatan yang ada. Operasi impor pembaca ke Vault belum diverifikasi.</p><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-daily-note-plugins/index.md" download="index.md">Input indeks Markdown (214 byte)</a><a class="zip-download" href="/assets/downloads/obsidian-daily-note-plugins/author-inputs-and-saved-examples.zip" download="author-inputs-and-saved-examples.zip">Masukan 3 + contoh tersimpan aktual 2 ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Periksa dan FAQ saat Anda tersandung</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Apakah saya memerlukan Kalender dan Catatan Berkala?</summary><div class="faq-answer">Gunakan dua contoh ini saat Anda ingin menggabungkan entri pemilihan tanggal dan pengaturan catatan harian dan mingguan. Kalender adalah pintu masuk ke kalender, dan Catatan Periodik adalah salah satu yang mengatur folder, format, dan template untuk Harian/Mingguan. Jika Anda ingin mengetahui pengaturan standar harian, Anda dapat memulai dengan penjelasan catatan harian dari artikel induk.</div></details><details class="faq-item"><summary class="faq-summary">Bagaimana jika nomor minggu tidak ditampilkan?</summary><div class="faq-answer">Dalam Kalender ini1.5.10, ketika Tampilkan nomor minggu di Kalender Pengaturan dinyalakan, kolom nomor minggu ditampilkan di ujung kiri. Pilih tab Kalender karena tab lain seperti Tautan Balik dapat dipilih hanya dengan membuka bilah sisi kanan.</div></details><details class="faq-item"><summary class="faq-summary">Bagaimana jika saya mengklik tanggal dan saya tidak dapat beralih ke teks?</summary><div class="faq-answer">Kali ini, konfirmasi pembuatan Catatan Harian Baru dan Catatan Mingguan Baru ditampilkan di jendela terpisah Pengaturan yang terbuka, bukan di layar utama. Lihat kedua layar, konfirmasikan nama file target, dan pilih Buat di layar konfirmasi. Hasil dari menekan tanggal yang sama berkali-kali sebelum konfirmasi belum diverifikasi.</div></details><details class="faq-item"><summary class="faq-summary">Manakah format mingguan YYYY atau gggg?</summary><div class="faq-answer">Nilai yang digunakan dalam contoh tetap ini adalah gggg-[W]ww, dan 2026-W40 dibuat di lingkungan 2026-09-30. Format yang mewakili tahun minggu dan tahun tanggal mungkin tidak cocok di batas, jadi jangan mencampur format, dan juga periksa tanggal mulai minggu dan lokal aplikasi. Hasil dari semua batas tahun, lokasi, dan zona waktu belum diverifikasi.</div></details><details class="faq-item"><summary class="faq-summary">Apakah Anda juga menggunakan variabel template dan Templater?</summary><div class="faq-answer">Saya menggunakan {{date:YYYY-MM-DD}} asli dari Obsidian untuk input harian, dan mengkonfirmasi penggantian ke 2026-09-30 dalam pembuatan yang sebenarnya. Teks mingguan adalah teks statis penulis. Eksekusi Templater, JavaScript, variabel sewenang-wenang dan semua token format tidak termasuk dalam contoh ini.</div></details><details class="faq-item"><summary class="faq-summary">Apakah iPhone, SimpleMemo, dan sinkron bekerja dengan cara yang sama?</summary><div class="faq-answer">Penulis Vault dari versi Linux dari Obsidian1.13.7 mengkonfirmasi operasi yang sebenarnya. iOS, Android, OS lainnya, kerja sama dengan Obsidian Sync, SimpleMemo, sinkronisasi antar-terminal, kecepatan, produktivitas, dan efek aliran masuk tidak diverifikasi dalam catatan ini. Untuk rute yang akan ditambahkan ke buku harian dari iPhone, silakan merujuk ke artikel catatan harian lainnya.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Lingkup dan materi resmi yang benar-benar dikonfirmasi</h2></div><div class="ce-chapter__body"><ul><li>Versi resmi Linux Obsidian 1.13.7/Penginstal 1.13.7, UI Bahasa Inggris. Kalender 1.5.10/Catatan Periodik 0.0.17 tampilan versi aktual.</li><li>Pengaturan GUI sebenarnya penulis Vault, konfirmasi pembuatan harian dan mingguan, teks, penyimpanan, dan pembukaan kembali dalam aplikasi yang sama. Pergerakan bulanan dikonfirmasi oleh upaya tetap lainnya.</li><li>Aset rilis resmi dari plug-in diterapkan secara manual. Kode tambahan digunakan untuk mempersiapkan lingkungan awal, membaca keadaan dan menyimpan file, dan menyalin yang asli. API tidak menggantikan pembuatan, pengeditan, penyimpanan, dan pembukaan kembali catatan.</li><li>PNG dan Markdown yang diterbitkan mempertahankan byte dari file asli. iOS, OS lainnya, SimpleMemo, Sinkronisasi, semua tanggal, minggu, bulan, waktu, zona waktu, produktivitas, dan efek arus masuk belum diverifikasi.</li></ul>
+<p>Kegagalan awal tetap dicatat: peluncuran yang berhenti pada tahap persiapan, ketidaksesuaian layar versi beta dengan pengaturan penyimpanan, klik pada tab tersembunyi, dan terlewatnya dialog konfirmasi di jendela lain. Contoh pembuatan dan penyimpanan dalam artikel ini didasarkan pada percobaan tetap yang terpisah. Layar Quick switcher tidak terlihat melalui Ctrl+O; catatan baru berhasil dibuka kembali dengan klik nyata dari daftar berkas di lokasi penyimpanan yang sama. Perincian dan keterkaitan dengan berkas asli dirangkum dalam <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/daily-note-plugins-20260930.md" target="_blank" rel="noopener">catatan verifikasi</a>.</p>
+<details class="proof-details"><summary>Layar versi Umum yang sebenarnya</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener" aria-label="Buka versi Obsidian yang sebenarnya 1.13.7 dan versi Penginstal 1.13.7 ditampilkan secara Umum dalam ukuran aslinya"><img src="/assets/img/obsidian-daily-note-plugins/version.png" width="900" height="700" loading="lazy" decoding="async" alt="Versi Obsidian 1.13.7 yang sebenarnya dan versi Penginstal 1.13.7 ditampilkan di Umum"></a><figcaption>Setelah memproses konfirmasi pembuatan yang tersisa di jendela terpisah, saya memilih Umum sekali dari GUI yang sebenarnya dan mengamati 1.13.7 dari aplikasi dan penginstal. <a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener">Buka gambar asli</a></figcaption></figure></details>
+<ul class="source-list"><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/README.md" target="_blank" rel="noopener">Komit tetap Kalender 1.5.10・README Resmi</a></li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/src/settings.ts" target="_blank" rel="noopener">Sumber pengaturan tetap kalender</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/README.md" target="_blank" rel="noopener">Catatan Berkala Komit tetap 0.0.17・README Resmi</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/src/settings/SettingsTab.svelte" target="_blank" rel="noopener">Catatan Periodik memperbaiki pengaturan sumber UI</a></li></ul>
+<p class="receipt-line">Catatan operasi asli, pengaturan, dan aktual diubah secara terpisah. Kami belum memverifikasi reproduksi dari pembuatan yang sama dari file rilis resmi dan sumbernya.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">Selanjutnya, tentukan pintu masuk untuk meninggalkan catatan di buku harian</h2></div><div class="ce-chapter__body"><p>Setelah menyiapkan formulir untuk dibuka dari tanggal dan nomor minggu, Anda dapat memilih tempat untuk menambahkan catatan harian singkat. Rute untuk menambahkan dari iPhone ke buku harian Obsidian, dan konfirmasi catatan harian standar dan format tanggal tercakup dalam artikel induk.</p><div class="internal-links"><a data-next-step="daily-note" href="/id/obsidian/daily-note/">Kepada artikel induk dari Daily Note</a><a href="/id/obsidian/plugins/templater/">Cara menggunakan Templater</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var k=b.getAttribute('data-copy'),e=document.querySelector('[data-code="'+k+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/id/obsidian/" class="footer__link">Integrasi Obsidian</a>
+        <a href="/id/use-cases/" class="footer__link">Contoh penggunaan</a>
+        <a href="/id/guides/" class="footer__link">Panduan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/note-to-email/" class="footer__link">Catatan ke email</a>
+        <a href="/id/vs/" class="footer__link">Bandingkan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/faq" class="footer__link">Pertanyaan umum</a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

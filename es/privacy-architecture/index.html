@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/privacy-architecture/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Diseño de privacidad: dónde pasa el cuerpo de la nota y dónde no se queda</title>
+  <meta name="description" content="Se liberan todas las rutas de datos de SimpleMemo. El postscript de Vault se completa localmente, el etiquetado de IA no envía el texto a un servidor externo en el dispositivo, y la entrega de correo es estándar SMTP y no E2EE - está claro sin ocultar lo que se puede y no se puede hacer.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Diseño de privacidad: dónde pasa el cuerpo de la nota y dónde no se queda">
+  <meta property="og:description" content="Vault postscript se completa localmente. El etiquetado de IA está en el dispositivo. Todas las rutas de datos se divulgan, incluida la razón por la que no es E2EE.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/privacy-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Diseño de privacidad: dónde pasa el cuerpo de la nota y dónde no se queda">
+  <meta name="twitter:description" content="Vault postscript se completa localmente. El etiquetado de IA está en el dispositivo. Todas las rutas de datos se divulgan, incluida la razón por la que no es E2EE.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/privacy-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy-architecture/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy-architecture/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy-architecture/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy-architecture/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy-architecture/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy-architecture/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy-architecture/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/es/privacy-architecture/#article",
+  "inLanguage": "es",
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "headline": "Diseño de privacidad: dónde pasa el cuerpo de la nota y dónde no se queda",
+  "description": "Se liberan todas las rutas de datos de SimpleMemo. La posdata de Vault se completa localmente, el etiquetado de IA está en el dispositivo y la entrega de correo electrónico es estándar SMTP, no E2EE - cultura clara sin ocultar lo que puede y no puede hacer.",
+  "url": "https://simplememofast.com/es/privacy-architecture/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/privacy-architecture/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Diseño de privacidad",
+      "item": "https://simplememofast.com/es/privacy-architecture/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/privacy-architecture/#webpage",
+  "inLanguage": "es",
+  "name": "Diseño de privacidad",
+  "url": "https://simplememofast.com/es/privacy-architecture/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .flow-steps{list-style:none;margin:1.5rem 0 2rem;padding:0;counter-reset:flow}
+    .flow-steps li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .flow-steps li::before{counter-increment:flow;content:counter(flow);position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .flow-step__title{display:block;font-weight:700;color:var(--text);margin-bottom:.3rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary)}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .honest-box{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0;font-size:.92rem;line-height:1.8;color:var(--text-secondary)}
+    .honest-box strong{color:var(--text)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/es/privacy-architecture/#faq","inLanguage":"es","mainEntity":[{"@type":"Question","name":"¿Participará un servidor externo en la adición a Obsidian Vault?","acceptedAnswer":{"@type":"Answer","text":"No estaré involucrado. El postscript Vault es para escribir el archivo directamente en la carpeta Vault en el terminal (URI fallback si no es posible), y no utiliza un plug-in o red. El guardado local de giros sin transmisión de correo electrónico también se completa en la terminal."}},{"@type":"Question","name":"¿No se puede enviar el contenido de la nota a Apple o a un servidor externo con etiquetado de IA?","acceptedAnswer":{"@type":"Answer","text":"No se puede enviar. La IA en el dispositivo de Apple Foundation Models solo se realiza en iPhone y no implica comunicación en red. Los modelos que no son compatibles con Apple Intelligence se reducen automáticamente a la forma ligera en el terminal, y no hay transmisión externa en ese caso. Para obtener más información, consulte Explicación de la adición automática de etiquetas AI."}},{"@type":"Question","name":"¿Por qué no E2EE?","acceptedAnswer":{"@type":"Answer","text":"Esto se debe a que la dirección de entrega de la nota es \"bandeja de entrada de correo electrónico habitual\". Se puede leer en la bandeja de entrada = el servidor receptor se puede descifrar, por lo que E2EE no está estructuralmente establecido. Si le da prioridad a E2EE, se requerirá un cliente dedicado, que se cambiará por el valor de esta aplicación que \"se puede leer en la aplicación de correo electrónico de cualquier terminal\". Standard Notes, etc. se recomienda para aplicaciones donde E2EE es esencial."}},{"@type":"Question","name":"¿En qué se diferencia este contenido de la política de privacidad?","acceptedAnswer":{"@type":"Answer","text":"El texto completo del manejo legal se puede encontrar en Política de privacidad (especialmente §12 \"Información técnica sobre el cifrado\"). Esta página reconstruye el contenido técnico como un mapa de ruta de acuerdo con los intereses de los usuarios de Obsidian (si se completa localmente). Si hay un conflicto, la política de privacidad tendrá prioridad."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/privacy-architecture/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/privacy-architecture/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/privacy-architecture/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/privacy-architecture/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/privacy-architecture/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/privacy-architecture/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/privacy-architecture/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/privacy-architecture/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy-architecture/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>Diseño de privacidad</span>
+        </div>
+        <h1 class="lp-hero__title"> <span>¿Dónde pasa el cuerpo de la nota, <br> donde no se queda?</span> </h1>
+        <p class="lp-hero__sub"> <span> "Aunque es una herramienta para escribir a Vault local, ¿pasa por un servidor externo?" - Esta es una página que responde a las preguntas más frecuentes de los usuarios de Obsidian con un mapa de rutas. Escriba lo que se ha hecho (finalización local, IA en el dispositivo, servidor no guardado de Vault postscript) y lo que no se ha hecho (no E2EE) con la misma resolución. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/es/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Fecha de publicación: <time datetime="2026-08-11">2026 08 mes 11</time> · Confirmación de la condición del análisis: <time datetime="2026-09-30">2026 año 09 mes 30</time></span> </p>
+      </div><nav class="sd-hero-index" aria-label="Contenido de esta página"><p>Contenido de esta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Ruta de datos de Memo 1</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Lo que queda en el servidor y lo que no</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Protección de texto de memo y análisis de uso</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Data path -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>Memo 1 paso de datos</span> </h2></div><div class="ce-chapter__body">
+        <ol class="flow-steps">
+          <li><span class="flow-step__title">Creada en el dispositivo y protegida con AES-GCM-256</span> La nota entra primero en Outbox, la cola local de mensajes pendientes. Outbox y el historial de envíos se cifran con <strong>AES-GCM-256</strong> mediante CryptoKit de Apple. La clave simétrica de 256 bits se guarda en Apple Keychain y está configurada para no transferirse a otros dispositivos. La aplicación la lee al cifrar y descifrar. La copia de la clave incluida en una copia de seguridad tampoco funciona en otro dispositivo. Antes de cambiar de teléfono, confirma que las notas necesarias hayan llegado a su destino. <a href="/es/privacy">Detalles de la gestión de claves y explicación de Apple</a>. Sin conexión, las notas esperan aquí y se reenvían automáticamente cuando vuelve la red.</li>
+          <li><span class="flow-step__title">Escritura en Obsidian Vault: completamente local</span>Si está activada la integración con Obsidian, el contenido se añade a Vault mediante <strong>escritura directa de archivos en la carpeta Vault del dispositivo</strong>, con una alternativa mediante URI si no se puede abrir. No se utilizan complementos ni servidores externos. La vía de escritura en Vault no usa la red.</li>
+          <li><span class="flow-step__title">Etiquetado de IA - completado en el dispositivo</span> El título (dentro de los caracteres 20), las etiquetas (1~3) y el tipo (hacer/idea/registro) son otorgados automáticamente por <strong>Apple Foundation Models on-device AI</strong> solo en iPhone. <strong> El texto de la nota no se enviará a un servidor externo para su etiquetado. </strong>Los modelos no compatibles Apple Intelligence se recuden automáticamente a la forma ligera en el terminal.</li>
+          <li><span class="flow-step__title">Envío de correo: tránsito mediante TLS sin almacenamiento permanente</span>Solo durante el envío, el texto <strong>pasa</strong> por nuestra Relay API, en Cloudflare Workers, y la plataforma externa Resend mediante TLS (HTTPS). No se almacena de forma permanente ni se registra en logs. El cliente utiliza <code>URLSessionConfiguration.ephemeral</code> y no deja cookies ni caché.</li>
+          <li><span class="flow-step__title">A su bandeja de entrada — Entrega con SMTP estándar (=no E2EE)</span>La entrega final es estándar SMTP. Es por eso que puedes leerlo como está con tu aplicación de correo electrónico habitual, pero no es <strong>cifrado de extremo a extremo (E2EE)</strong>. Para esta decisión de diseño, consulte "Escribir honestamente" a continuación.</li>
+        </ol>
+      </div></section>
+
+      <!-- What stays / what doesn't -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>Lo que permanece en el servidor y lo que no</span> </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente">
+          <table class="compare-table">
+            <thead><tr><th scope="col">Datos</th><th scope="col">Dónde</th><th scope="col">¿Se quedará?</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">cuerpo de la nota</th><td>Nuestro servidor (plataforma de retransmisión/transmisión)</td><td class="yes">No se dejó (solo se pasó en el momento de la transmisión, no se registró)</td></tr>
+              <tr><th scope="row">cuerpo de la nota</th><td>Tu bandeja de entrada de correo</td><td>Permanecer (ese es el propósito)</td></tr>
+              <tr><th scope="row">cuerpo de la nota</th><td>Su Obsidian Vault (en el momento de la configuración)</td><td>Permanecer (local en la terminal)</td></tr>
+              <tr><th scope="row">Outbox・Historial de transmisión</th><td>Solo en la terminal</td><td>Almacenamiento cifrado con AES-GCM-256</td></tr>
+              <tr><th scope="row">Dirección de correo electrónico</th><td>Cloudflare D1</td><td class="yes">Guarde la correspondencia entre el ID de envío y el hash de destino. Grabe por separado de los recordatorios de suscripción y elimine periódicamente aquellos que excedan 35 días</td></tr>
+              <tr><th scope="row">Eventos de uso, identificadores de terminal e información de diagnóstico</th><td>Cloudflare D1</td><td>90 Eliminaciones que han excedido el día regularmente. Se puede vincular al hash de destino a través del ID saliente</td></tr>
+              <tr><th scope="row">Entrada de etiquetado de IA (texto)</th><td>Servidor externo</td><td class="yes">No enviado (procesamiento en el dispositivo)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></section>
+
+      <!-- Memo protection and analytics -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>Protección de texto de memo y análisis de utilización</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>En la aplicación iOS, use CryptoKit para cifrar el cuerpo de la nota, el llavero para el almacenamiento de claves y la sesión de URL para transmitir el texto. GoogleSignIn y Firebase Authentication se utilizan para introducir automáticamente correos electrónicos arbitrarios, y Firebase App Check se utiliza para proteger el back-end API. <strong>El análisis de uso de la empresa y AppsFlyer se manejan de manera diferente dependiendo de la elección de la versión y el análisis de la aplicación. </strong></span> </p>
+          <p class="lp-section__lead"> <span>En las versiones con una opción de «Análisis de uso» en Ajustes, los eventos propios de uso y el análisis del estado de suscripción procedente del dispositivo están desactivados por defecto y comienzan tras el consentimiento. Estas versiones mantienen el SDK de AppsFlyer detenido hasta que esté disponible una opción separada para la medición de adquisición. Las versiones sin esta pantalla de elección también envían eventos propios de uso y análisis del estado de suscripción procedente del dispositivo. Eliminamos la restricción del servidor aplicada desde el 28/9 que impedía guardar las solicitudes del sistema anterior; no reconstruimos retrospectivamente eventos que no se recopilaron. Consulta la política de privacidad para conocer las condiciones de la medición de adquisición y uso de AppsFlyer.</span> <span> El análisis interno de la versión correspondiente con consentimiento válido se ocupa de la identificación de la sesión de instalación, eventos de uso, resultados de transmisión, etc. Para la versión anterior de AppsFlyer, envíe una nota inicial exitosa, la autenticación exitosa, la visualización de la pantalla de facturación, la selección del plan y la compra exitosa, y establezca el mismo identificador de instalación en ID de usuario del cliente. La dirección de correo electrónico, el cuerpo de la nota y el código de autenticación no se incluyen directamente en los elementos del evento establecidos desde la aplicación, pero el ID de envío de la empresa está vinculado al hash de destino, y la información adquirida y los registros de uso también están asociados. No es un análisis completamente anónimo. Consulte la política <a href="/es/privacy"> 1(E)</a> para conocer los términos de retirada del consentimiento y la versión, y para obtener detalles del artículo, consulte la Política de privacidad <a href="/es/privacy#technical"></a>. </span> </p>
+      </div></section>
+
+      <!-- Honest limitations -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>Para escribir honestamente - No es E2EE</span> </h2></div><div class="ce-chapter__body">
+        <div class="honest-box">
+          <p style="margin-bottom:.75rem;"><strong>SimpleMemo no es un cifrado de extremo a extremo (E2EE). </strong>El cuerpo del correo electrónico se enviará a su bandeja de entrada utilizando el estándar SMTP. " Es un diseño que elige el primero porque se puede leer como está con la aplicación de correo electrónico habitual y "solo tú tienes la clave de cifrado al final de la ruta" no son compatibles.</p>
+          <p style="margin-bottom:.75rem;">Outbox y el historial de envíos se cifran en el dispositivo con AES-GCM-256. Esto es <strong>protección local</strong>, no un sustituto del E2EE (<a href="/es/glossary/e2e-encryption/" style="color:var(--accent);">qué es el E2EE y por qué esta aplicación no lo ofrece</a>).</p>
+          <p>Para aquellos que son la máxima prioridad y requieren E2EE, una aplicación para portátil diseñada con E2EE, como Standard Notes, es más adecuada. Después de especificar esto, "no dejar el texto en el servidor", "completar el etiquetado en el terminal" y "hacer el postscript Vault localmente" son el alcance defensivo de esta aplicación.</p>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>Preguntas frecuentes</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Participará un servidor externo en la adición a Obsidian Vault?</summary><div class="faq-answer"><p>No estaré involucrado. El postscript Vault es para escribir el archivo directamente en la carpeta Vault en el terminal (URI fallback si no es posible), y no utiliza un plug-in o red. El guardado local de giros sin transmisión de correo electrónico también se completa en la terminal.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿No se puede enviar el contenido de la nota a Apple o a un servidor externo con etiquetado de IA?</summary><div class="faq-answer"><p>No se puede enviar. La IA en el dispositivo de Apple Foundation Models solo se realiza en iPhone y no implica comunicación en red. Los modelos que no son compatibles con Apple Intelligence se reducen automáticamente a la forma ligera en el terminal, y no hay transmisión externa en ese caso. Para obtener más información, consulte <a href="/es/ai-tags/" style="color:var(--accent);">Explicación de la adición automática de etiquetas AI</a>.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Por qué no E2EE?</summary><div class="faq-answer"><p>Esto se debe a que la dirección de entrega de la nota es "bandeja de entrada de correo electrónico habitual". Se puede leer en la bandeja de entrada = el servidor receptor se puede descifrar, por lo que E2EE no está estructuralmente establecido. Si le da prioridad a E2EE, se requerirá un cliente dedicado, que se cambiará por el valor de esta aplicación que "se puede leer en la aplicación de correo electrónico de cualquier terminal". Standard Notes, etc. se recomienda para aplicaciones donde E2EE es esencial.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿En qué se diferencia este contenido de la política de privacidad?</summary><div class="faq-answer"><p>El texto completo del manejo legal se puede encontrar en <a href="/es/privacy" style="color:var(--accent);">Política de privacidad</a> (especialmente §12 "Información técnica sobre el cifrado"). Esta página reconstruye el contenido técnico como un mapa de ruta de acuerdo con los intereses de los usuarios de Obsidian (si se completa localmente). Si hay un conflicto, la política de privacidad tendrá prioridad.</p></div></details></div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>Comprueba la ruta y luego pruébalo</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>Gratis 3/día. El postscript de Vault es local y el texto no permanece en el servidor.</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Descargar de App Store"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Descargar de App Store" loading="lazy"> </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>Páginas relacionadas</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/es/privacy"><span> Política de privacidad (texto)</span></a>
+          <a href="/es/devlog/privacy-first-design"><span>Registro de desarrollo: Diseño de privacidad primero</span></a>
+          <a href="/es/glossary/e2e-encryption/"><span>Qué es E2EE (por qué esta aplicación no es aplicable)</span></a>
+          <a href="/es/glossary/aes-gcm/"><span>Qué es AES-GCM</span></a>
+          <a href="/es/ai-tags/"><span>Adición automática de etiquetas de IA (en el dispositivo)</span></a>
+          <a href="/es/obsidian/"><span>Mecanismo de cooperación Obsidian</span></a>
+          <a href="/es/vs/obsidian-share-sheet/"><span>Comparación sincera con la hoja compartida Obsidian</span></a>
+          <a href="/es/faq"><span>Preguntas frecuentes</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="devlog" href="/es/devlog/privacy-first-design" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Siguiente lectura </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> ¿Por qué elegiste este diseño? - Registros de desarrollo </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> El desarrollador explica el proceso de toma de decisiones del diseño que prioriza la privacidad. </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de aplicaciones alternativas Captio</span></a></li>
+    <li><a href="/es/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cómo enviarte un correo electrónico a ti mismo</span></a></li>
+    <li><a href="/es/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Preguntas frecuentes</span></a></li>
+    <li><a href="/es/blog/memo-app-encryption-comparison" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de cifrado de aplicaciones de memos</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio-alternative/" class="footer__link"><span>Alternativas a Captio</span></a>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

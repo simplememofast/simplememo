@@ -48,6 +48,17 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/siri/iphone/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/siri/iphone/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/siri/iphone/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/siri/iphone/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/siri/iphone/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/siri/iphone/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/siri/iphone/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/siri/iphone/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/siri/iphone/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/siri/iphone/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/siri/iphone/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/siri/iphone/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -131,10 +142,10 @@
        行末に取り残される（旧 .flow-row の崩れの原因）。表示指定は必ず
        [data-lang].active より強い詳細度で書くこと。
        矢印は擬似要素にしてあるので、単独で行送りされることはない。 */
-    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
+    .flow-card{container-type:inline-size;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
     .flow-card .flow-steps,
     .flow-card .flow-steps[data-lang].active{display:grid;grid-template-columns:1fr;gap:2rem;list-style:none;margin:0 auto;padding:0;max-width:30rem}
-    .flow-step{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
+    .flow-step{position:relative;min-inline-size:0;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
     .flow-step--siri{background:rgba(122,120,255,.14);border-color:rgba(139,124,255,.34)}
     .flow-step__who{font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#4fdcf0}
     .flow-step--siri .flow-step__who{color:#b0a5ff}
@@ -150,9 +161,9 @@
     /* 縦つなぎ: 線 + 三角の矢じり */
     .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
     .flow-step + .flow-step::after{content:'';position:absolute;left:50%;top:-.6rem;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(34,211,238,.85);border-bottom:0}
-    @media(min-width:900px){
+    @container(min-width:46rem){
       .flow-card .flow-steps,
-      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,1fr);gap:1.75rem;max-width:none;align-items:stretch}
+      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.75rem;max-width:none;align-items:stretch}
       /* 横つなぎ: 同じ擬似要素を回転させて使う */
       .flow-step + .flow-step::before{left:auto;right:calc(100% + .45rem);top:50%;width:.9rem;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.8))}
       .flow-step + .flow-step::after{left:auto;right:calc(100% + .1rem);top:50%;transform:translateY(-50%);border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid rgba(34,211,238,.85);border-right:0}
@@ -313,10 +324,11 @@
     .guide-body p a,.guide-body li a{color:#6ab4ff;text-underline-offset:.2em}
     .guide-body h3{margin-top:1.5rem;margin-bottom:.5rem}
 
-    .quick-route{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin:1.25rem 0 1.5rem;max-width:32rem}
-    .quick-route a{position:relative;display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:64px;border:1px solid #5182ae;border-radius:12px;background:#14253a;color:#eaf2ff;text-decoration:none;font-size:1.125rem;font-weight:700}
-    .quick-route a+a::before{content:'→';position:absolute;left:-1.15rem;color:#a8d3ff}
+    .quick-route{display:grid;grid-template-columns:minmax(0,1fr);gap:.75rem;margin:1.25rem 0 1.5rem;max-width:32rem}
+    .quick-route a{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:.75rem;min-inline-size:0;padding:.5rem 1rem;overflow-wrap:anywhere;text-align:center;min-height:64px;border:1px solid #5182ae;border-radius:12px;background:#14253a;color:#eaf2ff;text-decoration:none;font-size:1.125rem;font-weight:700}
+    .quick-route a+a::before{content:none;position:absolute;left:-1.15rem;color:#a8d3ff}
     .quick-route span{font-size:.875rem;color:#a8d3ff}
+    @media(min-width:600px){.quick-route{grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}.quick-route a{flex-direction:column;align-items:center;justify-content:center;padding:.5rem .25rem;gap:.25rem}.quick-route a+a::before{content:'→'}}
     .capture-step{scroll-margin-top:76px}
     /* Beginner guide: semantic HTML diagram, with decorative line icons. */
     .guide-body{max-width:920px;font-size:1.125rem}
@@ -364,8 +376,8 @@
 <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
 <link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
-<link rel="stylesheet" href="/assets/css/site-chrome.css?v=57c362d5f2">
-<script src="/js/site-chrome.js?v=5b6b3c7863" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
 </head>
 <body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
   <a href="#main-content" class="skip-link">本文へスキップ</a>
@@ -373,19 +385,19 @@
   <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
     <div class="global-nav__inner">
       <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
-      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/"><span lang="ja">使い方</span></a><a href="/use-cases/"><span lang="ja">活用事例</span></a><a href="/vs/"><span lang="ja">比較</span></a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
-        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
         <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
         <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
         <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
-        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
-        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
         <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><p class="site-language-group">このページ</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span></div><p class="site-language-group site-language-group--homes">他の言語のトップページ</p><div class="site-language-grid"><a href="/en/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/siri/iphone/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/siri/iphone/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/siri/iphone/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/siri/iphone/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/siri/iphone/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/siri/iphone/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/siri/iphone/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/siri/iphone/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/siri/iphone/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
         <a data-cta-variant="v1" data-cta-cluster="voice" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">
           <span lang="ja">ダウンロード</span>
         </a>
@@ -464,25 +476,25 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
-        <a href="/" class="footer__link"><span lang="ja">ホーム</span></a>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
         <a href="/voice-input/" class="footer__link"><span lang="ja">音声入力</span></a>
-        <a href="/obsidian/" class="footer__link"><span lang="ja">Obsidian連携</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja">設定ガイド</span></a>
+        <a href="/obsidian/" class="footer__link">Obsidian連携</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span></a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
         <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
-        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span></a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/about/" class="footer__link">開発者について</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
       </div>
       </nav>
       <p class="footer__copyright">

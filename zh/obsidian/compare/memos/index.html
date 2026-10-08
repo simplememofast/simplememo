@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/memos/">
+  <title>Obsidian和memos的比较 — 自助主机派的分岔路口【2026】 | SimpleMemo</title>
+  <meta name="description" content="Obsidian和memos，从Markdown文件和自托管SQLite这个正本的差异进行比较。 在Apple Silicon Mac上启动Memos 0.30.0，实机确认了日语备忘录、标签、任务、时间线保存。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian和memos的比较 — 自助主机派的分岔路">
+  <meta property="og:description" content="文件的Obsidian和自己运用服务器的memos。 根据Memos 0.30.0的实际画面，整理管理对象的差异。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-08T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian和memos的比较 — 自助主机派的分岔路">
+  <meta name="twitter:description" content="文件的Obsidian和自己操作服务器的memos。 用实机确认保存了。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/compare/memos/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "Obsidian和memos的比较 — 自助主机派的分岔路",
+  "description": "从保存方式和运用责任比较Obsidian和memos。 包含Memos 0.30.0的实机确认。",
+  "url": "https://simplememofast.com/zh/obsidian/compare/memos/",
+  "datePublished": "2026-09-08",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-memos.png"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian比较",
+      "item": "https://simplememofast.com/zh/obsidian/compare/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Obsidian和memos",
+      "item": "https://simplememofast.com/zh/obsidian/compare/memos/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian和memos应该选哪个？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "如果想直接管理Markdown文件的话，Obsidian，如果想在自己运行的Web应用程序上简短地记录，然后用时间线回顾的话，memos是候选人。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "memos可以直接使用Obsidian的保管库吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "无法使用。 在这次的标准启动中，SQLite被初始化了。 不是直接编辑Obsidian的Markdown文件夹的机制。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "memos是免费的吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "本体是开源的。 但是，公开运用的服务器和域名等费用、更新、备份、安全管理的时间是另外需要的。"
+      }
+    }
+  ],
+  "inLanguage": "zh-Hans",
+  "@id": "https://simplememofast.com/zh/obsidian/compare/memos/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球导航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/about/">关于开发者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/compare/memos/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/compare/memos/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/compare/memos/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/compare/memos/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/compare/memos/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/compare/memos/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/compare/memos/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/compare/memos/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/compare/memos/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><div class="container" style="max-width:880px">
+  <header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian × 备忘录</div><h1 class="lp-hero__title">Obsidian和memos的比较<br>自助主持人派的分道扬防</h1><p class="lp-hero__sub">无论哪个都是“可以自己拿着”的笔记本，但是拿着的东西不一样。 在Obsidian中管理Markdown文件，在memos中自己管理Web应用程序和数据库。 在Mac上实际启动了Memos 0.30.0，保存了简短的备忘录，确认了差异。</p><p class="article-meta">作者: <a href="/zh/about/">AI ATAKA</a> ・ 公开・确认日: <time datetime="2026-09-08">2026年9月8日</time></p></div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>结论：是拥有文件还是移动服务</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>对比表：相似的是拥有感，不同的是正本</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>尝试本地启动Memos 0.30.0保存</span><span aria-hidden="true">↗</span></a></nav></header>
+  <aside class="tip-box">这个页面<strong>Obsidian和memos的保存、运用的比较</strong>。“ 自助主机的话是一样的”不总结，而是将实际管理的对象分开进行判断。</aside>
+  <section class="lp-section ce-chapter sd-chapter" style="padding-top:1rem"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">结论：是拥有文件，还是运行服务</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong>如果想把笔记本的正本直接当作普通文件处理的话，Obsidian。 如果想从浏览器中简短地写，将时间线、标签、公开范围处理成一个Web应用程序的话，memos是候选人。 </strong></p><p>即使memos是自我托管，正本也不是和Obsidian一样的Markdown文件夹。 在这次启动中，在Memos指定的数据目录中初始化了SQLite。 代替自由度，承担包括备份和更新在内的服务运用。</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">对比表：相似的是拥有感，不同的是正本</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th>判断轴</th><th>Obsidian</th><th>备忘录</th></tr></thead><tbody>
+    <tr><th>正本</th><td data-label="Obsidian">保管库内的Markdown文件</td><td data-label="备忘录">Web应用程序处理的数据库。 这次的标准启动是SQLite</td></tr>
+    <tr><th>主要入口</th><td data-label="Obsidian">在桌面/移动应用中打开笔记</td><td data-label="备忘录">从浏览器的作曲家向时间线投稿</td></tr>
+    <tr><th>整理</th><td data-label="Obsidian">文件夹、链接、属性、插件</td><td data-label="备忘录">标签、搜索、日历、图钉、Relations、Saved Views</td></tr>
+    <tr><th>共享</th><td data-label="Obsidian">另外选择Publish等</td><td data-label="备忘录">每个备忘录都有公开范围</td></tr>
+    <tr><th>自己管理的东西</th><td data-label="Obsidian">文件配置和同步方法</td><td data-label="备忘录">服务器、数据、更新、备份、公开时的HTTPS</td></tr>
+    <tr><th>这次确认</th><td data-label="Obsidian">官方的保存规格</td><td data-label="备忘录">0.30.0的本地启动、管理员制作、日语备忘录保存</td></tr>
+  </tbody></table></div><p>memos的构成和运用责任在<a href="https://usememos.com/docs/deploy/binary" target="_blank" rel="noopener">官方Binary指南</a>，编辑・标签・Relations・公开范围在<a href="https://usememos.com/docs/usage/memos" target="_blank" rel="noopener">官方Usage指南</a>中确认。</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="hands-on"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">尝试了本地启动Memos 0.30.0保存</h2></div><div class="ce-chapter__body"><p class="lp-section__lead">获取官方GitHub Releases的Apple Silicon用存档，确认公开checksums和SHA-256一致后，在不对外公开的本地环境中启动。</p><ol class="steps-list">
+    <li><strong>在新的数据区域启动。 </strong>指定<br>任务专用的临时目录后，SQLite被初始化，通过private access启动。</li>
+    <li><strong>创建第一个管理员。 </strong><br>首次画面制作了本地验证用的管理员。 主页上排列着搜索、日历、标签、公开范围、输入栏。</li>
+    <li><strong>保存日语的简短备忘录。 </strong><br>标签、未完成的检查项目、项目符号、正文输入到一个备忘录中。</li>
+    <li><strong>确认反映在时间线上。 </strong><br>保存后立即显示备忘录，标签被添加到左侧，当天的日历上显示1件。</li>
+  </ol>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-home.png"><img src="/assets/img/obsidian/memos-home.png" alt="本地启动Memos 0.30.0，管理员创建后显示的空时间线" width="1200" height="649" loading="lazy"></a><figcaption>实机拍摄：管理员制作后的主页。 本地的空实例，不包含个人数据。</figcaption></figure>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-note.png"><img src="/assets/img/obsidian/memos-note.png" alt="用Memos 0.30.0保存日语标签、检查项目、项目符号的时间线" width="1200" height="649" loading="lazy"></a><figcaption>实机拍摄：保存比较用备忘录后。 确认了标签、任务、每个日期的件数。</figcaption></figure>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="storage"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">即使是自助主机也不一定“直接拥有Markdown”</h2></div><div class="ce-chapter__body"><p>在Obsidian中，用文件管理软件打开保管库就可以确认笔记本的实体。 在另一个编辑器中读取相同的Markdown，是更换工具时的出路。</p><p>memos是服务器读取和写写数据库后提供画面。 官方文档的标准是SQLite，也可以选择MySQL和PostgreSQL。 这一方面在可以将数据置于自己的管理之下，但并不是直接打开Obsidian的保管库并同时使用的形式。 如果以转移为前提，在投入实际投入之前，应该尝试少量备份和恢复，以必要格式导出。 这次，那些是未验证的。</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="operations"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">选择memos增加的，比起笔记功能，运用责任</h2></div><div class="ce-chapter__body"><p>即使只在家里或公司内部使用，也需要更新和备份。 如果在互联网上公开的话，还要处理域名、反向代理、HTTPS、访问控制、故障时的恢复。 官方指南还说明了二进制用户管理升级、回滚、进程监控、数据权限和HTTPS。</p><p><strong>如果能够享受服务器运用本身，或者已经有运用基础的话，memos的自助主机是自然的选择。 </strong>如果只想集中于笔记的话，处理本地文件的Obsidian更容易缩小责任范围。</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">无论选择哪个，移动中的入口都另行考虑</h2></div><div class="ce-chapter__body"><p>Obsidian是保存知识和连接的工具，memos是作为将短记录流向时间线的工具而设计的。 但是，从Apple Watch和Siri留下一句话的速度是另一个课题。 SimpleMemo，如果打开了Obsidian连接，就会在保留邮件的同时在Obsidian的每日笔记中补充。 <strong>没有直接投稿到memos的功能。 </strong>如果收货地址是Obsidian的话，可以作为辅助入口使用。</p><aside class="tip-box"><strong>不混合角色:</strong> memos的自助主机和SimpleMemo不直接合作。 请避免为了配合而读懂的表达，请先决定实际的保存地址。</aside></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">常见问题</h2></div><div class="ce-chapter__body">
+    <div class="faq-item"><details><summary class="faq-summary">Obsidian和memos应该选哪个？</summary><div class="faq-answer">如果想直接管理Markdown文件的话，Obsidian，如果想在自己运行的Web应用程序上简短地记录，然后用时间线回顾的话，memos是候选人。</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">memos可以直接使用Obsidian的保管库吗？</summary><div class="faq-answer">无法使用。 在这次的标准启动中，SQLite被初始化了。 不是直接编辑Obsidian的Markdown文件夹的机制。</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">memos是免费的吗？</summary><div class="faq-answer">本体是开源的。 但是，公开运用的服务器和域名等费用、更新、备份、安全管理的时间是另外需要的。</div></details></div>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="verification"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">验证环境和范围</h2></div><div class="ce-chapter__body"><div class="tip-box"><p><strong>实机确认：</strong> 2026年9月8日、Apple Silicon Mac/macOS 26.4.1/Memos 0.30.0。 公开官方的darwin arm64档案与SHA-256核对，本地限定启动。 确认了SQLite初始化、private access、管理员制作、日语备忘录、标签、任务的保存。</p><p><strong>未验证：</strong>外部公开，HTTPS，多个用户，Spaces，SSO，与其他终端使用，备份恢复，升级，导入/导出，移动，Obsidian迁移，与SimpleMemo直接合作。 不保证未经验证的动作。</p></div><p>不是与比较对象合作的报道。 本网站由YURIKA, K.K.运营，还刊登了独立应用程序“SimpleMemo”的信息。</p></div></section>
+  <aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下来阅读</span><strong>Obsidian作为备忘录的发送地址的方法</strong><span style="display:block;margin-top:.5rem">决定好保管地点后，准备走路时的入口。 </span></a></aside>
+  <nav class="internal-links" aria-label="相关页面"><a href="/zh/obsidian/compare/">Obsidian比较中心</a><a href="/zh/obsidian/compare/logseq/">与Logseq的比较</a><a href="/zh/obsidian/compare/capacities/">与Capacities的比较</a><a href="/zh/obsidian/getting-started/">Obsidian的开始方法</a></nav>
+</div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="页脚导航"><div class="footer__col"><p class="footer__col-title">产品</p><a href="/zh/download/" class="footer__link">下载</a><a href="/zh/" class="footer__link">首页</a><a href="/zh/obsidian/" class="footer__link">Obsidian 集成</a></div><div class="footer__col"><p class="footer__col-title">比较与迁移</p><a href="/zh/vs/" class="footer__link">对比</a><a href="/zh/obsidian/compare/" class="footer__link">Obsidian比较</a></div><div class="footer__col"><p class="footer__col-title">支持</p><a href="/zh/about/" class="footer__link">关于开发者</a><a href="/zh/faq" class="footer__link">常见问题</a><a href="/zh/privacy" class="footer__link">隐私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

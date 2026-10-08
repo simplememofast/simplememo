@@ -256,7 +256,12 @@ def rewrite_jsonld(text: str, localize) -> str:
     return JSONLD_RE.sub(rewrite, text)
 
 
-def finish_breadcrumbs(text: str, root: Path) -> str:
+def finish_breadcrumbs(text: str, root: Path, documents: dict[str, str] | None = None) -> str:
+    # Legacy bilingual documents retain their editorial breadcrumb labels, as
+    # they do in finalize(). Keep the translation builder on the same rule.
+    if re.search(r'<script[^>]+src=["\'][^"\']*/js/lang\.js', text):
+        return text
+    documents = documents or {}
     def localize(value, breadcrumb=False):
         if isinstance(value, list):
             for item in value:
@@ -269,9 +274,9 @@ def finish_breadcrumbs(text: str, root: Path) -> str:
                 if url.netloc in ("", "simplememofast.com") and url.path.startswith("/en/"):
                     rel = url.path.lstrip("/") + ("index.html" if url.path.endswith("/") else ".html")
                     path = root / rel
-                    if path.is_file():
+                    if rel in documents or path.is_file():
                         reader = MarkupReader()
-                        reader.feed(path.read_text(encoding="utf-8"))
+                        reader.feed(documents[rel] if rel in documents else path.read_text(encoding="utf-8"))
                         heading = " ".join(" ".join(reader.heading).split())
                         if heading:
                             value["item"] = target

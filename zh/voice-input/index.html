@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/voice-input/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>iPhone的语音输入备忘录 — iOS 26的设定・使用条件 | SimpleMemo</title>
+  <meta name="description" content="SimpleMemo的语音输入，将iPhone所说的内容记为备忘录。 介绍iOS 26以后的对应机型、语言、首次权限和语音模型的准备、自动启动的设置。 文字转录在终端内处理。 也可以确认邮件发送、Obsidian保存的条件。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iPhone的语音输入备忘录 — iOS 26的设定・使用条件 | SimpleMemo">
+  <meta property="og:description" content="SimpleMemo的语音输入，将iPhone所说的内容记为备忘录。 介绍iOS 26以后的对应机型、语言、首次权限和语音模型的准备、自动启动的设置。 文字转录在终端内处理。 也可以确认邮件发送、Obsidian保存的条件。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-31T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/voice-input/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <meta property="og:image:width" content="256">
+  <meta property="og:image:height" content="256">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iPhone的语音输入备忘录 — iOS 26的设定・使用条件 | SimpleMemo">
+  <meta name="twitter:description" content="SimpleMemo的语音输入，将iPhone所说的内容记为备忘录。 介绍iOS 26以后的对应机型、语言、首次权限和语音模型的准备、自动启动的设置。 文字转录在终端内处理。 也可以确认邮件发送、Obsidian保存的条件。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/voice-input/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/voice-input/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/voice-input/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/voice-input/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/voice-input/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/voice-input/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/voice-input/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/voice-input/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/voice-input/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/voice-input/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/voice-input/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/voice-input/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "语音输入",
+      "item": "https://simplememofast.com/zh/voice-input/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/voice-input/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "iPhone的语音输入备忘录 — iOS 26的设定・使用条件",
+  "description": "SimpleMemo的语音输入，将iPhone所说的内容记为备忘录。 介绍iOS 26以后的对应机型、语言、首次权限和语音模型的准备、自动启动的设置。 文字转录在终端内处理。 也可以确认邮件发送、Obsidian保存的条件。",
+  "url": "https://simplememofast.com/zh/voice-input/",
+  "datePublished": "2026-05-31",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/voice-input/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/voice-input/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "语音输入需要追加费用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "语音的文字转录，不使用按量收费的外部语音识别API。 备忘录的发送框架和Premium的条件是不同的。 首次获取语音模型等需要通信，通信费根据使用环境而定。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "说的语音会发送到什么地方吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "此功能的文字转录在终端内进行，不会向外部的语音识别服务器发送语音和文本。 完成备忘录的邮件发送时，将正文发送到邮件的中继服务和收件人。 Obsidian保存和其他连接，按照选择的设置和各连接的操作条件进行。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以使用的条件是？ 不支持的终端会怎么样呢？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "需要 iOS 26 或更高版本支持的机型与语言、麦克风和语音识别权限，并完成语音模型准备。低于 iOS 26 的版本不会显示此功能的麦克风。如果机型或语言不受支持，或准备过程出错，可以使用键盘输入。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "语音模型使用终端的容量吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的。 模型不包含在应用程序本体的下载容量中，而是保存在系统区域。 终端的可用空间和获取未导入模型的通信是必要的。 因为也有系统更新，所以不能保证第一次只通信一次。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是“语音自动输入”？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "启用设置中的“启动时自动开启语音输入”后，应用会在普通启动时尝试开始语音输入。需要受支持的机型和语言、相关权限及准备好的语音模型。请确认已开始后再说话。“语音记笔记”快捷指令是另一种入口。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "语音输入中也可以用键盘打字吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的。 可以同时使用语音和手动输入。 请确认识别的文字，用键盘修改说错和固有名词后再发送。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "用语音写的备忘录也会在Obsidian上追加吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "语音输入和Obsidian连接是不同的功能。 补充时需要打开iPhone方面的连接，设置访问保管库、保存地点。 请确认使用的保存方法的操作条件。 对应的Obsidian专用模式有效期间不会发送邮件。 仅通过发送操作并不能确定发送、保存成功，请在保存处进行确认。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/voice-input/#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "iPhone的语音输入备忘录 — iOS 26的设定・使用条件 | SimpleMemo",
+  "url": "https://simplememofast.com/zh/voice-input/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#22d3ee;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:#22d3ee;margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Voice feature page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.22);color:var(--text)}
+    .flow-arrow{color:#22d3ee;font-weight:700}
+    .waveform{display:flex;align-items:center;justify-content:center;gap:4px;height:60px;margin-top:1.25rem}
+    .waveform span{display:block;width:5px;border-radius:3px;background:linear-gradient(180deg,#22d3ee,#3b82f6)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- app-schema: managed by scripts/inject_app_schema.py -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://simplememofast.com/#app",
+  "name": "SimpleMemo",
+  "alternateName": [
+    "Simple Memo - for Obsidian",
+    "Captio式シンプルメモ",
+    "シンプルメモ",
+    "SimpleMemoFast",
+    "Simple Memo"
+  ],
+  "url": "https://simplememofast.com/",
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "iOS 16.0+, watchOS",
+  "softwareVersion": "5.9.12",
+  "isAccessibleForFree": true,
+  "inLanguage": "zh-Hans",
+  "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "JPY",
+      "description": "每天最多3条（使用期限不限）",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Monthly",
+      "price": "500",
+      "priceCurrency": "JPY",
+      "description": "每月500日元・无限发送",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Yearly",
+      "price": "5000",
+      "priceCurrency": "JPY",
+      "description": "年额5,000日元・无限发送",
+      "availability": "https://schema.org/InStock"
+    }
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav aria-label="主导航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh/guides/">使用指南</a></li>
+<li><a href="/zh/use-cases/">使用场景</a></li>
+<li><a href="/zh/vs/">对比</a></li>
+<li><a href="/zh/methods/"><span>方法</span></a></li>
+<li><a href="/zh/blog/"><span>博客</span></a></li>
+<li><a href="/zh/glossary/"><span>术语集</span></a></li>
+<li><a href="/zh/faq">常见问题</a></li>
+<li><a href="/zh/about/">关于开发者</a></li>
+<li><a href="/zh/devlog/">开发日志</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/voice-input/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/voice-input/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/voice-input/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/voice-input/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/voice-input/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/voice-input/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/voice-input/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/voice-input/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/voice-input/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下载</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>语音输入 · iOS 26以后</span>
+</div>
+<h1 class="lp-hero__title"> <span>只是说话，笔记。 </span> </h1>
+<p class="lp-hero__sub"><span>对应的iOS 26以后的iPhone，可以点击麦克风将说出的话变成文字。 文字转录在终端内处理，不发送到外部的语音识别服务器。 第一次需要准备权限和语音模型。 完成的备忘录的邮件发送、Obsidian保存，遵循各自的设置和操作条件。 </span></p>
+<div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+<a aria-label="从App Store下载" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="hero" data-cta-position="hero" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="从App Store下载" class="badge-img" height="40" loading="eager" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<a class="hero-cta-secondary" href="#setup" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(34,211,238,.3);border-radius:24px;color:#22d3ee;text-decoration:none;font-size:.9rem;"> <span>查看使用方法</span> </a>
+</div>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者：<a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+<a class="ce-read-link" href="#capture-section-1">阅读正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="从想读的内容中选择" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>了解功能</b></a><a class="ce-route" href="#capture-section-3"><span>02</span><b>自动输入的设置</b></a><a class="ce-route" href="#capture-section-6"><span>03</span><b>可用的条件</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO/iPhone</p><div class="ce-device"><img alt="SimpleMemo的输入画面。 上方发送，右下方语音输入按钮。" decoding="async" fetchpriority="high" height="1389" src="/assets/img/obsidian-voice-input/01-compose.webp" width="640"/></div><figcaption class="ce-stage-foot">SimpleMemo的实际输入画面</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>本页目录</summary><nav aria-label="目录"><a href="#capture-section-1">通过这个功能改变</a><a href="#capture-section-2">怎么动</a><a href="#capture-section-3">“语音自动输入”— 设置正常启动时的开始</a><a href="#capture-section-4">使用方法</a><a href="#capture-section-5">活用想法</a><a href="#capture-section-6">动作条件和注意事项</a><a href="#capture-section-7">常见问题</a><a href="#capture-section-8">相关页面</a><a href="#capture-section-9">参考文献</a></nav></details>
+<!-- Answer-first definition (AIO) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span>一言以蔽之</span></div>
+<p>SimpleMemo的语音输入是将所说的话在终端内变成文字的功能。 在对应的iOS 26以后的机型、语言中，点击备忘录栏的麦克风，确认文字转录的状态后再说话。 启用设置的“启动时自动打开语音输入”后，在正常应用程序启动时也会尝试启动语音输入。 不会省略第一次的权限确认和模型准备。</p>
+</div>
+</section>
+<!-- Why -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"> <span>通过这个功能改变</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">🙌 <span>即使手被堵住了</span></div>
+<div class="reason-card__desc">
+<span>做饭的时候，抱着孩子的时候，边走边走。 即使在不能打键盘的场景中，也能用声音原封不动地留下。</span>
+</div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🔒 <span>在设备上私下</span></div>
+<div class="reason-card__desc">
+<span>文字转录在终端内完成。 语音和文本都不会发送到外部的语音识别服务器。<a href="/zh/blog/memo-app-privacy" style="color:var(--accent);">隐私第一</a>的设计。</span>
+</div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">💸 <span>无需按量收费API</span></div>
+<div class="reason-card__desc">
+<span>文字转录不使用按量收费的外部语音识别API。 发送范围、Premium的条件和获取模型的通信、终端容量是不同的。</span>
+</div>
+</div>
+</div>
+</div></section>
+<!-- How it works -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>怎么动</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>点击右下方的麦克风开始录音，发话在<strong>直播中变成文字插入光标位置</strong>。 录音中会显示跟随声音大小的<strong>真正的波形</strong>，“现在听到了”和“再按一次就完成了”没有文字。 </span> </p>
+<div class="flow-card">
+<div class="flow-row">
+<span class="flow-chip">🎙️ <span>点击麦克风</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">🗣️ <span>说话</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">✍️ <span>现场文字</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">📤 <span>一键发送</span></span>
+</div>
+<div aria-hidden="true" class="waveform">
+<span style="height:16px"></span><span style="height:30px"></span><span style="height:48px"></span><span style="height:26px"></span><span style="height:54px"></span><span style="height:34px"></span><span style="height:20px"></span><span style="height:44px"></span><span style="height:30px"></span><span style="height:14px"></span><span style="height:38px"></span><span style="height:24px"></span>
+</div>
+</div>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span>可以同时使用语音和手动输入</span></div>
+<div class="reason-card__desc">
+<span>录音中键盘也不会下降。 用声音输入大筋，只用手纠正固有名词和数字——可以这样使用。</span>
+</div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>发送自动停止</span></div>
+<div class="reason-card__desc">
+<span>录音中发送的话会自动停止，正文会清除。 Captio的“写→发送→立即清除”的节奏保持不变。</span>
+</div>
+</div>
+</div>
+<div class="tip-box">
+<div class="tip-box__title"><span>技术备忘录</span></div>
+<p>文字转录使用Apple的<code>SpeechAnalyzer</code> / <code>SpeechTranscriber</code>（iOS 26）。 语音模型不包含在应用程序的捆绑包中，而是将必要的语言下载到系统区域。 虽然与应用程序本体的下载容量不同，但终端的可用空间和首次获取的通信是必要的。 如果模型尚未导入，请等待准备，确认文字转录可以使用后再说。 也有通过系统更新模型。</p>
+</div>
+</div></section>
+<!-- Auto-start spotlight -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3">“语音自动输入”— 设置正常启动时的开始</h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead">在应用设置中启用“启动时自动开启语音输入”，应用便会在普通启动时尝试开始语音输入。需要受支持的机型和语言、麦克风与语音识别权限，并完成语音模型准备。请确认屏幕状态后再说话。可分配给操作按钮等入口的“语音记笔记”快捷指令，是另一种调用方式。</p>
+<div class="tip-box">
+<div class="tip-box__title"><span>配合技术</span></div>
+<p>从主页和锁屏对应的入口打开应用程序，确认文字转录后发送。 可能会要求解锁或认证，从启动到发送、保存所需的时间会根据条件而变化。 对Obsidian的追记，需要iPhone方面的配合和保管库、保存地的设置。</p>
+</div>
+</div></section>
+<!-- Setup / How to -->
+<section class="lp-section ce-chapter" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>使用方法</span> </h2></div><div class="ce-chapter__body">
+
+<ul class="prereq-list">
+<li>iPhone（iOS 26以后・语音输入对应机型）</li>
+<li>从App Store安装SimpleMemo</li>
+<li>第一次允许麦克风和语音识别（文字转录在终端内处理）</li>
+</ul>
+<ol class="steps-list">
+<li><strong>点击右下方的麦克风</strong>点击<br/>备忘录输入画面右下方的麦克风图标。 第一次需要麦克风、语音识别的许可和未导入语言的语音模型的准备。 因为准备可能需要时间，所以请确认文字抄写可以使用后再说。</li>
+<li><strong>说话</strong><br/>确认文字转录处于可以使用的状态后再说话。 说话的途中经过也会在直播中显示，确定的文字被插入到光标位置。 也可以同时使用键盘手动输入。</li>
+<li><strong>再次点击停止</strong><br/>波形（停止按钮）再次点击，语音输入就会停止。</li>
+<li><strong>发送</strong><br/>像往常一样一键发送。 发送时如果录音中的话会自动停止，正文会被清除。</li>
+</ol>
+<div class="tip-box">
+<div class="tip-box__title"><span>想自动开始的时候</span></div>
+<p>在设置中启用“启动时自动开启语音输入”。请确认机型和语言受支持，并已授予权限、准备好语音模型。普通启动时自动开始，与“语音记笔记”快捷指令的设置相互独立。</p>
+</div>
+</div></section>
+<!-- Use cases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>活用想法</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span>在家务、育儿的间隙</span></div>
+<div class="reason-card__desc"><span>手放不开的时候才用声音。 可以瞬间留下购物的追加和“必须要做那个”。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>长文一口气</span></div>
+<div class="reason-card__desc"><span>说出自己的想法，粗略地写出来，稍后整理。 可以比打字更快地吐出来。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>想法的瞬间捕捉</span></div>
+<div class="reason-card__desc"><span><a href="/zh/use-cases/ideas/" style="color:var(--accent);">想法备忘录</a>新鲜度是命。 自动启动×语音的话，可以在忘记之前留下声音。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>日语输入麻烦的时候</span></div>
+<div class="reason-card__desc"><span>转换多的日语，说话也更快。 用声音写，只需要用手修改需要的地方。</span></div>
+</div>
+</div>
+</div></section>
+<!-- Constraints (honest) -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>动作条件和注意事项</span> </h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="trouble-item">
+<div class="trouble-item__q">需要iOS 26以后的对应机型、对应语言</div>
+<div class="trouble-item__a"><p>语音输入依赖 Apple 新的设备端语音识别（iOS 26）。低于 iOS 26 的版本不会显示此功能的麦克风。如果机型或语言不受支持，或模型准备遇到问题，请使用键盘输入。</p></div>
+</div>
+<div class="trouble-item">
+<div class="trouble-item__q">第一次可能需要下载语音模型</div>
+<div class="trouble-item__a"><p>未导入的语音模型使用通信获取到系统领域。 确认可用空间和连接，第一次请等待准备后再尝试文字转录。</p></div>
+</div>
+<div class="trouble-item">
+<div class="trouble-item__q">需要麦克风和语音识别的许可</div>
+<div class="trouble-item__a"><p>首次点击时（自动启动ON的话，启动后立即）会出现许可对话框。 拒绝时，可以在警报的“打开设置”中稍后允许。</p></div>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7">常见问题</h2></div><div class="ce-chapter__body"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">语音输入需要追加费用吗？</summary><div class="faq-answer"><p>语音的文字转录，不使用按量收费的外部语音识别API。 备忘录的发送框架和Premium的条件是不同的。 首次获取语音模型等需要通信，通信费根据使用环境而定。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">说的语音会发送到什么地方吗？</summary><div class="faq-answer"><p>此功能的文字转录在终端内进行，不会向外部的语音识别服务器发送语音和文本。 完成备忘录的邮件发送时，将正文发送到邮件的中继服务和收件人。 Obsidian保存和其他连接，按照选择的设置和各连接的操作条件进行。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">可以使用的条件是？ 不支持的终端会怎么样呢？</summary><div class="faq-answer"><p>需要 iOS 26 或更高版本支持的机型与语言、麦克风和语音识别权限，并完成语音模型准备。低于 iOS 26 的版本不会显示此功能的麦克风。如果机型或语言不受支持，或准备过程出错，可以使用键盘输入。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">语音模型使用终端的容量吗？</summary><div class="faq-answer"><p>是的。 模型不包含在应用程序本体的下载容量中，而是保存在系统区域。 终端的可用空间和获取未导入模型的通信是必要的。 因为也有系统更新，所以不能保证第一次只通信一次。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">什么是“语音自动输入”？</summary><div class="faq-answer"><p>启用设置中的“启动时自动开启语音输入”后，应用会在普通启动时尝试开始语音输入。需要受支持的机型和语言、相关权限及准备好的语音模型。请确认已开始后再说话。“语音记笔记”快捷指令是另一种入口。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">语音输入中也可以用键盘打字吗？</summary><div class="faq-answer"><p>是的。 可以同时使用语音和手动输入。 请确认识别的文字，用键盘修改说错和固有名词后再发送。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">用语音写的备忘录也会在Obsidian上追加吗？</summary><div class="faq-answer"><p>语音输入和Obsidian连接是不同的功能。 补充时需要打开iPhone方面的连接，设置访问保管库、保存地点。 请确认使用的保存方法的操作条件。 对应的Obsidian专用模式有效期间不会发送邮件。 仅通过发送操作并不能确定发送、保存成功，请在保存处进行确认。</p></div></details></div></div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+<span>只要说话，马上就会记下来。</span>
+</div>
+<div class="cta-box__desc">
+<span>下载免费。 语音输入是iOS 26以后的对应终端。</span>
+</div>
+<a aria-label="从App Store下载" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="从App Store下载" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+</div>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="08" id="capture-section-8"> <span>相关页面</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh/fastest-voice-memo/"><span>通过动作按钮调用语音备忘录</span></a>
+<a href="/zh/obsidian/"><span>Obsidian合作</span></a>
+<a href="/zh/apple-watch-obsidian/"><span>Apple Watch × Obsidian配合</span></a>
+<a href="/zh/blog/obsidian-voice-input"><span>在Obsidian上用语音输入记笔记的方法4选</span></a>
+<a href="/zh/guides/draft-autosave/"><span>草稿自动保存</span></a>
+<a href="/zh/guides/gmail-star-todo/"><span>用Gmail星将收件箱ToDo化</span></a>
+<a href="/zh/use-cases/ideas/"><span>想法备忘录的活用</span></a>
+<a href="/zh/blog/memo-app-privacy"><span>备忘录应用程序的隐私</span></a>
+<a href="/zh/note-to-email/"><span>备忘录→邮件的构造</span></a>
+<a href="/zh/siri/"><span>Siri・AirPods只记下声音</span></a>
+</div>
+</div></section>
+<section class="references ce-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);"><div class="ce-chapter__head"><h2 data-ce-number="09" id="capture-section-9" style="font-size:1.1rem;margin-bottom:1rem;"> <span>参考文献</span> </h2></div><div class="ce-chapter__body">
+
+
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://developer.apple.com/documentation/speech" rel="noopener" style="color:var(--accent);" target="_blank">Apple — Speech framework</a> — <span>语音识别（SpeechAnalyzer / SpeechTranscriber）的官方文档</span></li>
+<li><a href="https://support.apple.com/guide/iphone/dictate-text-iph2c0651cd/ios" rel="noopener" style="color:var(--accent);" target="_blank">Apple — 用iPhone进行语音输入 / Dictate text on iPhone</a> — <span>关于iOS的语音输入的官方支持</span></li>
+<li><a href="https://www.apple.com/privacy/" rel="noopener" style="color:var(--accent);" target="_blank">Apple — Privacy</a> — <span>关于设备处理和隐私的Apple的方针</span></li>
+<li><a data-cta-cluster="voice" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store的下载页面</span></li>
+<li><a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener" target="_blank">Apple — WWDC25: Bring advanced speech-to-text to your app</a> — 终端内的文字转录、系统领域的模型、对应机型・语言的说明</li>
+</ul>
+
+</div></section><aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="feature" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>决定语音留下的备忘录的目的地</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中设置连接和保存地址后，语音备忘录可以在邮件和Obsidian上留下。 </span> </span> </a>
+</aside><section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>设置指南一览</span></a></li>
+<li><a href="/zh/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>博客文章一览</span></a></li>
+<li><a href="/zh/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>活用事例</span></a></li>
+<li><a href="/zh/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常见问题</span></a></li>
+<li><a href="/zh/blog/ios26-speechanalyzer-live-mic" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>面向开发者：iOS 26 SpeechAnalyzer 实施解说</span></a></li>
+</ul>
+
+</section></div></div>
+
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="页脚导航" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">产品</p>
+<a class="footer__link" href="/zh/download/">下载</a>
+<a class="footer__link" href="/zh/">首页</a>
+<a class="footer__link" href="/zh/voice-input/"><span>语音输入</span></a>
+<a class="footer__link" href="/zh/obsidian/">Obsidian 集成</a>
+<a class="footer__link" href="/zh/use-cases/">使用场景</a>
+<a class="footer__link" href="/zh/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比较与迁移</p>
+<a class="footer__link" href="/zh/note-to-email/">将笔记发送到邮箱</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支持</p>
+<a class="footer__link" href="/zh/roadmap/">公开路线图</a>
+<a class="footer__link" href="/zh/devlog/">开发日志</a>
+<a class="footer__link" href="/zh/about/">关于开发者</a>
+<a class="footer__link" href="/zh/faq">常见问题</a>
+<a class="footer__link" href="/zh/privacy">隐私</a>
+<a class="footer__link" href="/zh/contact">联系我们</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

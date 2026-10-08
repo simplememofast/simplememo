@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/second-brain/">
+  <title>Crie um segundo cérebro com Obsidian — Exemplo de implementação da pasta 4 e link no PARA | SimpleMemo</title>
+  <meta name="description" content="Procedimento de implementação para iniciar o PARA com Obsidian. 4 Pastas, notas de apresentação, links internos e a mudança para o Arquivo são explicados na tela real da versão para Mac. Exemplos de preenchimento do CÓDIGO e dos modelos manuais Markdown também são introduzidos. Você pode tentar o status de verificação e a etapa de verificação do link após a movimentação sem adicionar um plug-in.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Crie um segundo cérebro com Obsidian - pasta 4 do PARA e exemplo de implementação de link">
+  <meta property="og:description" content="Procedimento de implementação para iniciar o PARA com Obsidian. 4 Pastas, notas de apresentação, links internos e a mudança para o Arquivo são explicados na tela real da versão para Mac. Exemplos de preenchimento do CÓDIGO e dos modelos manuais Markdown também são introduzidos. Você pode tentar o status de verificação e a etapa de verificação do link após a movimentação sem adicionar um plug-in.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-15T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/obsidian/second-brain/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Crie um segundo cérebro com Obsidian - pasta 4 do PARA e exemplo de implementação de link">
+  <meta name="twitter:description" content="Procedimento de implementação para iniciar o PARA com Obsidian. 4 Pastas, notas de apresentação, links internos e a mudança para o Arquivo são explicados na tela real da versão para Mac. Exemplos de preenchimento do CÓDIGO e dos modelos manuais Markdown também são introduzidos. Você pode tentar o status de verificação e a etapa de verificação do link após a movimentação sem adicionar um plug-in.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/second-brain/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/second-brain/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/second-brain/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/second-brain/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/second-brain/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/second-brain/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/second-brain/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/second-brain/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/second-brain/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.journal-sample{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.journal-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.journal-note{color:var(--text-secondary);font-size:.9rem}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/second-brain/#article",
+  "inLanguage": "pt-BR",
+  "headline": "Crie um segundo cérebro com Obsidian - pasta 4 do PARA e exemplo de implementação de link",
+  "description": "Procedimento de implementação para iniciar o PARA com Obsidian. 4 Pastas, notas de apresentação, links internos e a mudança para o Arquivo são explicados na tela real da versão para Mac. Exemplos de preenchimento do CÓDIGO e dos modelos manuais Markdown também são introduzidos. Você pode tentar o status de verificação e a etapa de verificação do link após a movimentação sem adicionar um plug-in.",
+  "url": "https://simplememofast.com/pt-BR/obsidian/second-brain/",
+  "datePublished": "2026-09-15",
+  "dateModified": "2026-09-15",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-second-brain.png"
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/pt-BR/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Segundo Cérebro",
+      "item": "https://simplememofast.com/pt-BR/obsidian/second-brain/"
+    }
+  ]
+}</script>
+<style>.para-body{line-height:1.95}.para-body h2{font-size:clamp(1.45rem,4vw,2rem);margin:3rem 0 1rem;line-height:1.5}.para-body h3{margin:1.8rem 0 .7rem}.para-body p{margin:1rem 0}.para-body a{color:var(--accent)}.para-body pre{overflow-x:auto;padding:1.2rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:.86rem;line-height:1.7}.para-body code{overflow-wrap:anywhere}.para-body pre code{overflow-wrap:normal}.para-body img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--border);margin:1.5rem auto}.para-body ul,.para-body ol{padding-left:1.5rem}.para-body th,.para-body td{text-align:left;border-bottom:1px solid var(--border);padding:.8rem;min-width:130px}.para-body table{border-collapse:collapse;width:100%}.para-body .table-wrap{overflow-x:auto}.para-toc{padding:1rem 1.25rem;border:1px solid var(--border);border-radius:12px}.para-toc a{display:block;padding:.4rem 0}.para-body h2{scroll-margin-top:80px}</style><link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/pt-BR/obsidian/second-brain/#faq","inLanguage":"pt-BR","mainEntity":[{"@type":"Question","name":"Preciso de um plug-in?","acceptedAnswer":{"@type":"Answer","text":"A pasta, itens de seleção, links internos e exemplos móveis neste artigo não adicionam plug-ins da comunidade. Não lidamos com classificação ou sincronização automática com serviços externos."}},{"@type":"Question","name":"Preciso transferir todos os memorandos existentes para o PARA?","acceptedAnswer":{"@type":"Answer","text":"Neste procedimento, você pode começar com um projeto prático. Se você quiser transferir uma nota existente, prepare um backup e verifique o movimento do link em um pequeno número antes de prosseguir."}},{"@type":"Question","name":"Não tenho certeza se devo colocá-lo em Projetos ou Recursos.","acceptedAnswer":{"@type":"Answer","text":"Se for o manuscrito da apresentação que está acontecendo agora, ele pode ser dividido em Projetos, e se for um material geral usado para outras apresentações, pode ser dividido em Recursos. Se você vincular ao material do lado do manuscrito, poderá consultar o mesmo texto sem copiá-lo para ambos."}},{"@type":"Question","name":"Se eu fizer um gráfico, o segundo cérebro será concluído?","acceptedAnswer":{"@type":"Answer","text":"Não sei se o material pode ser usado na situação necessária apenas exibindo o link. Primeiro, prossiga para o documento a partir da nota de trabalho e tente ver se você pode retornar um ponto principal ao manuscrito. A partir desta confirmação de operação, não julgamos a melhoria da memória e da produtividade.Se você quiser restringir o intervalo de notas a serem exibidas, consulte Exemplos de pesquisa de tags de pasta e gráficos locais."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">Pular para o conteúdo</a>
+<nav aria-label="Navegação global" class="global-nav" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/pt-BR/guides/">Guias</a></li><li><a href="/pt-BR/use-cases/">Casos de uso</a></li><li><a href="/pt-BR/vs/">Comparar</a></li><li><a href="/pt-BR/blog/">Blog</a></li><li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li></ul><a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Baixar</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/obsidian/second-brain/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/second-brain/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/second-brain/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/second-brain/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/second-brain/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/second-brain/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/obsidian/second-brain/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/second-brain/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/second-brain/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content" id="main-content"><article class="container" style="max-width:880px"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label">Obsidian · Guia de Implementação PARA</div><h1 class="lp-hero__title">Crie um segundo cérebro com Obsidian <br/>4 PARA começando com uma pasta e link</h1><p class="lp-hero__sub">Conecte o trabalho em andamento com os materiais a serem usados posteriormente. Apresentaremos a tela real desde a criação até a mudança para o Arquivo, tomando uma nota de apresentação como exemplo.</p><p class="article-meta">Autor: <a href="/pt-BR/about/">AI ATAKA</a> ・ Publicado e confirmado: <time datetime="2026-09-15">2026 ano 9 mês 15</time></p><a class="ce-read-link" href="#concept">Ler o artigo <span aria-hidden="true">↓</span></a></div><nav aria-label="Escolha o assunto que deseja ler" class="ce-routes"><a class="ce-route" href="#folders"><span>01</span><b>Criar uma pasta 4</b></a><a class="ce-route" href="#project"><span>02</span><b>Escrever notas de apresentação</b></a><a class="ce-route" href="#archive"><span>03</span><b>transferir para Arquivo</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">PARA / QUATRO LUGARES</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>Projetos</strong></div><div class="cn-concept-row"><span>02</span><strong>Áreas</strong></div><div class="cn-concept-row"><span>03</span><strong>Recursos</strong></div><div class="cn-concept-row"><span>04</span><strong>Arquivo</strong></div></div><figcaption class="ce-stage-foot">locais de armazenamento 4 da PARA (diagrama conceitual)</figcaption></figure></header><div class="ce-article"><details class="ce-index"><summary>Índice desta página</summary><nav aria-label="Índice"><a href="#concept">Segundo Cérebro, CÓDIGO e o papel do PARA</a><a href="#folders">1 Crie uma pasta de 4 na sala de armazenamento</a><a href="#project">2. Escreva seus objetivos e o próximo trabalho em suas anotações de apresentação</a><a href="#links">3. Vincule os critérios e materiais</a><a href="#distill">4. Retire os pontos principais na situação em que você o usa</a><a href="#archive">5 Mover para Arquivo e reabrir o link</a><a href="#review">O que você olha para trás quando começa a operar?</a><a href="#faq">Perguntas frequentes</a><a href="#sources">Materiais de referência e escopo de confirmação</a><a href="#capture-section-10">Baixar modelo manual</a></nav></details><details class="ce-legacy-index"><summary>Para o procedimento de prática</summary><nav aria-label="Índice deste artigo" class="para-toc"><a href="#folders">Criar uma pasta 4</a><a href="#project">Escreva uma nota de apresentação</a><a href="#links">Link para o material</a><a href="#archive">Mover para Arquivo</a><a href="#starter">Use o modelo manual</a></nav></details><p>O número de memorandos aumentou, mas não consigo encontrar os materiais para usar na próxima tarefa. Nesse caso, vamos criar um lugar para colocar "agora" e "ver mais tarde" na sala de armazenamento Obsidian.</p>
+<p>Neste artigo, prepararemos links para pastas 4, notas de trabalho e materiais relacionados como um exemplo de preparação para uma apresentação. A primeira coisa a fazer é apenas um pequeno grupo. Não há necessidade de reclassificar as notas existentes de uma só vez.</p>
+<p>O exemplo de operação foi confirmado no cofre de verificação da versão Mac de Obsidian 1.13.7 em 2026 ano 9 mês 15. A programação e o texto na tela são exemplos fictícios. Na verdade, ele manipula pastas, verifica itens, links internos e se move para o Arquivo.</p>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="01" id="concept">Segundo Cérebro, CÓDIGO e o papel do PARA</h2></div><div class="ce-chapter__body">
+<p>O segundo cérebro é uma maneira de pensar para deixar informações que você usará mais tarde fora de si mesmo e tirá-las do trabalho e do estudo. O código de Tiago Forte mostra o fluxo de Capturar, Organizar, Destilar e Expressar. <a href="https://fortelabs.com/blog/basboverview/">Explanação do Forte Labs</a></p>
+<p>PARA é um método de divisão de armazenamento de informações em tipos 4. Projetos são atividades contínuas com objetivos, Áreas são áreas de responsabilidade para continuar a cuidar, Recursos são materiais de interesse e Arquivos são lugares para colocar itens que não estão atualmente em uso. <a href="https://fortelabs.com/blog/para/">Explanação do autor original de PARA</a></p>
+<p>Aqui, vou tentar essa ideia na pasta e nota Obsidian. Não é uma configuração que automatiza todo o CÓDIGO. Se você quiser revisar a ideia ou a entrada do memorando, consulte também <a href="/pt-BR/methods/second-brain/">Como fazer um segundo cérebro</a>.</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="folders">1 Crie uma pasta de 4 na sala de armazenamento</h2></div><div class="ce-chapter__body">
+<p>Se você fizer isso como um teste, preparar uma sala de armazenamento para a prática não afetará o notebook original. Se você estiver usando pela primeira vez, pode prosseguir em <a href="/pt-BR/obsidian/getting-started/">Como iniciar o Obsidian</a>.</p>
+<p>e dê o seguinte nome. De acordo com a tela real desta vez, o nome da pasta equivalente a Arquivos usará o singular <code>Archive</code>.</p>
+<div aria-labelledby="folders" class="table-wrap ce-table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>pasta</th>
+<th>O que colocar desta vez</th>
+<th>Julgamento quando você se perde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Projetos</td>
+<td>Notas de preparação</td>
+<td>Existe uma meta que pode ser determinada a ser concluída</td>
+</tr>
+<tr>
+<td>Áreas</td>
+<td>Padrões que você deseja manter ao escrever frases</td>
+<td>Isso continuará mesmo depois que um anúncio específico terminar?</td>
+</tr>
+<tr>
+<td>Recursos</td>
+<td>Lista de verificação para ler antes da apresentação</td>
+<td>Documentos para consultar em situações necessárias</td>
+</tr>
+<tr>
+<td>Arquivo</td>
+<td>Notas que não estão sendo trabalhadas no momento</td>
+<td>Vou deixá-lo em mãos, mas você quer removê-lo da lista em andamento?</td>
+</tr>
+</tbody>
+</table></div>
+<p>Por exemplo, escrever é uma atividade contínua, enquanto concluir o texto da apresentação de 1 de 10 tem um ponto final. Colocar os critérios da primeira em Areas e as tarefas da segunda em Projects facilita escolher qual nota abrir em seguida. Essa é apenas uma forma de classificar: você pode mudar o local conforme a finalidade.</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="project">2. Escreva seus objetivos e o próximo trabalho em suas anotações de apresentação</h2></div><div class="ce-chapter__body">
+<p>Faça um caderno chamado <code>Conference talk</code> em <code>Projects</code>. O nome está em inglês para torná-lo compatível com a tela real, mas não importa se é japonês no meu armazenamento.</p>
+<pre aria-label="Exemplo de descrição de Markdown" role="region" tabindex="0"><code class="language-markdown"># Conference talk
+
+Target date: 2026-10-01
+
+- [ ] Draft outline
+- [ ] Rehearse
+
+Related area: [[Areas/Writing]]
+Reference: [[Resources/Presentation checklist]]
+</code></pre>
+<p><code>Draft outline</code> é o trabalho de fazer um plano de composição, e <code>Rehearse</code> é uma prática de apresentação. Ao substituí-lo pelo seu próprio exemplo, tente escrever em um tamanho que você possa mover a mão em seguida, em vez de uma palavra ampla como "preparar".</p>
+<p><img alt="A tela real do Obsidian mostrando links para tarefas inacabadas do 2 e notas relacionadas nas notas de anúncio em Projetos" decoding="async" height="768" loading="lazy" src="/assets/img/obsidian-second-brain/project-open.png" width="984"/></p>
+<p><em> A tela real do cofre de verificação. A data é a data-alvo da amostra, não o cronograma de anúncio real. </em></p>
+<p>Você pode clicar no campo de verificação na visualização de leitura, etc. Desta vez, quando verifiquei a coluna do plano de configuração, Markdown se tornou <code>- [x] Draft outline</code> e, mesmo que eu reabrisse a nota, a condição permaneceu. A coluna de prática permanece desmarcada. Você não apenas separa as pastas, mas também pode tornar a próxima tarefa visível ao abrir a nota.</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 id="links">3. Vincule os critérios e materiais</h2></div><div class="ce-chapter__body">
+<p>Em seguida, faça <code>Areas/Writing</code> e <code>Resources/Presentation checklist</code>. O primeiro inclui os critérios para escrita, e o segundo inclui o conteúdo a ser confirmado antes da apresentação. O seguinte é um exemplo de entrada manual.</p>
+<pre aria-label="Exemplo de descrição de Markdown" role="region" tabindex="0"><code class="language-markdown"># Writing
+
+Ongoing standard: keep examples reproducible and sources attributable.
+
+Current project: [[Projects/Conference talk]]
+</code></pre>
+<p>Este padrão significa "ser capaz de reproduzir exemplos e rastrear fontes". É definido como um padrão para uso, mesmo que o anúncio mude.</p>
+<p>Você pode passar para este padrão a partir do <code>[[Areas/Writing]]</code> da nota de apresentação. Em vez de copiar o corpo do documento todas as vezes, coloque um link que abra quando necessário. Nesta verificação, foi confirmado que foi movido da nota de apresentação para Redação e o link de retorno foi aberto.</p>
+<p>Obsidian pode criar links internos na forma de <code>[[ノート名]]</code>. Se você tiver mais de uma nota com o mesmo nome, selecione um candidato que inclua uma pasta e verifique se a nota pretendida será aberta. <a href="https://obsidian.md/help/links">Descrição oficial do link interno</a>. Para um exemplo específico de conexão de ideias relacionadas com notas, consulte <a href="/pt-BR/obsidian/zettelkasten/">Etapas para iniciar Zettelkasten com Obsidian</a>.</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 id="distill">4. Retire os pontos principais na situação em que você o usa</h2></div><div class="ce-chapter__body">
+<p>Depois de colocar os materiais, tentarei usá-los uma vez no trabalho real. Se for uma apresentação, abra a lista de verificação e escreva brevemente "Pontos a serem corrigidos com este plano de composição" no caderno de apresentação.</p><p>Se você quiser verificar os exemplos de operação e configuração em japonês, consulte também o <a href="/pt-BR/obsidian/community/">histórico de atualização do manuscrito japonês 3 e o guia de origem que organiza o intervalo não confirmado da pergunta</a>.</p>
+<p>Por exemplo, você pode considerar as seguintes entradas.</p>
+<pre aria-label="Exemplo de descrição de Markdown" role="region" tabindex="0"><code class="language-markdown">## 今回使う要点
+- 冒頭で、聞き手に持ち帰ってほしい問いを一つ示す。
+- 操作例には、その結果を確認できる画面を添える。
+
+## 次の作業
+- [ ] 導入の段落を3文で書く。
+</code></pre>
+<p>Esta é uma proposta feita para o texto, e não é um resultado de operação que é refletido na tela real. Depois de coletar os materiais, escolha os pontos principais e use-os para o seu manuscrito. Quando você estiver ciente do Destilação e Expresso de CÓDIGO, você pode primeiro começar com uma pequena tarefa de "escolher um dos materiais e usar o que está fazendo agora".</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="archive">5 Mover para Arquivo e reabrir o link</h2></div><div class="ce-chapter__body">
+<p>O trabalho concluído ou o trabalho que não foi abordado uma vez pode ser removido da lista em andamento. Abra o menu da nota de destino em Obsidian e selecione <code>Archive</code> no comando mover. O nome da operação e a posição de exibição podem variar dependendo do idioma e da versão. <a href="https://obsidian.md/help/manage-notes">Explicação oficial do gerenciamento de notas</a></p>
+<p>Nesta mudança, foi confirmado que o "link 2 no arquivo 2", então optei por atualizar esse horário. A configuração de atualização sempre automática não foi alterada.</p>
+<p><img alt="O link para a nota de apresentação permanece na nota de escrita e a tela real é exibida após a atualização do link 2 no arquivo 2" decoding="async" height="768" loading="lazy" src="/assets/img/obsidian-second-brain/archive-links-updated.png" width="984"/></p>
+<p><em>A tela real imediatamente após a movimentação. Reabri as notas de apresentação no Arquivo a partir do link atualizado e verifiquei o status da verificação. </em></p>
+<p>, verifique o próximo ponto 3.</p>
+<ol>
+<li>As notas de apresentação estão no Arquivo e foram movidas da localização original dos Projetos.</li>
+<li>Abra as notas de apresentação que foram movidas do lado da Escrita e do documento.</li>
+<li>O corpo e o status de verificação da nota permanecem.</li>
+</ol>
+<p>No exemplo da tela, tentamos apenas o movimento, e a apresentação não estava completa. Você pode se mover mesmo que haja uma caixa de seleção restante, para que você possa separar e julgar "Consegui me mudar" e "o trabalho está concluído".</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="review">O que você olha para trás quando começa a operar?</h2></div><div class="ce-chapter__body">
+<p>Primeiro de tudo, use-o para um projeto e abra Projetos quando começar a trabalhar. Se você não sabe o que fazer a seguir, adicione um no final da nota. Se houver muitos links para o material, coloque apenas o que você usa desta vez perto do texto.</p>
+<p>Há também uma maneira de revisar o que você terminou, o que está em espera e os materiais que você usará a seguir em um horário que você decidir, como nos fins de semana. Esta é uma proposta de operação, e não é o resultado de medir o efeito de uma frequência de revisão fixa.</p>
+<p>Se você quiser manter um registro diário primeiro, você também pode usar o modelo manual de <a href="/pt-BR/obsidian/journaling/">journaling</a> com Obsidian. Se você quiser separar as anotações que deixa em qualquer logo e as anotações que você organiza em sua mesa, consulte <a href="/pt-BR/methods/second-brain/">Como se conectar da entrada do memorando ao Obsidian</a>.</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="faq">Perguntas frequentes</h2></div><div class="ce-chapter__body">
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Preciso de um plug-in?</summary><div class="faq-answer">
+<p>A pasta, itens de seleção, links internos e exemplos móveis neste artigo não adicionam plug-ins da comunidade. Não lidamos com classificação ou sincronização automática com serviços externos.</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Preciso transferir todos os memorandos existentes para o PARA?</summary><div class="faq-answer">
+<p>Neste procedimento, você pode começar com um projeto prático. Se você quiser transferir uma nota existente, prepare um backup e verifique o movimento do link em um pequeno número antes de prosseguir.</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Não tenho certeza se devo colocá-lo em Projetos ou Recursos.</summary><div class="faq-answer">
+<p>Se for o manuscrito da apresentação que está acontecendo agora, ele pode ser dividido em Projetos, e se for um material geral usado para outras apresentações, pode ser dividido em Recursos. Se você vincular ao material do lado do manuscrito, poderá consultar o mesmo texto sem copiá-lo para ambos.</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Se eu fizer um gráfico, o segundo cérebro será concluído?</summary><div class="faq-answer">
+<p>Não sei se o material pode ser usado na situação necessária apenas exibindo o link. Primeiro, prossiga para o documento a partir da nota de trabalho e tente ver se você pode retornar um ponto principal ao manuscrito. A partir desta confirmação de operação, não julgamos a melhoria da memória e da produtividade.</p><p>Se você quiser restringir o intervalo de notas a serem exibidas, consulte <a href="/pt-BR/obsidian/graph-view/">Exemplos de pesquisa de tags de pasta e gráficos locais</a>.</p>
+</div></details></div></div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="sources">Materiais de referência e escopo de confirmação</h2></div><div class="ce-chapter__body">
+<ul>
+<li><a href="https://fortelabs.com/blog/basboverview/">Forte Labs — Construindo um Segundo Cérebro</a></li>
+<li><a href="https://fortelabs.com/blog/para/">Laboratórios Fortes — PARA</a></li>
+<li><a href="https://obsidian.md/help/links">Obsidian — Links internos</a></li>
+<li><a href="https://obsidian.md/help/manage-notes">Obsidian — Gerenciar notas</a></li>
+</ul>
+<p>Data de confirmação do documento: 2026 ano 9 mês 15. O escopo da operação real é o cofre de verificação da versão Mac do Obsidian 1.13.7. O efeito da operação a longo prazo, plug-in, entrega automática, sincronização multiterminal e produtividade do CÓDIGO não estão incluídos nesta verificação.</p></div></section><section class="ce-chapter" id="starter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="capture-section-10">Baixar modelo manual</h2></div><div class="ce-chapter__body"><p><a download="" href="/assets/templates/obsidian-para-starter.zip">Baixe Markdown para prática PARA (ZIP)</a></p><p>Quando você expande o ZIP, há arquivos de informações como Projetos・Áreas・Recursos・Arquivo. Copie a pasta para o novo cofre de prática ou cole o texto de cada Markdown no caderno correspondente e use-o. Se tiver o mesmo nome do notebook existente, não o substitua e tente em outro repositório.</p><p>A data e o texto são amostras fixas. Mesmo que você faça o download, a data não será automaticamente alterada ou importada para o cofre. É um modelo manual feito separadamente da tela real, e a importação e a sincronização do leitor no terminal não foram verificadas.</p></div></section><p style="font-size:.9rem;color:var(--text-secondary)">Este site é operado por YURIKA, K.K. e apresenta o aplicativo independente "SimpleMemo". Obsidian Este não é um artigo oficial.</p><aside class="next-step"><a data-next-step="explore" href="/pt-BR/obsidian/">Veja a configuração para deixar uma nota de iPhone para Obsidian</a></aside></div></article></main><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Navegação do rodapé" class="footer__nav"><div class="footer__col"><p class="footer__col-title">Produto</p><a class="footer__link" href="/pt-BR/download/">Baixar</a><a class="footer__link" href="/pt-BR/">Início</a><a class="footer__link" href="/pt-BR/obsidian/">Integração com Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Comparações e migração</p><a class="footer__link" href="/pt-BR/vs/">Comparar</a><a class="footer__link" href="/pt-BR/obsidian/compare/">Comparação Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Suporte</p><a class="footer__link" href="/pt-BR/about/">Sobre o desenvolvedor</a><a class="footer__link" href="/pt-BR/faq">Perguntas frequentes</a><a class="footer__link" href="/pt-BR/privacy">Privacidade</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

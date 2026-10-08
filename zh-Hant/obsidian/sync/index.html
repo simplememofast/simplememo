@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian的同步方法比較 — iCloud・Sync・Git・Syncthing【2026】 | SimpleMemo</title>
+  <meta name="description" content="Obsidian的同步方法比較4。 關於iCloud Drive・官方Sync・Git・Syncthing，整理了費用・對應OS・衝突時的行為。 Git和Syncthing實際上發生了衝突編輯，在這個環境中實際測量了破壞方式。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian的同步方法比較 — iCloud・Sync・Git・Syncthing【2026】 | SimpleMemo">
+  <meta property="og:description" content="4的同步方法以費用、對應OS、衝突時的行為進行比較。 Git和Syncthing實際上發生了衝突編輯，在這個環境中實際測量了破壞方式。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-26T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/sync/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的同步方法比較 — iCloud・Sync・Git・Syncthing【2026】 | SimpleMemo">
+  <meta name="twitter:description" content="4的同步方法以費用、對應OS、衝突時的行為進行比較。 Git和Syncthing實際上發生了衝突編輯，在這個環境中實際測量了破壞方式。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/sync/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/sync/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/sync/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/sync/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/sync/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/sync/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/sync/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/sync/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/sync/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/sync/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/sync/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian合作",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "同步方法總結",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/sync/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Obsidian的同步方法總結 — iCloud/官方Sync/Git/Syncthing比較",
+  "description": "Obsidian的同步方法4個（iCloud Drive・官方Obsidian Sync・Git・Syncthing）根據費用・對應OS・衝突時的行為進行了比較，Git和Syncthing實際再現了競爭編輯，驗證了破壞方式。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/sync/",
+  "datePublished": "2026-08-26",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "最終選哪個好呢？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "如果只用Apple產品的話，已經開啟的iCloud Drive是最省事的。 也使用Windows/Android，或者官方要求版本歷史和支援的話，付費的Obsidian Sync。 熟悉Git，如果想作為提交履歷留下保管庫的變化的話，Git。 如果不想免費透過雲企業的話，就選擇Syncthing（iPhone・iPad在Obsidian的官方幫助中“官方不支援”的處理）。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "不使用Obsidian Sync可以在多個終端上同步嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以。 保管庫只是沒有特殊格式的Markdown檔案的集合，所以iCloud Drive・Dropbox・Google Drive等OS標準的檔案同步，以及Git和Syncthing等通用的同步工具可以直接使用。 Obsidian Sync是同步方法的選擇之一，不是必須的。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "同時用2臺編輯會怎麼樣？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "根據方式不同，破損方式也不同。 在本報道中實際測量後，Git將衝突標記（<<<<<<<）直接寫入同一檔案中，需要手動解決。 Syncthing自動採用一邊，一邊將另一個作為名為“sync-conflict”的單獨檔案儲存，資料沒有丟失。 iCloud Drive和Obsidian Sync在這個環境下（沒有Linux・macOS/iOS）無法實機驗證。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以同時使用多種同步方法嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian官方幫助建議將Obsidian Sync與Dropbox、Google Drive、OneDrive等其他雲端儲存同時使用時會發生同步衝突（sync conflicts），建議備份保管庫。 避免將雙重同步結構疊加在同一資料夾中，在1個保管庫中使用1個同步方法比較安全。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "用Obsidian Sync覆蓋錯誤的話可以恢復嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "根據官方幫助，透過Version History功能可以瀏覽、恢復每個筆記的過去版本。 保留期限為Standard計劃1個月，Plus計劃12個月，附件為2周（2026年8月26日在官方幫助中確認）。 恢復選擇檔案，從“Open version history”開始。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/sync/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "Obsidian的同步方法比較 — iCloud・Sync・Git・Syncthing【2026】 | SimpleMemo",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/sync/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 原因/事象ブロック（コンフリクトの実測結果を並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:20%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/sync/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/sync/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/sync/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/sync/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/sync/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/sync/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/sync/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/sync/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/sync/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+<div class="ce-hero-copy">
+        <div class="lp-hero__label">
+          <span>Obsidian 同步方法的比較</span>
+        </div>
+        <h1 class="lp-hero__title"><span class="ce-title-line">Obsidian</span><span class="ce-title-line">在多個終端上<span class="ce-title-accent">同步</span></span><span class="ce-title-line">4的方法</span></h1>
+        <p class="lp-hero__sub"> <span>保管庫沒有特殊格式，只是Markdown資料夾。 所以同步方法不受Obsidian本身的束縛，可以自由選擇<strong>iCloud Drive等OS標準同步、付費官方Obsidian Sync、Git等版本管理、Syncthing等自託管型同步工具</strong>。 這裡透過費用、對應OS、衝突時的行為比較了4方式，<strong>Git和Syncthing實際碰撞了2臺的離線編輯，確認了破損方式</strong>。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開: <time datetime="2026-08-26">2026年8月26日</time></span> </p>
+      <a class="ce-read-link" href="#guide-section-1">閱讀正文 <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">一個金庫·您的裝置</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>選擇同步方式</span></div><div class="ce-chip-grid"><div class="ce-chip">iCloud驅動器</div><div class="ce-chip">Obsidian Sync</div><div class="ce-chip">Git</div><div class="ce-chip">同步</div></div><div class="ce-connector">↓</div><div class="ce-folder"><div class="ce-note">Vault /<br>筆記本.md<br>附件</div></div></div><p class="ce-stage-foot">構成影象</p></div>
+</div>
+<div class="ce-routes" aria-label="從想讀的內容中選擇"><a class="ce-route" href="#guide-section-1"><span>01</span><b>瞭解4方式</b></a><a class="ce-route" href="#guide-section-2"><span>02</span><b>比較費用・OS</b></a><a class="ce-route" href="#guide-section-3"><span>03</span><b>檢視競爭時的行為</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>本頁目錄</summary><nav aria-label="頁面內的目錄"><a href="#guide-section-1">01 4的同步方法</a><a href="#guide-section-2">02 對比表</a><a href="#guide-section-3">03 比較破損方式 — 實際嘗試引起衝突</a><a href="#guide-section-4">04 選擇方法的基準</a><a href="#guide-section-5">05 無論哪種同步方式，保管庫都只是資料夾</a><a href="#guide-section-6">06 常見問題</a><a href="#guide-section-7">07 相關頁面</a></nav></details>
+
+
+      <!-- Answer-first (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span>一言以蔽之</span></div>
+          <p><span>如果僅用Apple產品完成的話<strong>iCloud Drive</strong>（預設執行，沒有額外費用）就足夠了。 Windows/Android也一樣，或者想要官方版本歷史和支援的話<strong>Obsidian Sync</strong>（收費）。 如果熟悉Git並想將變更履歷作為提交留下的話<strong>Git</strong>（免費・需要設定）。 如果想不透過雲運營商免費同步的話<strong>Syncthing</strong>（免費・需要設定。  iPhone・iPad官方不支援）。 <strong>實測發現的區別是“發生衝突（衝突編輯）時的破壞方式”</strong>，Git在筆記正文中直接插入衝突標記，需要手動解決，Syncthing自動保留一個，將另一個作為單獨的檔案儲存。 </span></p>
+        </div>
+      </section>
+
+      <!-- Voice route — GROWTH_LTV_ENGAGEMENT_2026-09-01 §6 P1: every hub child points at the
+           shortest iPhone→voice→vault path once, below the answer block so the answer stays first. -->
+      <p class="voice-route" style="margin:0 0 1.5rem;padding:.75rem 1rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.7;"> <span>從iPhone<strong>用聲音說話留給Obsidian</strong>最短的方法，總結為<a href="/zh-Hant/blog/obsidian-voice-input">4方式的比較（附帶不需要外掛的步驟）</a>。 </span> </p>
+
+      <!-- Four methods overview -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"> <span>4個同步方法</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>無論哪個都做“在多個終端上整理保管庫資料夾的內容”的同樣的工作，但是結構不同。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">☁️ <span>iCloud驅動器</span></div>
+            <div class="reason-card__desc"><span>Apple純正的檔案同步。 只需將保管庫資料夾放在iCloud Drive內，Mac/iPhone/iPad之間無需追加設定即可齊全。 無法到達Windows/Android/Linux。<a href="/zh-Hant/obsidian/sync/icloud/">設定步驟在另一頁</a>中。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔄 <span>Obsidian Sync（官方・收費）</span></div>
+            <div class="reason-card__desc"><span>Obsidian開發者提供的官方服務。 擁有E2E加密・Version History功能，對應所有平臺。 費用是<a href="/zh-Hant/obsidian/pricing/">在另一篇報道中已實測</a>在、<a href="/zh-Hant/obsidian/sync/official-sync/">Standard/Plus需要哪個</a>也在另外的頁面上整理。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span>Git</span></div>
+            <div class="reason-card__desc"><span>將保管庫視為Git儲存庫，透過提交、push、pull進行同步的方式。 使用社群外掛（Obsidian Git等）也可以實現自動化。 所有變更都作為履歷留下的同時，解決衝突需要Git的知識。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔁 <span>同步</span></div>
+            <div class="reason-card__desc"><span>開源的自託管型檔案同步。 不透過雲企業，終端之間直接（P2P）同步。 免費，有面向電腦（Windows・Mac・Linux）的官方版。 Android官方應用程式的開發結束，使用社群版（Syncthing-Fork）。 iPhone・iPad在Obsidian的官方幫助中是“官方不支援”的處理，透過其他公司製造的應用程式（Synctrain等）迴避的形式。 在各個終端上安裝應用程式進行配對也很麻煩。</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- Comparison table -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"> <span>對比表</span> </h2></header><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="對比表（可以橫向滾動）">
+          <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span>專案</span></th>
+              <th scope="col">iCloud驅動器</th>
+              <th scope="col"><span>Obsidian Sync（官方）</span></th>
+              <th scope="col">Git</th>
+              <th scope="col">同步</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span>費用</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-yes"><span>免費</span></span> <span>（預設的iCloud容量內）</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-no"><span>收費</span></span> <span>（<a href="/zh-Hant/obsidian/pricing/">費用詳情</a>）</span></td>
+              <td data-label="Git"><span class="mk-yes"><span>免費</span></span> <span>（取決於主機的容量）</span></td>
+              <td data-label="同步"><span class="mk-yes"><span>免費</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>設定的麻煩</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-yes"><span>幾乎沒有</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>低</span></span> <span>（在應用程式內完成）</span></td>
+              <td data-label="Git"><span class="mk-no"><span>高</span></span> <span>（儲存庫・外掛設定）</span></td>
+              <td data-label="同步"><span class="mk-part"><span>中</span></span> <span>（每個終端配對）</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>對應平臺</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-no">Apple<span>僅</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>全部平臺</span></span></td>
+              <td data-label="Git"><span class="mk-yes"><span>所有平臺</span></span> <span>（手機取決於外掛）</span></td>
+              <td data-label="同步"><span class="mk-part"><span>電腦・Android</span></span> <span>（Android是社群版。 iPhone・iPad不支援官方）</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>衝突時的行為</span></th>
+              <td data-label="iCloud驅動器"><span>帶編號的重複檔案（Apple官方幫助・Obsidian的實機驗證未實施）</span></td>
+              <td data-label="Obsidian Sync"><span>具體處理沒有記載在官方幫助中。 可以透過Version History恢復</span></td>
+              <td data-label="Git"><span class="mk-part"><span>在正文中插入碰撞標記（實測）</span></span></td>
+              <td data-label="同步"><span class="mk-part"><span>作為單獨的檔案同時儲存（實測）</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>版本歷史</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-no"><span>無</span></span> <span>（Markdown檔案單體）</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>有</span></span> <span>（Standard 1月・Plus 12月保持）</span></td>
+              <td data-label="Git"><span class="mk-yes"><span>有</span></span> <span>（無限期・承諾單位）</span></td>
+              <td data-label="同步"><span class="mk-part"><span>預設無效</span></span> <span>（可以透過設定啟用）</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>通訊的加密</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-yes"><span>有</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span>E2E加密</span></span></td>
+              <td data-label="Git"><span class="mk-part"><span>主機依賴</span></span> <span>（HTTPS/SSH）</span></td>
+              <td data-label="同步"><span class="mk-yes"><span>TLS・P2P直連</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span>可以離線寫嗎</span></th>
+              <td data-label="iCloud驅動器"><span class="mk-yes">◎</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes">◎</span></td>
+              <td data-label="Git"><span class="mk-yes">◎</span></td>
+              <td data-label="同步"><span class="mk-yes">◎</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span>※“衝突時的行為”“版本履歷”的部分單元格的驗證範圍不同。 詳情請看下一章和末尾的“驗證環境和驗證範圍”。 </span></p>
+      </div></section>
+
+      <!-- Failure modes — the unique value of this article -->
+      <section class="lp-section ce-chapter" id="conflicts">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"> <span>比較破損方式 — 實際發生了衝突</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>雖然經常看到同步方式的目錄式比較，但<strong>“同時用2臺編輯的話實際會怎麼樣”移動手確認的報道並不多。 </strong>在這裡，在這個驗證環境（Ubuntu 24.04・GitHub Actions）中實際設定了Git和Syncthing，在模仿2臺終端的資料夾中<strong>離線新增單獨的1行後重啟同步</strong>。 iCloud Drive和Obsidian Sync，因為這個環境下沒有macOS/iOS，所以實機無法再現，是基於官方幫助的記載。 </span> </p>
+
+        <div class="cz">
+          <div class="cz__n"><span>實測 — Git</span></div>
+          <h3 class="cz__t"><span>在筆記正文中直接插入碰撞標記</span></h3>
+          <p><span>製作了1箇中央儲存庫，將2的clone分別視為不同的終端。 兩者都處於“離線”狀態，在同一筆記的末尾加上另一個1行並提交，按順序push。 </span></p>
+          <pre class="note-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># デバイスAを先にpush → 成功
+$ git push origin master
+   ba48c62..f0be52e  master -> master
+
+# デバイスBをpush → 拒否される
+$ git push origin master
+ ! [rejected]  master -> master (fetch first)
+
+# デバイスBがpull（マージを試み、衝突）
+$ git pull origin master --no-rebase
+Auto-merging Daily Notes/2026-08-26.md
+CONFLICT (content): Merge conflict in Daily Notes/2026-08-26.md
+
+# ノートの中身（Obsidianで開くとこのまま見える）
+# 2026-08-26
+
+- 08:00 起床
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 09:15 買い物メモ
+&#61;&#61;&#61;&#61;&#61;&#61;&#61;
+- 09:00 会議メモ
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; f0be52e...</code></pre>
+          <p><span><strong>資料不會丟失</strong>但是，帶有碰撞標記狀態的筆記本直接用Obsidian開啟。 如果不注意地閱讀的話，可能會誤讀自己的文章，為了解決，需要在理解<code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>的意思後手動編輯，重新提交。 即使使用像Obsidian Git這樣的外掛，這個最終的衝突解決也是需要Git知識的工作。 </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>實測 — Syncthing</span></div>
+          <h3 class="cz__t"><span>留下一邊，把另一邊退到其他檔案</span></h3>
+          <p><span>按照同樣的步驟（透過apt安裝的Syncthing v1.27.2啟動2例項，用本地TCP直接配對）嘗試的話，與Git的破壞方式完全不同。 </span></p>
+          <pre class="note-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># 同期再開後のvault-a
+Daily Notes/2026-08-26.md
+Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
+
+# 2026-08-26.md（採用された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:15 買い物メモ（デバイスBで追記）
+
+# 2026-08-26.sync-conflict-....md（退避された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:00 会議メモ（デバイスAで追記）</code></pre>
+          <p><span>Syncthing自動將其中一個保留原檔名，將另一個儲存為名為<code>*.sync-conflict-日時-デバイスID.md</code>的<strong>另一個筆記</strong>。 正文中不會混入標記，也不需要Git知識。 但是<strong>不會自動合併</strong>，如果在沒有注意到被撤離的筆記的情況下放置的話，同一話題的筆記會分裂成2的檔案。 保管庫的搜尋結果中不熟悉的檔名增加，這可能會造成操作上的噪音。 </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>官方資訊・未驗證 — iCloud Drive</span></div>
+          <h3 class="cz__t"><span>Apple官方幫助上有編號的重複檔案</span></h3>
+          <p><span>Apple官方的Mac幫助說明，在iCloud Drive上文件的版本衝突時，可以在衝突解決對話方塊中選擇並保留各個版本，如果保留多個版本，則像“Seven Wonders”“Seven Wonders 2”一樣<strong>末尾帶有編號的檔名</strong>。 但是這個對話方塊是針對Apple的檔案版本化API對應的應用程式（Pages等）的行為，<strong>像Obsidian一樣直接讀寫到檔案系統的應用程式不一定會出現相同的對話方塊</strong>。  這個環境中沒有macOS/iOS，Obsidian+iCloud Drive沒有進行實機驗證。 </span></p>
+          <p><span>現有報道的<a href="/zh-Hant/obsidian/daily-note/#missing">“不進入每日筆記”章節</a>中處理的同步延遲（即使寫入即時也需要幾秒鐘~數十秒才能反映），與這種競爭是不同的現象。 瞭解兩者的話，透過iCloud的故障分類會更快。 </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>官方資訊・未驗證 — Obsidian Sync</span></div>
+          <h3 class="cz__t"><span>衝突的解決演算法不公開。 可以依靠的是Version History</span></h3>
+          <p><span>官方幫助（obsidian.md/help/sync，2026年8月26日獲取）中，沒有同時編輯時採用哪個版本的具體演算法記載。 另一方面<strong>“Obsidian Sync與Dropbox、Google Drive、OneDrive等其他雲端儲存同時使用的話，可能會發生同步衝突（sync conflicts），請備份保管庫”</strong>的官方注意事項，Obsidian Sync也存在競爭的概念本身。  作為恢復手段明確說明的是<strong>Version History</strong>功能，可以以筆記為單位從列表中選擇過去的版本進行恢復。 保留期限為Standard計劃1個月，Plus計劃12個月，附件不分計劃2周。 </span></p>
+          <p><span>在這個環境下，因為需要付款，所以無法建立Obsidian Sync的賬戶，無法再現實際的競爭。 </span></p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>共同的教訓</span></div>
+          <p><span>4方式中，實測的Git・Syncthing都沒有<strong>丟失資料</strong>。 破壞方法的區別在於“標記是否混入正文”和“是否分裂成其他檔案”，兩者<strong>如果不注意就會安靜地放置</strong>這一點是共同的。 1的保管庫不要以多個同步方式進行雙重同步（Obsidian公式明確提醒這一點）是最可靠的預防措施。 </span></p>
+        </div>
+      </div></section>
+
+      <!-- How to choose -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"> <span>選擇方法的基準</span> </h2></header><div class="ce-chapter__body">
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">🍎 <span>僅使用Apple產品</span></div>
+            <div class="reason-card__desc"><span>iCloud Drive就足夠了。 已經開啟了，不需要額外的費用和設定。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🖥️ <span>Windows/Android也一樣</span></div>
+            <div class="reason-card__desc"><span>如果想在沒有技術知識的情況下獲得官方支援和版本履歷的話，Obsidian Sync。 如果免費的話，Syncthing是對手。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span>習慣了Git</span></div>
+            <div class="reason-card__desc"><span>如果想要將保管庫的變化本身作為提交履歷留下的話，Git。 前提是能夠自己解決衝突。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔒 <span>不想透過雲企業</span></div>
+            <div class="reason-card__desc"><span>4中，終端之間直接同步的只有Syncthing。 雖然是免費的，但iPhone・iPad在Obsidian的官方幫助中作為“官方不支援”的處理，各個終端的設定也是自己進行的。</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"> <span>無論哪種同步方式，保管庫都只是資料夾</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>選擇哪種同步方式，只是決定保管庫資料夾的“排列方法”而已。 SimpleMemo將傳送的備忘錄留在自己的郵件中，直接在<strong>iCloud Drive上的保管庫資料夾的每日筆記中</strong>進行補充。 以iCloud Drive同步的保管庫為物件，僅透過Git和Syncthing操作（不透過iCloud Drive）的保管庫資料夾，目前不在物件之列。 </span> </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span>無論哪種同步方式，到達目的地都是同一個資料夾</span></div>
+          <p class="cta-box__desc"><span>下載免費。 只需選擇一次iCloud Drive上的保管庫資料夾即可完成設定。 </span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="從App Store下載"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"> </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-ja.svg?v=45629ebf9d" width="132" height="132" alt="App Store下載二維碼" loading="lazy">
+
+            <small><span>PC使用者用智慧手機讀取</span></small>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"> <span>常見問題</span> </h2></header><div class="ce-chapter__body">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>最終選哪個好呢？ </span></summary>
+            <div class="faq-answer"><span>如果只用Apple產品的話，已經開啟的iCloud Drive是最省事的。 也使用Windows/Android，或者官方要求版本歷史和支援的話，付費的Obsidian Sync。 熟悉Git，如果想作為提交履歷留下保管庫的變化的話，Git。 如果不想免費透過雲企業的話，就選擇Syncthing（iPhone・iPad在Obsidian的官方幫助中“官方不支援”的處理）。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>不使用Obsidian Sync可以在多個終端上同步嗎？ </span></summary>
+            <div class="faq-answer"><span>可以。 保管庫只是沒有特殊格式的Markdown檔案的集合，所以iCloud Drive・Dropbox・Google Drive等OS標準的檔案同步，以及Git和Syncthing等通用的同步工具可以直接使用。 Obsidian Sync是同步方法的選擇之一，不是必須的。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>同時用2臺編輯會怎麼樣？ </span></summary>
+            <div class="faq-answer"><span>根據方式不同，破損方式也不同。 在本報道中實際測量後，Git將衝突標記（&lt;&lt;&lt;&lt;&lt;&lt;&lt;）直接寫入同一檔案中，需要手動解決。 Syncthing自動採用一邊，一邊將另一個作為名為“sync-conflict”的單獨檔案儲存，資料沒有丟失。 iCloud Drive和Obsidian Sync在這個環境下（沒有Linux・macOS/iOS）無法實機驗證。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>可以同時使用多種同步方法嗎？ </span></summary>
+            <div class="faq-answer"><span>Obsidian官方幫助建議將Obsidian Sync與Dropbox、Google Drive、OneDrive等其他雲端儲存同時使用時會發生同步衝突（sync conflicts），建議備份保管庫。 避免將雙重同步結構疊加在同一資料夾中，在1個保管庫中使用1個同步方法比較安全。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>用Obsidian Sync覆蓋錯誤的話可以恢復嗎？ </span></summary>
+            <div class="faq-answer"><span>根據官方幫助，透過Version History功能可以瀏覽、恢復每個筆記的過去版本。 保留期限為Standard計劃1個月，Plus計劃12個月，附件為2周（2026年8月26日在官方幫助中確認）。 恢復選擇檔案，從“Open version history”開始。</span></div>
+          </details>
+        </div>
+      </div></section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span>驗證環境和驗證範圍</span></div>
+          <p style="margin:0;"><span>驗證日期：2026年8月26日/環境：Linux桌面（Ubuntu 24.04・GitHub Actions執行環境）。 <strong>實測（在這個會話中實際移動確認）</strong>: Git 2.x — 中央儲存庫1個和2個clone離線同時編輯→push的拒絕→pull時的合併衝突→再現插入正文的衝突標記。 Syncthing v1.27.2（透過apt安裝）—在本地TCP中直接配對的2例項之間再現相同的場景，確認<code>sync-conflict-*.md</code>檔案的生成。  <strong>基於官方資訊的記載（未驗證）</strong>：Obsidian Sync版本履歷的保留期限・其他雲同時使用時的注意事項（obsidian.md/help/sync從本會話直接獲取・2026年8月26日）、iCloud Drive上檔案衝突時的帶編號檔名（Apple官方Mac幫助）、Syncthing的對應終端（obsidian.md/help/sync-notes和Syncthing的文件・2026年10月1日確認）。  <strong>在這個環境下無法驗證的事情</strong>：iCloud Drive和Obsidian組合的實際競爭行為（沒有macOS/iOS），Obsidian Sync的實際競爭再現（因為是收費服務，所以未簽約）。 Obsidian的版本和各工具的行為在未來可能會發生變化，所以最新資訊請在各官方網站上確認。 </span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"> <span>相關頁面</span> </h2></header><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh-Hant/obsidian/sync/icloud/"><span>用iCloud同步的設定步驟（iPhone×Mac）</span></a>
+          <a href="/zh-Hant/obsidian/sync/official-sync/"><span>Standard/Plus，需要的是哪一個</span></a>
+          <a href="/zh-Hant/obsidian/"><span>Obsidian合作詳情</span></a>
+          <a href="/zh-Hant/obsidian/daily-note/"><span>在每日筆記中補充的方法</span></a>
+          <a href="/zh-Hant/obsidian/what-is-vault/"><span>保管庫（Vault）是指 — 實體只是資料夾</span></a>
+          <a href="/zh-Hant/obsidian/pricing/"><span>Obsidian的費用 — 免費能用到什麼程度</span></a>
+          <a href="/zh-Hant/obsidian/getting-started/"><span>Obsidian的開始方法（實際畫面指南）</span></a>
+          <a href="/zh-Hant/obsidian/compare/logseq/"><span>Obsidian vs Logseq 比較驗證</span></a>
+          <a href="/zh-Hant/faq"><span>常見問題</span></a>
+        </div>
+      </div></section>
+
+    </div>
+</div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>參考文獻</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/help/sync" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync</a> — <span>Obsidian Sync的官方幫助。 2026年8月26日直接從本會議獲取</span></li>
+    <li><a href="https://obsidian.md/help/sync/version-history" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Version History</a> — <span>版本歷史的保留期限・恢復方法的官方幫助</span></li>
+    <li><a href="https://support.apple.com/en-in/guide/mac-help/mh40780/mac" target="_blank" rel="noopener" style="color:var(--accent);">If document versions conflict in iCloud Drive on Mac — Apple Support</a> — <span>iCloud Drive上的文件衝突時的行為相關的官方指南</span></li>
+    <li><a href="https://git-scm.com/docs/git-merge" target="_blank" rel="noopener" style="color:var(--accent);">git-merge — Git官方文件</a> — <span>關於合併衝突機制的官方參考</span></li>
+    <li><a href="https://docs.syncthing.net/users/syncing.html" target="_blank" rel="noopener" style="color:var(--accent);">Syncthing Documentation — File Versioning &amp; Conflicts</a> — <span>關於Syncthing的衝突檔案命名規則的官方檔案</span></li>
+    <li><a href="https://obsidian.md/help/sync-notes" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync your notes across devices</a> — <span>每個終端的同步方法的官方幫助（iPhone・iPad將Syncthing列為“官方不支援”的選項，Android以官方應用程式的開發結束為由介紹社群版）。 2026年10月1日確認</span></li>
+    <li><a href="https://docs.syncthing.net/users/contrib.html" target="_blank" rel="noopener" style="color:var(--accent);">Syncthing Documentation — Community Contributions</a> — <span>Android（Syncthing-Fork等）和iPhone・iPad（Synctrain）的社群應用程式一覽</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>App Store的下載頁面</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>透過Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定合作和儲存地址，傳送的備忘錄也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一覽</span></a></li>
+    <li><a href="/zh-Hant/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>日報</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

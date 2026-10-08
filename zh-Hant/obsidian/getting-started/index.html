@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/getting-started/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian的下載・安裝方法|Windows・Mac和初始設定</title>
+  <meta name="description" content="Obsidian的官方下載地址和Windows・Mac的安裝步驟指南。 進行日語設定、保管庫的製作、第一個筆記和連結。 區分Linux版1.13.6的實畫面6張和基於官方資料的OS不同步驟，還解說儲存地址和備份的確認。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian的下載・安裝方法|Windows・Mac和初始設定">
+  <meta property="og:description" content="Obsidian的官方下載地址和Windows・Mac的安裝步驟指南。 進行日語設定、保管庫的製作、第一個筆記和連結。 區分Linux版1.13.6的實畫面6張和基於官方資料的OS不同步驟，還解說儲存地址和備份的確認。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-12T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/getting-started/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-getting-started.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的下載・安裝方法|Windows・Mac和初始設定">
+  <meta name="twitter:description" content="Obsidian的官方下載地址和Windows・Mac的安裝步驟指南。 進行日語設定、保管庫的製作、第一個筆記和連結。 區分Linux版1.13.6的實畫面6張和基於官方資料的OS不同步驟，還解說儲存地址和備份的確認。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-getting-started.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/getting-started/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/getting-started/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/getting-started/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/getting-started/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/getting-started/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/getting-started/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/getting-started/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/getting-started/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/getting-started/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/getting-started/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/getting-started/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/getting-started/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian合作",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Obsidian的開始方法",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/getting-started/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/getting-started/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Obsidian的下載・安裝方法|Windows・Mac和初始設定",
+  "description": "Obsidian的官方下載地址和Windows・Mac的安裝步驟指南。 進行日語設定、保管庫的製作、第一個筆記和連結。 區分Linux版1.13.6的實畫面6張和基於官方資料的OS不同步驟，還解說儲存地址和備份的確認。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/getting-started/",
+  "datePublished": "2026-08-12",
+  "dateModified": "2026-09-22",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-getting-started.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/getting-started/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/getting-started/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian在哪裡可以下載？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方網站（黑曜石.md/下載）可以免費下載。 2026年8月12日確認時Windows用安裝器（.exe）、macOS用磁碟映像（.dmg）、Linux用AppImage/.deb/.tar.gz，正在分發面向iOS/Android的官方應用程式，本報道實際下載、安裝並驗證了Linux版AppImage。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Obsidian可以免費使用嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "應用程式本體個人使用、商業使用都是免費的。 收費的只有官方同期的Obsidian Sync（Standard 月4美元・年付）和公開服務的Obsidian Publish等附加服務。 這篇報道的驗證（安裝~筆記製作~連結~圖表檢視）也全部在免費範圍內完成。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "需要註冊賬號嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不需要。 在2026年8月12日的實機驗證中，從安裝到保管庫的製作、筆記的製作、連結、圖表檢視的顯示，一次也沒有要求輸入郵箱地址和賬戶註冊。 只有在使用付費官方同步（Obsidian Sync）等情況下才需要賬戶。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以用日語嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以使用。 在首次啟動畫面的語言選單中可以選擇日語，選單和設定也會顯示日語。 這篇報道的驗證（Obsidian 1.13.6）也全部用日語UI進行。 確認保管庫名和筆記本名稱也可以像“備忘錄”、“第一次的筆記本”這樣的日語原樣使用。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "保管庫（Vault）是什麼？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是儲存筆記的資料夾。 實體是普通的資料夾，透過驗證建立之後的保管庫的內容是設定用的.obsidian資料夾和“ようこそ.md”的2。 筆記本都是普通的Markdown檔案（.md），所以即使不使用Obsidian也可以用文字編輯器開啟。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Windows和Mac也是同樣的步驟嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方釋出Windows用安裝器（.exe）和macOS用磁碟映像（.dmg）在2026年8月12日確認有（Linux用是AppImage・deb・tar.gz）。 本報道的截圖是Linux版的，雖然沒有驗證Windows版、Mac版的畫面，但是安裝後從製作保管庫開始的流程是同一個Obsidian應用程式的操作。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "只用iPhone就可以開始嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Obsidian有iOS版應用程式，可以從App Store免費獲得（本報道中沒有驗證iOS版的動作）。 在iPhone中想到的1行留在Obsidian的方法在每日筆記中補充的方法和從iPhone傳送到Obsidian的方法6選中詳細解說。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以使用現有的Markdown資料夾嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在保管庫的管理畫面中選擇“作為保管庫開啟資料夾”，可以指定現有的資料夾。 避免在另一個保管庫內部建造新的保管庫，請確認開啟的地方和筆記本的內容。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "使用Obsidian Sync不需要備份嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "同步和備份是分開的。 因為錯誤刪除和覆蓋可能會反映在同步物件上，所以請準備另外的副本，確認是否開啟必要的筆記和附件。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/getting-started/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "Obsidian的下載・安裝方法|Windows・Mac和初始設定",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/getting-started/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── OS別ダウンロード表 ────────────────────────────
+       狭い画面では行ごとのカードに組み替える（/obsidian/compare/logseq/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+
+    /* ── 検証スクリーンショット ─────────────────────────
+       実UIのキャプチャ。掲載幅800pxで文字がつぶれないことを確認済み。
+       枠線は「これは図解ではなく画面の写し」であることを示す控えめな合図。 */
+    .shot{margin:1.5rem 0 2rem}
+    .shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}
+    .shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}
+    .shot-pair{display:grid;grid-template-columns:1fr;gap:1.25rem;margin:1.5rem 0 2rem}
+    @media(min-width:760px){.shot-pair{grid-template-columns:1fr 1fr}}
+    .shot-pair .shot{margin:0}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .start-toc{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin:1rem 0}.start-toc a{display:inline-flex;align-items:center;min-height:44px;color:var(--accent)}.start-toc a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.start-supplement{font-size:.95rem;line-height:1.85;color:var(--text-secondary)}.start-supplement p{margin-bottom:1.2rem}.start-supplement li{margin:.7rem 0}.start-supplement ul,.start-supplement ol{padding-left:1.4rem;margin-bottom:1.2rem}.start-supplement a{color:var(--accent);text-decoration:underline;text-underline-offset:3px}.start-supplement strong{color:var(--text)}.lp-section{scroll-margin-top:80px}
+  </style>
+  <!-- Ahrefs analytics - deferred for LCP (same pattern as gtag above) -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://analytics.ahrefs.com/analytics.js';
+        s.async = true;
+        s.setAttribute('data-key', '6MwVxHQiKMs/Wl2rNBoiwQ');
+        document.head.appendChild(s);
+      });
+    });
+  </script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <style id="guide-rendering">
+    @supports (content-visibility: auto) and selector(html:has(:target)) {
+      @media screen {
+        html { scroll-behavior: auto; }
+        main .lp-section {
+          content-visibility: auto;
+          contain-intrinsic-size: auto 800px;
+        }
+        /* Resolve fragment links against the complete chapter heights. */
+        html:has(:target) main .lp-section {
+          content-visibility: visible;
+          contain-intrinsic-size: none;
+        }
+      }
+    }
+  </style>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/getting-started/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/getting-started/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/getting-started/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/getting-started/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/getting-started/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/getting-started/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/getting-started/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/getting-started/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/getting-started/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+<div class="ce-hero-copy">
+        <div class="lp-hero__label">
+          <span>Obsidian入門 實畫面指南</span>
+        </div>
+        <h1 class="lp-hero__title"><span class="ce-title-line">Obsidian的</span><span class="ce-title-line ce-title-accent">下載</span><span class="ce-title-line">和安裝</span></h1>
+        <p class="lp-hero__sub"> <span>首先從官方網站下載您使用的OS用的Obsidian。 下面總結了Windows、Mac的匯入步驟。 啟動後選擇日語，製作保管庫，進入第一個筆記本。 之後的<strong>實畫面6張是2026年8月12日操作Linux版1.13.6的記錄</strong>。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者：<a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ 公開：<time datetime="2026-08-12">2026年8月12日</time>・ 真實畫面的驗證日：2026年8月12日 ・ 補充更新：2026年9月22日</span> </p>
+      <a class="ce-read-link" href="#download-guide-title">閱讀正文 <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">你的第一個筆記</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>第一次的保管庫</span></div><div class="ce-stack"><div class="ce-stack-row"><b>01</b><span>安裝</span></div><div class="ce-stack-row"><b>02</b><span>製作保管庫</span></div><div class="ce-stack-row"><b>03</b><span>寫筆記</span></div><div class="ce-stack-row"><b>04</b><span>透過連結連線</span></div></div></div><p class="ce-stage-foot">構成影象</p></div>
+</div>
+<div class="ce-routes" aria-label="從想讀的內容中選擇"><a class="ce-route" href="#download-guide-title"><span>01</span><b>從官方下載</b></a><a class="ce-route" href="#guide-section-6"><span>02</span><b>製作保管庫</b></a><a class="ce-route" href="#guide-section-7"><span>03</span><b>寫第一個筆記</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>本頁目錄</summary><nav aria-label="頁面內的目錄"><a href="#download-guide-title">01 官方下載地址和OS不同的步驟</a><a href="#guide-section-2">02 Obsidian怎麼開始才好呢？</a><a href="#guide-section-3">03 開始之前：是新建還是開啟現有的保管庫</a><a href="#guide-section-4">04 Step 1: 安裝 — 對應OS和分發形式</a><a href="#guide-section-5">05 Step 2: 首次啟動 — 選擇日語，進入製作保管庫的畫面</a><a href="#guide-section-6">06 Step 3: 製作保管庫（Vault） — 只需決定名字和地點</a><a href="#guide-section-7">07 Step 4: 寫第一個筆記 — Ctrl+N（Mac是⌘N）</a><a href="#guide-section-8">08 Step 5: 連結 — [[ ]]是Obsidian的核心</a><a href="#guide-section-9">09 確認第一個筆記本是否處於可用狀態，5點</a><a href="#guide-section-10">10 與同步分開，測試是否可以從副本讀取</a><a href="#guide-section-11">11 開始後的課題 — iPhone的“瞬間的備忘錄”怎麼辦</a><a href="#guide-section-12">12 常見問題</a><a href="#guide-section-13">13 相關頁面</a></nav></details>
+
+
+      <section class="lp-section ce-chapter start-supplement" id="download-guide" aria-labelledby="download-guide-title">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="download-guide-title" data-ce-number="01">官方下載地址和OS不同的步驟</h2></header><div class="ce-chapter__body">
+        <p><a href="https://obsidian.md/download" target="_blank" rel="noopener">開啟Obsidian官方下載頁面</a> → 選擇您使用的OS。</p>
+        <ul>
+          <li><strong>Windows：</strong>從“Windows”的“Universal”獲取安裝程式，開啟並按照螢幕上的指示進行安裝。</li>
+          <li><strong>Mac：</strong>獲取“macOS”的“Universal”並開啟，將Obsidian拖到“Applications”資料夾。</li>
+          <li><strong>Linux：</strong>在官方頁面選擇分發形式。 每種形式的操作請參考<a href="https://obsidian.md/help/install" target="_blank" rel="noopener">官方安裝步驟</a>。 本報道的實際畫面是AppImage版。</li>
+          <li><strong>iPhone・iPad / Android：</strong>可以從官方下載頁面內的App Store / Google Play的連結獲得。 以下的實畫面指南以桌面版為物件。</li>
+        </ul>
+        <p>上面的指南是基於<strong>2026年9月22日確認的官方資料</strong>。 Windows、Mac、移動版不是這次實機驗證的記錄。</p>
+        <p>安裝好後<a href="#first-launch">日語設定和首次啟動</a>。 如果已經有筆記本的資料夾的話，可以確認<a href="#start-choice">開啟現有保管庫的步驟</a>。</p>
+      </div></section>
+
+      <!-- Answer block (AIO): question-form <h2> + a two-sentence definitive answer.
+           Canonical beginner query for the coverage lane (C02) — no ranked GSC query yet,
+           so the phrasing follows the「〜はどうやって始める」question form. Keep above the fold. -->
+      <section class="lp-section ce-chapter" data-answer-block="obsidian-getting-started" style="padding-top:1rem;">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"><span>Obsidian怎麼開始好呢？ </span></h2></header><div class="ce-chapter__body">
+        <div>
+          <p><strong>從官方網站免費安裝自己的OS用Obsidian，在首次啟動畫面中製作1個保管庫（Vault），就可以當場開始寫筆記了。 不需要註冊賬號。 </strong>在實機驗證中，從安裝到顯示第一個筆記、連結、圖表檢視不到15分鐘，在此期間一次也沒有要求輸入郵箱地址。</p>
+          <p>以下，透過這個驗證拍攝的實畫面截圖，按照1一步一步地遵循相同的步驟。</p>
+        </div>
+
+      </div></section>
+
+<nav class="start-toc" aria-label="指南部分"><a href="#download-guide"><span>官方下載</span></a><a href="#start-choice"><span>選擇新的還是現有的</span></a><a href="#install"><span>安裝</span></a><a href="#create-vault"><span>製作保管庫</span></a><a href="#first-note"><span>寫筆記</span></a><a href="#first-link"><span>建立連結</span></a><a href="#start-checks"><span>確認儲存</span></a><a href="#start-backup"><span>確認副本</span></a></nav>
+<section class="lp-section ce-chapter start-supplement" id="start-choice"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"><span>開始之前：是新建還是開啟現有的保管庫</span></h2></header><div class="ce-chapter__body"><div><p>第一次使用的話，按照接下來的步驟可以製作新的保管庫。 如果有現有的Markdown資料夾，在保管庫的管理畫面中選擇<strong>“作為保管庫開啟資料夾”</strong>，指定該資料夾。 如果在保管庫中設定另一個保管庫的話，連結的處理會出現問題，所以不要巢狀。</p><p>儲存地址，稍後在檔案管理畫面中選擇可以開啟的地方，保留資料夾名和位置。 如果想在其他終端上使用同樣的保管庫，請先確認<a href="/zh-Hant/obsidian/sync/">同步方法和對應終端</a>。 僅僅在本地製作備忘錄和設定同步是不同的工作。</p><p>這個補充和下面的儲存、影印確認，是基於2026年9月9日確認的<a href="https://obsidian.md/help/manage-vaults" target="_blank" rel="noopener">保管庫的官方管理指南</a>等的指南。 刊登的實畫面是2026年8月12日的Linux版1.13.6的記錄，與現在的畫面細節可能有所不同。</p></div></div></section>
+
+      <!-- Step 0: download / install -->
+      <section class="lp-section ce-chapter ce-chapter--wide" id="install">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4"> <span>Step 1: 安裝 — 對應OS和分發形式</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>Obsidian可以從<a href="https://obsidian.md/download" target="_blank" rel="noopener">官方網站的下載頁面</a>免費獲得。 2026年8月12日直接確認了官方釋出（v1.13.6）的分發檔案，提供了以下格式。 </span> </p>
+        <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="對比表（可以橫向滾動）">
+          <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col">作業系統</th>
+              <th scope="col"><span>分發形式（在v1.13.6上確認）</span></th>
+              <th scope="col"><span>本報道的驗證</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Windows</th>
+              <td data-label="分發形式"><span>安裝器（<code>.exe</code>）</span></td>
+              <td data-label="本報道的驗證"><span><span class="mk-part">只確認分發的存在</span>（執行未驗證）</span></td>
+            </tr>
+            <tr>
+              <th scope="row">macOS</th>
+              <td data-label="分發形式"><span>磁碟映像（<code>.dmg</code>）</span></td>
+              <td data-label="本報道的驗證"><span><span class="mk-part">只確認分發的存在</span>（執行未驗證）</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Linux</th>
+              <td data-label="分發形式"><span><code>AppImage</code>（x64/arm64）・<code>.deb</code>・<code>.tar.gz</code></span></td>
+              <td data-label="本報道的驗證"><span><span class="mk-yes">實際安裝、啟動AppImage</span>（本報道的全部截圖）</span></td>
+            </tr>
+            <tr>
+              <th scope="row">iOS/安卓</th>
+              <td data-label="分發形式"><span>App Store / Google Play的官方應用程式</span></td>
+              <td data-label="本報道的驗證"><span><span class="mk-no">未驗證</span>（僅官方資訊）</span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span>※ 分發形式是當天確認官方GitHub釋出（obsidianmd/obsidian-releases v1.13.6）的分發檔案的實測。 下載後，Windows執行<code>.exe</code>，Mac開啟<code>.dmg</code>，將應用程式拖到Applications，按照OS標準步驟進行安裝。 </span></p>
+      </div></section>
+
+      <!-- Step 1: first launch -->
+      <section class="lp-section ce-chapter ce-chapter--wide" id="first-launch">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5"> <span>Step 2: 首次啟動 — 選擇日語，進入製作保管庫的畫面</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>第一次啟動時，不是筆記畫面而是<strong>決定“保管庫（Vault）怎麼辦”的畫面</strong>。 雖然有很多人在這裡感到困惑，但要做的就是1——按下“新建保管庫”的<strong>建立</strong>。 在畫面下方的語言選單中選擇<strong>日語</strong>，整個UI都會變成日語（本報道的驗證也全部是日語UI）。 也有登入按鈕，這是付費官方同步（Obsidian Sync）用的，<strong>開始不需要賬號</strong>。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/01-vault-picker.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/01-vault-picker.png" width="800" height="648" loading="lazy" alt="Obsidian 1.13.6的首次啟動畫面。“ 新建保管庫”“作為保管庫開啟資料夾”“從Obsidian Sync開啟保管庫”的3選項，顯示的是選擇日語的語言選單">
+          </picture>
+          <figcaption><span>首次啟動畫面（Obsidian 1.13.6・日語UI）。“ 按“新建保管庫”的“建立”。 可以從下面的語言選單中選擇日語。 </span></figcaption>
+        </figure>
+      </div></section>
+
+      <!-- Step 2: create vault -->
+      <section class="lp-section ce-chapter ce-chapter--wide" id="create-vault">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6"> <span>Step 3: 製作保管庫（Vault） — 只需決定名字和地點</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>決定的只有<strong>名稱</strong>和<strong>位置（製作地點）</strong>的2。 驗證中名稱為“備忘錄”，地點為主頁內的<code>Vaults</code>資料夾。 名稱可以直接使用日語。 這裡製作的保管庫的實體是<strong>在指定的地方製作的普通資料夾</strong>——這件事之後，開啟資料夾的內容，用實物進行確認。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/02-create-vault.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/02-create-vault.png" width="800" height="648" loading="lazy" alt="建立本地保管庫的畫面。 在保管庫的名稱中輸入了“備忘錄”，位置指定了/root/Vaults">
+          </picture>
+          <figcaption><span>保管庫的製作畫面。 指定名稱“備忘錄”和地點，按下“製作”，Vault就會當場開啟。 </span></figcaption>
+        </figure>
+        <p class="lp-section__lead"> <span>按下“建立”，在開啟日語的“歡迎”筆記本的狀態下，保管庫就啟動了。 右邊已經能看到圖表檢視了。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/03-vault-welcome.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/03-vault-welcome.png" width="800" height="500" loading="lazy" alt="製作後的保管庫。 左邊是檔案一覽表，中央是“歡迎”筆記，右邊是圖表檢視">
+          </picture>
+          <figcaption><span>製作後的保管庫“備忘錄”。 從左邊開始檔案一覽・“歡迎”筆記・圖表檢視。 </span></figcaption>
+        </figure>
+        <div class="tip-box">
+          <div class="tip-box__title"><span>保管庫的實體只是資料夾</span></div>
+          <p><span>製作後用檔案管理器（終端）開啟保管庫資料夾，裡面只有<strong>設定用的隱藏資料夾<code>.obsidian</code>和“ようこそ.md”的2個</strong>。 筆記的正文是<code>.md</code>檔案，Obsidian以外的文字編輯器也可以閱讀。 另一方面，應用程式為了同步狀態和後設資料也使用IndexedDB。 請區分本文的儲存形式和應用程式內部的儲存處理。 <a href="https://obsidian.md/help/data-storage" target="_blank" rel="noopener">官方資料儲存說明</a>。 </span></p>
+        </div>
+        <pre class="note-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># 作成直後の保管庫の中身（実測・2026-08-12）
+Vaults/メモ/
+├─ .obsidian/     ← 設定フォルダ（app.json, appearance.json など5ファイル）
+└─ ようこそ.md    ← 最初から入っている案内ノート（普通のMarkdown）</code></pre>
+      </div></section>
+
+      <!-- Step 3: first note -->
+      <section class="lp-section ce-chapter ce-chapter--wide" id="first-note">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7"> <span>Step 4: 寫第一個筆記 — Ctrl+N（Mac是⌘N）</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span><code>Ctrl+N</code>（Mac是<code>⌘N</code>）製作了新的筆記，在標題中輸入“第一次的筆記”，寫了正文。 用<code>- </code>開頭的行會自動變成專案符號，所謂的Markdown記法可以直接使用，<strong>即使不記得記法，只要寫普通的文章就沒問題</strong>。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/04-first-note.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/04-first-note.png" width="800" height="500" loading="lazy" alt="正在編輯“第一次筆記”的畫面。 正文中顯示段落和要點，右側的圖表檢視增加了節點">
+          </picture>
+          <figcaption><span>第一個筆記。 寫的瞬間自動儲存，在檔案一覽表和圖表檢視中也會立即出現。 </span></figcaption>
+        </figure>
+        <p class="lp-section__lead"> <span>沒有儲存按鈕。 <strong>寫的內容會自動儲存在<code>.md</code>檔案中</strong>。 實際上，用文字編輯器開啟這個筆記的話，裡面是這樣的。 是畫面上看到的Markdown。 </span> </p>
+        <pre class="note-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># はじめてのノート.md の実際の中身（テキストエディタで開いた実物）
+
+今日からObsidianを使い始めた。
+
+このノートは普通のMarkdownファイルとして保存されている。
+
+- 覚えたいこと
+- 思いついたこと
+- あとで調べたいこと
+
+をここに書いていく。</code></pre>
+      </div></section>
+
+      <!-- Step 4: linking -->
+      <section class="lp-section ce-chapter ce-chapter--wide" id="first-link">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-8"> <span>Step 5: 連結 — <code>[[ ]]</code>是Obsidian的核心</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>在筆記本中輸入<code>[[</code>，選擇連結的候選人就會出現在現場。 這是Obsidian的最大特點，<strong>連結的筆記還不存在也沒關係</strong>。 在驗證中，還沒有的“購物清單”這個名字寫成了<code>[[買い物リスト]]</code>。 候選者會顯示“找不到匹配的”，這樣就正常了。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/05-link-popup.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/05-link-popup.png" width="800" height="500" loading="lazy" alt="[[購物清單]]和輸入中的畫面。 連結候選的彈出式視窗顯示“找不到匹配的東西”">
+          </picture>
+          <figcaption><span>輸入<code>[[</code>後出現的候選彈窗。 不存在的筆記名也可以連結——這裡和普通的備忘錄軟體不同。 </span></figcaption>
+        </figure>
+        <p class="lp-section__lead"> <span>一邊按<code>Ctrl</code>一邊點選寫的連結（Mac是<code>⌘</code>+點選），<strong>在那一瞬間“買い物リスト.md”被開啟了</strong>。 寫下內容後，在右側的圖表檢視中，“第一次筆記→購物清單”的連線以線的形式出現，畫面下方是“1 反向連結”——也就是說“這個筆記是從第一次筆記開始連結的”的相反方向資訊也被自動記錄下來。 </span> </p>
+        <figure class="shot">
+          <picture>
+            <source srcset="/assets/img/obsidian-getting-started/06-linked-note-graph.webp" type="image/webp">
+            <img src="/assets/img/obsidian-getting-started/06-linked-note-graph.png" width="800" height="500" loading="lazy" alt="透過點選連結建立的“購物清單”筆記和顯示與第一次筆記的聯絡的圖表檢視">
+          </picture>
+          <figcaption><span>點選連結製作的“購物清單”。 圖表檢視中描繪了連線，狀態列顯示“1 反向連結”。 </span></figcaption>
+        </figure>
+        <div class="tip-box">
+          <div class="tip-box__title"><span>到此為止學到的東西</span></div>
+          <p><span>1保管庫=只是製作資料夾 2筆記本=只是寫Markdown檔案 3用<code>[[リンク]]</code>連線筆記本（先貼，後製作）。 Obsidian的入門用這個3就完成了。 標籤、外掛、同步等都是在這個基礎上需要後新增的，<strong>不需要在第一天設定</strong>。 </span></p>
+        </div>
+      </div></section>
+
+<section class="lp-section ce-chapter start-supplement" id="start-checks"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-9" data-ce-number="09"><span>確認第一個筆記本是否處於可用狀態，5點</span></h2></header><div class="ce-chapter__body"><div><p>寫好正文後，進行下一次確認後，明天也可以從同一個地方繼續。 這是讀者在自己的環境中嘗試的檢查清單。</p><ol class="start-check-list"><li><strong>名字：</strong>“第一次的筆記本”等，取個容易找到的名字。</li><li><strong>重新顯示：</strong>開啟另一個筆記本後返回，確認是否還有寫的一句話。</li><li><strong>實際檔案：</strong>在保管庫資料夾內找到對應的<code>.md</code>，用文字編輯器開啟副本閱讀正文。</li><li><strong>連結：</strong>開啟建立的連結，確認是否移動到預期的筆記。</li><li><strong>重啟：</strong>關閉應用程式重新開啟，確認是否能找到同一個保管庫和筆記本。</li></ol><p>在應用程式上找不到備忘錄時，首先確認<strong>當前開放的保管庫的名稱和位置</strong>。 如果只是開啟另一個空的保管庫的話，可以透過開啟原來的資料夾繼續。 查詢地點的方法請參考<a href="/zh-Hant/obsidian/what-is-vault/">保管庫的實體和儲存地點</a>。</p><p>如果圖表上沒有線，先確認連結是否開啟，檢視圖表的顯示範圍和過濾器。 沒有必要為了出線而增加外掛。 比起畫面的外觀，首先確認開啟必要的筆記。</p></div></div></section>
+<section class="lp-section ce-chapter start-supplement" id="start-backup"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-10" data-ce-number="10"><span>與同步分開，測試是否可以從複製讀取</span></h2></header><div class="ce-chapter__body"><div><p>同步是將變更反映到其他終端的機制，也有誤刪的情況。 <a href="https://obsidian.md/help/backup" target="_blank" rel="noopener">Obsidian官方的備份指南</a>建議使用與同期不同的副本。 不僅要恢復筆記，還想恢復附件和保管庫設定的話，請確認包括<code>.obsidian</code>在內的資料夾內容。</p><ol class="start-backup-list"><li>編輯完畢，將儲存的保管庫資料夾複製到其他備份地址。</li><li>從副本中取出必要的筆記和附件到驗證用的其他資料夾。 不覆蓋原來的保管庫。</li><li>用文字編輯器或影象檢視器開啟，確認是否可以閱讀正文和必要的附件。</li></ol><p>即使複製了1次，之後的更新部分也不包括在內。 選擇適合自己使用頻率的備份方法。 <code>.obsidian</code>是包含設定的隱藏資料夾，請不要斷定為不需要的檔案而刪除。</p></div></div></section>
+
+      <!-- Mobile capture context + CTA (MEDIUM: inline 1箇所) -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-11" data-ce-number="11"> <span>開始後的課題 — iPhone的“一瞬間的備忘錄”怎麼辦</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>Obsidian也有iOS應用程式，有將保管庫放在iCloud Drive與iPhone共享的方法（本報道中iOS版未經驗證。 iPhone方面的選擇在<a href="/zh-Hant/blog/obsidian-iphone-memo">iPhone到Obsidian的方法6選</a>進行比較）。 外出時的短紙條想收集到同一個保管庫時，確定輸入入口會很方便。 SimpleMemo是從iPhone向自己傳送備忘錄，<strong>設定了合作的Obsidian的每日筆記中也可以追加</strong>的應用程式。  Siri和Apple Watch也可以輸入入口。 </span> </p>
+        <p class="lp-section__lead"> <span><strong>在SimpleMemo留下第一個1之前：</strong>同時使用郵件時，在APP上完成收件人的設定和認證。“ 在“預約”階段繼續驗證收件人，完成後請確認收件箱。 對Obsidian的追記，開啟連線，設定保管庫內的儲存地址和必要的資料夾訪問，確認每日筆記中是否還有同樣的1件。 語音輸入需要iOS 26以後的對應終端、語言和麥克風、語音識別的許可權。 </span> </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span>在今天建造的保管庫裡，從明天開始1行一行地存起來</span></div>
+          <p class="cta-box__desc"><span>設定郵件的收件人和Obsidian的儲存地址，可以從簡短的備忘錄開始嘗試。 下載免費。 Free的郵件傳送框是每天3則。 </span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__mid&amp;mt=8" class="app-store-badge" aria-label="從App Store下載" data-cta-position="mid"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"> </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-getting-started-ja.svg?v=6aaa2ccde3" width="132" height="132" alt="App Store下載二維碼" loading="lazy">
+
+            <small><span>PC使用者用智慧手機讀取</span></small>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-12" data-ce-number="12"> <span>常見問題</span> </h2></header><div class="ce-chapter__body">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Obsidian在哪裡可以下載？ </span></summary>
+            <div class="faq-answer"><span>官方網站（<a href="https://obsidian.md/download" target="_blank" rel="noopener">黑曜石.md/下載</a>）可以免費下載。 2026年8月12日確認時Windows用安裝器（<code>.exe</code>）、macOS用磁碟映像（<code>.dmg</code>）、Linux用<code>AppImage</code>/<code>.deb</code>/<code>.tar.gz</code>，正在分發面向iOS/Android的官方應用程式，本報道實際下載、安裝並驗證了Linux版AppImage。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Obsidian可以免費使用嗎？ </span></summary>
+            <div class="faq-answer"><span>應用程式本體個人使用、商業使用都是免費的。 收費的只有官方同期的Obsidian Sync（Standard 月4美元・年付）和公開服務的Obsidian Publish等附加服務。 這篇報道的驗證（安裝~筆記製作~連結~圖表檢視）也全部在免費範圍內完成。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>需要註冊賬號嗎？ </span></summary>
+            <div class="faq-answer"><span>不需要。 在2026年8月12日的實機驗證中，從安裝到保管庫的製作、筆記的製作、連結、圖表檢視的顯示，一次也沒有要求輸入郵箱地址和賬戶註冊。 只有在使用付費官方同步（Obsidian Sync）等情況下才需要賬戶。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>可以用日語嗎？ </span></summary>
+            <div class="faq-answer"><span>可以使用。 在首次啟動畫面的語言選單中可以選擇日語，選單和設定也會顯示日語。 這篇報道的驗證（Obsidian 1.13.6）也全部用日語UI進行。 確認保管庫名和筆記本名稱也可以像“備忘錄”、“第一次的筆記本”這樣的日語原樣使用。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>保管庫（Vault）是什麼？ </span></summary>
+            <div class="faq-answer"><span>是儲存筆記的資料夾。 實體是普通的資料夾，透過驗證建立之後的保管庫的內容是設定用的<code>.obsidian</code>資料夾和“ようこそ.md”的2。 筆記本都是普通的Markdown檔案（<code>.md</code>），所以即使不使用Obsidian也可以用文字編輯器開啟。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Windows和Mac也是同樣的步驟嗎？ </span></summary>
+            <div class="faq-answer"><span>官方釋出Windows用安裝器（<code>.exe</code>）和macOS用磁碟映像（<code>.dmg</code>）在2026年8月12日確認有（Linux用是AppImage・deb・tar.gz）。 本報道的截圖是Linux版的，雖然沒有驗證Windows版、Mac版的畫面，但是安裝後從製作保管庫開始的流程是同一個Obsidian應用程式的操作。</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>只用iPhone就可以開始嗎？ </span></summary>
+            <div class="faq-answer"><span>Obsidian有iOS版應用程式，可以從App Store免費獲得（本報道中沒有驗證iOS版的動作）。 在iPhone中想到的1行留在Obsidian的方法<a href="/zh-Hant/obsidian/daily-note/">在每日筆記中補充的方法</a>和<a href="/zh-Hant/blog/obsidian-iphone-memo">從iPhone傳送到Obsidian的方法6選</a>中詳細解說。</span></div>
+          </details>
+        </div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>可以使用現有的Markdown資料夾嗎？ </span></summary><div class="faq-answer"><span>在保管庫的管理畫面中選擇“作為保管庫開啟資料夾”，可以指定現有的資料夾。 避免在另一個保管庫內部建造新的保管庫，請確認開啟的地方和筆記本的內容。</span></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>使用Obsidian Sync不需要備份嗎？ </span></summary><div class="faq-answer"><span>同步和備份是分開的。 因為錯誤刪除和覆蓋可能會反映在同步物件上，所以請準備另外的副本，確認是否開啟必要的筆記和附件。</span></div></details></div>
+      </div></section>
+
+      <!-- Verification environment (§28/§30) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
+          <div class="tip-box__title"><span>驗證環境和驗證範圍</span></div>
+          <p style="margin:0;"><span>驗證日期：2026年8月12日 / 物件：Obsidian 1.13.6（官方AppImage・日語UI）/ 環境：Linux桌面（Ubuntu 24.04）。 刊登的截圖是在上述環境下安裝~製作保管庫~製作筆記~連結~實際操作圖表檢視後拍攝的。 分發形式（.exe/.dmg/AppImage/deb/tar.gz）是當天直接確認官方GitHub釋出的實測。 <strong>Windows版・macOS版・iOS版的執行沒有驗證</strong>（關於它們的描述是基於官方分發物・官方資訊的確認）。  規格、費用可能會發生變化，請在官方網站上確認最新資訊。 </span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-13" data-ce-number="13"> <span>相關頁面</span> </h2></header><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh-Hant/obsidian/what-is-vault/"><span>保管庫（Vault）是指（實測）</span></a>
+          <a href="/zh-Hant/obsidian/sync/"><span>同步方法總結（iCloud/官方Sync/Git/Syncthing）</span></a>
+          <a href="/zh-Hant/obsidian/sync/icloud/"><span>用iCloud同步的設定步驟（iPhone×Mac）</span></a>
+          <a href="/zh-Hant/obsidian/plugins/"><span>外掛入門（從6,812個開始實測頂部10）</span></a>
+          <a href="/zh-Hant/obsidian/plugins/dataview/"><span>Dataview的使用方法（查詢入門）</span></a>
+          <a href="/zh-Hant/obsidian/pricing/"><span>Obsidian的費用（免費能用到什麼程度）</span></a>
+          <a href="/zh-Hant/obsidian/compare/"><span>Obsidian比較中心（比較物件的選擇方法）</span></a>
+          <a href="/zh-Hant/obsidian/"><span>Obsidian合作詳情</span></a>
+          <a href="/zh-Hant/obsidian/daily-note/"><span>在每日筆記中補充的方法</span></a>
+          <a href="/zh-Hant/obsidian/compare/logseq/"><span>Obsidian和Logseq的比較</span></a>
+          <a href="/zh-Hant/blog/obsidian-iphone-memo"><span>從iPhone傳送到Obsidian的方法6選</span></a>
+          <a href="/zh-Hant/blog/obsidian-voice-input"><span>Obsidian語音輸入的方法4選</span></a>
+          <a href="/zh-Hant/methods/second-brain/"><span>第二腦</span></a>
+          <a href="/zh-Hant/faq"><span>常見問題</span></a>
+        </div>
+      </div></section>
+
+    </div>
+</div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>參考文獻・資料的來源</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/download" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian — Download（官方）</a> — <span>官方下載頁面</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-releases" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-releases（GitHub）</a> — <span>官方釋出。 最新版1.13.6和分發形式（.exe/.dmg/AppImage/deb/tar.gz）在2026-08-12上直接確認v1.13.6釋出的分發檔案</span></li>
+    <li><a href="https://help.obsidian.md/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help（官方幫助）</a> — <span>保管庫、連結、圖表檢視等各功能的官方文件</span></li>
+    <li><a href="https://obsidian.md/pricing" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian — Pricing（官方）</a> — <span>本體免費（個人・商用）和Obsidian Sync等費用</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);" data-cta-position="reference">SimpleMemo — App Store</a> — <span>App Store的下載頁面</span></li>
+  </ul>
+  <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span>Obsidian是Dynalist Inc. 的商標。 本網站是與Obsidian開發商沒有合作關係的獨立媒體，SimpleMemo是YURIKA, K.K.開發的獨立應用程式。 </span></p>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Obsidian的儲存地址和同時使用郵件時的首次設定。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式比較一覽</span></a></li>
+    <li><a href="/zh-Hant/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一覽</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

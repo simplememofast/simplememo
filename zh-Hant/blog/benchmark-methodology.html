@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/benchmark-methodology">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>測量方法的透明度 — SimpleMemo的基準是這樣測量的</title>
+  <meta name="description" content="SimpleMemo的0.4秒啟動（warm啟動）・一鍵傳送是如何測量的？ 測試環境、啟動速度和傳送速度的測量方法、原始資料、與其他應用程式的比較步驟、限制事項都透明公開的E-E-A-T重視的測量方法論檔案。">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="測量方法的透明度 — SimpleMemo的基準是這樣測量的">
+  <meta property="og:description" content="SimpleMemo的“0.4秒啟動”（暖啟動）“一鍵傳送”是如何測量的呢？ 透明地公開測試環境、測量方法、限制事項。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/blog/benchmark-methodology">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="測量方法的透明度 — SimpleMemo的基準是這樣測量的">
+  <meta name="twitter:description" content="SimpleMemo的“0.4秒啟動”（暖啟動）“一鍵傳送”是如何測量的呢？ 透明地公開測試環境、測量方法、限制事項。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology#article",
+  "inLanguage": "zh-Hant",
+  "image": "https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png",
+  "headline": "測量方法的透明度 — SimpleMemo的基準是這樣測量的",
+  "description": "SimpleMemo的“0.4秒啟動”（warm啟動）“一鍵傳送”是如何測量的呢？ 測試環境、測量方法、限制事項透明公開。",
+  "url": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology",
+  "datePublished": "2026-03-16",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "部落格",
+      "item": "https://simplememofast.com/zh-Hant/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "測量方法的透明度",
+      "item": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "測量方法的透明度 — 基準方法論",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  },
+  "url": "https://simplememofast.com/zh-Hant/blog/benchmark-methodology"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.app-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.app-card__name{font-size:1.05rem;font-weight:700}.app-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.app-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}
+    .disclosure{background:rgba(245,180,60,.06);border:1px solid rgba(245,180,60,.2);border-left:3px solid rgba(245,180,60,.5);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .citation-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:2rem 0;font-size:.875rem;color:var(--text-muted);line-height:1.7;text-align:center}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .comparison-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .comparison-table th,.comparison-table td{padding:.75rem 1rem;text-align:center;border-bottom:1px solid var(--border)}
+    .comparison-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .comparison-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap;text-align:left}
+    .comparison-table thead th{border-bottom:2px solid var(--border)}
+    .comparison-table .highlight{color:var(--accent);font-weight:700}
+    .video-note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/blog/benchmark-methodology" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/benchmark-methodology" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/benchmark-methodology" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/blog/benchmark-methodology" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/benchmark-methodology" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/benchmark-methodology" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/benchmark-methodology" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/benchmark-methodology" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/benchmark-methodology" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="page-content"><div class="container">
+
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+      <div class="lp-hero__label"><span>測量方法論</span></div>
+      <h1 class="lp-hero__title"><span>測量方法的透明度 —<br>SimpleMemo的基準是這樣測量的</span></h1>
+      <p class="lp-hero__sub"><span>SimpleMemo公佈的“0.4秒啟動”“一鍵傳送”的數值是如何測量的呢？ 測試環境、測量程式、限制事項全部透明公開。 我認為沒有方法論的效能主張是沒有意義的。 </span></p>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開日: <time datetime="2026-03-16">2026年03月16日</time></span> </p>
+    </div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>為什麼要公開測量方法</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>測量環境</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>啟動速度的測量方法</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+      <p style="color:var(--text-secondary);margin:0;">SimpleMemo從點選到可以輸入的0.4秒，在iPhone 16e (A18)・iOS 26.5.2畫面收錄→透過幀解析測量（warm啟動，5次中值）。 傳送請求的往返時間，以前刊登了Charles Proxy測量的數值，但由於沒有留下測量記錄（日期、每次的數值），所以停止刊登數值（2026-09-30）。 是單一裝置的測量，不是統計上嚴格的實驗室測試。</p>
+
+    </div>
+
+    <!-- Disclosure -->
+    <div class="disclosure">
+      <span><strong>資訊公開：</strong> 筆者（AI ATAKA）是SimpleMemo的開發者。 本報道公開了關於本公司產品效能主張的測量方法。 因為是開發者的自我測試，所以與第三方驗證不同，請知悉。</span>
+
+    </div>
+
+    <!-- Section 1: Why We Publish Our Methodology -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>為什麼要公開測量方法</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">對透明度的承諾</span><span class="app-card__rank">電子-A-T</span></div>
+          <div class="app-card__desc">
+            <p>主張應用程式的效能很簡單。“ 只要寫啟動0.4秒”“一鍵傳送”誰都可以。 但是，不明確說明測量方法的效能主張本質上是沒有意義的。</p>
+            <p style="margin-top:.75rem">我們認為，使用者應該能夠理解數字背後的測量過程。 在哪個裝置上，在什麼條件下，測試了幾次，採用了哪個統計值。 在沒有這些資訊的情況下聲稱“最快”是不真誠的。</p>
+            <p style="margin-top:.75rem">在這篇文章中，將透明地公開SimpleMemo的所有基準數值是如何引導的。 因為是用可以再現的方法測量的，所以也可以在相同的條件下進行驗證。</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 2: Test Environment -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>測量環境</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">測試環境的詳情</span><span class="app-card__rank">環境</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>終端:</strong> iPhone 16e（A18晶片）</li>
+              <li><strong>作業系統：</strong> iOS 26.5.2</li>
+              <li><strong>儲存：</strong> 256GB，空閒 14.29GB</li>
+              <li><strong>網路：</strong> Wi-Fi（傳送測試時）、機內模式（離線佇列測試時）</li>
+              <li><strong>SimpleMemo版本:</strong> 5.7.3（App Store釋出版）</li>
+              <li><strong>最新測試實施日期:</strong> 2026年8月11日</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3: Launch Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>啟動速度的測量方法</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">0.4秒的依據</span><span class="app-card__rank">啟動速度</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>測量方法：</strong>進行60fps的畫面錄製，以幀為單位解析</li>
+              <li><strong>測量區間：</strong>從點選應用程式圖示的瞬間（手指離開的幀）開始，直到游標在文字欄位中閃爍</li>
+              <li><strong>啟動條件：</strong>從應用程式切換器強制關閉，5秒以上等待後啟動。 但是在iOS 26.5.2中，即使遵循這個步驟，實際上也會<strong>在warm中啟動</strong>（透過錄影目視確認所有啟動）。 刊登的值是warm啟動的值</li>
+              <li><strong>嘗試次數：</strong> 5次測量，採用中值</li>
+              <li><strong>結果:</strong> 0.4秒（60fps的18幀）</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>更正（2026-08-11）：</strong>這裡以前寫過“雖然暖啟動更快，但公佈了更保守的冷啟動值”。 <strong>那是錯誤的。 </strong>雖然每次都會強制終止和5秒以上的等待，但iOS 26.5.2實際上是以warm啟動的，刊登值是warm啟動的值。 因為所有應用程式的條件都相同，所以作為比較是成立的，但不是“保守的數值”。</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3.5: Raw Data Table -->
+    <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>輸入開始前的原始資料</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">iPhone 16e (A18)・iOS 26.5.2的實測（2026年8月11日，warm啟動（從應用程式切換器強制終止5秒以上等待後啟動，iOS 26.5.2實際上透過目視確認是warm啟動）。 數值是秒。 <strong>“直到輸入開始”</strong>是點選圖示後，直到鍵盤全部出現並能實際輸入為止，包括中途需要的點選。</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">應用程式</th><th scope="col">每次的實際測量值</th><th scope="col">刊登值</th><th scope="col">次數</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 0.37–0.43）</span></td><td class="highlight">0.40</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>0.90<span style="color:var(--text-muted)">（最快值）</span></td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">0.95 / 0.93 / 0.92 / 0.92 / 0.92</td><td>0.92</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 1.20–2.37）</span></td><td>1.73</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 1.97–2.23）</span></td><td>2.07</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 2.30–5.10）</span></td><td>2.50</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 2.20–3.30）</span></td><td>2.60</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未儲存（範圍 2.50–3.50）</span></td><td>2.80</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;margin:.75rem 0 1.5rem">Bear 和 Drafts 在第 1 次測量中波動較大，因此統一條件重新測量，並保留了各次資料。其他 6 個應用僅儲存了中位數和範圍，表中也如實顯示。<strong>我們不會用沒有記錄的數字填表。</strong></p>
+
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">參考：<strong>直到第一個文字出現在螢幕上</strong>（在上面的“直到輸入開始”中加了打鍵1次）。 這裡所有應用程式都留下了每次的數值。 按鍵部分在應用程式之間分散了0.2~0.5秒——因為那是手的時間，不是應用程式的時間，所以沒有采用公開值。</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">應用程式</th><th scope="col">每次的實際測量值</th><th scope="col">中值</th><th scope="col">次數</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums">1.00 / 0.50 / 0.60 / 0.53 / 0.67</td><td class="highlight">0.60</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">1.33 / 1.75 / 1.62 / 1.67 / 1.73</td><td>1.67</td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums">2.20 / 2.80 / 1.30 / 1.70 / 2.70 / 2.14 / 2.88 / 1.47 / 1.68 / 2.73</td><td>2.17</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums">2.44 / 2.43 / 2.17 / 2.09</td><td>2.30</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums">2.70 / 5.40 / 2.80 / 2.90 / 2.60</td><td>2.80</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums">3.30 / 3.50 / 3.00 / 2.60 / 2.80</td><td>3.00</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums">3.10 / 3.30 / 2.80 / 3.80 / 3.80</td><td>3.30</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="video-note">
+          <strong>關於測量影片：</strong> 畫面收錄的影片檔案，現在不公開。 </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 4: Send Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>傳送速度的測量方法</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">傳送請求的往返時間</span><span class="app-card__rank">傳送速度</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>測量方法：</strong>透過Charles Proxy進行網路定時測量</li>
+              <li><strong>測量區間：</strong>從傳送按鈕的點選到伺服器的確認響應（HTTP 200）</li>
+              <li><strong>網路：</strong>到Cloudflare邊緣的延遲15ms的Wi-Fi環境</li>
+              <li><strong>嘗試次數：</strong> 10次測量，採用中值</li>
+              <li><strong>結果：</strong>停止刊登數值。 因為這個測量的日期和時間、每次的數值記錄沒有留下，無法再次確認（2026-09-30。 刪除了首頁的“傳送請求時間（API往返）”）</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>補充：</strong>這個數值不包括郵件收件箱的傳送時間。 到達收件箱的時間因郵件提供商和通訊情況而異，沒有測量。</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 5: Competitor Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>與其他應用程式的比較測量</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">為了公平的比較</span><span class="app-card__rank">比較方法</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>同一裝置：</strong>所有應用程式在同一iPhone 16e (A18)上測試</li>
+              <li><strong>相同條件:</strong>同一天，在同一網路環境下測量</li>
+              <li><strong>最新版本:</strong> 更新到測試日可用的最新版本</li>
+              <li><strong>滿足啟動條件：</strong>每次測量前強制關閉應用程式，5秒以上等待（實際上會啟動溫暖）</li>
+              <li><strong>嘗試次數：</strong>每個應用程式測量5次，採用中值（Apple Notes 10次，Google Keep 4次）</li>
+              <li><strong>實際安裝：</strong>只報告自己實際安裝並測試的應用程式</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 6: Limitations and Caveats -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>限制事項和注意事項</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">需要您知道的事情</span><span class="app-card__rank">注意</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li>結果可能因裝置型號、iOS版本、儲存情況而異</li>
+              <li>只在1臺裝置上進行測試，不是統計上嚴格的實驗室測試</li>
+              <li>競爭應用程式的效能可能會透過更新得到改善</li>
+              <li>表的數值是2026年8月11日的測量。 之後的iOS和應用程式的更新，結果可能會發生變化</li>
+              <li><strong>最後更新日期：2026-10-03</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Citation Notice -->
+    <div class="citation-notice">
+      <span>這個測量方法論的引用、參考帶有出處連結，可以自由使用。 出處：simplememofast.com/blog/benchmark-methodology</span>
+
+    </div>
+
+    <!-- CTA Box -->
+    <div class="cta-box">
+      <div class="cta-box__title"><span>0.4秒開始寫</span></div>
+      <div class="cta-box__desc"><span>在公開測量方法的8應用程式的比較中，輸入時間最短的備忘錄應用程式（warm啟動）。 下載免費。</span></div>
+      <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="從App Store下載"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="從App Store下載" loading="lazy"></a>
+
+    </div>
+
+    <!-- Related Articles -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"><span>相關報道</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/zh-Hant/blog/fastest-memo-app-benchmark"> <span>啟動速度基準2026</span> </a>
+        <a href="/zh-Hant/blog/memo-app-speed-test-2026"> <span>備忘錄應用程式速度測試2026</span> </a>
+        <a href="/zh-Hant/blog/best-memo-apps-2026"> <span>推薦備忘錄應用程式10選 2026</span> </a>
+      </div>
+    </div></section>
+
+    <!-- Related Pages -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>相關頁面</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/zh-Hant/vs/"><span>應用程式比較一覽</span></a>
+        <a href="/zh-Hant/devlog/"><span>開發記錄</span></a>
+        <a href="/zh-Hant/captio-alternative/"><span>Captio替代</span></a>
+        <a href="/zh-Hant/blog/"><span>部落格一覽</span></a>
+      </div>
+    </div></section>
+
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>透過Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定合作和儲存地址，傳送的備忘錄也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/blog/fastest-memo-app-benchmark" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>啟動速度基準2026</span></a></li>
+    <li><a href="/zh-Hant/blog/memo-app-speed-test-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式速度測試2026</span></a></li>
+    <li><a href="/zh-Hant/devlog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>開發記錄</span></a></li>
+    <li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - 用於Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo的開發者。 從iPhone開始，正在開發在設定的郵箱地址和連線物件的筆記上留下文章的應用程式。 </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/zh-Hant/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">簡介</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X/推特</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+<section class="related-links ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-10" data-ce-number="10"><span>相關的統計方法</span></h2></div><div class="ce-chapter__body"><p><a href="/zh-Hant/data/voice-shift/">“語音轉移”定點調查的統計方法和公開情況</a>中，說明了使用記錄的計數方法和公開前的確認條件。 確定的調查數值未刊登。</p></div></section>
+</main>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio-alternative/" class="footer__link"><span>Captio替代</span></a>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/blog/" class="footer__link"><span>部落格</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

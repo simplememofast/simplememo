@@ -9,6 +9,7 @@ const FROZEN_EXPERIMENT_PATHS = new Set([
 ]);
 
 function campaignTokenOf(urlPath) {
+  urlPath = require('./localized-sources').sourceRouteOf(urlPath);
   if (FROZEN_EXPERIMENT_PATHS.has(urlPath)) return null;
   const pathWithoutLocale = urlPath.replace(/^\/(en|es|ko|zh|zh-Hant|ar|id|pt-BR|tr)\//, '/');
   return /(?:^|[/-])obsidian(?:[/-]|$)/i.test(pathWithoutLocale)

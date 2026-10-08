@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/day1">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>[يوم يوميات التطوير1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع "تلك التجربة" مرة أخرى | SimpleMemo</title>
+  <meta name="description" content="مذكرات التطوير Day1، التي فككت تجربة Captio وسجلت جميع القرارات الفنية، بما في ذلك سبب اختيارك UIKit، والتصميم الذي يختفي عند إرساله، وبنية Outbox لمنع الانسكاب، وRelay API، وتصميم الخصوصية. سيتم إطلاق الإرسال والتصميم بنقرة واحدة لمنع الانسكابات.">
+  <meta name="theme-color" content="#070b14">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="[يوم يوميات التطوير1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع &quot;تلك التجربة&quot; مرة أخرى">
+  <meta property="og:description" content="مذكرات تطوير Day1 تتحلل تجربة Captio وتسجل جميع الأحكام الفنية من UIKit وOutbox architecture وRelay API وتصميم الخصوصية. نقل الحركة بنقرة واحدة والتصميم لمنع الانسكاب.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/ar/devlog/day1">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ar_SA">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="article:author" content="Obsidian連携シンプルメモ開発チーム">
+  <meta property="article:section" content="Development">
+  <meta property="article:tag" content="Captio">
+  <meta property="article:tag" content="UIKit">
+  <meta property="article:tag" content="Outbox Architecture">
+  <meta property="article:tag" content="Privacy">
+  <meta property="article:tag" content="Swift">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="[يوم يوميات التطوير1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع &quot;تلك التجربة&quot; مرة أخرى">
+  <meta name="twitter:description" content="سجل تطوير Day1 يقوم بتفكيك تجربة Captio ويسجل جميع القرارات الفنية من UIKit وOutbox architecture وRelay API وتصميم الخصوصية.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/day1">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/day1">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/day1">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/day1">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/day1">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/day1">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/day1">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/day1">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ar/devlog/day1#article",
+  "headline": "[يوم يوميات التطوير1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع \"تلك التجربة\" مرة أخرى",
+  "description": "مذكرات تطوير Day1 تتحلل تجربة Captio وتسجل جميع الأحكام الفنية من UIKit وOutbox architecture وRelay API وتصميم الخصوصية. نقل الحركة بنقرة واحدة والتصميم لمنع الانسكاب.",
+  "url": "https://simplememofast.com/ar/devlog/day1",
+  "inLanguage": "ar",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-day1.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ar/devlog/day1#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "الصفحة الرئيسية",
+      "item": "https://simplememofast.com/ar/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "يوميات التطوير",
+      "item": "https://simplememofast.com/ar/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "يوم يوميات التطوير1",
+      "item": "https://simplememofast.com/ar/devlog/day1"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ar/devlog/day1#webpage",
+  "inLanguage": "ar",
+  "name": "يوم يوميات التطوير1 - أحب Captio كثيرا لدرجة أنني أردت إنشاء هذه التجربة مرة أخرى",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ar/#website"
+  },
+  "url": "https://simplememofast.com/ar/devlog/day1"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
+    .article-toc ol { padding-left: 20px; }
+    .article-toc li { margin-bottom: 6px; }
+    .article-toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; }
+    .article-toc a:hover { text-decoration: underline; }
+    .related-topics { margin-top: 50px; }
+    .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="الملاحة الرئيسية" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ar/guides/">أدلة الاستخدام</a><a href="/ar/use-cases/">حالات الاستخدام</a><a href="/ar/vs/">المقارنة</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ar/guides/">أدلة الاستخدام</a></li>
+        <li><a href="/ar/use-cases/">حالات الاستخدام</a></li>
+        <li><a href="/ar/vs/">المقارنة</a></li>
+        <li><a href="/ar/methods/"><span>الطريقة</span></a></li>
+        <li><a href="/ar/blog/"><span>مدونة</span></a></li>
+        <li><a href="/ar/glossary/"><span> مسرد</span></a></li>
+        <li><a href="/ar/faq">الأسئلة الشائعة</a></li>
+        <li><a href="/ar/about/">عن المطوّر</a></li>
+        <li><a href="/ar/devlog/">سجل التطوير</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>تنزيل</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="العربية · اختر اللغة"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>AR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ar" dir="rtl"><p class="site-language-title">اختر اللغة</p><div class="site-language-grid"><a href="/devlog/day1" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/day1" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/day1" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/day1" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/day1" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/day1" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/day1" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/day1" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ar" aria-current="page"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/tr/devlog/day1" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">تنزيل</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="القائمة"><span>القائمة</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- ======================== -->
+      <!-- JAPANESE VERSION         -->
+      <!-- ======================== -->
+      <div>
+        <h1 class="page-content__title sd-title">[يوم يوميات التطوير1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع "تلك التجربة" مرة أخرى</h1>
+        <div class="article-meta">2026 سنة 2 شهر 13 يوم</div>
+
+        <!-- Table of Contents -->
+        <nav class="article-toc">
+          <h2>جدول المحتويات</h2>
+          <ol>
+            <li><a href="#ja-intro">مقدمة: وجود Captio</a></li>
+            <li><a href="#ja-section1">كان "ماذا" Captio جيدا - حاولت تفكيك التجربة</a></li>
+            <li><a href="#ja-section2">الهندسة المعمارية: لماذا هي UIKit بدلا من SwiftUI</a></li>
+            <li><a href="#ja-section3">تصميم يدرك "يختفي عند إرساله" بنقرة واحدة</a></li>
+            <li><a href="#ja-section4">بنية Outbox لمنع الانسكاب</a></li>
+            <li><a href="#ja-section5">تتابع API: إرسال لا يعتمد على تعاون OAuth في صندوق البريد</a></li>
+            <li><a href="#ja-section6">ما فعلته اليوم: محو الشعور الصغير بعدم الراحة واحدا تلو الآخر</a></li>
+            <li><a href="#ja-section7">تم حل عدم اتساق حالة عرض السجل</a></li>
+            <li><a href="#ja-section8">هاجس بانويد بالخصوصية</a></li>
+            <li><a href="#ja-section9">دعم لغة 10: أريد تقديمه لمستخدمي Captio في جميع أنحاء العالم</a></li>
+            <li><a href="#ja-section10">تعلم اليوم: المنتج هو تصميم "الشعور بالأمان"</a></li>
+            <li><a href="#ja-section11">المرة القادمة (Day2) معاينة</a></li>
+          </ol>
+        </nav>
+
+        <div class="page-content__body">
+
+          <!-- Introduction -->
+          <section id="ja-intro">
+            <p>هل تعرف التطبيق المسمى Captio؟</p>
+            <p>اكتب ملاحظة واضغط على زر الإرسال. هذا كل ما تحتاجه لتلقي مذكرة إلى عنوان بريدك الإلكتروني. في اللحظة التي تبدأ فيها، سيتم عرض لوحة المفاتيح، وإذا كتبت، فأرسلها، وإذا أرسلتها، فستختفي. لا توجد وظائف غير ضرورية على الإطلاق. كان مجرد الكثير من التطبيق.</p>
+            <p>لكن "هذا كل شيء" كان مريحا بشكل لا يصدق.</p>
+            <p>الأفكار التي توصلت إليها في قطار الركاب، والمهام التي خطرت إلى الذهن فجأة أثناء الاجتماع، وكلمة عبرت عن ذهني قبل الذهاب إلى الفراش - Captio سلمتها جميعا على الفور إلى صندوق البريد الخاص بي. لا توجد متاعب في فتح تطبيق المذكرة، وتحديد مجلد، وإضافة عنوان. كانت تجربة "الاحتكاك الصفري" شيئا لا يمكنك التخلي عنه بمجرد أن تعرفه.</p>
+            <p>قام Captio بإنهاء الخدمة.</p>
+            <p>جربت العديد من التطبيقات البديلة، ولكن لم يكن أي منها بعيدا عن تلك التجربة. بدء التشغيل البطيء، وهناك عناصر غير ضرورية في واجهة المستخدم، وتبقى الملاحظات بعد الإرسال - قد يبدو الأمر اختلافا تافها، ولكن جوهر التجربة التي أنشأها Captio كان تراكم مثل هذه "الأشياء التافهة".</p>
+            <p>لذلك قررت أن أصنعها بنفسي. جرب Captio مرة أخرى.</p>
+            <p>هذا هو سجل تطوير "SimpleMemo" Day1. في هذه المقالة، سنقوم بتفكيك تجربة Captio وتسجيل جميع الأحكام الفنية حول كيفية إعادة إنتاجها في مجموعة من التقنيات الحديثة.</p>
+          </section>
+
+          <!-- Section 1 -->
+          <section id="ja-section1" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-01">1. "ماذا" من Captio كان جيدا - حاولت تفكيك التجربة</h2></div><div class="ce-chapter__body">
+            <p>من أجل التعبير عن تجربة Captio، حاولت تقسيمها إلى عنصرين من 3.</p>
+
+            <h3>العنصر 1: التشغيل الفوري إلى الإدخال</h3>
+            <p>Captio، يتم عرض لوحة المفاتيح على الفور وإدخال النص ممكن. يتم عرض الشاشة الرئيسية بعد شاشة البداية، ولا يوجد إجراء للضغط على زر إنشاء المذكرة من هناك. البداية = الإدخال. نسمي هذا "الوقت من بدء التشغيل إلى إدخال النص" <strong>Time-to-Text</strong>. كان Captio أقل من 0.5 ثانية في التجربة.</p>
+
+            <h3>العنصر 2: يختفي فور الإرسال (مسح فوري بعد الإرسال)</h3>
+            <p>عند الضغط على زر الإرسال، سيتم مسح الشاشة على الفور. " إرسال..." ليس لدي وقت للانتظار أثناء التحديق في شريط التقدم. في اللحظة التي تختفي فيها الملاحظة التي كتبتها، يمكنك الانتقال إلى الإجراء التالي مع شعور بالأمان "أوه، تمكنت من إرسالها". نسمي هذا "الوقت من الضغط على زر الإرسال إلى واجهة المستخدم يتم مسحها" <strong>Send-to-Reset</strong>. الهدف هو إفراغ الشاشة قبل أن تشعر أنك كنت تنتظر.</p>
+
+            <h3>العنصر 3: لا شيء غير ضروري (لا شيء غير ضروري)</h3>
+            <p>وظيفة المجلد، وظيفة العلامة، النص المنسق، دعم تخفيض السعر - لم يكن لدى Captio أي منها. لا يوجد سوى حقل إدخال نصي وزر إرسال. جعلت هذه النظافة الحمل المعرفي أقرب إلى الصفر. تطبيق لا يتعين عليه التفكير في ما يجب القيام به. كان Captio.</p>
+
+            <p>يتم إعادة إنتاج عنصر 3 هذا في تطوير iOS الحديث. هذه هي مهمة "SimpleMemo".</p>
+          </div></section>
+
+          <!-- Section 2 -->
+          <section id="ja-section2" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-02">2. الهندسة المعمارية: لماذا UIKit "بدلا من SwiftUI"</h2></div><div class="ce-chapter__body">
+            <p>في تطوير iOS في 2026، قد يبدو من الهرطقة اختيار UIKit بدلا من SwiftUI. ومع ذلك، كان هدفنا ذو الأولوية القصوى واضحا - <strong>Time-to-Text 500ms أو أقل</strong>.</p>
+
+            <p>إعادة تقييم "الجسم" في SwiftUI، "تهيئة "StateObject""، حل "@Environment" - يمكن تجاهل هذه النفقات العامة في التطوير العادي للتطبيق، ولكن لا يمكن تجاهلها لتحقيق "مدخلات بدء التشغيل". أريد التركيز على حقل النص بسرعة حتى مع 1ms.</p>
+
+            <p>هناك، <strong>UIKit تم اعتماد البناء المباشر دون استخدام القصة المصورة</strong>.</p>
+
+            <p>قم بإنشاء نافذة باستخدام SceneDelegate وقم بتعيين CompositeViewController مباشرة على rootViewController. تخطي حتى عملية تحليل Storyboard.</p>
+
+<pre tabindex="0"><code>// SceneDelegate.swift
+func scene(_ scene: UIScene,
+           willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    window.rootViewController = ComposeViewController()
+    window.makeKeyAndVisible()
+    self.window = window
+}</code></pre>
+
+            <p>ومع `viewDidAppear` في ComposeViewController، ركز على الفور على عرض النص.</p>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    textView.becomeFirstResponder()
+}</code></pre>
+
+            <p>يقصر رمز 2 هذا وحده المسار من بدء التشغيل إلى عرض لوحة المفاتيح.</p>
+
+            <p>الهدف هو 500ms أو أقل. في السجل الذي تم قياسه لاحقا عن طريق تسجيل الشاشة (2026 8 11، iPhone 16e، بداية دافئة)، كانت 0.4 ثانية من النقر على الرمز إلى شاشة لوحة المفاتيح. في SwiftUI، من الصعب التحكم في توقيت `@FocusState` وإعادة تقييم الجسم بالتفصيل، ومن الصعب تعبئة هذا المسار (لم يتم قياس الاثنين ومقارنتهما في ظل نفس الظروف).</p>
+
+            <p>UIKit قد يكون "قديما". ومع ذلك، "سريع". في نقطة 1 هذه، لا يزال UIKit هو الخيار الأفضل.</p>
+          </div></section>
+
+          <!-- Section 3 -->
+          <section id="ja-section3" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-03">3. تصميم يدرك "يختفي عند إرساله" بنقرة واحدة</h2></div><div class="ce-chapter__body">
+            <p>هناك أهم حكم تصميم لإعادة إنتاج تجربة Captio "يختفي عند إرسالها". إنه لفصل <strong> الرسوم المتحركة للإرسال ومسح واجهة المستخدم تماما عن استجابة الشبكة</strong>.</p>
+
+            <p>تدفق نقل التطبيقات الشائعة هو كما يلي:</p>
+            <ol>
+              <li>اضغط على زر الإرسال</li>
+              <li>إظهار مؤشر التحميل</li>
+              <li>في انتظار رد من الخادم</li>
+              <li>امسح واجهة المستخدم إذا نجحت، فقم بعرض الخطأ إذا فشل</li>
+            </ol>
+
+            <p>في هذا التدفق، سيكون تأخير الشبكة هو تأخير واجهة المستخدم كما هي. تدفقنا هكذا:</p>
+            <ol>
+              <li>اضغط على زر الإرسال</li>
+              <li><strong>على الفور</strong>مسح واجهة المستخدم (الرسوم المتحركة: 0.25 ثانية)</li>
+              <li>نقل الشبكة في الخلفية</li>
+              <li>عند النجاح: حذف بهدوء من Outbox؛ وعند الفشل: إعادة المحاولة في الخلفية</li>
+            </ol>
+
+<pre tabindex="0"><code>// ComposeViewController.swift
+private func performSendAnimation() {
+    UIView.animate(withDuration: 0.25,
+                   delay: 0,
+                   options: .curveEaseOut) {
+        self.textView.alpha = 0
+        self.subjectField.alpha = 0
+    } completion: { _ in
+        self.textView.text = ""
+        self.subjectField.text = ""
+        self.textView.alpha = 1
+        self.subjectField.alpha = 1
+        self.textView.becomeFirstResponder()
+    }
+}</code></pre>
+
+            <p>بالنسبة للمستخدمين، في اللحظة التي تضغط فيها على زر الإرسال، "تختفي" المذكرة ويمكنك كتابة المذكرة التالية. يتم التعامل مع نجاح أو فشل الشبكة في مكان غير مرئي للمستخدم.</p>
+
+            <p>"ولكن ماذا لو فشل الإرسال؟" - الإجابة على هذا السؤال هي بنية Outbox في القسم التالي.</p>
+          </div></section>
+
+          <!-- Section 4 -->
+          <section id="ja-section4" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-04">4. بنية Outbox لمنع الانسكابات</h2></div><div class="ce-chapter__body">
+            <p>فصل واجهة مستخدم الإرسال عن استجابة الشبكة يعني أنه قد يحدث موقف "تم فيه مسح واجهة المستخدم، ولكن فشل إرسال البريد الإلكتروني بالفعل". هذا غير مقبول على الإطلاق. لم يتم إرسال الملاحظة التي اعتقد المستخدم أنها "تم إرسالها" بالفعل - هذه خسارة قاتلة في الثقة لتطبيق المذكرة.</p>
+
+            <p>ما تم اعتماده هناك هو <strong>نمط Outbox</strong>.</p>
+
+            <p>تدفق إرسال الرسائل هو كما يلي:</p>
+            <ol>
+              <li><strong>إرسال زر النقر</strong>: تشفير الرسالة AES-GCM وحفظها في Outbox (التخزين المحلي)</li>
+              <li><strong>مسح واجهة المستخدم</strong>: مسح الشاشة فوراً باستخدام performSendAnimation</li>
+              <li><strong>الإرسال في الخلفية</strong>: قراءة الرسالة من Outbox وإرسالها إلى Relay API</li>
+              <li><strong>النجاح</strong>: حذف الرسالة من Outbox</li>
+              <li><strong>فشل</strong>: اتركه في انتظار الإرسال وأعد إرساله لاحقا</li>
+              <li><strong>دون اتصال</strong>: يراقب NWPathMonitor الاتصال ويعيد الإرسال تلقائياً عند عودته</li>
+            </ol>
+
+            <p>الشيء المهم هو <strong>تخزينه في Outbox قبل إرسال طلب الشبكة</strong>. نتيجة لذلك، حتى إذا تعطل التطبيق فجأة أو تم إيقاف تشغيل الجهاز، فستظل الرسالة المكتوبة إلى Outbox.</p>
+
+            <p>الرسائل المخزنة في Outbox محمية بتشفير AES-GCM باستخدام CryptoKit. يتم تخزين مفتاح التشفير في سلسلة المفاتيح ولا يمكن الوصول إليه من خارج رمل التطبيق.</p>
+
+<pre tabindex="0"><code>// OutboxManager.swift
+func enqueue(message: OutboxMessage) throws {
+    let key = try KeychainHelper.getOrCreateSymmetricKey()
+    let sealedBox = try AES.GCM.seal(
+        message.plainData,
+        using: key
+    )
+    let encrypted = EncryptedOutboxEntry(
+        id: message.id,
+        sealedData: sealedBox.combined!,
+        createdAt: Date(),
+        retryCount: 0
+    )
+    try persistenceStore.save(encrypted)
+}</code></pre>
+
+            <p>أيضا، لأنه ينفذ كل شيء من تلقاء نفسه، <strong>الاعتماد على المكتبة الخارجية هو صفر</strong>. CryptoKit وNWPathMonitor وURLSession - اكتملت جميعها بإطار عمل Apple الأصلي. يعد التحرر من التحكم في إصدار مكتبة الجهات الخارجية والتدقيق الأمني ميزة كبيرة للفرق الصغيرة.</p>
+          </div></section>
+
+          <!-- Section 5 -->
+          <section id="ja-section5" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-05">5 ترحيل API: الإرسال دون الاعتماد على تعاون OAuth في صندوق البريد</h2></div><div class="ce-chapter__body">
+            <p>لم يتم الكشف رسميا عن آلية نقل Captio. سبب إعلان إنهاء المطور هو أنه لم يعد قادرا على الاستمرار في قضاء الوقت للحفاظ على استقرار وسلامة التطبيق، ولم يتم الاستشهاد بطريقة الإرسال كسبب. ومع ذلك، بشكل عام، يتأثر الإرسال بالاعتماد على البريد الإلكتروني الخارجي API بسهولة بالتغييرات في متطلبات مقدم الخدمة وقيود الوصول.</p>
+
+            <p>اخترنا التكوين <strong>Cloudflare العمال + Resend API</strong>.</p>
+
+            <p>Cloudflare Workers هي منصة حوسبة متطورة تنفذ التعليمات البرمجية في مركز البيانات الأقرب إلى المستخدمين في جميع أنحاء العالم. تتم معالجة الطلبات الواردة من اليابان على حافة اليابان، وتتم معالجة الطلبات الواردة من الولايات المتحدة على حافة الولايات المتحدة. هذا يلغي تقريبا مشكلة البدء البارد مقارنة بالخوادم التقليدية (AWS Lambda، وما إلى ذلك).</p>
+
+            <p>استخدم Resend API لإرسال رسائل البريد الإلكتروني. Resend هو بريد إلكتروني API للمطورين.</p>
+
+            <h3>تدفق مصادقة البريد الإلكتروني</h3>
+            <p>عندما يقوم المستخدم بتعيين عنوان البريد الإلكتروني الوجهة، يتم إجراء مصادقة البريد الإلكتروني باستخدام رمز التحقق المكون من أرقام 6. هذا يمنع الإرسال غير المصرح به إلى عناوين البريد الإلكتروني التابعة لجهات خارجية.</p>
+
+            <h3>حد المعدل متعدد الطبقات</h3>
+            <p>يتم تنفيذ قيود المعدل متعددة الطبقات لمنع الاستخدام غير المصرح به.</p>
+
+<pre tabindex="0"><code>// Cloudflare Worker - Rate Limit Configuration
+const RATE_LIMITS = {
+  devicePerMinute: 30,    // 1デバイスあたり1分30回
+  devicePerDay: 200,      // 1デバイスあたり1日200回
+  ipPerHour: 120,         // 1IPあたり1時間120回
+  globalPerDay: 300       // サービス全体で1日300回（調整可能）
+};</code></pre>
+
+            <p>من خلال تطبيق حد معدل في طبقة 3 حسب الجهاز وIP والعالمي، يمكنك حظر الهاربين وهجمات الروبوتات على جهاز واحد.</p>
+
+            <p><strong>تحديث 2026-09:</strong> أُزيل الحد الخاص بكل جهاز والحد الإجمالي لكل 1 يوم في شهر 6 من عام 2026. الحد الحالي للإرسال هو حد لكل عنوان IP خلال 1 ساعة.</p>
+
+            <h3>ضمان المساواة في القوة</h3>
+            <p>لمنع الإرسال المكرر بسبب عدم استقرار الشبكة، يُمنح كل إرسال UUID، وتفحص Relay API التكرار. إذا أُعيد إرسال رسالة تحمل UUID نفسه، تُعاد استجابة نجاح من المحاولة 2 وما بعدها دون إرسال بريد جديد. بذلك، حتى مع آلية إعادة المحاولة في نمط Outbox، لا يتلقى المستخدم الملاحظة نفسها مرتين.</p>
+
+            <p><strong>2026-10 Postscript: </strong>لا يتحقق خادم الإرسال الحالي من الازدواجية نفسها. قم بتمرير معرف الرسالة كمفتاح Idempotency للطلب إلى Resend، ويتذكر Resend نفس المفتاح لساعات 24، ويعيد نفس الاستجابة كما كان من قبل لنفس طلب المحتوى. لذلك، لن يتم إرسال نفس المذكرة مرارا وتكرارا خلال ساعات 24 (لمزيد من التفاصيل، <a href="/ar/devlog/relay-api-design">Relay API design</a>).</p>
+          </div></section>
+
+          <!-- Section 6 -->
+          <section id="ja-section6" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-06">6. ما فعلته اليوم: محو الانزعاج الصغير واحدا تلو الآخر</h2></div><div class="ce-chapter__body">
+            <p>تم إنفاق الكثير من أعمال تنفيذ Day1 في مراجعة مربع حوار تصنيف النجوم. تقييم App Store هو شريان الحياة للتطبيق، ولكن لا تسعى إلى التقييم بطريقة تضر بتجربة المستخدم.</p>
+
+            <h3>إعادة تصميم ظروف العرض</h3>
+            <p>تم تعيين شروط عرض مربع حوار تصنيف النجوم على النحو التالي:</p>
+            <ul>
+              <li><strong>معروض لكل 100</strong>: يتم عرضه فقط للمستخدمين الذين استخدموا التطبيق بالكامل</li>
+              <li><strong> الحد الأدنى لفاصل أيام 14</strong>: لقد مر أكثر من 14 منذ آخر مرة تم عرضها</li>
+              <li><strong>لن يتم عرض 30 لمدة يوم بعد الإغلاق</strong>: إذا أغلقه المستخدم، فلن يتم عرض 30 مرة أخرى لمدة يوم واحد</li>
+            </ul>
+
+            <h3>تعديل منطقة النقر في أيقونة النجمة</h3>
+            <p>توصي إرشادات الواجهة البشرية Apple بالحد الأدنى لحجم اللمس المستهدف ل 44x44pt. لم تستوف منطقة النقر في أيقونة النجمة هذا المعيار، لذلك تم تصحيحها.</p>
+
+<pre tabindex="0"><code>// StarRatingView.swift
+private func createStarButton() -> UIButton {
+    let button = UIButton(type: .custom)
+    button.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: 44),
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+    ])
+    return button
+}</code></pre>
+
+            <h3>تصحيح تشويه أيقونة النجمة</h3>
+            <p>UIStackView. تم تعيين `contentMode` على `.scaleAspectFit`، وتم تغيير توزيع StackView إلى `.equalSpacing`.</p>
+
+            <h3>التدفق بعد التقييم</h3>
+            <ul>
+              <li><strong>نجوم 5</strong>: الانتقال إلى شاشة مراجعة App Store (`SKStoreReviewController`)</li>
+              <li><strong>نجوم 4 أو أقل</strong>: عرض نخب "شكرا لك" بهدوء وانتهى. لا تقود المراجعات السلبية إلى App Store.</li>
+            </ul>
+          </div></section>
+
+          <!-- Section 7 -->
+          <section id="ja-section7" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-07">7 تم حل عدم اتساق حالة العرض في "السجل"</h2></div><div class="ce-chapter__body">
+            <p>لاحظت خطأ في شاشة سجل الإرسال (السجل). كانت هناك رسالة تفيد بأن الحالة ظلت "إرسال" على الرغم من اكتمال الإرسال.</p>
+
+            <p>نتيجة للتحقيق في السبب، وجد أن هناك مشكلة في منطق تحديث الحالة. في التطبيقات السابقة، تم استخدام المحتوى النصي للرسالة كمفتاح لتحديث الحالة. ومع ذلك، إذا أرسلت ملاحظة بنفس المحتوى أكثر من مرة، فلن يتمكن البحث النصي من تحديد الرسالة الصحيحة.</p>
+
+            <p>كان التصحيح بسيطا وواضحا. تم تغيير البحث المستند إلى النص إلى <strong>تحديث الحالة المستند إلى الهوية</strong>. يتم تعيين UUID لكل رسالة عند حفظ Outbox، لذا استخدم هذا المعرف لتحديث حالة السجل.</p>
+
+<pre tabindex="0"><code>// HistoryManager.swift
+// Before: テキストベースの検索（バグの原因）
+// func updateStatus(forText text: String, status: SendStatus)
+
+// After: IDベースのステータス更新
+func updateStatus(forMessageId id: UUID, status: SendStatus) {
+    guard let index = entries.firstIndex(where: { $0.messageId == id }) else {
+        return
+    }
+    entries[index].status = status
+    persistEntries()
+}</code></pre>
+
+            <p>باستخدام هذا التصحيح، بغض النظر عن عدد المرات التي ترسل فيها ملاحظة بنفس المحتوى، يتم الآن عرض كل حالة بشكل صحيح.</p>
+          </div></section>
+
+          <!-- Section 8 -->
+          <section id="ja-section8" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-08">8. التزام بانويد بالخصوصية</h2></div><div class="ce-chapter__body">
+            <p>يتم كتابة المعلومات الخاصة في تطبيق المذكرة. كلمات المرور والمخاوف الشخصية والأفكار التجارية - من المستحيل التنبؤ بما سيكتبه المستخدمون. هذا هو السبب في أن حماية الخصوصية ليست "كافية" ولكن "المفرطة" مناسبة تماما.</p>
+
+            <h3>تراكب الخصوصية في مبدل التطبيقات</h3>
+            <p>في مبدل تطبيق iOS، يتم عرض شاشة التطبيق كصورة مصغرة. يعرض تراكب الخصوصية عندما يهاجر التطبيق إلى الخلفية بحيث لا يمكن رؤية محتويات الملاحظة من شاشة مبدل التطبيق.</p>
+
+            <p><strong>تحديث 2026-09:</strong> هذه الحماية غير مفعّلة في التطبيق الحالي؛ شيفرة العرض ما زالت موجودة لكنها لا تُستدعى. قد تبقى الملاحظة المعروضة في صورة مبدّل التطبيقات. راجع مقالة «تصميم الخصوصية» للتفاصيل.</p>
+
+            <h3>جلسة URL سريعة الزوال</h3>
+            <p>تخزن جلسة عنوان URL العادية ذاكرة التخزين المؤقت وملفات تعريف الارتباط ومعلومات المصادقة على القرص. باستخدام `URLSessionConfiguration.ephemeral`، نتأكد من عدم بقاء هذه المعلومات على القرص على الإطلاق. هذا لمنع محتويات المذكرة من البقاء في التخزين كذاكرة تخزين للاتصالات.</p>
+
+            <h3>سجلات غير ضارة</h3>
+            <p>سجلات التصحيح قيد التطوير يجب أن تكون حذرة. " يمكن أن تكون العملية غير الضارة على ما يبدو وهي "إخراج محتويات المذكرة المرسلة إلى السجل" فجوة أمنية. سياستنا واضحة:</p>
+            <ul>
+              <li>لن يتم تسجيل محتويات المذكرة في <strong>السجل على الإطلاق حتى لو كان بناء DEBUG</strong></li>
+              <li>لا يستخدم سجل الأخطاء `localizedDescription` ويتم تسجيل <strong>`type(of: error)` فقط</strong></li>
+              <li>السبب: لأن `localizedDescription` قد يحتوي على مدخلات المستخدم</li>
+            </ul>
+
+<pre tabindex="0"><code>// NetworkManager.swift
+// BAD: エラーの詳細をログに出力
+// Logger.error("Send failed: \(error.localizedDescription)")
+
+// GOOD: エラーの型のみをログに出力
+Logger.error("Send failed: \(type(of: error))")</code></pre>
+
+            <p>قد يبدو بجنون العظمة. ومع ذلك، أعتقد أن هذه الدرجة من جنون العظمة ضرورية من أجل الثقة واستخدام تطبيق المذكرة.</p>
+          </div></section>
+
+          <!-- Section 9 -->
+          <section id="ja-section9" class="ce-chapter sd-chapter ce-chapter--wide">
+            <div class="ce-chapter__head"><h2 id="reading-09">9. دعم اللغة 10: أريد تسليمه لمستخدمي Captio في جميع أنحاء العالم</h2></div><div class="ce-chapter__body">
+            <p>كان لدى Captio مستخدمين في جميع أنحاء العالم، وخاصة في البلدان الناطقة باللغة الإنجليزية. من أجل تقديم "SimpleMemo" إلى المستخدمين السابقين، تم دعم لغة 10 من الإصدار الأول.</p>
+
+            <p>اللغات المدعومة: اليابانية، الإنجليزية، الإسبانية، الفرنسية، الألمانية، الإيطالية، البرتغالية، الكورية، الصينية (المبسطة)، العربية.</p>
+
+            <p><strong>تحديث 2026-09:</strong> يذكر الوصف الحالي في App Store دعم 10 لغات: اليابانية والإنجليزية والإسبانية والفرنسية والألمانية والبرتغالية والروسية والصينية المبسطة والصينية التقليدية والعربية. الإيطالية والكورية الواردتان في القائمة أعلاه غير مذكورتين في الوصف الحالي.</p>
+
+            <p>خاصة <strong>كانت مراسلات RTL العربية (من اليمين إلى اليسار)</strong> تحديا تقنيا. ليس فقط اتجاه النص، ولكن أيضا يجب عكس تخطيط واجهة المستخدم بأكمله. من خلال الاستخدام المستمر للقيد "الرائد" / "التتبع" للتخطيط التلقائي، فإنه يحقق تخطيطا طبيعيا حتى في بيئة RTL.</p>
+
+            <h3>تبديل اللغة داخل التطبيق</h3>
+            <p>بالإضافة إلى تبديل اللغة داخل التطبيق بعد iOS 16، يتم أيضا تنفيذ آلية تبديل لغة فريدة من نوعها. عندما يتم تبديل اللغة، يتم استبدال ViewController بانتقال "cross-dissolve" لتوفير تجربة تبديل سلسة.</p>
+
+<pre tabindex="0"><code>// LanguageManager.swift
+func applyLanguageChange() {
+    guard let window = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first?.windows.first else { return }
+
+    let newVC = ComposeViewController()
+    newVC.view.frame = window.bounds
+    UIView.transition(with: window,
+                      duration: 0.3,
+                      options: .transitionCrossDissolve,
+                      animations: {
+        window.rootViewController = newVC
+    })
+}</code></pre>
+          </div></section>
+
+          <!-- Section 10 -->
+          <section id="ja-section10" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-10">10. تعلم اليوم: المنتج هو تصميم "الشعور بالأمان"</h2></div><div class="ce-chapter__body">
+            <p>بعد الانتهاء من Day1، ما أعتقده هو أن جوهر هذا المنتج هو تصميم "الشعور بالأمان".</p>
+
+            <p>لخص الأرقام الفنية:</p>
+            <ul>
+              <li><strong>Time-to-Text</strong>: 500ms أو أقل (الهدف)</li>
+              <li><strong>Send-to-Reset</strong>: قصر لا يشعر بالانتظار (الهدف)</li>
+              <li><strong>فقدان الرسائل</strong>: يمنعه نمط Outbox</li>
+              <li><strong>التشفير</strong>: AES-GCM (CryptoKit)</li>
+              <li><strong>تبعية المكتبة الخارجية</strong>: صفر</li>
+            </ul>
+
+            <p>ومع ذلك، يتم تلخيص كل هذه الأرقام في هدف واحد يسمى "الشعور بالأمان".</p>
+
+            <p>بدء التشغيل السريع → "يمكنك الكتابة على الفور في أي وقت" راحة البال. <br> يختفي عند إرساله → "معالجة" الشعور بالأمان. <br> التدابير المضادة للانسكاب → "لن تختفي بدون انتقال" راحة البال. <br> التشفير → "لا يمكن لأحد أن يرى" راحة البال.</p>
+
+            <p>Captio كان محبوبا ليس بسبب وظيفته الممتازة. " لأن تجربة "الاستخدام براحة البال" كانت مصقولة تماما. أريد أن أتولى ذلك.</p>
+          </div></section>
+
+          <!-- Section 11 -->
+          <section id="ja-section11" class="ce-chapter sd-chapter">
+            <div class="ce-chapter__head"><h2 id="reading-11">11 في المرة القادمة (Day2) إشعار</h2></div><div class="ce-chapter__body">
+            <p>Day2 يخطط للعمل على الموضوعات التالية:</p>
+            <ul>
+              <li><strong>تطور الرسوم المتحركة للإرسال</strong>: من 0.25 الثانية الحالية إلى الرسوم المتحركة الأكثر راحة</li>
+              <li><strong>تحسين توقيت تحديثات حالة السجل</strong>: مقارنة التحديثات في الوقت الفعلي مقابل تحديثات الدفعات</li>
+              <li><strong>هل تحتاج حقا إلى نخب ناجح؟ </strong>: النظر في خيار "عدم العرض" للحصول على ملاحظات حول الإرسال الناجح</li>
+            </ul>
+            <p>تهدف إلى أناقة "لا شيء" من Captio، تابع إلى Day2.</p>
+          </div></section>
+
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- ENGLISH VERSION          -->
+      <!-- ======================== -->
+
+      <!-- ======================== -->
+      <!-- RELATED TOPICS (shared)  -->
+      <!-- ======================== -->
+      <div class="related-topics">
+        <h2 id="reading-12" data-ce-number="12"> <span>المواضيع ذات الصلة الحفر العميق</span> </h2>
+        <div class="related-grid">
+          <a href="/ar/devlog/uikit-vs-swiftui" class="related-card">
+            <div class="related-card__title">
+              <span>UIKit مقابل SwiftUI: اختيار سرعة بدء التشغيل</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>السبب في أنني اخترت UIKit في 2026. التصميم المعماري الذي يهدف إلى وقت النص 500ms أو أقل.</span>
+
+            </div>
+          </a>
+          <a href="/ar/devlog/outbox-architecture" class="related-card">
+            <div class="related-card__title">
+              <span>هندسة Outbox: تصميم لمنع الانسكاب</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>يتم مسح واجهة المستخدم بمجرد إرسالها، ولكن تظل الرسالة غير المرسلة على الجهاز ويتم إعادة إرسالها. الحجم الكامل لنمط Outbox المشفر AES-GCM.</span>
+
+            </div>
+          </a>
+          <a href="/ar/devlog/relay-api-design" class="related-card">
+            <div class="related-card__title">
+              <span>Relay API: بناء منصة تسليم البريد الإلكتروني مع Cloudflare Workers</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>الإرسال دون الاعتماد على تعاون OAuth لصندوق البريد. أرسل مع Resend من التتابع API (Cloudflare Workers) الذي يتحرك على الحافة.</span>
+
+            </div>
+          </a>
+          <a href="/ar/devlog/privacy-first-design" class="related-card">
+            <div class="related-card__title">
+              <span>الخصوصية التصميم الأول: التزام بجنون العظمة</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>جلسة عناوين URL سريعة الزوال، ومعالجة السجل، والمواصفات الحالية لمبدل التطبيقات (لم يتم تمكين وظيفة إخفاء الملاحظات تلقائيا).</span>
+
+            </div>
+          </a>
+          <a href="/ar/captio-alternative/" class="related-card">
+            <div class="related-card__title">
+              <span>Captio دليل مقارنة التطبيقات البديلة والترحيل</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>إجراء الترحيل من Captio، جدول مقارنة الوظائف، الأسئلة الشائعة. انقر هنا إذا كنت تفكر في النقل.</span>
+
+            </div>
+          </a>
+          <a href="/ar/note-to-email/" class="related-card">
+            <div class="related-card__title">
+              <span>كيفية إرسال ملاحظة إلى نفسك عن طريق البريد الإلكتروني</span>
+
+            </div>
+            <div class="related-card__desc">
+              <span>أرسل الفكرة التي توصلت إليها عبر البريد الإلكتروني على الفور. مذكرة → دليل استخدام البريد الإلكتروني.</span>
+
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-13" data-ce-number="13"> <span>المراجع</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple - وثائق UIKit</a> - <span>مرجع رسمي إلى إطار عمل UIKit. يستخدم لبناء واجهة مستخدم SimpleMemo</span></li>
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple — CryptoKit Documentation</a> — <span>AES-GCM يستخدم لتنفيذ حماية بيانات Outbox مع التشفير</span></li>
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare وثائق العمال</a> — <span>تم تم ادخدمها كقاعدة بدون خادم لترحيل البريد API</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span>نمط تصميم يتم فيه كتابة الرسالة التي سيتم إرسالها أولا في جدول الانتظار (Outbox)، ويتم إرسال عملية أخرى. يستخدم SimpleMemo نفس الفكرة في المحطة الطرفية</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — بروتوكول نقل البريد البسيط (SMTP)</a> — <span>المواصفات القياسية لبروتوكول نقل البريد</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ar/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>القراءة التالية</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>إنشاء مكان لتخزين الملاحظات باستخدام تعاون Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> إذا قمت بتعيين الرابط وحفظت الوجهة في iPhone، يمكنك أيضا ترك الملاحظات المرسلة إلى Obsidian. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>المحتوى ذو الصلة</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ar/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio مقارنة التطبيقات البديلة</span></a></li>
+    <li><a href="/ar/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>قائمة منشورات المدونة</span></a></li>
+    <li><a href="/ar/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>قائمة مقارنة تطبيقات المذكرة</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ar" dir="rtl"><a class="site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">ملاحظة صغيرة. خطوة تالية.</p><p class="site-footer-description">أرسل الملاحظات من iPhone إلى Obsidian والبريد الإلكتروني.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="روابط التذييل">
+      <div class="footer__col">
+        <p class="footer__col-title">المنتجات</p>
+        <a href="/ar/download/" class="footer__link">تنزيل</a>
+        <a href="/ar/" class="footer__link">الرئيسية</a>
+        <a href="/ar/how-to/" class="footer__link"><span>كيفية الاستخدام</span> </a>
+        <a href="/ar/templates/" class="footer__link"><span>القوالب</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">المقارنة والنقل</p>
+        <a href="/ar/captio/" class="footer__link"><span>نوع Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">القراءة</p>
+        <a href="/ar/devlog/" class="footer__link">سجل التطوير</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">الدعم</p>
+        <a href="/ar/roadmap/" class="footer__link">خطة التطوير العامة</a>
+        <a href="/ar/about/" class="footer__link">عن المطوّر</a>
+        <a href="/ar/terms" class="footer__link"><span>شروط الاستخدام</span> </a>
+        <a href="/ar/privacy" class="footer__link">الخصوصية</a>
+        <a href="/ar/contact" class="footer__link">تواصل معنا</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / الجهة المشغّلة: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

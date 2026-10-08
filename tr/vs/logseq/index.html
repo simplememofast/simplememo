@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/logseq/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Logseq ile karşılaştırma — SimpleMemo | Not uygulamalarının karşılaştırılması</title>
+  <meta name="description" content="Logseq ve SimpleMemo&#x27;i depolama ve giriş rolünde karşılaştırın. Geleneksel dosya sürümü Logseq OG ile SQLite kullanan DB sürümü arasındaki farkı, Hızlı ekleme, senkronizasyon, ek, Markdown dışa aktarma kısıtlamaları dahil olmak üzere yedeklemeyi ve resmi belgede geçişten önce kontrol edilecek adımları kontrol edeceğiz.">
+  <meta name="robots" content="max-snippet:-1, max-image-preview:large">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="SimpleMemo ve Logseq - Not uygulamalarının kapsamlı bir karşılaştırması">
+  <meta property="og:description" content="Logseq ve SimpleMemo&#x27;i depolama ve giriş rolünde karşılaştırın. Geleneksel dosya sürümü Logseq OG ile SQLite kullanan DB sürümü arasındaki farkı, Hızlı ekleme, senkronizasyon, ek, Markdown dışa aktarma kısıtlamaları dahil olmak üzere yedeklemeyi ve resmi belgede geçişten önce kontrol edilecek adımları kontrol edeceğiz.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/vs/logseq/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="SimpleMemo ve Logseq - Not uygulamalarının kapsamlı bir karşılaştırması">
+  <meta name="twitter:description" content="Logseq ve SimpleMemo&#x27;i depolama ve giriş rolünde karşılaştırın. Geleneksel dosya sürümü Logseq OG ile SQLite kullanan DB sürümü arasındaki farkı, Hızlı ekleme, senkronizasyon, ek, Markdown dışa aktarma kısıtlamaları dahil olmak üzere yedeklemeyi ve resmi belgede geçişten önce kontrol edilecek adımları kontrol edeceğiz.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/vs/logseq/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/logseq/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/logseq/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/logseq/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/logseq/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/logseq/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/logseq/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/logseq/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/logseq/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/logseq/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/vs/logseq/#article",
+  "inLanguage": "tr",
+  "image": "https://simplememofast.com/assets/img/og/vs-logseq.png",
+  "headline": "SimpleMemo ve Logseq - Not uygulamalarının kapsamlı bir karşılaştırması",
+  "description": "Logseq ve SimpleMemo'i depolama ve giriş rolünde karşılaştırın. Geleneksel dosya sürümü Logseq OG ile SQLite kullanan DB sürümü arasındaki farkı, Hızlı ekleme, senkronizasyon, ek, Markdown dışa aktarma kısıtlamaları dahil olmak üzere yedeklemeyi ve resmi belgede geçişten önce kontrol edilecek adımları kontrol edeceğiz.",
+  "url": "https://simplememofast.com/tr/vs/logseq/",
+  "datePublished": "2026-03-06",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/vs/logseq/"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Memo uygulaması karşılaştırması",
+      "item": "https://simplememofast.com/tr/vs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "vs Logseq",
+      "item": "https://simplememofast.com/tr/vs/logseq/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/vs/logseq/#webpage",
+  "inLanguage": "tr",
+  "name": "SimpleMemo ve Logseq Karşılaştırması",
+  "url": "https://simplememofast.com/tr/vs/logseq/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}.compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}.compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}.compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}.compare-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap}.compare-table .yes{color:#3fb950}.compare-table .no{color:#f85149}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.diff-list{list-style:none;margin:1.5rem 0 2rem;padding:0}.diff-list li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}.diff-list li .diff-num{position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}.diff-list li strong{color:var(--text)}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}@media(max-width:600px){.choose-grid{grid-template-columns:1fr}}.choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}.choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.choose-card ul{list-style:none;padding:0;margin:0;font-size:.87rem;color:var(--text-secondary);line-height:1.8}.choose-card ul li::before{content:"&#10003; ";color:#3fb950;font-weight:700}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  .logseq-scroll{max-width:100%;overflow-x:auto;margin:1.5rem 0}.logseq-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.logseq-scroll table{width:100%;min-width:680px;border-collapse:collapse;font-size:.93rem}.logseq-scroll th,.logseq-scroll td{padding:.8rem;border:1px solid var(--border);vertical-align:top;text-align:left;line-height:1.9}.logseq-scroll th{background:var(--surface)}.logseq-scroll caption{text-align:left;padding:.5rem 0;color:var(--text-muted);font-size:.85rem}.lp-section>p,.lp-section>ol{line-height:1.9;color:var(--text-secondary)}.lp-section li{margin:.8rem 0}.lp-section .faq-details{padding:1rem 0;border-bottom:1px solid var(--border)}.lp-section .faq-summary{font-weight:700;cursor:pointer;line-height:1.8}.lp-section .faq-answer{padding:1rem 0;line-height:1.9;color:var(--text-secondary)}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<link rel="stylesheet" href="/assets/css/capture-sixth.css?v=384c55dbee"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/tr/vs/logseq/#faq","inLanguage":"tr","mainEntity":[{"@type":"Question","name":"Logseq'in tamamını Markdown dosyasına kaydetmek istiyor musunuz?","acceptedAnswer":{"@type":"Answer","text":"Hayır. Önceki dosya sürümü Logseq OG'ye ayrılmıştır ve DB sürümü SQLite veritabanını kullanır. DB sürümünün Markdown dışa aktarması, tüm özellikleri ve zaman damgalarını koruyan bir biçimde değildir."}},{"@type":"Question","name":"DB sürümünü mevcut grafikle denemeden önce ne yapıyorsunuz?","acceptedAnswer":{"@type":"Answer","text":"Orijinal grafiğin bağımsız bir kopyasını bırakın ve önemli olmayan küçük bir test grafiği ile deneyin. Yalnızca SQLite'e değil, aynı zamanda eklere de ihtiyacınız varsa, SQLite DB ve varlıklar dahil olmak üzere dışa aktarmayı seçin ve içe aktarmayı ayrı bir grafiğe kontrol edin."}},{"@type":"Question","name":"Önceki eklentiyi DB sürümünde olduğu gibi kullanabilir miyim?","acceptedAnswer":{"@type":"Answer","text":"uyumluluğu tek tek kontrol edin. Resmi Pazaryeri'nin \"DB'yi Destekler Mi?\" Lütfen DB uyumlu ekrana bakarak kullandığınız eklentinin DB grafiğini destekleyip desteklemediğini kontrol edin."}},{"@type":"Question","name":"Logseq'in hızlı girişi bir eklenti mi gerekli?","acceptedAnswer":{"@type":"Answer","text":"DB sürümünün resmi belgesi, mevcut dergiye kısa notlar gönderen yerleşik bir \"Hızlı ekleme\"ye sahiptir. Giriş sürüm ve terminal için farklıdır, bu nedenle ek eklentiler aramadan önce lütfen mevcut uygulamaya danışın."}},{"@type":"Question","name":"Resmi senkronizasyonu kullanırsam veri kaybı olmayacak mı?","acceptedAnswer":{"@type":"Answer","text":"Eşzamanlama, yedeklemenin yerine geçmez. Resmi README, DB sürümü için bir beta ve yeni mobil sürüm ve RTC için alfadır ve veri kaybı ve bağımsız yedekleme olasılığını yönlendirir. Kullanılacak sürümü ve senkronizasyon rotasını kontrol edin."}},{"@type":"Question","name":"SimpleMemo kullanırsam, otomatik olarak Logseq'e eklenir mi?","acceptedAnswer":{"@type":"Answer","text":"Bu sayfadaki birleşik örnek, e-posta gelen kutusunda alınan metnin gerekirse Logseq'e nasıl kopyalanacağıdır. Logseq'in DB'sine veya grafiğine otomatik olarak yazma işlevini veya tüm grafiği taşıma yeteneğini göstermez."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-sixth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="Ana gezinme" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/tr/guides/">Kılavuzlar</a></li>
+<li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+<li><a href="/tr/vs/">Karşılaştır</a></li>
+<li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+<li><a href="/tr/blog/"><span>Blog</span></a></li>
+<li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+<li><a href="/tr/faq">Sık sorulan sorular</a></li>
+<li><a href="/tr/about/">Geliştirici hakkında</a></li>
+<li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>İndir</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/vs/logseq/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/vs/logseq/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/logseq/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/vs/logseq/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/vs/logseq/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/vs/logseq/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/logseq/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/vs/logseq/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/vs/logseq/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">İndir</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label"><span>Memo uygulaması karşılaştırması</span></div>
+<h1 class="lp-hero__title"><span>SimpleMemo ve Logseq<br/> Giriş, depolama ve geçişteki farklılıklar</span></h1>
+<p class="lp-hero__sub"><span>Logseq ile ilgili bilgi geliştirmek istiyorsanız, önce kullandığınız sürümü kontrol edin. Kaydetme ve geçiş prosedürü, Markdown dosyasını işleyen OG ile SQLite kullanan DB sürümü arasında farklıdır. SimpleMemo, gelen kutusuna vb. gerekli metni bırakmak için bir giriş olarak karşılaştırılır. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Yazar: <a href="/tr/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Yayınlandı: <time datetime="2026-03-06">2026 yıl 3 ay 6 gün</time> ・ Güncelleme: <time datetime="2026-09-09">2026 yıl 9 ay 9 gün</time></span> </p>
+<a class="ce-read-link" href="#heading-logseq-versions">İçeriği oku <span aria-hidden="true">↓</span></a></div><nav aria-label="Okumak istediğiniz konuyu seçin" class="ce-routes"><a class="ce-route" href="#heading-logseq-versions"><span>01</span><b>İlk olarak OG ve DB sürümleri arasında ayrım yapın</b></a><a class="ce-route" href="#heading-logseq-capture"><span>02</span><b>Günlük not ve Hızlı ekleme ile başlayın</b></a><a class="ce-route" href="#heading-logseq-sync"><span>03</span><b>Eşzamanlama ve yedeklemeyi ayrı ayrı hazırlayın</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">LOGSEQ / SAHA REHBERİ</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>OG ve DB sürümü</strong></div><div class="cn-concept-row"><span>02</span><strong>Eşzamanlama ve yedekleme</strong></div><div class="cn-concept-row"><span>03</span><strong>Küçük bir miktarla geçişi deneyin</strong></div></div><figcaption class="ce-stage-foot">Operasyon öncesi onay noktaları</figcaption></figure></header><div class="ce-article">
+
+<!-- 意図の分岐: このページはSimpleMemo vs Logseq。Obsidian vs Logseqを探して
+         着地した検索者（「logseq obsidian 比較」系クエリ）を実験記事へ送る。 -->
+<div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:1rem 1.25rem;margin:0 0 1rem;font-size:.92rem;line-height:1.8;">
+<span><strong>Obsidian ve Logseq arasındaki karşılaştırma</strong>mi arıyorsunuz? Eklenti sayısının gerçek sayısıyla karşılaştırıldığında her iki uygulamayla da aynı klasörü açan deneyler <a href="/tr/obsidian/compare/logseq/" style="color:var(--accent);">Obsidian ve Logseq Karşılaştırma Doğrulaması [2026]</a> . Bu sayfa SimpleMemo ve Logseq arasında bir karşılaştırmadır.</span>
+</div>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-versions"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-logseq-versions"><span>İlk olarak, OG ve DB sürümlerini ayırt edin</span></h2></div><div class="ce-chapter__body"><p><span>Resmî depoda dosya tabanlı grafikler Logseq OG projesine ayrılmıştır. 13/7/2026 tarihinde yayımlanan 2.0.1, DB sürümünün betasıdır. Eski sürümün dosya saklama, Org ve eklenti açıklamalarını DB sürümüne doğrudan uygulamayın.</span></p><div aria-labelledby="heading-logseq-versions" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-versions-caption"><span> Dosya sürümünü ve DB sürümünü ayrı ayrı kontrol edin. Yana doğru kaydırabilirsiniz. </span></caption><thead><tr><th scope="col"><span>Öğe</span></th><th scope="col">Logseq OG</th><th scope="col">Logseq DB</th></tr></thead><tbody><tr><th scope="row"><span>Koruma merkezi</span></th><td><span>Markdown・Org dosya grafiği</span></td><td><span> SQLite'in DB grafiği. Ek ayrıca varlıkları da ele alır</span></td></tr><tr><th scope="row"><span>Metin paket</span></th><td><span> dosyasını başka bir düzenleyiciyle okuyun. Benzersiz sözdizimini onaylayın</span></td><td><span>Standart Markdown dışa aktarmada bazı bilgiler kayboldu</span></td></tr><tr><th scope="row"><span>Mevcut fonksiyonlar</span></th><td><span>Kullandığınız sürümü ve eklentiyi kontrol edin</span></td><td><span>Org gibi değişiklikler desteklenmiyor. DB uyumlu eklentileri kontrol edin</span></td></tr><tr><th scope="row"><span>Denemeden önce hazırlık</span></th><td><span>Tüm grafiğin ve ekin bağımsız bir kopyasını bırakın</span></td><td><span>Önemli test grafikleri ve DB ve ek dışa aktarma</span></td></tr></tbody></table></div><p><a href="https://github.com/logseq/docs/blob/master/db-version-changes.md" rel="noopener" target="_blank"><span>Resmi: DB sürümünde neler değişti</span></a></p><p><a href="https://github.com/logseq/logseq/releases/tag/2.0.1" rel="noopener" target="_blank"><span>Resmi: 2.0.1 beta sürümü</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-capture"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-logseq-capture"><span>Günlük not ve Hızlı ekleme ile başlayın</span></h2></div><div class="ce-chapter__body"><p><span>Logseq, düşünceleri madde işaretli bloklar ve referanslarla bir araya getiren bir araçtır. Her şeyi baştan bağlamaya, günlük notta kısa bir kayıt yazmaya ve ardından kullandığınız durumla ilişkilendirmeye gerek yoktur. </span></p><p><span> DB sürümü, mevcut dergiye göndermek için yerleşik Hızlı eklemeyi resmi olarak yönlendirir. " "Hızlı giriş için her zaman bir eklenti gereklidir" açıklaması uygun değildir. Kullandığınız terminaldeki girişi açın ve girmeyi, kaydetmeyi ve yeniden görüntülemeyi deneyin. </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#search-commands" rel="noopener" target="_blank"><span>Resmi: Hızlı açıklama ekleyin</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-sync"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-logseq-sync"><span>Eşzamanlama ve yedeklemeyi ayrı ayrı hazırlayın</span></h2></div><div class="ce-chapter__body"><p><span> Resmi README, DB sürümünün bir beta olduğunu ve yeni mobil sürümün ve RTC'nin alfa olduğunu açıklar ve veri kaybı ve yedekleme olasılığını yönlendirir. Tek başına senkronizasyonu etkinleştirmek, yanlışlıkla silinmesini ve veri kaybını önlemez. İlk olarak, üretimin içeriğini içermeyen küçük bir grafikle deneyin. </span></p><p><span> Dosya sürümünün ve DB sürümünün senkronizasyon ayarlarını karıştırmadan kullandığınız sürümün talimatlarını kontrol edin. Kaydın senkronizasyon hedefinde bulunup bulunamayacağı veya bağımsız bir kopyanın geri okunup okunamayacağı başka bir onaydır. </span></p><p><a href="https://github.com/logseq/logseq#-database-version" rel="noopener" target="_blank"><span>Resmi: Geliştirme aşaması ve test grafiği bilgileri</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-export"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-logseq-export"><span>DB yedeklemesini ve Markdown dışa aktarmayı ayrı ayrı kullanın</span></h2></div><div class="ce-chapter__body"><p><span> Dışa Aktarma grafiğinin DB sürümünde, DB ve ekleri özetleyen "Hem SQLite DB'yi hem de varlıkları dışa aktar"ı seçebilirsiniz. Standart Markdown dışa aktarma, okunması kolay metni ortaya çıkarmak için kullanılır, ancak tüm nitelikleri veya zaman damgalarını korumaz. Tek yedekleme olarak geçiş için yalnızca Markdown yapmayın. </span></p><p><span>Gerekli içeriği açıp açamayacağınızı görmek için orijinal grafiği bırakırken yeni bir ayrı grafikle İçe Aktar → SQLite + varlıkları (.zip) deneyin. Eski dosya grafiklerini DB'ye dönüştürürken, lütfen Org destek dışı, görev durumu dönüşümü ve birden fazla sorguyu ve içe aktarma kısıtlamalarını da kontrol edin. </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#graph-export" rel="noopener" target="_blank"><span>Resmi: Dışa aktarma ve içe aktarma biçimi</span></a></p></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-checks"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-logseq-checks"><span>Geçişten önce küçük miktarlarda görüntülenen 6 öğe</span></h2></div><div class="ce-chapter__body"><div aria-labelledby="heading-logseq-checks" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-checks-caption"><span>Az miktarda geçişte görüntülenen 6 öğeleri. Yana doğru kaydırabilirsiniz. </span></caption><thead><tr><th scope="col"><span>Onay öğesi</span></th><th scope="col"><span>Kontrol edilecek içerikler</span></th></tr></thead><tbody><tr><th scope="row"><span>Metin ve hiyerarşi</span></th><td><span>Paragrafları, madde işaretlerini ve alt blokları okuyabilir misiniz</span></td></tr><tr><th scope="row"><span>referans ve bağlantı</span></th><td><span>Sayfaya veya bloğa referansın amaçlanan yere gidip gitmediğini görün</span></td></tr><tr><th scope="row"><span>Nitelikler ve görevler</span></th><td><span>Değer, son tarih ve durum nasıl dönüştürüldü</span></td></tr><tr><th scope="row"><span>ek</span></th><td><span>Gerçek PDF, görüntü ve ses dosyasını açmak istiyor musunuz</span></td></tr><tr><th scope="row"><span>Ara ve eklenti</span></th><td><span>Gerekli arama ve DB uyumlu eklentileri kullanabilir misiniz</span></td></tr><tr><th scope="row"><span>geri oku</span></th><td><span>Gerekli kaydı başka bir grafiğe aktararak yeniden görüntüleyebilir misiniz</span></td></tr></tbody></table></div><p><span>Bu tablo geçişi onaylamak içindir. Tüm grafiklerin aynı sonuca sahip olduğunu doğrulayan bir tablo değildir. Orijinal veriler onay tamamlanana kadar bırakılacaktır. </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-trial"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-logseq-trial"><span>İşlemi değiştirmeden önce 5 prosedürü</span></h2></div><div class="ce-chapter__body"><ol><li><span> Kullandığınız Logseq'in sürümünü ve kaydetme yöntemini kaydedin ve orijinal grafiği bağımsız bir konuma yedekleyin. </span></li><li><span> Her 1 metnini, görevi, eki ve bağlantıyı önemli olmayan küçük bir test grafiğinde hazırlayın. </span></li><li><span> üzerindeki 6 öğesini kontrol edin ve ayrı bir grafiğe aktararak gerekli çıktıyı açın. </span></li><li><span>Birlikte kullanmak istiyorsanız, kısa bir not alın ve son Logseq depolama hedefinde bulup bulamayacağınızı kontrol edin. </span></li><li><span> Tutarsızlıkları ve eksik işlevleri kaydettikten sonra, üretim verilerinin işlenmesini belirleyin. </span></li></ol></div></section>
+<section class="lp-section ce-chapter" id="logseq-memo"><div class="ce-chapter__head"><h2 data-ce-number="07" id="heading-logseq-memo"><span>SimpleMemo kullanırken</span></h2></div><div class="ce-chapter__body"><p><span>Genellikle e-posta gelen kutunuza geri bakarsanız, orada kısa bir cümle bırakmanın ve yalnızca ihtiyacınız olanı Logseq'in günlük notuna yazmanın bir yolu vardır. Kopyalama sırasında, metni ve hedefi bildiğinizden emin olun. E-postanın gelmesi ve Logseq'e kaydetme farklı işlemlerdir ve otomatik eklenti varsayılmaz. </span></p><p><span> girişine giriş olarak denemek istiyorsanız, <a data-cta-cluster="vs" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a> hedefini ayarlayabilir ve 1 kasasının gelişinden itibaren kontrol edebilirsiniz. Grafikleri değiştirmek veya taşımak için kullanılmaz. </span></p><p><span><a href="/tr/note-to-email/">ilk e-postayı gönderme</a> ve <a href="/tr/obsidian/compare/logseq/">geçmiş dosya sürümü karşılaştırması</a> bölümüne de bakın. </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-faq"><div class="ce-chapter__head"><h2 data-ce-number="08" id="heading-logseq-faq"><span>Sıkça Sorulan Sorular</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Logseq'in tamamını Markdown dosyasına kaydetmek istiyor musunuz?</summary><div class="faq-answer"><p>Hayır. Önceki dosya sürümü Logseq OG'ye ayrılmıştır ve DB sürümü SQLite veritabanını kullanır. DB sürümünün Markdown dışa aktarması, tüm özellikleri ve zaman damgalarını koruyan bir biçimde değildir.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">DB sürümünü mevcut grafikle denemeden önce ne yapıyorsunuz?</summary><div class="faq-answer"><p>Orijinal grafiğin bağımsız bir kopyasını bırakın ve önemli olmayan küçük bir test grafiği ile deneyin. Yalnızca SQLite'e değil, aynı zamanda eklere de ihtiyacınız varsa, SQLite DB ve varlıklar dahil olmak üzere dışa aktarmayı seçin ve içe aktarmayı ayrı bir grafiğe kontrol edin.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Önceki eklentiyi DB sürümünde olduğu gibi kullanabilir miyim?</summary><div class="faq-answer"><p>uyumluluğu tek tek kontrol edin. Resmi Pazaryeri'nin "DB'yi Destekler Mi?" Lütfen DB uyumlu ekrana bakarak kullandığınız eklentinin DB grafiğini destekleyip desteklemediğini kontrol edin.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Logseq'in hızlı girişi bir eklenti mi gerekli?</summary><div class="faq-answer"><p>DB sürümünün resmi belgesi, mevcut dergiye kısa notlar gönderen yerleşik bir "Hızlı ekleme"ye sahiptir. Giriş sürüm ve terminal için farklıdır, bu nedenle ek eklentiler aramadan önce lütfen mevcut uygulamaya danışın.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Resmi senkronizasyonu kullanırsam veri kaybı olmayacak mı?</summary><div class="faq-answer"><p>Eşzamanlama, yedeklemenin yerine geçmez. Resmi README, DB sürümü için bir beta ve yeni mobil sürüm ve RTC için alfadır ve veri kaybı ve bağımsız yedekleme olasılığını yönlendirir. Kullanılacak sürümü ve senkronizasyon rotasını kontrol edin.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo kullanırsam, otomatik olarak Logseq'e eklenir mi?</summary><div class="faq-answer"><p>Bu sayfadaki birleşik örnek, e-posta gelen kutusunda alınan metnin gerekirse Logseq'e nasıl kopyalanacağıdır. Logseq'in DB'sine veya grafiğine otomatik olarak yazma işlevini veya tüm grafiği taşıma yeteneğini göstermez.</p></div></details></div></div></div></section>
+<section class="lp-section ce-chapter" id="logseq-scope"><div class="ce-chapter__head"><h2 data-ce-number="09" id="heading-logseq-scope"><span>Onay aralığı</span></h2></div><div class="ce-chapter__body"><p><span> 2026 yıl 9 ay 9 resmi depoyu, DB sürüm açıklamasını ve değişikliklerini, 2.0.1 sürümünü onayladı. Bu makaledeki prosedür, bu kez gerçek makineyle geçişi tamamlayan bir rapor değildir. Yazar SimpleMemo'ün geliştiricisidir. </span></p></div></section>
+<div class="cta-box">
+<div class="cta-box__title"><span>E-posta ile geriye bakmak için notun girişi</span></div>
+<div class="cta-box__desc"><span>Hedefi ayarlayın, kısa notun gelişini kontrol edin ve kullanmaya başlayın.</span></div>
+<a aria-label="App Store üzerinden indirin" class="app-store-badge" data-cta-cluster="vs" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="App Store üzerinden indirin" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a>
+<div class="cta-qr">
+<img alt="App Store üzerinden indirme QR kodu" height="132" loading="lazy" src="/assets/img/qr-vs-logseq-ja.svg?v=977b245661" width="132"/>
+<small><span>PC'niz varsa akıllı telefonunuzla okuyun</span></small>
+</div>
+</div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="chapter-10"><span>İlgili sayfalar</span></h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/tr/vs/"><span>Memo Uygulaması Karşılaştırma Listesi</span></a>
+<a href="/tr/obsidian/compare/logseq/"><span>Obsidian ve Logseq karşılaştırma testi</span></a>
+<a href="/tr/vs/obsidian/"><span>vs Obsidian</span></a>
+<a href="/tr/vs/roam-research/"><span>vs Roam Research</span></a>
+<a href="/tr/vs/notion/"><span>vs Notion</span></a>
+<a href="/tr/vs/anytype/"><span>vs Anytype</span></a>
+<a href="/tr/vs/tana/"><span>vs Tana</span></a>
+<a href="/tr/captio-alternative/"><span>Captio Alternatif Kılavuz</span></a>
+</div>
+</div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/tr/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Sonraki okuma</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Karşılaştırmanın yanında, ölçülen gerçek değere bakın</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span> Ana not uygulamasının başlangıcını ve girişin başlangıcını gerçekten ölçen bir tablo var. </span> </span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="11" id="chapter-11"> <span>İlgili içerikler</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/tr/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio Alternatif Uygulama Karşılaştırması</span></a></li>
+<li><a href="/tr/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Kendinize nasıl e-posta gönderilir</span></a></li>
+<li><a href="/tr/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Sık sorulan sorular</span></a></li>
+<li><a href="/tr/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Kılavuz nasıl kullanılır</span></a></li>
+</ul>
+</div></section></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Alt bilgi gezinmesi" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Ürün</p>
+<a class="footer__link" href="/tr/download/">İndir</a>
+<a class="footer__link" href="/tr/">Ana sayfa</a>
+<a class="footer__link" href="/tr/use-cases/">Kullanım örnekleri</a>
+<a class="footer__link" href="/tr/guides/">Kılavuzlar</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+<a class="footer__link" href="/tr/captio-alternative/"><span>Captio alternatifi</span></a>
+<a class="footer__link" href="/tr/note-to-email/">E-postaya not gönderme</a>
+<a class="footer__link" href="/tr/vs/">Karşılaştır</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Destek</p>
+<a class="footer__link" href="/tr/roadmap/">Açık yol haritası</a>
+<a class="footer__link" href="/tr/devlog/">Geliştirme günlüğü</a>
+<a class="footer__link" href="/tr/about/">Geliştirici hakkında</a>
+<a class="footer__link" href="/tr/faq">Sık sorulan sorular</a>
+<a class="footer__link" href="/tr/privacy">Gizlilik</a>
+<a class="footer__link" href="/tr/contact">İletişim</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

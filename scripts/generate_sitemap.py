@@ -10,11 +10,11 @@ Strategy:
   - Group entries by sitemap target:
       sitemap-ja.xml      -> ja root URLs
       sitemap-en.xml      -> /en/* URLs
-      sitemap-locales.xml -> 8 minor-locale homepage stubs
+      sitemap-locales.xml -> the other 8 supported locales
       sitemap.xml         -> index referencing the three above
   - Annotate each <url> with <xhtml:link rel="alternate"> entries pulled
-    from i18n_config (TOP_CLUSTER for the homepages, JA_EN_PAIRS for
-    paired pages).
+    from the published translation registry, retaining the legacy i18n_config
+    fallback for existing pages outside a registry group.
 
 Usage:
     python3 scripts/generate_sitemap.py [--dry-run] [--check]
@@ -33,6 +33,7 @@ from xml.etree import ElementTree as ET
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+from localization_registry import published_groups, page_url
 from sitemap_lastmod import content_lastmods, git  # noqa: E402
 
 from i18n_config import (  # noqa: E402
@@ -76,6 +77,12 @@ for ja_path, en_path in JA_EN_PAIRS:
     PAIR_BY_URL[ja_url] = info
     PAIR_BY_URL[en_url] = info
 
+
+for group, pages in published_groups():
+    alternates = [(locale, absolute_url(page_url(file))) for locale, file in pages.items()]
+    default = absolute_url(page_url(pages.get('ja', group['source'])))
+    for file in pages.values():
+        PAIR_BY_URL[absolute_url(page_url(file))] = {'alternates': alternates, 'x_default': default}
 
 # ---------------------------------------------------------------------------
 
@@ -129,12 +136,11 @@ def collect_urls() -> dict[str, Path]:
 # ---------------------------------------------------------------------------
 
 def determine_target(url: str) -> str:
-    """Return 'en' for en URLs, 'locales' for minor-locale homepage
-    stubs, 'ja' for everything else."""
+    """Group every locale's homepage and nested pages consistently."""
     rest = url[len(SITE_URL):]
     if rest == "/en/" or rest.startswith("/en/"):
         return "en"
-    if rest.strip("/") in MINOR_LOCALES:
+    if rest.strip("/").split("/", 1)[0] in MINOR_LOCALES:
         return "locales"
     return "ja"
 

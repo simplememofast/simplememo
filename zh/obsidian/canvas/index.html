@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/canvas/">
+  <title>Obsidian的Canvas — 并排连接卡片的使用方法 | SimpleMemo</title>
+  <meta name="description" content="Obsidian的Canvas从三张卡片开始的实践指南。 用Linux版1.13.7制作了空的Canvas，确认了短文卡、现有Markdown、连接标签、移动、保存和重新显示。 刊登未加工的实画面、保存的Canvas全文、参考备忘录和练习用ZIP、确认的范围。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian的Canvas — 排列卡片连接的使用方法">
+  <meta property="og:description" content="Obsidian的Canvas从三张卡片开始的实践指南。 用Linux版1.13.7制作了空的Canvas，确认了短文卡、现有Markdown、连接标签、移动、保存和重新显示。 刊登未加工的实画面、保存的Canvas全文、参考备忘录和练习用ZIP、确认的范围。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/canvas/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-canvas.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的Canvas — 排列卡片连接的使用方法">
+  <meta name="twitter:description" content="Obsidian的Canvas从三张卡片开始的实践指南。 用Linux版1.13.7制作了空的Canvas，确认了短文卡、现有Markdown、连接标签、移动、保存和重新显示。 刊登未加工的实画面、保存的Canvas全文、参考备忘录和练习用ZIP、确认的范围。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-canvas.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/canvas/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/canvas/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/canvas/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/canvas/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/canvas/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/canvas/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/canvas/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/canvas/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/canvas/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/canvas/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/canvas/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/canvas/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.canvas-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.canvas-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.canvas-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.canvas-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.canvas-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.canvas-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.canvas-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.canvas-guide h2,.canvas-guide h3{scroll-margin-top:76px}@media(max-width:720px){.canvas-guide .note-flow{grid-template-columns:1fr}.canvas-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.canvas-guide .source-note{font-size:.85rem;line-height:1.8;color:var(--text-muted)}.canvas-guide .raw-link{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 0}.canvas-guide .rt-table code{overflow-wrap:anywhere}.canvas-guide h2,.canvas-guide h3{scroll-margin-top:76px}.canvas-guide ol{padding-left:1.5rem}.canvas-guide .raw-json summary{cursor:pointer;min-height:44px;padding:.65rem 0}.canvas-guide .raw-json pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;tab-size:2}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/canvas/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "Obsidian的Canvas — 排列卡片连接的使用方法",
+  "description": "Obsidian的Canvas从三张卡片开始的实践指南。 用Linux版1.13.7制作了空的Canvas，确认了短文卡、现有Markdown、连接标签、移动、保存和重新显示。 刊登未加工的实画面、保存的Canvas全文、参考备忘录和练习用ZIP、确认的范围。",
+  "url": "https://simplememofast.com/zh/obsidian/canvas/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-canvas.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/obsidian/canvas/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "帆布",
+      "item": "https://simplememofast.com/zh/obsidian/canvas/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/obsidian/canvas/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Canvas的课本卡和笔记本的卡片有什么不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "这次文本卡的文章保存在.canvas内的text字段中，笔记的卡片在file字段中参考資料/参照メモ.md。 没有尝试过将文本卡转换为其他Markdown的操作和反向链接的动作。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "如何将卡片相互连接，在线上命名？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "将指针放在卡片的边缘，将出现的圆圈拖到另一张卡片上。 双击线，输入标签，用Esc完成编辑。 这次连接了两张课本卡，保存了本文を確認的标签。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "下载的Canvas也需要参考备忘录吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "这个例子的文件卡参考了名为資料/参照メモ.md的相对路径。 不仅是Untitled.canvas，在同一保管库内的資料 文件夹中配置参照メモ.md的构成。 还准备了保留两个文件的原始相对路径的ZIP。 读者方面的导入和其他保管库尚未验证。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "重新打开保存的Canvas，画面也会完全相同吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "这次，在同一应用内移动到其他笔记本重新打开Canvas，保存的612 bytes和SHA256一致。 另一方面，画面的显示位置和文本卡内的滚动位置发生了变化。 应用程序整体重启后，没有确认其他终端、同步、速度和生产力。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="canvas-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球导航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/about/">关于开发者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/canvas/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/canvas/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/canvas/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/canvas/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/canvas/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/canvas/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/canvas/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/canvas/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/canvas/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="canvas-guide container">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/zh/obsidian/">Obsidian</a>/帆布</p><span class="lp-hero__label">用小卡片，确认保存内容</span><h1 class="lp-hero__title">排列使用Obsidian的Canvas的<br>卡片，给线起名字</h1><p class="lp-hero__sub">制作空的Canvas，放置两篇短文和一张现有笔记本，保存线条和标签的练习。 使用Linux版的实画面和保存文件，确认了卡片的移动和重新打开。</p><p class="article-meta">作者: <a href="/zh/about/">SimpleMemo Developer</a> · 实际操作确认: <time datetime="2026-10-01">2026年10月1日（日本时间）</time> · Linux版Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>放置文章，参考笔记，用线连接</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>1。 从命令调色板中创建空的Canvas</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>2。 放两篇短文和一张现有的笔记本</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">放置文章，参考笔记，用线连接</h2></div><div class="ce-chapter__body"><p><strong>Canvas是Obsidian的核心插件，将文本卡和笔记本卡放置在平面上。 </strong>首先只排列三张，用线连接两张，将关系留在标签上。 确认是否保存了本文和参考的笔记。</p><nav class="capture-toc" aria-label="这篇报道的步骤"><a href="#create">新建</a><a href="#cards">放卡</a><a href="#connect">线和标签</a><a href="#move">移动卡片</a><a href="#reopen">保存和重新显示</a><a href="#raw">练习用文件</a></nav><p class="source-note">卡片上的文章和参考备忘录是作者编写的短文。 不是实际使用者的记录。 图的排列是手动排列的，不是衡量知识的正确性和生产力的结果。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="create"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02">1。 从命令调色板中制作空的Canvas</h2></div><div class="ce-chapter__body"><p>在这次的环境下，激活了Canvas和命令调色板。 在<code>Ctrl＋P</code>中打开命令调色板，选择<strong>Canvas: Create new canvas</strong>。 左边的文件列表的名字是<code>Untitled.canvas</code>。 以空状态保存的原始文件是<code>{}</code>的2 bytes。</p><p>接下来要放的卡片文章是虚构的观察和确认指南。 参考用的<code>資料/参照メモ.md</code>，在应用程序启动前就准备好了。 添加卡片的操作是在实际的Canvas上进行的。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="cards"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">2。 放两篇短文和一张现有笔记本</h2></div><div class="ce-chapter__body"><p>双击Canvas的空白部分，输入文本。 在另一个空白部分也做了同样的操作，制作了两张文本卡。 保存的全文如下。</p><div class="role-map"><div><h3>课本卡A</h3><pre class="capture-code" tabindex="0"><code># 観察カード
+
+著者作成の短文を並べます。</code></pre></div><div><h3>课本卡B</h3><pre class="capture-code" tabindex="0"><code># 次の確認
+
+参照メモを開いて本文を確認します。</code></pre></div></div><figure class="shot"><a href="/assets/img/obsidian-canvas/two-text-cards.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-canvas/two-text-cards.png" width="1720" height="1000" loading="lazy" decoding="async" alt="在Canvas中输入两个文本卡的真实画面"></a><figcaption>两张短文卡片。 高度60，可以看到显示中的部分和滚动条。 <a href="/assets/img/obsidian-canvas/two-text-cards.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>接着，将文件一览表的<code>資料/参照メモ.md</code>拖到Canvas。 第三张是参考Markdown的文件卡。 在这次的保存数据中，两张是<code>type: text</code>，一张是<code>type: file</code>。</p><p class="tip-box">短文卡的高度是60，没有一次性显示全文。 图像的卡片内有滚动条，看到的部分不一样。 仅通过卡片内的显示不判断全文，还确认正文和保存内容。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="connect"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">3。 连接两张，在线上写上“本文を確認”</h2></div><div class="ce-chapter__body"><ol><li>将指针放在观察卡的右端，从出现的圆圈拖到下一个确认卡的左端。</li><li>双击制作的线。</li><li><strong>本文を確認</strong>，用<code>Esc</code>完成标签的编辑。</li></ol><figure class="shot"><a href="/assets/img/obsidian-canvas/connected-labeled.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-canvas/connected-labeled.png" width="1720" height="1000" loading="lazy" decoding="async" alt="两个文本卡之间显示名为本文を確認的连接标签和参考备忘录的实际画面"></a><figcaption>将两张用线连接起来，加上“本文を確認”的实画面。 第三张是现有的Markdown的文件卡。 <a href="/assets/img/obsidian-canvas/connected-labeled.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>保存的连接，从观察卡的右侧到下一个确认卡的左侧，标签是<code>本文を確認</code>。 在第三张的参考备忘录中，这个例子没有连接线。 在图像中，可以确认两张之间的标签和参考备忘录的正文。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="move"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">4。 选择卡片，拖动内部改变位置</h2></div><div class="ce-chapter__body"><p>选择参考备忘录的文件卡，从内部拖动移动。 在最初的操作中抓住了边界，无意中改变了尺寸。 记录那个状态后，用<code>Ctrl＋Z</code>恢复，重新拖动内部。</p><figure class="shot"><a href="/assets/img/obsidian-canvas/file-card-moved.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-canvas/file-card-moved.png" width="1720" height="1000" loading="lazy" decoding="async" alt="通过内部拖动移动参考备忘录的文件卡的实际画面"></a><figcaption>Undo后，通过内部拖动只移动文件卡的画面。 连接和标签被保存了。 <a href="/assets/img/obsidian-canvas/file-card-moved.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>在最终的保存数据中，只有文件卡的坐标从<code>x=-32, y=61</code>变为<code>x=-160, y=-60</code>，400×400的大小、参考目的地、ID是一样的。 和其他两张正文的连接意义是一样的。</p><p class="source-note">这是确认一张内部拖拽的记录。 不是经过尺寸变更功能验证的操作。 坐标是保存内容的比较，并不是表示所需时间和效率的值。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="reopen"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">5。 保存后，从其他笔记重新打开Canvas</h2></div><div class="ce-chapter__body"><p>用<code>Ctrl＋S</code>保存，从文件一览表中打开另一个Markdown，之后回到<code>Untitled.canvas</code>。 正在确认已保存的三张卡、一连接、标签。</p><figure class="shot"><a href="/assets/img/obsidian-canvas/reopened-canvas.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-canvas/reopened-canvas.png" width="1720" height="1000" loading="lazy" decoding="async" alt="从另一个Markdown重新打开Canvas，显示三张卡片和连接标签的实画面"></a><figcaption>在同一应用内重新打开Canvas的真实画面。 保存bytes是一样的，显示位置和卡内的滚动是不同的。 <a href="/assets/img/obsidian-canvas/reopened-canvas.png" target="_blank" rel="noopener">打开原图</a></figcaption></figure><p>移动后、重新显示后、应用程序结束后的Canvas原件，都是612 bytes与SHA256一致。 另一方面，Canvas的显示位置和文本卡内的滚动位置发生了变化。 保存文件的一致和画面显示完全相同是另外的确认。</p><p>这次在同一应用程序的进程中重新打开了。 结束整个应用程序重启后的恢复，没有尝试其他终端和同步。 最后在General设置中实际显示app/installer 1.13.7，自己的应用程序和显示用过程正常结束。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">保存练习用Canvas和参考笔记</h2></div><div class="ce-chapter__body"><p>接下来的两个文件，与实际操作后保存的原件是相同的bytes。 也保留Canvas参考的<code>資料/参照メモ.md</code>的相对路径。 单独保存时，在同一保管库内配合以下配置。</p><pre class="capture-code" tabindex="0"><code>Untitled.canvas
+資料/
+  参照メモ.md</code></pre><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th scope="col">保管库内的相对路径</th><th scope="col">原始文件</th></tr></thead><tbody><tr><th scope="row"><code>Untitled.canvas</code></th><td data-label="原始文件"><a class="raw-link" data-source-path="Untitled.canvas" href="/assets/downloads/obsidian-canvas/Untitled.canvas" download="Untitled.canvas">保存Untitled.canvas（612 bytes）</a></td></tr><tr><th scope="row"><code>資料/参照メモ.md</code></th><td data-label="原始文件"><a class="raw-link" data-source-path="資料/参照メモ.md" href="/assets/downloads/obsidian-canvas/%E8%B3%87%E6%96%99/%E5%8F%82%E7%85%A7%E3%83%A1%E3%83%A2.md" download="参照メモ.md">保存参照メモ.md（214 bytes）</a></td></tr></tbody></table></div><p><a class="raw-link" href="/assets/downloads/obsidian-canvas/canvas-practice-fixture.zip" download="canvas-practice-fixture.zip" data-download-kind="zip">将两个文件汇总保存（ZIP）</a></p><p class="source-note">ZIP是准备报道时制作的新的分发用软件包，保留两个文件的正文和相对路径。 展开后的通行证・SHA256与原件进行了核对。 读者方面的导入、其他保管库、公开服务器的配送尚未验证。</p><details class="raw-json"><summary>查看保存的Canvas全文（612 bytes）</summary><pre class="capture-code" data-evidence="Untitled.canvas" tabindex="0"><code>{
+	&quot;nodes&quot;:[
+		{&quot;id&quot;:&quot;3f4ab2bb724d8e0a&quot;,&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;# 観察カード\n\n著者作成の短文を並べます。&quot;,&quot;x&quot;:-507,&quot;y&quot;:-289,&quot;width&quot;:250,&quot;height&quot;:60},
+		{&quot;id&quot;:&quot;e3670f8ddf28da4b&quot;,&quot;type&quot;:&quot;text&quot;,&quot;text&quot;:&quot;# 次の確認\n\n参照メモを開いて本文を確認します。&quot;,&quot;x&quot;:73,&quot;y&quot;:-289,&quot;width&quot;:250,&quot;height&quot;:60},
+		{&quot;id&quot;:&quot;678949267c596805&quot;,&quot;type&quot;:&quot;file&quot;,&quot;file&quot;:&quot;資料/参照メモ.md&quot;,&quot;x&quot;:-160,&quot;y&quot;:-60,&quot;width&quot;:400,&quot;height&quot;:400}
+	],
+	&quot;edges&quot;:[
+		{&quot;id&quot;:&quot;ddb0f48d2fcb7657&quot;,&quot;fromNode&quot;:&quot;3f4ab2bb724d8e0a&quot;,&quot;fromSide&quot;:&quot;right&quot;,&quot;toNode&quot;:&quot;e3670f8ddf28da4b&quot;,&quot;toSide&quot;:&quot;left&quot;,&quot;label&quot;:&quot;本文を確認&quot;}
+	]
+}</code></pre></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">常见问题</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Canvas的课本卡和笔记本的卡片有什么不同？</summary><div class="faq-answer">这次文本卡的文章保存在.canvas内的text字段中，笔记的卡片在file字段中参考資料/参照メモ.md。 没有尝试过将文本卡转换为其他Markdown的操作和反向链接的动作。</div></details>
+<details class="faq-item"><summary class="faq-summary">如何将卡片相互连接，在线上命名？</summary><div class="faq-answer">将指针放在卡片的边缘，将出现的圆圈拖到另一张卡片上。 双击线，输入标签，用Esc完成编辑。 这次连接了两张课本卡，保存了本文を確認的标签。</div></details>
+<details class="faq-item"><summary class="faq-summary">下载的Canvas也需要参考备忘录吗？</summary><div class="faq-answer">这个例子的文件卡参考了名为資料/参照メモ.md的相对路径。 不仅是Untitled.canvas，在同一保管库内的資料 文件夹中配置参照メモ.md的构成。 还准备了保留两个文件的原始相对路径的ZIP。 读者方面的导入和其他保管库尚未验证。</div></details>
+<details class="faq-item"><summary class="faq-summary">重新打开保存的Canvas，画面也会完全相同吗？</summary><div class="faq-answer">这次，在同一应用内移动到其他笔记本重新打开Canvas，保存的612 bytes和SHA256一致。 另一方面，画面的显示位置和文本卡内的滚动位置发生了变化。 应用程序整体重启后，没有确认其他终端、同步、速度和生产力。</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">验证环境和确认范围</h2></div><div class="ce-chapter__body"><ul><li><strong>环境：</strong>Linux版Obsidian 1.13.7，安装程序1.13.7，无社区插件。 作者制作的小型日语保管库。</li><li><strong>实GUI：</strong>命令选择，新Canvas，文本输入，从文件列表拖动，连接和标签，Undo和内部拖动，保存，通过其他笔记重新显示，General设置，正常结束。</li><li><strong>辅助：</strong>初期Markdown的准备、保存原始文件、readonly的Canvas数据、active view、DOM位置的读取。 卡片的生成、连接、移动没有在应用程序API上进行。</li><li><strong>原图：</strong>未加工真实画面的PNG刊登。 短文卡的全文不能一次性看到，重新显示时的显示位置也不相同。</li><li><strong>未验证：</strong>group，颜色，图像·语音·Web嵌入，转换，全尺寸变更，全应用程序重启，大Canvas，正式的JSON Canvas规格符合，iOS/Android/Windows/macOS，Sync，SimpleMemo，速度·生产力·流入效果。</li></ul><p>实际操作是2026年10月1日（日本时间），记录UTC是2026年9月30日。 初期准备失败和恢复、原始图像、保存文件的对应总结为<a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/canvas-20260930.md" target="_blank" rel="noopener">验证记录</a>。</p><h3>官方说明的确认地址</h3><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Plugins/Canvas.md" target="_blank" rel="noopener">Obsidian官方帮助：Canvas</a> — 新建、卡片、连接、标签、移动说明。 固定了commit确认了。</li></ul><p class="source-note">官方说明中，也包含了这个例子中没有尝试过的功能。 本网站是独立应用程序“SimpleMemo”的开发者网站，不是Obsidian的官方报道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh/obsidian/zettelkasten/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下来阅读</span><strong>在笔记的正文中，留下链接和理由的练习</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="页脚导航"><div class="footer__col"><p class="footer__col-title">产品</p><a href="/zh/download/" class="footer__link">下载</a><a href="/zh/" class="footer__link">首页</a><a href="/zh/obsidian/" class="footer__link">Obsidian 集成</a></div><div class="footer__col"><p class="footer__col-title">比较与迁移</p><a href="/zh/vs/" class="footer__link">对比</a><a href="/zh/obsidian/compare/" class="footer__link">Obsidian比较</a></div><div class="footer__col"><p class="footer__col-title">支持</p><a href="/zh/about/" class="footer__link">关于开发者</a><a href="/zh/faq" class="footer__link">常见问题</a><a href="/zh/privacy" class="footer__link">隐私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

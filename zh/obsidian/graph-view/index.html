@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/graph-view/">
+  <title>Obsidian的图表视图 — 缩小显示范围的使用方法 | SimpleMemo</title>
+  <meta name="description" content="Obsidian的图表视图，从保存笔记和显示条件确认的实践指南。 在Linux版1.13.7中添加了作者制作的笔记GUI，确认了文件夹、标签搜索、孤立笔记、颜色组、本地图表的深度1、2。 刊登真实画面和保存Markdown，保留文件夹构成的练习用ZIP，确认范围。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian的图表视图 — 缩小显示范围的使用方法">
+  <meta property="og:description" content="Obsidian的图表视图，从保存笔记和显示条件确认的实践指南。 在Linux版1.13.7中添加了作者制作的笔记GUI，确认了文件夹、标签搜索、孤立笔记、颜色组、本地图表的深度1、2。 刊登真实画面和保存Markdown，保留文件夹构成的练习用ZIP，确认范围。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/graph-view/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-graph-view.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的图表视图 — 缩小显示范围的使用方法">
+  <meta name="twitter:description" content="Obsidian的图表视图，从保存笔记和显示条件确认的实践指南。 在Linux版1.13.7中添加了作者制作的笔记GUI，确认了文件夹、标签搜索、孤立笔记、颜色组、本地图表的深度1、2。 刊登真实画面和保存Markdown，保留文件夹构成的练习用ZIP，确认范围。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-graph-view.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/graph-view/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/graph-view/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/graph-view/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/graph-view/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/graph-view/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/graph-view/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/graph-view/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/graph-view/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/graph-view/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.graph-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.graph-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.graph-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.graph-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.graph-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.graph-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.graph-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.graph-guide h2,.graph-guide h3{scroll-margin-top:76px}@media(max-width:720px){.graph-guide .note-flow{grid-template-columns:1fr}.graph-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.graph-guide .source-note{font-size:.85rem;line-height:1.8;color:var(--text-muted)}.graph-guide .raw-link{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 0}.graph-guide .rt-table code{overflow-wrap:anywhere}.graph-guide h2,.graph-guide h3{scroll-margin-top:76px}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/graph-view/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "Obsidian的图表视图 — 缩小显示范围的使用方法",
+  "description": "Obsidian的图表视图，从保存笔记和显示条件确认的实践指南。 在Linux版1.13.7中添加了作者制作的笔记GUI，确认了文件夹、标签搜索、孤立笔记、颜色组、本地图表的深度1、2。 刊登真实画面和保存Markdown，保留文件夹构成的练习用ZIP，确认范围。",
+  "url": "https://simplememofast.com/zh/obsidian/graph-view/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-graph-view.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/obsidian/graph-view/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "图表视图",
+      "item": "https://simplememofast.com/zh/obsidian/graph-view/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/obsidian/graph-view/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "图表上看不到笔记时，要确认什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在这次的例子中，Search files的搜索字符串和Orphans的ON/OFF改变了对象。 打开目标笔记确认保存内容，清空搜索字符串，同时确认孤立笔记时打开Orphans。 Tags、Attachments、Existing files only等条件也可以在官方帮助中确认。 没有尝试所有设置的组合。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "全局图和本地图有什么不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "全局图表以保管库的整个笔记为对象，本地图表以连接打开的笔记的范围为对象。 在这次的入口笔记中，打开Incoming links和Outgoing links，关闭Neighbor links，深度1是3笔记・2链接，深度2是4笔记・3链接。 不包括其他连接成分和孤立笔记。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tags的切换和tag:搜索是同一个操作吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方帮助的Tags是为了在图表上显示标签而进行的切换。 Tag：搜索是缩小包含指定标签的笔记的搜索。 这次Tags在OFF状态下，用tag:#研究显示了4笔记。 这个例子没有尝试过将标签本身显示为节点的操作。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "节点和线多的话，可以判断知识和生产力高吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在这篇文章中确认的是，保存的笔记、内部链接、指定显示条件的结构差异。 没有衡量知识的正确性、理解的深度、生产力和速度。 本文中确认链接理由的练习，在Zettelkasten的笔记和链接的实践指南中介绍。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="graph-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球导航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/about/">关于开发者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/graph-view/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/graph-view/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/graph-view/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/graph-view/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/graph-view/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/graph-view/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/graph-view/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/graph-view/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/graph-view/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/zh/obsidian/">Obsidian</a> / 图表视图</p><span class="lp-hero__label">选择显示范围，返回正文</span><h1 class="lp-hero__title">使用Obsidian的图形视图缩小<br>显示范围，确认连接</h1><p class="lp-hero__sub">打开图表后，先选择想看的笔记范围。 通过文件夹、标签搜索、孤立笔记的显示、颜色组、本地图表的深度，在小作者制作的保管库中确认了。</p><p class="article-meta">作者: <a href="/zh/about/">SimpleMemo Developer</a> · 实际操作确认: <time datetime="2026-10-01">2026年10月1日（日本时间）</time> · Linux版Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>根据想看的范围，选择整体和附近的笔记</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>这个例子的保存内容和显示条件</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1。 添加笔记，比较保存的内容和图表</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">根据想看的范围，选择整体和附近的笔记本</h2></div><div class="ce-chapter__body"><p><strong>查看整个保管库时使用全局图表进行搜索，查看打开的笔记本周围时选择本地图表的深度。 </strong>颜色组是区分符合所选条件的笔记的显示。 打开笔记本确认是否保存了正文和内部链接。</p><nav class="capture-toc" aria-label="这篇报道的确认项目"><a href="#grow">添加笔记的前后</a><a href="#filter">文件夹和标签</a><a href="#orphans">孤立笔记</a><a href="#groups">颜色组</a><a href="#local">本地深度</a><a href="#raw">练习用文件</a></nav><p class="source-note">例的笔记名、文章、标签是作者制作的。 研究和生活的真实记录，不是从使用者的保管库中获取的。 显示位置是布局，不是表示所需时间或理解程度的值。</p><p>自己排列卡片表示关系的步骤，请参考<a href="/zh/obsidian/canvas/">在Canvas中创建、连接、移动、重新显示的实例</a>。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">这个例子的保存内容和显示条件</h2></div><div class="ce-chapter__body"><p>首先准备了六个Markdown。“ “研究”的三个笔记是入口→假设→验证，“生活”的两个笔记是购物→吃饭和内部链接，孤立笔记没有其他笔记的链接。 可以区分两个连接成分和一个孤立笔记的练习用构成。</p><pre class="capture-code" tabindex="0"><code>研究/入口.md → 研究/仮説.md → 研究/検証.md
+生活/買い物.md → 生活/食事.md
+孤立.md
+
+後からGUIで追加: 追加メモ.md → 研究/入口.md</code></pre><p>最初的六个文件是在应用程序启动前准备的，只有第七个是用实际的编辑器制作的。“ 研究”文件夹的三本笔记和附加笔记上写着<code>#研究</code>，生活中的二本上写着<code>#生活</code>。</p><p>全局图的第一个条件是Search files空白、Tags OFF、Attachments OFF、Existing files only OFF、Orphans ON。 没有未解决的链接。 之后的比较中，只切换了说明的搜索、Orphans、颜色组。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="grow"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1。 添加笔记，比较保存内容和图表</h2></div><div class="ce-chapter__body"><p>从左边的丝带打开<strong>Open graph view</strong>。 一开始是六笔记、三链接。 接下来用<code>Ctrl＋N</code>制作“追加备忘录”，将名字和正文输入到实际编辑器中。 保存的全文是以下92 bytes。</p><pre class="capture-code" data-evidence="追加メモ.md" tabindex="0"><code># 追加メモ
+
+GUIで追加する著者作成ノートです。 [[研究/入口]]
+
+#研究
+</code></pre><p>等待自动保存后打开图表，变成了七笔记、四链接。 从附加备忘录到研究/入口的1个增加了，已保存的Markdown和内部链接的解决结果也一致。</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/global-before.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/global-before.png" width="1024" height="800" loading="lazy" decoding="async" alt="六个初期笔记的图表和Filters设置的实际画面"></a><figcaption>添加前。 6笔记・3链接是实renderer的读数。 设置面板覆盖了一部分。 <a href="/assets/img/obsidian-graph-view/global-before.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-graph-view/global-after.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/global-after.png" width="1024" height="800" loading="lazy" decoding="async" alt="附加备忘录制作后的全球图表的实画面"></a><figcaption>添加后。 7笔记・4链接是实renderer的读数。 从附加备忘录中保存了入口的链接。 <a href="/assets/img/obsidian-graph-view/global-after.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p class="source-note">设置面板覆盖了一部分节点。 这两个图像的件数是从实际的Graph renderer读取节点名称和链接端点后确认的数值。 不是在图像中可以看到所有圆圈的计数方法。 图像保持原样保存。</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/added-note-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/added-note-reopened.png" width="1024" height="800" loading="lazy" decoding="async" alt="重新显示附加备忘录的读取视图中显示正文和研究标签"></a><figcaption>追加备忘录从文件一览表中重新打开的实画面。 右边链接的本地图表，以附加备忘录为对象发生了变化。 <a href="/assets/img/obsidian-graph-view/added-note-reopened.png" target="_blank" rel="noopener">打开原图</a></figcaption></figure><p>最后从文件一览表中重新打开附加备忘录，阅读了正文和标签。 添加时、重新显示后、应用程序正常结束后的保存Markdown是相同的内容。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="filter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2。 在文件夹和标签中，选择不同的范围</h2></div><div class="ce-chapter__body"><p>Graph settings的<strong>Filters → Search files</strong>中输入搜索字符串。 选择文件夹内的笔记的例子是<code>path:"研究/"</code>，选择包含标签的笔记的例子是<code>tag:#研究</code>。 这次的结果有如下不同。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th scope="col">输入的条件</th><th scope="col">对象笔记</th><th scope="col">确认的结构</th></tr></thead><tbody><tr><th scope="row"><code>path:"研究/"</code></th><td data-label="对象">研究 文件夹的入口・假设・验证</td><td data-label="结构">3笔记本/2链接</td></tr><tr><th scope="row"><code>tag:#研究</code></th><td data-label="对象">上述三本笔记和保管库正下方的附加备忘录</td><td data-label="结构">4笔记本/3链接</td></tr><tr><th scope="row">清空搜索字符串</th><td data-label="对象">这次的七个笔记全部</td><td data-label="结构">7笔记本/4链接</td></tr></tbody></table></div><figure class="shot"><a href="/assets/img/obsidian-graph-view/path-filter.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/path-filter.png" width="1024" height="800" loading="lazy" decoding="async" alt="在Search files中输入path研究，只显示入口假说验证的实画面"></a><figcaption>在路径搜索中，选择了研究 文件夹的三个笔记和两个链接的实画面。 <a href="/assets/img/obsidian-graph-view/path-filter.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>因为附加备忘录就在保管库的正下方，所以不符合研究 文件夹的通行证条件。 因为拥有<code>#研究</code>，所以符合标签条件。 这里没有尝试将Tags的切换保持关闭状态，将标签本身显示为节点的操作。</p><p>缩小范围时，将Search files清空。 这次，搜索候选与操作重合时，用<code>Esc</code>关闭后，点击了下一个切换。 文件夹名和标签名，根据自己的保存内容。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="orphans"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3。 如果也看孤立笔记的话，请打开Orphans</h2></div><div class="ce-chapter__body"><p>在清空搜索字符串的状态下，关闭Filters的<strong>Orphans</strong>后，孤立.md会消失，变成了六笔记、四链接。 回到ON后，回到了包括孤立.md在内的七笔记・四链接。 无论哪个链接端点都一样。</p><p>在这个例子中，因为已经保存的孤立笔记没有内部链接，所以切换时显示对象发生了变化。 看不到笔记时，会分别确认当前图表的搜索、显示条件，看看是否保存了正文。 不是尝试未解决的链接和所有过滤器组合的结果。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="groups"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">4。 通过颜色组，辨别符合条件的笔记本</h2></div><div class="ce-chapter__body"><p><strong>Groups → New group</strong>中添加组，第一个输入<code>path:"研究/"</code>，第二个输入<code>tag:#生活</code>。 点击组的颜色圆圈，在Linux的颜色选择画面中将第一个更改为RGB <code>30 / 140 / 220</code>（<code>#1e8cdc</code>）。 第二个分配的颜色是<code>#d6ad5c</code>。</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/native-color-choice.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/native-color-choice.png" width="1280" height="900" loading="lazy" decoding="async" alt="在实际颜色选择画面的RGB栏输入30 140 220的画面"></a><figcaption>Linux的实际颜色选择画面。 选择RGB 30 / 140 / 220，与关闭后的renderer颜色进行核对。 <a href="/assets/img/obsidian-graph-view/native-color-choice.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>研究 文件夹 中的三条笔记变为蓝色，带有生活标签的两条笔记变为金色。仓库根目录下新增的笔记和 孤立.md 不符合这两个条件，因此没有显示分组颜色。我们也核对了节点名称和颜色的读取结果；整体仍为七条笔记、四条链接。</p><p class="source-note">原始图像是实际的颜色选择画面，GUI输入使用了现有的X11鼠标、键盘辅助。 在应用程序API和DOM的值代入中没有设置颜色。 没有尝试过颜色组的重复、重新排列、其他颜色和OS的选择画面。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="local"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07">5。 根据本地图表的深度，选择附近的笔记</h2></div><div class="ce-chapter__body"><p>文件一览表中打开研究/入口.md，选择了笔记的<strong>More options → Open linked view → Open local graph</strong>。 本地图形的Filters有Depth滑块。 这次的条件是Incoming links ON、Outgoing links ON、Neighbor links OFF。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th scope="col">深度</th><th scope="col">入口周边的笔记</th><th scope="col">确认的结构</th></tr></thead><tbody><tr><th scope="row">1</th><td data-label="范围">入口，从入口参考的假设，参考入口的附加备忘录</td><td data-label="结构">3笔记本/2链接</td></tr><tr><th scope="row">2</th><td data-label="范围">在上述中，增加了从假设中参考的验证</td><td data-label="结构">4笔记本/3链接</td></tr></tbody></table></div><figure class="shot"><a href="/assets/img/obsidian-graph-view/local-depth-1.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/local-depth-1.png" width="1024" height="800" loading="lazy" decoding="async" alt="入口笔记的本地图表上显示入口假设追加笔记的三个笔记"></a><figcaption>入口的Depth 1。 在关闭设置面板的原始图像中，可以看到三个笔记、两个链接。 <a href="/assets/img/obsidian-graph-view/local-depth-1.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-graph-view/local-depth-2.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/local-depth-2.png" width="1024" height="800" loading="lazy" decoding="async" alt="在入口笔记的Depth2的本地图中加入验证，显示四个笔记"></a><figcaption>入口的Depth 2。 加上验证的四笔记、三链接的原图像。 <a href="/assets/img/obsidian-graph-view/local-depth-2.png" target="_blank" rel="noopener">打开原始图像</a></figcaption></figure><p>Depth通过实际的滑块操作从1改为2，确认了节点名称和链接端点。 生活二笔记本和孤立.md没有连接到入口，所以没有进入这两个深度。</p><p class="source-note">第二张图片是选择设置后关闭面板拍摄的原始图片。 这是以入口为对象的深度1・2的记录。 打开另一个笔记的话，链接的本地图表的对象也会改变。 深度3~5和Incoming/Outgoing/Neighbor links的其他组合没有尝试过。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">下载练习用的七个Markdown</h2></div><div class="ce-chapter__body"><p>七个文件和GUI添加后保存的Markdown的原件是相同的bytes。 ZIP是准备这篇报道时制作的分发用软件包，保留了七个正文和相对路径。 在单独下载中，将表格的文件夹名和文件名一起放置。</p><p><a class="raw-link" href="/assets/downloads/obsidian-graph-view/obsidian-graph-fixture.zip" download="obsidian-graph-fixture.zip" data-download-kind="zip">将七个文件汇总保存（ZIP）</a></p><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th scope="col">保管库内的相对路径</th><th scope="col">原Markdown</th></tr></thead><tbody><tr><th scope="row"><code>孤立.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E5%AD%A4%E7%AB%8B.md" download="孤立.md" data-source-path="孤立.md">保存孤立.md</a></td></tr><tr><th scope="row"><code>生活/買い物.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%94%9F%E6%B4%BB/%E8%B2%B7%E3%81%84%E7%89%A9.md" download="買い物.md" data-source-path="生活/買い物.md">保存買い物.md</a></td></tr><tr><th scope="row"><code>生活/食事.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%94%9F%E6%B4%BB/%E9%A3%9F%E4%BA%8B.md" download="食事.md" data-source-path="生活/食事.md">保存食事.md</a></td></tr><tr><th scope="row"><code>研究/仮説.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E4%BB%AE%E8%AA%AC.md" download="仮説.md" data-source-path="研究/仮説.md">保存仮説.md</a></td></tr><tr><th scope="row"><code>研究/入口.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E5%85%A5%E5%8F%A3.md" download="入口.md" data-source-path="研究/入口.md">保存入口.md</a></td></tr><tr><th scope="row"><code>研究/検証.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E6%A4%9C%E8%A8%BC.md" download="検証.md" data-source-path="研究/検証.md">保存検証.md</a></td></tr><tr><th scope="row"><code>追加メモ.md</code></th><td data-label="原Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E8%BF%BD%E5%8A%A0%E3%83%A1%E3%83%A2.md" download="追加メモ.md" data-source-path="追加メモ.md">保存追加メモ.md</a></td></tr></tbody></table></div><p class="source-note">将展开ZIP的七个文件的相对路径、正文的SHA256与原件进行了核对。 读者端的ZIP导入、其他保管库的配置、公开服务器的配送，不包含在实际应用程序的验证中。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">常见问题</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">图表上看不到笔记时，要确认什么？</summary><div class="faq-answer">在这次的例子中，Search files的搜索字符串和Orphans的ON/OFF改变了对象。 打开目标笔记确认保存内容，清空搜索字符串，同时确认孤立笔记时打开Orphans。 Tags、Attachments、Existing files only等条件也可以在官方帮助中确认。 没有尝试所有设置的组合。</div></details>
+<details class="faq-item"><summary class="faq-summary">全局图和本地图有什么不同？</summary><div class="faq-answer">全局图表以保管库的整个笔记为对象，本地图表以连接打开的笔记的范围为对象。 在这次的入口笔记中，打开Incoming links和Outgoing links，关闭Neighbor links，深度1是3笔记・2链接，深度2是4笔记・3链接。 不包括其他连接成分和孤立笔记。</div></details>
+<details class="faq-item"><summary class="faq-summary">Tags的切换和tag:搜索是同一个操作吗？</summary><div class="faq-answer">官方帮助的Tags是为了在图表上显示标签而进行的切换。 Tag：搜索是缩小包含指定标签的笔记的搜索。 这次Tags在OFF状态下，用tag:#研究显示了4笔记。 这个例子没有尝试过将标签本身显示为节点的操作。</div></details>
+<details class="faq-item"><summary class="faq-summary">节点和线多的话，可以判断知识和生产力高吗？</summary><div class="faq-answer">在这篇文章中确认的是，保存的笔记、内部链接、指定显示条件的结构差异。 没有衡量知识的正确性、理解的深度、生产力和速度。 本文中确认链接理由的练习，在Zettelkasten的笔记和链接的实践指南中介绍。</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">验证环境和确认范围</h2></div><div class="ce-chapter__body"><ul><li><strong>实际应用：</strong>Linux版Obsidian 1.13.7，安装程序1.13.7。 没有社区插件，作者制作的小型日语保管库。</li><li><strong>实GUI：</strong>打开图表，新建笔记、输入、保存、搜索输入、Orphans切换、组创建和颜色选择、从文件列表和菜单打开本地图表、Depth滑块、重新显示、General设置、正常结束。</li><li><strong>辅助：</strong>启动前准备初期六Markdown，读取了保存文件、内部链接的解决结果、renderer的节点名/线数/颜色、设置。 添加笔记和更改显示条件是实GUI。</li><li><strong>图片：</strong>未加工实际画面的原始PNG刊登。 设置面板和狭窄的显示区域覆盖了部分节点的记录，件数是按照注明的API读数进行核对的。</li><li><strong>未验证：</strong>iOS/Android/Windows/macOS、Sync、SimpleMemo配合、别终端、大保管库、所有搜索、显示设置、速度、学习、生产力、流入效果。</li></ul><p>实际操作的日期是2026年10月1日（日本时间），记录的UTC日期是2026年9月30日。 原始读取记录和辅助代码的更正、保存文件、原始图像的对应，汇总在<a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/graph-view-20260930.md" target="_blank" rel="noopener">验证记录</a>中。</p><h3>官方说明的确认地址</h3><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Plugins/Graph%20view.md" target="_blank" rel="noopener">Obsidian官方帮助：Graph view</a> — Filters、Groups、Local Graph的说明。</li><li><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Plugins/Search.md" target="_blank" rel="noopener">Obsidian官方帮助：Search</a> — path:和tag:的说明。</li></ul><p class="source-note">区分了固定的官方来源的说明和这个Linux的有限实际操作。 并不是实际尝试了官方说明中的所有功能的结果。 本网站是介绍独立应用程序“SimpleMemo”的开发者网站，不是Obsidian官方的报道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh/obsidian/zettelkasten/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下来阅读</span><strong>在笔记的正文中，留下链接和理由的练习</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="页脚导航"><div class="footer__col"><p class="footer__col-title">产品</p><a href="/zh/download/" class="footer__link">下载</a><a href="/zh/" class="footer__link">首页</a><a href="/zh/obsidian/" class="footer__link">Obsidian 集成</a></div><div class="footer__col"><p class="footer__col-title">比较与迁移</p><a href="/zh/vs/" class="footer__link">对比</a><a href="/zh/obsidian/compare/" class="footer__link">Obsidian比较</a></div><div class="footer__col"><p class="footer__col-title">支持</p><a href="/zh/about/" class="footer__link">关于开发者</a><a href="/zh/faq" class="footer__link">常见问题</a><a href="/zh/privacy" class="footer__link">隐私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

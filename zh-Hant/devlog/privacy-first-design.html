@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>隱私第一設計：備忘錄應用程式中的偏執著 | SimpleMemo 開發日誌</title>
+  <meta name="description" content="解說iPhone版SimpleMemo的隱私設計。 說明AES-GCM的終端內加密、通訊快取、診斷日誌、使用分析的範圍，以及在應用程式切換器中不隱藏備忘錄的現行規格、郵件配送的限制。 Keychain的金鑰管理、儲存目的地留下的資訊、AppsFlyer和本公司解析的識別符號的關聯也明確說明。">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="隱私第一設計：備忘錄應用程式中的偏執執">
+  <meta property="og:description" content="解說iPhone版SimpleMemo的隱私設計。 說明AES-GCM的終端內加密、通訊快取、診斷日誌、使用分析的範圍，以及在應用程式切換器中不隱藏備忘錄的現行規格、郵件配送的限制。 Keychain的金鑰管理、儲存目的地留下的資訊、AppsFlyer和本公司解析的識別符號的關聯也明確說明。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="隱私第一設計：備忘錄應用程式中的偏執執">
+  <meta name="twitter:description" content="解說iPhone版SimpleMemo的隱私設計。 說明AES-GCM的終端內加密、通訊快取、診斷日誌、使用分析的範圍，以及在應用程式切換器中不隱藏備忘錄的現行規格、郵件配送的限制。 Keychain的金鑰管理、儲存目的地留下的資訊、AppsFlyer和本公司解析的識別符號的關聯也明確說明。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design#article",
+  "headline": "隱私第一設計：備忘錄應用程式中的偏執執",
+  "description": "解說iPhone版SimpleMemo的隱私設計。 說明AES-GCM的終端內加密、通訊快取、診斷日誌、使用分析的範圍，以及在應用程式切換器中不隱藏備忘錄的現行規格、郵件配送的限制。 Keychain的金鑰管理、儲存目的地留下的資訊、AppsFlyer和本公司解析的識別符號的關聯也明確說明。",
+  "url": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design",
+  "inLanguage": "zh-Hant",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-09-24",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "開發日誌",
+      "item": "https://simplememofast.com/zh-Hant/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "隱私第一設計",
+      "item": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "隱私第一設計：偏執的執著",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  },
+  "url": "https://simplememofast.com/zh-Hant/devlog/privacy-first-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/devlog/privacy-first-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/devlog/privacy-first-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/privacy-first-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/privacy-first-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/privacy-first-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>隱私第一設計：備忘錄應用程式中的偏執的執著</span> </h1>
+
+      <div class="article-meta">
+        <span>2026年2月13日公開・保護・使用分析的說明更新：2026年9月6日</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1。 為什麼隱私對備忘錄軟體很重要</h2>
+          <p>工作想法、個人草稿、日常記錄。 在備忘錄軟體中，會收集給別人看之前的資訊。 和快速書寫一樣，能夠理解儲存在哪裡，被送到哪裡也很重要。</p>
+          <p>在這篇文章中，將分別說明終端內的加密、通訊快取、畫面顯示、診斷日誌和使用分析。 一種保護並不能保證其他途徑的保護。</p>
+          <div class="philosophy-highlight">
+            <strong>2026年9月6日更新：</strong>核對與公開版相同版本（5.8.17）的來源，更正了畫面保護、日誌、使用解析的說明。 記錄能做的事情和限制。 </div>
+
+          <h2 id="reading-02">2。 在應用程式切換器中自動隱藏備忘錄的功能無效</h2>
+          <p>iOS將應用程式移動到後臺後的畫面作為快照使用。 Apple會引導畫面中，如果畫面有機密資訊的話，在移動到背景時要清除。</p>
+          <p>在確認的5.8.17的源中，<code>sceneWillResignActive</code>和<code>sceneDidEnterBackground</code>進行草稿儲存，不呼叫隱私疊加的顯示處理。 雖然保留了以前的顯示用函式，但不是作為有效保護執行的路徑。</p>
+          <p><strong>顯示中的備忘錄可能會留在應用程式切換器的影象中。 </strong>即使對Outbox進行加密，畫面影象也不會被隱藏。 更正這篇報道舊版中的“經常隱藏備忘錄內容”的說明。</p>
+
+          <h2 id="reading-03">3. ephemeral URLSession：抑制通訊快取的磁碟儲存</h2>
+          <p>標準的<code>URLSession</code>將快取、Cookie、認證資訊儲存在磁碟上。 在一般的應用程式中，這是一個很方便的功能，但在備忘錄應用程式中是不需要的，可能會成為風險。</p>
+          <p>通訊快取留在終端上，意味著磁碟上存在何時訪問哪個URL的痕跡。 Cookie被儲存意味著會話資訊會留在終端上。</p>
+          <p>在這個軟體中，使用<code>URLSessionConfiguration.ephemeral</code>。</p>
+          <pre tabindex="0"><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>無磁碟快取：</strong>不將此URLSession的快取儲存到磁碟</li>
+            <li><strong>Cookie的使用無效：</strong>這個URLSession不接受Cookie，也不設定要求</li>
+            <li><strong>URL快取失效：</strong>將快取儲存本身設定為<code>nil</code></li>
+            <li><strong>不使用永久儲存的構成：</strong>URLSession的會話資訊不儲存到磁碟</li>
+          </ul>
+          <p>這是關於URLSession的快取等的保護，不是應用程式單獨儲存、傳送的使用事件或消除伺服器端的傳送記錄的功能。 透過使用解析的識別符號進行關聯，也與這個設定分開進行。</p>
+
+          <h2 id="reading-04">4。 效能測量日誌的輸出範圍</h2>
+          <p><code>PerformanceLogger</code>的日誌輸出被<code>#if DEBUG</code>包圍。 在沒有定義DEBUG的構建中，不包含這個記錄器的日誌輸出處理。</p>
+          <p>這個記錄器的<code>logError</code>，記錄的不是錯誤的詳細文，而是型別。 例如，使用<code>URLError</code>這種型別，不直接輸出可能包含檔案路徑和使用者輸入的<code>localizedDescription</code>。</p>
+          <p>另一方面，不是自動將傳遞給<code>logEvent</code>的事件名和附加字串全部無害化的機制。 呼叫方需要不傳遞郵箱地址、備忘錄正文、認證資訊。</p>
+          <p><strong>這個說明不擴充套件到應用程式、外部SDK、OS整體的“零日誌”的保證。 </strong>本公司的使用事件傳送和AppsFlyer作為不同的機制生效。 獲取範圍在本報道的使用分析FAQ和<a href="/zh-Hant/privacy#technical">隱私政策</a>中說明。</p>
+
+          <h2 id="reading-05">5。 AES-GCM加密Outbox的保護範圍</h2>
+          <p>等待傳送的備忘錄，在終端內的Outbox佇列中進行管理。 儲存時使用Apple的CryptoKit用AES-GCM進行加密。 新的密碼金鑰用256位元生成。</p>
+          <p>鑰匙存放在Keychain中，使用<code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>。 在這個設定中，從重啟後的首次解鎖到下次重啟都可以訪問，備份恢復到其他終端時不會轉移鑰匙。 應用程式為了加密、解密讀取金鑰。</p>
+          <p>這是儲存資料的保護，並不是隱藏顯示中的畫面，也不是保證免受任何終端侵犯的安全。 在更換機型之前，請確認必要的備忘錄是否已送達儲存地址。</p>
+          <p>使用郵件傳送時，正文由本公司的Relay API和配送基礎處理，作為郵件留在收件箱中。 <strong>終端內的加密並不意味著郵件配送的端到端加密（E2EE）。 </strong>詳細內容在<a href="/zh-Hant/privacy#technical">隱私政策</a>和<a href="/zh-Hant/privacy-architecture/">資料的通道</a>中說明。</p>
+          <p>等待傳送的佇列，請參考<a href="/zh-Hant/devlog/outbox-architecture">Outbox架構的解說</a>。</p>
+
+          <h2 id="reading-06">6。 備忘錄正文的保護和外部SDK的作用</h2>
+          <p>iOS在應用內，備忘錄正文的加密使用CryptoKit，鑰匙保管使用Keychain，正文的傳送使用URLSession。 Network.framework負責監視連線狀態，BackgroundTasks負責後臺傳送的排程。</p>
+          <p>另一方面，應用程式也使用外部SDK。 GoogleSignIn和Firebase Authentication用於Google賬戶的任意郵件自動輸入，Firebase App Check在啟動時初始化保護後端API。 AppsFlyer用於獲取、使用分析，設定與本公司分析共同的安裝識別符號。</p>
+          <p>即使設計不將備忘錄正文納入事件專案，也會保留識別符號和傳送記錄的關聯。 包括SDK在內的使用分析範圍，需要與本文的加密分開確認。 專案和用途在<a href="/zh-Hant/privacy#technical">隱私政策</a>中進行了說明。</p>
+
+          <h2 id="reading-07">7。 明確保護範圍</h2>
+          <p>終端內的加密、通訊快取的處理、利用分析，分別具有不同的作用。 即使有Outbox的加密和ephemeral URLSession，使用事件的收集也不會消失。</p>
+          <p>重視能夠快速留下備忘錄和能夠理解獲取的資訊。 說明使用分析的傳送目的地、識別符號、關聯的範圍，根據應用程式的變化進行重新審查。</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-08" data-ce-number="08">常見問題</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">問。 備忘錄的內容會儲存在伺服器上嗎？</div>
+              <div class="faq-item__answer">郵件傳送時，正文透過本公司的Relay API和配送基礎。 在本公司的Relay API中，除非有法令對應或故障對應等正當必要性，否則不會對本文進行永久儲存。 與在配送地址的郵箱中儲存是不同的。 每個儲存目的地的說明<a href="/zh-Hant/privacy-architecture/">隱私設計</a>。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">問。 應用程式對通訊進行加密嗎？</div>
+              <div class="faq-item__answer">是的。 API通訊使用HTTPS。 Ephemeral URLSession是不將該會話的快取、Cookie、認證資訊永久儲存在磁碟上的配置。 不會消除另外進行的使用分析和伺服器端的記錄。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">問。 丟失終端時，備忘錄安全嗎？</div>
+              <div class="faq-item__answer">Outbox用AES-GCM加密儲存，新的金鑰用256位生成。 金鑰使用不轉移到其他終端的Keychain保護類。 但是，不是保護顯示中的畫面和配送地址的郵件的機制。 僅憑終端內的加密，並不能保證丟失時所有資訊的安全。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">問。 有分析和追蹤嗎？</div>
+              <div class="faq-item__answer">是的。 使用本公司的使用分析和AppsFlyer SDK。 本公司分析會傳送隨機的安裝識別符號、會話識別符號、活動種類・時間、應用程式的版本、傳送結果等。 AppsFlyer傳送首次備忘錄傳送成功、認證成功、收費畫面顯示、方案選擇、購買成功的活動，購買時可能會附加金額、貨幣、期限等。 因為將相同的安裝識別符號也設定為AppsFlyer的Customer User ID，所以可以將獲取資訊和使用事件聯絡起來。 從應用程式設定的活動專案中不直接包含郵箱地址、備忘錄正文、驗證碼，但本公司解析的傳送ID與收件人郵箱地址的雜湊相關聯，所以不是完全匿名的資訊。 詳情<a href="/zh-Hant/privacy#technical">隱私政策的技術對策</a>。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">問。 如何區分使用Apple純正框架和外部SDK？</div>
+              <div class="faq-item__answer">iOS應用內備忘錄正文的加密和金鑰保管使用CryptoKit和Keychain，正文的傳送使用URLSession進行。 另一方面，Google登入、Firebase的後端保護、AppsFlyer的獲取、使用分析使用外部SDK。 本文的保護和帶有識別符號的使用分析是區分說明的。</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">相關報道</h2>
+            <div class="related-grid">
+              <a href="/zh-Hant/devlog/day1" class="related-card">
+                <div class="related-card__title">【Day1】Captio太喜歡了，想再做一次“那個體驗”</div>
+                <div class="related-card__desc">為了再現Captio的體驗，首次開發時的技術判斷記錄。</div>
+              </a>
+              <a href="/zh-Hant/devlog/" class="related-card">
+                <div class="related-card__title">開發日誌一覽</div>
+                <div class="related-card__desc">SimpleMemo的技術決策記錄。</div>
+              </a>
+              <a href="/zh-Hant/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Outbox架構：防止溢位的設計</div>
+                <div class="related-card__desc">管理等待傳送備忘錄的佇列和用AES-GCM加密的Outbox設計的解說。</div>
+              </a>
+              <a href="/zh-Hant/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API：用Cloudflare Workers構建郵件傳送基礎</div>
+                <div class="related-card__desc">使用Cloudflare Workers的郵件傳送基礎和轉播本文的設計解說。</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10"> <span>參考文獻</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span>用於透過AES-GCM加密實現Outbox資料保護</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span>透過臨時（臨時）會話的網路通訊確保隱私</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preventing Insecure Network Connections (App Transport Security)</a> — <span>TLS通訊的強制資料傳輸時的安全保證</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple 開發人員 — 從您的程式碼生成日誌訊息</a> — <span>日誌的儲存範圍和機密資訊的處理</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple 開發人員 — 準備您的UI在後臺執行</a> — <span>應用程式切換器用快照和畫面上的資訊</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — 首次解鎖後的鑰匙串訪問，僅此裝置</a> — <span>金鑰的訪問條件和其他終端的過渡限制</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian連線，建立儲存筆記的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>啟用Obsidian連線，可以確認設定儲存目的地的步驟。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式比較一覽</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/how-to/" class="footer__link"><span>使用方法</span> </a>
+        <a href="/zh-Hant/templates/" class="footer__link"><span>模板</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio/" class="footer__link"><span>Captio式</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/terms" class="footer__link"><span>使用規則</span> </a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

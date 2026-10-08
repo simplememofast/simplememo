@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>التصميم الأول للخصوصية: التزام بجنون العظمة بتطبيقات المذكرة | يوميات التطوير SimpleMemo</title>
+  <meta name="description" content="شرح تصميم الخصوصية لإصدار iPhone SimpleMemo. سأشرح نطاق التشفير داخل المحطة الطرفية وذاكرة التخزين المؤقت للاتصال وسجل التشخيص وتحليل استخدام AES-GCM، بالإضافة إلى المواصفات الحالية وقيود تسليم البريد التي لا تخفي الملاحظات مع مبدل التطبيق. يتم أيضا تحديد إدارة مفاتيح سلسلة المفاتيح والمعلومات التي تبقى في وجهة التخزين والارتباط بين AppsFlyer ومعرفات التحليل الخاصة بنا.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="الخصوصية التصميم الأول: الالتزام بجنون العظمة لتطبيقات المذكرة">
+  <meta property="og:description" content="شرح تصميم الخصوصية لإصدار iPhone SimpleMemo. سأشرح نطاق التشفير داخل المحطة الطرفية وذاكرة التخزين المؤقت للاتصال وسجل التشخيص وتحليل استخدام AES-GCM، بالإضافة إلى المواصفات الحالية وقيود تسليم البريد التي لا تخفي الملاحظات مع مبدل التطبيق. يتم أيضا تحديد إدارة مفاتيح سلسلة المفاتيح والمعلومات التي تبقى في وجهة التخزين والارتباط بين AppsFlyer ومعرفات التحليل الخاصة بنا.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ar_SA">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="الخصوصية التصميم الأول: الالتزام بجنون العظمة لتطبيقات المذكرة">
+  <meta name="twitter:description" content="شرح تصميم الخصوصية لإصدار iPhone SimpleMemo. سأشرح نطاق التشفير داخل المحطة الطرفية وذاكرة التخزين المؤقت للاتصال وسجل التشخيص وتحليل استخدام AES-GCM، بالإضافة إلى المواصفات الحالية وقيود تسليم البريد التي لا تخفي الملاحظات مع مبدل التطبيق. يتم أيضا تحديد إدارة مفاتيح سلسلة المفاتيح والمعلومات التي تبقى في وجهة التخزين والارتباط بين AppsFlyer ومعرفات التحليل الخاصة بنا.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ar/devlog/privacy-first-design#article",
+  "headline": "الخصوصية التصميم الأول: الالتزام بجنون العظمة لتطبيقات المذكرة",
+  "description": "شرح تصميم الخصوصية لإصدار iPhone SimpleMemo. سأشرح نطاق التشفير داخل المحطة الطرفية وذاكرة التخزين المؤقت للاتصال وسجل التشخيص وتحليل استخدام AES-GCM، بالإضافة إلى المواصفات الحالية وقيود تسليم البريد التي لا تخفي الملاحظات مع مبدل التطبيق. يتم أيضا تحديد إدارة مفاتيح سلسلة المفاتيح والمعلومات التي تبقى في وجهة التخزين والارتباط بين AppsFlyer ومعرفات التحليل الخاصة بنا.",
+  "url": "https://simplememofast.com/ar/devlog/privacy-first-design",
+  "inLanguage": "ar",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-09-24",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ar/devlog/privacy-first-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "الصفحة الرئيسية",
+      "item": "https://simplememofast.com/ar/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "يوميات التطوير",
+      "item": "https://simplememofast.com/ar/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "الخصوصية التصميم الأول",
+      "item": "https://simplememofast.com/ar/devlog/privacy-first-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ar/devlog/privacy-first-design#webpage",
+  "inLanguage": "ar",
+  "name": "الخصوصية التصميم الأول: التزام بجنون العظمة",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ar/#website"
+  },
+  "url": "https://simplememofast.com/ar/devlog/privacy-first-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="الملاحة الرئيسية" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ar/guides/">أدلة الاستخدام</a><a href="/ar/use-cases/">حالات الاستخدام</a><a href="/ar/vs/">المقارنة</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ar/guides/">أدلة الاستخدام</a></li>
+        <li><a href="/ar/use-cases/">حالات الاستخدام</a></li>
+        <li><a href="/ar/vs/">المقارنة</a></li>
+        <li><a href="/ar/methods/"><span>الطريقة</span></a></li>
+        <li><a href="/ar/blog/"><span>مدونة</span></a></li>
+        <li><a href="/ar/glossary/"><span> مسرد</span></a></li>
+        <li><a href="/ar/faq">الأسئلة الشائعة</a></li>
+        <li><a href="/ar/about/">عن المطوّر</a></li>
+        <li><a href="/ar/devlog/">سجل التطوير</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>تنزيل</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="العربية · اختر اللغة"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>AR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ar" dir="rtl"><p class="site-language-title">اختر اللغة</p><div class="site-language-grid"><a href="/devlog/privacy-first-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/privacy-first-design" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/privacy-first-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/privacy-first-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/privacy-first-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ar" aria-current="page"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">تنزيل</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="القائمة"><span>القائمة</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>الخصوصية التصميم الأول: الالتزام بجنون العظمة بتطبيقات المذكرة</span> </h1>
+
+      <div class="article-meta">
+        <span>2026 سنة 2 شهر 13 يوم الإصدار ・تحديث شرح تحليل الحماية والاستخدام: 2026 سنة 9 شهر 6 يوم</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1. لماذا تعتبر الخصوصية مهمة لتطبيقات المذكرات</h2>
+          <p>أفكار العمل والمسودات الشخصية والسجلات اليومية. يجمع تطبيق المذكرة المعلومات قبل عرضها على الأشخاص. بنفس أهمية القدرة على الكتابة بسرعة، من المهم فهم مكان تخزينها وأين يتم إرسالها.</p>
+          <p>في هذه المقالة، سنشرح التشفير وذاكرة التخزين المؤقت للاتصال وعرض الشاشة وسجل التشخيص وتحليل الاستخدام في المحطة الطرفية بشكل منفصل. لا تضمن الحماية الواحدة حماية الطرق الأخرى.</p>
+          <div class="philosophy-highlight">
+            <strong>2026 سنة 9 شهر 6 تم تحديثه:</strong>تم تجميع مصدر نفس الإصدار (5.8.17) مثل الإصدار العام، وتم تصحيح شرح حماية الشاشة والسجل وتحليل الاستخدام. اكتب كل من ما يمكنك القيام به وما تحده. </div>
+
+          <h2 id="reading-02">2 لم يتم تمكين وظيفة إخفاء الملاحظات تلقائيا في مبدل التطبيق</h2>
+          <p>iOS يستخدم الشاشة كلقطة بعد انتقال التطبيق إلى الخلفية. يرشدك Apple إلى إزالة المعلومات السرية على الشاشة عند الانتقال إلى الخلفية.</p>
+          <p>في مصدر 5.8.17 المؤكد، يقوم <code>sceneWillResignActive</code> و<code>sceneDidEnterBackground</code> بحفظ المسودة ولا تتصل بعملية عرض تراكب الخصوصية. تبقى وظيفة العرض السابقة، ولكنها ليست مسارا يعمل كحماية صالحة.</p>
+          <p><strong>قد تبقى الملاحظة المعروضة ظاهرة في صورة مبدّل التطبيقات.</strong> تشفير Outbox لا يخفي صورة الشاشة. نصحح هنا وصف النسخة السابقة من المقالة الذي ادّعى إخفاء محتوى الملاحظات دائماً.</p>
+
+          <h2 id="reading-03">3. جلسة URL سريعة الزوال: تقليل تخزين القرص في ذاكرة التخزين المؤقت للاتصال</h2>
+          <p>يخزن <code>URLSession</code> القياسي ذاكرة التخزين المخابئ وملفات تعريف الارتباط ومعلومات المصادقة على القرص. هذه ميزة مفيدة للتطبيقات العامة، ولكنها غير ضرورية لتطبيقات المذكرات ويمكن أن تشكل خطرا.</p>
+          <p>إذا بقيت ذاكرة التخزين المؤقت للاتصال على المحطة الطرفية، فهذا يعني أن هناك آثارا ل URL ومتى قمت بالوصول إليها على القرص. إذا تم حفظ ملف تعريف الارتباط، فهذا يعني أن معلومات الجلسة ستبقى على المحطة الطرفية.</p>
+          <p>يستخدم هذا التطبيق <code>URLSessionConfiguration.ephemeral</code>.</p>
+          <pre tabindex="0"><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>لا يوجد ذاكرة التخزين المؤقت للقرص:</strong>لا تحفظ ذاكرة التخزين المؤقت لجلسة عنوان URL هذه على القرص</li>
+            <li><strong>تعطيل استخدام ملفات تعريف الارتباط:</strong>لا تقبل جلسة URL هذه ملفات تعريف الارتباط ولا تحدد الطلب</li>
+            <li><strong>تم تعطيل ذاكرة التخزين المؤقت URL:</strong>تعيين تخزين ذاكرة التخزين المؤقت نفسه على <code>nil</code></li>
+            <li><strong>التكوين الذي لا يستخدم التخزين المستمر:</strong>لا يخزن معلومات جلسة URLSession إلى قرص</li>
+          </ul>
+          <p>هذه حماية تتعلق بذاكرة التخزين المؤقت ل URLSession، وما إلى ذلك، وليست وظيفة تقضي على أحداث الاستخدام التي يخزنها التطبيق وينقلها بشكل منفصل أو سجلات الإرسال على جانب الخادم. يتم أيضا إجراء الارتباط بواسطة معرف تحليل الاستخدام بشكل منفصل عن هذا الإعداد.</p>
+
+          <h2 id="reading-04">4. نطاق الإخراج لسجل قياس الأداء</h2>
+          <p><code>PerformanceLogger</code> محاط ب <code>#if DEBUG</code>. في الإنشاءات التي لا يتم فيها تعريف DEBUG، لا يتم تضمين معالجة إخراج السجل لهذا المسجل.</p>
+          <p>يسجل <code>logError</code> الخاص بالمسجل هذا النوع، وليس البيان التفصيلي للخطأ. على سبيل المثال، استخدم نوع <code>URLError</code> ولا تقم بتحرير <code>localizedDescription</code> كما هو، والذي قد يحتوي على مسارات ملفات ومدخلات المستخدم.</p>
+          <p>من ناحية أخرى، فهي ليست آلية تجعل تلقائيا جميع أسماء الأحداث والسلاسل الإضافية التي يتم تمريرها إلى <code>logEvent</code> غير ضارة. من الضروري عدم تمرير عنوان البريد الإلكتروني أو نص المذكرة أو معلومات المصادقة لدى المتصل.</p>
+          <p><strong>لا ينبغي تعميم هذا الشرح بوصفه ضماناً لعدم وجود أي سجلات في التطبيق أو حزم SDK الخارجية أو نظام التشغيل بأكمله.</strong> يظل إرسال أحداث الاستخدام الخاصة بنا وAppsFlyer مفعّلين كآليتين منفصلتين. نشرح نطاق البيانات المجموعة في الأسئلة الشائعة عن تحليل الاستخدام في هذه المقالة وفي <a href="/ar/privacy#technical">سياسة الخصوصية</a>.</p>
+
+          <h2 id="reading-05">5. نطاق حماية Outbox بتشفير AES-GCM</h2>
+          <p>تتم إدارة المذكرات التي تنتظر الإرسال في قائمة انتظار تسمى Outbox في المحطة الطرفية. عند الحفظ، استخدم CryptoKit من Apple للتشفير باستخدام AES-GCM. يتم إنشاء مفتاح التشفير الجديد باستخدام بتات 256.</p>
+          <p>احتفظ بالمفتاح في سلسلة المفاتيح واستخدم <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. باستخدام هذا الإعداد، يمكنك الوصول من إلغاء القفل الأول بعد إعادة التشغيل إلى إعادة التشغيل التالية، ولن يتم نقل المفتاح عند استعادة النسخة الاحتياطية إلى محطة طرفية أخرى. يقرأ التطبيق مفتاح التشفير وفك التشفير.</p>
+          <p>هذه هي حماية البيانات المخزنة، وليس لإخفاء الشاشة المعروضة أو ضمان الأمان من أي انتهاك طرفي. قبل تغيير النموذج، يرجى التأكد من أن الملاحظات الضرورية قد وصلت إلى عنوان التخزين.</p>
+          <p>عند استخدام إرسال البريد الإلكتروني، تتم معالجة النص بواسطة Relay API ومنصة التسليم، ويظل كبريد إلكتروني في صندوق الوارد. <strong>التشفير في المحطة الطرفية لا يعني التشفير من طرف إلى طرف (E2EE) لتسليم البريد. </strong>يتم شرح التفاصيل في <a href="/ar/privacy#technical"> سياسة الخصوصية</a> و <a href="/ar/privacy-architecture/">مسار البيانات</a>.</p>
+          <p>للاطلاع على قوائم انتظار الإرسال، راجع <a href="/ar/devlog/outbox-architecture">شرح بنية Outbox</a>.</p>
+
+          <h2 id="reading-06">6 حماية نص المذكرة ودور SDK الخارجي</h2>
+          <p>iOS في التطبيق، استخدم CryptoKit لتشفير نص المذكرة، وسلسلة المفاتيح لتخزين المفاتيح، وURLSession لإرسال النص. Network.framework يراقب حالة الاتصال، و BackgroundTasks مسؤول عن جدولة نقل الخلفية.</p>
+          <p>من ناحية أخرى، يستخدم التطبيق أيضا SDK خارجي. يتم استخدام GoogleSignIn وFirebase Authentication لإدخال رسائل البريد الإلكتروني التعسفية تلقائيا باستخدام حساب Google، ويتم تهيئة فحص تطبيق Firebase عند بدء التشغيل لحماية الواجهة الخلفية API. يستخدم AppsFlyer لتحليل الاستحواذ والاستخدام، ويحدد معرف التثبيت الشائع في تحليلك الخاص.</p>
+          <p>حتى لو لم يتضمن التصميم نص المذكرة في عنصر الحدث، يظل ارتباط المعرفات وسجلات الإرسال قائما. يجب تأكيد نطاق تحليل الاستخدام، بما في ذلك SDK، بشكل منفصل عن تشفير النص. يتم وصف العناصر والاستخدامات في <a href="/ar/privacy#technical"> سياسة الخصوصية</a>.</p>
+
+          <h2 id="reading-07">7. حدد نطاق الحماية</h2>
+          <p>التشفير في المحطة الطرفية، والتعامل مع ذاكرة التخزين المؤقت للاتصالات، وتحليل الاستخدام لكل منها أدوار مختلفة. حتى مع تشفير Outbox وجلسة URL سريعة الزوال، فإن هذا لا يعني أنه سيتم التخلص من مجموعة أحداث الاستخدام.</p>
+          <p>نحن نقدر القدرة على ترك الملاحظات بسرعة وفهم المعلومات التي سيتم الحصول عليها. اشرح الوجهة والمعرف ونطاق الارتباط لتحليل الاستخدام، وراجعه وفقا للتغييرات في التطبيق.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-08" data-ce-number="08">الأسئلة الشائعة</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">س. هل سيتم حفظ محتويات المذكرة على الخادم؟</div>
+              <div class="faq-item__answer">عند إرسال بريد إلكتروني، يمر النص عبر Relay API ومنصة التسليم. لا يحتفظ Relay API بالنص بشكل دائم ما لم تكن هناك حاجة مشروعة للامتثال القانوني أو استجابة الفشل. إنه يختلف عن الحفظ في صندوق البريد لوجهة التسليم. وصف كل وجهة تخزين هو<a href="/ar/privacy-architecture/">تصميم الخصوصية</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">س. هل يقوم التطبيق بتشفير الاتصال؟</div>
+              <div class="faq-item__answer">نعم. يستخدم HTTPS للاتصال API. جلسة عنوان URL سريعة الزوال هي تكوين لا يخزن بشكل دائم ذاكرة التخزين المؤقت وملفات تعريف الارتباط ومعلومات المصادقة الخاصة بالجلسة على القرص. إنه لا يلغي تحليل الاستخدام وسجلات جانب الخادم التي يتم تنفيذها بشكل منفصل.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">س. إذا فقدت محطتي، هل المذكرة آمنة؟</div>
+              <div class="faq-item__answer">يتم تشفير Outbox وحفظه باستخدام AES-GCM، ويتم إنشاء المفتاح الجديد باستخدام بت 256. يستخدم المفتاح فئة حماية سلسلة المفاتيح التي لا تهاجر إلى محطة طرفية أخرى. ومع ذلك، فهي ليست آلية تحمي شاشة العرض والبريد الإلكتروني إلى عنوان التسليم. التشفير في المحطة وحدها لا يضمن أمان جميع المعلومات في حالة الفقدان.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">س. هل هناك أي تحليلات أو تتبع؟</div>
+              <div class="faq-item__answer">نعم. نحن نستخدم تحليل الاستخدام الخاص بنا وAppsFlyer SDK. سيتم إرسال معرفات التثبيت العشوائي ومعرفات الجلسة ونوع الحدث والوقت وإصدار التطبيق ونتائج الإرسال وما إلى ذلك إلى تحليلنا الخاص. يرسل AppsFlyer أحداثا مثل إرسال المذكرة الأولية الناجحة والمصادقة الناجحة وعرض شاشة الفوترة واختيار الخطة ونجاح الشراء، ويمكن إضافة المبلغ والعملة والفترة وما إلى ذلك في وقت الشراء. تم تعيين نفس معرف التثبيت أيضا لمعرف مستخدم عميل AppsFlyer، بحيث يمكن ربط معلومات الاستحواذ وأحداث الاستخدام. لا تتضمن عناصر الحدث المحددة من التطبيق مباشرة عنوان بريد إلكتروني أو نص مذكرة أو رمز مصادقة، ولكن معرف إرسال التحليل الداخلي مرتبط بتجزئة عنوان البريد الإلكتروني الوجهة، لذلك فهي ليست معلومات مجهولة المصدر تماما. لمزيد من التفاصيل<a href="/ar/privacy#technical">التدابير الفنية لسياسة الخصوصية</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">س. كيف تستخدم إطار عمل Apple الأصلي وSDK الخارجي بشكل منفصل؟</div>
+              <div class="faq-item__answer">iOS استخدم CryptoKit وسلسلة المفاتيح لتشفير وتخزين نص المذكرة في التطبيق، وإرسال النص باستخدام URLSession. من ناحية أخرى، يتم استخدام SDK الخارجي لتسجيل الدخول إلى Google، وحماية الواجهة الخلفية بواسطة Firebase، وتحليل الاستحواذ والاستخدام بواسطة AppsFlyer. يتم شرح حماية النص وتحليل الاستخدام بالمعرفات بشكل منفصل.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">مقالات ذات صلة</h2>
+            <div class="related-grid">
+              <a href="/ar/devlog/day1" class="related-card">
+                <div class="related-card__title">[Day1] أحب Captio كثيرا لدرجة أنني أردت أن أصنع "تلك التجربة" مرة أخرى</div>
+                <div class="related-card__desc">سجل الأحكام الفنية الصادرة في وقت التطوير الأولي لإعادة إنتاج تجربة Captio.</div>
+              </a>
+              <a href="/ar/devlog/" class="related-card">
+                <div class="related-card__title">قائمة يوميات التطوير</div>
+                <div class="related-card__desc">سجل اتخاذ القرارات الفنية ل SimpleMemo.</div>
+              </a>
+              <a href="/ar/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">هندسة Outbox: تصميم لمنع الانسكاب</div>
+                <div class="related-card__desc">شرح قائمة الانتظار التي تدير مذكرة الانتظار التي سيتم إرسالها وتصميم Outbox الذي يتم تشفيره باستخدام AES-GCM.</div>
+              </a>
+              <a href="/ar/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API: بناء منصة تسليم البريد الإلكتروني مع Cloudflare Workers</div>
+                <div class="related-card__desc">شرح منصة إرسال البريد الإلكتروني باستخدام عمال Cloudflare والتصميم لنقل النص.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10"> <span>المراجع</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple — CryptoKit Documentation</a> — <span>AES-GCM يستخدم لتنفيذ حماية بيانات Outbox مع التشفير</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple — وثائق URLSession</a> — <span>تأمين الخصوصية من خلال اتصالات الشبكة من خلال جلسات سريعة الزوال (مؤقتة)</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple — منع اتصالات الشبكة غير الآمنة (أمان نقل التطبيقات)</a> — <span>TLS ضمان الأمان عند نقل البيانات عن طريق فرض الاتصال</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple - إنشاء رسائل السجل من التعليمات البرمجية الخاصة بك</a> - <span>نطاق تخزين السجل والتعامل مع المعلومات السرية</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple - إعداد واجهة المستخدم الخاصة بك للتشغيل في الخلفية</a> - <span>لقطات ومعلومات على الشاشة لمحولي التطبيقات</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">مطور Apple - الوصول إلى سلسلة المفاتيح بعد إلغاء القفل لأول مرة، هذا الجهاز فقط</a> - <span>شروط الوصول الرئيسية وقيود الترحيل إلى المحطات الطرفية الأخرى</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ar/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>القراءة التالية</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>إنشاء مكان لتخزين الملاحظات باستخدام رابط Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Obsidian يمكنك الاطلاع على الخطوات لتمكين الرابط وتعيين وجهة التخزين. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>المحتوى ذو الصلة</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ar/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio مقارنة التطبيقات البديلة</span></a></li>
+    <li><a href="/ar/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>قائمة منشورات المدونة</span></a></li>
+    <li><a href="/ar/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>قائمة مقارنة تطبيقات المذكرة</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ar" dir="rtl"><a class="site-brand" href="/ar/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>مع Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">ملاحظة صغيرة. خطوة تالية.</p><p class="site-footer-description">أرسل الملاحظات من iPhone إلى Obsidian والبريد الإلكتروني.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="روابط التذييل">
+      <div class="footer__col">
+        <p class="footer__col-title">المنتجات</p>
+        <a href="/ar/download/" class="footer__link">تنزيل</a>
+        <a href="/ar/" class="footer__link">الرئيسية</a>
+        <a href="/ar/how-to/" class="footer__link"><span>كيفية الاستخدام</span> </a>
+        <a href="/ar/templates/" class="footer__link"><span>القوالب</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">المقارنة والنقل</p>
+        <a href="/ar/captio/" class="footer__link"><span>نوع Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">القراءة</p>
+        <a href="/ar/devlog/" class="footer__link">سجل التطوير</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">الدعم</p>
+        <a href="/ar/roadmap/" class="footer__link">خطة التطوير العامة</a>
+        <a href="/ar/about/" class="footer__link">عن المطوّر</a>
+        <a href="/ar/terms" class="footer__link"><span>شروط الاستخدام</span> </a>
+        <a href="/ar/privacy" class="footer__link">الخصوصية</a>
+        <a href="/ar/contact" class="footer__link">تواصل معنا</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / الجهة المشغّلة: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

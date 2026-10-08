@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/autopilot/">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>自律型應用程式運營的實際測量值 | SimpleMemo</title>
+  <meta name="description" content="SimpleMemo的運營，AI執行到什麼程度，人類從哪裡判斷。 公開了從駕駛臺賬中得出的實測值、可逆/不可逆劃分的許可權表、尚未完成的一覽表，彙總指令碼和活的臺賬。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="自律型應用程式運營的實際測量值 | SimpleMemo">
+  <meta property="og:description" content="AI執行到什麼程度，人類從哪裡判斷。 駕駛臺賬的實際測量值和尚未完成的一覽表。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/autopilot/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="自律型應用程式運營的實際測量值 | SimpleMemo">
+  <meta name="twitter:description" content="AI執行到什麼程度，人類從哪裡判斷。 駕駛臺賬的實際測量值和尚未完成的一覽表。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/autopilot/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/autopilot/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/autopilot/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/autopilot/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/autopilot/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/autopilot/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/autopilot/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/autopilot/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/autopilot/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/autopilot/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/autopilot/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/autopilot/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: WebPage + BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/autopilot/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "自主型應用程式運營的實測值 - SimpleMemo",
+  "description": "AI執行運營到什麼程度，人類從哪裡判斷。 從駕駛臺賬中得出的實測值和尚未完成的一覽表。",
+  "url": "https://simplememofast.com/zh-Hant/autopilot/",
+  "datePublished": "2026-08-25",
+  "dateModified": "2026-09-17",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "主頁",
+        "item": "https://simplememofast.com/zh-Hant/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "自主型應用程式運營",
+        "item": "https://simplememofast.com/zh-Hant/autopilot/"
+      }
+    ]
+  },
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  },
+  "about": {
+    "@id": "https://simplememofast.com/#app"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    /* /autopilot/ — 台帳を読ませるページ。装飾より、行が読めることを優先する */
+    .ap-lead { color: var(--text-secondary); line-height: 1.9; font-size: 0.96rem; margin-bottom: 8px; }
+    .ap-stamp { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 36px; }
+    .ap-sec { margin-bottom: 52px; }
+    .ap-sec > h2 { font-size: 1.18rem; font-weight: 800; color: var(--text); letter-spacing: -0.01em;
+      margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .ap-sec > .ap-note { font-size: 0.86rem; color: var(--text-muted); line-height: 1.8; margin: 10px 0 18px; }
+    .ap-sec p { color: var(--text-secondary); line-height: 1.85; font-size: 0.92rem; }
+    .ap-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 8px; }
+    table.ap-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 460px; }
+    table.ap-table th, table.ap-table td { text-align: left; padding: 9px 12px;
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.65; }
+    table.ap-table th { color: var(--text-muted); font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.02em; white-space: nowrap; }
+    table.ap-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.ap-table tr:last-child td { border-bottom: none; }
+    .ap-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 18px; }
+    @media (min-width: 720px) { .ap-kpis { grid-template-columns: repeat(4, 1fr); } }
+    .ap-kpi { background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; }
+    .ap-kpi__v { font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .ap-kpi__l { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; line-height: 1.55; }
+    .ap-cycle { list-style: none; padding: 0; margin: 6px 0 0; counter-reset: ap; }
+    .ap-cycle li { position: relative; padding: 0 0 18px 42px; counter-increment: ap;
+      border-left: 1px solid var(--border); margin-left: 13px; }
+    .ap-cycle li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .ap-cycle li::before { content: counter(ap); position: absolute; left: -13px; top: 0;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--surface-elevated);
+      border: 1px solid var(--border-highlight); color: var(--accent);
+      font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .ap-cycle b { color: var(--text); font-weight: 800; font-size: 0.94rem; display: block; margin-bottom: 4px; }
+    .ap-cycle span { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.75; }
+    blockquote.ap-quote { margin: 14px 0; padding: 14px 18px; border-left: 3px solid var(--accent);
+      background: var(--surface); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      color: var(--text-secondary); font-size: 0.89rem; line-height: 1.85; }
+    blockquote.ap-quote cite { display: block; margin-top: 8px; font-style: normal;
+      font-size: 0.76rem; color: var(--text-muted); }
+    pre.ap-log { overflow-x: auto; background: #060a12; border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; font-size: 0.78rem; line-height: 1.75;
+      color: #c9d4ec; margin: 6px 0 8px; }
+    .ap-links { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 6px; }
+    @media (min-width: 600px) { .ap-links { grid-template-columns: 1fr 1fr; } }
+    .ap-links a { display: block; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 16px; text-decoration: none; color: inherit;
+      transition: border-color 0.25s, background 0.25s; }
+    .ap-links a:hover { border-color: var(--border-highlight); background: var(--surface-elevated); }
+    .ap-links b { display: block; font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .ap-links span { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; }
+    .ap-flag { color: var(--accent); font-weight: 700; }
+    .ap-qr { text-align: center; margin: 44px 0 0; padding: 26px 20px; background: var(--surface-elevated);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .ap-qr img { width: 148px; height: 148px; display: block; margin: 0 auto 12px; border-radius: 10px; background: #fff; padding: 8px; }
+    .ap-qr p { font-size: 0.86rem; color: var(--text-secondary); margin: 0; }
+    @media (max-width: 767px) { .ap-qr--desktop { display: none; } }
+
+    /* 実物への導線。**このページはプレスリリースの着地面**なのに、
+       スマートフォンからは App Store へ行く手段が1つも無かった ——
+       QR はデスクトップ限定（上の媒体クエリ）で、ナビのCTAは 768px 以下で消える。
+       透明性のページなので売り込まない。事実だけ置いて、§2 の境界へ戻す。 */
+    .ap-cta { margin-top: 40px; padding: 26px 22px; border: 1px solid rgba(34,211,238,.22);
+      border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(34,211,238,.05), rgba(34,211,238,0) 55%), var(--surface); }
+    .ap-cta h2 { margin-top: 0; }
+    .ap-cta__row { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 14px; }
+    .ap-cta__row a { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 20px;
+      border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+    .ap-cta__store { background: linear-gradient(135deg,#22d3ee,#3b82f6); color: #0a0c12; }
+    .ap-cta__ghost { color: var(--accent); border: 1px solid rgba(100,180,255,.22); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/autopilot/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/autopilot/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/autopilot/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/autopilot/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/autopilot/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/autopilot/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/autopilot/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/autopilot/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/autopilot/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title">自律型應用程式運營 — AI執行到什麼程度，人類從哪裡決定</h1>
+
+      <p class="ap-lead"> 這個應用程式的日常運營，大部分由AI執行。 但是並不是“全部自動做”。 <b>對App Store的公開、實機的事前確認、價格變更、廣告、合同，是故意作為人工操作留下的。 </b>這個頁面是為了公開那個邊界和實際移動了多少人進入的統計指令碼。 </p>
+      <p class="ap-lead"> 上面的數字都是從臺賬上出來的。 <b>估計值和尚未測量的東西是這樣寫的。 </b> </p>
+      <section id="citation-summary" aria-labelledby="citation-title" class="ap-note">
+        <h2 id="citation-title" data-ce-number="01">介紹、引用用：閱讀23天的結果</h2>
+        <p>以下是<strong>2026年8月11日~9月2日（日本時間）</strong>的固定統計。 與每天更新的以下執行情況有區別。</p>
+        <blockquote>在SimpleMemo的AI運營臺賬中，23日的所有41件中，實際著手的28次中19次出貨，28次中7次有人介入。</blockquote>
+        <p>出貨率的分母不是41件而是著手28次。 剩下的13件，根據這個觀測期間的條件，跳過11件和無駕駛2件。 人的干預包括基礎修理等，即使成果物的編輯0件也不能說“人的工作為零”。</p>
+        <figure style="margin:1rem 0"><img src="/assets/img/i18n/zh-Hant/autopilot-outcomes-2026-09-02-ja.dca4c3ed.adc44b5a2a29.svg" width="900" height="447" style="max-width:100%;height:auto" alt="著手28次的明細：出貨19，失敗6，無成果物2，取消1" loading="lazy"><figcaption>出處：SimpleMemo開發團隊，AI運營臺賬的2026年9月2日時的固定統計。</figcaption></figure>
+        <p><a href="/assets/downloads/autopilot-runs-2026-09-02.csv" download>儲存全部41件的CSV</a> / <a href="/assets/img/research/autopilot-outcomes-2026-09-02-ja.svg" download>儲存日語的結果圖（SVG）</a> / <a href="/data/autopilot-research-2026-09-02.json">統計來源的固定資料</a> / <a href="/zh-Hant/autopilot/">統計方法和失敗事例（英語）</a></p>
+        <p>介紹時加上期間、分母<a href="/zh-Hant/autopilot/#citation-summary">這個統計的連結</a>，讀者可以確認原件。 由單一應用程式的運營者記錄，一部分是從履歷中重新構成的。 沒有對照組和人的工作時間的比較，沒有顯示時間削減、銷售額增加、其他公司的再現性。</p>
+      </section>
+      <p class="ap-stamp">最後更新 2026-09-04 / <b>每個節的測量時間點不同。 </b>§3的比率是2026-08-11 〜 2026-09-02（23日・41執行）時點，§5的自律分數是從<span data-decision-date>2026-10-08</span>時點的臺賬計算的/臺賬（§10）是活的，所以每天都在移動</p>
+      <p class="ap-note"><a href="/zh-Hant/autopilot/">英語報告：結果、方法和失敗案例</a> / <a href="/assets/downloads/autopilot-runs-2026-09-02.csv">2026年9月2日的41執行（CSV）</a> / <a href="/zh-Hant/press/">介紹用的圖表・資料</a>。 CSV是固定期限的記錄。 最新值請參考下面的臺賬。</p>
+
+      <!-- 1. 1サイクル -->
+      <section class="ap-sec">
+        <h2 id="reading-02">1。 1天的週期</h2>
+        <p class="ap-note">按時啟動，按照以下順序旋轉。 沒有人每次都發出指示的起點。</p>
+        <ol class="ap-cycle">
+          <li><b>觀測</b><span>閱讀搜尋查詢的動向、網站的實際繪製、執行臺賬、費用、資格資訊的期限。 如果有前一天沒有解決的故障，就從那裡撿起來。 </span></li>
+          <li><b>起案</b><span>只選擇當天要做的事情1件。 因為程式書規定為“1會話1動作”，所以不會一起出多個。 </span></li>
+          <li><b>實施</b><span>切斷分支進行變更，釋出PR。 無論程式碼、報道、設定哪個，路徑都是一樣的。 </span></li>
+          <li><b>驗證</b><span>CI對83種進行檢查（已經實際測量了所有83“故意破壞就會掉落”）。 <b>除非透過，否則不會合並。 </b>誇大表達的檢查和臺賬的算術檢查也包括在這裡。 </span></li>
+          <li><b>出貨</b><span>只有透過驗證時點的提交才會合併。 合併=正式公開。 <b>但是這只是網站，iOS應用程式是另外的途徑（§2）。 </b></span></li>
+          <li><b>測量</b><span>出貨的東西用執行ID在臺賬上寫1行。 著手、結果、PR、干預、費用在同一行。 </span></li>
+          <li><b>回到下一個判斷</b><span>失敗的次數按失敗的種類記錄下來，第二天以後的起案會讀它。 <b>檢測沒有寫臺賬的回的檢查，也在後面新增（§7）。 </b></span></li>
+        </ol>
+      </section>
+
+      <!-- 2. 担当分担 -->
+      <section class="ap-sec">
+        <h2 id="reading-03">2。 負責分擔 — 可以立即提交的東西，透過審查的東西</h2>
+        <p class="ap-note"> 如果把這個2作為1的“自動部署”來說明的話，聽起來比實際情況更強烈。 分開寫。 </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>路徑</th><th>物件</th><th>AI能否立即投入生產</th></tr></thead>
+          <tbody>
+            <tr><td><b>A道</b></td><td>網站・報道・伺服器設定・Feature Flag</td><td>可以出（只有透過CI驗證的）</td></tr>
+            <tr><td><b>B道</b></td><td>iOS應用程式本體</td><td>TestFlight內部發布已經由AI執行。 5.8.46的審查提交在業主單獨批准後由AI執行。 實機確認由人進行，自主提交門的透過尚未確認。 批准後自動公開的設定</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note" id="lane-b"> <b>Lane B的實測（2026-08-11〜09-08・<a href="/data/app-releases.json">應用程式本體的臺賬</a>）。 </b>剪掉標籤的版本是<b>52</b>，其中App Store排列的版本是<b>10</b>（5.7.8 / 5.7.11 / 5.8.0 / 5.8.1 / 5.8.2 / 5.8.4 / 5.8.5 / 5.8.9 / 5.8.17 / 5.8.26）。 有實機確認記錄的版本是<b>3</b>（因為記錄的臺賬是從2026-08-28開始的，所以只能說“沒有”之前的版本。 記錄是人的申報，不是機器的驗證）。 從儲存在臺賬上的狀態的觀測來看，以公開時間為寬度的版本是<b>3</b>。 各版的程式碼差分，提交<b>40.3%</b>，變更行<b>21.1%</b>是AI作者（計數方法與§3的程式碼作者率相同。 簽名、預告片、Claude Code的腳印都沒有的提交都算在人方，所以從手邊的環境中用所有者的簽名進行的更改不會出現在這裡）。 <b>僅對公開狀態的觀測，不能成為AI執行實機確認、審查提交、公開的證據。  </b>上面的§1的“出貨”中不包括這個10版。 </p>
+        <p class="ap-note"> 許可權表有19領域，<b>其中15執行中・10是批准制</b>。 可逆操作由AI單獨執行，不可逆操作需要批准。 <b>CI看到的只有“不可逆的領域是否不需要批准”“執行中的領域是否指向依據檔案”“金額移動的領域是否有上限”的3點</b>，機器看不到實際是否人批准。 那裡寫在前面。 </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>操作</th><th>可逆性</th><th>誰來決定</th></tr></thead>
+          <tbody>
+            <tr><td>網站內容的新設・更新</td><td>可逆</td><td>AI單獨執行</td></tr>
+            <tr><td>階段公開的<b>撤回</b>（檢測到故障後停止）</td><td>可逆</td><td>AI單獨執行</td></tr>
+            <tr><td>階段公開的<b>擴大</b>（提高分配比例）</td><td><b>不可逆</b></td><td>機械門（曝光50%・1日1段）。 <b>100%的最終階段和母數不足的情況下提高的操作只有人類</b></td></tr>
+            <tr><td>提交App Review</td><td><b>不可逆</b></td><td>機械門（未執行、執行方也未安裝）。 <b>實機的事前確認和使門生效的操作只有人類</b></td></tr>
+            <tr><td>向App Store公開（稽核透過後）</td><td><b>不可逆</b></td><td>機械門（未執行、執行方也未實施）。 <b>一次性公開的判斷和使門生效的操作只有人類</b></td></tr>
+            <tr><td>價格、方案、免費名額變更</td><td><b>不可逆</b></td><td>僅限人類<span class="ap-flag">（未設定上限）</span></td></tr>
+            <tr><td>廣告出稿・廣告預算變更</td><td><b>不可逆</b></td><td>只有人類<span class="ap-flag">（未實現）</span></td></tr>
+            <tr><td>合同、支付、匯款</td><td><b>不可逆</b></td><td>只有人類<span class="ap-flag">（未實現）</span></td></tr>
+            <tr><td>釋出新聞稿</td><td><b>不可逆</b></td><td>僅限人類（傳送操作和可否的判斷）</td></tr>
+            <tr><td>個人資訊事故、法律請求、重大障礙、火上澆油</td><td><b>不可逆</b></td><td>只有人類（只定義方針）</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 將相同功能的“縮回”和“擴大”分為不同的領域。 因為即使展開後再放回去，也不會讓看到的人看不到。 <b>但是，透過這個門執行的升級還沒有1件。 </b>階段公開中的標誌是1個（tf04_progress），警衛每小時進行判定，但未達到判定所需的母數（各群30）保持（2026-08-27的實測run 33076125334）。 <b>“擴大”的行，在2026-09-02上從“人類的認可”重新寫了。  </b>自動升級由所有者在2026-08-28上啟用（<code>rollout-promotion.json</code>的<code>auto_promote.enabled</code>），<b>許可權表中曝光50%為帶有機械門的AI執行。 </b>只有頁面是舊的寫法，比實際情況人手多。 <b>過小申報也有差異</b>——開啟放在旁邊的許可權表，寫著不一樣的東西，因為形式是一樣的，所以改了。 </p>
+      </section>
+
+      <!-- 3. 実測 -->
+      <section class="ap-sec">
+        <h2 id="reading-04">3。 實測 — 移動了多少次，進入了多少次人</h2>
+        <div class="ap-kpis">
+          <div class="ap-kpi"><div class="ap-kpi__v">67.9%</div><div class="ap-kpi__l">AI完跑率<br>（著手28次中出貨19次）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">25.0%</div><div class="ap-kpi__l">人類介入率<br>（人摸了1次的執行）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">對成果物的干預<br>（出貨19件物品有人觸控的次數）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">74.4%</div><div class="ap-kpi__l">出貨日率<br>（23天中出現什麼的日子）</div></div>
+        </div>
+        <p> <b>人類干預率25.0%原封不動地出。 </b>4次和1次的執行中有人。 但是這個數字是“在執行中，人們是否觸動了1次”的計算，只是將工作流程的設定重新調整1行的日子也會被整個干預。 在那裡按種類劃分干預。 </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>干預的種類</th><th class="num">執行數</th><th class="num">比例</th></tr></thead>
+          <tbody>
+            <tr><td><b>對成果物的干預</b>（人寫了報道、重寫了）</td><td class="num"><b>0</b></td><td class="num"><b>0.0%</b></td></tr>
+            <tr><td>執行基礎的修理（工作流程、程式書、指令碼）</td><td class="num">4</td><td class="num">14.3%</td></tr>
+            <tr><td>代跑（所有路線不發，人代為執行）</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>啟動（第一次有人透過演示・只有一次）</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>只起票（委託了人，結果沒做）</td><td class="num">1</td><td class="num">3.6%</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 出貨的19件，全部由AI書寫。 實際的干預是“基礎修理”14.3%的一點，寫那個修理的也是AI。 人類所做的是，意識到它壞了，並說要修復它。 </p>
+        <p class="ap-note"> <b>按執行路徑區分，主路徑為 5/12，備用路徑為 14/16。</b>主路徑由定時工作流啟動，在 8 月 23 日首次釋出成果，此後也發生過無成果輸出或因每週使用上限而失敗的情況。備用路徑也失敗過 2 次。<b>如果沒有備用路徑，有多個日期都會停止執行。</b>沒有執行的日期共 2 天，即 8 月 16 日和 17 日。<b>“連續執行”指連續留下執行結果記錄的天數。</b>其中也包括事先判斷後跳過和執行失敗。未執行（no_run）或臺賬沒有記錄的日期會中斷連續天數；是否釋出成果則另以“連續釋出”統計。<!-- run-streaks:start --> 按此定義，截至目前連續執行 <b>52</b> 天，從 2026 年 8 月 18 日至 2026 年 10 月 8 日；最長也是 <b>52</b> 天，從 2026 年 8 月 18 日至 2026 年 10 月 8 日。“目前”截至臺賬最後記錄的 2026 年 10 月 8 日。根據執行定義，失敗但有記錄的日期也算有記錄的一天，因此不會中斷連續執行。<b>目前連續釋出 0 天</b>，<b>最長連續釋出 8 天</b>，從 2026 年 9 月 1 日至 2026 年 9 月 8 日。<!-- run-streaks:end --> 10 月 1 日的恢復記錄屬於負責人要求的維護，保留了 9 月 20 日和 10 月 1 日沒有產出成果的結果，並驗證已有的原因修復、關聯維修記錄，不計作定時執行成功釋出或無人介入釋出。9 月 16 日和 17 日的回收記錄也是負責人要求的維護，不屬於定時執行、無人介入釋出或文章釋出。9 月 17 日已驗證 1 項頁內導航修復；海報試作與回滾屬於 1 個未達速度標準的週期。尚未取得的任務結果仍為未知，間歇性渲染延遲仍未解決。9 月 9 日只有事先判斷後避免重複執行的記錄，未開始實施，也沒有釋出，但仍計入上述連續執行天數。9 月 10 日記錄了 1 次佔用執行資源後因驗證環境不足而中斷，以及另 1 次因防止重複而結束的執行，兩者均不計作釋出。8 月 30 日和 31 日，主路徑與備用路徑都因同一個每週使用上限而失敗，均未釋出成果。 </p>
+        <p class="ap-note"> 程式碼一側有另一個尺子。 3儲存庫・全部分支・合併除外・2026-08-11~08-21，<b>提交的99.5%（194件中193件），變更行的94.2%（48,976行中46,159行）是AI作者</b>（<b>2026-08-22 統計</b>）。 測量日期本身沒有放在視窗中（因為對提高率的方向有效。 包括8月22日的話94.2%→96.6%）。 <b>件數的話，以後再數的話不合適。  </b>因為看了所有分支，所以被squash消失的分支無法從後面算起，如果把相同的視窗重新計算為2026-08-26，就變成了<b>194 → 164提交</b>（30件少）。 <b>率不變</b>（99.5% → 99.4%，變更行的94.2%相同），但抽絕對數時請與上面的統計日一起處理。 </p>
+      </section>
+
+      <!-- 4. 領域別 -->
+      <section class="ap-sec">
+        <h2 id="reading-05">4。 自動化率 — 每月的推移和各領域的明細</h2>
+        <p class="ap-note"> <b>自律度是12.5%→85.4%。 </b>2026年6到9月的4個月。 將相同的192任務固定在分母上進行計數。 程式碼變更的AI作者率與業務執行率是不同的指標。 每月變動，9月是中途統計。 月度值記錄在<a href="/data/autonomy-timeline.json">自律度的推移</a>的code_ai_commit_rate / code_ai_line_rate中。 每月的執行件數包括編寫程式碼以外的工作（選擇、驗證、記錄、停止措施）的轉移。 9月13日分母變更導致的數值變化，與執行件數的增加分開記錄。 </p>
+        <figure style="margin:4px 0 14px;">
+          <img src="/assets/img/i18n/zh-Hant/autonomy-timeline.eac0634b.c4f629c6c490.svg"
+               alt="運營任務的自律度和程式碼變更的AI作者率的月度推移。 以現行事業範圍192件重新構成的綜合自動化率。 2026年4月8.3%、8月69.3%、9月途中85.4%"
+               width="880" height="352" loading="lazy" style="max-width:100%;height:auto;">
+        </figure>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>月</th><th class="num">綜合自動化率</th><th class="num">那個月轉移到執行方的數量</th><th>測量方法</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04（釋出）</td><td class="num">8.3%</td><td class="num">0</td><td>重組</td></tr>
+            <tr><td>2026-05</td><td class="num">11.5%</td><td class="num">6</td><td>重組</td></tr>
+            <tr><td>2026-06</td><td class="num">12.5%</td><td class="num">2</td><td>重組</td></tr>
+            <tr><td>2026-07</td><td class="num">19.3%</td><td class="num">13</td><td>重組</td></tr>
+            <tr><td>2026-08</td><td class="num">69.3%</td><td class="num">96</td><td>觀測執行件數、用現行分母重新構成</td></tr>
+            <tr><td>2026-09（途中）</td><td class="num"><b>85.4%</b></td><td class="num">31</td><td><b>現行標準的統計（以下注記）</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>⚠ 實測是2026年8月和9月的中間。 </b>在此之前是重組，當時沒有測量這個指標。 計數方法是將“AI執行的任務的證明檔案，最初提交的月份”視為該工程的執行開始月進行累積，<b>證明的追加日期和實際執行日期有幾天~幾周的偏差。 </b>分母也是將現在的盤點（192任務）固定到過去，<b>當時“要做的事情一覽表”本身並不存在。  </b>因為當時的“提案停滯”“人執行”“未著手”的明細沒有恢復，所以<b>這個系列只能是綜合自動化率</b>，無法實現AI參與率和覆蓋率的推移。 原始資料原封不動地放在<a href="/data/autonomy-timeline.json">自律度的推移</a>中，極限一覽表也在同一檔案的<code>known_limits</code>中。 </p>
+        <p class="ap-note"> 203任務・13區域按1件逐盤點，根據誰執行來計算。 <b>綜合自動化率85.4%，AI執行率91.1%，AI參與率95.0%，覆蓋率93.8%（2026-09-15）。 </b>公開了包括未著手在內的明細。 9月15日，根據同一期間的首次下載、頁面瀏覽、比較物件、同時措施的實測，將現有的CPP業務反映在AI執行中。 AI執行164/180，綜合164/192。 評價是描述性的，獲得的提高和因果效果尚未確定。 <b>164件中退款檢測、收費恢復、故障通知的3件，按業主指定的“測試運用準備完成+實際執行自動監視”計入。 </b>未觀測到實際的首次退款、收費恢復、故障指南。 9月13日條件變更時點的記錄：<span data-acceptance-before="refund-tested-readiness-20260913">變更前的例項必須標準：159/176=90.34%</span>。 <span data-acceptance-before="billing-recovery-tested-readiness-20260913">收費恢復準備變更前：161/177=90.96%</span>。 收費恢復準備後162/178=91.01%。 <span data-acceptance-before="service-notice-tested-readiness-20260913">故障指南準備變更前：162/178=91.01%</span>。 那時準備完畢163/179=91.06%，約+0.050點。 當時這個3件作為例項必須排除的參考值是160/176=90.91%。 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/refund-tested-readiness-20260913.md">測試範圍、評分條件變更</a>和<a href="/data/refund-readiness-20260913.json">準備退款的證據</a>、<a href="/data/billing-recovery-readiness-20260913.json">恢復收費準備的證據</a>和<a href="https://github.com/simplememofast/simplememo/blob/main/docs/billing-recovery-tested-readiness-20260913.md">驗證範圍</a>、<a href="/data/service-notice-readiness-20260913.json">故障指導準備的證據</a>和<a href="https://github.com/simplememofast/simplememo/blob/main/docs/service-notice-tested-readiness-20260913.md">驗證範圍</a>公開。 並不表示實際的故障指南或對所有使用者的到達、通知義務的滿足。 9月9日，<a href="/data/x-japanese-execution.json">X日語投稿的預約操作和公開結果核對</a>，更新了現有1業務的執行者。 同日，<a href="/data/service-reconciliation-execution.json">公司服務1項合同、請求、服務提供、支付進行核對</a>，追加了記錄預付款繼續和稅種例外的1業務。 9月11日，<a href="/data/physical-device-verification-20260911.json">iPhone和Watch的實機確認6專案完成</a>，反映了實機確認1業務的執行結果。 9月12日，<a href="/data/delegated-review-acceptance-20260912.json">已驗證1342的自主提交確認已被Apple受理</a>，反映了App Review提交1業務。 稽核透過和App Store公開還沒有加分。 同日，<a href="/data/production-stop-exercise-20260912.json">完成了實際Act的停止、恢復訓練</a>，反映了訓練1業務。 並不是說驗證了全停止機制和應用程式Kill。 9月13日，<a href="/data/company-monthly-budget-execution.json">制定全公司的月度預算，適用於支出判斷</a>，讀取了公開設定和實際案件的判定。 反映月度預算1業務，成為AI執行161/177。 並不意味著完成了現有債務的結算和全部結算的自動控制。 2026-08-25在盤點中增加了13件，比率從61.3%下降到58.6%。 之後的實施回到了66.8%（2026-09-02時點・當時的分母）。 <b>不是實施減少，而是隨著應該做的事情的列表變得準確，分母增加</b>（加起來的13件中10件未實施）。 任務的粒度在領域之間不一致，將所有任務等價計算的點作為極限附加。 </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>領域</th><th class="num">綜合</th><th class="num">AI參與</th></tr></thead>
+          <tbody>
+            <tr><td>12 事業連續性</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>10 AgentOps・治理</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>2 修正錯誤</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>5 AI預算、代幣管理</td><td class="num">88.2%</td><td class="num">100.0%</td></tr>
+            <tr><td>11 資料・隱私</td><td class="num">81.8%</td><td class="num">100.0%</td></tr>
+            <tr><td>6 應用程式運營決策</td><td class="num">85.7%</td><td class="num">100.0%</td></tr>
+            <tr><td>3 自律型營銷</td><td class="num">81.3%</td><td class="num">92.9%</td></tr>
+            <tr><td>1 下期功能開發</td><td class="num">85.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>4 自動實際部署</td><td class="num">83.3%</td><td class="num">88.9%</td></tr>
+            <tr><td>8 客戶支援</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>7 法人經營</td><td class="num">71.4%</td><td class="num">91.7%</td></tr>
+            <tr><td>9 貨幣化</td><td class="num">66.7%</td><td class="num">87.5%</td></tr>
+            <tr><td>13 模擬領域</td><td class="num">57.1%</td><td class="num">57.1%</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note" id="scope-20260913"> <b>9月13日，首先整理了評分範圍。 </b>目前事業中不進行的活動、招聘、個別商談營業的6件和現有方針中不進行的退款意見傳送1件被排除在物件之外。 在這個整理的時候，AI執行159件是不變的，實施中的分母從179件變成了176件，所有物件從199件變成了192件。 <span data-scope-before="2026-09-13">以往範圍（9月13日變更前）：執行159/179=88.8%，綜合159/199=79.9%</span>。 舊分母199的月度系列也儲存在原始資料中。 在開始調查、準備活動的時候，或者確認實際案件、現有義務的時候，將成對的AI方和人類方同時回到物件。 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/automation-scope-review-20260913.md">公開了7件的理由和4指標的比較</a>。 </p>
+      </section>
+
+      <!-- 5. 自律スコア -->
+      <section class="ap-sec">
+        <h2 id="reading-06">5。 自律分數 — 不是“自動化的數量”而是“經過驗證的決定的數量”</h2>
+        <p class="ap-note"> §4的自動化率是<b>任務覆蓋率</b>。“ 雖然說“自動化了什麼”，但<b>“有沒有確認那個決定是否正確的機制”一句話也不說。 </b>如果將未經驗證的決定自動化100%，覆蓋率為100%。 因此，在2026-09-04上，<b>並設了另外的尺子</b>。 不是換乘——因為一方伸長而另一側不伸長是有意義的，所以兩個都照樣拿出來。 </p>
+        <p class="ap-note"> 計算方法是“反證器（=可以做出判斷的機制）是哪一層”。 將運營決定分為5層，除了實施的驗證外，還連線了合格性的判定、價值合同的結算、成熟後的探索。 <b>區分實施完成和運用實績的實證進行顯示。 </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>層</th><th>決定什麼層</th><th>反證器</th><th>狀態</th></tr></thead>
+          <tbody>
+            <tr><td>L0 實施</td><td>被選中的東西，如何製作</td><td>CI 101瓶的自動檢查。 如果失敗的話，那回就不會正式上場了</td><td><b>執行中</b></td></tr>
+            <tr><td>L1 合格性</td><td>那個任務，著手<b>好</b>的東西</td><td>執行前門（可逆性、變更邊界、證據的新鮮度、預算、重複）</td><td>在執行處理程式之前判定。 現有執行停止R2，價值合同必須透過全部5標準</td></tr>
+            <tr><td>L2 價值</td><td>那個任務是<b>應該做的</b>嗎</td><td>實施前的單獨提交的宣告和公開後的實測結算</td><td><b>已批准6指標（09-04為3件、09-05為3件）。 等待結算實績</b></td></tr>
+            <tr><td>L3 框架</td><td>當初提問的方式是否正確</td><td>成熟判定和從合格候選人的下級進行限定探索</td><td><b>已實施。 結算20件為止保留</b></td></tr>
+            <tr><td>L4 憲法</td><td>這家公司是為了什麼而行動</td><td>無。 人類維護目的、指標、禁止事項、支出上限</td><td><b>固定在人類上</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>自律分數是<span data-score-total>44.6</span>分（100滿分，<span data-decision-date>2026-10-08</span>時間點）。 </b> 已驗證的決定覆蓋率，只有事先固定的合同在公開後的實測結算後才會加分。 <b>90超過點是目標，在實測達到之前不會顯示為達成。 </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>成分</th><th class="num">得分</th><th class="num">分配點</th><th>現在發生了什麼</th></tr></thead>
+          <tbody>
+            <tr data-score="vdc"><td>已驗證決定覆蓋率</td><td class="num"><b>13.1</b></td><td class="num">30</td><td>期間內出貨16件中，能夠確認事前宣告和公開後的實測結算的是7件。</td></tr>
+            <tr data-score="umr"><td>無檢查合併率</td><td class="num"><b>11.1</b></td><td class="num">25</td><td>在沒有人的干預下，以可逆性加權實際變化的比例。 R0有貢獻上限。</td></tr>
+            <tr data-score="ra"><td>恢復自律性</td><td class="num"><b>5.7</b></td><td class="num">20</td><td>故障7件中機器檢測到的是4件，無干預的修理是0件。 正式的自動revert成功是0次。</td></tr>
+            <tr data-score="ep"><td>升級精度</td><td class="num"><b>8.9</b></td><td class="num">15</td><td>已經判定升級的必要性的是23件。 其中18件是業主委託的AI評價，不是獨立的人類評價。</td></tr>
+            <tr data-score="tuc"><td>限制下的吞吐量</td><td class="num"><b>5.7</b></td><td class="num">10</td><td>維持檢查，每週4.0次出貨。 每週7次是分配上的標準。</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>恢復，從異常檢測到實際健康確認進行確認。 </b> 發貨後，除非機器自己發現並倒退，否則<b>原則上不能傳遞更危險的區域的許可權。 </b>在自動倒回的回出現1次之前，許可權不擴大——的順序是按原樣決定的。 </p>
+        <p class="ap-note"> <b>將停止的回分為“層”。 </b>到目前為止，在執行前睡覺的次數、執行後失敗的次數、名額用完的次數都作為同樣的“失敗”排列著，所以<b>無法回答“是選擇方法錯誤，還是製作方法錯誤”。 </b>沒有回答不是調查方法的問題，而是因為記錄在同一列。 臺賬上記錄的出貨以外的結果，分為以下層。 </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>層</th><th class="num">件數</th><th>意思</th><th>最接近的例子</th></tr></thead>
+          <tbody>
+            <tr data-stage="eligibility"><td>資格判定（執行前停止）</td><td class="num"><b>48</b></td><td>完成事前判定，但未開始任務</td><td>在沒有秘金鑰匙的日子裡安靜地睡覺（8次）/<b>沒有結構化的判定記錄（6次）</b></td></tr>
+            <tr data-stage="execution"><td>執行（開始後失敗）</td><td class="num"><b>13</b></td><td>已開始實作，但在完成前失敗</td><td>拒絕許可權、認證失敗、時間過期</td></tr>
+            <tr data-stage="cost"><td>成本（達到使用額度後停止）</td><td class="num"><b>8</b></td><td>達到使用量上限</td><td>主系統和備援系統耗盡了同一使用額度，並在同一天停止運作</td></tr>
+            <tr data-stage="absent"><td>執行路徑缺失（自動化尚不存在）</td><td class="num"><b>2</b></td><td>既未進行事前判定，也未執行任務</td><td>備援系統尚不存在的那一天</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>最多的是合格性層。 </b>而且那裡直到2026-09-04為止，除了“是否有秘金鑰匙”以外沒有判定。 製作的是那個判定，在現有的執行中記錄判定，<b>無法恢復的操作在執行前停止。 </b>新的價值合同必須透過全部5標準才能製作。 </p>
+        <p class="ap-note"> 2026-09-05，將執行資訊的缺失判定錯誤地記錄為“未著手”的1件，與模型的著手證據進行核對後進行了更正。 原來的行和確認證據留在<a href="/data/autopilot-runs.json">駕駛臺賬的更正記錄</a>中。 成果物的結果還沒有確定，沒有算在出貨和恢復中。 </p>
+        <p class="ap-note"> <b>這個很難提高分數的裝置也一起放進去了。 </b>如果放鬆檢查的話，分數會自動上升，所以<b>檢查次數減少期間分數保持不變</b>。 為了不讓容易恢復的細小更新量產也不會增長，對其貢獻設定了上限。 <b>失敗率不能計入分數</b>——因為如果降低失敗率本身是目的的話，就會造成放鬆檢查的壓力。 而且<b>這個數字，沒有給決定每天執行的AI看</b>。 因為如果將儀器作為最佳化物件，作為儀器的壽命就會結束。 </p>
+        <p class="ap-note"> 分配點本身（<a href="/data/autonomy-score.json">自律分數的分配點</a>）和執行前的判定標準（<a href="/data/eligibility-policy.json">合格性門的標準</a>），以及<a href="/data/contract-coverage.json">價值合同的覆蓋方針</a>，<b>AI被放在無法改寫的一側。 </b>為了不創造可以自己決定自己的評分方法的地方。 覆蓋方針記錄的，不是方便的事實——雖然在2026年9月4日準備了價值合同的機制，但<b>公開通道的出貨14件中，事先登記的預測連1個都沒有</b>。 現在只是數數，沒有停止出貨。 判定結果在<a href="/data/eligibility-log.json">合格性的判定臺賬</a>，分數的推移在<a href="/data/autonomy-score-history.json">自律分數的履歷</a>中。 <a href="/data/value-contracts.json">價值合同和結算</a>、<a href="/data/decision-review.json">成熟、探索的記錄</a>、<a href="/data/decision-recovery.json">恢復的痕跡</a>也公開了。 恢復訓練不計入實際的成功次數。 </p>
+        <p class="ap-note"> <b>要移動最上方的成分（已驗證的決定覆蓋率），首先需要決定“用哪個指標來衡量價值”。 </b>那個<a href="/data/value-metrics.json">指標的許可列表和基準值</a>也放在同一個地方——<b>2026-09-04業主批准了出貨日率、公開日率、未解決故障件數的3指標。 </b> <b>2026-09-05中殘留的3指標（故障檢測時間、1出貨的實際費用、判定理由未記錄的棄置率）也得到了批准。  </b>認可每個指標都記錄在臺賬上，僅僅認可不會增加分數。 比較標準是各指標最近14日的中值。 在以後的每日自律措施中，著手前的價值合同是必須的，公開後收集宣佈的期間的實測進行結算。 僅靠認可不會增加分數。 之所以沒有將製作新指標的許可權交給AI，是因為<b>即使放任不管，如果選擇能移動的指標，就會看起來預測是對的</b>。 </p>
+      </section>
+
+      <!-- 6. AIに与えていない権限 -->
+      <section class="ap-sec">
+        <h2 id="reading-07">6。 沒有給AI的許可權，有理由寫著</h2>
+        <p> 想公開的不是可以做的事情的一覽表，而是邊界。 應用程式的釋出路徑本身是自動化的，但是<b>啟動該鏈的許可權沒有賦予開發用的AI工作流程。 </b> 設定檔案上寫著這樣的理由。 </p>
+        <blockquote class="ap-quote"> 有這個許可權的話，不要求確認的設定的AI會直接呼叫出貨工作流程，<b>完全不透過人類就可以出貨到App Store</b>。 沒有這個功能所需的核心用途——儲存庫的讀取、提交、push、PR製作、評論全部在沒有許可權的情況下執行。 如果需要的話，不是擴大這個許可權，<b>製作限定用途的其他路徑</b>。
+          <cite>來自工作流程設定檔案的評論</cite>
+        </blockquote>
+        <blockquote class="ap-quote">
+          <b>用實機確認後提交。 不是以後，而是先。</b>
+          <cite>釋出規程書的面向人類的硬規則</cite>
+        </blockquote>
+      </section>
+
+      <!-- 7. 実行ログ -->
+      <section class="ap-sec">
+        <h2 id="reading-08">7。 執行日誌的摘錄 — 不順利的回也以同樣的形式保留</h2>
+        <p class="ap-note"> 臺賬是1執行1行。 出貨的次數和失敗的數，寫在同一列。 以下是實物的摘錄。 </p>
+        <pre class="ap-log" tabindex="0">run_id      : ap-20260823-actions
+date_jst    : 2026-08-23
+route       : actions          outcome : shipped
+pr          : 538              artifact: /obsidian/pricing/
+repair_of   : ap-20260822-actions
+note        : 主系（GitHub Actions）の初出荷。導入から12回目の定時起動で
+              初めて成果物が出た。06:18→06:36 JST（約18分）。過去11回は
+              10〜90秒で終わっており、所要時間そのものが「回ったが何も
+              していない」との違いを示す。
+              この行は主系自身が書いていない。出荷したのに台帳が
+              0件のままだったのはこのため。
+
+run_id      : ap-20260825-actions
+date_jst    : 2026-08-25
+route       : actions          outcome : failed
+failure_class: auth_or_credential
+detected_by : 副系のフォールバックが実行履歴を遡って発見
+note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
+              「台帳を書く主体がいない」という構造的な穴がある。</pre>
+        <p class="ap-note"> <b>這個2行排列的本身就是現在的位置。 </b>雖然首次出貨了，但是寫臺賬的主體在失敗的回中留下了不存在的漏洞，9月2日時尚未解決的失敗是7件（8月27日~31日。 其中3件是每週的使用上限），<b>原封不動</b>登載在臺賬上。 檢測的中值是13.4小時，最大70.8小時。 修理的中位數是6.7小時。 <b>檢測比8月末晚</b>（因為主系連續3天只跳過“有分支”，將其彙總到8月31日）。 </p>
+      </section>
+
+      <!-- 8. できていないこと -->
+      <section class="ap-sec">
+        <h2 id="reading-09">8。 未完成的事情</h2>
+        <p class="ap-note">這個基礎不是“所有領域自動完成”的狀態。 把程式書和報告中寫的東西原封不動地排列起來。</p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th>領域</th><th>現狀</th></tr></thead>
+          <tbody>
+            <tr><td>功能開發</td><td>分析和提案是AI。 <b>自動選擇→階段公開→效果測量→持續/撤回為止還沒有透過的實績</b></td></tr>
+            <tr><td>bug修正</td><td>測試和分類是自動的。 <b>實際故障的檢測→修正→金絲雀公開→自動回滾的閉環未實現</b></td></tr>
+            <tr><td>實機測試</td><td><b>iOS模擬器、實機iPhone無法操作、拍攝、測量</b>（必須有macOS環境）</td></tr>
+            <tr><td>廣告運用</td><td><b>未實現。 </b>在這個預算規模下，有公司分析認為每日自動投標會最佳化噪音，沒有著手</td></tr>
+            <tr><td>預算分配</td><td>直到上限的自我停止。 <b>分配的最佳化還沒有。 </b>上限值本身也是暫定的，不是實測來源</td></tr>
+            <tr><td>故障檢測</td><td>透過App Store的報告<b>注意到了收費失敗</b>，但<b>恢復的導線（支付方式更新指南）尚未實施</b></td></tr>
+            <tr><td>銷售額資料</td><td>App Store方面的銷售額、收費資料從8月25開始匯入，<b>LTV、回收期間在積攢28天之前無法提取</b>（因為廣告費為零，所以獲得單價在定義上不存在）</td></tr>
+            <tr><td>客戶支援</td><td>透過接收口、分類、已批准的模板實現自動回答。 <b>不屬於模板的用事和故障指南一併傳送是人</b>（後者沒有傳送路徑本身）</td></tr>
+            <tr><td>法人領域</td><td>法定期限6件在機器的監視下（9月2日），銀行、卡餘額的讀取和合同的定型/非定型分類也是機器。 <b>記賬、請求、支付的核對沒有動</b>，申報、支付、非定型合同的批准是人。 <b>不無人化</b></td></tr>
+            <tr><td>宣傳的釋出操作</td><td>原稿、評分、檢查、影象都是自動的。 <b>釋出本身由人類從管理畫面進行</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>不寫“完全自動化了”。 </b>可以說的是，AI可以持續執行日常運營的結構，以及自動化停止時注意到的2。 </p>
+      </section>
+
+      <!-- 9. 広報自身の採点 -->
+      <section class="ap-sec">
+        <h2 id="reading-10">9。 宣傳稿也用同樣的尺子進行評分</h2>
+        <p class="ap-note"> 根據過去5個新聞稿的實績校對評分式。 <b>n=5的校準，不能成為外插的依據。 </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格">
+          <table class="ap-table">
+          <thead><tr><th class="num">分數</th><th class="num">光伏</th><th class="num">轉載</th><th>標題</th></tr></thead>
+          <tbody>
+            <tr><td class="num">21</td><td class="num">469</td><td class="num">22</td><td>自動新增AI標籤</td></tr>
+            <tr><td class="num">40</td><td class="num">1,347</td><td class="num">28</td><td>只要和AirPods說話就能到Obsidian（Siri對應）</td></tr>
+            <tr><td class="num">46</td><td class="num">217</td><td class="num">0</td><td>首次釋出</td></tr>
+            <tr><td class="num">65</td><td class="num">10,434</td><td class="num">28</td><td>只要說話就能到Obsidian — Apple Watch首次對應</td></tr>
+            <tr><td class="num">71</td><td class="num">12,188</td><td class="num">34</td><td>新功能“Obsidian合作”開始提供</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 最沉淪的是，沒有1個固有名詞的回。 <b>在傳送稿件中，如果出現誇張的表達，CI會掉落的檢查。 </b> </p>
+      </section>
+
+      <!-- 10. 台帳 -->
+      <section class="ap-sec">
+        <h2 id="reading-11">10。 活著的臺賬</h2>
+        <p class="ap-note">這是這個頁面數字的來源。 <b>包括是否更新在內，可以原樣看到。 </b></p>
+        <div class="ap-links">
+          <a href="/data/autopilot-runs.json"><b>駕駛臺賬</b><span>1執行1行。 著手、結果、PR、干預、費用、未解決的故障</span></a>
+          <a href="/data/app-releases.json"><b>應用程式本體的臺賬（Lane B）</b><span>1版1行。 標籤、構建、實機確認記錄、App Store的狀態、公開的觀測幅度、程式碼差分</span></a>
+          <a href="/data/autopilot-status.json"><b>執行情況</b><span>現在什麼在動，什麼在停止</span></a>
+          <a href="/data/autopilot-cost.json"><b>AI實際費用</b><span>每月上限和按種類劃分的範圍。 <b>上限值是暫定的</b></span></a>
+          <a href="/data/automation-coverage.json"><b>自動化盤點</b><span>203任務・13區域按1件，根據誰執行分類</span></a>
+          <a href="/data/autonomy-timeline.json"><b>自律度的推移</b><span>每月綜合自動化率。 <b>實測是2026-08和09途中</b>，其他是重組。 極限是同一檔案的known_limits</span></a>
+          <a href="/data/authority-matrix.json"><b>許可權表</b><span>19領域。 可逆/不可逆和只有人類的操作</span></a>
+          <a href="/data/code-authorship.json"><b>程式碼作者的臺賬</b><span>凍結了計數方法本身</span></a>
+          <a href="/data/operating-memory.json"><b>駕駛記憶</b><span>假設了什麼，摘掉了什麼，改變了什麼。 <b>失敗的回也沒有刪除</b></span></a>
+        </div>
+        <p class="ap-note"> 觀測的實際費用是<b>$50.8681（10執行部分・2026-09-02時點）</b>。 副系16執行部分，因為無法從外面讀取日程啟動會話的日誌<b>不是零而是未觀測</b>。 月度上限$40是<b>暫定值</b>，不是實測來源。 </p>
+        <p class="ap-note"> <b>這個金額是2026年8月25日之後重新輸入的。 </b>直到最後，臺賬還顯示為$0.8149（1執行部分）。 因為8月23日出貨1次分$7.2967，全部漏掉了。 <b>漏掉的理由不是打錯而是結構。 </b>雖然有在執行的最後輸出金額的機制，但將其寫入臺賬的主體是<b>第二天的執行</b>，第二天因§7的失敗而停止。 <b>記錄在最需要的一次，記錄會下降。 </b> </p>
+        <p class="ap-note"> <b>這個洞被堵住了。 </b>每天早上9時執行的另一個執行，直接讀取執行履歷並寫入臺賬。 即使第二天的執行失敗，也會留下記錄。 <b>但是並不完整。 </b>只有<b>種類（是報道還是修理）可以從執行記錄中判斷時才寫</b>種類。 無法判斷的回會保持空狀態，<b>空行不判斷之後出現的1每次的上限。 </b>實際上，現在成為問題的8月23日的行在那個狀態下，<b>3.6倍的超額沒有判定的情況下透過了</b>（用手補了）。 §7的“寫臺賬的主體在掉落的回中不存在”，是形狀相同的洞。 </p>
+        <p class="ap-note"> <b>這個$7.2967已經有1的問題了。 </b>1次的上限定為<b>$2.00</b>。 3.6倍。 即使那樣也沒有停止，是因為<b>上限執行時沒有看到的路徑</b>。 寫著數值，也有檢查數值是否矛盾的機制，但<b>實際行駛的駕駛哪裡都沒有讀取該數值的地方。 </b> </p>
+        <p class="ap-note"> 8月25日接線了。 但是<b>在執行中不能停止</b> ——因為費用在執行結束之前無法確定。 可以停止的是<b>下一個1次</b>，在收到超過的人的評論之前，不讓下一個定時執行。 因為只有主系會停止，所以<b>在等待評論期間，副系也會繼續出貨</b>（§3的1/6・10/10）。 解除只有人類——<b>如果AI能自己透過自己的超額的話，上限是“拜託”。  </b> <b>這個停止是正式的，一次也沒有起火。 </b> </p>
+      </section>
+
+      <!-- 11. 実物 -->
+      <section class="ap-sec ap-cta">
+        <h2 id="reading-12">11。 這個頁面的數字是正在執行的應用程式</h2>
+        <p class="ap-note"> “SimpleMemo”是面向iPhone/Apple Watch的應用程式，只要在想到的瞬間說或寫，就可以在自己的郵件和Obsidian上留下備忘錄。 <b>每天最多3則無限期免費</b>，不需要註冊信用卡（只需認證郵箱地址）。 </p>
+        <div class="ap-cta__row">
+          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="ap-cta__store">App Store免費下載</a>
+          <a href="/zh-Hant/" class="ap-cta__ghost">首頁 →</a>
+        </div>
+        <p class="ap-note"> <b>從這裡開始是人的領地。 </b>對App Store的公開、實機的事前確認、價格、廣告、合同，按照本頁的§2由人決定。 上面說明的，是前面的運營方法。 </p>
+      </section>
+
+      <div class="ap-qr ap-qr--desktop">
+        <img src="/assets/img/qr-autopilot-ja.svg?v=3cfffdff9a" alt="用App Store開啟的二維碼" width="148" height="148" loading="lazy">
+        <p>用智慧手機的相機讀取後，App Store就會開啟。</p>
+      </div>
+
+    </div>
+  </main>
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/how-to/" class="footer__link"><span>使用方法</span> </a>
+        <a href="/zh-Hant/templates/" class="footer__link"><span>模板</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio/" class="footer__link"><span>Captio式</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/autopilot/" class="footer__link"><span>自主型應用程式運營</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/terms" class="footer__link"><span>使用規則</span> </a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

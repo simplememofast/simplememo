@@ -25,6 +25,7 @@ const fs = require('fs');
 const path = require('path');
 const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 const { CAMPAIGN_OBSIDIAN, CAMPAIGN_OTHER, FROZEN_EXPERIMENT_PATHS, campaignTokenOf } = require('./lib/cta-page-groups');
+const { generatedSourceFileOf } = require('./lib/localized-sources');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'admin', 'tools', 'growth'];
@@ -119,7 +120,10 @@ function chromeZones(html) {
 function classify(html) {
   const zones = chromeZones(html);
   const anchors = [];
-  for (const m of html.matchAll(/<a\b[^>]*href="[^"]*apps\.apple\.com[^"]*"[^>]*>/gi)) {
+  // Script strings are not rendered anchors. Keep offsets while masking them.
+  const markup = html.replace(/<!--[\s\S]*?-->|<script\b[^>]*>[\s\S]*?<\/script>/gi,
+    (match) => ' '.repeat(match.length));
+  for (const m of markup.matchAll(/<a\b[^>]*href="[^"]*apps\.apple\.com[^"]*"[^>]*>/gi)) {
     anchors.push({ tag: m[0], index: m.index });
   }
   const zoneOf = (i) => {
@@ -241,6 +245,8 @@ if (SELFTEST) {
   })());
   // 他社のストアリンクは編集上の引用。**印を付けない。**
   t('他社アプリのリンクは placement を持たない', placements(`<main>${long}${rival}</main>`)[0] === null);
+  t('スクリプト文字列とコメントは表示中のCTAに数えない',
+    placements(`<script>const hidden = '${own()}';</script><!--${own()}--><main>${own()}</main>`).length === 1);
 
   // 冪等性。**属性を剥がしてから測らないと --write と --check が永久にすれ違う。**
   const tagged1 = `<main>${long}<a data-cta-placement="hero" data-cta-cluster="other" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=1&amp;ct=jp__x&amp;mt=8">D</a>${long}</main>`;
@@ -260,12 +266,15 @@ if (SELFTEST) {
       campaignTokenOf(p) === CAMPAIGN_OTHER));
   t('評価中のページは既存キャンペーンを維持する',
     [...FROZEN_EXPERIMENT_PATHS].every((p) => campaignTokenOf(p) === null));
+  t('生成翻訳は出典ページの計測キャンペーンを維持する',
+    campaignTokenOf('/ar/obsidian/getting-started/') === null
+      && campaignTokenOf('/tr/obsidian/') === CAMPAIGN_OBSIDIAN);
   t('2つのトークンはAppleの長さ制限内で異なる',
     CAMPAIGN_OBSIDIAN !== CAMPAIGN_OTHER
       && [CAMPAIGN_OBSIDIAN, CAMPAIGN_OTHER].every((token) => token.length <= CT_MAX));
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 17 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 19 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
@@ -289,11 +298,31 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
   // disagreed forever and CI would have stayed red. Normalising first means
   // the same page always yields the same placements, however many times the
   // script has run over it.
-  const measured = classify(stripCtaAttrs(html));
+  // Text length changes across languages without moving a CTA in the layout.
+  // Generated pages therefore inherit the editorial source's measured slots.
+  const sourceFile = generatedSourceFileOf(urlPath);
+  const baseline = sourceFile ? fs.readFileSync(path.join(ROOT_DIR, sourceFile), 'utf8') : html;
+  let measured = classify(stripCtaAttrs(baseline));
   if (!measured.some((a) => a.isOwn)) continue;
   // Attribute stripping never reorders anchors, so the Nth measured anchor is
   // the Nth live anchor.
   const anchors = classify(html);
+  let sourceAnchors = sourceFile ? classify(baseline) : anchors;
+  if (sourceFile) {
+    const hrefOf = (a) => a.tag.match(/\bhref="([^"]*)"/)?.[1];
+    const visibleHrefs = new Set(anchors.map(hrefOf));
+    // Legacy bilingual utilities have an extra inactive storefront reference.
+    // Keep every measured CTA; omit only absent, non-campaign references.
+    const retained = sourceAnchors.map((a, i) => a.isCta || visibleHrefs.has(hrefOf(a)) ? i : -1)
+      .filter((i) => i >= 0);
+    measured = retained.map((i) => measured[i]);
+    sourceAnchors = retained.map((i) => sourceAnchors[i]);
+  }
+  if (sourceFile && (anchors.length !== measured.length || anchors.some((a, i) =>
+      a.tag.match(/\bhref="([^"]*)"/)?.[1] !== sourceAnchors[i].tag.match(/\bhref="([^"]*)"/)?.[1]))) {
+    problems.push(`${rel}: translated App Store anchors differ from ${sourceFile}`);
+    continue;
+  }
   anchors.forEach((a, i) => { a.placement = measured[i]?.placement ?? null; });
 
   // Rebuild back-to-front so earlier offsets stay valid.

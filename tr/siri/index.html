@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/siri/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>AirPods ile sesli not - Uygulamayı açmadan Siri ile Obsidian'ye gönder | SimpleMemo</title>
+  <meta name="description" content="AirPods&#x27;den Siri&#x27;e not aktarmak için ayarlar ve koşullar. Hedefin kimlik doğrulamasını, depolama klasörünü ve kilit sırasındaki yürütmeyi kontrol edin ve e-postaların, Obsidian depolama alanının ve diğer terminal senkronizasyonunun alınmasını ayrı olarak kontrol edin. Ayrıca, uygulamayı açmak için ses kısayolu arasındaki farkı ve çevrimdışı bekleme koşullarını da açıklar.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="AirPods ile sesli not - Uygulamayı açmadan Siri ile Obsidian&#x27;ye gönder | SimpleMemo">
+  <meta property="og:description" content="AirPods&#x27;den Siri&#x27;e not aktarmak için ayarlar ve koşullar. Hedefin kimlik doğrulamasını, depolama klasörünü ve kilit sırasındaki yürütmeyi kontrol edin ve e-postaların, Obsidian depolama alanının ve diğer terminal senkronizasyonunun alınmasını ayrı olarak kontrol edin. Ayrıca, uygulamayı açmak için ses kısayolu arasındaki farkı ve çevrimdışı bekleme koşullarını da açıklar.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/tr/siri/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <meta property="og:image:width" content="256">
+  <meta property="og:image:height" content="256">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="AirPods ile sesli not - Uygulamayı açmadan Siri ile Obsidian&#x27;ye gönder | SimpleMemo">
+  <meta name="twitter:description" content="AirPods&#x27;den Siri&#x27;e not aktarmak için ayarlar ve koşullar. Hedefin kimlik doğrulamasını, depolama klasörünü ve kilit sırasındaki yürütmeyi kontrol edin ve e-postaların, Obsidian depolama alanının ve diğer terminal senkronizasyonunun alınmasını ayrı olarak kontrol edin. Ayrıca, uygulamayı açmak için ses kısayolu arasındaki farkı ve çevrimdışı bekleme koşullarını da açıklar.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/siri/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/siri/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/siri/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/siri/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/siri/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/siri/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/siri/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/siri/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/siri/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/siri/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/siri/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/siri/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Siri ile sesli not",
+      "item": "https://simplememofast.com/tr/siri/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/siri/#article",
+  "inLanguage": "tr",
+  "headline": "AirPods ile sesli not - Uygulamayı açmadan Siri ile Obsidian'ye gönderin",
+  "description": "AirPods'den Siri'e not aktarmak için ayarlar ve koşullar. Hedefin kimlik doğrulamasını, depolama klasörünü ve kilit sırasındaki yürütmeyi kontrol edin ve e-postaların, Obsidian depolama alanının ve diğer terminal senkronizasyonunun alınmasını ayrı olarak kontrol edin. Ayrıca, uygulamayı açmak için ses kısayolu arasındaki farkı ve çevrimdışı bekleme koşullarını da açıklar.",
+  "url": "https://simplememofast.com/tr/siri/",
+  "datePublished": "2026-08-05",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/siri/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/tr/siri/#faq",
+  "inLanguage": "tr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AirPods sapını basılı tuttuğumda Siri görünmüyor",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AirPods Pro (1 ve 2 nesli) ve AirPods 4 (gürültü önleme ile) varsayılan kök ayarı \"gürültü kontrolü anahtarlama\"'dır ve Siri başlamaz. Basıp basılı tuttuğunuzda ses duyulur, bu nedenle başarısız olduğunuzu fark etmek zordur. Ayarlar → Bluetooth → Lütfen AirPods'inizin i'sine değiştirin → \"Basıp basılı tutarken işlem\" → Siri (her sol ve sağ için ayarlar vardır). Ayarları değiştirmeden kullanmak istiyorsanız, lütfen \"Hey Siri、シンプルメモで残す\" ile konuşun ve terminalinizdeki metin girişine devam edip edemeyeceğinizi kontrol edin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Siri yanıt vermiyor / \"Bunun için uygulamayı bulamıyorum\" diyor",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kısayol uygulamasını açın ve \"SimpleMemo\" kısayol ayarlarında Siri'in açık olduğundan emin olun (kapalıysa tüm ifadeler tanınmaz). Açıldığında lütfen \"Hey Siri、シンプルメモで残す\" deyin. Lütfen \"〜で残す\" ifadesini deneyin. Kurulumdan hemen sonra kayıt olmak birkaç dakika sürebilir, bu nedenle lütfen uygulamayı bir kez başlatın ve denemeden önce bir süre bekleyin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"シンプルメモにメモ\" dediğimde farklı bir hareket yaptım",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "\"シンプルメモで残す\"i deneyin ve Siri'in metni dinleyen iletim işlemine geçtiğinden emin olun. Başka bir uygulama veya işlem seçilirse, Siri dil ayarlarının ve kısayollarının kaydını kontrol edin. Yalnızca uygulama adına sahip konuşmanın etkinleştirilip etkinleştirilmeyeceğini veya iletim işleminin kaydedilip kaydedilmeyeceğini görmek için lütfen Siri'ün talimatlarını kontrol edin. Mevcut sürümün tüm terminallerinde aynı şekilde yorumlanamaz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "uygulamayı açmadan nasıl gönderirim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Siri'in \"で残す\"i, metni uygulamanın iletim sürecine aktarmak için giriştir. Hedef e-postanın kimlik doğrulaması gibi ilk ayarlar gereklidir. Normal modda e-posta göndermek ve Obsidian'ye eklemek farklı kanallardadır ve depolama depolama alanını yalnızca Siri'ün \"Gönderildi\" ile kontrol edemezsiniz. Lütfen seçilen klasöre doğrudan yazmanın başarılı olup olmadığını ve başka bir terminale senkronizasyonun olup olmadığını ayrı ayrı kontrol edin. \" 声でメモ\" uygulamayı açmak için başka bir giriştir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Siri ile çevrimdışı (aralık dışında) konuşursam ne olur?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Metin Siri'den uygulamaya iletilmişse ve normal mod e-postası beklemedeyse, şifreli Outbox'e kaydedin ve iletişim geri yüklendikten sonra yeniden göndermeyi deneyin. Siri'nin arama ve ses tanıma özelliği aralık dışında mevcut olmayabilir. Doğrudan depoya yazmak için terminaldeki hedef klasör ve yazma izni gereklidir. Lütfen e-posta bekleme, depolama alanı ve diğer terminal senkronizasyonunu ayrı ayrı kontrol edin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Sadece AirPods ile tamamlanacak mı? Ekrana bakmam gerekiyor mu?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gerekli ayarlara sahip bir ortamda, Siri ile ses alışverişinden bir not geçirebilirsiniz. Kilitli Siri kullanım ayarlarına, seçilen kısayola ve terminalin durumuna bağlı olarak, ekranın kilidini açmak veya çalıştırmak gerekebilir. Uygulamayı açmak için \"声でメモ\" ve metni iletim sürecine iletmek için \"で残す\" farklı girişlerdir. Tüm terminal eyaletlerinde çalışmaya gerek olmadığının garantisi yoktur, lütfen ilk nottaki gelen kutusunun ve depolama alanının gövdesini kontrol edin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "\"Yüksek kaliteli kayıt\" nedir?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yüksek kaliteli kayıt, uygulama içindeki sesli girişte AirPods mikrofonunu kullanmaya yönelik ayardır. Desteklenen iOS ve AirPods gerekir; Ayarlar → Gelişmiş Ayarlar içinden değiştirilir. Siri üzerinden metin gönderen kestirmeden ayrı bir özelliktir. Mikrofon değişiminin başlama süresine etkisi burada ölçülmedi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Siri iletimi ücretsiz bir planla kullanılabilir mi?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "kullanılabilir. Siri ile gönderim, uygulama içinden gönderme ile aynı şekilde kabul edilir ve ücretsiz plan 1 günlük iletim çerçevesi paylaşılır. Çerçeve kullanılmışsa, Siri üst sınıra ulaşmanız için size rehberlik edecektir. Ses mi yoksa ekran mı olduğu terminalin durumuna bağlıdır."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/tr/siri/#webpage",
+  "inLanguage": "tr",
+  "name": "AirPods ile sesli not - Uygulamayı açmadan Siri ile Obsidian'ye gönder | SimpleMemo",
+  "url": "https://simplememofast.com/tr/siri/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/tr/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    /* カードは各セクション4枚。auto-fit だと広い画面で3列＋1枚だけ余る
+       ので2×2に固定する。列が広いぶん文節折返しの行末も揃いやすい。 */
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.95rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.6rem;position:relative;line-height:1.8}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#54cf68;font-weight:700}
+
+    /* ── 会話フロー図 ──────────────────────────────────
+       注意: 上の [data-lang].active{display:revert} は詳細度 (0,2,0) で、
+       .flow-steps{display:grid} (0,1,0) に勝ってしまう。言語切替後に
+       display が block へ戻され、チップがインラインに落ちて矢印だけが
+       行末に取り残される（旧 .flow-row の崩れの原因）。表示指定は必ず
+       [data-lang].active より強い詳細度で書くこと。
+       矢印は擬似要素にしてあるので、単独で行送りされることはない。 */
+    .flow-card{container-type:inline-size;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
+    .flow-card .flow-steps,
+    .flow-card .flow-steps[data-lang].active{display:grid;grid-template-columns:1fr;gap:2rem;list-style:none;margin:0 auto;padding:0;max-width:30rem}
+    .flow-step{position:relative;min-inline-size:0;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
+    .flow-step--siri{background:rgba(122,120,255,.14);border-color:rgba(139,124,255,.34)}
+    .flow-step__who{font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#4fdcf0}
+    .flow-step--siri .flow-step__who{color:#b0a5ff}
+    .flow-step__say{font-size:.95rem;font-weight:700;line-height:1.7;color:var(--text)}
+
+    /* 言語で画像を出し分けるため data-lang を載せる。上の注意書きのとおり
+       [data-lang].active{display:revert} (0,2,0) が display:flex に勝つので、
+       .flow-steps と同じく詳細度を上げた指定を併記する。これが無いと
+       言語切替後に block へ戻り、横スクロール帯が縦積みになる。 */
+    .shot-strip,
+    .shot-strip[data-lang].active{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+    .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000}
+    /* 縦つなぎ: 線 + 三角の矢じり */
+    .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
+    .flow-step + .flow-step::after{content:'';position:absolute;left:50%;top:-.6rem;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(34,211,238,.85);border-bottom:0}
+    @container(min-width:46rem){
+      .flow-card .flow-steps,
+      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.75rem;max-width:none;align-items:stretch}
+      /* 横つなぎ: 同じ擬似要素を回転させて使う */
+      .flow-step + .flow-step::before{left:auto;right:calc(100% + .45rem);top:50%;width:.9rem;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.8))}
+      .flow-step + .flow-step::after{left:auto;right:calc(100% + .1rem);top:50%;transform:translateY(-50%);border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid rgba(34,211,238,.85);border-right:0}
+    }
+
+    .phrase-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .phrase-table th,.phrase-table td{padding: .8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.7;vertical-align:top}
+    .phrase-table th{background:rgba(100,180,255,.06);font-weight:700;white-space:nowrap}
+    .phrase-table td:first-child{width:38%}
+    .phrase-mark{font-weight:700;white-space:nowrap}
+    .phrase-mark--best{color:#54cf68}
+    .phrase-mark--ok{color:#ffb734}
+    .phrase-mark--ng{color:#ff7089}
+    /* 狭い画面では2列を縦に割ると1列目が潰れて「シン|プルメモで残|す」と
+       語中で折り返す。行ごとのカードに組み替えて全幅を使わせる。 */
+    @media(max-width:700px){
+      .phrase-table,.phrase-table tbody,.phrase-table tr,.phrase-table td{display:block;width:auto}
+      .phrase-table{border-collapse:separate;border-spacing:0}
+      .phrase-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .phrase-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .phrase-table td{border:0;padding:.55rem 1rem}
+      .phrase-table td:first-child{width:auto;font-size:1rem;padding-bottom:.15rem}
+      .phrase-table td+td{color:var(--text-secondary);padding-top:0}
+      .phrase-table td+td::before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- app-schema: managed by scripts/inject_app_schema.py -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://simplememofast.com/#app",
+  "name": "SimpleMemo",
+  "alternateName": [
+    "Simple Memo - for Obsidian",
+    "Captio式シンプルメモ",
+    "シンプルメモ",
+    "SimpleMemoFast",
+    "Simple Memo"
+  ],
+  "url": "https://simplememofast.com/",
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "iOS 16.0+, watchOS",
+  "softwareVersion": "5.9.12",
+  "isAccessibleForFree": true,
+  "inLanguage": "tr",
+  "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "JPY",
+      "description": "günde en fazla 3 mesaj (kullanım süresi sınırı yok)",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Monthly",
+      "price": "500",
+      "priceCurrency": "JPY",
+      "description": "Aylık 500 yen · Sınırsız gönderim",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Yearly",
+      "price": "5000",
+      "priceCurrency": "JPY",
+      "description": "Yıllık 5,000 yen · Sınırsız gönderim",
+      "availability": "https://schema.org/InStock"
+    }
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">Ana içeriğe geç</a>
+  <!-- Global Navigation -->
+  <nav aria-label="Ana gezinme" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/tr/guides/">Kılavuzlar</a><a href="/tr/use-cases/">Kullanım örnekleri</a><a href="/tr/vs/">Karşılaştır</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/tr/guides/">Kılavuzlar</a></li>
+<li><a href="/tr/use-cases/">Kullanım örnekleri</a></li>
+<li><a href="/tr/vs/">Karşılaştır</a></li>
+<li><a href="/tr/methods/"><span>Yöntemler</span></a></li>
+<li><a href="/tr/blog/"><span>Blog</span></a></li>
+<li><a href="/tr/glossary/"><span>Sözlük</span></a></li>
+<li><a href="/tr/faq">Sık sorulan sorular</a></li>
+<li><a href="/tr/about/">Geliştirici hakkında</a></li>
+<li><a href="/tr/devlog/">Geliştirme günlüğü</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>İndir</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/siri/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/siri/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/siri/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/siri/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/siri/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/siri/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/siri/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/siri/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/siri/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8">İndir</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menü"><span>Menü</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>AirPods × Siri (ayarları ve iletim sonuçlarını kontrol edin)</span>
+</div>
+<h1 class="lp-hero__title"> <span> AirPods'den Obsidian'e not. </span> </h1>
+<p class="guide-note" data-translation-example-note="">Aşağıdaki sesli komutlar Japonca örneklerdir. Siri dilini ve cihazınızda kayıtlı kestirmeleri kontrol edin.</p>
+
+<p class="lp-hero__sub"> <span>AirPods, "<strong><span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span></strong>" ile bir not gönderebilir. Siri'nin ilk ayarlarını ve kullanım koşullarını ayarlayın, mevcut hedefi kontrol edin ve kullanın. Normal modda e-posta göndermek ve <a href="/tr/obsidian/" style="color:var(--accent);">Obsidian</a>'e eklemek farklı yollardır. <strong>Lütfen gelen kutusunu ve belirlenen notu sırasıyla kontrol edin</strong> tamamlama bildiriminden sonra bile. Kilidini açmanız istenebilir. </span> </p>
+<p class="lp-hero__sub">Siri'i ilk kez kullanıyorsanız, <a href="/tr/siri/iphone/">iPhone ile konuş ile başlayabilir ve bir not, 3 adımları için resimli bir kılavuz</a> gönderebilirsiniz.</p>
+<!-- Existing app icon; guide conditions are described in the text. -->
+
+<div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+<a aria-label="App Store üzerinden indirin" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="hero" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="App Store üzerinden indirin" class="badge-img" height="40" loading="eager" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<a class="hero-cta-secondary" href="#setup" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(34,211,238,.3);border-radius:24px;color:#22d3ee;text-decoration:none;font-size:.9rem;"> <span>Ayarları görüntüleyin</span> </a>
+</div>
+<div class="cta-qr">
+<img alt="App Store üzerinden indirme QR kodu" height="132" loading="lazy" src="/assets/img/qr-siri-hero-ja.svg?v=4c228ff48a" width="132"/>
+<small><span>PC'niz varsa akıllı telefonunuzla okuyun</span></small>
+</div>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>Yazar: <a href="/tr/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> <span> · Durum onayı: 2026 yıl 9 ay 30 gün</span></p>
+<a class="ce-read-link" href="#capture-section-1">İçeriği oku <span aria-hidden="true">↓</span></a></div><nav aria-label="Okumak istediğiniz konuyu seçin" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>Değişim örneği</b></a><a class="ce-route" href="#capture-section-6"><span>02</span><b>3 Adımlarla ayarlayın</b></a><a class="ce-route" href="#capture-section-7"><span>03</span><b>Yanıt vermediğinde</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO / iPHONE</p><div class="ce-device"><img alt="SimpleMemo uygulama içi Siri kılavuz ekranı. AirPods&#x27;den giriş ve nereye kaydedileceğine dair bilgiler." decoding="async" fetchpriority="high" height="1385" src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640"/></div><figcaption class="ce-stage-foot">SimpleMemo uygulama içi bilgi ekranı</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>Bu sayfanın içindekiler tablosu</summary><nav aria-label="İçindekiler"><a href="#capture-section-1">Siri ile 2 dönüş değişimi örneği</a><a href="#capture-section-2">uygulama içi kılavuz ekran örneği</a><a href="#capture-section-3">Siri göndererek onaylamak için</a><a href="#capture-section-4">Siri'e iletilen ifadelerin ve işlemlerin onaylanması</a><a href="#capture-section-5">Ayar 3 adımdır</a><a href="#capture-section-6">Yanıt vermediğinde</a><a href="#capture-section-7">Böyle bir durumda</a><a href="#capture-section-8">Sık sorulan sorular</a><a href="#capture-section-9">İlgili sayfalar</a></nav></details>
+<!-- Answer-first -->
+<!-- Explainer video — generated by scripts/build-videos.py; see
+           docs/SEO_AIO_PLAN_2026-08.md §4 P0-3. One VideoObject per page: the same
+           contentUrl on several URLs makes them compete to be the watch page. -->
+<figure class="lp-video" style="margin:2rem 0;">
+<video controls="" height="720" muted="" playsinline="" poster="/assets/video/siri-airpods-poster.jpg?v=dc9aaca588" preload="none" style="width:100%;height:auto;border-radius:var(--radius-sm);display:block;background:#0b1020;" width="1280">
+<source src="/assets/video/siri-airpods.mp4?v=3f3b2078bf" type="video/mp4"/>
+<span>Tarayıcınız video oynatmayı desteklemiyor.</span>
+</video>
+<figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;"><span> Bu, mevcut uygulama içi kılavuz görüntülerini kullanan açıklayıcı bir slayt gösterisidir. Bu, depolama ve e-posta alımının gerçek ölçümünü veya 2 alıcılarının eşzamanlı gelişini gösteren bir video değildir. Lütfen metindeki mevcut koşulları kontrol edin. Videodaki uygulama ekranındaki "iPhone hala cebinde" ve "e-posta ve Obsidian aynı anda geliyor" gibi geleneksel ifadeler de mevcut koşulsuz çalışma garantisi değildir. Yetkiye, kimlik doğrulamaya ve terminal durumuna bağlı olarak ekranı iptal etmek ve çalıştırmak gerekir. </span></figcaption>
+</figure>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "@id": "https://simplememofast.com/tr/siri/#video",
+  "name": "Siri ve AirPods ile eller serbest bir not bırakın",
+  "description": "Bu, mevcut uygulama içi kılavuz görüntülerini kullanan açıklayıcı bir slayt gösterisidir. Bu, depolama ve e-posta alımının gerçek ölçümünü veya 2 alıcılarının eşzamanlı gelişini gösteren bir video değildir. Lütfen metindeki mevcut koşulları kontrol edin. Videodaki uygulama ekranındaki \"iPhone hala cebinde\" ve \"e-posta ve Obsidian aynı anda geliyor\" gibi geleneksel ifadeler de mevcut koşulsuz çalışma garantisi değildir. Yetkiye, kimlik doğrulamaya ve terminal durumuna bağlı olarak ekranı iptal etmek ve çalıştırmak gerekir.",
+  "thumbnailUrl": [
+    "https://simplememofast.com/assets/video/siri-airpods-poster.jpg?v=dc9aaca588"
+  ],
+  "uploadDate": "2026-08-11T13:42:48+09:00",
+  "duration": "PT24S",
+  "contentUrl": "https://simplememofast.com/assets/video/siri-airpods.mp4?v=3f3b2078bf",
+  "encodingFormat": "video/mp4",
+  "inLanguage": "tr",
+  "isFamilyFriendly": true,
+  "publisher": {
+    "@id": "https://simplememofast.com/#organization"
+  },
+  "mainEntityOfPage": {
+    "@id": "https://simplememofast.com/tr/siri/#webpage"
+  }
+}</script>
+<section class="lp-section" style="padding-top:0;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span>Tek cümleyle</span></div>
+<p><span>"<strong><span lang="ja" translate="no">シンプルメモで残す</span></strong>", Siri'in metni dinlediği ve uygulamanın iletim işlemine aktardığı giriştir. Normal modda, e-posta iletiminin sonucu ve Obsidian'ye ekleme ayrı olarak ele alınır. <strong>Siri'ün "Gönderildi" tek başına depolama alanına kaydedilmeyi ve başka bir terminalle senkronize edilmeyi doğrulayamaz. </strong>Depolama klasörünü ve entegrasyon ayarlarını kontrol edin ve belirtilen notun gövdesini kontrol edin. " "Yalnızca Obsidian'e kaydet" etkinleştirilmiş olsa da not e-posta ile gönderilmeyecektir. </span></p>
+</div>
+</section>
+<!-- The flow -->
+<section class="lp-section ce-chapter" style="padding-top:0;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"> <span>Siri arasındaki 2 dönüş değişimi örneği</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> Bu, aramadan sonra Siri sorusunun metninin nasıl yanıtlanacağına dair bir örnektir. Yanıt ve kimlik doğrulama istekleri, terminalin durumuna ve ayarlarına bağlı olarak değişir. Aşağıdakiler, mevcut dağıtım sürümünün yeni bir gerçek makine testi değil, bir kullanım kılavuzudur. </span> </p>
+<div class="flow-card">
+<ol class="flow-steps">
+<li class="flow-step"><span class="flow-step__who">🎧 Sen</span><span class="flow-step__say">"<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>"</span></li>
+<li class="flow-step flow-step--siri"><span class="flow-step__who">Siri</span><span class="flow-step__say">"Ne yazmak istiyorsunuz?" </span></li>
+<li class="flow-step"><span class="flow-step__who">💬 Sen</span><span class="flow-step__say">Metni Konuş</span></li>
+<li class="flow-step flow-step--siri"><span class="flow-step__who">Siri</span><span class="flow-step__say">"Not gönderildi"</span></li>
+</ol>
+</div>
+<p style="font-size:.9rem;color:var(--text-muted);line-height:1.85;max-width:44rem;"> <span> Siri'in yanıtının sesli mi yoksa ekran mı olduğu kullanım durumuna bağlıdır. <a href="https://support.apple.com/guide/shortcuts/run-shortcuts-with-siri-apd07c25bb38/ios" rel="noopener" style="color:var(--accent);" target="_blank">Apple kılavuzunda</a>, kilitleme sırasında uygulamayı açmak için bir kısayol çalıştırırsanız, kilidini açmanız istenecektir. " "<span lang="ja" translate="no">声でメモ</span>", "<span lang="ja" translate="no">で残す</span>" göndermekten farklı olan uygulamayı açmak için giriştir. </span> </p>
+</div></section>
+<!-- In-app guide screenshots -->
+<section class="lp-section ce-chapter ce-chapter--wide" style="padding-top:0;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>uygulama içi kılavuz ekran örneği</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> Bu, mevcut uygulama içi kılavuz 6 ekranını kullanarak işlemin açıklamasına bir örnektir. Resimde "aynı anda var", "tüm AirPods için aynı" ve "iPhone hala cebinde" gibi geleneksel ifadeler var. Bu, her depolama hedefinin sonuçlarını ayrı ayrı kontrol etmek için bir açıklama örneğidir, mevcut işlem garantisi değil, izinler, kimlik doğrulama, ses tanıma. Lütfen resepsiyonu, terminal içi depolamayı ve diğer terminallerle senkronizasyonu ayrı ayrı kontrol edin. </span> </p>
+<div class="shot-strip" role="region" aria-label="Siri bağlantı ayar ekranı (yatay olarak kaydırılabilir)" tabindex="0">
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 1. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640"/>
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 2. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-2.png?v=750f4525e5" width="640"/>
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 3. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-3.png?v=7eb70fae13" width="640"/>
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 4. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-4.png?v=3d1e3ec928" width="640"/>
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 5. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-5.png?v=096968ffa9" width="640"/>
+<img alt="Mevcut Siri kullanım kılavuzu ekran örneği 6. Gerçek alım, kaydetme ve senkronizasyon metnin koşulları tarafından onaylanır." height="1385" loading="lazy" src="/assets/img/siri/onboarding-6.png?v=6ef777e921" width="640"/>
+</div>
+</div></section>
+<!-- Why it matters -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span> Siri göndererek onaylayın</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">👖 <span>Kilitleme sırasında yürütme koşullarını kontrol edin</span></div>
+<div class="reason-card__desc"><span>Bu, Siri'in arama veya kilit sırasında kullanılmasına izin verildiği ve yürütme için gerekli ayarların hazır olduğu giriştir. Ekranı iptal etmeniz veya çalıştırmanız istenirse, terminalin talimatlarını izleyin.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📬 <span>Geçerli depolama adresini kontrol edin</span></div>
+<div class="reason-card__desc"><span>Normal mod<a href="/tr/note-to-email/" style="color:var(--accent);">E-posta gönder</a>ve<a href="/tr/obsidian/" style="color:var(--accent);">Depoya ekle</a>farklı bir sonuçtur. " "Sadece Obsidian" geçerliyse, e-posta gönderilmeyecektir. Göndermeden önce mevcut modu ve depolama hedefini kontrol edin.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📵 <span>E-posta beklemedeyken</span></div>
+<div class="reason-card__desc"><span>Uygulama metni kabul ediyorsa ve normal modda e-posta beklemedeyse, metni Outbox'e kaydedin ve iletişim devam ettikten sonra yeniden göndermeyi deneyin. Siri'in ses tanıma özelliği menzil dışında kullanılamaz ve depolamanın başarısını garanti eden bir kılavuz değildir.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🔒 <span>Başarısız olsan bile susma</span></div>
+<div class="reason-card__desc"><span>Döndürülen Siri'in ayarlanmamış, üst sınır, bekleme ve hata gibi bilgilerini kontrol edin. Bu yanıt tek başına tüm depolama hedeflerinin geldiğini doğrulamaz.</span></div>
+</div>
+</div>
+</div></section>
+<!-- Phrases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>Siri'e iletilen ifadelerin ve işlemlerin onaylanması</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> Siri ifadesinin püf noktası, iPhone standart işleviyle rekabet etmeyen birini seçmektir. İlk olarak, <strong> "<span lang="ja" translate="no">で残す</span>"</strong> deneyin ve terminalde görüntülenebilen ve yüksek sesle okunabilen işlemi kontrol edin. </span> </p>
+<div>
+<div aria-labelledby="capture-section-4" class="ce-table-scroll" role="region" tabindex="0">
+<table class="phrase-table">
+<thead><tr><th scope="col">Spoeh</th><th scope="col">Sonuçlar</th></tr></thead>
+<tbody>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--best">◎</span> 「<span lang="ja" translate="no">シンプルメモ<strong>で残す</strong></span>」</th><td data-label="Sonuçlar"><strong>tansiye edildi. </strong>Metni dinlemenin bir iletim işlemi olup olmadığını kontrol edin.</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ok">△</span> 「<span lang="ja" translate="no">シンプルメモ<strong>に送信</strong></span>」</th><td data-label="Sonuçlar">Mesaj uygulamasında iki seçenek olabilir. Gerçekleştirmek istediğiniz işlemi seçin ve Siri yanıtını kontrol edin.</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> 「<span lang="ja" translate="no">シンプルメモ<strong>にメモ</strong></span>」</th><td data-label="Sonuçlar">iPhone standart not işlevine bir talimat olarak yorumlanması kolaydır ve teslim edilmeyebilir.</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> "SimpleMemo" (sadece isim)</th><td data-label="Sonuçlar">Uygulamayı başlatın veya kayıtlı bir iletim işlemi olup olmadığını Siri kılavuzunu kontrol edin.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></section>
+<!-- Setup -->
+<section class="lp-section ce-chapter" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>Ayar 3 adımdır</span> </h2></div><div class="ce-chapter__body">
+
+<ul class="prereq-list">
+<li>iPhone (iOS 16.4 veya üstü. 1 Kontrol merkezindeki sesli nota dokunun iOS 18 veya üstü)</li>
+<li>SimpleMemo'in (hedef e-postanın kimlik doğrulaması) ilk ayarı tamamlandı</li>
+<li>Siri'i AirPods ile kullanırken, terminalin kullanım iznini ve yürütme koşullarını kontrol edin (sahip olmasanız bile, iPhone ana ünitesinin Siri ile kullanabilirsiniz)</li>
+</ul>
+<ol class="steps-list">
+<li><strong>Uygulamanın ilk kurulumunu tamamlayın</strong><br/> Hedef e-postayı doğrulayın ve normal şekilde bir kez gönderilmesini mümkün kılın. <a href="/tr/obsidian/" style="color:var(--accent);">Obsidian entegrasyonu</a> kullanıyorsanız, terminalde depolama klasörünü ve yazma izinlerini ayarlayın ve ilk notun belirtilen nota kaydedildiğinden emin olun.</li>
+<li><strong>Kısayol uygulamasında "Siri" seçeneğinin açık olup olmadığını kontrol edin</strong><br/> kısayol uygulamasını açın ve "SimpleMemo" ayarlarında Siri düğmesinin açık olduğundan emin olun. Bu kapalıysa, herhangi bir ifadeye yanıt vermez (çalışmadığında en önemli kontrol noktasıdır).</li>
+<li><strong>"<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>" ile konuşun</strong><br/> "Ne yazmak istiyorsunuz?" Metni yanıtlayın ve iletim, kaydetme, bekleme ve döndürülen başlangıç ayarı gibi talimatları kontrol edin. Siri'nin tamamlama kılavuzu dışında, lütfen gelen kutusunun gövdesini ve belirlenen notu kontrol edin.</li>
+</ol>
+<div class="tip-box">
+<div class="tip-box__title"><span>Yüksek kaliteli kayıt (isteğe bağlı iOS 26 veya üstü)</span></div>
+<p style="margin:0;">Yüksek kaliteli kayıt, uygulama içindeki sesli girişte AirPods mikrofonunu kullanmaya yönelik ayardır. Desteklenen iOS ve AirPods gerekir; Ayarlar → Gelişmiş Ayarlar içinden değiştirilir. Siri üzerinden metin gönderen kestirmeden ayrı bir özelliktir. Mikrofon değişiminin başlama süresine etkisi burada ölçülmedi.</p>
+</div>
+</div></section>
+<!-- Troubleshooting -->
+<section class="lp-section ce-chapter" id="troubleshooting"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>Yanıt vermediğinde</span> </h2></div><div class="ce-chapter__body">
+
+<div class="tip-box">
+<div class="tip-box__title"><span>İlk onay: AirPods Pro ve AirPods 4'ün gövdeye uzun basması varsayılan ayarda Siri değil</span></div>
+<p style="margin:0;">AirPods Pro (1 ve 2 nesil) ve AirPods 4 (gürültü engelleme ile), gövdeye uzun basıldığında varsayılan ayarda <strong>"gürültü kontrolü anahtarlama"</strong>'dır. Basıp basılı tuttuğunuzda ses duyulacak, ancak Siri başlamayacaktır. <br/> <strong> Ayarları → Bluetooth → AirPods'unuzun i → "Uzun basıldığında işlem" → Siri</strong> düzeltmek için. Solda ve sağda ayarlar vardır, bu nedenle her ikisini de Siri'e ayarlamak kesindir. <br/> ayarlarını değiştirmek istemiyorsanız <strong>"Hey Siri"</strong> numaralı telefonu arayabilirsiniz (lütfen modelin Siri ayarlarını da kontrol edin).</p>
+</div>
+<ol class="steps-list">
+<li><strong>"Hey Siri" ile aramayı deneyin</strong><br/> ayarı → Siri'de "Hey Siri"ü Dinle" seçeneğinin açık olup olmadığını veya kilitliyken kullanılmasına izin verilip verilmediğini kontrol edin. Kök ayarından bağımsız olarak çağrılabilir, bu nedenle kesilmesi hızlıdır.</li>
+<li><strong>Kısayol uygulamasında "SimpleMemo"in Siri'i açık</strong><br/> Bu kapatılırsa, herhangi bir ifadeye yanıt vermez. Kurulumdan hemen sonra kayıt olmak birkaç dakika sürebilir, bu nedenle lütfen denemeden önce uygulamayı bir kez başlatın.</li>
+<li><strong>Siri dilinin Japonca olduğunu kontrol edin</strong><br/>Ayarlar → Siri → Dil. İngilizce ayarlanmış Siri, Japonca tetikleme ifadesini tanımaz.</li>
+<li><strong>Kod "<span lang="ja" translate="no">シンプルメモで残す</span>" veya</strong><br/> "~ni Memo" iPhone standart not Uygulamasına talimat olarak alınır. " Lütfen "<span lang="ja" translate="no">〜で残す</span>"ü deneyin ve gerçekleştirmek için işlemi kontrol edin.</li>
+<li><strong>Hedef e-posta kimliği doğrulanmış mı?</strong> <br/>Siri yanıt verse bile, muhatap ayarlanmamışsa bir not almazsınız. Lütfen uygulamayı açın ve ilk kurulumu tamamlayın.</li>
+</ol>
+</div></section>
+<!-- Use cases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7"> <span>Böyle bir durumda</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span>yürüyüş ve koşu sırasında</span></div>
+<div class="reason-card__desc"><span>Kalkıştan önce Siri'in kullanım ayarlarını ve depolama hedefini kontrol edin. Aklınıza gelen fikri teslim ettikten sonra, güvenli bir yere gerçek varışı doğrulayın.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>Ev işi yaparken ve yemek pişirirken</span></div>
+<div class="reason-card__desc"><span>Yapılandırılmış Siri'den kısa bir fikir nasıl aktarılır. Kimlik doğrulamanız istenirse, terminalin talimatlarını izleyin ve depolama hedefinin sonuçlarını kontrol edin.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>Yatmadan ve uyanmadan önce</span></div>
+<div class="reason-card__desc"><span>Terminalin yürütmeye izin vermesi koşuluyla, fikri Siri'e iletin. Lütfen yanıtı kontrol edin ve gerçek kaydetmeyi daha sonra kontrol edin.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>Hareket ederken eller serbest</span></div>
+<div class="reason-card__desc"><span>İşe gidip gelmek ve okula gitmek arasındaki boşlukta. Sürüş ve sürüş sırasında kullanın<a href="/tr/hands-free/" style="color:var(--accent);">Eller serbest sesli not güvenlik kılavuzu</a>adresine bir göz attığınızdan emin olun.</span></div>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="08" id="capture-section-8"> <span>Sıkça Sorulan Sorular</span> </h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">AirPods sapını basılı tuttuğumda Siri görünmüyor</summary><div class="faq-answer"><p>AirPods Pro (1 ve 2 nesli) ve AirPods 4 (gürültü önleme ile) varsayılan kök ayarı <strong>"gürültü kontrolü anahtarlama"</strong>'dır ve Siri başlamaz. Basıp basılı tuttuğunuzda ses duyulur, bu nedenle başarısız olduğunuzu fark etmek zordur. <strong> Ayarlar → Bluetooth → Lütfen AirPods'inizin i'sine değiştirin → "Basıp basılı tutarken işlem" → Siri</strong> (her sol ve sağ için ayarlar vardır). Ayarları değiştirmeden kullanmak istiyorsanız, lütfen "<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>" ile konuşun ve terminalinizdeki metin girişine devam edip edemeyeceğinizi kontrol edin.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri yanıt vermiyor / "Bunun için uygulamayı bulamıyorum" diyor</summary><div class="faq-answer"><p>Kısayol uygulamasını açın ve "SimpleMemo" kısayol ayarlarında <strong>Siri'in açık</strong> olduğundan emin olun (kapalıysa tüm ifadeler tanınmaz). Açıldığında lütfen "<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>" deyin. Lütfen <strong>"<span lang="ja" translate="no">〜で残す</span>"</strong> ifadesini deneyin. Kurulumdan hemen sonra kayıt olmak birkaç dakika sürebilir, bu nedenle lütfen uygulamayı bir kez başlatın ve denemeden önce bir süre bekleyin.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">"<span lang="ja" translate="no">シンプルメモにメモ</span>" dediğimde farklı bir hareket yaptım</summary><div class="faq-answer"><p>"<span lang="ja" translate="no">シンプルメモで残す</span>"i deneyin ve Siri'in metni dinleyen iletim işlemine geçtiğinden emin olun. Başka bir uygulama veya işlem seçilirse, Siri dil ayarlarının ve kısayollarının kaydını kontrol edin. Yalnızca uygulama adına sahip konuşmanın etkinleştirilip etkinleştirilmeyeceğini veya iletim işleminin kaydedilip kaydedilmeyeceğini görmek için lütfen Siri'ün talimatlarını kontrol edin. Mevcut sürümün tüm terminallerinde aynı şekilde yorumlanamaz.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">uygulamayı açmadan nasıl gönderirim?</summary><div class="faq-answer"><p>Siri'in "<span lang="ja" translate="no">で残す</span>"i, metni uygulamanın iletim sürecine aktarmak için giriştir. Hedef e-postanın kimlik doğrulaması gibi ilk ayarlar gereklidir. Normal modda e-posta göndermek ve Obsidian'ye eklemek farklı kanallardadır ve depolama depolama alanını yalnızca Siri'ün "Gönderildi" ile kontrol edemezsiniz. Lütfen seçilen klasöre doğrudan yazmanın başarılı olup olmadığını ve başka bir terminale senkronizasyonun olup olmadığını ayrı ayrı kontrol edin. " <span lang="ja" translate="no">声でメモ</span>" uygulamayı açmak için başka bir giriştir.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri ile çevrimdışı (aralık dışında) konuşursam ne olur?</summary><div class="faq-answer"><p>Metin Siri'den uygulamaya iletilmişse ve normal mod e-postası beklemedeyse, şifreli Outbox'e kaydedin ve iletişim geri yüklendikten sonra yeniden göndermeyi deneyin. Siri'nin arama ve ses tanıma özelliği aralık dışında mevcut olmayabilir. Doğrudan depoya yazmak için terminaldeki hedef klasör ve yazma izni gereklidir. Lütfen e-posta bekleme, depolama alanı ve diğer terminal senkronizasyonunu ayrı ayrı kontrol edin.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Sadece AirPods ile tamamlanacak mı? Ekrana bakmam gerekiyor mu?</summary><div class="faq-answer"><p>Gerekli ayarlara sahip bir ortamda, Siri ile ses alışverişinden bir not geçirebilirsiniz. Kilitli Siri kullanım ayarlarına, seçilen kısayola ve terminalin durumuna bağlı olarak, ekranın kilidini açmak veya çalıştırmak gerekebilir. Uygulamayı açmak için "<span lang="ja" translate="no">声でメモ</span>" ve metni iletim sürecine iletmek için "<span lang="ja" translate="no">で残す</span>" farklı girişlerdir. Tüm terminal eyaletlerinde çalışmaya gerek olmadığının garantisi yoktur, lütfen ilk nottaki gelen kutusunun ve depolama alanının gövdesini kontrol edin.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">"Yüksek kaliteli kayıt" nedir?</summary><div class="faq-answer"><p>Yüksek kaliteli kayıt, uygulama içindeki sesli girişte AirPods mikrofonunu kullanmaya yönelik ayardır. Desteklenen iOS ve AirPods gerekir; Ayarlar → Gelişmiş Ayarlar içinden değiştirilir. Siri üzerinden metin gönderen kestirmeden ayrı bir özelliktir. Mikrofon değişiminin başlama süresine etkisi burada ölçülmedi.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri iletimi ücretsiz bir planla kullanılabilir mi?</summary><div class="faq-answer"><p>kullanılabilir. Siri ile gönderim, uygulama içinden gönderme ile aynı şekilde kabul edilir ve ücretsiz plan 1 günlük iletim çerçevesi paylaşılır. Çerçeve kullanılmışsa, Siri üst sınıra ulaşmanız için size rehberlik edecektir. Ses mi yoksa ekran mı olduğu terminalin durumuna bağlıdır.</p></div></details></div>
+</div>
+</div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+<span>Fikri teslim edin ve kayıtlı adresin geldiğini onaylayın</span>
+</div>
+<div class="cta-box__desc">
+<span>indirmek ücretsizdir. Siri şanzıman iOS 16.4 veya üstü, kontrol merkezi iOS 18 veya üstü ve yüksek kaliteli kayıt iOS 26 veya üstü.</span>
+</div>
+<a aria-label="App Store üzerinden indirin" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="App Store üzerinden indirin" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<div class="cta-qr">
+<img alt="App Store üzerinden indirme QR kodu" height="132" loading="lazy" src="/assets/img/qr-siri-ja.svg?v=0d8ca41daa" width="132"/>
+<small><span>PC'niz varsa akıllı telefonunuzla okuyun</span></small>
+</div>
+</div>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="09" id="capture-section-9"> <span>İlgili sayfalar</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/tr/voice-input/"><span>Ses girişi (otomatik ses girişi)</span></a>
+<a href="/tr/hands-free/"><span>Eller serbest sesli not (taşınma, güvenlik kılavuzu)</span></a>
+<a href="/tr/fastest-voice-memo/"><span>Eylem düğmesiyle birlikte sesli notalar</span></a>
+<a href="/tr/obsidian/"><span>Obsidian entegrasyonu</span></a>
+<a href="/tr/obsidian/shortcuts-not-working/"><span>Kısayol çalışmadığında</span></a>
+<a href="/tr/obsidian/daily-note/"><span>Günlük deftere nasıl eklenir</span></a>
+<a href="/tr/note-to-email/"><span>Nottan e-postaya: nasıl çalışır?</span></a>
+<a href="/tr/apple-watch-obsidian/"><span>Apple Watch × Obsidian entegrasyonu</span></a>
+<a href="/tr/faq"><span>Sık sorulan sorular</span></a>
+</div>
+</div></section>
+</div></div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="container">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Kaynaklar</span> </h2>
+<ul style="font-size:.9rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.9;">
+<li><a href="https://developer.apple.com/documentation/appintents" rel="noopener" style="color:var(--accent);" target="_blank">Apple — Uygulama Niyetleri</a> — <span>Siri'den uygulama işlevlerini doğrudan çağıran mekanizmanın resmi belgesi</span></li>
+<li><a href="https://developer.apple.com/documentation/appintents/app-shortcuts" rel="noopener" style="color:var(--accent);" target="_blank">Apple — Uygulama Kısayolları</a> — <span>Siri ifadelerinin ayarlar olmadan nasıl sağlanacağına dair resmi belgeler</span></li>
+<li><a data-cta-cluster="voice" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store indirme sayfası</span></li>
+</ul>
+</div>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="feature" href="/tr/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Sıradaki yazı</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Sesle aldığınız notların gideceği yeri seçin</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone içinde entegrasyonu ve kayıt konumunu ayarlayarak sesli notlarınızı e-postada ve Obsidian içinde saklayabilirsiniz.</span> </span> </a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<div class="container">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>İlgili içerikler</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/tr/voice-input/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Ses girişi</span></a></li>
+<li><a href="/tr/hands-free/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Eller serbest</span></a></li>
+<li><a href="/tr/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Ayar Kılavuzu</span></a></li>
+<li><a href="/tr/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Sık sorulan sorular</span></a></li>
+</ul>
+</div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="Alt bilgi gezinmesi" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Ürün</p>
+<a class="footer__link" href="/tr/download/">İndir</a>
+<a class="footer__link" href="/tr/">Ana sayfa</a>
+<a class="footer__link" href="/tr/voice-input/"><span>Sesle giriş</span></a>
+<a class="footer__link" href="/tr/obsidian/">Obsidian entegrasyonu</a>
+<a class="footer__link" href="/tr/use-cases/">Kullanım örnekleri</a>
+<a class="footer__link" href="/tr/guides/">Kılavuzlar</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Karşılaştırmalar ve geçiş</p>
+<a class="footer__link" href="/tr/note-to-email/">E-postaya not gönderme</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Destek</p>
+<a class="footer__link" href="/tr/roadmap/">Açık yol haritası</a>
+<a class="footer__link" href="/tr/devlog/">Geliştirme günlüğü</a>
+<a class="footer__link" href="/tr/about/">Geliştirici hakkında</a>
+<a class="footer__link" href="/tr/faq">Sık sorulan sorular</a>
+<a class="footer__link" href="/tr/privacy">Gizlilik</a>
+<a class="footer__link" href="/tr/contact">İletişim</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

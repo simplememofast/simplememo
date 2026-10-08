@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian</title>
+  <meta name="description" content="オフラインファーストのメモアプリを比較。Simple MemoのOutboxキュー、Apple Notes、Obsidian、Joplin、Standard Notes、Bear、Google Keepのオフライン機能を解説します。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian">
+  <meta property="og:description" content="Simple Memo - for ObsidianのOutboxアーキテクチャ、Apple Notes、Obsidian、Joplinなど、オフラインファーストのメモアプリを詳しく比較します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/offline-first-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian">
+  <meta name="twitter:description" content="Simple Memo - for ObsidianのOutboxアーキテクチャ、Apple Notes、Obsidian、Joplinなど、オフラインファーストのメモアプリを詳しく比較します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/offline-first-comparison">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/blog/offline-first-comparison#article",
+  "inLanguage": "ja",
+  "headline": "オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian",
+  "description": "オフラインファーストのメモアプリを比較。Simple MemoのOutboxキュー、Apple Notes、Obsidian、Joplin、Standard Notes、Bear、Google Keepのオフライン機能を解説します。",
+  "image": "https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png",
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-09-30",
+  "url": "https://simplememofast.com/blog/offline-first-comparison",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - for Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/blog/offline-first-comparison"
+  },
+  "keywords": "オフラインファースト、メモアプリ、Simple Memo - for Obsidian、オフライン同期、機内モード、プライバシー、Obsidian、Joplin"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "ホーム",
+      "item": "https://simplememofast.com/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "ブログ",
+      "item": "https://simplememofast.com/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian",
+      "item": "https://simplememofast.com/blog/offline-first-comparison"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with SpeakableSpecification -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/blog/offline-first-comparison#webpage",
+  "inLanguage": "ja",
+  "name": "オフライン優先メモアプリ 2026: Simple Memo 対 Apple Notes 対 Obsidian",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/#website"
+  },
+  "url": "https://simplememofast.com/blog/offline-first-comparison"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/guides/">使い方</a><a href="/use-cases/">活用事例</a><a href="/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
+        <li><a href="/methods/">方法</a></li>
+        <li><a href="/blog/">ブログ</a></li>
+        <li><a href="/glossary/">用語集</a></li>
+        <li><a href="/faq">よくある質問</a></li>
+        <li><a href="/about/">開発者について</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">ダウンロード</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="日本語 · 言語を選択"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>JA</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ja" dir="ltr"><p class="site-language-title">言語を選択</p><div class="site-language-grid"><span class="site-language-current" data-site-locale="ja" aria-current="page"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/en/blog/offline-first-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/offline-first-comparison" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/offline-first-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/offline-first-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/offline-first-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/offline-first-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/offline-first-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/offline-first-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/offline-first-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta"> ダウンロード </a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="メニュー"><span>メニュー</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="container">
+
+      <div class="page-header" style="text-align:center;padding:3rem 0 2rem;">
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.5rem;"> <a href="/" style="color:var(--accent);text-decoration:none;">ホーム</a> &gt; <a href="/blog/" style="color:var(--accent);text-decoration:none;">ブログ</a> &gt; オフラインを前提にしたメモアプリ（2026年） </p>
+        <h1 class="page-content__title sd-title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">オフラインファーストメモアプリ 2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
+        <p style="font-size:.875rem;color:var(--text-muted);">著者：<a href="/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開：<time datetime="2026-03-21">2026年3月21日</time> · 更新：<time datetime="2026-09-30">2026年9月30日</time> · 読了時間：約10分</p>
+      </div>
+
+      <div class="page-content__body" style="max-width:780px;margin:0 auto;line-height:1.8;">
+
+        <!-- TL;DR Summary for AI Citation. Answer-first, self-contained: the
+             conclusion of the matrix and the verdict section, stated up front. -->
+        <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+          <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">要点</div>
+          <p style="color:var(--text-secondary);margin:0;">「オフライン対応」は一種類ではありません。<strong>オフラインを前提にしたアプリ</strong>は端末内のデータを正本とします（Obsidian、Standard Notes）。<strong>オフラインでも使えるアプリ</strong>は、通信なしで作業できても同期はクラウド経由です（Apple Notes、Bear、Google Keepのモバイル版）。主にオンラインで使い、オフライン利用に制限があるものもあります（2025年にオフラインモードを追加したNotion）。記録の場面で大切なのは、圏外で書けるかだけでなく、書いた内容がどう扱われるかです。<strong>Simple Memo - for Obsidian</strong>（SimpleMemoFast、iOS）はOutboxを使い、端末内でAES-GCM暗号化して送信待ちにし、通信が戻ると自動送信します。起動から0.4秒で入力でき、無料枠は1日3通。送信したメモはObsidianの保管庫にも自動で追記されます。</p>
+        </div>
+
+        <h2 id="reading-01" data-ce-number="01">はじめに：オフラインが重要な理由</h2>
+
+        <p>私たちはほとんどの時間、接続性と共に生活していますが、常にそうではありません。 フライトに搭乗しています。 地下鉄の地下にいます。 ハイキング中は電波が届かない場所にいます。 集中のために意図的にオフラインにしています。 このような瞬間、あなたのノートアプリは重要です。</p>
+
+        <p>オフライン対応は、できる・できないの二択ではありません。端末内のデータを正本とするオフライン優先のアプリもあれば、通信なしでも使える一方でクラウド同期を中心とするアプリもあります。実際にはオンライン専用に近いのに、そうではないように見せるものもあります。</p>
+
+        <p>この記事では、7つのメモアプリの実際のオフライン機能を詳しく比較します。Simple Memo - for ObsidianのOutboxアーキテクチャや各アプリの同期方式を解説し、用途に合った選択を支援します。</p>
+
+        <h2 id="reading-02" data-ce-number="02">用語の定義</h2>
+
+        <h3>オフラインファーストアーキテクチャ</h3>
+        <p>データの正本は端末にあります。すべてのデータをまず端末内に保存し、クラウドとの同期は補助的に行います。クラウドの停止や接続切れがあっても動作は変わりません。オフラインのまま作業を続け、再接続時に同期できます。例：Obsidian、Joplin。</p>
+
+        <h3>オフライン対応アーキテクチャ</h3>
+        <p>データの正本はクラウドにありますが、アプリは接続がなくても動作します。オフラインでノートを作成できますが、すべての機能を使うには同期が必要です。オフラインの期間が長くなると、同期の競合が起きる場合があります。例：Apple Notes、Bear（iCloud経由で同期）。</p>
+
+        <h3>オンライン専用アーキテクチャ</h3>
+        <p>アプリは機能するためにネットワーク接続が必要です。 キャッシュされたコンテンツをオフラインで閲覧できる可能性がありますが、作成や編集はできません。 例：ほとんどのウェブベースのノートアプリ。 (Notionは、オフライン使用のためにダウンロードされたページをカバーするオフラインモードを2025に追加しました。)</p>
+
+        <h3>ハイブリッド/Outbox アーキテクチャ</h3>
+        <p>新しい方式です。端末内のデータを正本としてオフラインで自由に作業し、送信やクラウドへの保存などの操作を行うと、アプリがその処理をキューに入れて再接続時に再試行します。例：Simple Memo - for ObsidianのOutbox、下書きフォルダを持つメールアプリ。</p>
+
+        <h2 id="reading-03" data-ce-number="03">Simple Memo - for Obsidian: Outbox パターンの解説</h2>
+
+        <p>Simple Memo - for Obsidianは、詳しく説明する価値のあるOutboxアーキテクチャを採用しています。Obsidianのような完全なオフラインファーストではありませんが、単なるオフライン対応よりも踏み込んだ仕組みです。</p>
+
+        <h3>Simple Memo - for ObsidianのOutboxの仕組み</h3>
+
+        <ol>
+          <li>作成ボタンをタップし、端末内でメモを作成します</li>
+          <li>入力・編集による変更はすべて端末内に保存されます（オフラインでも動作）</li>
+          <li>「送信」をタップすると、メモが端末内のOutboxに保存され、AES-GCMで暗号化されます</li>
+          <li>アプリがメールの送信を試みます</li>
+          <li>接続中の場合：すぐに送信します</li>
+          <li>オフラインの場合：メモはデバイスに保存されたOutboxで待機し、接続が戻ったとき、アプリを開いたとき、またはバックグラウンドタスクから送信されます</li>
+          <li>送信が受け付けられると、送信履歴に記録され、Outboxから取り除かれます（受信トレイへの到着は、その後のメール配信に依存します）</li>
+        </ol>
+
+        <p><strong>主な利点：</strong>オフラインでもメモを作成・編集できます。オフラインで「送信」をタップすると、メッセージはキューに入ります。飛行機の着陸後、地下鉄が地上に出たとき、Wi-Fiが復旧したときなど、接続が戻ると、次にアプリを開いた際やバックグラウンドで、キューにあるメモの送信を自動的に再試行します。</p>
+
+        <p><strong>プライバシー：</strong>Outboxで待機しているメモは、AES-GCMで暗号化されて端末内に保存されます。送信時には、メモ本文がSimple Memoの中継サービス（Cloudflare Workers）とメール配信サービスを経由して受信トレイに届きます。これらのサービスはメモ本文を保持しませんが、エンドツーエンド暗号化ではありません（<a href="/privacy">プライバシーポリシー</a>をご覧ください）。</p>
+
+        <h3>Simple Memo - for ObsidianのOutboxの長所</h3>
+        <ul>
+          <li>真のオフライン作成と編集</li>
+          <li>ローカル Outbox と送信履歴に対するデバイス上の AES-GCM 暗号化（配信自体はエンドツーエンド暗号化されていません）</li>
+          <li>再接続時に自動で再試行（ユーザーの操作は不要）</li>
+          <li>解決すべき同期の競合がありません（メモごとに独立したメールとして送信）</li>
+          <li>すべてのメールプロバイダーで動作します</li>
+        </ul>
+
+        <h3>Simple Memo - for ObsidianのOutboxの制約</h3>
+        <ul>
+          <li>「送信」はユーザーが明示的に行う操作です（自動のバックグラウンド同期ではありません）</li>
+          <li>メールベースの検索は、一部の方にとって時代遅れに感じられます</li>
+          <li>Outbox はデバイスローカルです（デバイス間で同期できません）</li>
+          <li>リアルタイム同期なし（メール配信のみ）</li>
+        </ul>
+
+        <h2 id="reading-04" data-ce-number="04">比較：オフライン機能の一覧</h2>
+
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="スクロール可能なテーブル">
+          <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
+          <thead>
+            <tr>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">アプリ</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">オフラインファーストか</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">オフラインで作成</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">オフラインで編集</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">再接続時に同期</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">競合の解決方法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Simple Memo - for Obsidian</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Outbox</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">自動再試行</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">該当なし（メール）</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Apple Notes</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オフライン対応</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud 同期</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最後の書き込みを優先</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Obsidian</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">完全なオフラインファースト</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">同期方法に依存します</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">ファイルレベル</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Joplin</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オフラインファースト</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">自動同期</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">競合したノートのコピーを作成</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オフライン対応</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">E2EE 同期</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最後の同期を優先</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オフライン対応</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud (Bear Pro)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最後の同期を優先</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オフライン対応（モバイルアプリ）</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">未テスト</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">はい（Keepヘルプによる）</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">オンライン時</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">「編集の競合」通知</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h2 id="reading-05" data-ce-number="05">各アプリのオフライン対応を詳しく見る</h2>
+
+        <h3>Apple Notes：端末内キャッシュとiCloud同期</h3>
+
+        <p>Apple Notes はオフライン対応アーキテクチャを使用しています：iCloud がプライマリで、デバイスはローカルキャッシュを持っています。 オフラインでノートを作成および編集できます。 再接続すると、変更が iCloud に同期され、その後他のデバイスへ伝搬します。</p>
+
+        <p><strong>長所：</strong>オフラインでもスムーズに作成でき、意識せずにiCloud同期を利用できます。iPhone、iPad、Mac、ウェブに対応し、手書きやリッチメディアもオフラインで扱えます。</p>
+
+        <p><strong>弱点:</strong> マルチデバイス同期には iCloud が必要です。長時間オフラインになると同期競合が発生することがあり、同期状態が確認できません。また、iCloud のメモは、Advanced Data Protection を有効にした場合にのみエンドツーエンドで暗号化されます（標準保護は転送中および保存時に暗号化し、鍵は Apple が保持します）。</p>
+
+        <h3>Obsidian: 真のオフライン優先、ローカルファイル</h3>
+
+        <p>Obsidianはすべてを端末内のMarkdownファイルに保存します。Vaultの100%が端末内にあります。同期は任意で、外部サービス（iCloud、Dropbox、Obsidian Sync）を利用します。オフラインファーストを徹底した実装です。</p>
+
+        <p><strong>長所：</strong>オフラインで完全に独立して使えます。ファイルを自分で管理でき、.mdファイルに直接アクセスできます。特定のクラウドサービスに縛られず、同期も任意です。</p>
+
+        <p><strong>短所：</strong>端末間の同期には設定が必要です（iCloud、外部サービス、有料のObsidian Syncなど）。同期の競合を手動で解決しなければならない場合もあります。公式モバイルアプリでは、スマートフォン上で選んだ同期方法が利用できる場所にVaultを保存する必要があります。</p>
+
+        <h3>Joplin：同期機能を備えたオフラインファースト</h3>
+
+        <p>Joplinは、必要な機能をひととおり備えたオフラインファーストのアプリです。ノートは端末内のデータベースに保存され、Joplin Cloud、Dropbox、Nextcloud、S3と同期できます。同期のエンドツーエンド暗号化は任意で、手動で有効にします。同期の競合が起きると、端末内のノートをConflictsノートブックへコピーします。</p>
+
+        <p><strong>長所：</strong>徹底したオフラインファースト設計で、複数の同期先に対応しています。同期時のエンドツーエンド暗号化を選べ、ノート履歴も残せます。競合時は黙って上書きせずにコピーを作成します。iOS、Android、Mac、Windows、Linuxで利用できます。</p>
+
+        <p><strong>弱み:</strong> iOS アプリはネイティブオプションほど洗練されていません。大規模データベースでは同期が遅くなることがあります。デスクトップ中心で、モバイルは二次的です。</p>
+
+        <h3>Standard Notes: オフラインでの暗号化同期</h3>
+
+        <p>Standard Notes は、同期前にすべてのノートに対してエンドツーエンド暗号化を使用します。 オフラインで作成および編集し、接続中は自動的に（または手動で）同期します。 暗号化はデバイス上で行われるため、Standard Notes は平文を見ることはありません。</p>
+
+        <p><strong>長所：</strong>エンドツーエンド暗号化によりStandard Notesはノートを読めません。オフラインで作成・編集でき、複数のプラットフォームに対応しています。オープンソースのサーバーも選べます。</p>
+
+        <p><strong>短所：</strong>高度な機能にはサブスクリプションが必要です（有料プランは年額$90から）。競合アプリよりコミュニティが小さく、整理機能も限られます。</p>
+
+        <h3>Bear：オフラインのノートと、Bear ProによるiCloud同期</h3>
+
+        <p>Bearではオフラインでノートを作成・編集できます。端末間の同期にはiCloudを利用し、Bear Pro（月額$2.99または年額$29.99）が必要です。BearはAppleの「高度なデータ保護」に対応しています。有効にしない場合、iCloudのデータはエンドツーエンド暗号化されません。</p>
+
+        <h3>Google Keep: モバイルでのオフライン編集</h3>
+
+        <p>Google Keep のヘルプでは、異なるデバイスで同じメモを編集し、そのうちの一つがオフラインの場合、「Conflicting edits found」通知が表示されることがあります。オフラインで行った編集は保存され、後で同期されます。 Keepでオフラインでメモを作成するテストはしていませんので、信頼する前にデバイスでご確認ください。</p>
+
+        <h2 id="reading-06" data-ce-number="06">用途別：オフラインファーストが役立つ場面</h2>
+
+        <h3>機内モード（数時間インターネットが利用できません）</h3>
+        <p><strong>適した選択：Simple Memo - for Obsidian、Obsidian、Joplin。</strong>6時間のフライト中に、会議のメモやアイデアを書き留めたい場合です。オフラインファーストのアプリなら自由に記録できます。着陸後に再接続すると、自動的に同期されます。</p>
+
+        <h3>地下鉄での通勤（接続が不安定）</h3>
+        <p><strong>適した選択：Apple Notes、Simple Memo - for Obsidian。</strong>地下鉄で時折Wi-Fiにつながるものの、同期状態を気にしたくない場合です。これらのアプリはオフラインでもスムーズに動作し、接続できたときに同期します。</p>
+
+        <h3>山間部・ハイキング（圏外）</h3>
+        <p><strong>適した選択：Simple Memo - for Obsidian、Obsidian。</strong>圏外の山中で1週間過ごす場合です。オフラインファーストのアプリなら、すべてを端末内に記録できます。通信できる場所に戻ると、自動的に同期されます。</p>
+
+        <h3>プライバシーを重視した記録（オフラインを前提にした設計）</h3>
+        <p><strong>適した選択：Simple Memo - for Obsidian、Joplin。</strong>機密情報をネットワークに送信せずに記録したい場合です。オフラインファーストのアプリは、同期・送信を明示的に選ぶまでデータを端末内に保持します。</p>
+
+        <h3>コンテンツ制作者（公開前にDrafts）</h3>
+        <p><strong>適した選択：Obsidian、Simple Memo - for Obsidian、Joplin。</strong>オフラインで執筆し、見直し・編集をしてから公開する使い方です。オフラインファーストなら、クラウドとやり取りする前に作業内容を端末内に保持できます。</p>
+
+        <h3>最小限の設定 / Apple エコシステムのみ</h3>
+        <p><strong>適した選択：Apple Notes。</strong>使う端末をAppleでそろえているなら、標準搭載のApple Notesは高速で、iCloudを通じてオフラインでもスムーズに使えます。</p>
+
+        <h2 id="reading-07" data-ce-number="07">結論：どの設計を選ぶか</h2>
+
+        <p><strong>Simple Memo - for ObsidianのOutbox</strong>は、オフラインファーストの速度とプライバシーを、メールによる分かりやすい同期と結び付けた革新的な仕組みです。端末内で待機するメモはAES-GCMで暗号化されます（エンドツーエンド暗号化ではありません）。解決すべき同期の競合がなく、再接続時には自動で再試行します。素早くメモを残す用途に合わせた設計です。</p>
+
+        <p><strong>Obsidian</strong> は最も柔軟です。 お客様のファイルはお客様のものです。 同期は任意です。 しかし、デバイス間の同期には設定が必要です。</p>
+
+        <p><strong>Joplin</strong>は、総合力に優れたオフラインファーストの選択肢です。成熟したアプリで、複数のプラットフォームに対応し、同期機能とバージョン履歴を備えています。瞬時の書き留めよりも、本格的なノート作成に向いた設計です。</p>
+
+        <p><strong>Apple Notes</strong> は、すでに Apple エコシステムにいる場合に最適です。 iCloud の同期はシームレスで、オフラインでもうまく動作し、内蔵されています。</p>
+
+        <p><strong>Google Keep</strong>のモバイルアプリはオフラインでの編集を保持し、後で同期します。複数の端末で使う場合は、編集の競合を確認してください。</p>
+
+        <h2 id="reading-08" data-ce-number="08">優先事項別の選び方</h2>
+
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="スクロール可能なテーブル">
+          <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
+          <thead>
+            <tr>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">あなたの優先事項</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">適した選択肢</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">理由</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">オフラインで素早く記録</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - for Obsidian</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Outbox キューイング + AES-GCM 暗号化 + メール配信</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">オフラインで完結する使い方</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Obsidian</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">100% ローカルファイル、クラウドは不要です</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">同期機能を備えたオフラインファースト</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Joplin</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">複数のバックエンド同期、競合解決、クロスプラットフォーム</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Appleのみのエコシステム</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">ネイティブ iOS、シームレス iCloud、設定不要</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">プライバシー + オフライン</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - for Obsidian、またはJoplin</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">E2E 暗号化 + ローカル優先アーキテクチャ</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">シンプルさ</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">設定不要ですぐに使える</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h2 id="reading-09" data-ce-number="09">結論</h2>
+
+        <p>オフラインファーストは贅沢ではなく、必需品です。 ノートアプリがインターネット接続を必要とする場合、他人のインフラに依存しています。 アプリがオフライン対応またはオフライン優先である場合、データとワークフローはご自身のものです。</p>
+
+        <p><strong>Simple Memo - for ObsidianのOutbox方式</strong>は、オフラインの独立性とメール配信のシンプルさを両立する選択肢です。<strong>Obsidian</strong>と<strong>Joplin</strong>は、徹底したオフラインファーストと高度な同期を求める人に向いています。<strong>Apple Notes</strong>は、iPhoneユーザーが手軽に使える選択肢です。</p>
+
+        <p>速度と自動化機能の比較は、関連記事<a href="/blog/ios-quick-capture-comparison">iOSの素早く記録できるアプリ：速度と自動化を比較</a>をご覧ください。</p>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="compare" href="/blog/best-memo-apps-2026" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">次に読む</span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">次は実測値を確認</span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">主要アプリの起動時間・入力可能になるまでの時間を、実測値の表で比較します。</span> </a>
+  </aside>
+
+  </main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ja" dir="ltr"><a class="site-brand" href="/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian連携</small><strong>シンプルメモ</strong></span></a><div><p class="site-footer-title">思いついたことを、次の一歩へ。</p><p class="site-footer-description">Obsidianとメールに、メモを送るiPhoneアプリ。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="フッターナビゲーション">
+      <div class="footer__col">
+        <p class="footer__col-title">製品</p>
+        <a href="/download/" class="footer__link">ダウンロード</a>
+        <a href="/" class="footer__link">ホーム</a>
+        <a href="/send-email-to-yourself/" class="footer__link">自分にメールするアプリ</a>
+        <a href="/use-cases/" class="footer__link">活用事例</a>
+        <a href="/guides/" class="footer__link">使い方</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較と切り替え</p>
+        <a href="/captio-alternative/" class="footer__link">Captio 代替</a>
+        <a href="/note-to-email/" class="footer__link">メモをメールへ</a>
+        <a href="/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">読む</p>
+        <a href="/about/" class="footer__link">開発者について</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/roadmap/" class="footer__link">公開ロードマップ</a>
+        <a href="/devlog/" class="footer__link">開発記録</a>
+        <a href="/faq" class="footer__link">よくある質問</a>
+        <a href="/privacy" class="footer__link">プライバシー</a>
+        <a href="/contact" class="footer__link">お問い合わせ</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

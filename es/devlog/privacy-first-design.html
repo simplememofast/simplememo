@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Diseño de privacidad primero: Compromiso paranoico con las aplicaciones de notas | Diario de desarrollo SimpleMemo</title>
+  <meta name="description" content="Explicación del diseño de privacidad de la versión iPhone SimpleMemo. Explicaré el alcance del cifrado en el terminal, la caché de comunicación, el registro de diagnóstico y el análisis de uso de AES-GCM, así como las especificaciones actuales y las restricciones de entrega de correo que no ocultan las notas con el conmutador de aplicaciones. También se especifica la gestión de la clave del llavero, la información que permanece en el destino de almacenamiento y la asociación entre AppsFlyer y nuestros propios identificadores de análisis.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Diseño de privacidad primero: compromiso paranoico con las aplicaciones de notas">
+  <meta property="og:description" content="Explicación del diseño de privacidad de la versión iPhone SimpleMemo. Explicaré el alcance del cifrado en el terminal, la caché de comunicación, el registro de diagnóstico y el análisis de uso de AES-GCM, así como las especificaciones actuales y las restricciones de entrega de correo que no ocultan las notas con el conmutador de aplicaciones. También se especifica la gestión de la clave del llavero, la información que permanece en el destino de almacenamiento y la asociación entre AppsFlyer y nuestros propios identificadores de análisis.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/devlog/privacy-first-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Diseño de privacidad primero: compromiso paranoico con las aplicaciones de notas">
+  <meta name="twitter:description" content="Explicación del diseño de privacidad de la versión iPhone SimpleMemo. Explicaré el alcance del cifrado en el terminal, la caché de comunicación, el registro de diagnóstico y el análisis de uso de AES-GCM, así como las especificaciones actuales y las restricciones de entrega de correo que no ocultan las notas con el conmutador de aplicaciones. También se especifica la gestión de la clave del llavero, la información que permanece en el destino de almacenamiento y la asociación entre AppsFlyer y nuestros propios identificadores de análisis.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/es/devlog/privacy-first-design#article",
+  "headline": "Diseño de privacidad primero: compromiso paranoico con las aplicaciones de notas",
+  "description": "Explicación del diseño de privacidad de la versión iPhone SimpleMemo. Explicaré el alcance del cifrado en el terminal, la caché de comunicación, el registro de diagnóstico y el análisis de uso de AES-GCM, así como las especificaciones actuales y las restricciones de entrega de correo que no ocultan las notas con el conmutador de aplicaciones. También se especifica la gestión de la clave del llavero, la información que permanece en el destino de almacenamiento y la asociación entre AppsFlyer y nuestros propios identificadores de análisis.",
+  "url": "https://simplememofast.com/es/devlog/privacy-first-design",
+  "inLanguage": "es",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-09-24",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/devlog/privacy-first-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Diario de desarrollo",
+      "item": "https://simplememofast.com/es/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Primero diseño de la privacidad",
+      "item": "https://simplememofast.com/es/devlog/privacy-first-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/devlog/privacy-first-design#webpage",
+  "inLanguage": "es",
+  "name": "Diseño de privacidad primero: compromiso paranoico",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  },
+  "url": "https://simplememofast.com/es/devlog/privacy-first-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/devlog/privacy-first-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/privacy-first-design" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/privacy-first-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/privacy-first-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/privacy-first-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Diseño de privacidad primero: compromiso paranoico con las aplicaciones de notas</span> </h1>
+
+      <div class="article-meta">
+        <span>Publicado: 2026-2-13 · Explicación sobre protección y análisis de uso actualizada: 2026-9-6</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1. Por qué la privacidad es importante en las aplicaciones de notas</h2>
+          <p>Ideas de trabajo, borradores personales, registros diarios. La aplicación de notas recopila información antes de mostrarla a la gente. Tan importante como poder escribir rápidamente, es importante entender dónde se almacena y dónde se envía.</p>
+          <p>Este artículo explica el cifrado, la caché de comunicación, la pantalla, el registro de diagnóstico y el análisis de uso en el terminal por separado. Una protección no garantiza la protección de otras rutas.</p>
+          <div class="philosophy-highlight">
+            <strong>2026 año 9 mes 6 actualización:</strong>La fuente de la misma versión (5.8.17) que la versión pública coincidió, y se corrigió la explicación de la protección de la pantalla, el registro y el análisis de uso. Anota tanto lo que puedes hacer como lo que limitas. </div>
+
+          <h2 id="reading-02">2. La capacidad de ocultar automáticamente las notas en el conmutador de aplicaciones no está habilitada</h2>
+          <p>iOS utiliza la pantalla como instantánea después de que la aplicación se mueva al fondo. Apple te guía para eliminar información confidencial de la pantalla cuando te mueves al fondo.</p>
+          <p>En la fuente del 5.8.17 confirmado, <code>sceneWillResignActive</code> y <code>sceneDidEnterBackground</code> guardan el borrador y no llaman al proceso de visualización de superposición de privacidad. La función de visualización anterior permanece, pero no es una ruta que funcione como una protección válida.</p>
+          <p><strong>Las notas que se muestran pueden permanecer en la imagen del conmutador de aplicaciones. </strong>El cifrado de la Outbox no oculta la imagen de la pantalla. Corrija la explicación de "siempre ocultar el contenido de la nota" en la versión anterior de este artículo.</p>
+
+          <h2 id="reading-03">3. URLSession efímera: Reducir el almacenamiento en disco en la caché de comunicación</h2>
+          <p>El estándar <code>URLSession</code> almacena cachés, cookies e información de autenticación en el disco. Esta es una función útil para las aplicaciones generales, pero no es necesaria para las aplicaciones de notas y puede ser un riesgo.</p>
+          <p>El hecho de que la caché de comunicación permanezca en el terminal significa que los rastros de los cuales se accedió a URL y cuándo existen en el disco. Si se guarda una cookie, significa que la información de la sesión permanecerá en el terminal.</p>
+          <p>Esta aplicación utiliza <code>URLSessionConfiguration.ephemeral</code>.</p>
+          <pre tabindex="0"><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>Sin caché de disco:</strong>No guarde la caché de esta URLSession en el disco</li>
+            <li><strong>Desactivar el uso de cookies:</strong>Esta URLSession no acepta cookies y no establece la solicitud</li>
+            <li><strong>Caché URL desactivado:</strong>Establezca el almacenamiento de caché en <code>nil</code></li>
+            <li><strong>Configuración que no utiliza almacenamiento persistente:</strong>No guarda la información de sesión de URLSession en el disco</li>
+          </ul>
+          <p>Esta es una protección relacionada con la caché de URLSession, etc., y no es una función que elimine los eventos de uso que la aplicación almacena y transmite por separado o los registros de transmisión en el lado del servidor. La asociación por el identificador del análisis de uso también se lleva a cabo por separado de esta configuración.</p>
+
+          <h2 id="reading-04">4. Rango de salida de registros de medición de rendimiento</h2>
+          <p>La salida de registro de <code>PerformanceLogger</code> está rodeada por <code>#if DEBUG</code>. En las compilaciones donde DEBUG no está definido, el procesamiento de salida de registro de este registrador no está incluido.</p>
+          <p>El <code>logError</code> de este registrador registra el tipo en lugar de los detalles del error. Por ejemplo, use el tipo <code>URLError</code> y no libere <code>localizedDescription</code> tal cual, que puede contener rutas de archivo y entrada de usuario.</p>
+          <p>Por otro lado, no es un mecanismo que automáticamente hace inofensivos todos los nombres de eventos y cadenas adicionales pasadas a <code>logEvent</code>. Es necesario no pasar la dirección de correo electrónico, el cuerpo de la nota o la información de autenticación a la que llama.</p>
+          <p><strong>Esta explicación no se extiende a la garantía de "registro cero" para toda la aplicación, el SDK externo y el sistema operativo. </strong>La transmisión de eventos de uso interno y AppsFlyer están habilitadas como mecanismos separados. El alcance de la adquisición se explicará en las preguntas frecuentes sobre el análisis de uso de este artículo y <a href="/es/privacy#technical"> Política de privacidad</a>.</p>
+
+          <h2 id="reading-05">5. Alcance de la protección de Outbox con cifrado AES-GCM</h2>
+          <p>Las notas que esperan ser enviadas se gestionan en la cola llamada Outbox en la terminal. Al guardar, use CryptoKit de Apple para cifrar con AES-GCM. La nueva clave de cifrado se genera con 256 bits.</p>
+          <p>Mantén la llave en el llavero y usa <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. Con esta configuración, puede acceder desde el primer desbloqueo después del reinicio hasta el siguiente reinicio, y la clave no se transferirá al restaurar la copia de seguridad a otro terminal. La aplicación lee la clave para el cifrado y el descifrado.</p>
+          <p>Esta es la protección de los datos almacenados, no para ocultar la pantalla que se muestra o garantizar la seguridad de todas las infracciones del terminal. Antes de cambiar el modelo, asegúrese de que las notas necesarias hayan llegado a la dirección de almacenamiento.</p>
+          <p>Cuando se utiliza el envío por correo, el contenido se procesa en nuestra Relay API y en la infraestructura de entrega, y permanece como correo en la bandeja de entrada. <strong>El cifrado dentro del dispositivo no implica cifrado de extremo a extremo (E2EE) durante la entrega del correo.</strong> Encontrarás los detalles en la <a href="/es/privacy#technical">política de privacidad</a> y en el <a href="/es/privacy-architecture/">recorrido de los datos</a>.</p>
+          <p>Para las colas de espera para la transmisión, consulte <a href="/es/devlog/outbox-architecture">Explicación de la arquitectura de la Outbox</a>.</p>
+
+          <h2 id="reading-06">6. Protección del cuerpo de la nota y el papel del SDK externo</h2>
+          <p>En la aplicación iOS, use CryptoKit para cifrar el cuerpo de la nota, Keychain para almacenar la clave y URLSession para enviar el texto. Network.framework monitorea el estado de la conexión, y BackgroundTasks es responsable de programar la transmisión en segundo plano.</p>
+          <p>Por otro lado, la aplicación también utiliza un SDK externo. GoogleSignIn y Firebase Authentication se utilizan para introducir automáticamente correos electrónicos arbitrarios con la cuenta Google, y la comprobación de la aplicación de Firebase se inicializa al inicio para proteger el backend API. AppsFlyer se utiliza para el análisis de adquisición y uso, y establece un identificador de instalación que es común a su propio análisis.</p>
+          <p>Incluso si el diseño no incluye el cuerpo de la nota en el elemento del evento, la asociación de identificadores y registros de transmisión permanece. El alcance del análisis de uso, incluido el SDK, debe confirmarse por separado del cifrado del texto. Los artículos y usos se describen en <a href="/es/privacy#technical"> Política de privacidad</a>.</p>
+
+          <h2 id="reading-07">7 Especifique el alcance de la protección</h2>
+          <p>El cifrado, el manejo de caché de comunicación y el análisis de utilización en el terminal tienen diferentes funciones. Incluso con el cifrado de Outbox y la URLSession efímera, no significa que se elimine la recopilación de eventos de uso.</p>
+          <p>Valora tanto poder dejar notas rápidamente como poder entender la información que se va a adquirir. Explica el destino, el identificador y el alcance de la asociación del análisis de uso, y revísalo de acuerdo con los cambios en la aplicación.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-08" data-ce-number="08">Preguntas frecuentes</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. ¿El contenido de la nota se guardará en el servidor?</div>
+              <div class="faq-item__answer">Al enviar un correo, su contenido pasa por nuestra Relay API y la infraestructura de entrega. Nuestra Relay API no conserva el contenido de forma permanente, salvo cuando exista una necesidad legítima, como cumplir obligaciones legales o responder a incidencias. Esto es distinto del almacenamiento en el buzón del destinatario. La explicación para cada destino está en<a href="/es/privacy-architecture/">Diseño de privacidad</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. ¿La aplicación cifra la comunicación?</div>
+              <div class="faq-item__answer">Sí. HTTPS se utiliza para la comunicación API. La sesión de URL efímera es una configuración que no almacena permanentemente la caché, la cookie y la información de autenticación de la sesión en el disco. No elimina el análisis de uso y los registros del lado del servidor que se llevan a cabo por separado.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">P. Si pierdo mi terminal, ¿la nota es segura?</div>
+              <div class="faq-item__answer">Outbox está encriptado y guardado con AES-GCM, y la nueva clave se genera con el bit 256. La clave utiliza la clase de protección de Keychain que no migra a otro terminal. Sin embargo, no es un mecanismo que protege la pantalla y el correo electrónico a la dirección de entrega. El cifrado en el terminal por sí solo no garantiza la seguridad de toda la información en caso de pérdida.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. ¿Hay algún análisis o seguimiento?</div>
+              <div class="faq-item__answer">Sí. Utilizamos nuestro propio análisis de uso y AppsFlyer SDK. Los identificadores de instalación aleatorios, los identificadores de sesión, el tipo y la hora del evento, la versión de la aplicación, los resultados de la transmisión, etc. se enviarán a nuestro propio análisis. AppsFlyer envía eventos como la transmisión de notas iniciales exitosa, la autenticación exitosa, la visualización de la pantalla de facturación, la selección del plan y el éxito de la compra, y la cantidad, la moneda, el período, etc. pueden agregarse en el momento de la compra. El mismo identificador de instalación también se establece para el ID de usuario de cliente de AppsFlyer, de modo que se puedan asociar la información de adquisición y los eventos de uso. Los elementos del evento establecidos desde la aplicación no incluyen directamente una dirección de correo electrónico, el cuerpo de la nota o el código de autenticación, pero el ID de envío del análisis interno está vinculado al hash de la dirección de correo electrónico de destino, por lo que no es información completamente anónima. Para más detalles<a href="/es/privacy#technical">Medidas técnicas para la política de privacidad</a>.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. ¿Cómo se utiliza el marco genuino Apple y el SDK externo por separado?</div>
+              <div class="faq-item__answer">Utilice CryptoKit y Keychain para cifrar y almacenar el cuerpo de la nota dentro de la aplicación iOS, y envíe el texto a través de URLSession. Por otro lado, el SDK externo se utiliza para el inicio de sesión de Google, la protección del back-end por parte de Firebase y el análisis de adquisición y uso por parte de AppsFlyer. La protección del texto y el análisis de uso con identificadores se explican por separado.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">Artículos relacionados</h2>
+            <div class="related-grid">
+              <a href="/es/devlog/day1" class="related-card">
+                <div class="related-card__title">[Day1] Amo tanto a Captio que quería hacer "esa experiencia" de nuevo</div>
+                <div class="related-card__desc">Un registro del juicio técnico en el momento del primer desarrollo para reproducir la experiencia de Captio.</div>
+              </a>
+              <a href="/es/devlog/" class="related-card">
+                <div class="related-card__title">Lista del diario de desarrollo</div>
+                <div class="related-card__desc">Registro de la toma de decisiones técnicas de SimpleMemo.</div>
+              </a>
+              <a href="/es/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Arquitectura de la Outbox: diseño para evitar derrames</div>
+                <div class="related-card__desc">Explicación de la cola que gestiona la nota de espera que se enviará y el diseño de la Outbox que se cifra con AES-GCM.</div>
+              </a>
+              <a href="/es/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API: Construye una plataforma de entrega de correo electrónico con los trabajadores de Cloudflare</div>
+                <div class="related-card__desc">Una explicación de la plataforma de transmisión de correo electrónico utilizando Cloudflare Workers y el diseño para transmitir el texto.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10"> <span>Referencias</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Desarrollador Apple — Documentación de CryptoKit</a> — <span>Utilizado para implementar la protección de datos de Outbox con cifrado AES-GCM</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Documentación de URLSession</a> — <span>Privacidad segura con comunicación de red a través de sesión efímera (temporal)</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Prevención de conexiones de red inseguras (seguridad de transporte de aplicaciones)</a> — <span>TLS Garantizar la seguridad durante la transferencia de datos forzando la comunicación</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Generación de mensajes de registro a partir de su código</a> — <span> Alcance del almacenamiento de registro y manejo de información confidencial</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Preparando su interfaz de usuario para que se ejecute en segundo plano</a> — <span>Instantáneas e información en pantalla para conmutadores de aplicaciones</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Desarrollador — Acceso al llavero después del primer desbloqueo, solo este dispositivo</a> — <span>Condiciones clave de acceso y restricciones de migración a otros terminales</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Siguiente lectura</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crea un lugar para almacenar notas con la integración Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Obsidian Habilita el enlace y comprueba los pasos para establecer el destino guardado. </span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Comparación de aplicaciones alternativas Captio</span></a></li>
+    <li><a href="/es/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los artículos del blog</span></a></li>
+    <li><a href="/es/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de comparación de aplicaciones de memos</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/how-to/" class="footer__link"><span>Guías</span> </a>
+        <a href="/es/templates/" class="footer__link"><span>Templo</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio/" class="footer__link"><span>Fúrmula Captio</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Lecturas</p>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/terms" class="footer__link"><span>Términos de uso</span> </a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

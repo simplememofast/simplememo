@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/templater/">
+  <title>Cara menggunakan Templater - Cara menjalankan dan mengatur catatan harian | SimpleMemo</title>
+  <meta name="description" content="Memperkenalkan cara memasukkan tanggal dan judul di Obsidian Templater. Pisahkan operasi memasukkan templat dan pengaturan yang akan dijalankan saat membuat catatan harian, dan atur tujuan konfirmasi jika variabel tetap ada. Ruang lingkup dikonfirmasi oleh versi Linux Obsidian 1.13.7 dan Templater 2.25.1, dan rentang yang tidak terverifikasi seperti iOS dan sinkronisasi juga ditentukan.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Cara menggunakan Templater - Cara menjalankan dan mengatur catatan harian">
+  <meta property="og:description" content="Memperkenalkan cara memasukkan tanggal dan judul di Obsidian Templater. Pisahkan operasi memasukkan templat dan pengaturan yang akan dijalankan saat membuat catatan harian, dan atur tujuan konfirmasi jika variabel tetap ada. Ruang lingkup dikonfirmasi oleh versi Linux Obsidian 1.13.7 dan Templater 2.25.1, dan rentang yang tidak terverifikasi seperti iOS dan sinkronisasi juga ditentukan.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Cara menggunakan Templater - Cara menjalankan dan mengatur catatan harian">
+  <meta name="twitter:description" content="Memperkenalkan cara memasukkan tanggal dan judul di Obsidian Templater. Pisahkan operasi memasukkan templat dan pengaturan yang akan dijalankan saat membuat catatan harian, dan atur tujuan konfirmasi jika variabel tetap ada. Ruang lingkup dikonfirmasi oleh versi Linux Obsidian 1.13.7 dan Templater 2.25.1, dan rentang yang tidak terverifikasi seperti iOS dan sinkronisasi juga ditentukan.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.template-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.template-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.template-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.template-code{max-width:100%;min-width:0;font-size:.9rem}.template-toc a{min-height:44px;display:inline-flex;align-items:center}.template-results{display:grid;gap:1rem}.template-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.template-results{grid-template-columns:1fr 1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/id/obsidian/plugins/templater/#article",
+  "inLanguage": "id",
+  "headline": "Cara menggunakan Templater - Cara menjalankan dan mengatur catatan harian",
+  "description": "Memperkenalkan cara memasukkan tanggal dan judul di Obsidian Templater. Pisahkan operasi memasukkan templat dan pengaturan yang akan dijalankan saat membuat catatan harian, dan atur tujuan konfirmasi jika variabel tetap ada. Ruang lingkup dikonfirmasi oleh versi Linux Obsidian 1.13.7 dan Templater 2.25.1, dan rentang yang tidak terverifikasi seperti iOS dan sinkronisasi juga ditentukan.",
+  "url": "https://simplememofast.com/id/obsidian/plugins/templater/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/obsidian/plugins/templater/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/id/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Pengantar plug-in",
+      "item": "https://simplememofast.com/id/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Templater",
+      "item": "https://simplememofast.com/id/obsidian/plugins/templater/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/id/obsidian/plugins/templater/#faq",
+  "inLanguage": "id",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Jika saya menyimpan Template, apakah Template akan berjalan secara otomatis?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Ini tidak diterapkan secara otomatis ke semua catatan hanya dengan menyimpan. Gunakan \"Templater: Buka modal templat penyisipan\" untuk memasukkan templat yang disimpan ke dalam catatan saat ini. Pemrosesan saat membuat file baru adalah pengaturan lain yang disebut \"Trigger Templater pada pembuatan file baru\"."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah saya juga memerlukan template Folder dalam catatan harian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dalam konfirmasi ini, Templates/Daily.md ditentukan dalam catatan harian inti, Pemicu Templater AKTIF, dan mode pencocokan Template adalah Tidak Ada, dan perintah dalam catatan tanggal baru digunakan. Tidak ada adalah pengaturan yang tidak secara otomatis menetapkan template, tetapi perintah Templateter yang sudah ada di badan baru diproses."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Jika saya menyalakan Pemicu, apakah catatan harian yang ada akan diperbaiki?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Kali ini, ketika saya membuka kembali buku catatan yang saya buat dengan perintah Catatan Harian setelah dinyalakan, konten yang disimpan tidak berubah. Catatan yang sama yang berisi perintah yang tidak diperluas dapat diperluas dengan \"Templater: Ganti templat dalam file aktif\". Ini adalah hasil dari pengaturan ini, dan pengaturan membuka catatan Harian saat startup dan pemrosesan batch belum diverifikasi."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bisakah saya menggunakan prosedur yang sama dengan iPhone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Manifes resmi Templater 2.25.1 bukan pengaturan khusus desktop, tetapi hanya versi Linux dari Obsidian 1.13.7 yang dikonfirmasi untuk operasi aktual kali ini. Layar iPhone, penyebaran templat, sinkronisasi antar-terminal, dan masukan dari SimpleMemo belum diverifikasi. Layar pengaturan pemicu juga menunjukkan pengaturan yang akan diaktifkan untuk setiap terminal."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Navigasi global" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/id/guides/">Panduan</a></li><li><a href="/id/use-cases/">Contoh penggunaan</a></li><li><a href="/id/vs/">Bandingkan</a></li><li><a href="/id/blog/">Blog</a></li><li><a href="/id/about/">Tentang pengembang</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Unduh</a><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/obsidian/plugins/templater/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/templater/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/plugins/templater/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/plugins/templater/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/templater/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/templater/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/templater/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/obsidian/plugins/templater/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/templater/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · Eksekusi templat</div><h1 class="lp-hero__title">Cara menggunakan Template <br> Cara menjalankan dan mengatur catatan harian</h1><p class="lp-hero__sub">Templater adalah plug-in yang menjalankan variabel dan fungsi dalam catatan dan memasukkan hasilnya ke dalam teks. Pertama, masukkan lembar 1 secara manual, lalu lanjutkan ke pengaturan saat membuat catatan harian. Di sini, kami memeriksa keadaan di mana variabel tetap ada dan hasilnya setelah pengaturan dengan templat yang sama.</p><p class="article-meta">Penulis: <a href="/id/about/">SimpleMemo Developer</a> ・ Diterbitkan dan diverifikasi: <time datetime="2026-09-30">2026 tahun 9 bulan 30 hari</time></p></div><nav class="sd-hero-index" aria-label="Isi halaman ini"><p>Isi halaman ini</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Siapkan Templater dan bedakan notasi</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Pertama, masukkan template ke dalam catatan saat ini</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Jalankan Templater di catatan harian baru</span><span aria-hidden="true">↗</span></a></nav></header>
+<aside class="tip-box"><strong>Lingkungan yang dikonfirmasi:</strong>Versi Linux Terisolasi Obsidian 1.13.7 dan Templater 2.25.1. 2026 tahun 9 bulan 30 hari 10:49 ~ 10:50 UTC (waktu Jepang 19:49 - 19:50) termasuk verifikasi catatan harian. Kedatangan, kecepatan, dan kualitas audio dari iPhone, sinkronisasi, dan SimpleMemo belum diverifikasi.<a href="#evidence">Metode dan cakupan konfirmasi</a>ditampilkan di akhir artikel.</aside>
+<nav class="template-toc" aria-label="Daftar isi artikel ini"><a href="#prepare">Persiapan dan notasi</a><a href="#insert">Masukkan secara manual</a><a href="#daily-note">Pengaturan catatan harian</a><a href="#not-applied">Saat tidak berlaku</a><a href="#faq">Pertanyaan umum</a><a href="#evidence">Verifikasi dan sumber</a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Siapkan Templater dan bedakan notasi</h2></div><div class="ce-chapter__body"><p>, cari "Templater" di plugin Komunitas Obsidian dan instal. Dalam verifikasi ini, file distribusi 2.25.1 resmi ditempatkan di karantina Vault, dan plug-in diaktifkan di layar pengaturan. Jika versi Obsidian atau Templater yang Anda gunakan berbeda, silakan periksa nama layar dan perilaku di lingkungan Anda sendiri.</p><p>Dalam contoh ini, isi <strong>Template folder location</strong> pada Templater dengan <code>Templates</code>. Perintah dimulai dengan <code>&lt;%</code> dan diakhiri dengan <code>%&gt;</code>. <code>tp.file.title</code> menggunakan judul catatan tujuan, sedangkan <code>tp.date.now("YYYY-MM-DD HH:mm")</code> menggunakan tanggal dan waktu eksekusi. Jangan menyamakannya dengan <a href="/id/obsidian/journaling/#starter">templat jurnal</a> yang tanggalnya ditulis manual atau sintaks <code>{{date}}</code> pada plugin inti Templates.</p><p>Jika Anda ingin memeriksa hasil penggantian dan penyimpanan judul dan tanggal dan waktu Template inti, silakan juga merujuk ke <a href="/id/obsidian/templates/">koleksi template Markdown</a> yang benar-benar memasukkan dan menampilkan ulang semua spesies 10.</p><aside class="tip-box">Templater adalah sebuah plug-in yang juga dapat menjalankan perintah JavaScript dan sistem. README RESMI MEMANDU ANDA UNTUK MENGGUNAKAN KODE YANG DAPAT ANDA PAHAMI DARI SUMBER YANG DAPAT DIANDALKAN. Dalam contoh singkat artikel ini, kami tidak menggunakan komunikasi eksternal, skrip pengguna, atau perintah sistem.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="insert"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Pertama, masukkan template ke dalam catatan saat ini</h2></div><div class="ce-chapter__body"><p>Teks asli dari <code>Templates/Simple.md</code> yang digunakan untuk verifikasi adalah sebagai berikut. Bagian memo bahasa Inggris adalah konten fiksi untuk verifikasi yang tidak menyertakan informasi pribadi.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="simple-template"># &lt;% tp.file.title %&gt;
+
+created: &lt;% tp.date.now(&quot;YYYY-MM-DD HH:mm&quot;) %&gt;
+result: templater-simple-expanded
+
+## Capture
+- Sample thought from isolated verification.
+</code></pre>
+<ol><li>Siapkan <code>Templates/Simple.md</code> dan buka buku catatan tempat Anda ingin memasukkannya.</li><li>Pilih <strong>Templater: Buka insert template modal</strong> di palet perintah dan pilih <code>Simple</code> dari daftar.</li><li>Periksa judul dan tanggal yang dimasukkan. Dalam catatan <code>Normal</code> ini, <code>tp.file.title</code> diterapkan ke <code>Normal</code>, dan rumus waktu diterapkan ke <code>2026-09-30 10:46</code>.</li></ol><p><code>result: templater-simple-expanded</code> adalah karakter tetap dalam teks asli. Fakta bahwa garis ini terlihat tidak digunakan untuk menentukan kesuksesan. <strong>Periksa apakah <code>&lt;% … %&gt;</code> telah diganti dengan nilai sebenarnya</strong>. Tanggal dan waktunya adalah UTC di lingkungan Linux ini, dan 19:46 di waktu Jepang.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/insert-template.png" alt="Dalam catatan Normal dari versi Linux Obsidian, layar tempat judul dan tanggal template Sederhana diperluas" width="1024" height="800" loading="lazy"><figcaption>2026 tahun 9 bulan 30 hari 10:46 UTC (19:46 JST). Saya memilih Sederhana dari layar pemilihan templat yang sebenarnya dan memasukkannya ke dalam catatan saat ini.</figcaption></figure>
+<p><strong>Replace templates in the active file</strong>, yang menjalankan perintah Templater yang sudah ditempelkan ke isi catatan, adalah operasi berbeda. Contoh pemulihan pada catatan harian ditunjukkan di <a href="#not-applied">bagian berikutnya</a>.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily-note"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Jalankan Templater di catatan harian baru</h2></div><div class="ce-chapter__body"><p>Pertama, saya mencoba mengonfigurasi catatan harian inti untuk memproses badan templat dan perintah Templater di badan. <code>Templates/Daily.md</code> yang digunakan adalah teks asli berikut.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-template"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre>
+<p>Nilai pengaturan kali ini adalah sebagai berikut. Periksa pengaturan catatan Core Daily dan Templater secara terpisah.</p><div class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal"><table class="rt-table"><thead><tr><th>Tempat untuk mengatur</th><th>Item yang ditampilkan</th><th>Nilai kali ini</th></tr></thead><tbody><tr><th>core Daily notes</th><td data-label="Barang">Format tanggal</td><td data-label="Nilai"><code>YYYY-MM-DD</code></td></tr><tr><th>core Daily notes</th><td data-label="Barang">Lokasi berkas baru</td><td data-label="Nilai"><code>Daily</code></td></tr><tr><th>core Daily notes</th><td data-label="Barang">Lokasi file template</td><td data-label="Nilai"><code>Templates/Daily.md</code></td></tr><tr><th>Templater</th><td data-label="Barang">Templat lokasi folder</td><td data-label="Nilai"><code>Templates</code></td></tr><tr><th>Templater</th><td data-label="Barang">Pemicu Templater pada pembuatan file baru</td><td data-label="Nilai">Bandingkan MATI dan AKTIF</td></tr><tr><th>Templater</th><td data-label="Barang">Mode pencocokan template</td><td data-label="Nilai"><code>None</code></td></tr></tbody></table></div>
+<p><strong>Pemicu diaktifkan dan mode pencocokan template diatur ke Tidak Ada</strong>. <code>None</code> adalah pengaturan yang tidak secara otomatis menetapkan templat, tetapi perintah Templatere yang sudah ada di badan catatan baru akan diproses. Dalam contoh ini, templat Folder dan templat file regex tidak ditambahkan karena templat ditentukan di sisi catatan harian.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/trigger-on-settings.png" alt="Pembuat Pemicu Templater pada pembuatan file baru AKTIF dan mode pencocokan Templat adalah Layar pengaturan Tidak Ada" width="900" height="700" loading="lazy"><figcaption>Konfigurasi Templater 2.25.1 yang sebenarnya dioperasikan. Pemicu hanya disimpan di terminal ini, dan catatan juga ditampilkan bahwa itu harus diaktifkan untuk setiap terminal.</figcaption></figure>
+<p>Saya membandingkan catatan yang baru dibuat dengan templat yang sama, format tanggal, dan alamat penyimpanan <code>Daily/2026-09-30.md</code>.</p><div class="template-results"><div><h3>Pemicu MATI: Upacara tetap</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-off"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div><div><h3>Pemicu AKTIF+Tidak Ada: Diperluas ke nilai</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-on"># Daily 2026-09-30
+
+note-title: 2026-09-30
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div></div>
+<p>Di sini, juga, <code>result: templater-daily-expanded</code> adalah karakter tetap di keduanya. Perbedaannya adalah bahwa <code>tp.file.title</code> dari judul <code>tp.date.now</code> dan <code>note-title</code> telah berubah menjadi nilai.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-off.png" alt="Layar dengan perintah tp.date.now dan tp.file.title yang tersisa di catatan tanggal yang dibuat dengan Trigger OFF" width="1024" height="800" loading="lazy"><figcaption>OFF, teks template dari catatan Harian disertakan, tetapi ekspresi Templater tetap tidak diperluas.</figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-on.png" alt="Layar tempat tanggal dan judul catatan diperluas dalam catatan Harian yang baru dibuat dengan Pemicu AKTIF dan Tidak Ada" width="1024" height="800" loading="lazy"><figcaption>Saat membuat yang baru di jalur yang sama dengan ON+None, judulnya diperluas menjadi Daily 2026-09-30 dan judul catatannya diperluas menjadi 2026-09-30.</figcaption></figure>
+<aside class="tip-box"><strong>Metode perbandingan:</strong>Untuk mengkonfirmasi pembuatan baru ON, saya hanya menghapus catatan tes fiksi dari karantina Vault dan membuatnya kembali dengan nama yang sama. Ini bukan prosedur untuk menghapus catatan harian yang direkam pembaca. Saat mencobanya sendiri, harap gunakan verifikasi Vault atau salinannya dan tinggalkan catatan yang ada.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="not-applied"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Apa yang Anda periksa ketika templat tidak diterapkan?</h2></div><div class="ce-chapter__body"><p><strong> Ini dibagi antara ketika teks catatan tidak disertakan dan ketika hanya ekspresi Templater dari teks yang tersisa. </strong>Dalam catatan OFF ini, teks itu sendiri disertakan. Bahkan jika Anda menyalakan Pemicu dan membuka kembali catatan yang sama yang ada dengan perintah catatan harian, konten yang disimpan SHA256 cocok sebelum dan sesudahnya, dan ekspresinya tetap ada.</p><p>Jalankan <strong>Templater: Ganti template di file aktif</strong> dengan catatan yang ada terbuka, dan Anda dapat memperluas ekspresi tanggal dan judul. Dalam catatan yang berisi catatan, periksa konten dan kode template, coba dengan salinan, lalu operasikan. Ini adalah hasil dari kondisi ini. Itu belum digeneralisasikan ke rute lain, seperti pengaturan untuk membuka catatan Harian saat startup.</p><div class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal"><table class="rt-table"><thead><tr><th>keadaan yang terlihat</th><th>Item untuk diperiksa</th><th>Ensis dan cakupan</th></tr></thead><tbody><tr><th>Rumusnya tetap ada dalam teks</th><td data-label="Konfirmasi">Memicu ON/OFF, apakah untuk membuat yang baru atau catatan yang sudah ada</td><td data-label="Ensis">Perbandingan MATI/AKTIF ini, membuka kembali catatan yang ada, konfirmasi dengan Ganti manual</td></tr><tr><th>Tidak ada teks dari templat</th><td data-label="Konfirmasi">Lokasi file template catatan harian</td><td data-label="Ensis">Tidak ada yang secara otomatis memilih templat. Kami juga akan memeriksa penunjukan sisi tempat teks dimasukkan</td></tr><tr><th>Tidak berfungsi di folder tertentu</th><td data-label="Konfirmasi">Dikecualikan folder, folder sumber template</td><td data-label="Ensis">Spesifikasi resmi 2.25.1. Folder dan sumber templat yang dikecualikan akan dikecualikan dari target pemrosesan pada saat pembuatan baru. Kasus ini sendiri belum diukur</td></tr><tr><th>Pengaturan tidak berfungsi di terminal lain</th><td data-label="Konfirmasi">Pengaturan pemicu terminal tersebut</td><td data-label="Ensis">Catatan tentang penyimpanan oleh terminal di layar pengaturan. Kali ini, operasi dan sinkronisasi terminal lain belum diverifikasi</td></tr><tr><th>Tidak ada catatan dalam postscript, itu berbeda</th><td data-label="Konfirmasi">Tanggal, folder tujuan, rute untuk membuat file</td><td data-label="Ensis"><a href="/id/obsidian/daily-note/#missing">Untuk masalah add-up catatan harian yang ada</a>. Periksa secara terpisah dari penyebaran Templater</td></tr></tbody></table></div><p>Pengaturan Templater saja tidak menyelesaikan penerimaan input eksternal, entri tambahan dari aplikasi lain, dan sinkronisasi antar-terminal. Dalam artikel ini, kami mengkonfirmasi pemrosesan template di Obsidian.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Pertanyaan umum</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">Jika saya menyimpan Template, apakah Template akan berjalan secara otomatis?</summary><div class="faq-answer">Ini tidak diterapkan secara otomatis ke semua catatan hanya dengan menyimpan. Gunakan "Templater: Buka modal templat penyisipan" untuk memasukkan templat yang disimpan ke dalam catatan saat ini. Pemrosesan saat membuat file baru adalah pengaturan lain yang disebut "Trigger Templater pada pembuatan file baru".</div></details>
+<details class="faq-item"><summary class="faq-summary">Apakah saya juga memerlukan template Folder dalam catatan harian?</summary><div class="faq-answer">Dalam konfirmasi ini, Templates/Daily.md ditentukan dalam catatan harian inti, Pemicu Templater AKTIF, dan mode pencocokan Template adalah Tidak Ada, dan perintah dalam catatan tanggal baru digunakan. Tidak ada adalah pengaturan yang tidak secara otomatis menetapkan template, tetapi perintah Templateter yang sudah ada di badan baru diproses.</div></details>
+<details class="faq-item"><summary class="faq-summary">Jika saya menyalakan Pemicu, apakah catatan harian yang ada akan diperbaiki?</summary><div class="faq-answer">Kali ini, ketika saya membuka kembali buku catatan yang saya buat dengan perintah Catatan Harian setelah dinyalakan, konten yang disimpan tidak berubah. Catatan yang sama yang berisi perintah yang tidak diperluas dapat diperluas dengan "Templater: Ganti templat dalam file aktif". Ini adalah hasil dari pengaturan ini, dan pengaturan membuka catatan Harian saat startup dan pemrosesan batch belum diverifikasi.</div></details>
+<details class="faq-item"><summary class="faq-summary">Bisakah saya menggunakan prosedur yang sama dengan iPhone?</summary><div class="faq-answer">Manifes resmi Templater 2.25.1 bukan pengaturan khusus desktop, tetapi hanya versi Linux dari Obsidian 1.13.7 yang dikonfirmasi untuk operasi aktual kali ini. Layar iPhone, penyebaran templat, sinkronisasi antar-terminal, dan masukan dari SimpleMemo belum diverifikasi. Layar pengaturan pemicu juga menunjukkan pengaturan yang akan diaktifkan untuk setiap terminal.</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Lingkungan verifikasi dan cakupan penggunaan untuk artikel ini</h2></div><div class="ce-chapter__body"><ul><li><strong>Operasi aktual: </strong>Isolasi Linux Vault, Obsidian 1.13.7, Templater 2.25.1. Operasikan layar pengaturan dan periksa pembuatan dan penyebaran catatan dengan perintah yang terdaftar di aplikasi. Untuk penyisipan manual, saya memilih templat dari daftar GUI.</li><li><strong>Perbandingan Catatan Harian: </strong>2026 tahun 9 bulan 30 hari 10:49~10:50 UTC (19:49~19:50 JST). Bandingkan OFF dan ON+None menyimpan Markdown dengan templat, tujuan penyimpanan, dan format tanggal yang sama. Kami juga mengkonfirmasi pembukaan kembali catatan MATI yang ada dan pemulihan dengan Penggantian eksplisit.</li><li><strong> Asli resmi: </strong> Periksa file distribusi, manifes, dan dokumen/sumber resmi 2.25.1. Versi minimum Obsidian dari manifes adalah 1.13.0. Ini bukan jaminan pengoperasian semua versi dan terminal.</li><li><strong>Tidak terverifikasi: </strong>iPhone/Android/Mac, Obsidian status tertutup dan pembuatan file eksternal, catatan harian saat startup, sinkronisasi, tautan SimpleMemo, kecepatan, kualitas audio, Siri, Tonton.</li></ul><p>Operasi desktop Linux ini bukan merupakan konfirmasi pada Simulator iOS atau mesin iPhone yang sebenarnya. Itu digambarkan sebagai hasil dari operasi aktual hanya sejauh yang ditunjukkan oleh memo fiksi dan disimpan Markdown yang ditunjukkan dalam gambar.</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/templater-20260930.md" target="_blank" rel="noopener">Catatan verifikasi, rentang asli dan konfirmasi</a></p><h3>Materi resmi</h3><ul class="source-list">
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/installation.md" target="_blank" rel="noopener">Cara memperkenalkan Templater</a> — Resmi 2.25.1 asli</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/settings.md" target="_blank" rel="noopener">Pengaturan: Pemicu, Tidak Ada, Folder Yang Dikecualikan</a> — Resmi 2.25.1 Asli</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/syntax.md" target="_blank" rel="noopener">Notasi: Fungsi Perintah dan Tanggal</a> — Resmi 2.25.1 Asli</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/README.md" target="_blank" rel="noopener">README: Catatan tentang fungsi dan eksekusi kode</a> — Resmi 2.25.1 asli</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/manifest.json" target="_blank" rel="noopener">Manifestasi 2.25.1</a> — Resmi 2.25.1 asli</li>
+</ul><div class="internal-links"><a href="/id/obsidian/plugins/">Gambaran umum plug-in Obsidian</a><a href="/id/obsidian/daily-note/">Tambahan ke Catatan Harian</a><a href="/id/obsidian/journaling/">Contoh pencatatan tanggal pencatatan</a></div><p class="template-note">Situs ini dioperasikan oleh YURIKA, K.K. dan memperkenalkan aplikasi independen "SimpleMemo". Ini bukan artikel resmi oleh Obsidian.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Baca selanjutnya</span><strong>Obsidian Periksa konfigurasi tautan dan simpan lokasi</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Navigasi footer"><div class="footer__col"><p class="footer__col-title">Produk</p><a href="/id/download/" class="footer__link">Unduh</a><a href="/id/" class="footer__link">Beranda</a><a href="/id/obsidian/" class="footer__link">Integrasi Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p><a href="/id/vs/" class="footer__link">Bandingkan</a><a href="/id/obsidian/compare/" class="footer__link">Perbandingan Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Bantuan</p><a href="/id/about/" class="footer__link">Tentang pengembang</a><a href="/id/faq" class="footer__link">Pertanyaan umum</a><a href="/id/privacy" class="footer__link">Privasi</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

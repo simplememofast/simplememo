@@ -86,6 +86,9 @@ jobs:
           node --test scripts/qr-routing.test.mjs
           node scripts/generate-qr-codes.mjs --check
 
+      - name: Public evidence asset pins match the checkout (no HTTP)
+        run: node --test scripts/full-public-assets-rate-limit.test.mjs
+
       - name: Prospective decisions and recovery safety
         run: |
           node scripts/autopilot-data.mjs --selftest
@@ -148,6 +151,11 @@ jobs:
         run: python3 scripts/sync_page_design.py --selftest
       - name: Public pages use the shared reading design
         run: python3 scripts/sync_page_design.py --check
+
+      - name: Static translation safeguards fire (self-test)
+        run: python3 scripts/build_site_translations.py --selftest
+      - name: All public topics have complete current translations
+        run: python3 scripts/build_site_translations.py --check
 
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
@@ -940,12 +948,14 @@ jobs:
           fi
 
       - name: WebKit transport failures retain evidence and bound cleanup
-        run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs
+        run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs scripts/viewport-pool.test.mjs
 
       - name: Landing pages do not scroll sideways (report-only)
-        timeout-minutes: 30
+        # Keep every page/width and both engines after the ten-language expansion.
+        timeout-minutes: 60
         run: |
           npm i --no-save playwright-core
+          node --test scripts/viewport-pool-browser.test.mjs
           node scripts/check-viewport-overflow.mjs --selftest || true
           node scripts/check-viewport-overflow.mjs --report
 

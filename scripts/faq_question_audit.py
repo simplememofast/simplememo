@@ -30,6 +30,10 @@ class Element:
                 yield from child.walk()
 
     def text(self, lang=None, inherited="ja"):
+        if self.attrs.get("translate") == "no" and lang == inherited.split("-")[0]:
+            # A quoted command in another language is visible inside this
+            # language's answer, rather than an alternative localized UI.
+            lang = None
         chosen = (self.attrs.get("data-lang") or self.attrs.get("lang") or inherited).split("-")[0]
         if self.tag in {"script", "style", "template", "noscript", "head"} or "hidden" in self.attrs:
             return ""
@@ -93,7 +97,7 @@ def question_elements(root):
         while parent:
             ancestors.append(parent)
             parent = parent.parent
-        if node.tag == "summary" or classes & {"faq-question", "faq-q"} or (
+        if node.tag == "summary" or "data-faq-question" in node.attrs or classes & {"faq-question", "faq-q"} or (
             "app-card__name" in classes and any(p.attrs.get("id") == "faq" for p in ancestors)
         ):
             found.append(node)

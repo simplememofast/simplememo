@@ -70,7 +70,8 @@ body header[data-site-header][data-site-header]>:is(div,nav)>a:not(.site-brand){
  body header[data-site-header][data-site-header]>:is(div,nav)>a:not(.site-brand){order:2!important;font-size:12px!important}
 }
 
-body [data-site-header][data-site-header]:not([data-site-ready]){position:static!important}
+/* Keep dropdowns above article content even on headers without a mobile-menu controller. */
+body [data-site-header][data-site-header]:not([data-site-ready]){position:relative!important}
 body [data-site-header][data-site-header] .global-nav__links a::after{position:static!important;inset:auto!important;transform:none!important;width:auto!important;height:auto!important;background:none!important;opacity:1!important}
 
 body [data-site-header][data-site-header] .lang-switcher{overflow:visible!important}
@@ -112,3 +113,64 @@ body [data-site-header][data-site-header] .site-language-check{display:block!imp
 body [data-site-header][data-site-header] .site-language-utility{width:100%!important}
 @media(max-width:767px){body [data-site-header][data-site-header] .site-language-panel{inset-inline-end:16px!important;padding:16px!important}body [data-site-header][data-site-header] .site-languages>summary{gap:5px!important;min-width:72px!important;padding:10px 7px!important}body [data-site-header][data-site-header] .site-language-grid>:is(a,.site-language-current){font-size:13px!important;padding:9px!important}body [data-site-header][data-site-header] .site-language-title{font-size:16px!important}}
 @media print{body [data-site-header][data-site-header] .site-languages{display:none!important}}
+
+/* Arabic uses a bundled font so its weight and spacing match the shared brand. */
+/* arabic */
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url(/assets/fonts/NotoSansArabic-Arabic-VF.woff2) format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+
+html[lang="ar"] body,
+html[lang="ar"] body.site-designed,
+html[lang="ar"] body .lpr,
+html[lang="ar"] body [data-site-header][data-site-header],
+html[lang="ar"] body [data-site-footer][data-site-footer] {
+  font-family:"Noto Sans Arabic",system-ui,-apple-system,Arial,sans-serif!important;
+  letter-spacing:normal!important;
+}
+html[lang="ar"] body :is(h1,h2,h3,h4,h5,h6,button,select,textarea,.site-language-panel) {
+  font-family:inherit!important;
+  letter-spacing:normal!important;
+}
+html[lang="ar"] body :is(h1,h2,h3) { line-height:1.45!important; }
+/* The original Japanese app demonstration retains its actual control layout. */
+html[dir="rtl"] .lpr-phone-screen { direction:ltr; text-align:left; }
+html[lang="ar"] body :is(h1,h2,h3) :is(em,.em,.q) { font-family:inherit!important; font-style:normal; }
+html:is([lang="zh-Hans"],[lang="zh-Hant"],[lang="ko"]) body :is(h1,h2,h3) :is(em,.em,.q) {
+  font-family:inherit!important;
+  font-style:normal;
+}
+
+/* Use the script's own glyph forms instead of the Japanese font fallback. */
+html[lang="zh-Hans"] { --site-script-font:"Sora","PingFang SC","Microsoft YaHei UI","Noto Sans CJK SC",system-ui,sans-serif; }
+html[lang="zh-Hant"] { --site-script-font:"Sora","PingFang TC","Microsoft JhengHei UI","Noto Sans CJK TC",system-ui,sans-serif; }
+html[lang="ko"] { --site-script-font:"Sora","Apple SD Gothic Neo","Malgun Gothic","Noto Sans CJK KR",system-ui,sans-serif; }
+html:is([lang="zh-Hans"],[lang="zh-Hant"],[lang="ko"]) :is(body,body.site-designed,body .lpr,body [data-site-header][data-site-header],body [data-site-footer][data-site-footer]) {
+  font-family:var(--site-script-font)!important;
+}
+
+/* Keep the utility app's identity beside the language control at narrow widths. */
+@media(max-width:767px) {
+  body header[data-site-header][data-site-header]>.site-language-utility>.brand { order:0!important; }
+  body header[data-site-header][data-site-header]>.site-language-utility:has(>.brand):has(>.local) {
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"brand languages" "status languages";
+    gap:3px 16px!important;
+  }
+  body header[data-site-header][data-site-header]>.site-language-utility:has(>.local)>.brand { grid-area:brand;justify-self:start; }
+  body header[data-site-header][data-site-header]>.site-language-utility:has(>.brand)>.local { grid-area:status;font-size:11px;line-height:1.5; }
+  body header[data-site-header][data-site-header]>.site-language-utility:has(>.local)>.site-languages { grid-area:languages;justify-self:end; }
+}
+
+/* Keep the keyboard focus ring inside clipped FAQ cards and above the answer. */
+body.site-designed .lpr .lpr-faq-q:focus-visible {
+  outline-offset:-4px;
+  border-radius:12px;
+}

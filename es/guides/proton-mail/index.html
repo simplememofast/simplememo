@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/guides/proton-mail/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Guía de configuración de Proton Mail — SimpleMemo</title>
+  <meta name="description" content="Pasos para establecer Proton Mail en la dirección de SimpleMemo y recibir el código de confirmación y la primera nota. Explicaremos de acuerdo con los materiales oficiales, desde la comprobación de spam, botes de basura y filtros cuando no los reciba, por qué no necesita Bridge, el alcance del cifrado y la exportación en formato EML en PC y Mac.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Guía de configuración de Proton Mail — SimpleMemo">
+  <meta property="og:description" content="Pasos para establecer Proton Mail en la dirección de SimpleMemo y recibir el código de confirmación y la primera nota. Explicaremos de acuerdo con los materiales oficiales, desde la comprobación de spam, botes de basura y filtros cuando no los reciba, por qué no necesita Bridge, el alcance del cifrado y la exportación en formato EML en PC y Mac.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/guides/proton-mail/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/guides-proton-mail.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Guía de configuración de Proton Mail — SimpleMemo">
+  <meta name="twitter:description" content="Pasos para establecer Proton Mail en la dirección de SimpleMemo y recibir el código de confirmación y la primera nota. Explicaremos de acuerdo con los materiales oficiales, desde la comprobación de spam, botes de basura y filtros cuando no los reciba, por qué no necesita Bridge, el alcance del cifrado y la exportación en formato EML en PC y Mac.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/guides-proton-mail.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/guides/proton-mail/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/proton-mail/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/guides/proton-mail/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/guides/proton-mail/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/guides/proton-mail/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/guides/proton-mail/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/guides/proton-mail/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/guides/proton-mail/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/guides/proton-mail/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/guides/proton-mail/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/guides/proton-mail/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/proton-mail/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/es/guides/proton-mail/#article",
+  "inLanguage": "es",
+  "image": "https://simplememofast.com/assets/img/og/guides-proton-mail.png",
+  "headline": "Guía de configuración de Proton Mail — SimpleMemo",
+  "description": "Pasos para establecer Proton Mail en la dirección de SimpleMemo y recibir el código de confirmación y la primera nota. Explicaremos de acuerdo con los materiales oficiales, desde la comprobación de spam, botes de basura y filtros cuando no los reciba, por qué no necesita Bridge, el alcance del cifrado y la exportación en formato EML en PC y Mac.",
+  "url": "https://simplememofast.com/es/guides/proton-mail/",
+  "datePublished": "2026-03-05",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/guides/proton-mail/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Guía de configuración",
+      "item": "https://simplememofast.com/es/guides/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Configura Proton Mail",
+      "item": "https://simplememofast.com/es/guides/proton-mail/"
+    }
+  ]
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .steps-list li strong{display:block;margin-bottom:.3rem;color:var(--text)}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .warn-box{background:rgba(255,180,50,.06);border:1px solid rgba(255,180,50,.25);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .warn-box__title{font-weight:700;color:#f0a040;margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .proton-summary{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;line-height:1.85}
+    .proton-review{font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin:1rem 0}.lp-section p{line-height:1.85;margin:.85rem 0}.lp-section a{color:var(--accent);text-underline-offset:3px}.lp-section[id]{scroll-margin-top:76px}
+    .proton-checks{padding-left:1.4rem;line-height:1.9}.proton-checks li{margin:1rem 0}.steps-list a{overflow-wrap:anywhere}
+</style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/guides/proton-mail/#webpage",
+  "inLanguage": "es",
+  "name": "Guía de configuración de Proton Mail — SimpleMemo",
+  "url": "https://simplememofast.com/es/guides/proton-mail/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  }
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/es/guides/proton-mail/#faq","inLanguage":"es","mainEntity":[{"@type":"Question","name":"¿Qué pasa si no recibo el código de confirmación para Proton Mail?","acceptedAnswer":{"@type":"Answer","text":"Compruebe el destinatario registrado con la cuenta mostrada, y revise la bandeja de entrada, el spam y la papelera respectivamente. \" Todos los correos electrónicos excluyen el spam y la basura por defecto. Comprueba el filtro, el bloqueo y el espacio libre, y sigue la pantalla de tiempo de espera en la aplicación para reenviar."}},{"@type":"Question","name":"¿Necesitas el puente Proton Mail?","acceptedAnswer":{"@type":"Answer","text":"Si solo quieres recibir correos electrónicos de SimpleMemo con Proton Mail, no lo necesitas. Bridge es para clientes de correo de escritorio. No necesita registrar la contraseña de Proton, la clave API y la configuración de SMTP con SimpleMemo."}},{"@type":"Question","name":"¿Puedo usar cualquiera de los dos @proton.meと@protonmail.com?","acceptedAnswer":{"@type":"Answer","text":"Utilice la dirección que está habilitada en su cuenta de Proton y pueda recibirla realmente. Una dirección que solo reemplaza el dominio no es necesariamente válida para la misma cuenta."}},{"@type":"Question","name":"Si te envío Proton Mail, ¿todas las rutas serán E2EE?","acceptedAnswer":{"@type":"Answer","text":"No. En la entrega normal de correo electrónico, la transmisión SimpleMemo API y la plataforma de entrega externa manejan el texto. La protección posterior a la recepción en Proton Mail no cambia toda la ruta de transmisión a E2EE."}},{"@type":"Question","name":"¿Puedo usarlo con una cuenta gratuita de Proton Mail?","acceptedAnswer":{"@type":"Answer","text":"Puede recibir correos electrónicos regulares con una dirección de correo electrónico válida, y si tiene suficiente capacidad, puede usarla como destinatario. Por favor, compruebe la capacidad del lado de Proton y las condiciones de transmisión del plan gratuito y de pago en el lado SimpleMemo por separado."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/guides/proton-mail/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/guides/proton-mail/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/guides/proton-mail/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/guides/proton-mail/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/guides/proton-mail/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/guides/proton-mail/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/guides/proton-mail/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/guides/proton-mail/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/guides/proton-mail/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>Configura Proton Mail</span>
+
+        </div>
+        <h1 class="lp-hero__title"> <span>Usa <br>SimpleMemo con Proton Mail</span> </h1>
+        <p class="lp-hero__sub"><span>Proton Mail como destino y proceda al punto donde se recibirá el código de confirmación y la primera nota. También puede comprobar cómo averiguar si no puede recibirlo, si se requiere Bridge y el alcance de la protección del correo electrónico. </span></p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/es/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+      </div><nav class="sd-hero-index" aria-label="Contenido de esta página"><p>Contenido de esta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>5 paso para recibir la primera nota</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Orden de confirmación cuando no se reciben los códigos de confirmación y las notas</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Compruebe la fuente correcta y agréguela a la lista de permisos</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <div class="proton-summary"><p><span><strong>Confirme primero: </strong>No se requiere puente para recibir de SimpleMemo a Proton Mail. Para usar la entrega normal de correo electrónico, no hay ningún procedimiento para registrar la contraseña de Proton, la clave API y la configuración de SMTP en SimpleMemo. </span></p></div><p class="proton-review"><span>Confirmación final de documentos oficiales: <time datetime="2026-09-09">2026 año 9 mes 9 día</time>. El autor es el desarrollador de SimpleMemo. Esta guía es una descripción de la configuración y especificaciones, no el resultado de las mediciones reales de alcance en todas las cuentas de Proton. </span></p><nav class="internal-links" aria-label="Tabla de contenido en la página"><a href="#proton-setup"><span>Conjunto</span></a><a href="#proton-missing"><span>Cuando no lo consigues</span></a><a href="#proton-allowlist"><span>Lista de permisos</span></a><a href="#proton-privacy"><span>Rengo de cifrado</span></a><a href="#proton-export"><span>Escribir</span></a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="proton-setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>5 paso para recibir la primera nota</span></h2></div><div class="ce-chapter__body"><div><p>Prepare una aplicación para iPhone, y durante la configuración, puede verificar sus correos electrónicos entrantes en la aplicación Proton Mail o en la web. Para la primera confirmación de comunicación, utilice una nota corta que no contenga información personal.</p><ol class="steps-list"><li><strong>Prepara la aplicación</strong><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="hero" data-cta-position="hero" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" style="color:var(--accent)">Abre App Store desde este enlace</a>. Puedes comprobar la versión correspondiente de iOS y las condiciones de entrega actuales en la tienda.</li><li><strong>Compruebe la dirección válida en el lado de Proton</strong>Se muestra en la configuración de Proton Mail y copia la dirección que puede recibir. Elija la dirección que se puede usar para esa cuenta en lugar de reemplazar @proton.meと@protonmail.com con solo una cadena.</li><li><strong> Regístrese como destinatario de SimpleMemo</strong> Introduzca la dirección de correo electrónico del destinatario desde la configuración de la aplicación y proceda a enviar el código de confirmación. Por favor, compruebe si hay errores de entrada y espacios en blanco antes y después.</li><li><strong>Completa la autenticación con el código en el correo electrónico de confirmación</strong>Abre el correo electrónico que recibiste con Proton Mail, vuelve a la aplicación e introduce el código. Si no lo recibe, lo comprobaremos de acuerdo con el pedido de confirmación a continuación. Al reenviar, siga el tiempo de espera que se muestra en la aplicación y compruebe el último correo electrónico.</li><li><strong>Envía una nota corta para comprobar el texto</strong> Introduce una nota y envíala, y asegúrate de que el contenido se pueda leer en la bandeja de entrada Proton Mail. La recepción de transmisión en el lado de la aplicación y la llegada a la bandeja de entrada son confirmaciones separadas. Si también desea dejarlo en Obsidian, <a href="/es/obsidian/">establezca el trastero y la dirección adicional</a> por separado.</li></ol></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-missing"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>Orden de confirmación cuando no se reciben los códigos de confirmación y las notas</span></h2></div><div class="ce-chapter__body"><div><ol class="proton-checks"><li><strong> empareja el destinatario con la cuenta que se muestra. </strong>Compruebe la dirección con la que registró SimpleMemo y la cuenta Proton actualmente abierta. Separe las entradas incorrectas a otras direcciones similares y alias no válidos.</li><li><strong>Comprueba la bandeja de entrada, el correo no deseado y la papelera, respectivamente. </strong> Buscar por la hora y el tema de la transmisión. " "Todos los correos electrónicos" excluye el spam y la basura por defecto, por lo que puede pasarlo por alto solo en esa pantalla. <a href="https://proton.me/support/using-folders-labels">Descripción de la carpeta de Proton</a>.</li><li><strong>Compruebe su propia carpeta, filtro y configuración de bloque. </strong> Existe la posibilidad de que se esté moviendo desde la bandeja de entrada con la regla. También comprobaremos si el remitente real no está en la lista de bloqueo.</li><li><strong>Compruebe el espacio libre y el estado del lado receptor. </strong>Compruebe si hay una falta de capacidad y si puede recibir otros correos electrónicos regulares. Puede comprobar el uso actual en la pantalla Proton Mail. <a href="https://proton.me/support/increase-storage-space">Cómo comprobar la capacidad</a>.</li><li><strong> Reenviar solo si es necesario. </strong>El código de confirmación sigue la pantalla de tiempo de espera de la aplicación. Antes de reenviar la nota, compruebe el historial y la bandeja de entrada para evitar enviar duplicados de la misma nota que ya se han recibido.</li></ol><p>Si no funciona, será más fácil aislarlo organizando el tiempo y la zona horaria de transmisión, los errores que se muestran en la aplicación y hasta qué punto ha comprobado anteriormente. No es necesario compartir un código de autenticación o una contraseña.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-allowlist"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>Compruebe la fuente correcta y agréguela a la lista de permisos</span></h2></div><div class="ce-chapter__body"><div><p>Si el correo electrónico de confirmación o la nota está en el correo no deseado, compruebe si el correo electrónico corresponde a su operación y abra la dirección de correo electrónico del remitente para comprobarlo. Por favor, no juzgue solo por el nombre para mostrar, sino use la dirección de correo electrónico que realmente recibió.</p><ol class="proton-checks"><li>Abra "Configuración" → "Todos los ajustes" → "Filtros" en la web Proton Mail.</li><li>Añada la dirección de origen confirmada a la lista de permisos en la configuración de la lista de permisos de bloqueo de spam. Si se ha bloqueado, también comprobaremos el registro.</li><li>Envíe una breve nota a 1 y compruebe la llegada en la bandeja de entrada o en su dirección de transferencia.</li></ol><p>En el móvil, revisa el spam y filtra los elementos en "Configuración". Consulte también el procedimiento actual de <a href="https://proton.me/support/spam-filtering">Proton</a>, ya que el nombre de la pantalla y el diseño cambian con las actualizaciones.</p><div class="tip-box"><p>La lista de permisos es una configuración para evitar que los remitentes registrados sean tratados como spam. No resuelve el error del destino que ingresó, el error de entrega, la falta de espacio libre o la transferencia a su propia carpeta.</p></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-bridge"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>¿Necesitas un puente o un plan de pago? </span></h2></div><div class="ce-chapter__body"><div><p><strong> Si solo recibes correos electrónicos regulares de SimpleMemo con Proton Mail, no necesitas Bridge. </strong>Bridge es una aplicación para usar Proton Mail desde el escritorio Outlook, Apple Mail, Thunderbird, etc. Es una función diferente a establecer la dirección de Proton como el destinatario. <a href="https://proton.me/mail/bridge">Descripción oficial de Bridge</a>.</p><p>El correo electrónico de SimpleMemo se recibe a través de la API saliente y la plataforma de distribución externa. " No es una configuración para conectarse directamente al API de Proton. Incluso con una cuenta gratuita de Proton, puede recibir correos electrónicos regulares con una dirección válida, y si tiene suficiente capacidad, puede usarla como destinatario. Por favor, compruebe la capacidad del lado de Proton y las condiciones de transmisión del plan <a href="/es/faq#pricing-ja">SimpleMemo gratuito y de pago</a> por separado.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-privacy"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>Cifrado de la bandeja de entrada y rango de rutas de transmisión</span></h2></div><div class="ce-chapter__body"><div><p>Proton explica la protección TLS durante la comunicación y el cifrado de acceso cero después de recibir correos electrónicos externos normales que no usan PGP. <strong> Solo al dirigirse a Proton Mail, toda la ruta de SimpleMemo no se convierte en cifrado de extremo a extremo (E2EE). </strong><a href="https://proton.me/support/what-is-encrypted-within-protonmail">El rango cifrado con Proton</a>.</p><p>En SimpleMemo, la Relay API y Resend procesan el texto para entregar el correo. La protección que aplica Proton después de recibirlo no elimina el procesamiento de entrega anterior ni las copias del remitente. Consulta los detalles en la <a href="/es/privacy#technical">explicación técnica de SimpleMemo</a>.</p><p>Algunos artículos no son elegibles para el mismo E2EE que el texto, como el asunto del correo electrónico y la dirección del destinatario del remitente. Si piensa en el texto, la información del destino, el historial en la terminal y el destino de exportación por separado, será más fácil comprender el rango de almacenamiento.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-export"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>Al exportar un correo electrónico de nota, compruebe la copia descifrada</span></h2></div><div class="ce-chapter__body"><div><p>Si necesita hacer una copia de seguridad o migrar, puede usar <a href="https://proton.me/support/proton-mail-export-tool">Proton Mail Herramienta de exportación</a>. La herramienta oficial está disponible para todos los usuarios y se ejecuta en ordenadores Windows, macOS y Linux. Para todo el buzón, incluidos los no memorandos, el correo electrónico se exporta a EML y metadatos como JSON. <strong> La salida es un correo electrónico descifrado, no un archivo con el cifrado en la bandeja de entrada de Proton. </strong></p><ol class="proton-checks"><li>Elija el destino de almacenamiento que administra y asegúrese de que no entre en una carpeta compartida o en una sincronización en la nube no deseada.</li><li>Después de escribirlo con el procedimiento oficial, contiene los correos electrónicos y archivos adjuntos necesarios, y asegúrese de que puede abrir el EML y leer el texto.</li><li>Compruebe el formato que se puede leer en el destino y los derechos de cifrado y acceso del destino. Elimine el correo electrónico original después de asegurarse de que puede leer la copia necesaria.</li></ol><p>Esta salida no es la tarea necesaria para transmitir SimpleMemo. También es diferente de la configuración que guarda automáticamente en Proton Drive y se convierte automáticamente en notas Obsidian.</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="proton-faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>Preguntas frecuentes</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Qué pasa si no recibo el código de confirmación para Proton Mail?</summary><div class="faq-answer"><p>Compruebe el destinatario registrado con la cuenta mostrada, y revise la bandeja de entrada, el spam y la papelera respectivamente. " Todos los correos electrónicos excluyen el spam y la basura por defecto. Comprueba el filtro, el bloqueo y el espacio libre, y sigue la pantalla de tiempo de espera en la aplicación para reenviar.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Necesitas el puente Proton Mail?</summary><div class="faq-answer"><p>Si solo quieres recibir correos electrónicos de SimpleMemo con Proton Mail, no lo necesitas. Bridge es para clientes de correo de escritorio. No necesita registrar la contraseña de Proton, la clave API y la configuración de SMTP con SimpleMemo.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Puedo usar cualquiera de los dos @proton.meと@protonmail.com?</summary><div class="faq-answer"><p>Utilice la dirección que está habilitada en su cuenta de Proton y pueda recibirla realmente. Una dirección que solo reemplaza el dominio no es necesariamente válida para la misma cuenta.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Si te envío Proton Mail, ¿todas las rutas serán E2EE?</summary><div class="faq-answer"><p>No. En la entrega normal de correo electrónico, la transmisión SimpleMemo API y la plataforma de entrega externa manejan el texto. La protección posterior a la recepción en Proton Mail no cambia toda la ruta de transmisión a E2EE.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">¿Puedo usarlo con una cuenta gratuita de Proton Mail?</summary><div class="faq-answer"><p>Puede recibir correos electrónicos regulares con una dirección de correo electrónico válida, y si tiene suficiente capacidad, puede usarla como destinatario. Por favor, compruebe la capacidad del lado de Proton y las condiciones de transmisión del plan gratuito y de pago en el lado SimpleMemo por separado.</p></div></details></div></div></div></section>
+<!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>Recibe la primera nota con Proton Mail</span>
+
+        </div>
+        <div class="cta-box__desc">
+          <span>Puedes comprobar el destinatario y empezar cuando llegue una nota corta a tu bandeja de entrada.</span>
+
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Descargar de App Store"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Descargar de App Store" loading="lazy"> </a>
+
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"> <span>Páginas relacionadas</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/es/guides/"> <span>Guías de configuración</span> </a>
+          <a href="/es/guides/gmail/"> <span>Guía de configuración de Gmail</span> </a>
+          <a href="/es/guides/outlook/"> <span>Guía de configuración de Outlook</span> </a>
+          <a href="/es/guides/icloud/"> <span>Guía de configuración de correo electrónico de iCloud</span> </a>
+          <a href="/es/guides/custom-domain/"> <span>Guía de configuración de correo electrónico de dominio original</span> </a>
+          <a href="/es/captio-alternative/"> <span>Comparación de aplicaciones alternativas Captio</span> </a>
+        </div>
+      </div></section>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09"> <span>Referencias</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://proton.me/support/mail" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Soporte Proton Mail / Soporte Proton Mail</a> — <span>Página oficial de soporte de Proton Mail. Para configurar filtros de spam y listas de permisos</span></li>
+    <li><a href="https://proton.me/mail/bridge" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Puente Proton Mail</a> — <span>Aplicación puente para la integración de IMAP/SMTP con clientes de correo de escritorio</span></li>
+    <li><a href="https://proton.me/learn/encryption/types-of-encryption/zero-access" target="_blank" rel="noopener" style="color:var(--accent);">Proton — Cifrado de acceso cero / Cifrado de acceso cero</a> — Mecanismo de cifrado de acceso cero de <span>Proton Mail. Cómo proteger los correos electrónicos entrantes</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Simple Memo - para Obsidian — App Store</a> — <span>Página de descarga de App Store de SimpleMemo</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Leer a continuación</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Guarda tus notas en Obsidian</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Configura el acceso a la bóveda y el destino en iPhone para conservar también tus notas en Obsidian.</span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Contenido relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/es/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los métodos</span></a></li>
+    <li><a href="/es/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Todos los artículos del blog</span></a></li>
+    <li><a href="/es/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Preguntas frecuentes</span></a></li>
+    <li><a href="/es/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cómo enviarte un correo electrónico a ti mismo</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio-alternative/" class="footer__link"><span>Alternativas a Captio</span> </a>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

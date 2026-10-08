@@ -25,6 +25,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import siteFiles from './lib/site-files.js';
+import localizedSources from './lib/localized-sources.js';
 
 const require = createRequire(import.meta.url);
 const { collectHtmlFiles, toUrlPath } = siteFiles;
@@ -115,7 +116,8 @@ const fileFor = (slug, lang, placement = 'qr') => {
 
 /** Match the real page path, not a filename slug: some EN codes moved to /en/. */
 export function cppForQr(pagePath, map) {
-  const cpp = map.cpps.find((row) => row.match.some((re) => new RegExp(re).test(pagePath)));
+  const sourcePath = localizedSources.sourceRouteOf(pagePath);
+  const cpp = map.cpps.find((row) => row.match.some((re) => new RegExp(re).test(sourcePath)));
   if (!cpp?.ppid || cpp.asc_visible === false) return null;
   if (cpp.asc_state !== 'APPROVED' || cpp.asc_visible !== true
       || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(cpp.ppid)) {

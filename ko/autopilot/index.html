@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/autopilot/">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>자율형 앱 운영의 실측값 | SimpleMemo</title>
+  <meta name="description" content="SimpleMemo의 운영을 AI가 어디까지 실행하고, 인간이 어디서 판단하고 있는지. 운전대장에서 나온 실측값, 가역/불가역으로 구분한 권한표, 아직 수행되지 않은 사항의 목록을 집계 스크립트와 살아있는 대장을 함께 공개하고 있습니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="자율형 앱 운영의 실측값 | SimpleMemo">
+  <meta property="og:description" content="AI가 어디까지 실행하고, 인간이 어디서 판단하고 있는지. 운전대장의 실측값과 아직 수행되지 않은 사항의 목록.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/ko/autopilot/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="자율형 앱 운영의 실측값 | SimpleMemo">
+  <meta name="twitter:description" content="AI가 어디까지 실행하고, 인간이 어디서 판단하고 있는지. 운전대장의 실측값과 아직 수행되지 않은 사항의 목록.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/autopilot/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/autopilot/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/autopilot/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/autopilot/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/autopilot/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/autopilot/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/autopilot/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/autopilot/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/autopilot/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/autopilot/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/autopilot/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/autopilot/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: WebPage + BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/autopilot/#webpage",
+  "inLanguage": "ko",
+  "name": "자율형 앱 운영의 실제 측정값 - SimpleMemo",
+  "description": "AI가 어디까지 운영을 실행하고, 인간이 어디서 판단하고 있는지. 운전대장에서 나온 실측값과 아직 수행되지 않은 사항의 목록.",
+  "url": "https://simplememofast.com/ko/autopilot/",
+  "datePublished": "2026-08-25",
+  "dateModified": "2026-09-17",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "홈",
+        "item": "https://simplememofast.com/ko/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "자율형 앱 운영",
+        "item": "https://simplememofast.com/ko/autopilot/"
+      }
+    ]
+  },
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "about": {
+    "@id": "https://simplememofast.com/#app"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    /* /autopilot/ — 台帳を読ませるページ。装飾より、行が読めることを優先する */
+    .ap-lead { color: var(--text-secondary); line-height: 1.9; font-size: 0.96rem; margin-bottom: 8px; }
+    .ap-stamp { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 36px; }
+    .ap-sec { margin-bottom: 52px; }
+    .ap-sec > h2 { font-size: 1.18rem; font-weight: 800; color: var(--text); letter-spacing: -0.01em;
+      margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .ap-sec > .ap-note { font-size: 0.86rem; color: var(--text-muted); line-height: 1.8; margin: 10px 0 18px; }
+    .ap-sec p { color: var(--text-secondary); line-height: 1.85; font-size: 0.92rem; }
+    .ap-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 8px; }
+    table.ap-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 460px; }
+    table.ap-table th, table.ap-table td { text-align: left; padding: 9px 12px;
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.65; }
+    table.ap-table th { color: var(--text-muted); font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.02em; white-space: nowrap; }
+    table.ap-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.ap-table tr:last-child td { border-bottom: none; }
+    .ap-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 18px; }
+    @media (min-width: 720px) { .ap-kpis { grid-template-columns: repeat(4, 1fr); } }
+    .ap-kpi { background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; }
+    .ap-kpi__v { font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .ap-kpi__l { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; line-height: 1.55; }
+    .ap-cycle { list-style: none; padding: 0; margin: 6px 0 0; counter-reset: ap; }
+    .ap-cycle li { position: relative; padding: 0 0 18px 42px; counter-increment: ap;
+      border-left: 1px solid var(--border); margin-left: 13px; }
+    .ap-cycle li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .ap-cycle li::before { content: counter(ap); position: absolute; left: -13px; top: 0;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--surface-elevated);
+      border: 1px solid var(--border-highlight); color: var(--accent);
+      font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .ap-cycle b { color: var(--text); font-weight: 800; font-size: 0.94rem; display: block; margin-bottom: 4px; }
+    .ap-cycle span { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.75; }
+    blockquote.ap-quote { margin: 14px 0; padding: 14px 18px; border-left: 3px solid var(--accent);
+      background: var(--surface); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      color: var(--text-secondary); font-size: 0.89rem; line-height: 1.85; }
+    blockquote.ap-quote cite { display: block; margin-top: 8px; font-style: normal;
+      font-size: 0.76rem; color: var(--text-muted); }
+    pre.ap-log { overflow-x: auto; background: #060a12; border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; font-size: 0.78rem; line-height: 1.75;
+      color: #c9d4ec; margin: 6px 0 8px; }
+    .ap-links { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 6px; }
+    @media (min-width: 600px) { .ap-links { grid-template-columns: 1fr 1fr; } }
+    .ap-links a { display: block; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 16px; text-decoration: none; color: inherit;
+      transition: border-color 0.25s, background 0.25s; }
+    .ap-links a:hover { border-color: var(--border-highlight); background: var(--surface-elevated); }
+    .ap-links b { display: block; font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .ap-links span { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; }
+    .ap-flag { color: var(--accent); font-weight: 700; }
+    .ap-qr { text-align: center; margin: 44px 0 0; padding: 26px 20px; background: var(--surface-elevated);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .ap-qr img { width: 148px; height: 148px; display: block; margin: 0 auto 12px; border-radius: 10px; background: #fff; padding: 8px; }
+    .ap-qr p { font-size: 0.86rem; color: var(--text-secondary); margin: 0; }
+    @media (max-width: 767px) { .ap-qr--desktop { display: none; } }
+
+    /* 実物への導線。**このページはプレスリリースの着地面**なのに、
+       スマートフォンからは App Store へ行く手段が1つも無かった ——
+       QR はデスクトップ限定（上の媒体クエリ）で、ナビのCTAは 768px 以下で消える。
+       透明性のページなので売り込まない。事実だけ置いて、§2 の境界へ戻す。 */
+    .ap-cta { margin-top: 40px; padding: 26px 22px; border: 1px solid rgba(34,211,238,.22);
+      border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(34,211,238,.05), rgba(34,211,238,0) 55%), var(--surface); }
+    .ap-cta h2 { margin-top: 0; }
+    .ap-cta__row { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 14px; }
+    .ap-cta__row a { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 20px;
+      border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+    .ap-cta__store { background: linear-gradient(135deg,#22d3ee,#3b82f6); color: #0a0c12; }
+    .ap-cta__ghost { color: var(--accent); border: 1px solid rgba(100,180,255,.22); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/autopilot/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/autopilot/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/autopilot/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/autopilot/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/autopilot/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/autopilot/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/autopilot/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/autopilot/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/autopilot/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title">자율형 앱 운영 — AI가 어디까지 실행하고, 어디서 인간이 결정하는가</h1>
+
+      <p class="ap-lead"> 이 앱의 일상적인 운영은 그 대부분을 AI가 수행하고 있습니다. 단, “모두 자동으로 하고 있다”는 것은 아닙니다. <b>App Store에 대한 공개·실제 기기에서의 사전 확인·가격 변경·광고·계약은 의도적으로 인간의 조작으로 남겨두었습니다. </b> 이 페이지는 그 경계와 실제로 몇 번 움직이고 몇 명이 들어갔는지를 집계 스크립트와 함께 공개하기 위한 것입니다. </p>
+      <p class="ap-lead"> 올려 놓은 숫자는 모두 대장에서 나와 있습니다. <b>추정값과 아직 측정되지 않은 것은 그렇게 적혀 있습니다. </b> </p>
+      <section id="citation-summary" aria-labelledby="citation-title" class="ap-note">
+        <h2 id="citation-title" data-ce-number="01">소개·인용: 23일간의 결과를 읽기</h2>
+        <p>아래는 <strong>2026년8월11일〜9월2일(일본 시간)</strong>의 고정 집계입니다. 매일 업데이트되는 아래의 가동 상황과 구분하고 있습니다.</p>
+        <blockquote>SimpleMemo의 AI 운영 장부에 따르면, 23 일간의 전체 41건 중 실제로 착수한 28회에서 19회가 출하되었으며, 28회 중 7회에 사람의 개입이 기록되었습니다.</blockquote>
+        <p>출하율의 분모는 41건이 아니라 착수 28회입니다. 남아 있는 13건은 이 관측 기간 조건에 따른 스킵 11건과 무운전 2건입니다. 인간의 개입에는 기반 수리 등을 포함하며, 결과물 편집이 0건이라도 “인간 작업이 제로”라고 말할 수 없습니다.</p>
+        <figure style="margin:1rem 0"><img src="/assets/img/i18n/ko/autopilot-outcomes-2026-09-02-ja.dca4c3ed.36e8f7b0723f.svg" width="900" height="447" style="max-width:100%;height:auto" alt="시작 28회 내역: 출하 19, 실패 6, 산출물 없음 2, 취소 1" loading="lazy"><figcaption>출처: SimpleMemo 개발팀, AI 운영 대장의 2026년 9월 2일 기준 고정 집계.</figcaption></figure>
+        <p><a href="/assets/downloads/autopilot-runs-2026-09-02.csv" download>전체 41건의 CSV를 저장</a> / <a href="/assets/img/research/autopilot-outcomes-2026-09-02-ja.svg" download>일본어 결과도(SVG)를 저장</a> / <a href="/data/autopilot-research-2026-09-02.json">집계 원본 고정 데이터</a> / <a href="/ko/autopilot/">집계 방법 및 실패 사례(영어)</a></p>
+        <p>소개 시에는 기간·분모와 함께<a href="/ko/autopilot/#citation-summary">이 집계에 대한 링크</a>를 첨부하면, 독자가 원본을 확인할 수 있습니다. 단일 앱 운영자에 의한 기록이며, 일부는 기록에서 재구성하고 있습니다. 대조군이나 사람의 작업 시간에 대한 비교는 없으며, 시간 단축·매출 증가·다른 회사에서의 재현성을 보여주지 않았습니다.</p>
+      </section>
+      <p class="ap-stamp">최종 업데이트 2026-09-04 / <b>절마다 측정 시점이 다릅니다. </b>§3의 비율은 2026-08-11 ~ 2026-09-02(23일·41 실행) 시점이며, §5의 자율 점수는 <span data-decision-date>2026-10-08</span> 시점의 장부에서 계산됩니다 / 장부(§10)는 살아 있으므로 매일 움직입니다</p>
+      <p class="ap-note"><a href="/ko/autopilot/">English report: results, methodology and failure cases</a> / <a href="/assets/downloads/autopilot-runs-2026-09-02.csv">2026년 9월 2일까지의 41 실행(CSV)</a> / <a href="/ko/press/">소개용 도표·자료</a>。 CSV는 기간을 고정한 기록입니다. 최신값은 아래 장부를 참조하십시오.</p>
+
+      <!-- 1. 1サイクル -->
+      <section class="ap-sec">
+        <h2 id="reading-02">1. 1일의 사이클</h2>
+        <p class="ap-note">정시에 시작하고, 다음 순서대로 회전합니다. 사람이 매번 지시를 내리는 출발점은 없습니다.</p>
+        <ol class="ap-cycle">
+          <li><b>관측</b><span>검색 쿼리의 움직임·사이트 실화·실행 장부·비용·자격 정보의 기한을 읽습니다. 전날까지 해결되지 않은 버그가 있다면, 그곳에서 해결하십시오. </span></li>
+          <li><b>기안</b><span>그날에 할 일을 1건만 선택합니다. 절차서가 “1 세션 1 액션”이라고 정하고 있기 때문에, 한 번에 여러 개를 내보내지 않습니다. </span></li>
+          <li><b>구현</b><span>브랜치를 잘라 변경하고, PR을 발행합니다. 코드·기사·설정 중 어느 것이든 경로는 동일합니다. </span></li>
+          <li><b>검증</b><span>CI가 83종의 검사를 진행합니다(전체 83개에 대해 “고의로 부수면 떨어진다”는 것을 실측했습니다). <b>통하지 않는 한 병합되지 않습니다. </b> 과장 표현의 검사와 대장의 산수 검사도 여기 포함됩니다. </span></li>
+          <li><b>출하</b><span>검증을 통과한 시점의 커밋만 병합됩니다. 병합=본격 공개. <b>하지만 이는 사이트 측에만 해당되고, iOS 앱은 별도 경로(§2)입니다. </b></span></li>
+          <li><b>계측</b><span>출하된 물품을 실행 ID로 대장에 1 행을 씁니다. 착수·결과·PR·중재·비용이 같은 행에 실립니다. </span></li>
+          <li><b>다음 판단으로 돌아갑니다</b><span>실패한 회는 실패 유형별로 기록하고, 다음 날 이후의 초안이 그것을 읽습니다. <b>대장이 기록되지 않은 회차를 감지하는 검사도 나중에 추가하고 있습니다(§7). </b></span></li>
+        </ol>
+      </section>
+
+      <!-- 2. 担当分担 -->
+      <section class="ap-sec">
+        <h2 id="reading-03">2. 담당 분담 — 즉시 제출할 수 있는 것과 심사를 통과하는 것</h2>
+        <p class="ap-note"> 이 2을 1의 “자동 배포”로 설명하면 실제보다 더 강하게 들립니다. 나누어 씁니다. </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>경로</th><th>대상</th><th>AI가 즉시 본편에 올릴 수 있습니까</th></tr></thead>
+          <tbody>
+            <tr><td><b>A 차도</b></td><td>사이트·기사·서버 설정·특징 플래그</td><td>출할 수 있습니다(CI 검증을 통과한 것만)</td></tr>
+            <tr><td><b>B 차도</b></td><td>iOS 앱 본체</td><td>TestFlight 내부 배포는 AI가 실행되었습니다. 5.8.46의 심사 제출은 소유자의 개별 승인 후에 AI가 실행합니다. 실제 기기 확인은 사람이 수행하고, 자율 제출 게이트 통과는 확인되지 않았습니다. 승인 후에는 자동 공개 설정</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note" id="lane-b"> <b>Lane B의 실측（2026-08-11〜09-08・<a href="/data/app-releases.json">앱 본체의 장부</a>）。 </b> 태그를 잘라낸 버전은 <b>52</b>이며, 그 중 App Store에 나열된 버전은 <b>10</b>（5.7.8 / 5.7.11 / 5.8.0 / 5.8.1 / 5.8.2 / 5.8.4 / 5.8.5 / 5.8.9 / 5.8.17 / 5.8.26）。 실기 확인 기록이 있는 버전은 <b>3</b>(기록 장부가 2026-08-28으로 시작되었기 때문에, 그 이전 버전은 “없다”라고밖에 말할 수 없습니다.) 기록은 사람의 신고이며, 기계의 검증이 아닙니다). 대장에 저장된 상태의 관측으로부터, 공개 시각을 폭으로 잡을 수 있는 버전은 <b>3</b>입니다. 각 버전의 코드 차이는 커밋에서 <b>40.3%</b>, 변경 행에서 <b>21.1%</b>가 AI 저자입니다(계산 방법은 §3의 코드 저자 비율과 동일합니다). 서명·트레일러·Claude Code의 흔적이 전혀 없는 커밋은 사람 측에 포함되므로, 손에 있는 환경에서 소유자의 서명으로 넣은 변경은 여기 나오지 않습니다. <b>공개 상태의 관측만으로는 실기 확인·심사 제출·공개를 AI가 실행했다는 증거가 되지 않습니다.  </b> 위의 §1의 “출하”에 이 10 버전은 포함되어 있지 않습니다. </p>
+        <p class="ap-note"> 권한표에는 19개 영역이 있으며, <b>그중 15개가 가동 중이고 10개가 승인제</b>입니다. 되돌릴 수 있는 작업은 AI가 단독으로 실행하고, 되돌릴 수 없는 작업은 승인을 거칩니다. <b>CI가 확인하는 것은 ‘되돌릴 수 없는 영역이 승인 불필요로 바뀌지 않았는지’, ‘가동 중인 영역이 근거 파일을 가리키는지’, ‘금액이 변하는 영역에 상한이 있는지’라는 3가지뿐</b>이며, 실제로 사람이 승인했는지는 기계가 확인할 수 없습니다. 그 내용은 표에 적혀 있습니다. </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>작업</th><th>가역성</th><th>누가 결정할지</th></tr></thead>
+          <tbody>
+            <tr><td>사이트 콘텐츠의 신규 구축·업데이트</td><td>가역</td><td>AI가 단독으로 실행</td></tr>
+            <tr><td>단계 공개의<b>철회</b>（불량을 감지하여 중지）</td><td>가역</td><td>AI가 단독으로 실행</td></tr>
+            <tr><td>단계 공개의<b>확대</b>(배분 비율을 높임)</td><td><b>불가역</b></td><td>기계 게이트(노출 50%까지·1일1단). <b>100%에 대한 최종 단계와, 모수가 부족한 상태에서 올리는 작업은 인간에게만 해당됩니다</b></td></tr>
+            <tr><td>App Review에 제출</td><td><b>불가역</b></td><td>기계 게이트(미가동·실행 측도 미구현). <b>실제 기기에서 사전 확인 및 게이트를 활성화하는 작업은 인간만</b></td></tr>
+            <tr><td>App Store에 대한 공개(심사 통과 후)</td><td><b>불가역</b></td><td>기계 게이트(미가동·실행 측도 미구현). <b>일괄 공개의 판단과 게이트를 활성화하는 작업은 인간만</b></td></tr>
+            <tr><td>가격·플랜·무료 한도 변경</td><td><b>불가역</b></td><td>인간만<span class="ap-flag">（상한은 설정되지 않음）</span></td></tr>
+            <tr><td>광고 게재·광고 예산 변경</td><td><b>불가역</b></td><td>인간만<span class="ap-flag">（미구현）</span></td></tr>
+            <tr><td>계약·지불·송금</td><td><b>불가역</b></td><td>인간만<span class="ap-flag">（미구현）</span></td></tr>
+            <tr><td>보도자료 배포</td><td><b>불가역</b></td><td>인간만(스트리밍 조작 및 가능 여부 판단)</td></tr>
+            <tr><td>개인정보 사고·법적 청구·중대한 장애·소동</td><td><b>불가역</b></td><td>인간만(방침만 정의)</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 같은 기능의 “넣기”와 “넓히기”를 별도의 영역으로 구분해 두었습니다. 펼쳐서 다시 돌려도, 본 사람이 보지 않은 것으로 변하지 않기 때문입니다. <b>단, 이 문을 통해 실행된 승격은 아직 1건도 없습니다. </b> 단계 공개 중인 플래그는 1개(tf04_progress)이며, 가드는 매시간 판정을 내리고 있지만 판정에 필요한 모수(각 그룹 30)에 도달하지 못해 hold 상태 그대로입니다(2026-08-27의 실측 run 33076125334). <b>「확대」의 행은 2026-09-02에 「인간의 승인」에서 다시 작성했습니다.  </b> 자동 승급은 2026-08-28에 소유자가 활성화되어 있으며(<code>rollout-promotion.json</code>의 <code>auto_promote.enabled</code>), <b> 권한표에서는 노출 50%까지가 기계 게이트가 포함된 AI 실행입니다. </b> 페이지만이 오래된 작성 방식 그대로이며, 실제보다 인력이 더 많은 것처럼 읽을 수 있는 상태였습니다. <b>과소신고도 엇갈립니다</b> —— 옆에 놓은 권한표를 열면 다른 내용이 적혀 있다는 형태가 동일해서 수정했습니다. </p>
+      </section>
+
+      <!-- 3. 実測 -->
+      <section class="ap-sec">
+        <h2 id="reading-04">3. 실제 측정 — 몇 번 움직였는지, 몇 번 사람이 들어왔는지</h2>
+        <div class="ap-kpis">
+          <div class="ap-kpi"><div class="ap-kpi__v">67.9%</div><div class="ap-kpi__l">AI 완주율<br>（시작 28회 중 출하 19회）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">25.0%</div><div class="ap-kpi__l">인간 개입률<br>（사람이 1번이라도 터치한 실행）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">0건</div><div class="ap-kpi__l">성과물에 대한 개입<br>（출하 19건의 내용물을 사람이 만진 횟수）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">74.4%</div><div class="ap-kpi__l">출하일율<br>（23일 중 무언가가 나타난 날）</div></div>
+        </div>
+        <p> <b>인간 개입률 25.0%를 그대로 표시합니다. </b>4회에 1회 실행에 사람이 들어 있습니다. 다만 이 숫자는 “그 실행에 사람이 1을 한 번이라도 만졌는가”를 세어낸 것이며, 워크플로우 설정을 1 행만 수정한 날도 전체가 개입됩니다. 그곳에서 개입을 종류별로 구분하고 있습니다. </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>중재의 종류</th><th class="num">실행 수</th><th class="num">비율</th></tr></thead>
+          <tbody>
+            <tr><td><b>성과물에 대한 개입</b>(사람이 기사를 작성·재작성한)</td><td class="num"><b>0</b></td><td class="num"><b>0.0%</b></td></tr>
+            <tr><td>실행 기반 수리(워크플로우·절차·스크립트)</td><td class="num">4</td><td class="num">14.3%</td></tr>
+            <tr><td>대행(전체 경로가 불발하고 사람이 대신 실행)</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>시작(첫 회에 사람이 통과하여 시연·한 번만)</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>투표만(사람에게 의뢰했지만 결국 하지 않고 끝났습니다)</td><td class="num">1</td><td class="num">3.6%</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 출하된 19건은 모두 AI가 작성하고 있습니다. 실질적인 개입은 “기반 수리” 14.3%의 한 점에 있으며, 그 수리를 작성한 것도 AI였습니다. 인간이 한 일은 부서진 것을 알아차리고 고치라고 말하는 것입니다. </p>
+        <p class="ap-note"> <b>경로별로는 주 시스템 5/12·보조 시스템(대행) 14/16입니다.</b> 주 시스템은 정시 실행 워크플로로, 8월 23일에 처음 출하했고 이후에도 결과물이 없거나 주간 사용 한도로 실패한 실행이 있습니다. 보조 시스템도 2회 실패했습니다. <b>이중화하지 않았다면 멈췄을 날이 여러 번 있었습니다.</b> 미가동일은 2일(8월 16일·17일)입니다. <b>‘연속 가동’은 실행 결과 기록이 이어진 일수입니다.</b> 사전 판정으로 건너뛴 경우와 실패도 포함합니다. 미가동(no_run)과 대장에 기록이 없는 날은 연속을 끊으며, 출하 여부는 ‘연속 출하’로 별도 집계합니다. <!-- run-streaks:start --> 이 정의에 따른 현재 연속 가동은 <b>52</b>일(2026년 8월 18일~2026년 10월 8일)이고, 최장 기록도 <b>52</b>일(2026년 8월 18일~2026년 10월 8일)입니다. ‘현재’는 대장의 마지막 기재일(2026년 10월 8일)을 기준으로 합니다. 가동의 정의상 실패했더라도 행이 기록된 날은 ‘기록이 있는 날’이므로 연속이 끊어지지 않습니다. <b>현재 연속 출하는 0일</b>이며, <b>최장 연속 출하는 8일</b>(2026년 9월 1일~2026년 9월 8일)입니다. <!-- run-streaks:end --> 10월 1일의 복구 기록은 소유자 요청에 따른 유지보수입니다. 9월 20일과 10월 1일의 결과물 없는 실행을 기록하고 기존 원인 수정을 검증해 복구 기록을 연결했습니다. 정기 실행의 공개 성공이나 무개입 출하로는 세지 않습니다. 9월 16일·17일의 회수 기록도 소유자 요청 유지보수이며, 정기 실행·무개입 출하·기사 공개가 아닙니다. 9월 17일에는 페이지 내부 이동 수정 1건이 검증되었고, 포스터 시도와 롤백은 속도 기준을 충족하지 못한 1회의 주기였습니다. 받지 못한 작업 결과는 알 수 없으며, 간헐적인 렌더링 지연은 미해결 상태입니다. 9월 9일에는 사전 판정으로 중복 실행을 피한 기록만 있고, 구현에 착수하거나 출하하지 않았습니다. 이날도 위 연속 가동 일수에 포함됩니다. 9월 10일에는 점유 후 검증 환경 부족으로 중단된 1건과, 중복 방지로 종료된 별도 실행 1건을 기록했습니다. 둘 다 출하로 세지 않았습니다. 8월 30일·31일에는 주 시스템과 보조 시스템 모두 같은 주간 사용 한도로 실패하여 어느 쪽도 출하하지 못했습니다. </p>
+        <p class="ap-note"> 코드에는 별도의 지표가 있습니다. 3개 저장소·모든 브랜치·병합 제외·2026-08-11~08-21 범위에서 <b>커밋의 99.5%(194건 중 193건), 변경된 줄의 94.2%(48,976줄 중 46,159줄)는 AI가 작성자</b>입니다(<b>2026-08-22 집계</b>). 측정 당일은 집계 기간에 포함하지 않았습니다(비율이 높아지는 방향으로 작용하기 때문입니다. 8월 22일을 포함하면 94.2%→96.6%). <b>건수는 나중에 다시 세면 일치하지 않습니다.</b> 모든 브랜치를 대상으로 하므로 squash 후 사라진 브랜치는 나중에 셀 수 없습니다. 같은 기간을 2026-08-26에 다시 세었을 때 <b>194 → 164커밋</b>(30건 감소)이 되었습니다. <b>비율은 달라지지 않습니다</b>(99.5% → 99.4%, 변경된 줄의 94.2%는 동일). 다만 절대 건수를 인용할 때는 위 집계일과 함께 다뤄 주세요. </p>
+      </section>
+
+      <!-- 4. 領域別 -->
+      <section class="ap-sec">
+        <h2 id="reading-05">4. 자동화율 — 월별 추이와 영역별 내역</h2>
+        <p class="ap-note"> <b>자율도는 12.5%→85.4%입니다. </b>2026년 6월부터 9월까지의 4개월분입니다. 같은 192 작업을 분모에 고정하고 계산하고 있습니다. 코드 변경의 AI 저자율은 업무 실행률과는 별개의 지표입니다. 월별로 변동하며, 9월은 중간 집계입니다. 월별 값은 <a href="/data/autonomy-timeline.json">자율도 추이</a>의 code_ai_commit_rate / code_ai_line_rate에 기록되어 있습니다. 각 월의 실행 건수는 코드를 작성하는 것 이외의 작업(시책을 선택·검증·기록·멈춤)의 이전을 포함합니다. 9월 13일의 분모 변경에 따른 수치 변화는 실행 건수 증가와 별도로 기록하고 있습니다. </p>
+        <figure style="margin:4px 0 14px;">
+          <img src="/assets/img/i18n/ko/autonomy-timeline.eac0634b.a0f89061be70.svg"
+               alt="운영 작업의 자율도와 코드 변경 AI 저자율의 월별 추이. 현행 사업 범위 192건으로 재구성한 종합 자동화율. 2026년4월8.3%、8월69.3%、9월중85.4%"
+               width="880" height="352" loading="lazy" style="max-width:100%;height:auto;">
+        </figure>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>월</th><th class="num">종합 자동화율</th><th class="num">그 달에 실행 측으로 이동한 수</th><th>측정 방법</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04（런치）</td><td class="num">8.3%</td><td class="num">0</td><td>재구성</td></tr>
+            <tr><td>2026-05</td><td class="num">11.5%</td><td class="num">6</td><td>재구성</td></tr>
+            <tr><td>2026-06</td><td class="num">12.5%</td><td class="num">2</td><td>재구성</td></tr>
+            <tr><td>2026-07</td><td class="num">19.3%</td><td class="num">13</td><td>재구성</td></tr>
+            <tr><td>2026-08</td><td class="num">69.3%</td><td class="num">96</td><td>실행 건수를 관측·현행 분모로 재구성</td></tr>
+            <tr><td>2026-09（중간）</td><td class="num"><b>85.4%</b></td><td class="num">31</td><td><b>현행 기준의 집계(아래 주석)</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>⚠ 실측은 2026년 8월과 9월 중간까지입니다.</b> 그 이전은 재구성한 것으로, 당시 이 지표를 측정한 것은 아닙니다. ‘AI가 실행하는 작업의 증빙 파일이 처음 커밋된 달’을 해당 공정의 가동 시작 월로 보고 누적하는 방식입니다. <b>증빙 추가일과 실제 가동일은 며칠에서 몇 주까지 차이가 납니다.</b> 분모 역시 현재의 목록(192개 작업)을 과거에도 고정 적용한 것이며, <b>당시에는 ‘해야 할 일 목록’ 자체가 없었습니다.</b> 당시의 ‘제안에 그침’, ‘사람이 실행’, ‘미착수’ 세부 내역은 복원하지 않았으므로, <b>이 시계열로 나타낼 수 있는 것은 전체 자동화율뿐</b>입니다. AI 관여율과 커버율의 추이는 만들 수 없습니다. 원본 데이터는 <a href="/data/autonomy-timeline.json">자율성 추이</a>에 그대로 있으며, 한계 목록도 같은 파일의 <code>known_limits</code>에 들어 있습니다. </p>
+        <p class="ap-note"> 203 작업·13 영역을 1건씩 재고 조사하여, 누가 실행하느냐에 따라 계산한 것입니다. <b> 종합 자동화율 85.4%, AI 실행률 91.1%, AI 관여율 95.0%, 커버율 93.8%（2026-09-15）。 </b>미시작도 포함한 내역을 공개하고 있습니다. 9월 15일, 기존 CPP 업무를 동일 기간의 최초 다운로드·페이지 열람·비교 대상·동시 시책의 실측에 기반하여 AI 실행에 반영했습니다. AI 실행 164/180, 종합 164/192입니다. 평가는 서술적인 것이며, 획득 향상 및 인과 효과는 아직 확정되지 않았습니다. <b>164건 중 환불 감지·과금 복구·장애 안내의 3건은 소유자가 지정한 “테스트에서의 운영 준비 완료+본판 자동 감시”로 계상하고 있습니다. </b>본판의 최초 환불·과금 복구·장애 안내는 아직 관측되지 않았습니다. 9월 13일의 조건 변경 시점 기록: <span data-acceptance-before="refund-tested-readiness-20260913">변경 전의 실례 필수 기준: 159/176=90.34%</span>. <span data-acceptance-before="billing-recovery-tested-readiness-20260913">과금 복구 준비 변경 직전：161/177=90.96%</span>。 과금 회복 준비 후에는 162/178=91.01%. <span data-acceptance-before="service-notice-tested-readiness-20260913">장애 안내 준비 변경 직전：162/178=91.01%</span>. 그 시점의 준비가 완료되면 163/179=91.06%, 약 +0.050 포인트. 당시 이 3건을 실례 필수 항목으로 제외한 참고값은 160/176=90.91%입니다. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/refund-tested-readiness-20260913.md">테스트 범위·채점 조건 변경</a>와<a href="/data/refund-readiness-20260913.json">환불 준비 증거</a>、<a href="/data/billing-recovery-readiness-20260913.json">과금 복구 준비 증거</a>와<a href="https://github.com/simplememofast/simplememo/blob/main/docs/billing-recovery-tested-readiness-20260913.md">검증 범위</a>、<a href="/data/service-notice-readiness-20260913.json">장애 안내 준비 증거</a>와<a href="https://github.com/simplememofast/simplememo/blob/main/docs/service-notice-tested-readiness-20260913.md">검증 범위</a>를 공개하고 있습니다. 실제 장애 안내나 모든 이용자에 대한 도달·통지 의무의 충족을 나타내는 것이 아닙니다. 9월9일, <a href="/data/x-japanese-execution.json">X일본어 게시물의 예약 작업 및 공개 결과를 대조</a>하고, 기존 1 업무의 실행자를 업데이트했습니다. 같은 날, <a href="/data/service-reconciliation-execution.json">회사 서비스 1건의 계약·청구·서비스 제공·지불을 대조</a>하고, 선불 지속 및 세금 구분 예외를 기록한 1 업무를 추가했습니다. 9월 11일, <a href="/data/physical-device-verification-20260911.json">iPhone과 Watch의 실기 확인 6 항목을 완료</a>하고, 실기 확인 1 업무의 실행 결과를 반영했습니다. 9월 12일, <a href="/data/delegated-review-acceptance-20260912.json">검증된 1342의 자율 제출이 Apple에 접수된 것을 확인</a>하고, App Review 제출 1 업무를 반영했습니다. 심사 통과와 App Store 공개는 아직 가점이 되지 않았습니다. 같은 날, <a href="/data/production-stop-exercise-20260912.json">본판 Act의 정지·복원 훈련을 완료</a>하고, 훈련 1 업무를 반영했습니다. 전체 정지 메커니즘이나 앱 킬을 입증했다는 의미는 아닙니다. 9월 13일, <a href="/data/company-monthly-budget-execution.json"> 전사의 월간 예산을 수립하여 지출 판단에 적용</a>하고, 공개 설정과 실제 사건 판정을 다시 읽었습니다. 월간 예산 1 업무를 반영하여 AI 실행 161/177이 되었습니다. 기존 부채의 정산 및 전체 결제의 자동 제어를 완료했다는 의미는 아닙니다. 2026-08-25에 재고조사에 13건을 추가했으므로, 비율이 61.3%에서 58.6%로 감소했습니다. 그 이후의 구현에서 66.8%까지 복원되었습니다(2026-09-02 시점·당시의 분모). <b>구현이 감소한 것이 아니라, 해야 할 일 목록이 정확해진 만큼 분모가 증가하고 있습니다</b>（추가한 13건 중 10건이 미구현되었습니다）。 작업의 입자 크기가 영역 간에 일치하지 않으며, 전체 작업을 동등하게 계산하고 있는 점은 한계로 부록합니다. </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>영역</th><th class="num">종합</th><th class="num">AI 관여</th></tr></thead>
+          <tbody>
+            <tr><td>12 사업 연속성</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>10 AgentOps・지배구조</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>2 버그 수정</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>5 AI 예산·토큰 관리</td><td class="num">88.2%</td><td class="num">100.0%</td></tr>
+            <tr><td>11 데이터 프라이버시</td><td class="num">81.8%</td><td class="num">100.0%</td></tr>
+            <tr><td>6 앱 운영 의사결정</td><td class="num">85.7%</td><td class="num">100.0%</td></tr>
+            <tr><td>3 자율형 마케팅</td><td class="num">81.3%</td><td class="num">92.9%</td></tr>
+            <tr><td>1 차기 기능 개발</td><td class="num">85.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>4 자동 실전 배포</td><td class="num">83.3%</td><td class="num">88.9%</td></tr>
+            <tr><td>8 고객 지원</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>7 법인 경영</td><td class="num">71.4%</td><td class="num">91.7%</td></tr>
+            <tr><td>9 수익화</td><td class="num">66.7%</td><td class="num">87.5%</td></tr>
+            <tr><td>13 아날로그 영역</td><td class="num">57.1%</td><td class="num">57.1%</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note" id="scope-20260913"> <b>9월13일, 먼저 채점 범위를 정리했습니다. </b>현재 사업에서 진행하지 않는 이벤트·채용·개별 상담 영업의 6건과 기존 방침으로 진행하지 않는 환불 의견 전송 1건을 대상에서 제외했습니다. 이 정리 시점에서는 AI 실행 159건은 변함이 없으며, 진행 중인 분모는 179건에서 176건으로, 전체 대상은 199건에서 192건으로 변경되었습니다. <span data-scope-before="2026-09-13"> 기존 스코프(9월 13일 변경 전): 실행 159/179=88.8%, 종합 159/199=79.9%</span>. 구분모 199건의 월간 시리즈도 원본 데이터에 저장하고 있습니다. 활동 조사·준비를 시작하는 시점 또는 실제 과제·기존 의무를 확인한 시점에, 쌍이 되는 AI 측과 인간 측을 동시에 대상에 되돌립니다. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/automation-scope-review-20260913.md">7건의 이유와 4 지표의 비교</a>를 공개하고 있습니다. </p>
+      </section>
+
+      <!-- 5. 自律スコア -->
+      <section class="ap-sec">
+        <h2 id="reading-06">5. 자율 점수 — “자동화된 양”이 아니라 “검증된 결정의 양”</h2>
+        <p class="ap-note"> §4 의 자동화 비율은 <b>작업 피복 비율</b>입니다。「 '무엇을 자동화할 수 있었는지'는 말하지만, <b> '그 결정이 옳았는지 확인하는 메커니즘이 있는지'는 한 마디도 하지 않습니다. </b> 검증되지 않은 결정을 100% 자동화하면, 피복률은 100%가 됩니다. 그렇기에 2026-09-04에, 다른 물자를 <b>병설했습니다</b>. 전환이 아닙니다 — 한쪽이 늘어나고 다른 한쪽이 늘어나지 않는 것이 의미가 있기 때문에, 양쪽을 그대로 내겠습니다. </p>
+        <p class="ap-note"> 계산 방법은 “반증기(=그 판단을 내릴 수 있는 구조)가 어느 층까지인지”입니다. 운영 결정을 5 계층으로 나누고, 구현 검증에 더해, 적격성 판단·가치 계약 결제·성숙 후 탐색을 연결했습니다. <b>구현 완료와 운영 실적에 의한 실증을 구분하여 표시합니다. </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>층</th><th>무엇을 결정하는 층</th><th>반증기</th><th>상태</th></tr></thead>
+          <tbody>
+            <tr><td>L0 구현</td><td>선택된 것을 어떻게 만들까요</td><td>CI 101개의 자동 검사. 떨어지면 그 회는 본편에 나오지 않습니다</td><td><b>작동 중</b></td></tr>
+            <tr><td>L1 적격성</td><td>그 작업은, 착수해서<b>좋은</b>인가</td><td>실행 전 게이트(가역성·변경 경계·증거의 신선도·예산·중복)</td><td>실행 핸들러 직전 판정. 기존 운전은 R2을 중단하고, 가치 계약은 전체 5 기준을 통과해야 합니다</td></tr>
+            <tr><td>L2 가치</td><td>그 작업은, 해야<b>해야 할</b> 것이었을까요</td><td>구현 전 별도 커밋에 의한 선언과 공개 후 실측 결제</td><td><b>6 지표가 승인되었습니다(09-04에 3건·09-05에 3건). 결제 실적 대기</b></td></tr>
+            <tr><td>L3 프레임</td><td>원래 질문하는 방법이 올바른가</td><td>성숙 판정과, 적격 후보 하위에서의 제한 탐색</td><td><b>구현 완료. 결제 20건까지 보류</b></td></tr>
+            <tr><td>L4 헌법</td><td>이 회사는 무엇을 위해 움직이고 있습니까</td><td>없음. 목적·지표·금지 사항·지출 상한을 인간이 보수한다</td><td><b>인간에 고정</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b> 자율 점수는 <span data-score-total>44.6</span>점(100점 만점, <span data-decision-date>2026-10-08</span> 시점)입니다. </b> 검증된 결정 피복률은 사전에 고정된 계약이 공개 후 실제 측정으로 결제된 후에야 가점됩니다. <b>90점 초과는 목표이며, 실제 측정으로 도달할 때까지 달성이라고 표시하지 않습니다. </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>성분</th><th class="num">득점</th><th class="num">배점</th><th>지금 무슨 일이 일어나고 있나요</th></tr></thead>
+          <tbody>
+            <tr data-score="vdc"><td>검증된 결정 피복률</td><td class="num"><b>13.1</b></td><td class="num">30</td><td>기간 내 출하 16건 중 사전 선언 및 공개 후 실측 결제를 확인할 수 있었던 것은 7건입니다.</td></tr>
+            <tr data-score="umr"><td>무검사 병합율</td><td class="num"><b>11.1</b></td><td class="num">25</td><td>인간의 개입 없이 본편에 도달한 변경 비율을 가역성으로 가중치를 부여한다. R0에는 기여 상한이 있습니다.</td></tr>
+            <tr data-score="ra"><td>복구 자율성</td><td class="num"><b>5.7</b></td><td class="num">20</td><td>고장 7건 중 기계가 감지한 것은 4건이며, 무간섭 수리는 0건입니다. 본판의 자동 revert 성공은 0회입니다.</td></tr>
+            <tr data-score="ep"><td>에스컬레이션 정확도</td><td class="num"><b>8.9</b></td><td class="num">15</td><td>에스컬레이션의 필요성을 판단한 것은 23건입니다. 우리 18건은 소유자 위임에 의한 AI 평가이며, 독립적인 인간 평가가 아닙니다.</td></tr>
+            <tr data-score="tuc"><td>제한 하의 처리량</td><td class="num"><b>5.7</b></td><td class="num">10</td><td>검사를 유지하고 주 4.0회 출하합니다. 주 7회가 배점 기준입니다.</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b> 복구는 이상 감지부터 실제 상태 확인까지 확인합니다. </b> 출하한 후에 악화된 것을 기계가 스스로 찾아 되돌릴 수 없는 한, <b>더 위험한 영역의 권한을 전달하는 것은 원칙적으로 불가능합니다. </b> 자동으로 되감은 회차가 1회라도 나올 때까지, 권한은 확장하지 않는다——라는 순서를 그대로 정해 두었습니다. </p>
+        <p class="ap-note"> <b>멈춘 회를 “층”으로 구분했습니다. </b>지금까지는 실행 전에 잠든 회·실행하고 떨어진 회·틀이 소진된 회가 모두 같은 “실패”로 나열되어 있었기 때문에, <b> “선택 방법을 잘못했는지, 만드는 방법을 잘못했는지”에 답변할 수 없었습니다. </b> 답변하지 못한 것은 조사 방법의 문제가 아니라 기록이 같은 열에 있었기 때문입니다. 대장에 기록된 출하 외의 결과를 아래 층으로 구분하고 있습니다. </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>층</th><th class="num">건수</th><th>의미</th><th>가장 가까운 예</th></tr></thead>
+          <tbody>
+            <tr data-stage="eligibility"><td>적격성(실행 전에 중단)</td><td class="num"><b>48</b></td><td>사전 판정 후 작업을 시작하지 않음</td><td>비밀 키가 없는 날 조용히 대기함(8회) / <b>구조화된 판정 기록 없음(6회)</b></td></tr>
+            <tr data-stage="execution"><td>실행(시작한 뒤 실패)</td><td class="num"><b>13</b></td><td>구현을 시작했지만 완료 전에 실패</td><td>권한 거부·인증 실패·시간 초과</td></tr>
+            <tr data-stage="cost"><td>비용(사용 한도에 도달해 중단)</td><td class="num"><b>8</b></td><td>사용량 상한에 도달</td><td>주 시스템과 예비 시스템이 같은 사용 한도를 소진해 같은 날 중단</td></tr>
+            <tr data-stage="absent"><td>실행 경로 부재(자동화가 없었음)</td><td class="num"><b>2</b></td><td>사전 판정과 작업 실행 모두 이루어지지 않음</td><td>예비 시스템이 아직 없었던 날</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>가장 많은 것은 적격성 층입니다. </b>그리고 그곳에는 2026-09-04까지 “비밀키가 있는지” 외의 판정이 없었습니다. 만든 것은 그 판정이며, 기존 운전에서는 판정을 기록하고, <b> 되돌릴 수 없는 작업은 실행 전에 멈춥니다. </b>새로운 가치 계약은 전체 5 기준이 통과되지 않으면 생성할 수 없습니다. </p>
+        <p class="ap-note"> 2026-09-05, 실행 정보의 결측을 “미착”으로 잘못 기록한 1건을 모델의 착수 증거와 대조하여 수정했습니다. 원본 행과 확인 증거는 <a href="/data/autopilot-runs.json">운전대장의 정정 이력</a>에 남겨두고 있습니다. 산출물의 결과는 아직 확정되지 않았으며, 출하 및 복구에는 포함되지 않았습니다. </p>
+        <p class="ap-note"> <b>이 점수를 올리기 어렵게 만드는 장치도 함께 넣어 두었습니다. </b> 검사를 완화하면 점수가 자동으로 상승하므로, <b> 검사 횟수가 감소한 기간 동안은 점수를 그대로 유지합니다</b>. 복구하기 쉬운 세밀한 업데이트를 대량 생산해도 늘어나지 않도록, 그 기여에 상한을 두고 있습니다. <b>실패율은 점수에 포함되지 않습니다</b>——실패율을 낮추는 것 자체가 목적이 되면 검사를 완화하는 압력이 되기 때문입니다. 그리고<b>이 수치는 매일 실행을 결정하는 AI에게 보여주지 않았습니다</b>. 계기를 최적화 대상으로 하면, 계측기로서의 수명이 끝나기 때문입니다. </p>
+        <p class="ap-note"> 배점 자체(<a href="/data/autonomy-score.json">자율 점수의 배점</a>)와 실행 전 판정 기준(<a href="/data/eligibility-policy.json">적격성 게이트의 기준</a>), 그리고<a href="/data/contract-coverage.json">가치 계약의 커버 정책</a>은, <b>AI가 수정할 수 없는 측에 놓여 있습니다. </b>자신의 점수 매기는 방법을 스스로 결정할 수 있는 장소를 만들지 않기 때문입니다. 피복 방침이 기록된 것은 편리한 사실이 아닙니다 —— 가치 계약의 구조를 2026년 9월 4일에 준비해 두었음에도 불구하고, <b> 공개 레인의 출하 14건에 사전 등록된 예측이 1개도 첨부되지 않았습니다</b>. 지금은 세기만 할 뿐이며, 출하를 중단하지 않았습니다. 판정 결과는 <a href="/data/eligibility-log.json">적격성 판정 대장</a>에 있으며, 점수의 추이는 <a href="/data/autonomy-score-history.json">자율 점수 기록</a>에 있습니다. <a href="/data/value-contracts.json">가치 계약 및 결제</a>、<a href="/data/decision-review.json">성숙·탐색 기록</a>、<a href="/data/decision-recovery.json">복구의 증거</a>도 공개하고 있습니다. 복구 훈련은 실제 성공 횟수에 포함되지 않습니다. </p>
+        <p class="ap-note"> <b>가장 위의 성분(검증된 결정 피복률)을 움직이려면 먼저 “어떤 지표로 가치를 측정할지”를 결정해야 합니다. </b> 그<a href="/data/value-metrics.json"> 지표의 허가 목록과 기준값</a>도 같은 장소에 놓여 있습니다 — <b>2026-09-04에 대해 소유자가 출하일율·공개일율·미해결 고장 건수의 3 지표를 승인했습니다. </b> <b>2026-09-05에 남아 있는 3 지표(고장 감지까지의 시간·1 출하당 실비·판정 사유가 기록되지 않은 기각 비율)도 승인했습니다.  </b>승인은 지표별로 장부에 기록하며, 승인만으로는 점수가 증가하지 않습니다. 비교 기준은 각 지표의 최근 14일의 중앙값입니다. 앞으로의 일일 자율 정책에서는 착수 전 가치 계약이 필수가 되며, 공개 후에 선언한 기간의 실측을 모아 결제합니다. 승인만으로는 점수가 증가하지 않습니다. 새로운 지표를 만들 권한을 AI에게 넘기지 않은 이유는, <b> 방치해도 움직이는 지표를 선택하면 예측이 맞는 것처럼 보이게 되기 때문입니다</b>입니다. </p>
+      </section>
+
+      <!-- 6. AIに与えていない権限 -->
+      <section class="ap-sec">
+        <h2 id="reading-07">6. AI에게 부여되지 않은 권한이 이유와 함께 적혀 있습니다</h2>
+        <p> 공개하고 싶은 것은 할 수 있는 일의 목록이 아니라 경계 쪽입니다. 앱의 릴리스 경로 자체는 자동화되어 있지만, <b>그 체인을 시작할 권한을 개발용 AI 워크플로에 부여하지 않습니다. </b> 설정 파일에 이유가 이렇게 적혀 있습니다. </p>
+        <blockquote class="ap-quote"> 이 권한이 있으면, 확인을 요구하지 않는 설정의 AI가 출하 워크플로를 직접 호출하고,<b>인간을 전혀 개입시키지 않고 App Store에 출하할 수 있게 됩니다</b>。 이 기능에 필요한 핵심 용도는 없습니다 — 리포지토리의 읽기·커밋·푸시·PR 작성·댓글이 모두 권한 없이 작동합니다. 필요하게 되면, 이 권한을 확대하는 것이 아니라,<b>용도를 제한한 다른 경로를 만들어 주세요</b>。
+          <cite>워크플로우 설정 파일의 댓글에서</cite>
+        </blockquote>
+        <blockquote class="ap-quote">
+          <b>실기에서 확인한 후 제출하십시오. 뒤가 아니라 먼저.</b>
+          <cite>릴리스 절차서의 인간용 하드 규칙에서</cite>
+        </blockquote>
+      </section>
+
+      <!-- 7. 実行ログ -->
+      <section class="ap-sec">
+        <h2 id="reading-08">7. 실행 로그 발췌 — 잘 되지 않은 회차도 동일한 형식으로 남깁니다</h2>
+        <p class="ap-note"> 대장은 1 실행 1 행입니다. 출하한 회차와 실패한 회차를 같은 열에 적습니다. 아래는 실물에서 발췌한 내용입니다. </p>
+        <pre class="ap-log" tabindex="0">run_id      : ap-20260823-actions
+date_jst    : 2026-08-23
+route       : actions          outcome : shipped
+pr          : 538              artifact: /obsidian/pricing/
+repair_of   : ap-20260822-actions
+note        : 主系（GitHub Actions）の初出荷。導入から12回目の定時起動で
+              初めて成果物が出た。06:18→06:36 JST（約18分）。過去11回は
+              10〜90秒で終わっており、所要時間そのものが「回ったが何も
+              していない」との違いを示す。
+              この行は主系自身が書いていない。出荷したのに台帳が
+              0件のままだったのはこのため。
+
+run_id      : ap-20260825-actions
+date_jst    : 2026-08-25
+route       : actions          outcome : failed
+failure_class: auth_or_credential
+detected_by : 副系のフォールバックが実行履歴を遡って発見
+note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
+              「台帳を書く主体がいない」という構造的な穴がある。</pre>
+        <p class="ap-note"> <b>이 2개 행이 나란히 있는 것 자체가 현재의 위치입니다.</b> 첫 출하는 이루어졌지만, 대장을 작성할 주체가 실패한 실행에는 기록이 없다는 공백이 남아 있습니다. 9월 2일 기준 미해결 실패는 7건(8월 27일~31일, 그중 3건은 주간 사용 한도)이며, 대장에 <b>그대로</b> 기재되어 있습니다. 탐지까지 중앙값은 13.4시간, 최댓값은 70.8시간입니다. 복구까지 중앙값은 6.7시간입니다. <b>탐지는 8월 말보다 느려졌습니다</b>(주 시스템이 3일 연속 ‘브랜치가 존재한다’는 이유만으로 건너뛰었고, 이를 8월 31일에 한꺼번에 발견했기 때문입니다). </p>
+      </section>
+
+      <!-- 8. できていないこと -->
+      <section class="ap-sec">
+        <h2 id="reading-09">8. 할 수 없는 것</h2>
+        <p class="ap-note">이 기반은 “전체 영역이 자동으로 종료되는” 상태가 아닙니다. 절차서와 보고서에 적힌 것을 그대로 배열합니다.</p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th>영역</th><th>현황</th></tr></thead>
+          <tbody>
+            <tr><td>기능 개발</td><td>분석과 제안은 AI입니다. <b>자동 선정→단계 공개→효과 측정→연속/철회까지 통과한 실적은 아직 없습니다</b></td></tr>
+            <tr><td>버그 수정</td><td>테스트와 분류는 자동입니다. <b>본편 장애 감지→수정→카나리아 공개→자동 롤백의 폐쇄 루프는 아직 구현되지 않음</b></td></tr>
+            <tr><td>실기 테스트</td><td><b>iOS 시뮬레이터·실기 iPhone의 조작, 촬영, 측정이 불가능합니다</b>（macOS 환경이 필수）</td></tr>
+            <tr><td>광고 운영</td><td><b>미구현. </b>이 예산 규모에서는 일일 자동 입찰이 노이즈 최적화가 된다는 자체 분석이 있으며, 착수하지 않았습니다.</td></tr>
+            <tr><td>예산 배분</td><td>상한에서 자체 정지까지. <b>배분 최적화는 아직. </b>상한값 자체도 임시이며, 실제 측정에 기인한 것이 아닙니다</td></tr>
+            <tr><td>장애 감지</td><td>과금 실패는 App Store의 보고서를 통해<b>인지할 수 있게 되었지만</b>, <b>복구하는 도선(결제 방법 업데이트 안내)은 아직 구현되지 않았습니다</b></td></tr>
+            <tr><td>매출 데이터</td><td>App Store 측의 매출·과금 데이터는 8월 25부터 가져오기 시작했지만, <b>LTV·회수 기간은 28분이 모일 때까지 내놓을 수 없습니다</b>(광고비가 0이므로 획득 단가는 정의상 존재하지 않습니다)</td></tr>
+            <tr><td>고객 지원</td><td>수신자·분류·승인된 템플릿에서 자동 답변까지 구현합니다. <b>템플릿에 맞지 않는 용건과 장애 안내 일괄 배포는 사람</b>(후자는 전송 경로 자체가 없습니다)</td></tr>
+            <tr><td>법인 영역</td><td>법정 기한 6건은 기계의 감시 하에(9월 2일), 은행·카드 잔액의 조회와 계약의 정형/비정형 분류도 기계입니다. <b>전표·청구·지불의 대조는 손대지 않고</b>이며, 신고·지불·비정형 계약의 승인은 사람입니다. <b>무인화하지 않음</b></td></tr>
+            <tr><td>홍보 배포 작업</td><td>원고·채점·검사·이미지까지 자동. <b>배포 자체는 관리 화면에서 인간이 수행합니다</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> <b>「완전 자동화할 수 있었다」라고는 쓰지 않습니다. </b> 말할 수 있는 것은 AI가 일상적인 운영을 지속적으로 실행할 수 있는 구조로 만든 것과 자동화가 멈췄을 때 알아차리는 형태로 만든 2입니다. </p>
+      </section>
+
+      <!-- 9. 広報自身の採点 -->
+      <section class="ap-sec">
+        <h2 id="reading-10">9. 홍보 원고도 같은 자로 채점하고 있습니다</h2>
+        <p class="ap-note"> 과거 5개의 보도자료 실적으로 채점식을 보정하고 있습니다. <b>n=5의 보정이며, 외삽의 근거가 되지 않습니다. </b> </p>
+        <div class="ap-tablewrap">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="ap-table">
+          <thead><tr><th class="num">점수</th><th class="num">PV</th><th class="num">전재</th><th>목</th></tr></thead>
+          <tbody>
+            <tr><td class="num">21</td><td class="num">469</td><td class="num">22</td><td>AI 태그 자동 추가</td></tr>
+            <tr><td class="num">40</td><td class="num">1,347</td><td class="num">28</td><td>AirPods에 말하기만 하면 Obsidian으로 이동합니다(Siri 대응)</td></tr>
+            <tr><td class="num">46</td><td class="num">217</td><td class="num">0</td><td>초회 릴리스</td></tr>
+            <tr><td class="num">65</td><td class="num">10,434</td><td class="num">28</td><td>말만 하면 Obsidian으로 — Apple Watch 최초 대응</td></tr>
+            <tr><td class="num">71</td><td class="num">12,188</td><td class="num">34</td><td>신기능「Obsidian 연동」제공 시작</td></tr>
+          </tbody>
+        </table>
+        </div>
+        </div>
+        <p class="ap-note"> 가장 침체된 것은 고유명사가 1도 들어가지 않은 회였습니다. <b>배포 원고에는 과장된 표현이 나오면 CI가 떨어뜨리는 검사를 포함해 두었습니다. </b> </p>
+      </section>
+
+      <!-- 10. 台帳 -->
+      <section class="ap-sec">
+        <h2 id="reading-11">10. 살아 있는 대장</h2>
+        <p class="ap-note">이 페이지의 숫자 출처입니다. <b>업데이트 여부도 포함하여 그대로 볼 수 있습니다. </b></p>
+        <div class="ap-links">
+          <a href="/data/autopilot-runs.json"><b>운전대장</b><span>1 실행 1행. 착수·결과·PR·개입·비용·미해결 결함</span></a>
+          <a href="/data/app-releases.json"><b>앱 본체의 장부(Lane B)</b><span>1판 1행. 태그·빌드·실기 확인 기록·App Store 상태·공개 관측 폭·코드 차이</span></a>
+          <a href="/data/autopilot-status.json"><b>가동 상황</b><span>지금 무엇이 움직이고 있고, 무엇이 멈춰 있는지</span></a>
+          <a href="/data/autopilot-cost.json"><b>AI 실비</b><span>월별 상한과 종류별 한도. <b>상한값은 임시입니다</b></span></a>
+          <a href="/data/automation-coverage.json"><b>자동화 재고 조사</b><span>203 작업·13 영역을 1건씩, 누가 실행하느냐에 따라 분류</span></a>
+          <a href="/data/autonomy-timeline.json"><b>자율도 추이</b><span>월별 종합 자동화율. <b>실측은 2026-08와 09 중간</b>이며, 나머지는 재구성됩니다. 한계는 같은 파일의 known_limits</span></a>
+          <a href="/data/authority-matrix.json"><b>권한표</b><span>19 영역. 가역/불가역과 인간만의 조작</span></a>
+          <a href="/data/code-authorship.json"><b>코드 저자의 장부</b><span>셈 방법 자체가 동결되어 있습니다</span></a>
+          <a href="/data/operating-memory.json"><b>운전 기억</b><span>무엇을 가설하고, 제외했으며, 무엇을 바꿨는가. <b>실패한 회차도 삭제하지 않았습니다</b></span></a>
+        </div>
+        <p class="ap-note"> 관측 가능한 실제 비용은 <b>$50.8681（10 실행분·2026-09-02 시점）</b>입니다. 부계 16 실행분은 스케줄 시작 세션의 로그를 외부에서 읽을 수 없기 때문에 <b>제로가 아니라 미관측</b>입니다. 월별 상한 $40는 <b>임시값</b>이며, 실제 측정에 기인한 것이 아닙니다. </p>
+        <p class="ap-note"> <b>이 금액은 2026년 8월 25일에 나중에 다시 입력한 것입니다. </b> 직전까지 대장은 $0.8149(1 실행분)이라고 표시되어 있었습니다. 8월 23일의 출하 1회분 $7.2967이 전부 누락되었기 때문입니다. <b>빠진 이유는 오타가 아니라 구조 때문입니다. </b> 실행의 마지막에 금액을 출력하는 메커니즘이 있지만, 이를 장부에 기록하는 주체는 <b>다음 날의 실행</b>이며, 그 다음 날이 §7의 실패로 멈췄습니다. <b> 기록이 가장 필요한 회차에 기록이 떨어집니다. </b> </p>
+        <p class="ap-note"> <b>이 구멍은 막혔습니다. </b>매일 아침 9에 동작하는 다른 실행이 실행 기록을 직접 읽고 장부에 기록합니다. 다음 날 실행이 떨어져도 기록은 남습니다. <b>단, 완전하지 않습니다. </b>그 글은 <b>종류(기사인지 수리인지)가 실행 기록으로 판단할 수 있을 때만</b>종류를 작성합니다. 판단할 수 없는 회는 비어 있는 상태로 남아 있으며, <b> 빈 행은 이 뒤에 나타나는 1 회당 상한을 판단하지 않습니다. </b> 실제로, 현재 문제가 되고 있는 8월 23일의 행이 그 상태에서, <b>3.6배 초과가 판정되지 않은 채 통과하고 있었습니다</b>(손으로 보충했습니다). §7의 “대장을 쓰는 주체가 떨어진 회에는 존재하지 않는다”고, 형태가 같은 구멍입니다. </p>
+        <p class="ap-note"> <b>이 $7.2967에는 이미 1개의 문제가 있었습니다. </b>1회당 상한은 <b>$2.00</b>으로 정해 두었습니다. 3.6배입니다. 그럼에도 불구하고 멈추지 않은 것은 <b>상한을 실행할 때 보는 경로가 없었기 때문입니다</b>. 값은 적혀 있었고, 그 값이 모순되지 않는지 검사하는 시스템도 있었지만, <b> 실제로 달리고 있는 운전이 그 값을 읽는 장소는 어디에도 없었습니다. </b> </p>
+        <p class="ap-note"> 8월 25일에 배선했습니다. 단<b>달리고 있는 중에는 멈출 수 없습니다</b> — 비용은 실행이 끝날 때까지 확정되지 않기 때문입니다. 멈출 수 있는 것은 <b>다음 1회</b>이며, 초과가 사람들의 리뷰를 받을 때까지 다음 정시 실행을 진행하지 않는 형태로 하고 있습니다. 멈추는 것은 주계만이므로, <b> 리뷰를 기다리는 동안에도 부계가 출하를 계속합니다</b>（§3의 1/6・10/10）。 해제는 인간에게만 가능합니다 —— <b> AI가 자신의 초과를 스스로 통과할 수 있다면, 상한은 “부탁드립니다”가 됩니다.  </b> <b>이 정지는 본판에서 아직 한 번도 발화하지 않았습니다. </b> </p>
+      </section>
+
+      <!-- 11. 実物 -->
+      <section class="ap-sec ap-cta">
+        <h2 id="reading-12">11. 이 페이지의 숫자는 작동 중인 앱의 것입니다</h2>
+        <p class="ap-note"> 「SimpleMemo」은 생각나는 순간에 말하거나 쓰기만 하면 자신의 메일과 Obsidian에 메모를 남기는 iPhone/Apple Watch용 앱입니다. <b>하루 최대 3건 기간 없이 무료</b>이며, 신용카드 등록이 필요 없습니다(이메일 주소 인증만 필요합니다). </p>
+        <div class="ap-cta__row">
+          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=3d126d78-2267-4a6c-a860-c69707ab90a5&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="ap-cta__store">App Store에서 무료 다운로드</a>
+          <a href="/ko/" class="ap-cta__ghost">메인 페이지 →</a>
+        </div>
+        <p class="ap-note"> <b>여기부터는 인간의 영역입니다. </b>App Store에 대한 공개·실기 사전 확인·가격·광고·계약은 이 페이지의 §2에 따라 사람이 결정합니다. 위에서 설명드린 것은 바로 그 이전의 운영 방법입니다. </p>
+      </section>
+
+      <div class="ap-qr ap-qr--desktop">
+        <img src="/assets/img/qr-autopilot-ja.svg?v=3cfffdff9a" alt="App Store로 여는 QR 코드" width="148" height="148" loading="lazy">
+        <p>스마트폰 카메라로 읽어내면 App Store가 열립니다.</p>
+      </div>
+
+    </div>
+  </main>
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/how-to/" class="footer__link"><span>사용 방법</span> </a>
+        <a href="/ko/templates/" class="footer__link"><span>템플릿</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio/" class="footer__link"><span>Captio식</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/autopilot/" class="footer__link"><span>자율형 앱 운영</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/terms" class="footer__link"><span>이용 약관</span> </a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

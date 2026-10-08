@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/templater/">
+  <title>Templater的使用方法 — 執行方法和每日筆記的設定 | SimpleMemo</title>
+  <meta name="description" content="介紹在Obsidian的Templater中輸入日期和標題的方法。 將插入模板的操作和製作每日筆記時執行的設定分開，整理變數剩餘時的確認地址。 Linux版Obsidian 1.13.7和Templater 2.25.1確認的範圍，iOS和同步等未驗證的範圍也明確說明。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Templater的使用方法 — 執行方法和每日筆記的設定">
+  <meta property="og:description" content="介紹在Obsidian的Templater中輸入日期和標題的方法。 將插入模板的操作和製作每日筆記時執行的設定分開，整理變數剩餘時的確認地址。 Linux版Obsidian 1.13.7和Templater 2.25.1確認的範圍，iOS和同步等未驗證的範圍也明確說明。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Templater的使用方法 — 執行方法和每日筆記的設定">
+  <meta name="twitter:description" content="介紹在Obsidian的Templater中輸入日期和標題的方法。 將插入模板的操作和製作每日筆記時執行的設定分開，整理變數剩餘時的確認地址。 Linux版Obsidian 1.13.7和Templater 2.25.1確認的範圍，iOS和同步等未驗證的範圍也明確說明。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.template-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.template-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.template-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.template-code{max-width:100%;min-width:0;font-size:.9rem}.template-toc a{min-height:44px;display:inline-flex;align-items:center}.template-results{display:grid;gap:1rem}.template-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.template-results{grid-template-columns:1fr 1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/plugins/templater/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Templater的使用方法 — 執行方法和每日筆記的設定",
+  "description": "介紹在Obsidian的Templater中輸入日期和標題的方法。 將插入模板的操作和製作每日筆記時執行的設定分開，整理變數剩餘時的確認地址。 Linux版Obsidian 1.13.7和Templater 2.25.1確認的範圍，iOS和同步等未驗證的範圍也明確說明。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/plugins/templater/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/plugins/templater/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "外掛入門",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "模板",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/plugins/templater/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/plugins/templater/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "儲存Templater的模板會自動執行嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "並不是僅僅儲存就能自動應用於所有筆記本。 將儲存的模板放入現在的筆記中時，使用“Templater: Open insert template modal”。 建立新檔案時的處理是“Trigger Templater on new file creation”的另一個設定。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "每日筆記也需要Folder templates嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在這次確認中，在core Daily notes中指定了Templates/Daily.md，Templater的Trigger是ON，Template matching mode是None，新的日期筆記中的命令展開了。 None是不自動分配模板的設定，但是會處理新正文中已有的Templater命令。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "開啟Trigger的話，現有的每日筆記本也能修好嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這次，在OFF製作的筆記ON後用Daily notes的命令重新開啟，儲存的內容也沒有改變。 在包含未展開命令的同一筆記中，可以用“Templater: Replace templates in the active file”展開。 這是這次設定的結果，啟動時開啟Daily note的設定和一次性處理沒有驗證。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone也可以使用同樣的步驟嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Templater 2.25.1的官方manifest不是桌面專用的設定，但這次的實際操作確認只有Linux版Obsidian 1.13.7。 iPhone的畫面和模板展開、終端間同步、SimpleMemo的輸入沒有驗證。 在Trigger的設定畫面上，也顯示著每個終端的啟用設定。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球導航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh-Hant/guides/">使用指南</a></li><li><a href="/zh-Hant/use-cases/">使用情境</a></li><li><a href="/zh-Hant/vs/">比較</a></li><li><a href="/zh-Hant/blog/">部落格</a></li><li><a href="/zh-Hant/about/">關於開發者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/plugins/templater/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/templater/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/plugins/templater/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/plugins/templater/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/templater/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/templater/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/templater/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/templater/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/templater/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · 模板的執行</div><h1 class="lp-hero__title">Templater的使用方法<br>執行方法和每日筆記的設定</h1><p class="lp-hero__sub">Templater是執行筆記中的變數和函式，並將結果放入正文的外掛。 首先手動插入1張，然後進入製作每日筆記時的設定。 在這裡，用同一個模板確認了變數的剩餘狀態和設定後的結果。</p><p class="article-meta">作者: <a href="/zh-Hant/about/">SimpleMemo Developer</a> ・ 公開・驗證: <time datetime="2026-09-30">2026年9月30日</time></p></div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>準備Templater，區分記法</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>首先，將模板插入當前的筆記本</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>用新的每日筆記，執行Templater</span><span aria-hidden="true">↗</span></a></nav></header>
+<aside class="tip-box"><strong>確認的環境：</strong>隔離的Linux版Obsidian 1.13.7和Templater 2.25.1。 包含2026年9月30日10:49~10:50 UTC（日本時間19:49~19:50）的每日筆記驗證。 iPhone、同期、SimpleMemo的到達和速度、語音質量尚未驗證。<a href="#evidence">確認方法和範圍</a>在報道末尾顯示。</aside>
+<nav class="template-toc" aria-label="這篇報道的目錄"><a href="#prepare">準備和記法</a><a href="#insert">手動插入</a><a href="#daily-note">每日筆記的設定</a><a href="#not-applied">不適用時</a><a href="#faq">常見問題</a><a href="#evidence">驗證和出處</a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">準備Templater，區分記法</h2></div><div class="ce-chapter__body"><p>在官方匯入指南中，在Obsidian的Community plugins中搜尋“Templater”進行安裝。 在這次驗證中，將官方2.25.1的分發檔案放入隔離Vault中，在設定畫面中啟用了外掛。 如果正在使用的Obsidian和Templater的版本不同，請在自己的環境中確認畫面名稱和行為。</p><p>Templater的<strong>Template folder location</strong>中，在示例中指定<code>Templates</code>。 命令以<code>&lt;%</code>開始，以<code>%&gt;</code>結束。 <code>tp.file.title</code>是目標筆記的標題，<code>tp.date.now("YYYY-MM-DD HH:mm")</code>是使用執行時的日期和時間的例子。 不要與用手寫日期的<a href="/zh-Hant/obsidian/journaling/#starter">日記的模板</a>和core Templates的<code>{{date}}</code>記法混淆。</p><p>如果想要確認核心Templates的標題、日期的替換和儲存結果，也請參考<a href="/zh-Hant/obsidian/templates/">全部10種實際插入並重新顯示的Markdown模板集</a>。</p><aside class="tip-box">Templater是可以執行JavaScript和系統命令的外掛。 官方README指導您從可靠的來源使用可以理解的程式碼。 在這篇報道的簡短例子中，不使用外部通訊、使用者指令碼、系統命令。</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="insert"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">首先，將模板插入當前的筆記</h2></div><div class="ce-chapter__body"><p>用於驗證的<code>Templates/Simple.md</code>的原文如下。 英文備忘錄部分是不包含個人資訊的驗證用的虛構內容。</p>
+<pre class="template-code" tabindex="0"><code data-evidence="simple-template"># &lt;% tp.file.title %&gt;
+
+created: &lt;% tp.date.now(&quot;YYYY-MM-DD HH:mm&quot;) %&gt;
+result: templater-simple-expanded
+
+## Capture
+- Sample thought from isolated verification.
+</code></pre>
+<ol><li>準備<code>Templates/Simple.md</code>，開啟插入的筆記。</li><li>命令調色盤中選擇<strong>Templater: Open insert template modal</strong>，從列表中選擇<code>Simple</code>。</li><li>確認插入的標題和日期。 在這次的<code>Normal</code>筆記本中，<code>tp.file.title</code>向<code>Normal</code>展開，時間的公式向<code>2026-09-30 10:46</code>展開。</li></ol><p><code>result: templater-simple-expanded</code>是原文中的固定文字。 看不到這行不用於判斷成功。 <strong>確認<code>&lt;% … %&gt;</code>是否被替換為實際值</strong>。 日期和時間是這個Linux環境的UTC，日本時間是19:46。</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/insert-template.png" alt="在Linux版Obsidian的Normal筆記中，Simple模板的標題和日期展開的畫面" width="1024" height="800" loading="lazy"><figcaption>2026年9月30日10:46 UTC（19:46 JST）。 從實際的模板選擇畫面中選擇了Simple，插入了現在的筆記中。</figcaption></figure>
+<p>展開已經貼上到正文中的Templater命令的<strong>Replace templates in the active file</strong>是另外的操作。 每日筆記中的恢復例子在<a href="#not-applied">後面的節</a>中顯示。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily-note"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">用新的每日筆記，執行Templater</h2></div><div class="ce-chapter__body"><p>首先嚐試了core Daily notes放入模板正文，處理正文中的Templater命令的配置。 使用的<code>Templates/Daily.md</code>是以下原文。</p>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-template"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre>
+<p>這次的設定值如下。 分開確認core Daily notes和Templater的設定。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th>設定的地方</th><th>顯示的專案</th><th>這次的數值</th></tr></thead><tbody><tr><th>核心每日筆記</th><td data-label="專案">日期格式</td><td data-label="值"><code>YYYY-MM-DD</code></td></tr><tr><th>核心每日筆記</th><td data-label="專案">新檔案位置</td><td data-label="值"><code>Daily</code></td></tr><tr><th>核心每日筆記</th><td data-label="專案">模板檔案位置</td><td data-label="值"><code>Templates/Daily.md</code></td></tr><tr><th>模板</th><td data-label="專案">模板資料夾位置</td><td data-label="值"><code>Templates</code></td></tr><tr><th>模板</th><td data-label="專案">在建立新檔案時觸發模板</td><td data-label="值">比較OFF和ON</td></tr><tr><th>模板</th><td data-label="專案">模板匹配模式</td><td data-label="值"><code>None</code></td></tr></tbody></table></div>
+<p><strong>開啟Trigger，Template matching mode設定為None</strong>的設定畫面。 <code>None</code>是不自動分配模板的設定，但是會處理新筆記正文中已有的Templater命令。 在這個例子中，因為Daily notes方面指定了模板，所以沒有新增Folder templates和File regex templates。</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/trigger-on-settings.png" alt="Templater的Trigger Templater on new file creation是ON，Template matching mode是None的設定畫面" width="900" height="700" loading="lazy"><figcaption>實際操作的Templater 2.25.1的設定。 Trigger只儲存在這個終端上，還顯示每個終端都需要啟用的註釋。</figcaption></figure>
+<p>用相同的模板、日期格式、<code>Daily/2026-09-30.md</code>的儲存地址，比較了新制作的筆記本。</p><div class="template-results"><div><h3>Trigger OFF：公式還剩下</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-off"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div><div><h3>Trigger ON+None：被展開為值</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-on"># Daily 2026-09-30
+
+note-title: 2026-09-30
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div></div>
+<p>這裡<code>result: templater-daily-expanded</code>也是兩者的固定文字。 區別是，標題的<code>tp.date.now</code>和<code>note-title</code>的<code>tp.file.title</code>變成了數值。</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-off.png" alt="在Trigger OFF建立的日期筆記中留下了tp.date.now和tp.file.title命令的畫面" width="1024" height="800" loading="lazy"><figcaption>OFF中加入了Daily notes的模板正文，但Templater的表示式沒有展開。</figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-on.png" alt="用Trigger ON和None新建的Daily筆記上展開了日期和note-title的畫面" width="1024" height="800" loading="lazy"><figcaption>用ON+None在同一路徑上新建後，標題是Daily 2026-09-30，note-title是2026-09-30。</figcaption></figure>
+<aside class="tip-box"><strong>比較方法：</strong>為了確認ON的新制作，只刪除了隔離Vault的虛構的考試筆記，用同名重新制作了。 不是刪除讀者已記錄的每日筆記的程式。 自己嘗試時請使用驗證用Vault或副本，並留下現有的記錄。</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="not-applied"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">模板不適用時，要確認什麼？</h2></div><div class="ce-chapter__body"><p><strong>區分沒有包含筆記正文的情況和只留下正文的Templater式的情況。 </strong>在這次的OFF筆記中，正文字身就進去了。 開啟Trigger後，用Daily notes的命令重新開啟相同的現有筆記，儲存內容的SHA256前後一致，公式仍然存在。</p><p>在開啟現有筆記的狀態下執行<strong>Templater: Replace templates in the active file</strong>，就可以展開日期和標題的公式了。 在包含記錄的筆記中，確認內容和模板的程式碼，複製後進行操作。 這是這次條件的結果。 啟動時開啟Daily note的設定等，沒有推廣到其他路徑。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th>可見的狀態</th><th>確認的專案</th><th>依據和範圍</th></tr></thead><tbody><tr><th>正文中留下公式</th><td data-label="確認">Trigger的ON/OFF，是新建還是現有筆記本</td><td data-label="依據">這次的OFF/ON對比，重新開啟現有的筆記本，透過手動Replace確認</td></tr><tr><th>沒有模板的正文</th><td data-label="確認">每日筆記的模板檔案位置</td><td data-label="依據">None不會自動選擇模板。 也確認輸入正文的一方的指定</td></tr><tr><th>在特定資料夾中無法執行</th><td data-label="確認">Excluded folders、模板原資料夾</td><td data-label="依據">官方2.25.1的規格。 排除資料夾和模板源從新建時的處理物件中退出。 這個箱子本身沒有實際測量</td></tr><tr><th>其他終端的設定不起作用</th><td data-label="確認">那個終端的Trigger設定</td><td data-label="依據">設定畫面的按終端儲存的註記。 這次，其他終端的動作和同步尚未驗證</td></tr><tr><th>沒有追記的筆記・不一樣</th><td data-label="確認">日期、儲存資料夾、建立檔案的路徑</td><td data-label="依據"><a href="/zh-Hant/obsidian/daily-note/#missing">現有的每日筆記補充問題</a>。 與Templar的展開分開確認</td></tr></tbody></table></div><p>僅透過Templater的設定，並不能完成外部輸入受理、其他應用程式的補充、終端間同步。 在這篇文章中確認了Obsidian內的模板處理。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">常見問題</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">儲存Templater的模板會自動執行嗎？</summary><div class="faq-answer">並不是僅僅儲存就能自動應用於所有筆記本。 將儲存的模板放入現在的筆記中時，使用“Templater: Open insert template modal”。 建立新檔案時的處理是“Trigger Templater on new file creation”的另一個設定。</div></details>
+<details class="faq-item"><summary class="faq-summary">每日筆記也需要Folder templates嗎？</summary><div class="faq-answer">在這次確認中，在core Daily notes中指定了Templates/Daily.md，Templater的Trigger是ON，Template matching mode是None，新的日期筆記中的命令展開了。 None是不自動分配模板的設定，但是會處理新正文中已有的Templater命令。</div></details>
+<details class="faq-item"><summary class="faq-summary">開啟Trigger的話，現有的每日筆記本也能修好嗎？</summary><div class="faq-answer">這次，在OFF製作的筆記ON後用Daily notes的命令重新開啟，儲存的內容也沒有改變。 在包含未展開命令的同一筆記中，可以用“Templater: Replace templates in the active file”展開。 這是這次設定的結果，啟動時開啟Daily note的設定和一次性處理沒有驗證。</div></details>
+<details class="faq-item"><summary class="faq-summary">iPhone也可以使用同樣的步驟嗎？</summary><div class="faq-answer">Templater 2.25.1的官方manifest不是桌面專用的設定，但這次的實際操作確認只有Linux版Obsidian 1.13.7。 iPhone的畫面和模板展開、終端間同步、SimpleMemo的輸入沒有驗證。 在Trigger的設定畫面上，也顯示著每個終端的啟用設定。</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">驗證環境和可以使用這篇報道的範圍</h2></div><div class="ce-chapter__body"><ul><li><strong>實際操作：</strong>Linux的隔離Vault、Obsidian 1.13.7、Templater 2.25.1。 操作設定畫面，透過應用程式上註冊的命令確認筆記的製作、展開。 手動插入時從GUI列表中選擇了模板。</li><li><strong>每日筆記對照：</strong>2026年9月30日10:49~10:50 UTC（19:49~19:50 JST）。 以相同的模板、儲存地址、日期形式比較OFF和ON+None的儲存Markdown。 還確認了現有的OFF筆記的重新開啟和明確的Replace的恢復。</li><li><strong>官方原件：</strong>2.25.1的分發檔案・manifest・官方docs/source確認。 manifest的最小Obsidian版是1.13.0。 這不是所有版本和終端的執行保證。</li><li><strong>未驗證：</strong>iPhone/Android/Mac，Obsidian關閉狀態和從外部建立檔案，啟動時Daily note，同步，SimpleMemo配合，速度·語音質量·Siri·Watch。</li></ul><p>這個Linux的桌面操作不是iOS Simulator或iPhone實機的確認。 僅限於影象中顯示的虛構備忘錄和儲存Markdown顯示的範圍，作為實際操作的結果進行記載。</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/templater-20260930.md" target="_blank" rel="noopener">驗證記錄・原件和確認範圍</a></p><h3>官方資料</h3><ul class="source-list">
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/installation.md" target="_blank" rel="noopener">Templater的匯入方法</a> — 官方2.25.1原件</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/settings.md" target="_blank" rel="noopener">設定：Trigger、None、排除資料夾</a> — 官方2.25.1原件</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/syntax.md" target="_blank" rel="noopener">記法：命令和日期函式</a> — 官方2.25.1原件</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/README.md" target="_blank" rel="noopener">README：功能和程式碼執行的注意事項</a> — 官方2.25.1原件</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/manifest.json" target="_blank" rel="noopener">2.25.1的manifest</a> — 官方2.25.1原件</li>
+</ul><div class="internal-links"><a href="/zh-Hant/obsidian/plugins/">Obsidian的外掛一覽</a><a href="/zh-Hant/obsidian/daily-note/">每日筆記的補充</a><a href="/zh-Hant/obsidian/journaling/">日期筆記的記錄例子</a></div><p class="template-note">本網站由YURIKA, K.K.運營，介紹獨立應用程式“SimpleMemo”。 不是Obsidian官方的報道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下來閱讀</span><strong>確認Obsidian連線和儲存位置的設定</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="頁尾導航"><div class="footer__col"><p class="footer__col-title">產品</p><a href="/zh-Hant/download/" class="footer__link">下載</a><a href="/zh-Hant/" class="footer__link">首頁</a><a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a></div><div class="footer__col"><p class="footer__col-title">比較與遷移</p><a href="/zh-Hant/vs/" class="footer__link">比較</a><a href="/zh-Hant/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">支援</p><a href="/zh-Hant/about/" class="footer__link">關於開發者</a><a href="/zh-Hant/faq" class="footer__link">常見問題</a><a href="/zh-Hant/privacy" class="footer__link">隱私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/templater/">
+  <title>Use Templater: running templates and setting up daily notes | SimpleMemo</title>
+  <meta name="description" content="Introducing how to enter dates and headings in Templater of Obsidian. Separate the operation of inserting the template and the settings to be executed when creating a daily note, and organize the confirmation destination if the variable remains. The scope confirmed by the Linux version of Obsidian 1.13.7 and Templater 2.25.1, and the unverified range such as iOS and synchronization are also specified.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="How to use Templater - How to run and set up daily notes">
+  <meta property="og:description" content="Introducing how to enter dates and headings in Templater of Obsidian. Separate the operation of inserting the template and the settings to be executed when creating a daily note, and organize the confirmation destination if the variable remains. The scope confirmed by the Linux version of Obsidian 1.13.7 and Templater 2.25.1, and the unverified range such as iOS and synchronization are also specified.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="How to use Templater - How to run and set up daily notes">
+  <meta name="twitter:description" content="Introducing how to enter dates and headings in Templater of Obsidian. Separate the operation of inserting the template and the settings to be executed when creating a daily note, and organize the confirmation destination if the variable remains. The scope confirmed by the Linux version of Obsidian 1.13.7 and Templater 2.25.1, and the unverified range such as iOS and synchronization are also specified.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.template-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.template-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.template-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.template-code{max-width:100%;min-width:0;font-size:.9rem}.template-toc a{min-height:44px;display:inline-flex;align-items:center}.template-results{display:grid;gap:1rem}.template-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.template-results{grid-template-columns:1fr 1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/en/obsidian/plugins/templater/#article",
+  "inLanguage": "en",
+  "headline": "How to use Templater - How to run and set up daily notes",
+  "description": "Introducing how to enter dates and headings in Templater of Obsidian. Separate the operation of inserting the template and the settings to be executed when creating a daily note, and organize the confirmation destination if the variable remains. The scope confirmed by the Linux version of Obsidian 1.13.7 and Templater 2.25.1, and the unverified range such as iOS and synchronization are also specified.",
+  "url": "https://simplememofast.com/en/obsidian/plugins/templater/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/en/obsidian/plugins/templater/"
+  }
+}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Write on iPhone. Find it in your chosen Obsidian note.","item":"https://simplememofast.com/en/obsidian/"},{"@type":"ListItem","position":3,"name":"Obsidian plugins: where to start","item":"https://simplememofast.com/en/obsidian/plugins/"},{"@type":"ListItem","position":4,"name":"Use Templater Run templates and set up daily notes","item":"https://simplememofast.com/en/obsidian/plugins/templater/"}]}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/en/obsidian/plugins/templater/#faq",
+  "inLanguage": "en",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "If I save the Templater template, will it be executed automatically?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is not automatically applied to all notes just by saving. Use \"Templater: Open insert template modal\" to put the saved template into the current note. The processing when creating a new file is another setting called \"Trigger Templater on new file creation\"."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I also need Folder templates in Daily Note?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In this confirmation, Templates/Daily.md was specified in the core Daily notes, the Trigger of the Templater was ON, and the Template matching mode was None, and the command in the new date note was deployed. None is a setting that does not automatically assign templates, but the Templateter command already in the new body is processed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "If I turn on the Trigger, will the existing daily note be fixed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In this test, reopening a note created with the trigger OFF through the Daily notes command after turning the trigger ON did not change its saved content. In that same note, “Templater: Replace templates in the active file” expanded the unprocessed commands. These results apply to the tested configuration; opening the daily note at startup and batch processing were not tested."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I use the same procedure on iPhone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Templater 2.25.1's official manifest is not a desktop-only setting, but only the Linux version of Obsidian 1.13.7 is confirmed for actual operation this time. The iPhone screen, template deployment, inter-terminal synchronization, and input from SimpleMemo have not been verified. The trigger setting screen also shows the settings to be enabled for each terminal."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Global navigation" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/en/guides/">Guides</a></li><li><a href="/en/use-cases/">Use cases</a></li><li><a href="/en/vs/">Compare</a></li><li><a href="/en/blog/">Blog</a></li><li><a href="/en/about/">About the developer</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Download</a><details class="site-languages"><summary aria-label="English · Choose a language"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>EN</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="en" dir="ltr"><p class="site-language-title">Choose a language</p><div class="site-language-grid"><a href="/obsidian/plugins/templater/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="en" aria-current="page"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh/obsidian/plugins/templater/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/plugins/templater/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/templater/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/templater/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/templater/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/templater/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/templater/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/templater/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · Running Templates</div><h1 class="lp-hero__title">Use Templater<br>Run templates and set up daily notes</h1><p class="lp-hero__sub">Templater is a plug-in that executes variables and functions in a note and puts the results into the body. First, manually insert the 1 sheet, and then proceed to the settings when creating daily notes. Here, we checked the state where the variable remains and the result after setting with the same template.</p><p class="article-meta">Author: <a href="/en/about/">SimpleMemo Developer</a> · Published and tested: <time datetime="2026-09-30">2026-9-30</time></p></div><nav class="sd-hero-index" aria-label="On this page"><p>On this page</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Prepare the Templater and distinguish the notation</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>First, insert the template into the current note</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Run Templater in a new daily note</span><span aria-hidden="true">↗</span></a></nav></header>
+<aside class="tip-box"><strong>Confirmed environment:</strong>An isolated Linux installation of Obsidian 1.13.7 with Templater 2.25.1. This includes the daily-note tests on 2026-9-30 at 10:49–10:50 UTC (19:49–19:50 Japan time). iPhone, synchronization, delivery from SimpleMemo, speed, and voice quality were not tested.<a href="#evidence">Confirmation method and scope</a>is shown at the end of the article.</aside>
+<nav class="template-toc" aria-label="On this page"><a href="#prepare">Preparation and notation</a><a href="#insert">Insert manually</a><a href="#daily-note">Daily note setting</a><a href="#not-applied">When not applicable</a><a href="#faq">Frequently Asked Questions</a><a href="#evidence">Verification and source</a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Prepare the Templater and distinguish the notation</h2></div><div class="ce-chapter__body"><p>The official installation guide says to search for “Templater” in Obsidian Community plugins and install it. In this test, we placed the official 2.25.1 release files in an isolated Vault and enabled the plugin in Settings. If your Obsidian or Templater version differs, check the screen names and behavior in your own environment.</p><p>Template's <strong>Template folder location</strong>, specify <code>Templates</code> in the example. The command starts with <code>&lt;%</code> and ends with <code>%&gt;</code>. <code>tp.file.title</code> is the title of the target note, and <code>tp.date.now("YYYY-MM-DD HH:mm")</code> is an example of using the date and time of execution. Do not confuse the <a href="/en/obsidian/journaling/#starter"> journaling template</a>, which is written by hand, and the <code>{{date}}</code> notation of core Templates.</p><p>If you want to check the replacement and saving results of the title and date and time of the core templates, please also refer to <a href="/en/obsidian/templates/">Markdown template collection that actually inserts and re-displays all 10 types</a>.</p><aside class="tip-box">Templater is a plug-in that can also execute JavaScript and system commands. THE OFFICIAL README GUIDES YOU TO USE CODE THAT YOU CAN UNDERSTAND FROM A RELIABLE SOURCE. In the short example of this article, we do not use external communication, user script, or system commands.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="insert"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">First, insert the template into the current note</h2></div><div class="ce-chapter__body"><p>The original text of <code>Templates/Simple.md</code> used for verification is as follows. The English memo part is a fictional content for verification that does not include personal information.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="simple-template"># &lt;% tp.file.title %&gt;
+
+created: &lt;% tp.date.now(&quot;YYYY-MM-DD HH:mm&quot;) %&gt;
+result: templater-simple-expanded
+
+## Capture
+- Sample thought from isolated verification.
+</code></pre>
+<ol><li>Prepare <code>Templates/Simple.md</code> and open the inserted note.</li><li>In the command palette, select <strong>Templater: Open insert template modal</strong>, then choose <code>Simple</code> from the list.</li><li>Check the inserted heading and date. In this <code>Normal</code> note, <code>tp.file.title</code> is deployed to <code>Normal</code>, and the time formula is deployed to <code>2026-09-30 10:46</code>.</li></ol><p><code>result: templater-simple-expanded</code> is a fixed character in the original text. The fact that this line is visible is not used to determine success. <strong>Check if <code>&lt;% … %&gt;</code> has been replaced with the actual value</strong>. The date and time are UTC in this Linux environment, and 19:46 in Japan time.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/insert-template.png" alt="In the Normal note of the Linux version of Obsidian, the screen with the title and date of the Simple template is expanded" width="1024" height="800" loading="lazy"><figcaption>2026 year 9 month 30 day 10:46 UTC (19:46 JST). I selected Simple from the actual template selection screen and inserted it into the current note.</figcaption></figure>
+<p><strong>Replace templates in the active file</strong>, which expands Templater commands already pasted into the note, is a separate operation. A recovery example for daily notes appears in a <a href="#not-applied">later section</a>.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily-note"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Run Templater in the new daily note</h2></div><div class="ce-chapter__body"><p>First, I tried to configure the core Daily notes to include the template body and handle the Templater command in the body. The <code>Templates/Daily.md</code> used is the following original text.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-template"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre>
+<p>The setting value this time is as follows. Check the settings of core Daily notes and Templateter separately.</p><div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table class="rt-table"><thead><tr><th>Where to set</th><th>Items displayed</th><th>This time's value</th></tr></thead><tbody><tr><th>core Daily notes</th><td data-label="Item">Date format</td><td data-label="Value"><code>YYYY-MM-DD</code></td></tr><tr><th>core Daily notes</th><td data-label="Item">New file location</td><td data-label="Value"><code>Daily</code></td></tr><tr><th>core Daily notes</th><td data-label="Item">Template file location</td><td data-label="Value"><code>Templates/Daily.md</code></td></tr><tr><th>Templater</th><td data-label="Item">Template folder location</td><td data-label="Value"><code>Templates</code></td></tr><tr><th>Templater</th><td data-label="Item">Trigger Templater on new file creation</td><td data-label="Value">Compare OFF and ON</td></tr><tr><th>Templater</th><td data-label="Item">Template matching mode</td><td data-label="Value"><code>None</code></td></tr></tbody></table></div>
+<p>This settings screen shows <strong>Trigger enabled and Template matching mode set to None</strong>. <code>None</code> does not automatically assign a template, but it processes Templater commands already present in a new note’s body. In this example, Daily notes specifies the template, so we did not add Folder templates or File regex templates.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/trigger-on-settings.png" alt="Templater&#x27;s Trigger Templater on new file creation is ON, and Template matching mode is None setting screen" width="900" height="700" loading="lazy"><figcaption>Templater 2.25.1 settings that I actually operated. Trigger is only saved on this terminal, and a note is also displayed that it must be enabled for each terminal.</figcaption></figure>
+<p>I compared the newly made notes with the same template, date format, and <code>Daily/2026-09-30.md</code>.</p><div class="template-results"><div><h3>Trigger OFF: The ceremony remains</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-off"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div><div><h3>Trigger ON+None: Expanded to the value</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-on"># Daily 2026-09-30
+
+note-title: 2026-09-30
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div></div>
+<p>Here, too, <code>result: templater-daily-expanded</code> is a fixed character in both. The difference is that the <code>tp.file.title</code> of the heading <code>tp.date.now</code> and <code>note-title</code> has changed to the value.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-off.png" alt="Screen with tp.date.now and tp.file.title commands remaining in the date note created with Trigger OFF" width="1024" height="800" loading="lazy"><figcaption>OFF, the template text of the Daily notes was included, but the Templater expression remained unexpanded.</figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-on.png" alt="A screen where the date and note-title are expanded in the Daily note newly created with Trigger ON and None" width="1024" height="800" loading="lazy"><figcaption>When creating a new path with ON+None, the headline was expanded to Daily 2026-09-30 and the note-title was expanded to 2026-09-30.</figcaption></figure>
+<aside class="tip-box"><strong>Comparison method:</strong>In order to confirm the new creation of ON, I deleted only the fictitious test notes of the quarantine Vault and recreated them with the same name. This is not the procedure to delete the reader's recorded daily notes. When trying it yourself, please use a verification Vault or a copy and leave an existing record.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="not-applied"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">What to check when the template does not apply?</h2></div><div class="ce-chapter__body"><p><strong> It is divided between cases where the note body is not included and when only the Templater expression of the body remains. </strong>In this OFF note, the text itself was included. Even if you turn on Trigger and reopen the same existing note with the Daily notes command, the saved content SHA256 matches before and after, and the expression remains.</p><p>Run <strong>Templater: Replace templates in the active file</strong> with the existing note open, and I was able to expand the date and title expression. In the notes containing the record, check the contents and the code of the template, try it with a copy, and then operate. This is the result of this condition. It has not been generalized to other routes, such as the setting to open the Daily note at startup.</p><div class="sd-table" tabindex="0" role="region" aria-label="Scrollable table"><table class="rt-table"><thead><tr><th>visible state</th><th>Items to check</th><th>Cursis and scope</th></tr></thead><tbody><tr><th>The formula remains in the text</th><td data-label="Confirmation">On/OFF of Trigger, whether to create a new or an existing note</td><td data-label="Equisition">This OFF/ON comparison, reopening existing notes, confirmation with manual Replace</td></tr><tr><th>There is no text of the template</th><td data-label="Confirmation">Template file location of Daily notes</td><td data-label="Equisition">None does not automatically select templates. We will also check the designation of the side to enter the text</td></tr><tr><th>Does not work in a specific folder</th><td data-label="Confirmation">Excluded folders, the original folder of the template</td><td data-label="Equisition">Specifications of the official 2.25.1. The excluded folder and template source will be excluded from the processing target at the time of new creation. This case itself has not been measured</td></tr><tr><th>The setting does not work on another terminal</th><td data-label="Confirmation">Trigger setting of that terminal</td><td data-label="Equisition">Note on saving by terminal on the setting screen. This time, the operation and synchronization of another terminal have not been verified</td></tr><tr><th>There is no postscript note, it is different</th><td data-label="Confirmation">Date, destination folder, path to create the file</td><td data-label="Equisition"><a href="/en/obsidian/daily-note/#missing">To the existing daily note add-in problem</a>. I will check separately from the deployment of Templater</td></tr></tbody></table></div><p>Templater settings alone do not complete external input reception, additional notes from another app, and inter-terminal synchronization. In this article, we confirmed the template processing in Obsidian.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Frequently Asked Questions</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">If I save the Templater template, will it be executed automatically?</summary><div class="faq-answer">It is not automatically applied to all notes just by saving. Use "Templater: Open insert template modal" to put the saved template into the current note. The processing when creating a new file is another setting called "Trigger Templater on new file creation".</div></details>
+<details class="faq-item"><summary class="faq-summary">Do I also need Folder templates in Daily Note?</summary><div class="faq-answer">In this confirmation, Templates/Daily.md was specified in the core Daily notes, the Trigger of the Templater was ON, and the Template matching mode was None, and the command in the new date note was deployed. None is a setting that does not automatically assign templates, but the Templateter command already in the new body is processed.</div></details>
+<details class="faq-item"><summary class="faq-summary">If I turn on the Trigger, will the existing daily note be fixed?</summary><div class="faq-answer">In this test, reopening a note created with the trigger OFF through the Daily notes command after turning the trigger ON did not change its saved content. In that same note, “Templater: Replace templates in the active file” expanded the unprocessed commands. These results apply to the tested configuration; opening the daily note at startup and batch processing were not tested.</div></details>
+<details class="faq-item"><summary class="faq-summary">Can I use the same procedure on iPhone?</summary><div class="faq-answer">Templater 2.25.1's official manifest is not a desktop-only setting, but only the Linux version of Obsidian 1.13.7 is confirmed for actual operation this time. The iPhone screen, template deployment, inter-terminal synchronization, and input from SimpleMemo have not been verified. The trigger setting screen also shows the settings to be enabled for each terminal.</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Verification environment and the scope of use for this article</h2></div><div class="ce-chapter__body"><ul><li><strong>Actual operation: </strong>Linux isolation Vault, Obsidian 1.13.7, Templater 2.25.1. Operate the setting screen and check the creation and deployment of notes with the commands registered in the app. For manual insertion, I selected a template from the list of GUIs.</li><li><strong>Daily note comparison:</strong>2026 year 9 month 30 days 10:49~10:50 UTC (19:49~19:50 JST). Compare OFF and ON+None saving Markdown with the same template, storage destination, and date format. We also confirmed the reopening of the existing OFF note and the restoration by explicit Replace.</li><li><strong> Official original: </strong> Check the distribution file, manifest, and official docs/source of 2.25.1. The minimum Obsidian version of manifest is 1.13.0. This is not a guarantee of the operation of all versions and terminals.</li><li><strong>Unverified: </strong>iPhone/Android/Mac, Obsidian closed state and external file creation, daily note at startup, synchronization, SimpleMemo linkage, speed, audio quality, Siri, Watch.</li></ul><p>This Linux desktop operation is not confirmed on the iOS Simulator or iPhone actual machine. It is described as a result of actual operation only to the extent indicated by the fictional memo and saved Markdown shown in the image.</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/templater-20260930.md" target="_blank" rel="noopener">Verification record, original and confirmation range</a></p><h3>Official materials</h3><ul class="source-list">
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/installation.md" target="_blank" rel="noopener">How to introduce Templater</a> — Official 2.25.1 original</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/settings.md" target="_blank" rel="noopener"> Settings: Trigger, None, Excluded Folder</a> — Official 2.25.1 Original</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/syntax.md" target="_blank" rel="noopener">Notation: Command and Date Function</a> — Official 2.25.1 Original</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/README.md" target="_blank" rel="noopener">README: Notes on function and code execution</a> — Official 2.25.1 original</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/manifest.json" target="_blank" rel="noopener">2.25.1 manifest</a> — Official 2.25.1 original</li>
+</ul><div class="internal-links"><a href="/en/obsidian/plugins/">Obsidian plug-in overview</a><a href="/en/obsidian/daily-note/">Addition to Daily Notes</a><a href="/en/obsidian/journaling/">Example of recording date notes</a></div><p class="template-note">This site is operated by YURIKA, K.K. and introduces the independent app "SimpleMemo". This is not an official article by Obsidian.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Read next</span><strong>Check the Obsidian link and storage location settings</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="en" dir="ltr"><a class="site-brand" href="/en/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>for Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">A small note. A next step.</p><p class="site-footer-description">Send notes from your iPhone to Obsidian and email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">Product</p><a href="/en/download/" class="footer__link">Download</a><a href="/en/" class="footer__link">Home</a><a href="/en/obsidian/" class="footer__link">Obsidian integration</a></div><div class="footer__col"><p class="footer__col-title">Compare and switch</p><a href="/en/vs/" class="footer__link">Compare</a><a href="/en/obsidian/compare/" class="footer__link">Obsidian comparison</a></div><div class="footer__col"><p class="footer__col-title">Support</p><a href="/en/about/" class="footer__link">About the developer</a><a href="/en/faq" class="footer__link">FAQ</a><a href="/en/privacy" class="footer__link">Privacy</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

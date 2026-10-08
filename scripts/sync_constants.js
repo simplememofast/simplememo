@@ -242,6 +242,13 @@ if (SELFTEST) {
   t('英語ページの著作権表記を日本語へ戻さない', drift(englishCopyright, 'en/fixture.html').length === 0);
   t('英語ページの古い著作権表記も同期する',
     scanHtml('<p>© 2026 Old Name</p>', 'en/fixture.html', { write: true }).out === englishCopyright);
+  for (const [locale, line] of Object.entries(C.copyrightLines)) {
+    const rel = `${locale === 'zh-Hans' ? 'zh' : locale}/fixture.html`;
+    t(`${locale}: localized copyright stays localized`, drift(`<p>${line}</p>`, rel).length === 0);
+    t(`${locale}: stale publisher is detected and corrected`,
+      drift('<p>© 2026 Old Publisher</p>', rel).length === 1
+        && scanHtml('<p>© 2026 Old Publisher</p>', rel, {write: true}).out === `<p>${line}</p>`);
+  }
 
   // 何も食い違っていない面が黙ることを先に固定する。これが無いと、
   // 以下の「落ちた」が雑音の上で成立している可能性を排除できない。
@@ -589,7 +596,7 @@ if (SELFTEST) {
   }
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log('自己テスト ' + (68 + versionSelftestCount + priceSelftestCount + ratingSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
+  console.log('自己テスト ' + (84 + versionSelftestCount + priceSelftestCount + ratingSelftestCount) + ' 件中 ' + failures.length + ' 件失敗');
   process.exit(failures.length ? 1 : 0);
 }
 
@@ -1001,8 +1008,10 @@ function scanHtml(src, rel, { write = false } = {}) {
       const m = args2[0];
       const index = args2[args2.length - 2];
       if (scope === 'pricing' && !inPriceZone(index)) return m;
-      const canonical = desc === '© line' && rel.startsWith('en/')
-        ? C.copyrightLineEn : build(...args2);
+      const locale = rel.split('/')[0] === 'zh' ? 'zh-Hans' : rel.split('/')[0];
+      const canonical = desc === '© line'
+        ? (C.copyrightLines?.[locale] || (locale === 'en' ? C.copyrightLineEn : C.copyrightLine))
+        : build(...args2);
       if (m === canonical) return m;
       findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
       return write ? canonical : m;

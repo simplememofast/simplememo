@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/journaling/">
+  <title>用Obsidian進行日記 — 日期筆記和手動模板的記錄示例 | SimpleMemo</title>
+  <meta name="description" content="致用Obsidian開始做日報的人。 介紹在每個日期的Markdown上留下簡短的記錄，第二天或週末回顧的例子。 總結現有的手動模板、日期和時間的替換方法、記錄中斷的日子的處理。 區分了過去的實際操作影象和現在的官方說明，未驗證的動作。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="用Obsidian進行日記 — 日期筆記和手動模板的記錄示例">
+  <meta property="og:description" content="致用Obsidian開始做日報的人。 介紹在每個日期的Markdown上留下簡短的記錄，第二天或週末回顧的例子。 總結現有的手動模板、日期和時間的替換方法、記錄中斷的日子的處理。 區分了過去的實際操作影象和現在的官方說明，未驗證的動作。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-14T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/journaling/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-journaling.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="用Obsidian進行日記 — 日期筆記和手動模板的記錄示例">
+  <meta name="twitter:description" content="致用Obsidian開始做日報的人。 介紹在每個日期的Markdown上留下簡短的記錄，第二天或週末回顧的例子。 總結現有的手動模板、日期和時間的替換方法、記錄中斷的日子的處理。 區分了過去的實際操作影象和現在的官方說明，未驗證的動作。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-journaling.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/journaling/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/journaling/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/journaling/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/journaling/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/journaling/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/journaling/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/journaling/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/journaling/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/journaling/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/journaling/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/journaling/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/journaling/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.journal-sample{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.journal-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.journal-note{color:var(--text-secondary);font-size:.9rem}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/journaling/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "用Obsidian進行日記 — 日期筆記和手動模板的記錄示例",
+  "description": "致用Obsidian開始做日報的人。 介紹在每個日期的Markdown上留下簡短的記錄，第二天或週末回顧的例子。 總結現有的手動模板、日期和時間的替換方法、記錄中斷的日子的處理。 區分了過去的實際操作影象和現在的官方說明，未驗證的動作。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/journaling/",
+  "datePublished": "2026-09-14",
+  "dateModified": "2026-09-14",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-journaling.png"
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "日報",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/journaling/"
+    }
+  ]
+}</script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">跳到正文</a>
+<nav class="global-nav" aria-label="全球導航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/zh-Hant/guides/">使用指南</a></li><li><a href="/zh-Hant/use-cases/">使用情境</a></li><li><a href="/zh-Hant/vs/">比較</a></li><li><a href="/zh-Hant/blog/">部落格</a></li><li><a href="/zh-Hant/about/">關於開發者</a></li><li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a></li></ul><div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/journaling/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/journaling/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/journaling/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/journaling/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/journaling/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/journaling/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/journaling/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/journaling/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/journaling/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button></div></div></nav>
+<main class="page-content" id="main-content"><article class="container">
+<header class="lp-hero">
+<div class="ce-hero-copy"><div class="lp-hero__label">Obsidian · 按日期記錄</div><h1 class="lp-hero__title"><span class="ce-title-line">用Obsidian</span><span class="ce-title-accent ce-title-line">記日</span><span class="ce-title-context">在日期筆記本上，簡短地留著再看</span></h1><p class="lp-hero__sub">首先在日期的筆記本上，把今天想留下的1行。 晚上可以把“明天要做的事情”和“想記住的事情”加起來開始。 這裡介紹可以用手使用的模板和重讀記錄的具體例子。</p><p class="article-meta">作者: <a href="/zh-Hant/about/">AI ATAKA</a> ・ 公開・資料確認: <time datetime="2026-09-14">2026年9月14日</time></p><a class="ce-read-link" href="#guide-section-1">閱讀正文 <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage ce-stage--journal" aria-hidden="true"><p class="ce-stage-label">一點點，每天</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>日期筆記·填寫示例</span></div><div class="ce-note">#今天的記錄<br><br>・今天發生的事情<br>・注意到的事情<br>・接下來要做的事情</div></div><p>簡短地記錄 → 回顧幾天的</p><p class="ce-stage-foot">構成影象</p></div>
+</header>
+<div class="ce-routes" aria-label="從想讀的內容中選擇"><a class="ce-route" href="#guide-section-1"><span>01</span><b>寫第一個1行</b></a><a class="ce-route" href="#guide-section-2"><span>02</span><b>使用雛形</b></a><a class="ce-route" href="#guide-section-3"><span>03</span><b>回顧幾天的</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>本頁目錄</summary><nav aria-label="頁面內的目錄"><a href="#guide-section-1">用01 Obsidian寫日記的話，應該準備什麼？</a><a href="#guide-section-2">02 原樣試用現有的手動模板</a><a href="#guide-section-3">03 3如果回顧一天的話，把事件和接下來的行動分開</a><a href="#guide-section-4">04 寫不出來的日子・變長的日子・找不到的日子</a><a href="#guide-section-5">05 進入自動模板時，區分變數</a><a href="#guide-section-6">06 日期Markdown剩下的真實畫面及其極限</a><a href="#guide-section-7">07 分開郵件中留下的日記和Obsidian的日記</a></nav></details>
+
+<aside class="tip-box">這篇報道是<strong>使用Obsidian的筆記本填寫、翻看的例子</strong>。 下面的生活記錄是虛構的例子，不是測量持續效果的實驗。 實際畫面是從2026年8月11日的Linux版驗證開始重新刊登的。</aside>
+<nav class="journal-toc" aria-label="這篇報道的目錄"><a href="#first-note">第一個填寫例子</a><a href="#starter">手動模板</a><a href="#review">回頭看方法</a><a href="#template">與自動模板的區別</a><a href="#evidence">實際畫面和驗證範圍</a></nav>
+<section class="lp-section ce-chapter" id="first-note"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01">用Obsidian寫日記的話，準備什麼好呢？</h2></header><div class="ce-chapter__body"><p><strong>在保管庫裡準備1個日期的筆記，可以做成用專案符號留下當天發生的事情</strong>的形式。 從一開始就不需要增加標籤和外掛。 如果還沒有製作保管庫的話，請先參考<a href="/zh-Hant/obsidian/getting-started/">Obsidian的開始方法</a>。</p><p>官方的<a href="https://obsidian.md/help/plugins/daily-notes" target="_blank" rel="noopener">Daily notes說明</a>中，介紹了開啟今天的筆記，沒有的話製作的機制。 預設檔名是<code>YYYY-MM-DD</code>格式。 這是官方規格的確認，不是這次在Mac上操作設定畫面的記錄。</p><p>接下來是寫在2026年9月14日的筆記本上的<strong>虛構的完成例</strong>。 時間可以只放在以後想知道順序的記錄上。</p>
+<pre class="journal-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># 2026-09-14
+
+## 記録
+- 09:15 散歩の途中で、来週の発表の導入を思いついた。
+- 18:40 下書きを開いた。最初の一段落だけ直した。
+
+## 1日の終わりに
+- 明日やることを1つ：導入を声に出して読み直す。
+- 覚えておきたいことを1つ：短く始めると下書きに戻りやすかった。</code></pre>
+<p>在可以寫的日子裡寫長篇大寫也是自由的。 但是，如果承諾每次都填寫所有欄目會造成負擔的話，就減少到“記錄”。 這是運用的選擇，不能保證任何人都會繼續。</p></div></section>
+<section class="lp-section ce-chapter" id="starter"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02">原樣嘗試現有的手動模板</h2></header><div class="ce-chapter__body"><p><a href="/assets/downloads/obsidian-daily-ja.md" download>儲存日語的手動模板（Markdown）</a>。 本網站分發的原件是以下簡短的文字。 如果無法儲存連結，可以複製此內容後使用。</p>
+<pre class="journal-sample" tabindex="0" role="region" aria-label="文字示例（可以橫向滾動）"><code># YYYY-MM-DD
+
+## 記録
+
+- HH:mm この例を、残したいことに置き換える。
+
+## 1日の終わりに
+
+- 明日やることを1つ：
+- 覚えておきたいことを1つ：</code></pre>
+<p>用手開始時，<strong>在使用的保管庫內製作日期名的新筆記本，貼上上面的模板正文。 </strong>即使不知道移動下載的檔案的操作，也可以用這種方法嘗試填寫示例。</p><p>模板的標題、專案符號、檢查欄和內部連結的寫法，可以在<a href="/zh-Hant/obsidian/markdown-guide/">標準Markdown和Obsidian擴充套件記法的實畫面對應表</a>中確認。</p><ol><li>準備模板的影印件，用於當天的記錄。 留下原來的雛形。</li><li>將檔名和標題的日期替換為例如<code>2026-09-14</code>。</li><li><code>HH:mm</code>和例句，用自己的時間和記錄代替。 如果不需要時間的話，就剪掉那個部分。</li><li>儲存後用自己的Obsidian開啟，確認是否是預定的保管庫、日期、正文。</li></ol>
+<p><strong><code>YYYY-MM-DD</code>和<code>HH:mm</code>在這個檔案中只是文字。 </strong>僅僅下載後不會更改為今天的日期，也不會自動進入保管庫。 這裡的步驟是讀者確認的指南，這次沒有進行匯入保管庫。</p><p>如果想要更改日期或勾選欄的例子，也可以使用現有的<a href="/zh-Hant/resources/obsidian-inbox/">Markdown模板工具</a>。 在那裡分別確認是否可以儲存檔案和是否可以匯入自己的保管庫。 在嘗試個人記錄之前，請用虛構的簡短例子確認流程。</p></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="review"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03">3如果回顧天分的話，把事件和接下來的行動分開</h2></header><div class="ce-chapter__body"><p>日記越來越多時，代替全部重寫，有開啟最近的筆記本，拿起相同的話題的方法。 下表也是<strong>虛構的填寫例子</strong>。 3日是說明用的長度，並不表示效果的期限。</p><div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="對比表（可以橫向滾動）"><table class="rt-table"><thead><tr><th>日期</th><th>剩下的記錄</th><th>回頭看時的處理</th></tr></thead><tbody><tr><th>9月14日</th><td data-label="記錄">想到了發表的介紹</td><td data-label="處理">作為尚未嘗試的方案留下</td></tr><tr><th>9月15日</th><td data-label="記錄">大聲說出來的話開頭很長</td><td data-label="處理">區分為實際嘗試過</td></tr><tr><th>9月16日</th><td data-label="記錄">將匯入改到段落</td><td data-label="處理">下次確認是否傳達給對方</td></tr></tbody></table></div><p>在這個例子中，透過將“想到”和“嘗試”分開，可以選擇1個下一步要做什麼。 原文留在當天的筆記本上，在回看的那天的末尾簡短地總結的話，以後改變解釋的時候也可以回到原來的記錄。</p><p>同樣的話題多次出現，如果想用另一個筆記本思考的話，那個時候可以選擇做總結地址。 即使從一開始就沒有全部分類，也可以先按日期返回，這個順序。</p></div></section>
+<section class="lp-section ce-chapter" id="stuck"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04">寫不出來的日子・變長的日子・找不到的日子</h2></header><div class="ce-chapter__body"><ul><li><strong>寫不到的日子：</strong>可以選擇重新填充空白，還是從第二天開始重新開始。 如果以後再寫的話，像“9月16日追記”一樣，把事件的日期和填寫日期分開的話，就不會讀錯。</li><li><strong>日記變長的日子：</strong>在長正文的末尾有1行放“想記住的事情”的方法。 沒有必要把全文剪短。</li><li><strong>找不到筆記本的日子：</strong>依次確認開啟的保管庫、檔名的日期、儲存資料夾。 來自外部的補充和日期偏差在<a href="/zh-Hant/obsidian/daily-note/">每日筆記的補充問題</a>中處理。</li><li><strong>其他終端沒有出現的日子：</strong>分開儲存和同步進行確認。 在多個終端的運用<a href="/zh-Hant/obsidian/sync/">同步方法的比較</a>。 僅憑這篇報道的模板無法完成同步設定。</li></ul><p>不以回頭為目的的日子，只要記錄事件就可以使用。 想繼續使用Obsidian作為留下記錄的地方，請根據自己的負擔來判斷。</p></div></section>
+<section class="lp-section ce-chapter" id="template"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05">進入自動模板時，區分變數</h2></header><div class="ce-chapter__body"><p>手動模板和Obsidian插入值的模板是不同的。 在官方的<a href="https://obsidian.md/help/plugins/templates" target="_blank" rel="noopener">Templates說明</a>中，像<code>{{date}}</code>和<code>{{time}}</code>一樣帶括號的變數被引導。</p><p>Daily notes的模板指定是關於製作新日期筆記時的正文的設定。 不要認為已經存在的日記以後一律適用。 在想要自動化的階段，請閱讀上面的官方資料，用自己的設定進行嘗試。</p><p>使用Templater的<code>&lt;% … %&gt;</code>記法進行時，<a href="/zh-Hant/obsidian/plugins/templater/">Templater的執行例和每日筆記的設定</a>在另外的報道中處理。</p><aside class="tip-box"><strong>本次確認範圍：</strong>在2026年9月14日確認了官方說明。 目前Obsidian的模板設定、變數展開、iOS的動作尚未驗證。 過去的圖片並不能證實這些自動設定。</aside></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="evidence"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06">日期Markdown上剩下的真實畫面及其極限</h2></header><div class="ce-chapter__body"><figure class="shot"><img src="/assets/img/obsidian-logseq/roundtrip-obsidian.png" alt="2026年8月11日的Linux版Obsidian中，在日期筆記中顯示帶有時間的4行的過去驗證畫面" width="1600" height="1000" loading="lazy"><figcaption>2026年8月11日，根據Linux版Obsidian 1.13.6/Logseq 0.10.15的驗證。 日期筆記上顯示4行，最後一行是Logseq側輸入的記錄。</figcaption></figure><p>原來的<a href="/zh-Hant/obsidian/compare/logseq/">Obsidian和Logseq的比較驗證</a>中，確認了同一日期Markdown的往返寫入。 原來的變更記錄是<a href="https://github.com/simplememofast/simplememo/pull/470" target="_blank" rel="noopener">PR #470</a>。 這個畫面表明，在當時的驗證環境中，1個日期筆記中留下了簡短的記錄。</p><p>在這次的報道中，將這種形式與手動記事的例子連線起來。 <strong>不是驗證了匯入到現在的Mac・iPhone、同步、模板的自動應用、記事持續的效果。 </strong></p><ul><li><strong>過去的實際操作確認：</strong>2026年8月11日的Linux版日期Markdown往返。 再次確認影象和原來的公開記錄。</li><li><strong>本次原件・分發確認：</strong>手動模板的Git原件和公開URL的獲取內容進行核對。 字串的例子沒有替換為自動變數。</li><li><strong>官方資料確認：</strong>確認Daily notes和Templates的作用、變數記法。</li><li><strong>未驗證：</strong>現在的保管庫匯入、設定、終端同步、持續率、心理效果。 SimpleMemo的新功能和速度也沒有測量。</li></ul></div></section>
+<section class="lp-section ce-chapter" id="choose"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07">選擇留在郵件中的日記和Obsidian的日記</h2></header><div class="ce-chapter__body"><p>這篇報道的中心是，在Obsidian中開啟日期筆記，記錄簡短地回顧。 如果想把郵件放在日記的地方，請進入<a href="/zh-Hant/use-cases/journaling/">郵件中的1行日記</a>，如果想從寫什麼開始思考，請進入<a href="/zh-Hant/blog/journaling-for-beginners">日記的輸出示例</a>。</p><p>如果想將移動中的記錄也連線到Obsidian的話，可以確認<a href="/zh-Hant/obsidian/">SimpleMemo的配合、儲存地址設定</a>。 如果只在Obsidian內寫的話，沒有必要為了這篇報道而引進其他應用程式。</p><p class="journal-note">本網站由YURIKA, K.K.運營，介紹獨立應用程式“SimpleMemo”。 不是Obsidian官方的報道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下來閱讀</span><strong>確認Obsidian連線和儲存位置的設定</strong></a></aside>
+</div>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航"><div class="footer__col"><p class="footer__col-title">產品</p><a href="/zh-Hant/download/" class="footer__link">下載</a><a href="/zh-Hant/" class="footer__link">首頁</a><a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a></div><div class="footer__col"><p class="footer__col-title">比較與遷移</p><a href="/zh-Hant/vs/" class="footer__link">比較</a><a href="/zh-Hant/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">支援</p><a href="/zh-Hant/about/" class="footer__link">關於開發者</a><a href="/zh-Hant/faq" class="footer__link">常見問題</a><a href="/zh-Hant/privacy" class="footer__link">隱私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

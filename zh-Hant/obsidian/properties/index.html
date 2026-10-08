@@ -1,0 +1,245 @@
+<!-- PRIVATE C25: public admission/dates/evidence URL/CI/Pages/readback pending -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/properties/">
+  <title>Obsidian的屬性活用 — frontmatter和Dataview的實機例 | SimpleMemo</title>
+  <meta name="description" content="用Obsidian的屬性儲存狀態、數值、檢查、日期、標籤，連線Dataview的TABLE和LIST的入門。 用Linux 1.13.7的實GUI確認了三個虛構筆記，完成變更後列表從2個變成一個結果，儲存YAML，原Markdown和刊登驗證範圍。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian的屬性活用 — frontmatter和Dataview的實機例子">
+  <meta property="og:description" content="用Obsidian的屬性儲存狀態、數值、檢查、日期、標籤，連線Dataview的TABLE和LIST的入門。 用Linux 1.13.7的實GUI確認了三個虛構筆記，完成變更後列表從2個變成一個結果，儲存YAML，原Markdown和刊登驗證範圍。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/properties/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-properties.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的屬性活用 — frontmatter和Dataview的實機例子">
+  <meta name="twitter:description" content="用Obsidian的屬性儲存狀態、數值、檢查、日期、標籤，連線Dataview的TABLE和LIST的入門。 用Linux 1.13.7的實GUI確認了三個虛構筆記，完成變更後列表從2個變成一個結果，儲存YAML，原Markdown和刊登驗證範圍。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-properties.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/properties/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/properties/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/properties/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/properties/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/properties/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/properties/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/properties/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/properties/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/properties/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/properties/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/properties/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/properties/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.properties-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.properties-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.properties-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.properties-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.properties-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.properties-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.properties-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.properties-guide h2,.properties-guide h3{scroll-margin-top:76px}@media(max-width:720px){.properties-guide .note-flow{grid-template-columns:1fr}.properties-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.properties-guide .source-note{font-size:.85rem;line-height:1.8;color:var(--text-muted)}.properties-guide .raw-link{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 0}.properties-guide code{overflow-wrap:anywhere}.properties-guide pre{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}.properties-guide h2{scroll-margin-top:76px}.properties-guide .raw-source summary{cursor:pointer;min-height:44px;padding:.65rem 0}.properties-guide ol{padding-left:1.5rem}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/properties/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Obsidian的屬性活用 — frontmatter和Dataview的實機例子",
+  "description": "用Obsidian的屬性儲存狀態、數值、檢查、日期、標籤，連線Dataview的TABLE和LIST的入門。 用Linux 1.13.7的實GUI確認了三個虛構筆記，完成變更後列表從2個變成一個結果，儲存YAML，原Markdown和刊登驗證範圍。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/properties/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-properties.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/properties/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "屬性",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/properties/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/properties/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian的屬性和frontmatter是不同的資料嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "屬性是操作筆記結構化值的UI，值作為檔案開頭的YAML frontmatter儲存。 在這次的實機中，用GUI操作了status、tags、done、due、priority，與儲存的Markdown的值進行了核對。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "屬性的型別是按筆記設定的嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在官方資料中，同一屬性名稱在整個保管庫中使用相同的型別。 從名字旁邊的型別圖示開啟Property type，選擇型別。 在這次的實機中，在priority中選擇了Number，儲存了3。 並不是所有的型別和日期輸入都進行了驗證。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "在Dataview中列出屬性的基本形式是什麼？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在dataview程式碼塊上寫TABLE或LIST、FROM和WHERE。 在這次的三件中，以FROM \"記録\"為物件的資料夾，status = \"進行中\"的TABLE是2件，done = false的LIST是完成檢查變更前兩件，變更後一件。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "下載的例子是什麼狀態？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這是在GUI中將調查A的done更改為true後的儲存原件。 記録 資料夾內調查A・B・C，顯示了將一覧.md放在同一保管庫正下方的構成。 這次的實機結果是TABLE兩件，未完成LIST是調查C一件，保留不適用。 讀者匯入保管庫和其他環境的動作尚未驗證。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="properties-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球導航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh-Hant/guides/">使用指南</a></li><li><a href="/zh-Hant/use-cases/">使用情境</a></li><li><a href="/zh-Hant/vs/">比較</a></li><li><a href="/zh-Hant/blog/">部落格</a></li><li><a href="/zh-Hant/about/">關於開發者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/properties/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/properties/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/properties/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/properties/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/properties/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/properties/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/properties/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/properties/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/properties/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="properties-guide container"><header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/zh-Hant/obsidian/">Obsidian</a> / 屬性</p><span class="lp-hero__label">對齊筆記的值，連線列表</span><h1 class="lp-hero__title">Obsidian的屬性活用<br>frontmatter一覽</h1><p class="lp-hero__sub">將狀態、數值、檢查、日期、標籤儲存在筆記中，在Dataview中顯示符合條件的記錄。 這是使用虛構的三件的實GUI操作和確認儲存Markdown的入門。</p><p class="article-meta">作者: <a href="/zh-Hant/about/">SimpleMemo Developer</a> · 實機確認: <time datetime="2026-10-01">2026年10月1日（日本時間）</time> · Obsidian 1.13.7 / Linux</p></div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>屬性是處理筆記本開頭的YAML的UI</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>按順序決定名字、型別、值</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>確認儲存的frontmatter</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">屬性是處理筆記開頭的YAML的UI</h2></div><div class="ce-chapter__body"><p><strong>在Properties中輸入的名稱和值會儲存在筆記開頭的frontmatter中。 </strong>例如，如果準備好<code>status: 進行中</code>，就可以在Dataview的WHERE條件下選擇“進行中”的筆記。 和本文中寫的普通文章的處理方式不同。</p><p>首先，決定要比較什麼，然後使用少數專案。 在這個例子中，狀態為<code>status</code>，優先度為<code>priority</code>，完成為<code>done</code>，期限為<code>due</code>，分類為<code>tags</code>。 作者製作的虛構記錄，不是使用者的資料。</p><nav class="capture-toc" aria-label="屬性和列表的步驟"><a href="#properties">用GUI輸入</a><a href="#yaml">儲存YAML</a><a href="#query">表・列表</a><a href="#results">變更和結果</a><a href="#raw">練習用原件</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="properties"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">按順序決定名稱、型別、值</h2></div><div class="ce-chapter__body"><ol><li>開啟筆記，從<strong>Add property</strong>或官方的<code>Ctrl/Cmd+;</code>中新增專案。 在實機例子中，點選Add property新增了<code>priority</code>。</li><li>按專案名旁邊的型別圖示，開啟<strong>Property type</strong>選擇型別。 在實機上選擇Number，輸入3儲存。</li><li>現有的<code>status</code>選擇了Text，從“未著手”變更為“進行中”。 檢查、Date輸入、Tags輸入也透過實際的UI進行變更，確認會反映在儲存YAML中。</li><li>Tags不只是輸入文字就結束了，而是透過聚焦的輸入按Enter進行確定。 這次的輔助操作也無法確定一次，再次透過Enter和焦點移動確認了儲存。</li></ol><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">名字</th><th scope="col">這個例子的型別和值</th><th scope="col">在實機上做過的事情</th></tr></thead><tbody><tr><th scope="row">狀態</th><td data-label="型">Text / 進行中</td><td data-label="操作">Text選擇，未着手→進行中</td></tr><tr><th scope="row">優先順序</th><td data-label="型">編號/3</td><td data-label="操作">新增專案，選擇Number，輸入3</td></tr><tr><th scope="row">完成</th><td data-label="型">Checkbox / true或false</td><td data-label="操作">false→true→false，最後是true</td></tr><tr><th scope="row">到期</th><td data-label="型">日期/2026-10-03</td><td data-label="操作">10月1日→10月3日</td></tr><tr><th scope="row">標籤</th><td data-label="型">Tags / 驗證、屬性</td><td data-label="操作">新增屬性確定</td></tr></tbody></table></div><p>在官方資料中，同名的型號在整個保管庫中是通用的。 在將相同的名稱用於其他含義的值之前，先確認型別和用途。 List和Date &amp; time等，這裡沒有處理的型別不包含在這次的動作確認中。</p><figure class="shot"><a href="/assets/img/obsidian-properties/properties-number.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/properties-number.png" width="1024" height="800" loading="lazy" decoding="async" alt="將priority作為Number儲存在3中的實際Obsidian屬性畫面"></a><figcaption>priority的Number型和儲存值3。 日期還沒變更。 <a href="/assets/img/obsidian-properties/properties-number.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-properties/properties-final.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/properties-final.png" width="1024" height="800" loading="lazy" decoding="async" alt="最終狀態的status進行中，兩個標籤，完成檢查，10月3日期限，priority3可見的真實畫面"></a><figcaption>最終的儲存狀態。 Done已經檢查過了。 <a href="/assets/img/obsidian-properties/properties-final.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="yaml"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">確認儲存的frontmatter</h2></div><div class="ce-chapter__body"><p>下面是調查A的<strong>最後儲存全文，211 bytes</strong>。 在GUI中將done更改為true後的狀態，包括正文在內，內容與原Markdown相同。</p><details class="raw-source"><summary>檢視調查A的儲存Markdown全文</summary><pre class="capture-code" data-evidence="記録/調査A.md" tabindex="0"><code>---
+status: 進行中
+tags:
+  - 検証
+  - プロパティ
+done: true
+due: 2026-10-03
+priority: 3
+---
+
+# 調査A
+
+著者が検証用に作成した架空の記録です。顧客データではありません。
+</code></pre></details><p>在官方資料中，frontmatter用<code>---</code>包圍檔案開頭，以<code>名前: 値</code>的YAML格式進行描述。 屬性名稱不會在一個筆記中重複。 這個例子的數值3和檢查true分別儲存為數值和boolean。 Date是儲存這個值的確認，不是驗證所有日期格式和輸入的正確性的結果。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="query"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">將相同的值作為TABLE和LIST的條件</h2></div><div class="ce-chapter__body"><p>在實機中，將官方Dataview穩定釋出的三個檔案事先複製到隔離的保管庫中，透過實際的信任確認啟用了外掛。 這不是驗證Browse/Install的畫面操作的記錄。 外掛為了執行第三方程式碼，確認分發來源和使用條件後進行選擇。</p><p><strong>釋出名稱是0.5.70，分發manifest和實際畫面的顯示版是0.5.68。 </strong>需要的Obsidian最小版是manifest上的0.13.11，實際執行的Obsidian是1.13.7。 DataviewJS設定是false，將下一個DQL輸入到實際編輯器中，在Reading view中顯示。</p><p>資料夾名<code>記録</code>、專案名、狀態字串一致。 調查A/B正在進行中，C已完成。</p><pre class="capture-code" tabindex="0"><code># Properties接続検証
+
+著者が作成した架空の3件だけを表示します。
+
+## 進行中の表
+
+```dataview
+TABLE status AS &quot;状態&quot;, priority AS &quot;優先度&quot;, done AS &quot;完了&quot;, due AS &quot;期限&quot;
+FROM &quot;記録&quot;
+WHERE status = &quot;進行中&quot;
+SORT file.name ASC
+```
+
+## 未完了の一覧
+
+```dataview
+LIST
+FROM &quot;記録&quot;
+WHERE done = false
+SORT file.name ASC
+```
+
+## 保留の該当なし
+
+```dataview
+LIST
+FROM &quot;記録&quot;
+WHERE status = &quot;保留&quot;
+SORT file.name ASC
+```
+</code></pre><p>TABLE將正在進行的兩件列為表，LIST將done將false的筆記列為列表。 最後的LIST選擇了保留的筆記，也確認了沒有物件的情況下的實際顯示。 DQL的全部功能、內聯欄位、DataviewJS沒有在這裡嘗試。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="results"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">更改完成檢查後，未完成列表從2件到1件</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">條件</th><th scope="col">調查A的done=false</th><th scope="col">在GUI中更改為done=true後</th></tr></thead><tbody><tr><th scope="row">status = 進行中的TABLE</th><td data-label="變更前">調查A・B / 2件</td><td data-label="變更後">調查A・B / 2件。 顯示A的完成值true</td></tr><tr><th scope="row">done = false的LIST</th><td data-label="變更前">調查A・C / 2件</td><td data-label="變更後">調查C / 1件</td></tr><tr><th scope="row">status = 保留的LIST</th><td data-label="變更前">不適用</td><td data-label="變更後">不適用</td></tr></tbody></table></div><figure class="shot"><a href="/assets/img/obsidian-properties/dataview-before-list.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/dataview-before-list.png" width="1024" height="800" loading="lazy" decoding="async" alt="變更前的未完成列表中顯示調查A和調查C，不符合保留條件的Reading畫面"></a><figcaption>變更前的LIST兩件和沒有保留的結果。 <a href="/assets/img/obsidian-properties/dataview-before-list.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-properties/dataview-updated-results.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-properties/dataview-updated-results.png" width="1024" height="800" loading="lazy" decoding="async" alt="完成變更後的TABLE調查A和B，只能看到未完成LIST調查C的Reading畫面"></a><figcaption>變更後：TABLE兩件，LIST一件。 原封不動地刊登實際畫面。 <a href="/assets/img/obsidian-properties/dataview-updated-results.png" target="_blank" rel="noopener">開啟原圖</a></figcaption></figure><p>變更前的TABLE兩件用實際Reading DOM確認了，當時的PNG從表向下滾動。 上面的變更後，在PNG中可以看到表兩件和未完成一覽一件。 沒有重新制作並替換顯示位置和影象。</p><p>從檔案一覽表中再次開啟調查A和一覽表筆記，也確認了儲存Markdown的bytes和SHA256相同。 同一應用程式啟動中重新顯示，不是整個應用程式的重啟或確認其他終端。 在這次的條件下，數值反映在顯示上，沒有測量工作速度和生產力提高的因果關係。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">儲存最終狀態的四個檔案</h2></div><div class="ce-chapter__body"><p>是將實機儲存的原Markdown的bytes原樣複製的檔案。 調查A的done是true。 在以下配置中，查詢的FROM和資料夾名是一致的。 讀者在保管庫的匯入尚未驗證。</p><pre class="capture-code" tabindex="0"><code>保管庫/
+  一覧.md
+  記録/
+    調査A.md
+    調査B.md
+    調査C.md</code></pre><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">保管庫內的相對路徑</th><th scope="col">儲存原件</th></tr></thead><tbody><tr><th scope="row"><code>記録/調査A.md</code></th><td data-label="儲存原件"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBA.md" data-source-path="記録/調査A.md" download="調査A.md">儲存調査A.md（211 bytes）</a></td></tr><tr><th scope="row"><code>記録/調査B.md</code></th><td data-label="儲存原件"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBB.md" data-source-path="記録/調査B.md" download="調査B.md">儲存調査B.md（152 bytes）</a></td></tr><tr><th scope="row"><code>記録/調査C.md</code></th><td data-label="儲存原件"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E8%A8%98%E9%8C%B2/%E8%AA%BF%E6%9F%BBC.md" data-source-path="記録/調査C.md" download="調査C.md">儲存調査C.md（150 bytes）</a></td></tr><tr><th scope="row"><code>一覧.md</code></th><td data-label="儲存原件"><a class="raw-link" href="/assets/downloads/obsidian-properties/%E4%B8%80%E8%A6%A7.md" data-source-path="一覧.md" download="一覧.md">儲存一覧.md（472 bytes）</a></td></tr></tbody></table></div><p class="source-note">三記錄的初期內容在驗證前直接製作。 調查A的專案變更和列表筆記的查詢輸入是GUI操作的範圍。 不會把B/C作為GUI從頭開始建立的記錄。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">常見問題</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Obsidian的屬性和frontmatter是不同的資料嗎？</summary><div class="faq-answer">屬性是操作筆記結構化值的UI，值作為檔案開頭的YAML frontmatter儲存。 在這次的實機中，用GUI操作了status、tags、done、due、priority，與儲存的Markdown的值進行了核對。</div></details><details class="faq-item"><summary class="faq-summary">屬性的型別是按筆記設定的嗎？</summary><div class="faq-answer">在官方資料中，同一屬性名稱在整個保管庫中使用相同的型別。 從名字旁邊的型別圖示開啟Property type，選擇型別。 在這次的實機中，在priority中選擇了Number，儲存了3。 並不是所有的型別和日期輸入都進行了驗證。</div></details><details class="faq-item"><summary class="faq-summary">在Dataview中列出屬性的基本形式是什麼？</summary><div class="faq-answer">在dataview程式碼塊上寫TABLE或LIST、FROM和WHERE。 在這次的三件中，以FROM "記録"為物件的資料夾，status = "進行中"的TABLE是2件，done = false的LIST是完成檢查變更前兩件，變更後一件。</div></details><details class="faq-item"><summary class="faq-summary">下載的例子是什麼狀態？</summary><div class="faq-answer">這是在GUI中將調查A的done更改為true後的儲存原件。 記録 資料夾內調查A・B・C，顯示了將一覧.md放在同一保管庫正下方的構成。 這次的實機結果是TABLE兩件，未完成LIST是調查C一件，保留不適用。 讀者匯入保管庫和其他環境的動作尚未驗證。</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">官方資料和這個實機確認的範圍</h2></div><div class="ce-chapter__body"><p>GUI確認的UTC日是2026年9月30日，日本時間是2026年10月1日。 實際畫面、儲存原件、固定來源、輔助的更正、結束記錄的不足總結為<a href="https://github.com/simplememofast/simplememo/blob/main/docs/evidence/obsidian-properties-20261001.md" target="_blank" rel="noopener">驗證記錄</a>。 雖然傳送了結束Close，但根據記錄器的結束順序，Obsidian的結束程式碼未記錄。</p><ul><li><strong>已確認：</strong>Linux Obsidian 1.13.7，五種型別的有限GUI操作，儲存YAML，DQL三條件的實Reading顯示，值變更和重新顯示，同一啟動中的儲存一致。</li><li><strong>官方說明：</strong>Properties的儲存形式、型別的共享，用固定資料確認Dataview的frontmatter/QUERY/TABLE/LIST/WHERE。</li><li><strong>未確認：</strong>全型・全輸入驗證，外掛的安全稽核，全DQL/JS，應用程式重啟，iOS，同步，SimpleMemo配合，大保管庫·速度·生產力。</li></ul><p><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Editing%20and%20formatting/Properties.md" target="_blank" rel="noopener">官方Properties資料（固定commit）</a> · <a href="https://github.com/blacksmithgu/obsidian-dataview/tree/77ab745aee787d519642a87ed8f68be12fdc4b0d/docs/docs" target="_blank" rel="noopener">Dataview官方資料（固定commit）</a> · <a href="https://github.com/blacksmithgu/obsidian-dataview/releases/tag/0.5.70" target="_blank" rel="noopener">確認的穩定釋出</a></p></div></section>
+<section class="lp-section next-step ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">接下來，擴大查詢的寫法</h2></div><div class="ce-chapter__body"><p>值的名稱和型別齊全後，確認Dataview的顯示形式和寫法。 一般的DQL、內聯式、JS的區別將進入現有的解說。</p><a class="lp-btn-primary" href="/zh-Hant/obsidian/plugins/dataview/" data-next-step="explore">閱讀Dataview的使用方法</a></div></section></article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="頁尾導航"><div class="footer__col"><p class="footer__col-title">產品</p><a href="/zh-Hant/download/" class="footer__link">下載</a><a href="/zh-Hant/" class="footer__link">首頁</a><a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a></div><div class="footer__col"><p class="footer__col-title">比較與遷移</p><a href="/zh-Hant/vs/" class="footer__link">比較</a><a href="/zh-Hant/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">支援</p><a href="/zh-Hant/about/" class="footer__link">關於開發者</a><a href="/zh-Hant/faq" class="footer__link">常見問題</a><a href="/zh-Hant/privacy" class="footer__link">隱私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

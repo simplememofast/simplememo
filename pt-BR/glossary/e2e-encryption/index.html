@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/glossary/e2e-encryption/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>O que é criptografia E2E (criptografia de ponta a ponta)? Explicação do mecanismo, diferenças e limitações com TLS | Glossário</title>
+  <meta name="description" content="A criptografia E2E (criptografia de ponta a ponta) é um método no qual apenas os terminais remetente e receptor podem descriptografar dados. Explicação do mecanismo de troca de chaves, a diferença entre criptografia de caminho de comunicação (TLS) e criptografia de armazenamento, o status de suporte dos principais serviços, o que não pode ser protegido nem mesmo pelo E2EE e como escolher por modelo de ameaça. A razão pela qual SimpleMemo não é E2EE também é especificada.">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="O que é criptografia E2E (criptografia de ponta a ponta)? Explicação do mecanismo, diferenças e limitações com TLS | Glossário">
+  <meta property="og:description" content="Explicação do mecanismo de criptografia E2E, a diferença entre TLS e criptografia de armazenamento, o suporte aos principais serviços, o que não pode ser protegido pelo E2EE e como escolher por modelo de ameaça.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/glossary/e2e-encryption/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="O que é criptografia E2E (criptografia de ponta a ponta)? Explicação do mecanismo, diferenças e limitações com TLS | Glossário">
+  <meta name="twitter:description" content="Mecanismo de criptografia E2E, TLS・Diferença da criptografia de armazenamento, suporte para serviços principais, limitações e método de seleção.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/e2e-encryption/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/#article",
+  "inLanguage": "pt-BR",
+  "image": "https://simplememofast.com/assets/img/og/glossary-e2e-encryption.png",
+  "headline": "O que é criptografia E2E (criptografia de ponta a ponta)? Explicação do mecanismo, diferenças e limitações com TLS | Glossário",
+  "description": "A criptografia E2E (criptografia de ponta a ponta) é um método pelo qual apenas os terminais do remetente e do receptor podem descriptografar dados. O mecanismo de troca de chaves, a diferença entre TLS e criptografia no momento do armazenamento, o status de suporte dos principais serviços, limitações e como escolher por modelo de ameaça.",
+  "url": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/",
+  "datePublished": "2026-03-06",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/"
+  }
+}</script>
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Glossário",
+      "item": "https://simplememofast.com/pt-BR/glossary/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Criptografia E2E",
+      "item": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "name": "Criptografia E2E",
+  "description": "A criptografia E2E (criptografia de ponta a ponta) é um método no qual apenas o terminal do remetente e do receptor pode descriptografar dados. A diferença entre criptografia de caminho de comunicação (TLS) e criptografia de armazenamento, as limitações e como escolher por modelo de ameaça também são explicados.",
+  "inDefinedTermSet": {
+    "@type": "DefinedTermSet",
+    "name": "glossário do aplicativo de notas",
+    "url": "https://simplememofast.com/pt-BR/glossary/"
+  },
+  "url": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/"
+}</script>
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/#webpage",
+  "inLanguage": "pt-BR",
+  "name": "O que é criptografia E2E",
+  "url": "https://simplememofast.com/pt-BR/glossary/e2e-encryption/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/pt-BR/glossary/e2e-encryption/#faq","inLanguage":"pt-BR","mainEntity":[{"@type":"Question","name":"O que é criptografia E2E?","acceptedAnswer":{"@type":"Answer","text":"É um método que pode criptografar dados no dispositivo do remetente e descriptografá-los apenas no dispositivo do receptor. Servidores intermediários e operadores de rede não podem ler dados."}},{"@type":"Question","name":"SimpleMemo é uma criptografia E2E?","acceptedAnswer":{"@type":"Answer","text":"Não. O protocolo padrão SMTP é usado para enviar e-mails para que o usuário destinatário possa ler o texto no aplicativo de e-mail usual. Em vez disso, criptografia Outbox e AES-GCM-256 no terminal de histórico de transmissão, a privacidade é protegida com um modelo de minimização de dados que não possui armazenamento permanente do corpo do e-mail. Para aplicativos que exigem E2EE, considere Standard Notes, Signal, ProtonMail, etc."}},{"@type":"Question","name":"Qual é a diferença entre criptografia E2E e AES-GCM?","acceptedAnswer":{"@type":"Answer","text":"A criptografia E2E é um conceito arquitetônico (que pode descriptografar). AES-GCM é um algoritmo de criptografia (como criptografar). AES-GCM também pode ser usado para a implementação interna da criptografia E2E."}},{"@type":"Question","name":"Qual é a diferença entre a criptografia E2E e TLS (HTTPS)?","acceptedAnswer":{"@type":"Answer","text":"TLS protege apenas o caminho de comunicação entre o terminal e o servidor, e o operador pode ler o conteúdo quando chegar ao servidor. Ninguém na rota (incluindo o operador) pode ler o conteúdo da criptografia E2E até que ela chegue ao terminal do destinatário."}},{"@type":"Question","name":"A criptografia E2E é absolutamente segura?","acceptedAnswer":{"@type":"Answer","text":"Não. O que pode ser protegido são os canais de comunicação e vazamentos das empresas. Violações de terminal, backups de nuvem não criptografados, metadados, transferências de destinatários e capturas de tela não podem ser evitados."}},{"@type":"Question","name":"O e-mail (como Gmail) é criptografado com E2E?","acceptedAnswer":{"@type":"Answer","text":"E-mails normais protegem o caminho de comunicação com TLS, e o operador os criptografa ao salvar, mas não E2EE. Para fazer E2EE, você precisa de um mecanismo que suporte ambas as extremidades da transmissão e recepção, como PGP, S/MIME ou Proton Mail."}},{"@type":"Question","name":"LINE é uma criptografia E2E?","acceptedAnswer":{"@type":"Answer","text":"1 vs. 1 o texto de conversa é ativado por padrão com criptografia E2E chamada \"Letter Sealing\". No entanto, alguns conteúdos não são elegíveis, portanto, verifique as informações oficiais do LINE para obter detalhes."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegação principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/pt-BR/guides/">Guias</a></li>
+        <li><a href="/pt-BR/use-cases/">Casos de uso</a></li>
+        <li><a href="/pt-BR/vs/">Comparar</a></li>
+        <li><a href="/pt-BR/methods/"><span>Métodos</span></a></li>
+        <li><a href="/pt-BR/blog/"><span>Blog</span></a></li>
+        <li><a href="/pt-BR/glossary/"><span>Glossário</span></a></li>
+        <li><a href="/pt-BR/faq">Perguntas frequentes</a></li>
+        <li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li>
+        <li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Baixar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/glossary/e2e-encryption/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/glossary/e2e-encryption/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/glossary/e2e-encryption/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/glossary/e2e-encryption/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/glossary/e2e-encryption/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/glossary/e2e-encryption/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/glossary/e2e-encryption/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/glossary/e2e-encryption/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/glossary/e2e-encryption/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Baixar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="page-content">
+    <div class="container">
+
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label"><span>Glossário - Segurança</span></div>
+        <h1 class="lp-hero__title"><span>O que é criptografia E2E <br> (criptografia de ponta a ponta)</span></h1>
+        <p class="lp-hero__sub"> <span>A criptografia E2E (criptografia de ponta a ponta) é um método que criptografa dados no dispositivo do remetente e só pode ser descriptografado no dispositivo do destinatário. O conteúdo dos dados não pode ser lido no servidor intermediário. O SimpleMemo protege a privacidade com uma abordagem diferente de "não armazenar o corpo do memorando no servidor permanentemente". </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Autor: <a href="/pt-BR/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> <span> · Última atualização: <time datetime="2026-09-30">2026 ano 09 mês 30 dia</time></span></p>
+      </div><nav class="sd-hero-index" aria-label="Conteúdo desta página"><p>Conteúdo desta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>E2E Como a criptografia funciona — Entendendo o conceito em etapas 4</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>A diferença entre criptografia de caminho de comunicação, criptografia de armazenamento e criptografia E2E</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>E2E suporte a criptografia para serviços principais</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <div class="definition-block">
+        <div class="definition-block__label">Definição</div>
+        <p><strong>A criptografia E2E (Criptografia de ponta a ponta)</strong> é um método de criptografia que permite que os dados sejam descriptografados apenas em ambas as extremidades da comunicação (pontos finais). Criptografe os dados no dispositivo do remetente e descriptografe-os com a chave mantida pelo terminal da outra parte. O servidor que transmite a mensagem, o operador de rede e até mesmo o próprio provedor de serviços não conseguem ler o conteúdo dos dados. WhatsApp, Signal, Proton Mail, etc. adotaram esse método.</p>
+      </div>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span> Mecanismo de Criptografia E2E — Entendendo o Conceito 4 em Uma Etapa</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>O ponto principal da criptografia E2E é que "o serviço de retransmissão não tem a chave necessária para a descriptografia". O seguinte é um diagrama conceitual para entender o papel da criptografia de chave pública e da criptografia de mensagens. O Protocolo de Sinal real tem verificação de identidade, acordo de chave e atualização de chave, e não pode ser implementado apenas neste estágio 4. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>1. O terminal cria um par de chaves</span></div><div class="reason-card__desc"><span>Cada terminal cria um par de chaves públicas e privadas. A chave pública é uma chave que pode ser distribuída, e a chave privada é uma chave que só pode ser colocada dentro do terminal. O provedor de serviços apenas desempenha o papel de uma "lista telefônica" que mantém a chave pública e a entrega à outra parte.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>2. Concorde com uma chave comum com a outra parte</span></div><div class="reason-card__desc"><span>Da chave pública da outra parte e da sua chave privada, derive uma chave de sessão comum que apenas duas partes podem calcular (acordo de chave Diffie-Hellman). A chave em si não flui através da rede, portanto, mesmo que toda a comunicação seja gravada, a chave não pode ser determinada.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>3. Criptografar e enviar no terminal de envio</span></div><div class="reason-card__desc"><span>O texto usa a chave de sessão,<a href="/pt-BR/glossary/aes-gcm/">AES-GCM</a>e ChaCha20-Poly1305. O servidor recebe apenas o texto cifrado, e o lado receptor verifica a tag de autenticação e detecta adulteração.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>4 Apenas o terminal receptor descriptografa</span></div><div class="reason-card__desc"><span>São os terminais em ambas as extremidades da comunicação que lidam com as chaves necessárias para a descriptografia, não o servidor de retransmissão. O Double Ratchet do Signal atualiza a chave para cada mensagem, dificultando a exclusão de teclas passadas mais tarde (ocultação avançada). A natureza da substituição de novos materiais-chave após a violação para reproteger as comunicações futuras se distingue como recuperação após a violação. A segurança não é garantida até que o terminal seja continuamente violado.</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>Diferenças entre criptografia de caminho de comunicação, criptografia de armazenamento e criptografia E2E</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span> Existem tipos 3 na explicação de "criptografado", e o intervalo que pode ser protegido é completamente diferente. HTTPS (TLS) está apenas entre o terminal e o servidor, e a criptografia é protegida apenas no disco do servidor ao salvar, e ambos os provedores de serviços podem ler o conteúdo. Apenas a criptografia E2E percebe "ilegível até mesmo por operadores". </span> </p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal">
+        <table class="compare-table">
+          <thead><tr><th scope="col">Ponto de vista</th><th scope="col">Criptografia do canal de comunicação (TLS / HTTPS)</th><th scope="col">Criptografia em repouso</th><th scope="col">Criptografia E2E</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Seção para proteger</th><td>Comunicação entre o terminal e o servidor</td><td>Dados em servidores e discos</td><td>Todas as seções do terminal de transmissão para o terminal de recebimento</td></tr>
+            <tr><th scope="row">A pessoa que tem a chave</th><td>Terminal e servidor</td><td>Provedor de serviços</td><td>Apenas o terminal do usuário em ambas as extremidades</td></tr>
+            <tr><th scope="row">A empresa pode ler o conteúdo</th><td>Legível (texto simples após a chegada do servidor)</td><td>Leitável (o operador de negócios gerencia a chave)</td><td>Não consigo ler</td></tr>
+            <tr><th scope="row">Escutando a comunicação</th><td>pode ser evitado</td><td>Não elegível</td><td>pode ser evitado</td></tr>
+            <tr><th scope="row">Violação do servidor e fraude interna</th><td>Não pode ser evitado</td><td>Se a chave estiver no mesmo lugar, não pode ser evitado</td><td>Pode ser evitado (apenas textos cifrados são vazados)</td></tr>
+            <tr><th scope="row">Pesquisa do lado do servidor, edição colaborativa, processamento de IA</th><td>possível</td><td>possível</td><td>Em princípio, não consigo (porque não consigo ler o conteúdo)</td></tr>
+            <tr><th scope="row">Exemplo representativo</th><td>Quase todos os serviços da web</td><td>Armazenamento geral em nuvem</td><td>Sinal・WhatsApp・iMessage・Standard Notes</td></tr>
+          </tbody>
+        </table>
+
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>Suporte de criptografia E2E para serviços principais</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>Mesmo entre recursos chamados de criptografia, há diferenças importantes: E2EE por padrão, apenas quando ativada nas configurações, ou um projeto que não usa E2EE. Esta comparação se baseia na documentação pública das empresas em 9 de 2026. Como as especificações mudam, confira novamente as fontes oficiais antes de uma decisão importante.</span> </p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal">
+        <table class="compare-table">
+          <thead><tr><th scope="col">Serviço</th><th scope="col">Criptografia E2E</th><th scope="col">Suplemento</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Sinal</th><td class="yes">E2EE por padrão</td><td>Protocolo de Sinal. Todas as mensagens, chamadas e anexos são elegíveis</td></tr>
+            <tr><th scope="row">WhatsApp</th><td class="yes">E2EE por padrão</td><td>O Protocolo de Sinal é adotado. A criptografia de backup na nuvem é opcional</td></tr>
+            <tr><th scope="row">IMessage</th><td class="yes">E2EE entre terminais Apple</td><td>O backup iCloud mantém a chave Apple até que a "proteção avançada de dados" seja ativada</td></tr>
+            <tr><th scope="row">LINE</th><td class="yes">1 vs. 1 texto de conversa é E2EE</td><td>Selagem de carta (válida por padrão). Alguns conteúdos não são elegíveis</td></tr>
+            <tr><th scope="row">E-mails gerais como Gmail</th><td class="no">Não E2EE</td><td>A linha de comunicação é TLS, e o operador criptografa ao salvar. Um design que permite que as empresas leiam o conteúdo</td></tr>
+            <tr><th scope="row">Proton Mail</th><td class="yes">Protões são E2EE</td><td>Endereços externos podem ser transformados em E2EE com e-mail protegido por senha</td></tr>
+            <tr><th scope="row">Standard Notes</th><td class="yes">E2EE por padrão</td><td>Todas as notas são E2EE. Se você perder sua senha, não poderá recuperá-la</td></tr>
+            <tr><th scope="row">Memorando Apple</th><td>Dependendo da configuração</td><td>Apple detém a chave para memorandos normais (E2EE com "Proteção Avançada de Dados"). As notas bloqueadas são criptografadas com uma chave derivada da senha</td></tr>
+            <tr><th scope="row">Notion</th><td class="no">Não E2EE</td><td>Somente criptografia durante a comunicação e o armazenamento. Projeto para edição colaborativa e pesquisa no lado do servidor</td></tr>
+            <tr><th scope="row">Obsidian Sync</th><td class="yes">E2EE (Se você definir sua própria senha de criptografia)</td><td>A empresa Obsidian também não pode ser descriptografada. O cofre local em si não está criptografado</td></tr>
+            <tr><th scope="row">SimpleMemo</th><td class="no">Não E2EE</td><td>Criptografe o histórico de transmissão com Outbox e AES-GCM-256 no terminal. O texto é entregue na sua caixa de entrada com o padrão SMTP e não é armazenado permanentemente no servidor</td></tr>
+          </tbody>
+        </table>
+
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>E2E O que não pode ser protegido mesmo com criptografia</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>E2E A criptografia é uma tecnologia que protege o "meio" e não protege o "fim" e seus arredores. O caminho que vaza informações, mesmo que você esteja usando o aplicativo E2EE, está realmente concentrado neste 4. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>Terminal em si</span></div><div class="reason-card__desc"><span>O texto simples descriptografado existe no terminal. Se o terminal estiver infectado com malware ou estiver desbloqueado, ele será lido independentemente da criptografia. Os pré-requisitos são o bloqueio do terminal, a atualização do sistema operacional e a criptografia no terminal.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Metadados</span></div><div class="reason-card__desc"><span>"Quem, para quem, quando e quanto" permanecerá em muitos serviços, mesmo que o texto seja E2EE. Há também um design para minimizar metadados como o Signal, mas não será zero.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Backup</span></div><div class="reason-card__desc"><span>Mesmo que as conversas usem E2EE, o conteúdo pode ser lido a partir de um backup na nuvem se ele estiver protegido por uma chave do provedor. A criptografia dos backups do WhatsApp é opcional; no iMessage, o Apple pode descriptografar os backups, a menos que a Proteção Avançada de Dados esteja ativada.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Comportamento do destinatário</span></div><div class="reason-card__desc"><span>Se o destinatário encaminhar capturas de tela e cópias, a criptografia não será uma restrição. E2EE é uma tecnologia baseada na premissa de "confiar na outra parte".</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>Qual nível de criptografia é necessário - determinado pelo modelo de ameaça</span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span> Nem "É Perigoso Se Não For E2EE" Nem "É Seguro Se Você Tiver TLS". Se você decidir primeiro quem deseja proteger de quê, o nível necessário será dividido em quase 3. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>Quero evitar escutar a comunicação</span></div><div class="reason-card__desc"><span>O HTTPS (TLS) verificado corretamente protege a comunicação entre o terminal e o servidor de destino. Como o suporte e a política do TLS são diferentes para cada rota na entrega de correio, não é possível determinar que todas as rotas do envio ao recebimento serão protegidas apenas conectando-se ao API com o HTTPS.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Quero me proteger contra operadores de negócios e violações de servidores</span></div><div class="reason-card__desc"><span>Se o provedor de serviços não deve ser lido, como registros médicos, consultas legais, denúncias e mensagens privadas confidenciais, selecione os serviços que fornecem E2EE por padrão (Signal, Proton Mail, Standard Notes, etc.).</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Notas diárias que podem ser entregues na sua caixa de entrada</span></div><div class="reason-card__desc"><span>Se for uma "boa ideia, receber seu Gmail e procurá-lo mais tarde", como ideias, listas de tarefas e compras, criptografia no terminal e minimização de dados (não deixe o texto em seu próprio servidor) são práticos o suficiente. SimpleMemo está localizado aqui.</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span> SimpleMemo é uma criptografia E2E? </span></h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span><strong>Não. Simple Memo não fornece criptografia de ponta a ponta (E2EE). </strong>O corpo do e-mail é entregue usando o protocolo padrão SMTP para que o destinatário possa ser lido pelo próprio cliente de e-mail regular do destinatário (como Gmail / Apple Mail / Outlook). Em vez disso, protegemos a privacidade com um modelo chamado "criptografia no terminal + minimização de dados". Para aplicativos que exigem E2EE, considere serviços dedicados como Standard Notes, Signal e ProtonMail. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span>Modelo de criptografia E2E</span></div><div class="reason-card__desc"><span>Serviços como Standard Notes e ProtonMail armazenam dados no servidor em um estado criptografado. Até mesmo o operador do servidor não consegue descriptografar o conteúdo. Sincronização e backup são possíveis, mas o texto cifrado continuará a existir permanentemente no servidor. O destinatário descriptografa e lê com um cliente dedicado.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Modelo de Simple Memo</span></div><div class="reason-card__desc"><span>Outbox aguardando transmissão offline e o histórico de transmissão são criptografados com AES-GCM-256 no terminal. A chave é Apple Keychain. A comunicação é TLS.<strong>Como o corpo do e-mail é entregue no padrão SMTP, ele pode ser visível no servidor intermediário do canal de comunicação ou no servidor de e-mail recebido</strong>. Nosso servidor não armazena o texto permanentemente. O destinatário pode lê-lo como está com o aplicativo de e-mail usual.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span>Qual devo escolher</span></div><div class="reason-card__desc"><span>Depende do modelo de ameaça. Serviço dedicado E2EE (Standard Notes / Signal / ProtonMail, etc.) para conteúdo que você não deseja que seja visto por operadores de servidor de e-mail recebido, como registros médicos, consultas legais e denúncias. Se você puder entregá-lo ao seu Gmail como seus memorandos diários de ideias, ToDo e listas de compras, o modelo Simple Memo é prático.</span></div></div>
+        </div>
+      </div></section>
+
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>Perguntas Frequentes (Criptografia E2E)</span></h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">O que é criptografia E2E?</summary><div class="faq-answer"><p>É um método que pode criptografar dados no dispositivo do remetente e descriptografá-los apenas no dispositivo do receptor. Servidores intermediários e operadores de rede não podem ler dados.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo é uma criptografia E2E?</summary><div class="faq-answer"><p><strong>Não. </strong>O protocolo padrão SMTP é usado para enviar e-mails para que o usuário destinatário possa ler o texto no aplicativo de e-mail usual. Em vez disso, criptografia Outbox e AES-GCM-256 no terminal de histórico de transmissão, a privacidade é protegida com um modelo de minimização de dados que não possui armazenamento permanente do corpo do e-mail. Para aplicativos que exigem E2EE, considere Standard Notes, Signal, ProtonMail, etc.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Qual é a diferença entre criptografia E2E e AES-GCM?</summary><div class="faq-answer"><p>A criptografia E2E é um conceito arquitetônico (que pode descriptografar). AES-GCM é um algoritmo de criptografia (como criptografar). AES-GCM também pode ser usado para a implementação interna da criptografia E2E.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Qual é a diferença entre a criptografia E2E e TLS (HTTPS)?</summary><div class="faq-answer"><p>TLS protege apenas o caminho de comunicação entre o terminal e o servidor, e o operador pode ler o conteúdo quando chegar ao servidor. Ninguém na rota (incluindo o operador) pode ler o conteúdo da criptografia E2E até que ela chegue ao terminal do destinatário.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">A criptografia E2E é absolutamente segura?</summary><div class="faq-answer"><p>Não. O que pode ser protegido são os canais de comunicação e vazamentos das empresas. Violações de terminal, backups de nuvem não criptografados, metadados, transferências de destinatários e capturas de tela não podem ser evitados.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">O e-mail (como Gmail) é criptografado com E2E?</summary><div class="faq-answer"><p>E-mails normais protegem o caminho de comunicação com TLS, e o operador os criptografa ao salvar, mas não E2EE. Para fazer E2EE, você precisa de um mecanismo que suporte ambas as extremidades da transmissão e recepção, como PGP, S/MIME ou Proton Mail.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">LINE é uma criptografia E2E?</summary><div class="faq-answer"><p>1 vs. 1 o texto de conversa é ativado por padrão com criptografia E2E chamada "Letter Sealing". No entanto, alguns conteúdos não são elegíveis, portanto, verifique as informações oficiais do LINE para obter detalhes.</p></div></details></div>
+        </div>
+
+      </div></section>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">Referências e links externos</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://en.wikipedia.org/wiki/End-to-end_encryption" target="_blank" rel="noopener">Criptografia de ponta a ponta — Wikipedia</a></li>
+        <li><a href="https://signal.org/docs/" target="_blank" rel="noopener">Documento de Protocolo de Sinal</a></li>
+        <li><a href="https://signal.org/docs/specifications/doubleratchet/" target="_blank" rel="noopener">O Algoritmo de Catraca Dupla — Especificação de Sinal</a></li>
+        <li><a href="https://ssd.eff.org/module/what-should-i-know-about-encryption" target="_blank" rel="noopener">O que devo saber sobre criptografia? — Autodefesa de vigilância da EFF</a></li>
+        <li><a href="https://support.apple.com/102651" target="_blank" rel="noopener">iCloud Visão Geral da Segurança de Dados (Proteção Avançada de Dados) — Suporte Apple</a></li>
+        </ul>
+      </section>
+
+      <div class="cta-box">
+        <div class="cta-box__title"><span>Uma abordagem simples para criptografia no terminal + minimização de dados</span></div>
+        <div class="cta-box__desc"><span>SimpleMemo criptografa o Outbox offline e o histórico de transmissão AES-GCM-256 no terminal e não armazena o corpo do e-mail no servidor permanentemente. E2E Não é criptografado, mas é um modelo prático de privacidade para enviar notas diárias para sua caixa de entrada de e-mail. O download é gratuito.</span></div>
+        <a data-cta-variant="v1" data-cta-cluster="glossary" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Baixar na App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Baixar na App Store" loading="lazy"></a>
+
+      </div>
+
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"><span>Páginas relacionadas</span></h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/pt-BR/glossary/"><span>Top glossário</span></a>
+          <a href="/pt-BR/glossary/aes-gcm/"><span>O que é criptografia AES-GCM</span></a>
+          <a href="/pt-BR/blog/memo-app-security-comparison"><span>Comparação de segurança de aplicativos de memorando</span></a>
+          <a href="/pt-BR/blog/memo-app-encryption-comparison"><span>Compare a criptografia de aplicativos de memorando</span></a>
+          <a href="/pt-BR/glossary/outbox-architecture/"><span>O que é a arquitetura Outbox</span></a>
+          <a href="/pt-BR/vs/standard-notes/"><span>Comparação Standard Notes</span></a>
+          <a href="/pt-BR/guides/proton-mail/"><span>Proton Mail Guia de Configuração</span></a>
+          <a href="/pt-BR/privacy-architecture/"><span>Design de privacidade (o que não salvar)</span></a>
+          <a href="/pt-BR/glossary/smtp/"><span>O que é SMTP/IMAP</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Leia a seguir</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Guarde suas notas no Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Configure no iPhone o acesso ao cofre e o destino das notas para guardá-las também no Obsidian.</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Conteúdo relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/pt-BR/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de Métodos</span></a></li>
+    <li><a href="/pt-BR/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Artigos do blog</span></a></li>
+    <li><a href="/pt-BR/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perguntas frequentes</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegação do rodapé">
+      <div class="footer__col">
+        <p class="footer__col-title">Produto</p>
+        <a href="/pt-BR/download/" class="footer__link">Baixar</a>
+        <a href="/pt-BR/" class="footer__link">Início</a>
+        <a href="/pt-BR/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/pt-BR/guides/" class="footer__link">Guias</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparações e migração</p>
+        <a href="/pt-BR/captio-alternative/" class="footer__link"><span>Alternativa ao Captio</span></a>
+        <a href="/pt-BR/note-to-email/" class="footer__link">Notas por e-mail</a>
+        <a href="/pt-BR/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Artigos</p>
+        <a href="/pt-BR/glossary/" class="footer__link"><span> Glossário</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Suporte</p>
+        <a href="/pt-BR/roadmap/" class="footer__link">Roteiro público</a>
+        <a href="/pt-BR/devlog/" class="footer__link">Registro de desenvolvimento</a>
+        <a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a>
+        <a href="/pt-BR/faq" class="footer__link">Perguntas frequentes</a>
+        <a href="/pt-BR/privacy" class="footer__link">Privacidade</a>
+        <a href="/pt-BR/contact" class="footer__link">Contato</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

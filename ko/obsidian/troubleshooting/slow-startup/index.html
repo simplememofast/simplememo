@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/troubleshooting/slow-startup/">
+  <title>Obsidian이 무겁고 시작이 느릴 때의 분리 절차 | SimpleMemo</title>
+  <meta name="description" content="Obsidian의 시작이 느리면 보관함과 설정의 백업을 확보하고, 복사한 보관함으로 커뮤니티 플러그인을 분리합니다. Linux 버전 1.13.7에서 0·1·2개를 각 3회 측정한 결과와 원본 CSV·화면을 게시합니다. 표시까지의 시간과 측정용 연결 준비 시간을 구분하고, 공유 CPU 부하와 캐시 한계도 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian이 무겁고 시작이 느릴 때의 절단 절차">
+  <meta property="og:description" content="Obsidian의 시작이 느리면 보관함과 설정의 백업을 확보하고, 복사한 보관함으로 커뮤니티 플러그인을 분리합니다. Linux 버전 1.13.7에서 0·1·2개를 각 3회 측정한 결과와 원본 CSV·화면을 게시합니다. 표시까지의 시간과 측정용 연결 준비 시간을 구분하고, 공유 CPU 부하와 캐시 한계도 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-slow-startup.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian이 무겁고 시작이 느릴 때의 절단 절차">
+  <meta name="twitter:description" content="Obsidian의 시작이 느리면 보관함과 설정의 백업을 확보하고, 복사한 보관함으로 커뮤니티 플러그인을 분리합니다. Linux 버전 1.13.7에서 0·1·2개를 각 3회 측정한 결과와 원본 CSV·화면을 게시합니다. 표시까지의 시간과 측정용 연결 준비 시간을 구분하고, 공유 CPU 부하와 캐시 한계도 설명합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-slow-startup.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/troubleshooting/slow-startup/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/troubleshooting/slow-startup/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.crumb{font-size:.85rem;padding-top:1.2rem;color:var(--text-muted)}.lp-hero__title span{font-size:.83em}.reader-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.7rem;padding:0!important;list-style:none;counter-reset:flow}.reader-flow li{counter-increment:flow;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:1rem;min-width:0}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.85rem;color:var(--text-secondary);margin-top:.4rem}.comparison-table{table-layout:fixed}.comparison-table th:first-child{width:34%}.rt-table caption{text-align:left;font-size:.85rem;color:var(--text-secondary);padding-bottom:.75rem}.comparison-table td{overflow-wrap:anywhere}.sample-code{padding:1.1rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.8}.lp-section h3{margin:1.7rem 0 .8rem;font-size:1.15rem}.source-note{color:var(--text-muted);font-size:.85rem;line-height:1.8}.lp-section p,.steps-list li,.shot figcaption{overflow-wrap:anywhere}.method-record{padding:1rem;border:1px solid var(--border);border-radius:8px;margin-top:1rem}.method-record summary{cursor:pointer;min-height:32px;font-weight:700}.download-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.download-links a{display:inline-flex;align-items:center;min-height:48px;padding:.65rem 1rem;border:1px solid var(--border);border-radius:8px}.proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1rem 0}.proof-grid .shot{margin:0;min-width:0}.next-step{margin:2rem 0 3rem}.next-step>a{display:block;padding:1.3rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;text-decoration:none;color:inherit}.next-step span{display:block;font-size:.8rem;color:var(--accent-bright);margin-bottom:.5rem}@media(max-width:800px){.comparison-table caption{display:block;width:100%;box-sizing:border-box}.reader-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.comparison-table,.comparison-table tbody{display:block}.comparison-table thead{display:none}.comparison-table tr{display:block;margin:1rem 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}.comparison-table th,.comparison-table td{display:block!important;width:auto!important;white-space:normal!important;padding:.9rem!important;border:0!important}.comparison-table th{background:var(--surface)}.comparison-table td:before{content:attr(data-label);display:block;font-size:.8rem;font-weight:700;color:var(--accent-bright);margin-bottom:.4rem}.proof-grid{grid-template-columns:1fr}.lp-hero{padding-top:2.5rem}}@media(max-width:360px){.reader-flow{grid-template-columns:1fr}.sample-code{font-size:.85rem}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/#article",
+  "inLanguage": "ko",
+  "headline": "Obsidian이 무겁고 시작이 느릴 때의 절단 절차",
+  "description": "Obsidian의 시작이 느리면 보관함과 설정의 백업을 확보하고, 복사한 보관함으로 커뮤니티 플러그인을 분리합니다. Linux 버전 1.13.7에서 0·1·2개를 각 3회 측정한 결과와 원본 CSV·화면을 게시합니다. 표시까지의 시간과 측정용 연결 준비 시간을 구분하고, 공유 CPU 부하와 캐시 한계도 설명합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-slow-startup.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/ko/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "시작이 느리면",
+      "item": "https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/slow-startup/#faq",
+  "inLanguage": "ko",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "시작이 느린 원인은 플러그인 수에 따라 결정됩니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "수만으로는 판단할 수 없습니다. 이 고정된 작은 보관함에서는 0·1·2개를 각각 3회 측정했지만, 개수와 함께 플러그인 종류도 변하여 공유 환경의 부하와 캐시도 영향을 미칩니다. 독자의 보관함 원인이나 개수만을 특정한 인과관계를 특정한 결과가 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "플러그인을 중지하기 전에 무엇을 백업하시겠습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "작업 전에 Obsidian을 닫고, 자신의 보관함에 있는 노트와 첨부 파일, 숨겨진 폴더의 .obsidian을 포함한 설정을 다른 위치로 복사합니다. 복사본이 존재하고 알려진 노트를 읽을 수 있는지 확인한 후, 원래 보관함을 보관한 채 검증용 복사본으로 분리합니다. 이는 독자를 위한 절차 제안이며, 독자의 백업을 실제로 확인한 것이 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "0개의 조건은 플러그인을 설치하지 않은 조건인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "아니오. Templater와 QuickAdd의 동일한 공식 배포 파일을 모든 조건에 두고, 활성화하는 목록만 변경했습니다. 0개는 커뮤니티 플러그인이 비활성화되어 있으며, 실행 시에도 로드된 인스턴스가 0개였던 조건입니다. 핵심 기능은 동일한 5종입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "표의 CDP 준비 시간과 본문 표시 시간은 동일합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "별입니다. CDP 준비는 측정용 연결 대상이 응답한 시점입니다. 본문 표시는 그 후 연결하여 알려진 Markdown의 제목과 확인 표시가 실제 화면에 나타난 것을 읽은 시점입니다. 두 경우 모두 프로세스 시작 직전부터 측정하며, 본문 표시에는 연결 및 확인 처리 시간도 포함됩니다. 초기 렌더링이나 전체 플러그인의 초기화 완료를 측정한 것이 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "이 기사(문서)의 초를 다른 단말기나 큰 보관함에도 사용할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "사용할 수 없습니다. Linux 버전 Obsidian 1.13.7, 작은 저자 작성 노트, 고정 설정, 준비된 프로파일 복사본에서 9회만 해당됩니다. OS 캐시가 가열되고 있으며, 공유 CPU 부하는 약 35–44%였습니다. Windows, macOS, iOS, 대형 실용 보관함, 물리적인 콜드 실행, SimpleMemo의 속도는 측정하지 않았습니다."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="slow-startup-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="전 세계 탐색" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/ko/guides/">사용 가이드</a></li><li><a href="/ko/use-cases/">활용 사례</a></li><li><a href="/ko/vs/">비교</a></li><li><a href="/ko/blog/">블로그</a></li><li><a href="/ko/about/">개발자 소개</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">다운로드</a><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/troubleshooting/slow-startup/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/troubleshooting/slow-startup/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/troubleshooting/slow-startup/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/troubleshooting/slow-startup/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/troubleshooting/slow-startup/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/troubleshooting/slow-startup/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/troubleshooting/slow-startup/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/troubleshooting/slow-startup/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/troubleshooting/slow-startup/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:980px">
+<nav aria-label="빵가루" class="crumb"><a href="/ko/">홈</a> › <a href="/ko/obsidian/">Obsidian</a> › 시작이 느을 때</nav>
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">백업부터 시작하는 구분</div><h1 class="lp-hero__title">Obsidian이 무겁고 시작이 느릴 때의 <br><span>분할 절차</span></h1><p class="lp-hero__sub">먼저 원본 보관함을 보관하고, 복사한 보관함에서 플러그인과 설정을 분리합니다. 저자의 작은 검증 보관함에서 측정한 9의 결과를 동일한 조건으로 비교하기 위한 예시로 게재합니다.</p><p class="article-meta">집필: <a href="/ko/about/">SimpleMemo Developer</a> · 측정: <time datetime="2026-09-30">2026년 9월 30일</time> · Linux 버전 Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>설정을 변경하기 전에 원래 보관함을 보관하십시오</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>'무거워요'를 구분하여 검증용 복사본으로 확인합니다</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>고정된 작은 보관함에서, 0·1·2개를 각 3회 측정합니다</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">설정을 변경하기 전에 원래 보관함을 보관하십시오</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong>노트·첨부 파일·설정의 백업을 확보하고, 원본 보관함이 아니라 검증용 복사본으로 시도합니다. </strong>커뮤니티 플러그인을 한 번에 비활성화하고, 같은 노트가 표시될 때까지의 시간을 비교한 뒤, 차이가 있으면 하나씩 되돌려 확인합니다.</p><div class="tip-box"><strong>먼저 백업하십시오.</strong> Obsidian을 닫고, 자신의 보관함을 다른 장소로 복사합니다. 숨겨진 폴더의 <code>.obsidian</code> 도 설정으로 포함합니다. 복사본이 존재하고, 알려진 노트를 읽을 수 있는지 확인한 후 설정을 변경하십시오. 원본 노트나 플러그인 파일을 삭제하는 절차가 아닙니다.</div><p>여기부터의 구분은 독자를 위한 제안입니다. 독자의 단말기 원인을 진단한 결과가 아닙니다. 후반부 실측은 저자가 준비한 1 노트의 고정 조건만을 다룹니다.</p><ol class="reader-flow" aria-label="분할 순서"><li><strong>보관하기</strong><span>원래 노트·첨부·설정</span></li><li><strong>증상을 구분</strong><span>시작·본문 표시·편집 중</span></li><li><strong>복사본으로 비교하기</strong><span>같은 노트·같은 기준</span></li><li><strong>하나씩 되돌리기</strong><span>버전과 변경을 기록합니다</span></li></ol><nav class="capture-toc" aria-label="기사 내 안내"><a href="#diagnose">안전하게 자르다</a><a href="#comparison">9회의 실측값</a><a href="#method">측정 방법과 한계</a><a href="#originals">원 CSV·화면</a><a href="#faq">자주 묻는 질문</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="diagnose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">“무거워”를 구분하여 검증용 복사본으로 확인합니다</h2></div><div class="ce-chapter__body"><ol class="steps-list"><li><strong>어느 단계가 느린지 적어 두십시오. </strong><br> 앱을 실행할 때까지, 보관함을 열어 본문이 보일 때까지, 검색·링크·편집 중에는 각각 다른 증상이 나타납니다. OS, Obsidian 버전, 보관함의 대략적인 규모, 직전에 변경한 설정 및 유효한 플러그인을 기록합니다.</li><li><strong>백업을 확인하고, 검증할 복사본을 분리합니다. </strong><br> 앱을 닫고 복사본을 만든 뒤, 원본은 보관된 상태로 유지합니다. 검증용 복사본을 자동 동기화 대상과 혼동하지 않도록 배치 위치를 확인하고, 두 개를 동시에 열어 둔 상태에서 설정을 변경하지 않도록 합니다. 모르는 사람의 보관함나 확인되지 않은 플러그인을 사용할 필요가 없습니다.</li><li><strong> 복사하여 커뮤니티 플러그인을 비활성화하고 비교합니다. </strong><br> 유효한 목록과 설정을 기록한 후, 커뮤니티 플러그인 설정에서 비활성화하거나 Restricted mode(제한 모드)를 사용하여 재시작 후 동일한 알려진 노트가 표시될 때까지 비교합니다. 메뉴 표시를 버전·언어로 확인해 주세요. 플러그인이 중지된 동안에는 해당 플러그인이 담당하는 기능을 사용할 수 없게 됩니다.</li><li><strong> 차이가 보이면 하나씩 유효하게 되돌립니다. </strong><br> 동일한 복사본, 노트, 핵심 기능, 측정 기준을 유지하고, 플러그인의 이름·버전·활성화 순서를 기록합니다. 같은 조건을 여러 번 측정하고, 첫 번째만의 시간이나 한 번의 빠른 값으로 결론을 내리지 않도록 합니다.</li><li><strong>차이가 보이지 않으면, 보관함과 환경을 구분하여 비교합니다. </strong><br>제가 준비한 작은 노트의 별도 보관함에서도 같은 단계가 느린지 확인합니다. 동시에 동작하는 앱 및 OS 부하, 동기화·스토리지 상태 등도 기록합니다. 여기서 설정이나 파일을 한 번에 변경하면, 어떤 변경이 관련되었는지 알 수 없게 됩니다.</li></ol><p class="source-note">백업 생성, 제한 모드 전환, 리더 플러그인 복원, 동기화·스토리지 진단은 이 9회 측정에서 시연한 작업이 아닙니다. 실제 측정에서는 사전에 준비한 활성화 목록을 사용했으며, 실행 중의 작업이나 노트를 수정하지 않았습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">고정된 작은 보관함에서, 0·1·2개를 각 3회 측정합니다</h2></div><div class="ce-chapter__body"><p>동일한 Linux 환경과 저자 작성 노트를 사용하여 실제로 로드된 커뮤니티 플러그인이 0개, Templater 전용 1개, Templater+QuickAdd의 2개가 되는 조건을 비교했습니다. <strong>본문 표시까지의 중앙값은 각각 약 0.92초·0.95초·1.02초였습니다.</strong></p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table comparison-table"><caption>각 조건 3회. 단위는 ms(밀리초)이며, 원본 데이터를 정수로 반올림하여 표시합니다. 중앙값과 전체 3회의 최소–최대값입니다.</caption><thead><tr><th scope="col">실행 시 로드된 플러그인</th><th scope="col">측정 횟수</th><th scope="col">측정용 연결 준비<br><small>CDP ready</small></th><th scope="col">알고 있는 본문 표시<br><small>GUI text ready</small></th></tr></thead><tbody><tr><th scope="row">0개：2종 모두 무효</th><td data-label="측정 횟수">3회</td><td data-label="측정용 연결 준비">중앙값 <strong>324 ms</strong><br><small>범위 313–356 ms</small></td><td data-label="알고 있는 본문 표시">중앙값 <strong>917 ms</strong><br><small>범위 892–949 ms</small></td></tr><tr><th scope="row">1개：Templater 2.25.1</th><td data-label="측정 횟수">3회</td><td data-label="측정용 연결 준비">중앙값 <strong>325 ms</strong><br><small>범위 315–339 ms</small></td><td data-label="알고 있는 본문 표시">중앙값 <strong>948 ms</strong><br><small>범위 926–973 ms</small></td></tr><tr><th scope="row">2개：Templater 2.25.1 + QuickAdd 2.29.0</th><td data-label="측정 횟수">3회</td><td data-label="측정용 연결 준비">중앙값 <strong>329 ms</strong><br><small>범위 325–332 ms</small></td><td data-label="알고 있는 본문 표시">중앙값 <strong>1017 ms</strong><br><small>범위 1016–1105 ms</small></td></tr></tbody></table></div><p><strong>0개라도 2종의 배포 파일은 놓여 있습니다. </strong> 변경한 것은 커뮤니티 플러그인 활성화 목록입니다. 설치된 매니페스트를 셀 뿐만 아니라 실행 시 유효 목록과 실제 플러그인 인스턴스의 ID·버전을 읽어 0·1·2개를 확인했습니다. 코어 기능은 모든 조건에서 동일한 5종입니다.</p><p>이 순서에서 나온 중앙값을 플러그인 수만의 인과관계나 ‘늘어날수록 반드시 느려진다’는 일반 법칙으로 볼 수 없습니다. 개수와 함께 플러그인 종류도 달라졌고, 측정은 각 3회로 적으며, 공유 CPU와 캐시도 일정하지 않았습니다. 독자의 큰 보관함이나 기기에 이 차이를 그대로 적용하지 마세요.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="method"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">시작의 “어디까지”를 측정했는가</h2></div><div class="ce-chapter__body"><h3>연결 준비와 본문 표시를 구분합니다</h3><p>단조롭게 증가하는 시계로, Obsidian 프로세스를 시작하기 직전부터 경과 시간을 측정했습니다. 표시 환경 준비는 시작 전에 완료했습니다. <strong>CDP ready</strong>는 측정용 연결 대상이 응답하고 연결 대상 정보를 얻은 시점입니다. 이것만으로는 화면에 노트가 표시되었다고 말할 수 없습니다.</p><p><strong>GUI text ready</strong>는 해당 연결을 사용하여 실제 화면을 확인하고, <code>起動確認.md</code>의 제목 “起動確認”와 알려진 확인 표시가 표시된 시점입니다. 시작부터 연결·읽기 처리까지 포함합니다. 첫 번째 렌더링, 모든 플러그인의 초기화 완료, 편집 가능해지는 시점과는 별개의 지표입니다. 읽기 개수 상태 확인은 이 본문 표시를 관측한 후 별도로 기록했습니다.</p><h3>같은 입력과 순서를 사용합니다</h3><ul><li>공식 Obsidian 1.13.7. 실제 일반 화면에서 앱과 설치 프로그램의 버전을 확인했습니다.</li><li>Templater 2.25.1, QuickAdd 2.29.0의 동일한 공식 배포 파일을 전체 조건에 복사합니다. 이번에는 새로운 획득·종속성 설치가 없습니다.</li><li>입력은 저자가 직접 준비한 148바이트의 Markdown 1건입니다. 동일한 보관함 설정, 코어 기능 5종, 두 플러그인의 배포 파일을 사용하여, 활성화 목록 외의 보관함 파일을 실행 전에 대조했습니다. 시작 후에도 본문의 바이트/해시가 변하지 않았습니다.</li><li>코어 기능은 file-explorer, backlink, outline, properties, bookmarks입니다. Templater의 시작 template와 QuickAdd의 choice·macro·AI 설정 등은 실행하고 있지 않습니다.</li><li>사전에 0·1·2개의 3 조건과 각 3회를 정하고, <code>0,1,2 / 1,2,0 / 2,0,1</code> 순서대로 측정합니다. 예정한 9회를 모두 게재했으며, 빠른 값만 선별하거나 이탈한 값은 삭제하지 않았습니다.</li><li>측정 중에는 GUI 클릭, 노트 열기·쓰기 API, 플러그인 명령을 실행하지 않고, 읽기로 상태를 확인했습니다. 각 회마다 실제 화면을 저장하고, 측정에 사용한 앱만 정상적으로 종료하고 있습니다.</li></ul><h3>캐시 부하 프로파일의 한계</h3><p>처음에 미계측 준비용 프로파일에서 실제 신뢰 확인과 General 버전 확인을 수행하고, 준비된 설정을 각 회에 복사했습니다. 각 회마다 새로운 프로파일·캐시용 디렉터리를 만들고 있지만, OS의 페이지·디스크 캐시는 준비와 반복을 통해 워집니다. 재부팅이나 OS 캐시 삭제를 하지 않았으며, 물리적인 콜드 실행이나 최초의 미사용 설정이 아닙니다.</p><p><strong>각 회차의 전체 글로벌 프로파일에 대해, 시작 직전의 전체 해시 목록은 기록하지 않습니다. </strong> 공통의 준비된 원본 설정 및 복사 방법, 각 보관함의 시작 전 파일 대조는 남겨두고 있지만, 모든 프로파일의 모든 바이트가 동일했다고 주장하지 않습니다.</p><p>공유 환경에서는 CPU 사용률 관측값이 약 35–44%이며, 다른 앱도 실행되고 있었습니다. 보이는 논리 CPU는 5이며, CPU 할당은 4 CPU에 해당하고, 메모리 상한은 16 GiB입니다. CPU의 관측 구간에는 측정·상태 획득·이미지 저장도 포함되며, 개별 플러그인의 CPU 사용률은 아닙니다. 준비 전에 다른 빌드 작업도 확인했지만, 전체 9회 중에 동일한 빌드가 동작했음을 나타내는 기록은 아닙니다.</p><details class="method-record"><summary>측정 전 정지와 기록 수정에 관하여</summary><p>측정되지 않은 준비 단계에서 정상적으로 종료된 앱의 연결 대상이 해제되었는지 확인하는 검사가 TCP의 TIME_WAIT를 대기 중인 연결과 혼동하여 중지되었습니다. 실패 기록은 보관하고, 대기 없음·연결 거부를 확인하여 체크를 수정한 후, 미실행 예정이었던 9회를 측정했습니다. 준비 단계의 시간을 측정 샘플에 포함하지 않았습니다.</p><p>원본 이미지 목록을 확인했을 때, 준비용 신뢰 확인 화면을 세어 놓친 11건이라는 기대값을 12건으로 수정했습니다. 이미지·GUI·시간은 다시 생성하지 않고, 기존 CSV 등의 바이트를 유지한 채 기록 건수를 수정하고 있습니다.</p></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="originals"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">원하는 CSV, 노트, 실제 화면을 확인합니다</h2></div><div class="ce-chapter__body"><p>CSV는 라운드되지 않은 9회의 시각, 실행 시의 읽기 개수와 버전, 공유 부하, 종료 결과를 포함하는 원본 파일입니다. 표의 정수와는 별도로 원래 값을 확인할 수 있습니다. Markdown은 저자가 사전에 직접 준비한 입력이며, 앱을 통한 본문 저장의 결과가 아닙니다.</p><div class="download-links"><a href="/assets/downloads/obsidian-slow-startup/startup-trials-20260930.csv" download="startup-trials-20260930.csv">9회 원본 CSV를 다운로드</a><a href="/assets/downloads/obsidian-slow-startup/authored-input-20260930.md" download="authored-input-20260930.md">고정 입력의 Markdown을 다운로드</a></div><pre class="sample-code" tabindex="0"><code># 起動確認
+
+著者作成の固定ノートです。プラグインの起動比較にだけ使います。
+
+表示確認印 C21-STARTUP-20260930
+</code></pre><div class="proof-grid"><figure class="shot"><a href="/assets/img/obsidian/slow-startup/trial-01-actual-gui.png"><img src="/assets/img/obsidian/slow-startup/trial-01-actual-gui.png" alt="0개 조건의 1번째에서 起動確認 노트와 알려진 확인 마크를 표시한 실제 화면" width="1100" height="820" loading="lazy"></a><figcaption>0개 조건·1번째 원본 이미지. 본문의 표시와 확인 표시를 확인하십시오. 0개는 이미지의 외관이 아니라 다른 실행 시 상태 기록으로 확인하고 있습니다. <a href="/assets/img/obsidian/slow-startup/trial-01-actual-gui.png">미가공 PNG</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian/slow-startup/trial-02-actual-gui.png"><img src="/assets/img/obsidian/slow-startup/trial-02-actual-gui.png" alt="Templater만 조건의 1번째에서 동일한 노트를 표시한 실제 화면" width="1100" height="820" loading="lazy"></a><figcaption>Templater만·1번째 원본 이미지. 같은 본문을 표시합니다. 로드된 1과 버전은 다른 실행 시 상태로 대조하고 있습니다. <a href="/assets/img/obsidian/slow-startup/trial-02-actual-gui.png">미가공 PNG</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian/slow-startup/trial-03-actual-gui.png"><img src="/assets/img/obsidian/slow-startup/trial-03-actual-gui.png" alt="Templater와 QuickAdd 조건의 1번째에서 동일한 노트를 표시한 실제 화면" width="1100" height="820" loading="lazy"></a><figcaption>Templater+QuickAdd·1번째 원본 이미지. 같은 본문을 표시합니다. 로드된 2과 버전은 다른 실행 시 상태로 대조하고 있습니다. <a href="/assets/img/obsidian/slow-startup/trial-03-actual-gui.png">미가공 PNG</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian/slow-startup/master-General-version.png"><img src="/assets/img/obsidian/slow-startup/master-General-version.png" alt="준비용 일반 화면에서 Obsidian과 설치 프로그램이 1.13.7로 표시된 실제 화면" width="900" height="700" loading="lazy"></a><figcaption>미계측 준비용 General 화면. 앱과 설치 프로그램의 버전은 1.13.7입니다. 이는 측정 9에 추가하는 샘플이 아닙니다. <a href="/assets/img/obsidian/slow-startup/master-General-version.png">미가공 PNG</a></figcaption></figure></div><p class="source-note">에 게재된 4 이미지와 CSV·Markdown은, 동결된 원본과 bytes·SHA256가 일치하는 복사본입니다. 원본 검증 영수증은 23 항목의 확인과 82 파일의 바이트/해시를 포함하며, 영수증 자체를 포함하는 대조 범위는 83건입니다. 이번 9 회에서는 Windows·macOS·iOS, 대형 실용 보관함, 동기화, SimpleMemo의 속도·생산성 및 유입 효과를 측정하지 않았습니다. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/slow-startup-20260930.md">측정 조건과 원본의 대조 기록</a>。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">자주 묻는 질문</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">시작이 느린 원인은 플러그인 수에 따라 결정됩니까?</summary><div class="faq-answer">수만으로는 판단할 수 없습니다. 이 고정된 작은 보관함에서는 0·1·2개를 각각 3회 측정했지만, 개수와 함께 플러그인 종류도 변하여 공유 환경의 부하와 캐시도 영향을 미칩니다. 독자의 보관함 원인이나 개수만을 특정한 인과관계를 특정한 결과가 아닙니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">플러그인을 중지하기 전에 무엇을 백업하시겠습니까?</summary><div class="faq-answer">작업 전에 Obsidian을 닫고, 자신의 보관함에 있는 노트와 첨부 파일, 숨겨진 폴더의 .obsidian을 포함한 설정을 다른 위치로 복사합니다. 복사본이 존재하고 알려진 노트를 읽을 수 있는지 확인한 후, 원래 보관함을 보관한 채 검증용 복사본으로 분리합니다. 이는 독자를 위한 절차 제안이며, 독자의 백업을 실제로 확인한 것이 아닙니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">0개의 조건은 플러그인을 설치하지 않은 조건인가요?</summary><div class="faq-answer">아니오. Templater와 QuickAdd의 동일한 공식 배포 파일을 모든 조건에 두고, 활성화하는 목록만 변경했습니다. 0개는 커뮤니티 플러그인이 비활성화되어 있으며, 실행 시에도 로드된 인스턴스가 0개였던 조건입니다. 핵심 기능은 동일한 5종입니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">표의 CDP 준비 시간과 본문 표시 시간은 동일합니까?</summary><div class="faq-answer">별입니다. CDP 준비는 측정용 연결 대상이 응답한 시점입니다. 본문 표시는 그 후 연결하여 알려진 Markdown의 제목과 확인 표시가 실제 화면에 나타난 것을 읽은 시점입니다. 두 경우 모두 프로세스 시작 직전부터 측정하며, 본문 표시에는 연결 및 확인 처리 시간도 포함됩니다. 초기 렌더링이나 전체 플러그인의 초기화 완료를 측정한 것이 아닙니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">이 기사(문서)의 초를 다른 단말기나 큰 보관함에도 사용할 수 있습니까?</summary><div class="faq-answer">사용할 수 없습니다. Linux 버전 Obsidian 1.13.7, 작은 저자 작성 노트, 고정 설정, 준비된 프로파일 복사본에서 9회만 해당됩니다. OS 캐시가 가열되고 있으며, 공유 CPU 부하는 약 35–44%였습니다. Windows, macOS, iOS, 대형 실용 보관함, 물리적인 콜드 실행, SimpleMemo의 속도는 측정하지 않았습니다.</div></details></div></section>
+<aside class="next-step"><a data-next-step="explore" href="/ko/obsidian/plugins/"><span>다음에 읽기</span><strong>필요한 플러그인 선택 방법과 기존 가이드를 확인합니다</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴"><div class="footer__col"><p class="footer__col-title">프로덕트</p><a href="/ko/download/" class="footer__link">다운로드</a><a href="/ko/" class="footer__link">홈</a><a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a></div><div class="footer__col"><p class="footer__col-title">비교·전환</p><a href="/ko/vs/" class="footer__link">비교</a><a href="/ko/obsidian/compare/" class="footer__link">Obsidian 비교</a></div><div class="footer__col"><p class="footer__col-title">지원</p><a href="/ko/about/" class="footer__link">개발자 소개</a><a href="/ko/faq" class="footer__link">자주 묻는 질문</a><a href="/ko/privacy" class="footer__link">개인정보 보호</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

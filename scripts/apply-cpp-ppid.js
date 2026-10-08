@@ -178,6 +178,7 @@ if (map.asc_state_checked_jst) {
 
 /** First matching map entry wins; the current patterns are disjoint anyway. */
 function cppFor(urlPath) {
+  urlPath = require('./lib/localized-sources').sourceRouteOf(urlPath);
   for (const cpp of map.cpps) {
     if (cpp.match.some((re) => new RegExp(re).test(urlPath))) return cpp;
   }
