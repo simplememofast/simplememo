@@ -186,7 +186,19 @@
     }
 
   </style>
-  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- Ahrefs analytics - deferred for LCP (same pattern as gtag above) -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://analytics.ahrefs.com/analytics.js';
+        s.async = true;
+        s.setAttribute('data-key', '6MwVxHQiKMs/Wl2rNBoiwQ');
+        document.head.appendChild(s);
+      });
+    });
+  </script>
   <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/dynalist/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Dynalistの開発はもう終わっていますか？Obsidianに移行すべきですか？","acceptedAnswer":{"@type":"Answer","text":"過去の更新記事だけでは現在の保守状況や終了時期は判断できません。DynalistとObsidianは用途が異なります。必要な機能が動くか、データを書き出せるかを確認してから選んでください。"}},{"@type":"Question","name":"Dynalist Proのメール取り込みはどう動きますか？","acceptedAnswer":{"@type":"Answer","text":"設定のDynalist ProからEmail to inboxを開き、専用アドレスを確認します。入れ先を設定して送ると、件名が項目のタイトル、本文がノートになります。短いメールで結果を確認し、アドレスは公開しないでください。"}},{"@type":"Question","name":"スマートフォンで素早くメモするならどちらですか？","acceptedAnswer":{"@type":"Answer","text":"Dynalistのアウトラインで直接見返したいなら、そのアプリでの入力を試してください。自分のメール受信箱に残したいならシンプルメモが候補です。本記事では起動時間の優劣を測定していません。"}},{"@type":"Question","name":"Dynalistのアウトラインをシンプルメモへ移行できますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモはアウトライン全体の移行ツールではありません。併用するなら、受信した文章から必要な項目をDynalistへ手動で移す方法があります。別のアウトライナーへの移行には書き出し形式の対応を確認してください。"}},{"@type":"Question","name":"Dynalistの無料プランの制限は何ですか？","acceptedAnswer":{"@type":"Answer","text":"無料枠はアイテム・文書数が無制限で、ブックマークは5件です。Proには添付、履歴、日次バックアップなどが含まれます。シンプルメモの無料送信は1日3通までで、同じ料金体系ではありません。"}}]}</script>
 <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
