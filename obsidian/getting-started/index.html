@@ -310,6 +310,20 @@
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=57c362d5f2">
 <script src="/js/site-chrome.js?v=5b6b3c7863" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+  <style id="guide-rendering">
+    @media screen {
+      html { scroll-behavior: auto; }
+      main .lp-section {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 800px;
+      }
+      /* Resolve fragment links against the complete chapter heights. */
+      html:has(:target) main .lp-section {
+        content-visibility: visible;
+        contain-intrinsic-size: none;
+      }
+    }
+  </style>
 </head>
 <body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
   <a class="ce-skip" href="#main-content">本文へスキップ</a>
