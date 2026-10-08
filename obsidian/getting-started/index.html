@@ -307,6 +307,22 @@
     }
   </style></noscript>
 <link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <style id="guide-rendering">
+    @supports (content-visibility: auto) and selector(html:has(:target)) {
+      @media screen {
+        html { scroll-behavior: auto; }
+        main .lp-section {
+          content-visibility: auto;
+          contain-intrinsic-size: auto 800px;
+        }
+        /* Resolve fragment links against the complete chapter heights. */
+        html:has(:target) main .lp-section {
+          content-visibility: visible;
+          contain-intrinsic-size: none;
+        }
+      }
+    }
+  </style>
 <!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
 <link rel="stylesheet" href="/assets/css/site-chrome.css?v=57c362d5f2">
 <script src="/js/site-chrome.js?v=5b6b3c7863" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
