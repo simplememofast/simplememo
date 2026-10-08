@@ -167,7 +167,9 @@ function isBlockedDataPath(pathname) {
 // **Pages はリポジトリをそのまま配信するので、置いただけで公開される** ——
 // 追加した当日、`https://simplememofast.com/fixtures/engine-divergence.html` が 200 を返していた。
 // `noindex,nofollow` は索引だけを止める。配信を止めるのはここ。
-const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures"];
+// Translation catalogs are build inputs; browsers use generated HTML and
+// localized JS. They remain readable in the public repository.
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures", "/data/i18n"];
 
 // Referral/attribution params that carry no content meaning (step 1b).
 // Each one mints a distinct crawlable URL for the same page — GSC has

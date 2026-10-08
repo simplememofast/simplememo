@@ -1,0 +1,512 @@
+<!doctype html><html lang="zh-Hant"><head>
+<script src="/js/i18n/zh-Hant/messages.273a8e098e81.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/import/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始 | SimpleMemo</title>
+  <meta name="description" content="官方Importer 3.1.9用Linux版Obsidian執行，從Notion的HTML ZIP儲存4筆記本和5影象，Evernote ENEX儲存3筆記本。 將摺疊、縮排、塊連結的變化與原始資料進行比較，Apple Notes明確說明了macOS條件和未驗證範圍。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始 | SimpleMemo">
+  <meta property="og:description" content="官方Importer 3.1.9用Linux版Obsidian執行，從Notion的HTML ZIP儲存4筆記本和5影象，Evernote ENEX儲存3筆記本。 將摺疊、縮排、塊連結的變化與原始資料進行比較，Apple Notes明確說明了macOS條件和未驗證範圍。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01T08:07:09+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/import/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-import.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始 | SimpleMemo">
+  <meta name="twitter:description" content="官方Importer 3.1.9用Linux版Obsidian執行，從Notion的HTML ZIP儲存4筆記本和5影象，Evernote ENEX儲存3筆記本。 將摺疊、縮排、塊連結的變化與原始資料進行比較，Apple Notes明確說明了macOS條件和未驗證範圍。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-import.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/import/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/import/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/import/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/import/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/import/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/import/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/import/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/import/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/import/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/import/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/import/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/import/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.answer{font-size:1.05rem;line-height:1.9;border-left:3px solid #70d9e5;padding-left:1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.import-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.import-table th,.import-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.import-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em;color:#e4eefc}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#14376d;cursor:pointer}.download-row{display:flex;flex-wrap:wrap;gap:.7rem;margin:1rem 0}.download-row a,.toc-links a,.internal-links a{display:inline-flex;min-height:44px;align-items:center;padding:.5rem .85rem;border-radius:8px;border:1px solid var(--border);overflow-wrap:anywhere}.scope-note{padding:1rem 1.1rem;border-radius:10px;background:var(--surface);border:1px solid var(--border);line-height:1.85}.proof-details{padding:1rem;border:1px solid var(--border);border-radius:10px;margin:1rem 0}.proof-details summary{cursor:pointer;min-height:44px;line-height:1.7}.toc-links{display:flex;flex-wrap:wrap;gap:.6rem}.source-list{line-height:1.9}.receipt-line{font-size:.9rem;color:var(--text-secondary);overflow-wrap:anywhere}.steps-list{line-height:1.9}.steps-list li{margin:.5rem 0}.code-heading h3{font-size:1rem;margin:0;overflow-wrap:anywhere}a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #70d9e5;outline-offset:3px}@media(max-width:600px){.import-table,.import-table tbody,.import-table tr,.import-table th,.import-table td{display:block}.import-table thead{display:none}.import-table tr{margin:.85rem 0;border:1px solid var(--border);border-radius:8px;overflow:hidden}.import-table th,.import-table td{border:0;padding:.7rem}.import-table td::before{content:attr(data-label);display:block;font-weight:700;color:var(--text-secondary);margin-bottom:.3rem}.capture-code{padding:.8rem;font-size:.85rem}.proof-details{padding:.8rem}.lp-hero__title{overflow-wrap:anywhere}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始",
+  "description": "官方Importer 3.1.9用Linux版Obsidian執行，從Notion的HTML ZIP儲存4筆記本和5影象，Evernote ENEX儲存3筆記本。 將摺疊、縮排、塊連結的變化與原始資料進行比較，Apple Notes明確說明了macOS條件和未驗證範圍。",
+  "datePublished": "2026-10-01T08:07:09+09:00",
+  "dateModified": "2026-10-01",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-import.png",
+  "mainEntityOfPage": "https://simplememofast.com/zh-Hant/obsidian/import/",
+  "author": {
+    "@type": "Organization",
+    "name": "SimpleMemo"
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/import/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "在Notion中選擇哪種匯入方式？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這個驗證是Notion → File import。 Notion account是使用令牌和通訊的其他路徑，沒有執行。 實際畫面說明了關於File import不保留資料庫。 資料庫、數學公式的完全轉移超出了這個結果的範圍。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notion的ZIP要先解壓嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這個官方fixture是ZIP中還有1個ZIP的構成，外面的ZIP可以直接選擇Choose file。 帶有4的ID的HTML成為筆記，沒有ID的index.html沒有成為筆記。 不是任意ZIP構成成功的證明。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "0 failed的話，原來的外觀也一樣嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不一定相同。 在這個例子中，摺疊的內容被展開為普通的標題、列表，帶有縮排的段落變成了普通的段落。 0 failed是處理件數的顯示。 分別確認外觀、附件、連結。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Notion的標題和塊的連結為什麼會變成頁面連結？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "這次的原HTML即使顯示字串中有塊ID，href中也沒有錨，輸出是[[Formatting Tests]]。 在原來的export中丟失的位置，僅靠Importer無法恢復。 轉移前的export和輸出都看。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Evernote的程式碼還有縮排嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在這個ENEX的3例子中，空白4・8個，空行，程式碼內的反斜槓和符號仍然存在。 NBSP變成了普通的空白，4、8個的縮排一致了。 不是嘗試附件、所有格式、所有筆記的結果。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apple Notes也可以在這個環境下匯入嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "檢查這個固定source是否是macOS的桌面環境。 因為驗證的環境是Linux，所以沒有嘗試Apple Notes的實際匯入。 透過這個驗證無法判斷Mac的成功和完全轉移。"
+      }
+    }
+  ],
+  "inLanguage": "zh-Hant",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/import/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/import/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/import/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/import/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/import/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/import/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/import/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/import/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/import/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/import/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · 轉移筆記</p><h1 class="lp-hero__title">Obsidian的過渡指南 — 從Notion/Evernote/Apple Notes開始</h1><p class="lp-hero__sub">轉移後容易困擾的是，比起筆記的數量，附件、連結、正文的顯示方式。 在官方Importer中實際匯入了Notion的HTML ZIP和Evernote的ENEX，將原始資料與儲存的Markdown進行了比較。</p><p>驗證日：2026年9月30日（UTC） · Linux版 Obsidian 1.13.7 · Importer 3.1.9</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-import.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="官方Importer的固定驗證。 Notion是4筆記本和5影象，Evernote是3筆記本，Apple Notes是macOS條件的source確認"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="result"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">將匯入的數量和沒有留下的形狀分開</h2></div><div class="ce-chapter__body"><p class="answer"><strong>Notion儲存了4筆記本+5影象，Evernote儲存了3筆記本。 但是，Notion的摺疊和段落的縮排不會保持原樣。 </strong> Apple Notes沒有在Linux上驗證實際匯入。</p><p class="scope-note">輸入是官方儲存庫固定commit中的測試用fixture。 這不是作者從自己的Notion/Evernote賬戶實際export的資料。 在這篇文章中，用這個小例子展示了什麼還剩下，什麼要修改。</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="import-table"><thead><tr><th>轉移來源</th><th>選擇的路線</th><th>實際結果</th></tr></thead><tbody><tr><th scope="row">Notion</th><td data-label="路徑">Notion → File import → HTML的ZIP</td><td data-label="結果">4匯入/5附件/0失敗。 儲存親子頁面和圖片。 摺疊和縮排是變化。</td></tr><tr><th scope="row">Evernote</th><td data-label="路徑">Evernote（.enex）→ENEX 1件</td><td data-label="結果">3匯入/0附件/0失敗。 3種程式碼示例的縮排和符號進行核對。</td></tr><tr><th scope="row">Apple Notes</th><td data-label="路徑">確認固定source的macOS條件</td><td data-label="結果">實際匯入未驗證。 這不是在Mac上成功的結果。</td></tr></tbody></table></div>
+<nav class="toc-links" aria-label="這篇報道的目錄"><a href="#prepare">準備練習用Vault</a><a href="#notion">Notion</a><a href="#changes">倒塌的地方</a><a href="#evernote">Evernote</a><a href="#apple">Apple Notes</a><a href="#downloads">原始輸入和儲存示例</a><a href="#faq">常見問題</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">用練習用Vault，確認Importer的版本和儲存位置</h2></div><div class="ce-chapter__body"><p>首先準備空的練習用Vault，用少量的筆記本看輸出。 Obsidian的匯入和Vault的製作在<a href="/zh-Hant/obsidian/getting-started/">下載和安裝的家長指南</a>中處理。</p><ol class="steps-list"><li>在Settings → Community plugins中啟用Importer。 這個例子的實際畫面是<strong>Importer v3.1.9</strong>。</li><li>用Ctrl+P開啟Command palette，選擇<strong>Importer: Import notes</strong>。</li><li>選擇轉移源的格式，確認輸入檔案和Output folder。 也讀執行前的Preview。</li><li><strong>Start import</strong>，分別確認顯示完成的筆記、附加、failed的件數和Vault中儲存的檔案。</li></ol>
+<p class="scope-note">這次的初期準備，將官方釋出的main.js・manifest.json・styles.css手動配置到隔離Vault，啟用後用實際GUI進行操作。 不是點選Community plugins的Browse → Install匯入的驗證。 選定的3.1.9以外的版本也會有相同的結果，這是未驗證的。</p><figure class="shot"><img src="/assets/img/obsidian-import/enabled.png" loading="lazy" decoding="async" alt="Community plugins的Importer v3.1.9和ON的實畫面"><figcaption>實際啟用的Importer v3.1.9。 觀測了開關的ON和版顯示。 <a href="/assets/img/obsidian-import/enabled.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><details class="proof-details"><summary>Obsidian和Installer的實際版本畫面</summary><figure class="shot"><img src="/assets/img/obsidian-import/version.png" loading="lazy" decoding="async" alt="General的Obsidian和Installer的版本1.13.7"><figcaption>在General上確認了一次Version 1.13.7 / Installer version 1.13.7。 <a href="/assets/img/obsidian-import/version.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="notion"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Notion將HTML的ZIP傳遞給File import</h2></div><div class="ce-chapter__body"><p>這個版本的Notion有兩條路線。 這次選擇了<strong>File import</strong>。 畫面說明“不需要代幣和網路連線”“不保留資料庫”。 Notion account的資料庫、數式的轉移是另外的途徑，這個驗證沒有執行。</p><figure class="shot"><img src="/assets/img/obsidian-import/notion-route.png" loading="lazy" decoding="async" alt="Notion的account import和File import的實際選擇畫面"><figcaption>Notion account (recommended)和File import分別顯示的實際畫面。 驗證的是下面的File import。 <a href="/assets/img/obsidian-import/notion-route.png" target="_blank" rel="noopener">開啟原PNG</a></figcaption></figure><ol class="steps-list"><li>Notion選擇後，選擇File import。 實際畫面介紹了HTML格式的export。 在自己的過渡中，按照官方的export程式準備檔案。</li><li><strong>Choose file</strong>中選擇ZIP。 驗證時，在OS的檔案選擇畫面中選擇了官方fixture的<strong>notion-testspace.zip</strong>。 外部ZIP中還有另一個ZIP1件的構成，也直接讀取了。</li><li>Folders to import確認後Continue。 這次以選擇所有物件的初始狀態進行。</li><li>Output folder是<strong>Notion</strong>，Attachment location是<strong>Vault folder</strong>，Save parent pages in subfolders是<strong>ON</strong>。 這是沒有現有筆記本的空Vault的例子。 沒有驗證Update的覆蓋、競爭處理。</li><li>在下一個畫面中開啟Save Notion ID，關閉Single line breaks，在未選擇模板的初始狀態下閱讀Preview，選擇Start import1次。</li></ol><figure class="shot"><img src="/assets/img/obsidian-import/notion-settings.png" loading="lazy" decoding="async" alt="Notion的Output folder和Attachment location和父頁面的儲存設定"><figcaption>執行前的輸出設定。 附加的Vault folder，在這個空Vault的路線上儲存了影象。 <a href="/assets/img/obsidian-import/notion-settings.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-import/notion-finished.png" loading="lazy" decoding="async" alt="Notion匯入完成的4匯入5附件0失敗"><figcaption>實際完成顯示。 儲存4筆記和5附件，failed是0。 <a href="/assets/img/obsidian-import/notion-finished.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><p>父頁面是<code>Notion/Notion-Testspace/Notion-Testspace.md</code>，子頁面進入了同一個下屬。 Attachment Tests還在同名資料夾中。 父正文的3的連結，唯一對應這個Vault對應的子筆記本。</p><div class="code-heading"><h3>實際儲存的Notion父頁面的正文全文</h3><button class="copy-button" type="button" data-copy="notion-parent">複製正文</button></div><pre class="capture-code" tabindex="0"><code data-code="notion-parent">---
+notion-id: 1590080aa5a3802488c2e857dea7aa7d
+---
+**Notion-Testspace** is a Notion workspace created by [@felciabatta](https://github.com/felciabatta) to test the [Obsidian Importer](https://github.com/obsidianmd/obsidian-importer) plugin.
+
+This workspace has been exported to HTML format, [as described here](https://help.obsidian.md/import/notion), and comprises a single parent-page (this one) and the following sub-pages:
+
+[[Block Reference]]
+
+[[Formatting Tests]]
+
+When importing to Obsidian, if you leave _**Output folder**_ blank all the pages will be stored in a single parent-folder called _**Notion-Testspace**_.
+
+---
+
+[[Attachment Tests]]</code></pre><p>5張的JPEG與原ZIP的影象bytes・SHA256一致。 檔名URL編碼被解碼，<code>кошки-самые-лучшие.jpg</code>也被儲存。 在原export中已經變成<code>----.jpg</code>的名字，還是那個名字。</p><div class="code-heading"><h3>實際儲存的附加筆記的正文全文</h3><button class="copy-button" type="button" data-copy="notion-attachment">複製正文</button></div><pre class="capture-code" tabindex="0"><code data-code="notion-attachment">---
+notion-id: 15f0080aa5a380c6b16cfed449a03a8b
+---
+# Filenames
+
+The files below are included to test filenames with special characters — sometimes Notion url-encodes these, sometimes the filenames are entirely destroyed.
+
+![[felis-catus.jpg]]
+
+![[кошки-самые-лучшие.jpg]]
+
+![[----.jpg]]
+
+![[kocky-jsou-nejlepsi.jpg]]
+
+![[name-with-percents-006300610074.jpg]]</code></pre><figure class="shot"><img src="/assets/img/obsidian-import/notion-reopen.png" loading="lazy" decoding="async" alt="用實際GUI重新開啟Notion的Attachment Tests的原始畫面"><figcaption>開啟Attachment Tests，轉移到其他筆記本後，從檔案一覽表中重新開啟一次的畫面。 正文377 bytes在首次顯示時和重新開啟後一致。 畫面上顯示著影象的上部。 <a href="/assets/img/obsidian-import/notion-reopen.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="changes"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Notion改變了形狀，三個例項</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="import-table"><thead><tr><th>原始資料的形式</th><th>儲存的結果</th><th>轉移後的確認</th></tr></thead><tbody><tr><th scope="row">摺疊標題・toggle list</th><td data-label="儲存結果">隱藏的正文剩餘，展開為普通的標題・列表。 原來的details/summary的摺疊結構沒有保留。</td><td data-label="確認">確認是否可以閱讀正文，必要時使用Obsidian側的標題和列表的摺疊。</td></tr><tr><th scope="row">帶縮排的段落</th><td data-label="儲存結果">原HTML的巢狀indented段落，成為普通的獨立段落。 縮排的層次的外觀會發生變化。</td><td data-label="確認">判斷是否將想要保留層次的段落修改為標題、要點。</td></tr><tr><th scope="row">標題、塊的單獨連結</th><td data-label="儲存結果">例子的輸出是<code>[[Formatting Tests]]</code>。 原HTML的href已經沒有位置的錨了。</td><td data-label="確認">同時檢視原export和輸出，重新新增到必要位置的連結。 沒有判定是隻有Importer的故障。</td></tr></tbody></table></div>
+<p>例如原HTML的摺疊內的<code>With a hidden text block.</code>和<code>…with hidden content!</code>，也留在了儲存的Markdown中。 但是是普通的標題、列表的正文。 不是完全複製原畫面外觀的結果。</p><figure class="shot"><img src="/assets/img/obsidian-import/notion-block.png" loading="lazy" decoding="async" alt="匯入的Block Reference目錄和通常的標題的實際畫面"><figcaption>用實GUI開啟Block Reference的原始畫面。 觀測了目錄連結和標題的上部。 不作為確認下部所有要素的繪製和點選的畫面來處理。 <a href="/assets/img/obsidian-import/notion-block.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><p>Formatting Tests中的單獨連結，即使顯示字串中有Notion的塊ID，原HTML的href也只指向頁面。 儲存示例中的“Link to heading”和“Link to text block”都是頁面連結。 從目錄到標題的連結是另一個例子，在Markdown中生成了標題連結，但不是嘗試所有連結的實際點選的結果。</p><p>另外，外部的Web影象URL保留在儲存正文中。 因為這次驗證停止了外部通訊，所以那個外部影象的顯示是未驗證的。 正在和本地的5影象分開確認。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evernote"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Evernote選擇ENEX，比較程式碼的縮排</h2></div><div class="ce-chapter__body"><ol class="steps-list"><li>Importer再次從Command palette開啟，選擇<strong>Evernote (.enex)</strong>。 實際畫面介紹了每個筆記本的ENEX export。</li><li><strong>Choose files</strong>中選擇ENEX。 在這個例子中，在OS的檔案選擇畫面中傳遞了官方fixture的<strong>code-block-indentation.enex</strong>。</li><li>Output folder是<strong>Evernote</strong>，Attachment location是<strong>Vault folder</strong>，模板未選擇。 從Continue開始閱讀Preview，選擇了1次Start import。</li><li>完成顯示是3 imported / 0 attachments / 0 failed。 儲存的<code>Evernote/code-block-indentation/</code>有3筆記本。</li></ol><figure class="shot"><img src="/assets/img/obsidian-import/evernote-settings.png" loading="lazy" decoding="async" alt="Evernote的執行前Output folder Evernote和附加設定"><figcaption>執行前的Evernote的輸出設定。 正文進入了對應ENEX名字的子資料夾。 <a href="/assets/img/obsidian-import/evernote-settings.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-import/evernote-finished.png" loading="lazy" decoding="async" alt="Evernote匯入完成的3匯入0附件0失敗"><figcaption>實際完成顯示。 儲存了3筆記本，附件是0，failed是0。 輸入也沒有附件。 <a href="/assets/img/obsidian-import/evernote-finished.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><p>空白的例子保留了4・8的縮排和空行。 NBSP的例子變成了普通的空白，但4、8個縮排是一致的。 包含反斜槓、<code>*</code>、<code>_</code>的字串也作為程式碼塊內的文字保留下來。</p><div class="code-heading"><h3>包含空白縮排的真實儲存全文</h3><button class="copy-button" type="button" data-copy="evernote-spaces">複製正文</button></div><pre class="capture-code" tabindex="0"><code data-code="evernote-spaces">```python
+def f(x):
+    if x:
+
+        return 1
+    return 0    # aligned
+```
+</code></pre><div class="code-heading"><h3>包含反斜槓和Markdown符號的實際儲存全文</h3><button class="copy-button" type="button" data-copy="evernote-backslashes">複製正文</button></div><pre class="capture-code" tabindex="0"><code data-code="evernote-backslashes">```bash
+grep -o &#x27;a\\*b&#x27; file \\
+  | sed &#x27;s/_x_/*y*/&#x27;
+```
+</code></pre><figure class="shot"><img src="/assets/img/obsidian-import/evernote-reopen.png" loading="lazy" decoding="async" alt="Evernote的空白縮排用實GUI重新開啟的程式碼顯示"><figcaption>開啟Indented with spaces，轉移到另一個2筆記本後，從檔案一覽表中重新開啟一次的畫面。 本文78 bytes最初和重新開放後一致。 <a href="/assets/img/obsidian-import/evernote-reopen.png" target="_blank" rel="noopener">開啟原始PNG</a></figcaption></figure><p>這個3例子中沒有生成的frontmatter。 製作、更新日期和標籤等所有metadata、Evernote的附加、任意格式的保留尚未驗證。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="apple"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Apple Notes明確macOS條件和未驗證</h2></div><div class="ce-chapter__body"><p>官方的固定source正在檢查<code>Platform.isMacOS</code>和桌面環境。 這次執行的是Linux版Obsidian，所以沒有嘗試Apple Notes的實際匯入。 從source中讀取對應條件和在Mac上實際轉移是不同的。</p><p>從Apple Notes轉移時，請確認官方的<a href="https://help.obsidian.md/import/apple-notes" target="_blank" rel="noopener">Apple Notes的轉移步驟</a>和物件環境。 這個頁面的Notion/Evernote的成功件數，不能作為Apple Notes的實機成功使用。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">比較公式的小輸入和實際儲存的例子</h2></div><div class="ce-chapter__body"><p>再現用的輸入2件是官方儲存庫同一固定commit中的測試fixture。 不是自己賬戶的export。 可以用練習用Vault嘗試相同的輸入，也可以用於比較下面的儲存正文。</p><div class="download-row"><a class="fixture-download" data-file="notion-fixture" href="/assets/downloads/obsidian-import/notion-testspace.zip" download>notion-testspace.zip（官方固定裝置）</a><a class="fixture-download" data-file="evernote-fixture" href="/assets/downloads/obsidian-import/code-block-indentation.enex" download>code-block-indentation.enex（官方fixture）</a></div><p>儲存例子是實際用GUI生成的Markdown的原bytes。 ZIP中只包含正文7件。 不包括影象、plugin本體、設定、輸入fixture。 如果想將附加筆記的連結用圖片顯示的話，從Importer匯入原輸入到自己的練習用Vault進行確認。</p><div class="download-row"><a class="md-download" data-file="notion-parent" href="/assets/downloads/obsidian-import/notion-parent.md" download="notion-parent.md">Notion-Testspace.md（651位元組）</a><a class="md-download" data-file="notion-attachment" href="/assets/downloads/obsidian-import/notion-attachment.md" download="notion-attachment.md">Attachment Tests.md（377位元組）</a><a class="md-download" data-file="notion-block" href="/assets/downloads/obsidian-import/notion-block.md" download="notion-block.md">Block Reference.md（2287位元組）</a><a class="md-download" data-file="notion-formatting" href="/assets/downloads/obsidian-import/notion-formatting.md" download="notion-formatting.md">Formatting Tests.md（9423位元組）</a><a class="md-download" data-file="evernote-spaces" href="/assets/downloads/obsidian-import/evernote-spaces.md" download="evernote-spaces.md">Indented with spaces.md（78位元組）</a><a class="md-download" data-file="evernote-NBSP" href="/assets/downloads/obsidian-import/evernote-NBSP.md" download="evernote-NBSP.md">Indented with non-breaking spaces.md（51位元組）</a><a class="md-download" data-file="evernote-backslashes" href="/assets/downloads/obsidian-import/evernote-backslashes.md" download="evernote-backslashes.md">Backslashes and markdown in code.md（57位元組）</a><a class="zip-download" href="/assets/downloads/obsidian-import/actual-imported-markdown-examples.zip" download="actual-imported-markdown-examples.zip">實際儲存Markdown7件的ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">轉移前後的確認和FAQ</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">在Notion中選擇哪種匯入方式？</summary><div class="faq-answer">這個驗證是Notion → File import。 Notion account是使用令牌和通訊的其他路徑，沒有執行。 實際畫面說明了關於File import不保留資料庫。 資料庫、數學公式的完全轉移超出了這個結果的範圍。</div></details><details class="faq-item"><summary class="faq-summary">Notion的ZIP要先解壓嗎？</summary><div class="faq-answer">這個官方fixture是ZIP中還有1個ZIP的構成，外面的ZIP可以直接選擇Choose file。 帶有4的ID的HTML成為筆記，沒有ID的index.html沒有成為筆記。 不是任意ZIP構成成功的證明。</div></details><details class="faq-item"><summary class="faq-summary">0 failed的話，原來的外觀也一樣嗎？</summary><div class="faq-answer">不一定相同。 在這個例子中，摺疊的內容被展開為普通的標題、列表，帶有縮排的段落變成了普通的段落。 0 failed是處理件數的顯示。 分別確認外觀、附件、連結。</div></details><details class="faq-item"><summary class="faq-summary">Notion的標題和塊的連結為什麼會變成頁面連結？</summary><div class="faq-answer">這次的原HTML即使顯示字串中有塊ID，href中也沒有錨，輸出是[[Formatting Tests]]。 在原來的export中丟失的位置，僅靠Importer無法恢復。 轉移前的export和輸出都看。</div></details><details class="faq-item"><summary class="faq-summary">Evernote的程式碼還有縮排嗎？</summary><div class="faq-answer">在這個ENEX的3例子中，空白4・8個，空行，程式碼內的反斜槓和符號仍然存在。 NBSP變成了普通的空白，4、8個的縮排一致了。 不是嘗試附件、所有格式、所有筆記的結果。</div></details><details class="faq-item"><summary class="faq-summary">Apple Notes也可以在這個環境下匯入嗎？</summary><div class="faq-answer">檢查這個固定source是否是macOS的桌面環境。 因為驗證的環境是Linux，所以沒有嘗試Apple Notes的實際匯入。 透過這個驗證無法判斷Mac的成功和完全轉移。</div></details></div></section>
+<p class="receipt-line">公開日期：2026年10月01日</p><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">確認範圍和官方資料</h2></div><div class="ce-chapter__body"><ul><li>Linux版Obsidian/Installer 1.13.7、Importer v3.1.9的實際畫面。 透過手動配置官方release assets3件的隔離Vault從GUI啟用了。</li><li>Notion File import和Evernote ENEX各1次，從實際的OS檔案選擇和Start import開始執行。 將儲存的7筆記、5本地影象、有限的正文、連結、layout例子與原fixture進行了核對。</li><li>Notion的附加筆記和Evernote的空白程式碼筆記，從同一啟動內的檔案列表再次開啟，確認bytes一致。 重啟應用程式後重新開啟是未驗證的。</li><li>PNG・輸入fixture・儲存Markdown保持原bytes。 輔助程式碼用於準備和讀取，匯入和輸出檔案生成沒有用plugin API代替。</li></ul><p>保留了準備的profile ID錯誤、點選物件的selector等待失敗、檔案選擇中僅靠第一個Return沒有關閉的事實。 實際選擇確定是透過OS畫面的Open按鈕進行的。 應用程式是GUI Close後的實際wait在exit 0，Xorg是所有process的SIGTERM和實際wait 0。 控制器在末尾的Xlib結束處理中退出了1，整體沒有正常結束。 詳細情況總結在<a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/importer-20260930.md">驗證記錄</a>中。</p><p class="scope-note">真實賬戶的export、Notion account/API・資料庫・數式、Apple Notes的執行、全部metadata/全部layout/任意的大規模資料、其他OS、iOS、Sync、SimpleMemo、速度・安全性・生產力的效果尚未驗證。</p><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-importer/releases/tag/3.1.9" target="_blank" rel="noopener">匯入器3.1.9官方釋出</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/README.md" target="_blank" rel="noopener">固定commit的官方README</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/tests/notion/notion-testspace.zip" target="_blank" rel="noopener">Notion官方fixture的原件</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/tests/evernote/code-block-indentation.enex" target="_blank" rel="noopener">Evernote官方fixture的原件</a></li><li><a href="https://github.com/obsidianmd/obsidian-importer/blob/054df1d3f8e368b7c2add22c3bae26d96e721901/src/formats/apple-notes.ts#L120" target="_blank" rel="noopener">Apple Notes的固定source・OS條件</a></li></ul><p class="receipt-line">雖然進行了選定版的source和官方分發物的核對，但並不是從source再現同一構建的驗證。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">接下來，製作每天使用轉移的筆記本的入口</h2></div><div class="ce-chapter__body"><p>轉移後確認筆記的數量、附件、連結、易讀性，修改必要的正文。 第一次使用Vault和筆記本間連結的人，可以在父指南中確認Obsidian的基本操作。</p><div class="internal-links"><a data-next-step="getting-started" href="/zh-Hant/obsidian/getting-started/">Obsidian的匯入和基本操作</a><a href="/zh-Hant/obsidian/daily-note/">把每天的筆記變成每日筆記</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var e=document.querySelector('[data-code="'+b.getAttribute('data-copy')+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a>
+        <a href="/zh-Hant/use-cases/" class="footer__link">使用情境</a>
+        <a href="/zh-Hant/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/note-to-email/" class="footer__link">將筆記傳送至信箱</a>
+        <a href="/zh-Hant/vs/" class="footer__link">比較</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/faq" class="footer__link">常見問題</a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/obsidian-share-sheet/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian 공유 시트 vs 단축키 vs QuickAdd vs SimpleMemo|성실 비교</title>
+  <meta name="description" content="Obsidian 공식 1.13의 iOS 공유 시트·바로 가기·QuickAdd·SimpleMemo의 4 루트를 성실하게 비교합니다. 공식에서 충분한 경우를 먼저 명시한 뒤, 속도·Apple Watch·음성·AI 태그의 차이를 설명합니다(시작 시간은 SimpleMemo만 개발자가 측정합니다).">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian에 iPhone에서 메모를 넣는 4 루트 — 성실 비교">
+  <meta property="og:description" content="Obsidian 공식 1.13의 공유 시트·바로 가기·QuickAdd·SimpleMemo를 비교합니다. 공식적으로 충분한 경우도 명시한 성실한 비교.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/vs/obsidian-share-sheet/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/vs-obsidian.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian에 iPhone에서 메모를 넣는 4 루트 — 성실 비교">
+  <meta name="twitter:description" content="Obsidian 공식 1.13의 공유 시트·바로 가기·QuickAdd·SimpleMemo를 비교합니다. 공식적으로 충분한 경우도 명시한 성실한 비교.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-obsidian.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/obsidian-share-sheet/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/obsidian-share-sheet/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/vs/obsidian-share-sheet/#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/vs-obsidian.png",
+  "headline": "Obsidian 공유 시트 vs 단축키 vs QuickAdd vs SimpleMemo — 성실 비교",
+  "description": "Obsidian 공식 1.13의 iOS 공유 시트·바로 가기·QuickAdd·SimpleMemo의 4 루트를 성실하게 비교합니다. 공식적으로 충분한 경우를 먼저 명시한 뒤, 속도·Apple Watch·음성·AI 태그의 차이를 설명합니다(시작 시간은 SimpleMemo만 개발자가 측정합니다).",
+  "url": "https://simplememofast.com/ko/vs/obsidian-share-sheet/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/vs/obsidian-share-sheet/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "메모 앱 비교",
+      "item": "https://simplememofast.com/ko/vs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "vs Obsidian 공유 시트",
+      "item": "https://simplememofast.com/ko/vs/obsidian-share-sheet/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/vs/obsidian-share-sheet/#webpage",
+  "inLanguage": "ko",
+  "name": "Obsidian 공유 시트와의 성실한 비교",
+  "url": "https://simplememofast.com/ko/vs/obsidian-share-sheet/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .diff-list{list-style:none;margin:1.5rem 0 2rem;padding:0}
+    .diff-list li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .diff-list li .diff-num{position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .diff-list li strong{color:var(--text)}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+    @media(max-width:600px){.choose-grid{grid-template-columns:1fr}}
+    .choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .choose-card ul{list-style:none;padding:0;margin:0;font-size:.87rem;color:var(--text-secondary);line-height:1.8}
+    .choose-card ul li::before{content:"✓ ";color:#3fb950;font-weight:700}
+
+    .lose-card{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0}
+    .lose-card ul{list-style:none;padding:0;margin:0;font-size:.9rem;color:var(--text-secondary);line-height:1.9}
+    .lose-card ul li::before{content:"✗ ";color:#f85149;font-weight:700}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/vs/obsidian-share-sheet/#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"Obsidian 공식 1.13의 공유 시트가 있다면, SimpleMemo는 필요하지 않을까요?","acceptedAnswer":{"@type":"Answer","text":"공유 시트에서 텍스트나 URL을 Vault로 보내기만 하면 필요하지 않습니다. SimpleMemo가 가치를 갖는 경우는, 공유 출처가 없는 “생각”을 웜 실행 시 실제 측정 중앙값 0.4초에 작성하고 싶을 때, Apple Watch로 음성 입력하고 페어인 iPhone을 통해 전달하고 싶을 때, 음성의 자동 녹음·AI 태그 부여·메일에 이중화를 원할 때입니다. 해당되지 않으면 공식으로 충분합니다."}},{"@type":"Question","name":"단축의 공식 액션과 URL 스킴은 어떻게 다릅니까?","acceptedAnswer":{"@type":"Answer","text":"모바일 1.11 이후의 공식 단축키 액션은 Obsidian을 열지 않고 추가할 수 있습니다. 기존의 obsidian:// URL 스킴은 반드시 Obsidian을 앞에 실행하고, 본문이 끊기거나, 노트를 이중으로 작성하거나, 별도의 Vault에 쓰기와 같은 실패가 발생하기 쉬운 경로입니다. 증상별 구분 가이드에 정리하고 있습니다."}},{"@type":"Question","name":"SimpleMemo의 Vault 추가에 플러그인이 필요합니까?","acceptedAnswer":{"@type":"Answer","text":"필요 없습니다. Vault 폴더에 파일을 직접 추가하는 것을 기본으로 하며, 열 수 없는 경우에는 URI 폴백으로 추가합니다. QuickAdd와 같은 Vault 내부 템플릿 제어는 할 수 없지만, Obsidian 측의 설정은 0입니다. 시스템은 Obsidian 연동의 해설 페이지를 확인해 주세요."}},{"@type":"Question","name":"메모의 본문은 어느 서버에 저장됩니까?","acceptedAnswer":{"@type":"Answer","text":"영구적인 저장은 이루어지지 않습니다. 본 문서는 전송이 통과될 때만 서버를 경유하며, AI 태그 지정은 온 디바이스(Apple Foundation Models)에서 수행되기 때문에 외부 서버로 전송되지 않습니다. 다만 메일 배송은 표준 SMTP을 사용하기 때문에 E2EE(엔드투엔드 암호화)가 아닙니다. 프라이버시 설계의 전체 모습으로 통로를 도식화하고 있습니다."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/vs/obsidian-share-sheet/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/vs/obsidian-share-sheet/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/obsidian-share-sheet/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/vs/obsidian-share-sheet/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/vs/obsidian-share-sheet/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/obsidian-share-sheet/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/vs/obsidian-share-sheet/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/vs/obsidian-share-sheet/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/vs/obsidian-share-sheet/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>메모 앱 비교</span>
+        </div>
+        <h1 class="lp-hero__title"> <span>Obsidian에 iPhone에서 넣는 4 루트 <br> 공식 공유 시트로 충분한지, 부족한지</span> </h1>
+        <p class="lp-hero__sub"> <span>2026년 7월 말, Obsidian의 모바일 1.13에 공식 공유 시트 지원이 추가되었습니다. 이제 외부 앱은 필요하지 않을까요? — 그 의문에 정면으로 답변합니다. 먼저 결론의 절반을 말하자면, 텍스트를 공유 시트에서 Vault로 보내기만 하면 공식적으로 충분합니다. 이 페이지는 나머지 절반(속도·Apple Watch·음성·자동 태그)이 필요한 분들을 위한 성실한 비교입니다. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 공개일: <time datetime="2026-08-11">2026년08월11일</time></span> </p>
+      </div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>전제: 4개의 루트는 모두 “정답”이 될 수 있습니다</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>비교표: 4 루트의 강점·부득점</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>SimpleMemo가 지는 부분(솔직히)</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Premise -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>전제: 4개의 루트는 모두 “정답”이 될 수 있습니다</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>iPhone에서 Obsidian의 Vault에 메모를 넣는 주요 경로 4가지를 비교합니다. ①<strong>공식 1.13 공유 시트</strong>(다른 앱의 ‘공유’에서 Vault 노트로 보내기), ②<strong>단축어</strong>(모바일 1.11 이후의 공식 동작은 앱을 열지 않고 추가할 수 있으며, 기존 obsidian:// URL 스킴은 Obsidian을 전면에서 실행), ③<strong><a href="/ko/obsidian/plugins/quickadd/">QuickAdd</a> 등의 커뮤니티 플러그인</strong>(Vault 내 템플릿 삽입과 추가 위치를 세밀하게 제어), ④<strong>SimpleMemo</strong>(웜 실행 시 탭에서 입력 가능 상태까지 실측 중앙값 0.4초, 전송 후 이메일과 Vault 양쪽에 저장). 알맞은 방법은 ‘무엇을, 어디에서, 어떤 상황에서’ 기록하는지에 따라 달라집니다. 또한 <a href="https://obsidian.md/changelog/2026-09-02-mobile-v1.14.0/">모바일 1.14 사전 제공 버전</a>에는 iOS 26용 공식 Quick Capture가 추가되었습니다. 보관함 로딩을 기다리지 않고 잠금 화면·제어 센터·단축어에서 입력할 수 있으며, 표의 4가지 경로와는 별도의 입력 경로입니다. 사용 전에 일반 공개 버전에서 제공되는지 확인하세요.</span> </p>
+      </div></section>
+
+      <!-- Comparison Table -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>비교표: 4 루트의 강점·불편</span> </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="compare-table">
+            <thead><tr><th scope="col">항목</th><th scope="col">공식 공유 시트（1.13）</th><th scope="col">바로 가기</th><th scope="col">빠른 추가</th><th scope="col">SimpleMemo</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">추가 앱 / 플러그인</th><td class="yes">불필요(무료)</td><td class="yes">불필요（iOS 표준）</td><td class="no">플러인 도입·설정이 필요합니다</td><td class="no">앱 설치가 필요합니다</td></tr>
+              <tr><th scope="row">특기 시작</th><td class="yes">다른 앱에서의 “공유”(URL·선택 텍스트)</td><td>자동화·정형 처리</td><td>Obsidian을 열어 사용하는 작업 중</td><td class="yes">「생각해낸 순간」의 0부터 입력</td></tr>
+              <tr><th scope="row">생각에 떠오르는 메모의 속도</th><td>공유 원본 앱을 열고 나서 공유 시트를 추적합니다</td><td>단축키 실행+입력 프롬프트</td><td>Obsidian의 시작을 기다립니다(Vault 규모에 따라 변동)</td><td class="yes">시작 0.4초(실측·웜)→ 즉시 입력</td></tr>
+              <tr><th scope="row">Apple Watch에서의 입력</th><td class="no">불가(watchOS 앱 없음)</td><td class="no">Vault 부재로 인해 실질적으로 불가</td><td class="no">불가</td><td class="yes">손목으로 음성 입력. 전송·Vault 추가는 쌍의 iPhone을 통해</td></tr>
+              <tr><th scope="row">음성 입력</th><td>iOS 키보드 음성 입력에 의존</td><td>Siri을 통해 일부 가능</td><td>iOS 키보드 음성 입력에 의존</td><td class="yes">열면 자동 녹음(설정에서 켜기·iOS 26 이후)·온 디바이스 변환</td></tr>
+              <tr><th scope="row">태그·제목 부여</th><td>템플릿으로 일부 자동(페이지 제목·URL·날짜 등)</td><td class="no">수동(템플에서 일부 자동)</td><td class="yes">템플릿으로 강력하게 제어</td><td class="yes">온 디바이스 AI가 자동 부여(「AI 태그 자동 추가」를 켰을 때. 태그 지정을 위한 외부 전송 없음)</td></tr>
+              <tr><th scope="row">오프라인 시</th><td class="yes">로컬 저장으로 동작</td><td>액션에 의한</td><td class="yes">로컬 저장으로 동작</td><td class="yes">Outbox에 암호화 저장→자동 재전송</td></tr>
+              <tr><th scope="row">Vault 이외에 대한 보류</th><td class="no">없음</td><td class="no">없음(조합하면 가능)</td><td class="no">없음</td><td class="yes">메일 수신함에도 남는다(이중화). 일반 모드)</td></tr>
+              <tr><th scope="row">실패 모드</th><td>공유 대상 노트 선택 오류</td><td class="no">URL 스키마를 통해 본문이 끊기·이중 생성·별도 Vault 쓰기가 발생하기 쉽습니다</td><td>플러인 업데이트 시 고장날 수 있습니다</td><td>메일 경유가 필요 없는 사람에게는 과도</td></tr>
+              <tr><th scope="row">요금</th><td class="yes">무료</td><td class="yes">무료</td><td class="yes">무료(플러인)</td><td>무료 3통/일·무제한은 ¥500/월</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;">SimpleMemo의 시작 0.4초는 탭→키보드 입력이 가능해질 때까지의 웜 실행·5회 측정의 중앙값(2026-08-11 실측·<a href="/ko/blog/benchmark-methodology" style="color:var(--accent);">측정 방법을 공개</a>). 단축키의 실패 모드는 <a href="/ko/obsidian/shortcuts-not-working/" style="color:var(--accent);">증상별 트러블슈팅</a>에 자세히 설명됩니다.</p>
+      </div></section>
+
+      <!-- Where we lose (honest) -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>SimpleMemo가 지는 부분(솔직히)</span> </h2></div><div class="ce-chapter__body">
+        <div class="lose-card">
+          <ul>
+            <li><strong>Safari의 기사 URL 및 다른 앱으로부터의 “공유” 시작</strong>은 공식 공유 시트에서 승리합니다. SimpleMemo는 공유 시트 확장이 없는 앱 실행형이므로, “보고 있는 것을 전송” 용도로는 공식이 자연스럽습니다.</li>
+            <li><strong>추가 앱 불필요·완전 무료</strong>라는 점에서 공식·단축키에 뒤처집니다. SimpleMemo의 무료 플랜은 3통/일이며, 무제한은 프리미엄(¥500/월·¥5,000/년)이 필요합니다.</li>
+            <li><strong>Vault 내부에서의 삽입 위치 제어·템플릿 전개</strong>는 QuickAdd가 압도적으로 강력하며, SimpleMemo는 “결정한 노트에 대한 추가”만 가능합니다.</li>
+            <li><strong>메일을 거치지 않는 완전 로컬 운영</strong>을 원하는 사람에게는 적합하지 않습니다. SimpleMemo는 메일 전송이 본체이며, E2EE(엔드투엔드 암호화)가 아닙니다(<a href="/ko/privacy-architecture/" style="color:var(--accent);">데이터 경로는 여기에서 전부 공개</a>).</li>
+            <li>이미<strong>Obsidian을 1 낮에 열어 생활하고 있는 사람</strong>에게는 외부 앱을 추가할 이유 자체가 적을 것입니다. 그것은 건전한 결론입니다.</li>
+          </ul>
+        </div>
+      </div></section>
+
+      <!-- Where we win -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>그럼에도 불구하고 SimpleMemo를 사용할 이유가 남는 4 장면</span> </h2></div><div class="ce-chapter__body">
+        <ul class="diff-list">
+          <li> <span class="diff-num">1</span> <strong>「생각난 순간」의 제로 입력 — 공유 시트에는 공유 원본이 필요합니다</strong><br> 공유 시트는 “무언가를 보고 있는” 때의 도구입니다. 걸을 때 머릿속에 떠오른 한 마디에는 공유할 것이 없습니다. SimpleMemo는 탭에서 0.4초(웜 실행·실측 중앙값)로 키보드가 표시되고, 1를 작성하여 탭으로 전송합니다. Obsidian의 시작이나 노트 선택은 필요하지 않습니다. 공식 Quick Capture의 선행 제공 버전도 보관함의 로드를 기다리지 않고 입력할 수 있습니다. </li>
+          <li> <span class="diff-num">2</span> <strong>Apple Watch에서 음성 입력 — Obsidian은 watchOS 앱을 실행하고 있지 않습니다</strong><br> Obsidian에는 watchOS 앱이 없기 때문에, Watch 상에는 앱도 Vault도 공유 시트도 없습니다(<a href="/ko/obsidian/apple-watch-not-working/" style="color:var(--accent);">자세한 설명</a>). SimpleMemo는 Watch에서 음성 메모를 받아, 페어인 iPhone을 통해 이메일과 Vault 모두에 전달합니다. 전송 및 Vault 추가에는 iPhone 측의 설정과 중계가 필요합니다. </li>
+          <li> <span class="diff-num">3</span> <strong>음성 및 AI 태그 자동화 — “열기→말하기→끝”</strong><br> 설정의 “시작 시 음성 입력 자동 켜기”를 켜면, 열면 자동으로 녹음이 시작되고, 온 디바이스에서 문자 전사가 가능합니다(iOS 26 이후 지원 단말기). 또한 설정의 “AI 태그 자동 추가”를 켜면, 온 디바이스 AI(Apple Foundation Models)가 20자 이내의 제목·1~3개의 태그·종류(todo/idea/log)를 자동으로 부여합니다. 태깅을 위해 메모 본문이 외부 서버로 전송되지 않습니다. 태그가 붙은 상태로 Vault에 추가되므로, 이후 정리가 필요하지 않습니다. </li>
+          <li> <span class="diff-num">4</span> <strong>메일 수신함으로의 이중화 — 전송된 메모는 수신함에도 사본이 남습니다</strong><br> 일반 모드에서는 전송한 메모가 Vault에 대한 추가 기록과는 다른 경로로, 자신의 메일 수신함에도 도착합니다(「Obsidian에만 저장」 중에는 메일을 보내지 않습니다). 이미 전송된 메모라면, Vault의 동기화 사고나 스마트폰 분실이 있더라도 메일이라는 앱에 의존하지 않는 곳에 메모가 남습니다(전송 대기 메모는 기기 내에만 있습니다). </li>
+        </ul>
+      </div></section>
+
+      <!-- Who Should Choose Which -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>어떤 것을 선택해야 할까요</span> </h2></div><div class="ce-chapter__body">
+        <div class="choose-grid">
+          <div class="choose-card">
+            <div class="choose-card__title">공식 공유 시트 / 바로 가기 / QuickAdd용</div>
+            <ul>
+              <li>공유하고 싶은 것은 주로 URL·기사·선택 텍스트</li>
+              <li>추가 앱을 전혀 늘리고 싶지 않습니다</li>
+              <li>Vault 내의 삽입 위치와 템플릿을 세밀하게 제어하고 싶습니다(QuickAdd)</li>
+              <li>메일을 통한 설계에 저항이 있습니다</li>
+              <li>Obsidian을 항상 열어 작업하고 있습니다</li>
+            </ul>
+          </div>
+          <div class="choose-card">
+            <div class="choose-card__title">SimpleMemo 방향</div>
+            <ul>
+              <li>보행 중·이동 중에 떠오르는 생각을 바로 쓰고 싶습니다</li>
+              <li>Apple Watch로 음성 입력하고, 페어의 iPhone을 통해 전달하고 싶습니다</li>
+              <li>음성으로 쓰고 싶습니다(자동 녹음·온디바이스 변환)</li>
+              <li>제목·태깅을 자동화하고 싶습니다</li>
+              <li>Vault와 이메일 모두에 남는 이중화를 원합니다</li>
+            </ul>
+          </div>
+        </div>
+        <p class="lp-section__lead" style="margin-top:1rem;"> <span>병용이 가장 현실적입니다。「 '보고 있는 것을 보내기'는 공식 공유 시트이며, '머리에 떠오르는 것을 보내기'는 SimpleMemo, 'Vault 내부의 정형 작업'은 QuickAdd——시작점이 다른 도구는 경쟁하지 않습니다. </span> </p>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>자주 묻는 질문</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian 공식 1.13의 공유 시트가 있다면, SimpleMemo는 필요하지 않을까요?</summary><div class="faq-answer"><p>공유 시트에서 텍스트나 URL을 Vault로 보내기만 하면 필요하지 않습니다. SimpleMemo가 가치를 갖는 경우는, 공유 출처가 없는 “생각”을 웜 실행 시 실제 측정 중앙값 0.4초에 작성하고 싶을 때, Apple Watch로 음성 입력하고 페어인 iPhone을 통해 전달하고 싶을 때, 음성의 자동 녹음·AI 태그 부여·메일에 이중화를 원할 때입니다. 해당되지 않으면 공식으로 충분합니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">단축의 공식 액션과 URL 스킴은 어떻게 다릅니까?</summary><div class="faq-answer"><p>모바일 1.11 이후의 공식 단축키 액션은 Obsidian을 열지 않고 추가할 수 있습니다. 기존의 obsidian:// URL 스킴은 반드시 Obsidian을 앞에 실행하고, 본문이 끊기거나, 노트를 이중으로 작성하거나, 별도의 Vault에 쓰기와 같은 실패가 발생하기 쉬운 경로입니다. <a href="/ko/obsidian/shortcuts-not-working/" style="color:var(--accent);">증상별 구분 가이드</a>에 정리하고 있습니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo의 Vault 추가에 플러그인이 필요합니까?</summary><div class="faq-answer"><p>필요 없습니다. Vault 폴더에 파일을 직접 추가하는 것을 기본으로 하며, 열 수 없는 경우에는 URI 폴백으로 추가합니다. QuickAdd와 같은 Vault 내부 템플릿 제어는 할 수 없지만, Obsidian 측의 설정은 0입니다. 시스템은 <a href="/ko/obsidian/" style="color:var(--accent);">Obsidian 연동의 해설 페이지</a>를 확인해 주세요.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">메모의 본문은 어느 서버에 저장됩니까?</summary><div class="faq-answer"><p>영구적인 저장은 이루어지지 않습니다. 본 문서는 전송이 통과될 때만 서버를 경유하며, AI 태그 지정은 온 디바이스(Apple Foundation Models)에서 수행되기 때문에 외부 서버로 전송되지 않습니다. 다만 메일 배송은 표준 SMTP을 사용하기 때문에 E2EE(엔드투엔드 암호화)가 아닙니다. <a href="/ko/privacy-architecture/" style="color:var(--accent);">프라이버시 설계의 전체 모습</a>으로 통로를 도식화하고 있습니다.</p></div></details></div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>「생각에 따라」만, 바로 쓸 수 있는 입구로 전환</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>공유 시트와 함께 사용 가능. Vault와 이메일 모두에 남습니다. 무료로 3 통/일부터.</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"> </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"> <span>관련 페이지</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/ko/vs/"><span>메모 앱 비교 목록</span></a>
+          <a href="/ko/vs/obsidian/"><span>vs Obsidian（앱 전체 비교）</span></a>
+          <a href="/ko/obsidian/"><span>Obsidian 연동의 구조</span></a>
+          <a href="/ko/obsidian/shortcuts-not-working/"><span>단축키가 작동하지 않을 때</span></a>
+          <a href="/ko/obsidian/apple-watch-not-working/"><span>Apple Watch에서 Obsidian으로 보낼 수 없는 이유</span></a>
+          <a href="/ko/obsidian/daily-note/"><span>데일리 노트에 추가</span></a>
+          <a href="/ko/blog/obsidian-iphone-memo"><span>iPhone에서 Obsidian으로 메모를 보내는 방법 6 선택</span></a>
+          <a href="/ko/privacy-architecture/"><span>프라이버시 설계(데이터 경로)</span></a>
+          <a href="/ko/faq"><span>자주 묻는 질문</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="obsidian" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> 다음에 읽기 </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Vault 자동 추가 메커니즘 보기 </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> 플러그인 없이 Vault에 추가되는 메커니즘과 설정 절차를 설명하고 있습니다. </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자신에게 이메일을 보내는 방법</span></a></li>
+    <li><a href="/ko/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자주 묻는 질문</span></a></li>
+    <li><a href="/ko/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>사용 방법 가이드</span></a></li>
+  </ul>
+</section>
+<section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+  <h3 style="font-size:1rem;margin-bottom:0.75rem">참고문헌</h3>
+  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
+    <li><a href="https://obsidian.md/changelog/" target="_blank" rel="noopener">Obsidian Changelog（모바일 1.13의 공유 시트 지원）</a></li>
+    <li><a href="https://help.obsidian.md/" target="_blank" rel="noopener">Obsidian 공식 도움말</a></li>
+    <li><a href="https://github.com/chhoumann/quickadd" target="_blank" rel="noopener">QuickAdd（커뮤니티 플러그인·GitHub）</a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span></a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

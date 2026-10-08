@@ -317,7 +317,8 @@ def discover() -> list[tuple[Path, str, str]]:
         if hand_written_faqpage(text):
             print(f"[keep] {rel}: hand-written FAQPage left alone")
             continue
-        lang = "en" if rel.parts[0] == "en" else "ja"
+        document_language = re.search(r'<html\b[^>]*\blang=["\']([^"\']+)', text, re.IGNORECASE)
+        lang = document_language.group(1) if document_language else ("en" if rel.parts[0] == "en" else "ja")
         targets.append((path, page_url_for(path), lang))
     return targets
 

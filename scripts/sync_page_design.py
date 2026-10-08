@@ -8,6 +8,7 @@ Run --write after adding a page; --check reports missing or outdated design asse
 from html import escape, unescape
 from html.parser import HTMLParser
 from pathlib import Path
+from site_locales import UI, unprefixed_file
 import argparse
 import hashlib
 import re
@@ -65,10 +66,11 @@ def transform(source,rel):
     main=next((n for n in nodes if n.tag=='main'),None)
     refined=any(body.has(x) for x in ['capture-full','capture-home','capture-editorial'])
     home=rel in ['index.html','en/index.html','ar/index.html','es/index.html','id/index.html','ko/index.html','pt-BR/index.html','tr/index.html','zh-Hant/index.html','zh/index.html']
-    utility=not main or rel.startswith('memo-inbox/')
+    utility=not main or unprefixed_file(rel).startswith('memo-inbox/')
     family=body.attrs.get('data-design-family') or ('refined' if refined else ('home' if home else 'utility' if utility else 'reading'))
     attr(body,'data-design-family',family)
-    ja=next((n.attrs.get('lang') for n in nodes if n.tag=='html'),None)=='ja'
+    locale=next((n.attrs.get('lang') for n in nodes if n.tag=='html'),'ja')
+    ja=locale=='ja'
     if not refined and not utility:
         if home:
             cls(body,'capture-home','capture-full')
@@ -100,7 +102,7 @@ def transform(source,rel):
                         for i,h in enumerate(headings[:3],1):
                             id_=attrs.get(h.start,(h,{}))[1].get('id',h.attrs.get('id'))
                             links.append(f'<a href="#{escape(id_,quote=True)}"><span aria-hidden="true">{i:02d}</span><span>{escape(text(source,h))}</span><span aria-hidden="true">↗</span></a>')
-                        label='このページの内容' if ja else 'On this page'
+                        label=UI[locale][1]
                         add(hero.close,'</div><nav class="sd-hero-index" aria-label="'+label+'"><p>'+label+'</p>'+''.join(links)+'</nav>')
                 else:
                     h1=next((n for n in nodes if n.tag=='h1' and n.within(main)),None)
@@ -125,9 +127,9 @@ def transform(source,rel):
                     p=t.parent
                     if p and p.tag=='div' and len(p.children)==1:
                         cls(p,'sd-table');attr(p,'tabindex','0');attr(p,'role','region')
-                        if not (p.attrs.get('aria-label') or p.attrs.get('aria-labelledby')):attr(p,'aria-label','横にスクロールできる表' if ja else 'Scrollable table')
+                        if not (p.attrs.get('aria-label') or p.attrs.get('aria-labelledby')):attr(p,'aria-label',UI[locale][2])
                     else:
-                        label='横にスクロールできる表' if ja else 'Scrollable table'
+                        label=UI[locale][2]
                         add(t.start,'<div class="sd-table" tabindex="0" role="region" aria-label="'+label+'">');add(t.end,'</div>')
                 for n in nodes:
                     if (n.tag=='pre' or n.has('arch-diagram')) and n.within(main) and 'tabindex' not in n.attrs:attr(n,'tabindex','0')

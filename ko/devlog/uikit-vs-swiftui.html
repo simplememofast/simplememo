@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/uikit-vs-swiftui">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>UIKit vs SwiftUI：시작 속도를 위해 UIKit을 선택한 이유 | SimpleMemo 개발 일지</title>
+  <meta name="description" content="2026년을 위해 UIKit을 선택했습니다. Time-to-Text 500ms 이하를 목표로, Storyboard 사용 없이 직접 VC 생성, viewDidAppear에서 becomeFirstResponder를 선택한 설계 판단.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="UIKit vs SwiftUI：시작 속도를 위해 UIKit을 선택한 이유">
+  <meta property="og:description" content="2026년을 위해 UIKit을 선택했습니다. Time-to-Text 500ms 이하를 목표로, Storyboard 사용 없이 직접 VC 생성, viewDidAppear에서 becomeFirstResponder를 선택한 설계 판단.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/devlog/uikit-vs-swiftui">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="UIKit vs SwiftUI：시작 속도를 위해 UIKit을 선택한 이유">
+  <meta name="twitter:description" content="2026년을 위해 UIKit을 선택했습니다. Time-to-Text 500ms 이하를 목표로, Storyboard 사용 없이 직접 VC 생성, viewDidAppear에서 becomeFirstResponder를 선택한 설계 판단.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/uikit-vs-swiftui">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui#webpage",
+  "inLanguage": "ko",
+  "name": "UIKit vs SwiftUI：시작 속도를 위한 선택",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Styles */
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .related-card__desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .metric-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .metric-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": [
+    "BlogPosting",
+    "TechArticle"
+  ],
+  "@id": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui#article",
+  "headline": "UIKit vs SwiftUI：시작 속도를 위해 UIKit을 선택한 이유",
+  "description": "2026년을 위해 UIKit을 선택했습니다. Time-to-Text 500ms 이하를 목표로, Storyboard 사용 없이 직접 VC 생성, viewDidAppear에서 becomeFirstResponder를 선택한 설계 판단.",
+  "url": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui"
+  },
+  "inLanguage": "ko",
+  "keywords": "UIKit SwiftUI 성능, SwiftUI 시작 속도, iOS 앱 실행 성능, UIKit vs SwiftUI 2026",
+  "proficiencyLevel": "Expert",
+  "dependencies": "UIKit, Xcode Instruments (os_signpost)"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "개발 일지",
+      "item": "https://simplememofast.com/ko/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "UIKit vs SwiftUI",
+      "item": "https://simplememofast.com/ko/devlog/uikit-vs-swiftui"
+    }
+  ]
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/devlog/uikit-vs-swiftui" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/uikit-vs-swiftui" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/uikit-vs-swiftui" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/uikit-vs-swiftui" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/devlog/uikit-vs-swiftui" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/uikit-vs-swiftui" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/uikit-vs-swiftui" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/uikit-vs-swiftui" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/uikit-vs-swiftui" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>UIKit vs SwiftUI：시작 속도를 위해 UIKit을 선택한 이유</span> </h1>
+
+      <div class="article-meta">
+        <span>2026년2월13일 ・ 기술 주제 심층 탐구</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1. 왜 2026년에 UIKit인가요</h2>
+          <p>Apple은 매년 WWDC에서 SwiftUI의 진화를 강조하고 있으며, 선언적인 UI의 편리성은 이제 의심의 여지가 없습니다.</p>
+          <p>하지만, 이 앱에는 <strong>양도할 수 없는 요구사항</strong>이 있습니다. 그것은 <strong>Time-to-Text(시작부터 텍스트 입력이 가능해질 때까지의 시간)를 500ms 이하로 만드는</strong>입니다.</p>
+          <p>SwiftUI에서는 <code>@StateObject</code>의 초기화, <code>body</code>의 재평가, <code>.onAppear</code>의 타이밍 제어 등 선언적 UI 프레임워크 고유의 오버헤드가 존재합니다. 이것들은 일반적인 앱에서는 무시할 수 있는 정도이지만, 밀리초 단위의 최적화를 추구하는 상황에서는 무시할 수 없습니다.</p>
+          <p>한편, UIKit의 <code>viewDidAppear</code>에서 <code>becomeFirstResponder()</code>을 호출하는 경로는<strong>결정론적으로 고속</strong>이다. ViewController의 라이프사이클은 명확하며, 언제 키보드가 표시되는지를 정확하게 제어할 수 있습니다.</p>
+          <div class="metric-highlight">
+            <strong>설계 판단：</strong>Time-to-Text 500ms 이하라는 비기능 요구 사항을 충족하기 위해 UIKit을 채택했습니다. </div>
+
+          <h2 id="reading-02">2. Storyboard를 완전히 배제한 이유</h2>
+          <p>UIKit만 선택했다고 해도 충분하지 않습니다. Storyboard에도 시작 성능에 영향을 미치는 오버헤드가 있습니다.</p>
+          <ul>
+            <li><strong>XML 분석 비용：</strong>Storyboard는 내부적으로 XML 파일이며, 실행 시 파싱이 필요합니다</li>
+            <li><strong>Segue 해결 비용：</strong>화면 전환을 위한 Segue 설정 해결에 시간이 걸립니다</li>
+            <li><strong>불필요한 복잡성:</strong>간단한 메모 앱에 Storyboard의 시각적 설계 도구가 과도합니다</li>
+          </ul>
+          <p>대신에, <code>SceneDelegate</code>에서 직접 ViewController를 생성하는 방식을 채택했습니다.</p>
+          <pre tabindex="0"><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    let composeVC = ComposeViewController()
+    let navController = UINavigationController(rootViewController: composeVC)
+    window.rootViewController = navController
+    window.makeKeyAndVisible()
+    PerformanceLogger.shared.signpostEnd(name: "SceneConnect")
+}</code></pre>
+          <p>이 접근 방식으로, <strong>Storyboard의 파싱 시간 0, Segue 해결 시간 0</strong>을 구현하고 있습니다. SceneDelegate에서 직접 ComposeViewController를 생성함으로써, 시작 경로에서 불필요한 처리를 완전히 제거했습니다.</p>
+
+          <h2 id="reading-03">3. viewDidAppear의 1 행이 모든 것을 완료합니다</h2>
+          <p>UIKit의 가장 큰 강점은 ViewController의 라이프사이클이 명확하게 정의되어 있다는 점입니다. <code>viewDidAppear(_:)</code>이 호출된 시점에, 뷰는 화면에 완전히 표시됩니다. 이 확실한 타이밍에 <code>becomeFirstResponder()</code>을 호출함으로써 키보드 표시까지의 지연을 최소화할 수 있습니다.</p>
+          <pre tabindex="0"><code>override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    activateTextInput()
+}
+
+private func activateTextInput() {
+    textView.becomeFirstResponder()
+    PerformanceLogger.shared.endTimeToText()
+}</code></pre>
+          <p><code>os_signpost</code>에 의한 측정을 나노초 정밀도로 수행하고 있습니다. <code>PerformanceLogger.shared.endTimeToText()</code>이 Signpost의 종료 이벤트를 기록하여 Instruments에서의 상세한 분석을 가능하게 하고 있습니다.</p>
+          <div class="metric-highlight">
+            <strong>측정 결과：</strong>목표는 500ms 이하입니다. 아이콘 탭 후의 모습을 화면 녹화로 측정한 기록(2026년 8월 11일, iPhone 16e·웜 실행)에서는 입력란에 대한 포커스가 0.17초, 키보드 표시 완료가 0.4초였습니다. </div>
+
+          <h2 id="reading-04">4. 성능 측정 메커니즘</h2>
+          <p>“빠라”는 감각적인 판단이 아니라, 정량적인 데이터에 기반하여 설계 판단을 하고 있습니다.</p>
+          <ul>
+            <li><strong>PerformanceLogger：</strong><code>os_signpost</code>을 래핑한 커스텀 로거. 시작·전송·UI 업데이트의 각 단계를 측정</li>
+            <li><strong>Instruments 연동:</strong>Xcode의 os_signpost Instrument에서 나노초 정밀도의 트래킹이 가능합니다</li>
+            <li><strong>주요 메트릭：</strong>Time-to-Text（시작→입력 가능）、Send-to-Reset（전송 버튼→UI 초기화）</li>
+            <li><strong>지속적인 모니터링:</strong>개발 중인 모든 빌드에서 성능 측정을 수행하고, 리그레션을 즉시 감지</li>
+          </ul>
+          <p>성능은 기능이다. 사용자는 “속도”를 명시적으로 요구하지 않아도, 느린 앱은 무의식적으로 사용하지 않게 됩니다. 그렇기 때문에 성능을 수치로 지속적으로 관리하는 것이 중요합니다.</p>
+
+          <h2 id="reading-05">5. SwiftUI를 사용하는 경우가 있습니까?</h2>
+          <p>UIKit이 유일한 선택이라는 뜻은 아닙니다. 앱 내에는 SwiftUI가 적합한 경우도 있습니다.</p>
+          <ul>
+            <li><strong>설정 화면：</strong>시작 속도에 영향을 주지 않는 비크리컬 화면에서는 SwiftUI의 선언형 UI가 생산성을 향상시킵니다</li>
+            <li><strong>크리티컬 패스 정의:</strong>시작 → 메모 입력 → 전송이라는 코어 흐름은 UIKit으로 유지합니다</li>
+            <li><strong>하이브리드의 복잡성:</strong>UIKit과 SwiftUI를 혼합하면 UIHostingController의 관리 및 데이터 흐름의 일관성에 주의가 필요합니다</li>
+            <li><strong>현 시점의 판단:</strong>메모 앱의 UI는 단순하며, 전체 화면 UIKit으로 통일하는 것이 코드 기반의 일관성을 유지할 수 있습니다</li>
+          </ul>
+          <p>앞으로 SwiftUI의 성능이 더욱 개선된다면 재평가의 여지는 있지만, 크리티컬 패스인 UIKit은 당분간 유지할 방침입니다.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-06" data-ce-number="06">자주 묻는 질문</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. SwiftUI에서는 500ms 이하의 실행이 불가능한가요?</div>
+              <div class="faq-item__answer">불가능하지 않습니다. 다만, SwiftUI에서는<code>@StateObject</code>의 초기화 및<code>body</code>의 재평가만큼 처리가 추가됩니다. 가장 빠른 속도를 목표로 하는 이 개발에서는 라이프사이클을 세밀하게 제어할 수 있는 UIKit을 선택했습니다(두 가지를 동일한 조건으로 측정하고 비교한 결과는 아닙니다).</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Storyboard를 사용하지 않는 단점은 무엇인가요?</div>
+              <div class="faq-item__answer">UI의 시각화가 코드베이스가 됩니다. Interface Builder에서 드래그 앤 드롭 설계가 불가능해집니다. 다만 메모 앱의 UI는 단순하므로 코드 기반 UI 구축에 문제가 되지 않습니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 실제 기기에서의 측정 결과는?</div>
+              <div class="faq-item__answer">목표는 500ms 이하입니다. 기록이 남아 있는 측정은 아이콘 탭에서의 모습을 화면 녹화로 측정한 것입니다(2026년 8월 11일, iPhone 16e·웜 실행)이며, 입력란에 대한 포커스는 0.17초, 키보드 표시 완료는 0.4초입니다. 개발 중에는<code>os_signpost</code>으로 구간을 기록하고, Instruments로 분석하고 있습니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 앞으로 SwiftUI로 전환할 예정인가요?</div>
+              <div class="faq-item__answer">크리티컬 경로(시작→입력→전송)는 UIKit을 유지합니다. 설정 화면 등 비크리컬한 화면에 대해서는 SwiftUI 도입을 검토할 여지가 있습니다.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-07" data-ce-number="07">관련 기사</h2>
+            <div class="related-grid">
+              <a href="/ko/devlog/day1" class="related-card">
+                <div class="related-card__title">【Day1】Captio를 너무 좋아해서, 다시 한 번 "그 체험"을 만들고 싶어졌습니다</div>
+                <div class="related-card__desc">원터치 전송 및 누수 방지 설계. 모든 기술 판단을 기록한 초기 개발 일지.</div>
+              </a>
+              <a href="/ko/devlog/" class="related-card">
+                <div class="related-card__title">개발 일지 목록</div>
+                <div class="related-card__desc">SimpleMemo의 기술적 의사결정 기록.</div>
+              </a>
+              <a href="/ko/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Outbox 아키텍처: 누수 방지 설계</div>
+                <div class="related-card__desc">전송 즉시 UI가 클리어되지만, 전송되지 않은 메시지는 기기에 남아 재전송됩니다. AES-GCM 암호화 Outbox 패턴의 전체 내용.</div>
+              </a>
+              <a href="/ko/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API：Cloudflare Workers로 메일 전송 기반을 구축</div>
+                <div class="related-card__desc">메일함의 OAuth 연동에 의존하지 않는 전송. 에지에서 동작하는 중계 API(Cloudflare Workers)에서 Resend으로 전송합니다.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-08" data-ce-number="08"> <span>참고문헌</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — UIKit 문서</a> — <span>SimpleMemo의 UI 구축에 채택한 프레임워크의 공식 레퍼런스</span></li>
+    <li><a href="https://developer.apple.com/documentation/swiftui" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — SwiftUI 문서</a> — <span>비교 검토한 선언적 UI 프레임워크. 성능 측정 대상</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/ossignposter" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — os_signpost / OSSignposter</a> — <span>Time-to-Text 측정에 사용한 Instruments 연동의 성능 측정 API</span></li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2023/10160/" target="_blank" rel="noopener" style="color:var(--accent);">WWDC 2023 — Analyze hangs with Instruments</a> — <span>UI 응답 최적화를 참고한 WWDC 세션</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음 읽기</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian 연동으로 메모를 저장할 장소를 만들 수 있습니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>iPhone에서 연동 및 저장 위치를 설정하면, 전송한 메모를 Obsidian에도 남길 수 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span> 블로그 기사 목록</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/how-to/" class="footer__link"><span>사용 방법</span> </a>
+        <a href="/ko/templates/" class="footer__link"><span>템플릿</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio/" class="footer__link"><span>Captio식</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/terms" class="footer__link"><span>이용 약관</span> </a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

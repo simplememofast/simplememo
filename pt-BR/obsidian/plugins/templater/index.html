@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/templater/">
+  <title>Como usar o Templater - Como executar e configurar notas diárias | SimpleMemo</title>
+  <meta name="description" content="Apresentando como inserir datas e cabeçalhos no Templater do Obsidian. Separe a operação de inserção do modelo e as configurações a serem executadas ao criar uma nota diária e organize o destino de confirmação se a variável permanecer. O escopo confirmado pela versão Linux de Obsidian 1.13.7 e Templater 2.25.1, e o intervalo não verificado, como iOS e sincronização, também são especificados.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Como usar o Templater - Como executar e configurar notas diárias">
+  <meta property="og:description" content="Apresentando como inserir datas e cabeçalhos no Templater do Obsidian. Separe a operação de inserção do modelo e as configurações a serem executadas ao criar uma nota diária e organize o destino de confirmação se a variável permanecer. O escopo confirmado pela versão Linux de Obsidian 1.13.7 e Templater 2.25.1, e o intervalo não verificado, como iOS e sincronização, também são especificados.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Como usar o Templater - Como executar e configurar notas diárias">
+  <meta name="twitter:description" content="Apresentando como inserir datas e cabeçalhos no Templater do Obsidian. Separe a operação de inserção do modelo e as configurações a serem executadas ao criar uma nota diária e organize o destino de confirmação se a variável permanecer. O escopo confirmado pela versão Linux de Obsidian 1.13.7 e Templater 2.25.1, e o intervalo não verificado, como iOS e sincronização, também são especificados.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.template-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.template-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.template-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.template-code{max-width:100%;min-width:0;font-size:.9rem}.template-toc a{min-height:44px;display:inline-flex;align-items:center}.template-results{display:grid;gap:1rem}.template-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.template-results{grid-template-columns:1fr 1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/plugins/templater/#article",
+  "inLanguage": "pt-BR",
+  "headline": "Como usar o Templater - Como executar e configurar notas diárias",
+  "description": "Apresentando como inserir datas e cabeçalhos no Templater do Obsidian. Separe a operação de inserção do modelo e as configurações a serem executadas ao criar uma nota diária e organize o destino de confirmação se a variável permanecer. O escopo confirmado pela versão Linux de Obsidian 1.13.7 e Templater 2.25.1, e o intervalo não verificado, como iOS e sincronização, também são especificados.",
+  "url": "https://simplememofast.com/pt-BR/obsidian/plugins/templater/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/pt-BR/obsidian/plugins/templater/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/pt-BR/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Introdução aos plug-ins",
+      "item": "https://simplememofast.com/pt-BR/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Modelador",
+      "item": "https://simplememofast.com/pt-BR/obsidian/plugins/templater/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/plugins/templater/#faq",
+  "inLanguage": "pt-BR",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Se eu salvar o Modelo, ele será executado automaticamente?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Salvar sozinho não se aplica automaticamente a todas as notas. Use \"Templater: Open insert template modal\" para colocar o modelo salvo na nota atual. O processamento ao criar um novo arquivo é outra configuração chamada \"Trigger Templater na criação de um novo arquivo\"."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Eu também preciso de modelos de pasta na nota diária?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nesta confirmação, Templates/Daily.md foi especificado nas notas diárias principais, o gatilho do Templater estava LIGAdo, o modo de correspondência do modelo foi definido como Nenhum e o comando na nova nota de data foi expandido. Nenhuma é uma configuração que não atribui modelos automaticamente, mas o comando Templateter já no novo corpo é processado."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Se eu ligar o Trigger, minhas notas diárias existentes serão corrigidas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Desta vez, mesmo que eu tenha reaberto a nota feita com o comando Daily notes depois de ativar, o conteúdo salvo não mudou. A mesma nota contendo comandos não expandidos poderia ser expandida com \"Templater: Substituir modelos no arquivo ativo\". Este é o resultado desta configuração, e a configuração de abertura da nota diária na inicialização e processamento em lote não foi verificada."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso usar o mesmo procedimento para iPhone?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O manifesto oficial do Templater 2.25.1 não é uma configuração somente para desktop, mas esta confirmação de operação real é apenas para a versão Linux do Obsidian 1.13.7. A tela iPhone, a implantação do modelo, a sincronização entre terminais e a entrada do SimpleMemo não foram verificadas. A tela de configuração do gatilho também mostra as configurações a serem ativadas para cada terminal."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Navegação global" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/pt-BR/guides/">Guias</a></li><li><a href="/pt-BR/use-cases/">Casos de uso</a></li><li><a href="/pt-BR/vs/">Comparar</a></li><li><a href="/pt-BR/blog/">Blog</a></li><li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Baixar</a><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/obsidian/plugins/templater/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/templater/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/plugins/templater/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/plugins/templater/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/templater/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/templater/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/obsidian/plugins/templater/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/templater/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/templater/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · Modelos em execução</div><h1 class="lp-hero__title">Como usar o Templater <br> Como executar e configurar notas diárias</h1><p class="lp-hero__sub">Templater é um plug-in que executa variáveis e funções em uma nota e coloca os resultados no texto. Primeiro, insira manualmente a folha 1 e, em seguida, prossiga para as configurações ao criar notas diárias. Aqui, verificamos o estado em que a variável permanece e o resultado após a configuração com o mesmo modelo.</p><p class="article-meta">Autor: <a href="/pt-BR/about/">SimpleMemo Developer</a> ・ Publicado e verificado: <time datetime="2026-09-30">2026 ano 9 mês 30 dia</time></p></div><nav class="sd-hero-index" aria-label="Conteúdo desta página"><p>Conteúdo desta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Prepare Templater e distinção de notação</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Primeiro, insira o modelo na nota atual</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Executar Templater em uma nova nota diária</span><span aria-hidden="true">↗</span></a></nav></header>
+<aside class="tip-box"><strong>Ambiente confirmado:</strong>Versão Linux isolada Obsidian 1.13.7 e Templater 2.25.1. 2026 ano 9 mês 30 dia 10:49 ~ 10:50 UTC (horário do Japão 19:49 - 19:50) inclui verificação diária de notas. Chegada, velocidade e qualidade de áudio do iPhone, sincronização e SimpleMemo não foram verificadas.<a href="#evidence">Método de confirmação e escopo</a>será mostrado no final do artigo.</aside>
+<nav class="template-toc" aria-label="Índice deste artigo"><a href="#prepare">Preparação e anotação</a><a href="#insert">Inserir manualmente</a><a href="#daily-note">Configuração de nota diária</a><a href="#not-applied">Quando não aplicado</a><a href="#faq">Perguntas frequentes</a><a href="#evidence">Verificação e fonte</a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Prepare o Templater e distinga a notação</h2></div><div class="ce-chapter__body"><p>No guia de introdução oficial, procure por "Templater" nos plugins da Comunidade Obsidian e instale-o. Nesta verificação, o arquivo de distribuição do 2.25.1 oficial foi colocado na quarentena Vault, e o plug-in foi ativado na tela de configurações. Se a versão do Obsidian ou Templater que você está usando for diferente, verifique o nome da tela e o comportamento em seu próprio ambiente.</p><p>No exemplo, definimos <code>Templates</code> em <strong>Template folder location</strong> do Templater. Os comandos começam com <code>&lt;%</code> e terminam com <code>%&gt;</code>. <code>tp.file.title</code> usa o título da nota de destino; <code>tp.date.now("YYYY-MM-DD HH:mm")</code> usa a data e a hora da execução. Não confunda esses comandos com os <a href="/pt-BR/obsidian/journaling/#starter">modelos de diário</a> em que você escreve a data manualmente nem com a notação <code>{{date}}</code> do plugin nativo Templates.</p><p>Se você quiser verificar os resultados de substituição e salvamento do título e data dos modelos principais, consulte também a coleção de modelos <a href="/pt-BR/obsidian/templates/">Markdown</a> que realmente insere e exibe novamente todos os tipos 10.</p><aside class="tip-box">Templater é um plug-in que também pode executar JavaScript e comandos do sistema. O README Oficial o Guia Para Usar Um código que você pode essuir de uma fonte CONFIÁVEL. No breve exemplo deste artigo, não usamos comunicação externa, script do usuário ou comandos do sistema.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="insert"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Primeiro, insira o modelo na nota atual</h2></div><div class="ce-chapter__body"><p>O texto original do <code>Templates/Simple.md</code> usado para verificação é o seguinte. A parte do memorando em inglês é um conteúdo fictício para verificação que não inclui informações pessoais.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="simple-template"># &lt;% tp.file.title %&gt;
+
+created: &lt;% tp.date.now(&quot;YYYY-MM-DD HH:mm&quot;) %&gt;
+result: templater-simple-expanded
+
+## Capture
+- Sample thought from isolated verification.
+</code></pre>
+<ol><li>Prepare <code>Templates/Simple.md</code> e abra a nota inserida.</li><li>Selecione <strong>Templater: Abra inserir modelo modal</strong> na paleta de comandos e selecione <code>Simple</code> na lista.</li><li>Verifique o título e a data inseridos. Nesta nota <code>Normal</code>, <code>tp.file.title</code> é implantado para <code>Normal</code>, e a fórmula de tempo é implantada para <code>2026-09-30 10:46</code>.</li></ol><p><code>result: templater-simple-expanded</code> é um caractere fixo no texto original. O fato de esta linha ser visível não é usado para determinar o sucesso. <strong>Verifique se <code>&lt;% … %&gt;</code> foi substituído pelo valor real</strong>. A data e a hora são UTC neste ambiente Linux e 19:46 no horário do Japão.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/insert-template.png" alt="Tela com o título e a data do modelo Simples na Nota Normal da versão Linux do Obsidian" width="1024" height="800" loading="lazy"><figcaption>2026 ano 9 mês 30 dia 10:46 UTC (19:46 JST). Eu selecionei Simples na tela de seleção de modelo real e a inseri na nota atual.</figcaption></figure>
+<p><strong>Replace templates in the active file</strong> é uma operação separada, que expande comandos do Templater já colados no corpo da nota. Um exemplo de recuperação em uma nota diária aparece em uma <a href="#not-applied">seção posterior</a>.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily-note"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Executar Templater em uma nova nota diária</h2></div><div class="ce-chapter__body"><p>Primeiro, tentei configurar as notas diárias principais para processar o corpo do modelo e o comando Templater no corpo. O <code>Templates/Daily.md</code> usado é o seguinte texto original.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-template"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre>
+<p>As configurações para este tempo são as seguintes. Verifique as configurações do Core Daily notes e do Templater separadamente.</p><div class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal"><table class="rt-table"><thead><tr><th>Onde definir</th><th>Itens exibidos</th><th>O valor desta vez</th></tr></thead><tbody><tr><th>notas diárias principais</th><td data-label="Item">Formato de data</td><td data-label="Valor"><code>YYYY-MM-DD</code></td></tr><tr><th>notas diárias principais</th><td data-label="Item">Nova localização do arquivo</td><td data-label="Valor"><code>Daily</code></td></tr><tr><th>notas diárias principais</th><td data-label="Item">Localização do arquivo do modelo</td><td data-label="Valor"><code>Templates/Daily.md</code></td></tr><tr><th>Modelador</th><td data-label="Item">Localização da pasta do modelo</td><td data-label="Valor"><code>Templates</code></td></tr><tr><th>Modelador</th><td data-label="Item">Trigger Templater na criação de novo arquivo</td><td data-label="Valor">Compare OFF e ON</td></tr><tr><th>Modelador</th><td data-label="Item">Modo de correspondência de modelo</td><td data-label="Valor"><code>None</code></td></tr></tbody></table></div>
+<p><strong>O gatilho está ligado e o modo de correspondência do modelo está definido como Nenhum</strong> é a tela de configuração. <code>None</code> é uma configuração que não atribui modelos automaticamente, mas os comandos Templatere já no novo corpo da nota serão processados. Neste exemplo, os modelos de pasta e os modelos de regex de arquivo não são adicionados porque os modelos são especificados no lado das notas diárias.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/trigger-on-settings.png" alt="O Templater Trigger Templater na criação de novos arquivos está ATINADO e o modo de correspondência de Template é Nenhuma tela de configuração" width="900" height="700" loading="lazy"><figcaption>Configurações do Templater 2.25.1 que eu realmente operei. O gatilho é salvo apenas neste terminal, e uma nota também é exibida de que ele deve ser ativado para cada terminal.</figcaption></figure>
+<p>Comparamos as notas recém-criadas com o mesmo modelo, formato de data e <code>Daily/2026-09-30.md</code>.</p><div class="template-results"><div><h3>Gatilho DESLIGADO: A cerimônia permanece</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-off"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div><div><h3>Disparador ON+None: Expandido para o valor</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-on"># Daily 2026-09-30
+
+note-title: 2026-09-30
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div></div>
+<p>Aqui, também, <code>result: templater-daily-expanded</code> é um caractere fixo em ambos. A diferença é que o <code>tp.file.title</code> do título <code>tp.date.now</code> e <code>note-title</code> mudou para o valor.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-off.png" alt="Tela com comandos tp.date.now e tp.file.title restantes na nota de data criada com Trigger OFF" width="1024" height="800" loading="lazy"><figcaption>OFF, o texto do modelo das notas diárias foi incluído, mas a expressão Templater permaneceu sem expansão.</figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-on.png" alt="A tela com a data e o título da nota expandidos na nota diária recém-criada com Trigger ON e None" width="1024" height="800" loading="lazy"><figcaption>Ao criar um novo para o mesmo caminho com ON+None, o título foi expandido para Daily 2026-09-30 e o título da nota foi expandido para 2026-09-30.</figcaption></figure>
+<aside class="tip-box"><strong>Método de comparação:</strong>Para confirmar a nova criação de ON, apaguei apenas as notas de teste fictícias da quarentena Vault e a refiz com o mesmo nome. Este não é o procedimento para excluir as anotações diárias gravadas do leitor. Ao tentar você mesmo, use uma verificação Vault ou uma cópia e deixe um registro existente.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="not-applied"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">O que você verifica quando o modelo não se aplica?</h2></div><div class="ce-chapter__body"><p><strong> É dividido entre os casos em que o corpo da nota não está incluído e quando apenas a expressão Templater do texto permanece. </strong>Nesta nota OFF, o texto em si foi incluído. Mesmo se você ativar Trigger e reabrir a mesma nota existente com o comando Daily notes, o conteúdo salvo SHA256 corresponde antes e depois, e a expressão permanece.</p><p>Executar <strong>Templater: Substitua os modelos no arquivo ativo</strong> com a nota existente aberta, e você conseguiu expandir a expressão de data e título. Nas notas que contêm o registro, verifique o conteúdo e o código do modelo, tente com uma cópia e, em seguida, opere. Este é o resultado desta condição. Não foi generalizado para outras rotas, como a configuração para abrir a nota diária na inicialização.</p><div class="sd-table" tabindex="0" role="region" aria-label="Tabela com rolagem horizontal"><table class="rt-table"><thead><tr><th>estado visível</th><th>Itens para verificar</th><th>Efase e escopo</th></tr></thead><tbody><tr><th>A fórmula permanece no texto</th><td data-label="Confirmação">Acione ON/OFF, seja para criar um novo ou uma nota existente</td><td data-label="Ensis">Esta comparação OFF/ON, reabertura de notas existentes, confirmação com substituição manual</td></tr><tr><th>Não há texto do modelo</th><td data-label="Confirmação">Localização do arquivo de modelo de notas diárias</td><td data-label="Ensis">Nenhum não seleciona automaticamente o modelo. Também vou verificar a designação do lado onde o texto está incluído</td></tr><tr><th>Não funciona em uma pasta específica</th><td data-label="Confirmação">Pastas excluídas, a pasta original do modelo</td><td data-label="Ensis">Especificações do 2.25.1 oficial. A pasta excluída e a fonte do modelo serão excluídas do destino de processamento no momento da nova criação. Este caso em si não foi medido</td></tr><tr><th>As configurações não funcionam em outro terminal</th><td data-label="Confirmação">Configuração do gatilho desse terminal</td><td data-label="Ensis">Notas sobre salvar por terminal na tela de configurações. Desta vez, a operação e a sincronização de outro terminal não foram verificadas</td></tr><tr><th>Não há nota para o pós-escrito, é diferente</th><td data-label="Confirmação">Data, pasta de destino, caminho para criar arquivos</td><td data-label="Ensis"><a href="/pt-BR/obsidian/daily-note/#missing">Para o problema de adição de notas diárias existente</a>. Vou verificá-lo separadamente da implantação do Templater</td></tr></tbody></table></div><p>As configurações do Templater sozinhas não completam a aceitação de entrada externa, notas adicionais de outro aplicativo e a sincronização entre terminais. Neste artigo, confirmamos o processamento do modelo no Obsidian.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">Perguntas frequentes</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">Se eu salvar o Modelo, ele será executado automaticamente?</summary><div class="faq-answer">Salvar sozinho não se aplica automaticamente a todas as notas. Use "Templater: Open insert template modal" para colocar o modelo salvo na nota atual. O processamento ao criar um novo arquivo é outra configuração chamada "Trigger Templater na criação de um novo arquivo".</div></details>
+<details class="faq-item"><summary class="faq-summary">Eu também preciso de modelos de pasta na nota diária?</summary><div class="faq-answer">Nesta confirmação, Templates/Daily.md foi especificado nas notas diárias principais, o gatilho do Templater estava LIGAdo, o modo de correspondência do modelo foi definido como Nenhum e o comando na nova nota de data foi expandido. Nenhuma é uma configuração que não atribui modelos automaticamente, mas o comando Templateter já no novo corpo é processado.</div></details>
+<details class="faq-item"><summary class="faq-summary">Se eu ligar o Trigger, minhas notas diárias existentes serão corrigidas?</summary><div class="faq-answer">Desta vez, mesmo que eu tenha reaberto a nota feita com o comando Daily notes depois de ativar, o conteúdo salvo não mudou. A mesma nota contendo comandos não expandidos poderia ser expandida com "Templater: Substituir modelos no arquivo ativo". Este é o resultado desta configuração, e a configuração de abertura da nota diária na inicialização e processamento em lote não foi verificada.</div></details>
+<details class="faq-item"><summary class="faq-summary">Posso usar o mesmo procedimento para iPhone?</summary><div class="faq-answer">O manifesto oficial do Templater 2.25.1 não é uma configuração somente para desktop, mas esta confirmação de operação real é apenas para a versão Linux do Obsidian 1.13.7. A tela iPhone, a implantação do modelo, a sincronização entre terminais e a entrada do SimpleMemo não foram verificadas. A tela de configuração do gatilho também mostra as configurações a serem ativadas para cada terminal.</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Ambiente de verificação e escopo de uso para este artigo</h2></div><div class="ce-chapter__body"><ul><li><strong>Operação real: </strong>Isolamento Linux Vault, Obsidian 1.13.7, Templater 2.25.1. Opere a tela de configurações e verifique a criação e implantação de notas com os comandos registrados no aplicativo. Para inserção manual, selecionei um modelo da lista de GUIs.</li><li><strong>Comparação diária de notas:</strong>2026 ano 9 mês 30 dias 10:49~10:50 UTC (19:49~19:50 JST). Compare OFF e ON+None salvando Markdown com o mesmo modelo, destino de armazenamento e formato de data. Também confirmamos a reabertura da nota OFF existente e a restauração por Substituição explícita.</li><li><strong> Original oficial: </strong> Verifique o arquivo de distribuição, manifesto e documentos/fonte oficiais de 2.25.1. A versão mínima Obsidian do manifesto é 1.13.0. Isso não é uma garantia da operação de todas as versões e terminais.</li><li><strong>Não verificado: </strong>iPhone/Android/Mac, Obsidian estado fechado e criação de arquivo externo, nota diária na inicialização, sincronização, ligação SimpleMemo, velocidade, qualidade de áudio, Siri, Assista.</li></ul><p>Esta operação de desktop Linux não é uma confirmação no simulador iOS ou na máquina real iPhone. É descrito como resultado da operação real apenas na medida indicada pelo memorando fictício e salvo Markdown mostrado na imagem.</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/templater-20260930.md" target="_blank" rel="noopener">Registro de verificação, original e intervalo de confirmação</a></p><h3>Documentos oficiais</h3><ul class="source-list">
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/installation.md" target="_blank" rel="noopener">Como apresentar o Templater</a> — 2.25.1 original oficial</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/settings.md" target="_blank" rel="noopener">Configurações: Gatilho, Nenhuma, Pasta Excluída</a> — Original Oficial 2.25.1</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/syntax.md" target="_blank" rel="noopener">Notação: Função de Comando e Data</a> — Original Oficial 2.25.1</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/README.md" target="_blank" rel="noopener">LEIA-ME: Notas sobre função e execução de código</a> — Original Oficial 2.25.1</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/manifest.json" target="_blank" rel="noopener">manifesto de 2.25.1</a> — Original oficial 2.25.1</li>
+</ul><div class="internal-links"><a href="/pt-BR/obsidian/plugins/">Visão geral do plug-in Obsidian</a><a href="/pt-BR/obsidian/daily-note/">Adição ao caderno diário</a><a href="/pt-BR/obsidian/journaling/">Exemplo de gravação de notas de data</a></div><p class="template-note">Este site é operado pela YURIKA, K.K. e apresenta o aplicativo independente "SimpleMemo". Este não é um artigo oficial de Obsidian.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Próxima leitura</span><strong>Obsidian Verifique as configurações de integração e armazenamento</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Navegação do rodapé"><div class="footer__col"><p class="footer__col-title">Produto</p><a href="/pt-BR/download/" class="footer__link">Baixar</a><a href="/pt-BR/" class="footer__link">Início</a><a href="/pt-BR/obsidian/" class="footer__link">Integração com Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Comparações e migração</p><a href="/pt-BR/vs/" class="footer__link">Comparar</a><a href="/pt-BR/obsidian/compare/" class="footer__link">Comparação Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Suporte</p><a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a><a href="/pt-BR/faq" class="footer__link">Perguntas frequentes</a><a href="/pt-BR/privacy" class="footer__link">Privacidade</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

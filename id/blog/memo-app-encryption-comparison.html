@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>Bandingkan enkripsi aplikasi memo | Mana yang dapat disimpan dengan aman</title>
+  <meta name="description" content="Bandingkan jenis aplikasi memo 10 dalam hal jangkauan enkripsi dan manajemen kunci di terminal, selama komunikasi, dan di cloud. Selain perbedaan antara AES-GCM, CBC, dan E2EE, enkripsi terlampir Bear, metode baru Joplin, dan perlindungan data lanjutan dari memo Apple diatur. Kami juga akan menjelaskan kondisi pengaturan dan cara memeriksa tujuan cadangan dan ekspor.">
+  <meta property="og:title" content="Bandingkan enkripsi aplikasi memo | Mana yang dapat disimpan dengan aman">
+  <meta property="og:description" content="Bandingkan jenis aplikasi memo 10 dalam hal jangkauan enkripsi dan manajemen kunci di terminal, selama komunikasi, dan di cloud. Selain perbedaan antara AES-GCM, CBC, dan E2EE, enkripsi terlampir Bear, metode baru Joplin, dan perlindungan data lanjutan dari memo Apple diatur. Kami juga akan menjelaskan kondisi pengaturan dan cara memeriksa tujuan cadangan dan ekspor.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/blog/memo-app-encryption-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Bandingkan enkripsi aplikasi memo | Mana yang dapat disimpan dengan aman">
+  <meta name="twitter:description" content="Bandingkan jenis aplikasi memo 10 dalam hal jangkauan enkripsi dan manajemen kunci di terminal, selama komunikasi, dan di cloud. Selain perbedaan antara AES-GCM, CBC, dan E2EE, enkripsi terlampir Bear, metode baru Joplin, dan perlindungan data lanjutan dari memo Apple diatur. Kami juga akan menjelaskan kondisi pengaturan dan cara memeriksa tujuan cadangan dan ekspor.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/id/blog/memo-app-encryption-comparison#article",
+  "inLanguage": "id",
+  "image": "https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8",
+  "headline": "Bandingkan enkripsi aplikasi memo | Mana yang dapat disimpan dengan aman",
+  "description": "Bandingkan jenis aplikasi memo 10 dalam hal jangkauan enkripsi dan manajemen kunci di terminal, selama komunikasi, dan di cloud. Selain perbedaan antara AES-GCM, CBC, dan E2EE, enkripsi terlampir Bear, metode baru Joplin, dan perlindungan data lanjutan dari memo Apple diatur. Kami juga akan menjelaskan kondisi pengaturan dan cara memeriksa tujuan cadangan dan ekspor.",
+  "url": "https://simplememofast.com/id/blog/memo-app-encryption-comparison",
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/blog/memo-app-encryption-comparison"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/id/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Perbandingan enkripsi aplikasi memo",
+      "item": "https://simplememofast.com/id/blog/memo-app-encryption-comparison"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/blog/memo-app-encryption-comparison#webpage",
+  "inLanguage": "id",
+  "name": "Perbandingan enkripsi aplikasi memo [2026 tahun]",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/blog/memo-app-encryption-comparison"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .encryption-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:1.5rem 0;overflow-x:auto;display:block}
+    .encryption-table th,.encryption-table td{padding:.6rem .5rem;border:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
+    .encryption-table th{background:rgba(100,180,255,.08);color:var(--accent);font-weight:700;position:sticky;top:0}
+    .encryption-table td:first-child{font-weight:700;color:#fff}
+    .encryption-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+    .badge-e2e{background:rgba(52,199,89,.15);color:#34c759;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-partial{background:rgba(255,159,10,.15);color:#ff9f0a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-none{background:rgba(255,69,58,.1);color:#ff453a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    @media(max-width:768px){.encryption-table{font-size:.7rem}.encryption-table th,.encryption-table td{padding:.4rem .3rem}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .encryption-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a,.encryption-callout a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .encryption-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.encryption-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .encryption-table{display:table;width:100%;min-width:1000px;font-size:.85rem;margin:0;table-layout:fixed}
+    .encryption-table th,.encryption-table td{white-space:normal;overflow-wrap:anywhere;padding:.8rem;line-height:1.75}
+    .encryption-table th:first-child{width:14%}.encryption-table th:last-child{width:15%}.encryption-table tbody th{background:transparent;color:var(--text);position:static}
+    .encryption-table caption{text-align:left;padding:1rem;font-weight:700;color:var(--text)}
+    .encryption-steps{padding-left:1.4rem;line-height:1.9}.encryption-steps li{margin:1rem 0}
+    .encryption-callout{margin:1.75rem 0;padding:1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;line-height:1.85}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+
+  <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/id/blog/memo-app-encryption-comparison#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Jika itu AES-256, apakah itu E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tidak. AES-256 mewakili kode dan panjang kunci. Apakah itu E2EE atau bukan ditentukan oleh di mana itu dienkripsi dan didekripsi dan siapa yang dapat menggunakan kuncinya. Penyimpanan AES-256, di mana server mengelola kunci, dan desain yang hanya mendekripsi pada terminal pengguna berbeda."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apa perbedaan antara AES-GCM dan AES-CBC?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GCM menggabungkan enkripsi dan otentikasi. CBC tidak mendeteksi gangguan dengan enkripsi saja, jadi perlu untuk menggabungkan mekanisme otentikasi dengan benar. Keamanan seluruh aplikasi tidak dapat diberi peringkat berdasarkan nama metode saja."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Akankah E2EE juga mengenkripsi file di terminal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Itu belum tentu terjadi. Enkripsi sinkron Obsidian Sync dan Joplin tidak mengenkripsi file lokal dan basis data di terminal dengan cara yang sama. Silakan periksa enkripsi disk terminal, perlindungan lokal aplikasi, dan cadangan secara terpisah."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Dapatkah saya mengenkripsi catatan yang berisi gambar dan PDF dengan Bear?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bear 2.4 dan yang lebih baru dapat mengenkripsi catatan individual termasuk lampiran dengan Bear Pro. Tambahkan kata sandi ke catatan target, dan perbarui aplikasi tujuan sinkronisasi ke versi yang kompatibel. Tampilan judul dan catatan yang tidak terenkripsi perlu diperiksa secara terpisah."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah jurnal lama Hari Pertama juga secara otomatis menjadi E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jurnal baru default ke E2EE setelah 4.2, tetapi yang lama perlu diperiksa satu per satu. FAQ resmi saat ini menunjukkan kepada Anda cara menyalin entri ke jurnal E2EE yang baru daripada beralih langsung ke jurnal terenkripsi standar."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah email yang dikirimkan kepada Anda dari SimpleMemo E2EE?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tidak. Outbox dan enkripsi in-terminal dari riwayat transmisi dan pengiriman email terpisah. Teksnya melewati API yang keluar dan platform distribusi eksternal, dan salinannya tetap ada di sisi layanan surat. Silakan juga periksa pengaturan perlindungan dan berbagi kotak masuk dan mitra."
+      }
+    }
+  ],
+  "inLanguage": "id"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="Navigasi utama" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/id/guides/">Panduan</a></li>
+<li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+<li><a href="/id/vs/">Bandingkan</a></li>
+<li><a href="/id/methods/"><span>Metode</span></a></li>
+<li><a href="/id/blog/"><span>Blog</span></a></li>
+<li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+<li><a href="/id/faq">Pertanyaan umum</a></li>
+<li><a href="/id/about/">Tentang pengembang</a></li>
+<li><a href="/id/devlog/">Catatan pengembangan</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/blog/memo-app-encryption-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/memo-app-encryption-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/memo-app-encryption-comparison" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/memo-app-encryption-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/memo-app-encryption-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/memo-app-encryption-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/memo-app-encryption-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/blog/memo-app-encryption-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/memo-app-encryption-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">Unduh</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label"><span>Enkripsi dan Keamanan</span></div><h1 class="lp-hero__title"><span>Perbandingan Enkripsi Aplikasi Memo <br/> [2026]</span></h1><p class="lp-hero__sub"><span> "Kompatibel dengan AES-256" dan "operator tidak dapat membaca teks" adalah kondisi yang berbeda. Berdasarkan dokumen resmi aplikasi 10, bandingkan salinan mana yang dienkripsi, siapa yang menangani kunci dekripsi, dan apa yang mengaktifkan diri mereka sendiri. </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Penulis: <a href="/id/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Tanggal Publikasi: <time datetime="2026-03-21">2026 tahun 03 bulan 21 hari</time></span> </p><a class="ce-read-link" href="#encryption-scopes">Baca isi halaman <span aria-hidden="true">↓</span></a></div><nav aria-label="Pilih topik yang ingin dibaca" class="ce-routes"><a class="ce-route" href="#heading-encryption-scopes"><span>01</span><b>Ketahui jangkauan perlindungan</b></a><a class="ce-route" href="#heading-ten-apps"><span>02</span><b>Bandingkan aplikasi 10</b></a><a class="ce-route" href="#heading-check-your-copy"><span>03</span><b>Periksa pengaturan</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">KEAMANAN / TIGA LAPISAN</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>Komunikasi</strong></div><div class="cn-concept-row"><span>02</span><strong>Saat menyimpan</strong></div><div class="cn-concept-row"><span>03</span><strong>E2EE</strong></div></div><figcaption class="ce-stage-foot">Periksa rentang perlindungan enkripsi secara terpisah</figcaption></figure></header><div class="ce-article">
+
+<div class="tldr ce-lede"><p><span><strong>Untuk memeriksa terlebih dahulu: </strong>TLS komunikasi, penyimpanan terenkripsi ke terminal dan server, dan E2EE dilindungi dalam situasi yang berbeda. Bahkan jika sinkronisasinya adalah E2EE, enkripsi yang sama tidak harus berlanjut ke file lokal dan PDF yang diekspor di terminal. </span></p></div>
+<p class="encryption-review"><span>Konfirmasi akhir: <time datetime="2026-09-09">2026 tahun 9 bulan 9</time>. Penulisnya adalah pengembang SimpleMemo. Produk perusahaan lain membandingkan materi resmi dan bukan hasil dari pengujian intrusi atau audit keamanan independen untuk setiap aplikasi. </span></p>
+<nav aria-label="Daftar isi dalam artikel" class="internal-links"><a href="#encryption-scopes"><span>Rentang enkripsi</span></a><a href="#ten-apps"><span>Perbandingan Aplikasi 10</span></a><a href="#check-your-copy"><span>Periksa pengaturan Anda</span></a><a href="#simplememo-scope"><span>Kisaran SimpleMemo</span></a></nav>
+<section class="lp-section ce-chapter" id="encryption-scopes"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-encryption-scopes"><span>TLS・Enkripsi saat menyimpan・E2EE Apa bedanya? </span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>Komunikasi: Lindungi rute ke tujuan</h3><p>TLS melindungi saluran komunikasi seperti aplikasi dan server. Ini bukan mekanisme yang bersembunyi dari tujuan koneksi sampai teks diproses oleh tujuan koneksi. Tidak ada kontradiksi dengan layanan pencarian dan distribusi memo yang dikirim oleh HTTPS.</p></div>
+<div class="tip-card"><h3>Saat menyimpan: file mana yang akan dienkripsi dengan kunci siapa</h3><p>Basis data, server sinkronisasi, dan cadangan di terminal adalah salinan terpisah. Bahkan jika disk server dienkripsi, jika layanan mengelola kunci, itu dapat didekripsi selama pemrosesan yang diperlukan. Ini juga membedakan antara enkripsi seluruh terminal dan mekanisme yang digunakan aplikasi untuk mengenkripsi setiap catatan.</p></div>
+<div class="tip-card"><h3>E2EE: Jangan meneruskan kunci dekripsi teks ke tujuan sinkronisasi</h3><p>Enkripsi ujung ke ujung mengenkripsi dan mendekripsi di sisi terminal yang sesuai. Namun, metadata seperti judul dan waktu, tautan publik, transmisi ke fungsi AI, dan ekspor setelah dekripsi harus dikonfirmasi secara terpisah. Bahkan jika aplikasi memiliki fungsi E2EE, itu mungkin tidak valid di buku catatan Anda.</p></div></div></div></section>
+<section class="lp-section ce-chapter" id="cipher-and-keys"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-cipher-and-keys"><span>Baca AES-GCM・AES-CBC・Zero Knowledge</span></h2></div><div class="ce-chapter__body"><div><p><strong>AES-GCM</strong> menggabungkan enkripsi dan otentikasi untuk menghasilkan tag otentikasi yang digunakan untuk deteksi gangguan. <strong>AES-CBC</strong> adalah mode yang memberikan kerahasiaan dan tidak mendeteksi gangguan dengan sendirinya. OTENTIKASI HARUS DIGABUNGKAN DENGAN TEPAT DENGAN MEKANISME LAIN SEPERTI MAC. Nama CBC saja tidak dapat menentukan bahwa produk tersebut telah rusak. <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">Spesifikasi GCM NIST</a>, <a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">spesifikasi mode enkripsi termasuk CBC</a>.</p><p>"256" adalah panjang kunci dan tidak menjelaskan siapa yang akan memiliki kunci atau pengaturan cadangan. E2EE, yang menggunakan AES-GCM, juga dirancang untuk melindungi hanya bagian dalam terminal dengan AES-GCM.</p><p><strong>Zero Knowledge</strong> digunakan sebagai istilah untuk menggambarkan desain "operator bisnis tidak dapat mendekripsi teks" dalam produk penyimpanan. Tidak ada jaminan bahwa nama metode enkripsi atau semua data tidak akan dikumpulkan. Karena ada juga desain untuk menyimpan kunci terenkripsi di server, itu tidak ditentukan hanya dengan "kunci tidak ada di server", dan memeriksa subjek dan data target yang dapat didekripsi.</p></div></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="ten-apps"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-ten-apps"><span>Aplikasi 10: Bandingkan rentang dan pengaturan sebelum metode</span></h2></div><div class="ce-chapter__body"><div><p class="table-hint">Anda dapat menggulir ke samping untuk memeriksa "Kondisi" dan "Salin untuk diperiksa secara terpisah". Meja juga dapat dipindahkan ke samping pada papan ketik.</p><div aria-labelledby="ten-apps" class="encryption-scroll ce-table-scroll" role="region" tabindex="0"><table class="encryption-table"><caption>Perbandingan materi resmi (2026 tahun 9 bulan 9 konfirmasi)</caption><thead><tr><th scope="col">Aplikasi</th><th scope="col">Rentang enkripsi</th><th scope="col">Kondisi aktivasi dan konfirmasi</th><th scope="col">Salinan dan izin untuk dikonfirmasi secara terpisah</th><th scope="col">Ensis</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>Mengenkripsi dan menyinkronkan konten di sisi terminal. Spesifikasi publik adalah XChaCha20-Poly1305.</td><td>Data lokal juga dienkripsi saat menggunakan akun. Untuk penggunaan tanpa akun, perlindungan kode sandi, dll. diatur secara terpisah.</td><td>Periksa kondisi untuk lokasi yang disimpan untuk file yang diekspor dan teks yang disalin ke aplikasi lain.</td><td><a href="https://standardnotes.com/help/security/encryption">Rentang enkripsi</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">Metode</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>Pengaturan default adalah untuk mengenkripsi Vault jarak jauh dengan E2EE. AES-256-GCM</td><td>Di Vault jarak jauh yang telah memilih enkripsi standar, sisi Obsidian mengelola kunci. Periksa pengaturan dan kata sandi enkripsi.</td><td>File Markdown dari Vault lokal tidak dienkripsi oleh Obsidian itu sendiri. Enkripsi disk dan cadangan terminal berbeda.</td><td><a href="https://obsidian.md/help/sync/security">Keamanan sinkronisasi</a></td></tr><tr><th scope="row">Notion</th><td>Komunikasi adalah TLS 1.2 atau lebih tinggi, dan AES-256 saat disimpan.</td><td>Dokumen resmi menjelaskan enkripsi di sisi layanan. Hal ini dibedakan dari E2EE dari seluruh buku catatan bahwa hanya pengguna yang memiliki kunci dekripsi.</td><td>Otoritas untuk meneruskan halaman publik, tamu, dan layanan kolaboratif juga dikonfirmasi. Enkripsi saja tidak membatasi ruang lingkup publikasi.</td><td><a href="https://www.notion.com/help/security-and-privacy">Kebijakan Keamanan</a></td></tr><tr><th scope="row">Evernote</th><td>Penyimpanan AES-256 dengan komunikasi TLS dan kunci manajemen Google. Teks yang dipilih juga memiliki enkripsi frasa sandi.</td><td>Metode publikasi untuk teks yang dipilih adalah AES-128-CBC. Ini berbeda dari fungsi mengubah seluruh catatan dan lampiran menjadi E2EE secara massal.</td><td>Teks, judul, dan lampiran di luar rentang terenkripsi tidak diperlakukan sebagai perlindungan frasa sandi yang sama.</td><td><a href="https://evernote.com/en-us/security">penyimpanan dan komunikasi</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">enkripsi teks</a></td></tr><tr><th scope="row">Memo Apple / Apple Notes</th><td>Perlindungan normal iCloud dienkripsi saat berkomunikasi dan menyimpan. Memo iCloud tunduk pada E2EE dengan perlindungan data tingkat lanjut (ADP).</td><td>Periksa status aktif dan metode pemulihan ADP. Semua peserta memerlukan ADP untuk mempertahankan E2EE dari ADP dalam memo bersama.</td><td>Beberapa metadata dilindungi oleh standar. PDF yang diekspor dan lampiran email adalah salinan yang berbeda dari memo iCloud asli.</td><td><a href="https://support.apple.com/en-us/102651">Rentang perlindungan iCloud</a></td></tr><tr><th scope="row">Google Keep</th><td>Enkripsi selama komunikasi dan penyimpanan. Memproses konten untuk menyediakan fungsi seperti pencarian.</td><td>Perlindungan dokumen resmi tidak dibaca sebagai E2EE, yang hanya pengguna yang memiliki kuncinya.</td><td>Periksa perlindungan mitra bersama dan akun Google. Kebijakan untuk tidak menggunakan konten dalam iklan dan desain untuk tidak memproses konten berbeda.</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Privasi dan perlindungan Keep</a></td></tr><tr><th scope="row">Bear</th><td>Enkripsi catatan individual dengan Bear Pro. Setelah 2.4, lampiran seperti gambar dan PDF juga memenuhi syarat.</td><td>Tambahkan kata sandi ke catatan target dan perbarui aplikasi terminal yang disinkronkan. Berbeda dari kunci seluruh aplikasi.</td><td>Judul akan ditampilkan dalam daftar catatan. ADP iCloud juga dikonfirmasi, termasuk berbagai judul, tag, dll.</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">Catatan enkripsi</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">Dukungan lampiran 2.4</a> · <a href="https://bear.app/faq/syncing-privacy/">Rentang sinkronisasi</a></td></tr><tr><th scope="row">Joplin</th><td>E2EE dengan sinkronisasi yang diaktifkan. Metode asli baru dari v3.2 adalah AES-256-GCM.</td><td>Gunakan prosedur resmi untuk mengaktifkan enkripsi pada satu perangkat dan mengatur kunci pada terminal lain sambil menunggu sinkronisasi selesai.</td><td>Data lokal tidak dilindungi oleh enkripsi sinkron ini. Periksa juga enkripsi disk terminal.</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">Prosedur konfigurasi</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">Metode baru</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">Data dalam terminal</a></td></tr><tr><th scope="row">Hari Pertama</th><td>Jurnal baru yang akan dibuat setelah 4.2 adalah E2EE secara default. Teks dan media memenuhi syarat.</td><td>Periksa status jurnal lama satu per satu. FAQ resmi saat ini tidak dapat beralih langsung dari enkripsi standar, dan itu disalin ke jurnal E2EE yang baru.</td><td>Periksa juga alamat penyimpanan kunci. iCloud Keychain adalah E2EE, tetapi cadangan kunci iCloud unik Hari Pertama tidak menjadi E2EE bahkan jika ADP diaktifkan. Salinan lain dari buku harian yang saya tulis.</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">FAQ dari E2EE</a></td></tr><tr><th scope="row">SimpleMemo / Simple Memo</th><td>Enkripsi Outbox dan riwayat transmisi di terminal dengan AES-GCM CryptoKit. Kunci baru disimpan di Keychain dengan 256-bit.</td><td>Pengiriman email bukan E2EE. Transmisi API melewati platform distribusi eksternal, dan salinannya tetap ada di kotak masuk.</td><td>Perlindungan in-terminal tidak menjamin layanan surat atau metode penyimpanan Obsidian Vault yang terhubung.</td><td><a href="/id/privacy#technical">Deskripsi teknis</a></td></tr></tbody></table></div></div></div></section>
+<p class="encryption-callout"><span>Jika Anda ingin meninggalkan catatan singkat di kotak masuk Anda, <a data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a> juga merupakan pilihan. Silakan periksa enkripsi di terminal dan pengaturan penyimpanan dan berbagi untuk email keluar masing-masing. </span></p>
+<section class="lp-section ce-chapter" id="check-your-copy"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-check-your-copy"><span>Sebelum menggunakan, periksa pengaturan dan salin poin 5</span></h2></div><div class="ce-chapter__body"><div><ol class="encryption-steps"><li><strong>Buka pengaturan data yang ada. </strong>Jangan menilai hanya dari nama aplikasi, periksa apakah enkripsi valid dengan Catatan Bersama Jurnal Vault yang Anda gunakan. Nilai default untuk data baru tidak selalu berlaku untuk data lama juga.</li><li><strong>Amankan metode pemulihan. </strong>Periksa bagaimana produk akan memandu Anda, seperti kata sandi sinkronisasi, kunci enkripsi, dan kontak pemulihan. Harap hindari menghapus terminal dengan kunci yang hilang dan mencobanya.</li><li><strong>Periksa ruang lingkup publikasi, berbagi, dan kerja sama. </strong>Mengirim tautan publik dan layanan eksternal berbeda dari enkripsi pada saat penyimpanan. Informasi pekerjaan akan disesuaikan dengan penyimpanan dan rentang berbagi yang disetujui oleh afiliasi.</li><li><strong>Periksa sinkronisasi dan lampiran dengan 1 dari boneka. </strong> Jangan gunakan informasi rahasia dalam konten, dan periksa apakah informasi tersebut dibuka di terminal lain, apakah lampiran sudah benar, dan bagaimana status enkripsi ditampilkan. Ini saja tidak membuktikan keamanan implementasi enkripsi.</li><li><strong>Periksa tujuan ekspor dan cadangan. </strong>Salinan yang dibuat ke Markdown, PDF, email, dan folder unduhan dapat berada di luar E2EE aplikasi asli. Jangan hapus data asli sebelum konfirmasi migrasi selesai.</li></ol></div></div></section>
+<section class="lp-section ce-chapter" id="simplememo-scope"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-simplememo-scope"><span>Rentang yang dilindungi oleh SimpleMemo dan apa yang tersisa setelah transmisi</span></h2></div><div class="ce-chapter__body"><div><p>SimpleMemo mengenkripsi memo menunggu transmisi (Outbox) dan riwayat transmisi di terminal dengan AES-GCM. Dalam enkripsi umum aplikasi publik, kunci yang baru dibuat disimpan di Keychain dengan 256-bit, dan dienkripsi dan didekripsi dengan CryptoKit. Ini adalah sebuah implementasi yang melindungi data target di terminal.</p><p><strong> Ini bukan E2EE dari seluruh jalur email. </strong>Kirim dari aplikasi ke API dengan HTTPS, dan itu akan dikirim ke kotak masuk Anda melalui platform pengiriman email eksternal. " "Catatan yang tidak terkirim di terminal dienkripsi" tidak berarti bahwa "teks tidak akan ditangani dalam proses pengiriman" atau "tidak akan melewati server eksternal".</p><p>Bahkan jika item target Outbox dikecualikan setelah dikirim, riwayat transmisi, email yang masuk, dan catatan ke tautan tidak hilang. Operasi penghapusan file tidak disebut penghapusan lengkap media penyimpanan. Anda dapat memeriksa tujuan penyimpanan dan periode retensi di <a href="/id/privacy#technical"> Deskripsi Teknis Kebijakan Privasi</a> dan <a href="/id/privacy-architecture/"> Bagian Data</a>.</p><p>Saat menggunakan simpan ke Obsidian, perlindungan sinkronisasi dan pencadangan dengan Vault lokal tergantung pada pengaturan Anda. Untuk aplikasi di mana penting bahwa bisnis tidak dapat mendekripsi teks, silakan pilih penyimpanan dan pengoperasian E2EE yang memenuhi persyaratan terlebih dahulu.</p></div></div></section>
+<section class="lp-section ce-chapter" id="encryption-faq"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-encryption-faq"><span>Pertanyaan yang Sering Diajukan</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Jika itu AES-256, apakah itu E2EE?</summary><div class="faq-answer"><p>Tidak. AES-256 mewakili kode dan panjang kunci. Apakah itu E2EE atau bukan ditentukan oleh di mana itu dienkripsi dan didekripsi dan siapa yang dapat menggunakan kuncinya. Penyimpanan AES-256, di mana server mengelola kunci, dan desain yang hanya mendekripsi pada terminal pengguna berbeda.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apa perbedaan antara AES-GCM dan AES-CBC?</summary><div class="faq-answer"><p>GCM menggabungkan enkripsi dan otentikasi. CBC tidak mendeteksi gangguan dengan enkripsi saja, jadi perlu untuk menggabungkan mekanisme otentikasi dengan benar. Keamanan seluruh aplikasi tidak dapat diberi peringkat berdasarkan nama metode saja.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Akankah E2EE juga mengenkripsi file di terminal?</summary><div class="faq-answer"><p>Itu belum tentu terjadi. Enkripsi sinkron Obsidian Sync dan Joplin tidak mengenkripsi file lokal dan basis data di terminal dengan cara yang sama. Silakan periksa enkripsi disk terminal, perlindungan lokal aplikasi, dan cadangan secara terpisah.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Dapatkah saya mengenkripsi catatan yang berisi gambar dan PDF dengan Bear?</summary><div class="faq-answer"><p>Bear 2.4 dan yang lebih baru dapat mengenkripsi catatan individual termasuk lampiran dengan Bear Pro. Tambahkan kata sandi ke catatan target, dan perbarui aplikasi tujuan sinkronisasi ke versi yang kompatibel. Tampilan judul dan catatan yang tidak terenkripsi perlu diperiksa secara terpisah.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apakah jurnal lama Hari Pertama juga secara otomatis menjadi E2EE?</summary><div class="faq-answer"><p>Jurnal baru default ke E2EE setelah 4.2, tetapi yang lama perlu diperiksa satu per satu. FAQ resmi saat ini menunjukkan kepada Anda cara menyalin entri ke jurnal E2EE yang baru daripada beralih langsung ke jurnal terenkripsi standar.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apakah email yang dikirimkan kepada Anda dari SimpleMemo E2EE?</summary><div class="faq-answer"><p>Tidak. Outbox dan enkripsi in-terminal dari riwayat transmisi dan pengiriman email terpisah. Teksnya melewati API yang keluar dan platform distribusi eksternal, dan salinannya tetap ada di sisi layanan surat. Silakan juga periksa pengaturan perlindungan dan berbagi kotak masuk dan mitra.</p></div></details></div></div></div></section>
+<!-- Related Articles -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="chapter-7"> <span>Artikel terkait</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/id/blog/memo-app-security-comparison"> <span>Perbandingan keamanan aplikasi memo</span> </a>
+<a href="/id/blog/memo-app-privacy"> <span>Perbandingan privasi aplikasi Memo</span> </a>
+<a href="/id/vs/standard-notes/"> <span>SimpleMemo vs Standard Notes</span> </a>
+<a href="/id/vs/obsidian/"> <span>SimpleMemo vs Obsidian</span> </a>
+<a href="/id/vs/notion/"> <span>SimpleMemo vs Notion</span> </a>
+<a href="/id/vs/evernote/"> <span>SimpleMemo vs Evernote</span> </a>
+</div>
+</div></section>
+<div class="cta-box"><div class="cta-box__title"><span>Tinggalkan catatan di kotak masuk</span></div><div class="cta-box__desc"><span>Enkripsi riwayat transmisi dengan Outbox di terminal. Anda juga dapat memeriksa jalur email dan jangkauan perlindungan dari tujuan penyimpanan.</span></div><a aria-label="Unduh dari App Store" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="Unduh dari App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a></div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="chapter-8"><span>Halaman terkait</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/id/blog/free-memo-apps-ranking"><span>Peringkat Aplikasi Memo Gratis</span></a><a href="/id/blog/offline-memo-apps"><span>Aplikasi memo offline</span></a><a href="/id/blog/memo-taking-tips"><span>Cara mencatat pemilihan 10</span></a><a href="/id/blog/best-memo-apps-2026"><span>Pilihan aplikasi memo 20 yang direkomendasikan</span></a><a href="/id/blog/business-memo-apps-2026"><span>Pilihan Aplikasi Memo Bisnis 7</span></a><a href="/id/glossary/e2e-encryption/"><span>Terminologi: Enkripsi E2E</span></a><a href="/id/glossary/aes-gcm/"><span>Terminologi: AES-GCM</span></a><a href="/id/blog/"><span>Daftar Blog</span></a></div></div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/id/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Baca selanjutnya</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Setelah membandingkan, lihat hasil pengukurannya</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Lihat tabel pengukuran waktu membuka aplikasi catatan utama hingga siap mengetik.</span></span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="chapter-9"> <span>Konten terkait</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+<li><a href="/id/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cara mengirim email ke diri sendiri</span></a></li>
+<li><a href="/id/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar Perbandingan Aplikasi Memo</span></a></li>
+<li><a href="/id/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Panduan cara menggunakan</span></a></li>
+<li><a href="/id/comparison/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Panduan Perbandingan Komprehensif</span></a></li>
+<li><a href="/id/blog/business-memo-apps-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Aplikasi Memo Bisnis 2026</span></a></li>
+</ul>
+</div></section><aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - untuk Obsidian" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>Pengembang SimpleMemo. Dari iPhone, kami sedang mengembangkan sebuah aplikasi yang meninggalkan teks di catatan alamat email yang ditetapkan dan mitra. </span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/id/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">Profil</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X / Twitter</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+<!-- Author Bio -->
+
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">Referensi</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener">NIST (2007). SP 800-38D: Rekomendasi untuk Mode Operasi Cipher Blok: Galois/Mode Penghitung (GCM) dan GMAC.</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla, E. (2018) RFC 8446: Keamanan Lapisan Transportasi (TLS) Versi Protokol 1.3. IETF.</a></li>
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/a/final" target="_blank" rel="noopener">NIST (2001). SP 800-38A: Rekomendasi untuk Mode Operasi Cipher Blok (CBC, CFB, OFB, CTR).</a></li>
+        <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener">Apple Perusahaan Dokumentasi Apple CryptoKit.</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="Navigasi footer" class="footer__nav capture-footer-wide">
+<div class="footer__col">
+<p class="footer__col-title">Produk</p>
+<a class="footer__link" href="/id/download/">Unduh</a>
+<a class="footer__link" href="/id/">Beranda</a>
+<a class="footer__link" href="/id/use-cases/">Contoh penggunaan</a>
+<a class="footer__link" href="/id/guides/">Panduan</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+<a class="footer__link" href="/id/captio-alternative/"><span>Alternatif Captio</span></a>
+<a class="footer__link" href="/id/note-to-email/">Catatan ke email</a>
+<a class="footer__link" href="/id/vs/">Bandingkan</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Bacaan</p>
+<a class="footer__link" href="/id/blog/"><span>Blog</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Bantuan</p>
+<a class="footer__link" href="/id/roadmap/">Rencana pengembangan</a>
+<a class="footer__link" href="/id/devlog/">Catatan pengembangan</a>
+<a class="footer__link" href="/id/about/">Tentang pengembang</a>
+<a class="footer__link" href="/id/faq">Pertanyaan umum</a>
+<a class="footer__link" href="/id/privacy">Privasi</a>
+<a class="footer__link" href="/id/contact">Hubungi kami</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

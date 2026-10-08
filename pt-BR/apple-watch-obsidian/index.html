@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/apple-watch-obsidian/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Memorando de voz de Apple Watch para Obsidian | Adição automática via iPhone</title>
+  <meta name="description" content="O SimpleMemo permite ditar notas pelo Apple Watch e, por meio do iPhone, enviá-las para seu próprio e-mail e adicioná-las automaticamente às notas do Obsidian. O envio exige no mínimo 2 toques e dispensa plugins. Acrescentamos a integração com Obsidian à experiência de enviar rapidamente para si mesmo, como no Captio.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Memorando de voz de Apple Watch para Obsidian | Adição automática via iPhone">
+  <meta property="og:description" content="Deixe-o com sua voz antes que desapareça. Envie as notas faladas em Apple Watch para o e-mail endereçado a você e o caderno de Obsidian através do par de iPhone. Não é necessário plug-in, a torneira 2 mais curta.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-07-03T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/apple-watch-obsidian/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/apple-watch-obsidian.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Memorando de voz de Apple Watch para Obsidian | Adição automática via iPhone">
+  <meta name="twitter:description" content="Envie o memorando sobre o qual falei no Apple Watch para o e-mail endereçado a mim e o caderno do Obsidian através do par de iPhone. Não é necessário plug-in, a torneira 2 mais curta.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/apple-watch-obsidian.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/apple-watch-obsidian/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/apple-watch-obsidian/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Apple Watch × Obsidian",
+      "item": "https://simplememofast.com/pt-BR/apple-watch-obsidian/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/apple-watch-obsidian/#webpage",
+  "inLanguage": "pt-BR",
+  "name": "Memorando de voz de Apple Watch para Obsidian | Adição automática via iPhone",
+  "description": "SimpleMemo é um aplicativo de memorando que permite deixar uma nota de voz de Apple Watch e adicioná-la automaticamente ao seu endereço de e-mail e notas Obsidian via iPhone. Comece e envie com o toque 2 mais curto, sem necessidade de plug-in.",
+  "url": "https://simplememofast.com/pt-BR/apple-watch-obsidian/",
+  "datePublished": "2026-07-03",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "about": {
+    "@type": "SoftwareApplication",
+    "@id": "https://simplememofast.com/#app",
+    "name": "SimpleMemo",
+    "operatingSystem": "iOS, watchOS",
+    "applicationCategory": "ProductivityApplication",
+    "url": "https://apps.apple.com/jp/app/id6758438948",
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/pt-BR/apple-watch-obsidian/#faq",
+  "inLanguage": "pt-BR",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Posso usá-lo apenas com Apple Watch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Apple Watch pode ser inserido sozinho, mas a transmissão é feita por iPhone durante o emparelhamento. Como é um mecanismo que passa a solicitação de transmissão do relógio para o iPhone, a transmissão não pode ser concluída pela comunicação Wi-Fi/móvel do próprio relógio. Por favor, use-o com o iPhone ligado e conectado ao relógio."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "É uma função de link oficial do Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não. SimpleMemo é um aplicativo independente desenvolvido por YURIKA, K.K., não um plug-in de aplicativo oficial para Obsidian. Fornecemos uma função de link exclusiva que adiciona automaticamente notas enviadas ao armazenamento do Obsidian."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O memorando que falei no Apple Watch permanecerá automaticamente no Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. No entanto, não diretamente. Os memorandos enviados do Apple Watch serão automaticamente adicionados à nota do Obsidian se o link Obsidian estiver ativado no iPhone através do lado iPhone do processamento do link de emparelhamento (iPhone grava no cofre e o Watch não grava diretamente)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Você pode deixar no e-mail?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. O SimpleMemo foi projetado principalmente para a experiência de enviar e-mails para você mesmo. Não importa qual Apple Watch ou iPhone você enviar, você receberá um e-mail endereçado a você e, se você o tiver definido, o mesmo memorando permanecerá no Obsidian."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Está relacionado ao Captio?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não, não há parceria. SimpleMemo é um aplicativo independente e não é o sucessor ou aplicativo oficial do Captio. Para aqueles que querem uma experiência de memorando de \"enviando para você rapidamente\", fomos projetados com a adição da adição automática Obsidian."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso usá-lo de graça?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Sim. Se você tem o plano Free, pode usar o até 3 mensagens por dia gratuitamente, sem restrições no período de uso. Não é necessário registro de cartão de crédito. Se você quiser enviar mais, você pode enviar ilimitadamente com o plano Premium (mensal e anual). Verifique o preço na tela de compra no aplicativo do App Store."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso usá-lo offline?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O lado iPhone armazena o conteúdo da transmissão na fila Outbox no terminal mesmo quando não há comunicação, e o transmite automaticamente quando a comunicação é retornada (criptografia AES-GCM). O memorando enviado de Apple Watch será enviado para iPhone durante o emparelhamento (a transmissão não será concluída apenas pela comunicação do Relógio)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Quantos toques eu preciso enviar do Apple Watch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Se você puder usar a entrada de voz como está e nenhuma seleção ou confirmação adicional for necessária, abra o aplicativo (toque em 1), fale e pressione \"Concluído\" (toque em 2) e toque em 2 para prosseguir com o envio. Os aplicativos podem ser abertos a partir de pilhas inteligentes e complicações. Quando você abri-lo, a tela de entrada padrão será aberta automaticamente, mas o método de entrada exibido mudará dependendo do modelo, idioma e estado da tela, portanto, mude para entrada de voz quando o teclado aparecer."
+      }
+    }
+  ]
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-delta.woff2?v=978e976ab9" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-delta.woff2?v=4548bd5607" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" type="image/webp" href="/assets/img/apple-watch-obsidian-hero.webp" imagesrcset="/assets/img/apple-watch-obsidian-hero-800w.webp 800w, /assets/img/apple-watch-obsidian-hero.webp 1200w" imagesizes="(max-width: 760px) 100vw, 760px">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn,.lang-switcher__link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em;text-decoration:none;display:inline-block}
+    .lang-switcher__btn:hover,.lang-switcher__link:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Watch x Obsidian page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(100,180,255,.10);border:1px solid rgba(100,180,255,.2);color:var(--text)}
+    .flow-arrow{color:var(--accent);font-weight:700}
+    .limitation-box{background:rgba(255,180,100,.06);border:1px solid rgba(255,180,100,.25);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.9rem;line-height:1.9}
+    .note-preview{margin-top:1.25rem;background:#0d1117;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.9;color:#c9d1d9;overflow-x:auto}
+    .note-preview .nt-h{color:#79c0ff;font-weight:700}
+    .note-preview .nt-time{color:#6ab4ff}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn,.lang-switcher__link{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">Pular para o conteúdo</a>
+  <!-- Global Navigation -->
+  <nav aria-label="Navegação principal" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/pt-BR/guides/">Guias</a></li>
+<li><a href="/pt-BR/use-cases/">Casos de uso</a></li>
+<li><a href="/pt-BR/vs/">Comparar</a></li>
+<li><a href="/pt-BR/methods/"><span>Métodos</span></a></li>
+<li><a href="/pt-BR/blog/"><span>Blog</span></a></li>
+<li><a href="/pt-BR/glossary/"><span>Glossário</span></a></li>
+<li><a href="/pt-BR/faq">Perguntas frequentes</a></li>
+<li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li>
+<li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Baixar</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/apple-watch-obsidian/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/apple-watch-obsidian/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/apple-watch-obsidian/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/apple-watch-obsidian/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/apple-watch-obsidian/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/apple-watch-obsidian/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/apple-watch-obsidian/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/apple-watch-obsidian/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/apple-watch-obsidian/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Baixar</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>Apple Watch × Obsidian</span>
+</div>
+<h1 class="lp-hero__title"> <span> Basta falar com Apple Watch. Deixe-o para Obsidian antes que desapareça. </span> </h1>
+<p class="lp-hero__sub"> <span>O SimpleMemo permite ditar notas pelo Apple Watch e, por meio do iPhone, enviá-las para seu próprio e-mail e adicioná-las automaticamente às notas do Obsidian. Da abertura ao envio são <strong>no mínimo 2 toques</strong>, quando a entrada de voz pode ser usada diretamente. Ao abrir o app, a tela de entrada aparece automaticamente; fale e toque em “Concluído” para prosseguir com o envio. <strong>Não precisa de plugins</strong>. O registro no Obsidian também é adicionado pela integração no iPhone.</span> </p>
+<div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+<a aria-label="Baixar na App Store" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="hero" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"> <img alt="Baixar na App Store" class="badge-img" height="40" loading="eager" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<a class="hero-cta-secondary" href="#honest" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(100,180,255,.25);border-radius:24px;color:var(--accent);text-decoration:none;font-size:.9rem;"> <span>Leia o mecanismo honesto primeiro</span> </a>
+</div>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>Autor: <a href="/pt-BR/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ Publicado: <time datetime="2026-07-03">2026 ano 7 mês 3 dia</time> ・ Atualizado: <time datetime="2026-07-07">2026 ano 7 mês 7 dia</time></span> </p>
+<a class="ce-read-link" href="#capture-section-1">Ler o artigo <span aria-hidden="true">↓</span></a></div><nav aria-label="Escolha o assunto que deseja ler" class="ce-routes"><a class="ce-route" href="#capture-section-3"><span>01</span><b>Veja como usar</b></a><a class="ce-route" href="#capture-section-4"><span>02</span><b>Como funciona a integração</b></a><a class="ce-route" href="#capture-section-8"><span>03</span><b>Perguntas Frequentes</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLESMEMO / iPHONE</p><div class="ce-device"><img alt="Tela de entrada SimpleMemo. Enviar na parte superior, botão de entrada de voz no canto inferior direito." decoding="async" fetchpriority="high" height="1389" src="/assets/img/obsidian-voice-input/01-compose.webp" width="640"/></div><figcaption class="ce-stage-foot">Tela de entrada SimpleMemo no lado iPhone</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>Índice desta página</summary><nav aria-label="Índice"><a href="#capture-section-1">O momento em que você deseja fazer anotações desaparecerá antes de abrir o iPhone</a><a href="#capture-section-2">Basta falar com Apple Watch. Permanece no e-mail e Obsidian.</a><a href="#capture-section-3">Como usá-lo é simples</a><a href="#capture-section-4">Mecanismo Honesto: Distribuição de funções do Relógio, iPhone, Obsidian</a><a href="#capture-section-5">Obsidian de "um lugar para organizar mais tarde" para "um lugar onde você pode deixá-lo imediatamente"</a><a href="#capture-section-6">Como Captio, envie para si mesmo rapidamente. Além disso, também é deixado para Obsidian.</a><a href="#capture-section-7">É adequado para situações como esta</a><a href="#capture-section-8">Perguntas frequentes</a><a href="#capture-section-9">Páginas relacionadas</a></nav></details>
+<!-- Hero art -->
+<figure class="cn-pipeline"><div><span>01 / CAPTURA</span><strong>Apple Watch</strong><p>Deixe uma nota com sua voz</p></div><div><span>02 / ANEXO</span><strong>iPhone</strong><p>Adição à nota pelo processo de integração</p></div><div><span>03 / MANTER</span><strong>Obsidian</strong><p>Leia mais tarde</p></div><figcaption>Watch・iPhone・Obsidian divisão de função (diagrama de modelo) <br>SimpleMemo não é um aplicativo oficial ou plug-in do Obsidian, mas um aplicativo independente desenvolvido por YURIKA, K.K.. Obsidian é Dynalist Inc. É uma marca registrada de.</figcaption></figure>
+<!-- Answer-first definition (AIO) -->
+<section class="lp-section" style="padding-top:1rem;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span>Em poucas palavras</span></div>
+<p>Apple Watch <strong>Apenas fale</strong> Você pode fazer uma anotação (a tela de entrada abrirá automaticamente quando você abrir o aplicativo. O método de entrada varia dependendo do modelo e do idioma). Ao enviá-lo, você receberá um e-mail endereçado a você, e <strong> Se você ativar o link Obsidian no lado iPhone durante o emparelhamento, o mesmo memorando será automaticamente adicionado às notas diárias e notas da caixa de entrada de Obsidian</strong>. Escrever no cofre é um processamento local tratado pela iPhone, e o plug-in da comunidade de <strong>Obsidian é desnecessário</strong>.</p>
+</div>
+</section>
+<!-- Problem -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"> <span>O momento em que você deseja fazer anotações desaparecerá antes de abrir o iPhone</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> Durante uma caminhada, antes e depois de dirigir, entre as tarefas domésticas, antes de ir para a cama - a ideia perde a forma em poucos segundos depois de tirar o iPhone no seu bolso. Existem vários aplicativos de memorando de voz, mas eles tendem a ser enterrados sem serem organizados mais tarde. Quanto mais pessoas quiserem deixá-lo no Obsidian, mais tempo leva para "entrar e chegar à nota correta" se torna um gargalo. </span> </p>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">⌚ <span>Em situações em que o iPhone não pode ser liberado</span></div>
+<div class="reason-card__desc"><span>Você pode deixar um bilhete no seu pulso sem tirar o iPhone, como tarefas domésticas, antes e depois de dirigir, na academia ou durante uma caminhada, etc.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🗣️ <span>Só por falar se torna uma carta</span></div>
+<div class="reason-card__desc"><span>Quando você abre o aplicativo, a tela de entrada abre automaticamente e, se você falar com entrada de voz, o watchOS a transformará em texto no local.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🗂️ <span>A organização vem automaticamente</span></div>
+<div class="reason-card__desc"><span>Você não precisa "organizar mais tarde". Basta enviá-lo e ele será empilhado em ordem cronológica em um caderno fixo de Obsidian.</span></div>
+</div>
+</div>
+</div></section>
+<!-- What you get -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span> Basta falar com Apple Watch. Permanece no e-mail e Obsidian. </span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">🎙️ <span>Insira uma nota por voz de Apple Watch</span></div>
+<div class="reason-card__desc"><span>Quando você abrir o aplicativo, a tela de entrada será aberta automaticamente. Se você falar com entrada de voz (ditado), o watchOS a converterá em texto. Quando a entrada do teclado ou da escrita à mão aparecer, mude o método de entrada (o método de entrada que pode ser usado varia dependendo do modelo e do idioma).</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📲 <span>Enviar através do aplicativo iPhone</span></div>
+<div class="reason-card__desc"><span>Os memorandos enviados pelo relógio passam pelo mesmo mecanismo de transmissão que a versão iPhone. " Você não precisa se lembrar de onde fez anotações.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📬 <span>Grave no e-mail endereçado a você mesmo</span></div>
+<div class="reason-card__desc"><span>O endereço é o e-mail usual endereçado a você. A caixa de entrada será o local de coleta do memorando como está. O mecanismo é<a href="/pt-BR/note-to-email/" style="color:var(--accent);">Memorando → E-mail</a>Está explicado na página de.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🟣 <span>Adicionar à Nota Diária e Caixa de Entrada do Obsidian</span></div>
+<div class="reason-card__desc"><span>Se você ativar o link Obsidian no lado iPhone, o mesmo memorando será automaticamente adicionado à nota diária ou à nota da Caixa de Entrada. Plug-ins não são necessários.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🔋 <span>iPhone é salvo na fila de transmissão, mesmo offline</span></div>
+<div class="reason-card__desc"><span>O lado iPhone armazena o conteúdo transmitido na fila Outbox, mesmo que esteja fora do intervalo, e o transmite automaticamente quando a comunicação retorna (criptografia AES-GCM).</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">✍️ <span>Uma experiência simples que você pode escrever assim que começar</span></div>
+<div class="reason-card__desc"><span>Como Captio, "basta abrir, escrever (falar) e enviar".<a href="/pt-BR/captio-alternative/" style="color:var(--accent);">Substituição Captio</a> permanece, com a adição da integração com Obsidian.</span></div>
+</div>
+</div>
+<div class="tip-box">
+<div class="tip-box__title"><span>Lugar exato</span></div>
+<p>"Apple Watch não é armazenado diretamente no Obsidian por conta própria". As notas enviadas do Watch são gravadas na pasta de armazenamento do Obsidian via <strong> iPhone durante o emparelhamento</strong>. A escrita é sempre tratada pelo lado iPhone.</p>
+</div>
+</div></section>
+<!-- How it works -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span>É simples de usar</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span> O fluxo é uma maneira de "falar com o Watch → enviar via iPhone → gravar para e-mail e Obsidian". </span> </p>
+<div class="flow-card">
+<div class="flow-row">
+<span class="flow-chip">⌚ <span>Fale com Watch</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">📲 <span>Enviar via iPhone</span></span>
+<span class="flow-arrow">→</span>
+<span class="flow-chip">📬 <span>E-mail</span></span>
+<span class="flow-arrow">＋</span>
+<span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">🟣 <span>Adicionado automaticamente ao Obsidian</span></span>
+</div>
+<div aria-label="Pré-visualização da nota Obsidian" class="note-preview">
+<div class="nt-h"># 2026-07-03</div>
+<div>- <span class="nt-time">07:42</span> <span>Uma história de blog que surgiu comigo enquanto passeava com meu cachorro</span></div>
+<div>- <span class="nt-time">12:15</span> <span>A lista de compras enviada por Apple Watch antes de dirigir</span></div>
+<div>- <span class="nt-time">21:30</span> <span>Notas citadas do livro que estou prestes a ler</span></div>
+</div>
+</div>
+<h3 style="font-size:1.05rem;font-weight:700;margin:2rem 0 .5rem;">1 Configuração inicial - Ligue a ligação Obsidian (lado iPhone, apenas uma vez no início)</h3>
+<ul class="prereq-list">
+<li>SimpleMemo foi instalado no iPhone (iOS 16.0 ou posterior)</li>
+<li>Obsidian foi instalado no iPhone</li>
+<li>O cofre de Obsidian está localizado em <strong>iCloud Drive</strong> ou "neste iPhone" e pode ser aberto no aplicativo de arquivos</li>
+</ul>
+<ol class="steps-list">
+<li><strong>Ative a ligação Obsidian</strong>Ative a ligação "Obsidian" na coluna "Obsidian" na tela de configurações da versão <br/>iPhone.</li>
+<li><strong>pasta Obsidian</strong><br/>Obsidian Selecione a pasta no armazenamento (iCloud Drive ou "neste iPhone").</li>
+<li><strong>Selecione o destino</strong><br/> Selecione "Nota Diária" ou "Nota Especificada" (o nome padrão da nota é Caixa de Entrada) em "Endereço de envio".</li>
+</ol>
+<p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:2rem;">Esta configuração é apenas uma vez. Depois disso, o memorando enviado do Watch ou do iPhone será adicionado ao Obsidian com as mesmas regras. Etapas detalhadas de configuração são explicadas na página de link <a href="/pt-BR/obsidian/" style="color:var(--accent);">Obsidian</a>.</p>
+<h3 style="font-size:1.05rem;font-weight:700;margin:2rem 0 .5rem;">2 Envie uma nota com Apple Watch (cada operação)</h3>
+<ol class="steps-list">
+<li><strong>Abra o aplicativo (1th toque)</strong>Abra a partir do widget <br/> Smart Stack, disque a complicação ou a lista de aplicativos.</li>
+<li><strong>Falando</strong><br/> A tela de entrada padrão abre automaticamente. Se um teclado aparecer, etc., selecione a entrada de voz do método de entrada para falar (o método de entrada que pode ser usado varia dependendo do modelo e do idioma).</li>
+<li><strong>Pressione "Concluído" (toque em 2)</strong><br/> Quando a frase for confirmada, prossiga para enviar (iPhone durante o emparelhamento será enviado). Se você receber um e-mail endereçado a você e o link Obsidian estiver ativado, ele será automaticamente adicionado ao notebook.</li>
+</ol>
+<div class="tip-box">
+<div class="tip-box__title"><span>Compatível com pilha inteligente</span></div>
+<p>Se você adicionar o widget <strong>Smart Stack</strong> ao mostrador, basta girar a coroa digital ou deslizar para baixo para abrir o aplicativo.</p>
+</div>
+</div></section>
+<!-- Honest limitation -->
+<section class="lp-section ce-chapter" id="honest"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>Mecanismo Honesto: Compartilhamento de Funções do Relógio・iPhone・Obsidian</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Eu não quero uma página que se pareça com "tudo pode ser concluído apenas com Apple Watch". Vou explicar honestamente o que realmente está acontecendo. </span> </p>
+<div>
+<div class="trouble-item">
+<div class="trouble-item__q">Apple Watch — Ponto de partida de entrada e rede</div>
+<div class="trouble-item__a"><p>A entrada de voz é o ditado padrão do watchOS. Quando você abre o aplicativo, a tela de entrada padrão abre automaticamente, mas <strong> o método de entrada exibido muda dependendo do modelo, idioma e estado da tela</strong> (Mude para entrada de voz quando o teclado aparecer). A transmissão é feita pelo iPhone durante o emparelhamento, portanto, é necessária uma conexão com o iPhone (a transmissão não pode ser concluída apenas pela comunicação do relógio). Os detalhes são explicados na página compatível com <a href="/pt-BR/apple-watch/" style="color:var(--accent);">Apple Watch</a>.</p></div>
+</div>
+<div class="trouble-item">
+<div class="trouble-item__q">iPhone — O executor do envio e Obsidian escrita</div>
+<div class="trouble-item__a"><p>As notas vindas do Watch também passam pelo fluxo de envio de iPhone. A gravação na pasta do cofre do Obsidian sempre é realizada no iPhone; o Watch não acessa diretamente o cofre. iPhone também oferece abertura em 0.4 segundos (medição de inicialização a quente no iPhone 16e; <a href="/pt-BR/blog/benchmark-methodology" style="color:var(--accent);">veja o método</a>), entrada automática por voz ao abrir (modelos e idiomas compatíveis a partir de iOS 26) e fila offline com Outbox.</p></div>
+</div>
+<div class="trouble-item">
+<div class="trouble-item__q">Obsidian — Destino de gravação sem plug-in</div>
+<div class="trouble-item__a"><p>Não há necessidade de instalar o plug-in da comunidade. O aplicativo iPhone adiciona notas diretamente à pasta de armazenamento selecionada. No cofre dedicado Obsidian Sync que não pode ser acessado via iCloud Drive, ele pode não aparecer na lista de seleção de pastas. Nesse caso, o Obsidian começará por um momento no momento da transmissão e mudará automaticamente para o método do esquema URL que é adicionado.</p></div>
+</div>
+</div>
+</div></section>
+<!-- Obsidian users -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>Obsidian de "um lugar para organizar mais tarde" para "um lugar onde você pode deixá-lo imediatamente"</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Obsidian é forte no gerenciamento de conhecimento, mas tem obstáculos de entrada. SimpleMemo pode ser usado como uma "entrada de memorando temporário" na frente dele. </span> </p>
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span>Parte do trabalho para captura e organização</span></div>
+<div class="reason-card__desc"><span>Lá fora, pegue-o rapidamente com Apple Watch e iPhone, e quando voltar à sua mesa, sente-se com Obsidian e organize-o.<a href="/pt-BR/methods/second-brain/" style="color:var(--accent);">Segundo Cérebro</a>sim<a href="/pt-BR/methods/zettelkasten/" style="color:var(--accent);">Zettelkasten</a>crescerá como está.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>Compatível com Nota Diária e Caixa de Entrada</span></div>
+<div class="reason-card__desc"><span>Se você selecionar a nota diária do dia<code>yyyy-MM-dd.md</code>; se escolher a nota Inbox, tudo será reunido em 1 nota, em ordem cronológica.</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>Dupla paz de espírito</span></div>
+<div class="reason-card__desc"><span>Mesmo nos dias em que eu não abro o Obsidian, o mesmo memorando foi enviado para o meu e-mail. A divisão de função é que o e-mail é a caixa de entrada e o Obsidian é a sala de armazenamento.</span></div>
+</div>
+</div>
+</div></section>
+<!-- Captio alternative -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>Como Captio, envie para si mesmo rapidamente. Além disso, também é deixado para Obsidian. </span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>SimpleMemo valoriza a experiência de "memorandos para enviar e-mails para si mesmo". Basta abrir, escrever (ou falar) e enviar. É fácil pesquisar porque permanece no e-mail, e se você ligar o link Obsidian, poderá transformá-lo no gerenciamento de conhecimento como está. Este aplicativo não é afiliado ao Captio, mas foi projetado para aqueles que desejam uma experiência de memorando para "enviá-la rapidamente para si mesmo". </span> </p>
+<div class="internal-links">
+<a href="/pt-BR/captio-alternative/"><span>Detalhes como uma alternativa ao Captio</span></a>
+</div>
+</div></section>
+<!-- Use cases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7"> <span>É adequado para situações como esta</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card"><div class="reason-card__title"><span>🚶 Ideias que eu tivei enquanto caminhava</span></div><div class="reason-card__desc"><span>Você pode deixar sua voz sem parar o que vem à mente enquanto caminha.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span>🚗 Notas de compras antes e depois de dirigir</span></div><div class="reason-card__desc"><span>Depois de estacionar ou esperar pelos semáforos, você pode anotar o que deseja comprar a seguir e seus planos.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span>🛌 Diário antes de dormir</span></div><div class="reason-card__desc"><span>Você pode gravá-lo apenas falando sobre a reflexão de hoje enquanto está no futon.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span>📓 Registro diário para Obsidian Nota Diária</span></div><div class="reason-card__desc"><span>Os eventos e realizações do dia são acumulados no caderno do dia com um tempo.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span>💡 Blog, SNS e histórias de planejamento</span></div><div class="reason-card__desc"><span>Você pode deixar a história que de repente vem à mente em um lugar onde você pode olhar para trás mais tarde.</span></div></div>
+<div class="reason-card"><div class="reason-card__title"><span>📝 Notas-chave após a reunião</span></div><div class="reason-card__desc"><span>Assim que sair da sala de conferências, você pode deixar os pontos principais verbalmente enquanto se lembra.</span></div></div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="08" id="capture-section-8"> <span>Perguntas Frequentes</span> </h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Posso usá-lo apenas com Apple Watch?</summary><div class="faq-answer"><p>Apple Watch pode ser inserido sozinho, mas a transmissão é feita por iPhone durante o emparelhamento. Como é um mecanismo que passa a solicitação de transmissão do relógio para o iPhone, a transmissão não pode ser concluída pela comunicação Wi-Fi/móvel do próprio relógio. Por favor, use-o com o iPhone ligado e conectado ao relógio.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">É uma função de link oficial do Obsidian?</summary><div class="faq-answer"><p>Não. SimpleMemo é um aplicativo independente desenvolvido por YURIKA, K.K., não um plug-in de aplicativo oficial para Obsidian. Fornecemos uma função de link exclusiva que adiciona automaticamente notas enviadas ao armazenamento do Obsidian.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">O memorando que falei no Apple Watch permanecerá automaticamente no Obsidian?</summary><div class="faq-answer"><p>Sim. No entanto, não diretamente. Os memorandos enviados do Apple Watch serão automaticamente adicionados à nota do Obsidian se o link Obsidian estiver ativado no iPhone através do lado iPhone do processamento do link de emparelhamento (iPhone grava no cofre e o Watch não grava diretamente).</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Você pode deixar no e-mail?</summary><div class="faq-answer"><p>Sim. O SimpleMemo foi projetado principalmente para a experiência de enviar e-mails para você mesmo. Não importa qual Apple Watch ou iPhone você enviar, você receberá um e-mail endereçado a você e, se você o tiver definido, o mesmo memorando permanecerá no Obsidian.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Está relacionado ao Captio?</summary><div class="faq-answer"><p>Não, não há parceria. SimpleMemo é um aplicativo independente e não é o sucessor ou aplicativo oficial do Captio. Para aqueles que querem uma experiência de memorando de "enviando para você rapidamente", fomos projetados com a adição da adição automática Obsidian.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Posso usá-lo de graça?</summary><div class="faq-answer"><p>Sim. Se você tem o plano Free, pode usar o até 3 mensagens por dia gratuitamente, sem restrições no período de uso. Não é necessário registro de cartão de crédito. Se você quiser enviar mais, você pode enviar ilimitadamente com o plano Premium (mensal e anual). Verifique o preço na tela de compra no aplicativo do App Store.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Posso usá-lo offline?</summary><div class="faq-answer"><p>O lado iPhone armazena o conteúdo da transmissão na fila Outbox no terminal mesmo quando não há comunicação, e o transmite automaticamente quando a comunicação é retornada (criptografia AES-GCM). O memorando enviado de Apple Watch será enviado para iPhone durante o emparelhamento (a transmissão não será concluída apenas pela comunicação do Relógio).</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Quantos toques eu preciso enviar do Apple Watch?</summary><div class="faq-answer"><p>Se você puder usar a entrada de voz como está e nenhuma seleção ou confirmação adicional for necessária, abra o aplicativo (toque em 1), fale e pressione "Concluído" (toque em 2) e toque em 2 para prosseguir com o envio. Os aplicativos podem ser abertos a partir de pilhas inteligentes e complicações. Quando você abri-lo, a tela de entrada padrão será aberta automaticamente, mas o método de entrada exibido mudará dependendo do modelo, idioma e estado da tela, portanto, mude para entrada de voz quando o teclado aparecer.</p></div></details></div>
+</div>
+</div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+<span>A ideia no pulso, para Obsidian</span>
+</div>
+<div class="cta-box__desc">
+<span>O download é gratuito. Se você colocá-lo no iPhone, poderá usá-lo como está no Apple Watch emparelhado.</span>
+</div>
+<a aria-label="Baixar na App Store" class="app-store-badge" data-cta-cluster="obsidian" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=4b75e642-3dd9-425c-8ff7-9db0cc859eb6&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"> <img alt="Baixar na App Store" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+</div>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="09" id="capture-section-9"> <span>Páginas relacionadas</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/pt-BR/"><span>Início</span></a>
+<a href="/pt-BR/apple-watch/"><span>Apple Watch detalhes de suporte</span></a>
+<a href="/pt-BR/obsidian/"><span>Detalhes da integração com Obsidian</span></a>
+<a href="/pt-BR/obsidian/apple-watch-not-working/"><span>A razão pela qual você não pode enviar de Apple Watch para Obsidian</span></a>
+<a href="/pt-BR/voice-input/"><span>Mecanismo detalhado de entrada de voz</span></a>
+<a href="/pt-BR/blog/obsidian-voice-input"><span>4 maneiras de fazer anotações no Obsidian por voz</span></a>
+<a href="/pt-BR/blog/obsidian-iphone-memo"><span>Como enviar uma nota de iPhone para a seleção Obsidian 6</span></a>
+<a href="/pt-BR/captio-alternative/"><span>Comparação de Aplicativos Alternativos Captio</span></a>
+<a href="/pt-BR/how-to/"><span>Como usar (passos 5)</span></a>
+<a href="/pt-BR/note-to-email/"><span>Como funciona o envio de notas por e-mail</span></a>
+<a href="/pt-BR/faq"><span>Perguntas frequentes</span></a>
+</div>
+</div></section>
+</div></div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="container">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Referências</span> </h2>
+<ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+<li><a href="https://support.apple.com/ja-jp/guide/watch/welcome/watchos" rel="noopener" style="color:var(--accent);" target="_blank">Apple Watch Guia do Usuário</a> — <span>Guia oficial para watchOS, como pilha inteligente, complicação, entrada de voz, etc.</span></li>
+<li><a href="https://developer.apple.com/documentation/watchos-apps/" rel="noopener" style="color:var(--accent);" target="_blank">Apple Desenvolvedor — aplicativos watchOS</a> — <span>Documentação oficial pública API disponível para aplicativos watchOS (o início automático do ditado API não é fornecido)</span></li>
+<li><a href="https://obsidian.md/help/" rel="noopener" style="color:var(--accent);" target="_blank">Obsidian Help</a> — <span>Ajuda oficial do Obsidian. Consulte as especificações de cofres, notas diárias e sincronização</span></li>
+<li><a data-cta-cluster="obsidian" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>Página de download App Store</span></li>
+</ul>
+</div>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="feature" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Próxima leitura </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Determine o destino das notas deixadas por voz </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> Se você definir o link e salvar o destino no iPhone, poderá deixar notas de voz no e-mail e no Obsidian. </span> </a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<div class="container">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Conteúdo relacionado</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/pt-BR/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de Métodos</span></a></li>
+<li><a href="/pt-BR/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Artigos do blog</span></a></li>
+<li><a href="/pt-BR/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Casos de uso</span></a></li>
+<li><a href="/pt-BR/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perguntas frequentes</span></a></li>
+</ul>
+</div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="Navegação do rodapé" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">Produto</p>
+<a class="footer__link" href="/pt-BR/download/">Baixar</a>
+<a class="footer__link" href="/pt-BR/">Início</a>
+<a class="footer__link" href="/pt-BR/apple-watch/">Apple Watch</a>
+<a class="footer__link" href="/pt-BR/obsidian/">Integração com Obsidian</a>
+<a class="footer__link" href="/pt-BR/use-cases/">Casos de uso</a>
+<a class="footer__link" href="/pt-BR/guides/">Guias</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Comparações e migração</p>
+<a class="footer__link" href="/pt-BR/note-to-email/">Notas por e-mail</a>
+<a class="footer__link" href="/pt-BR/vs/">Comparar</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">Suporte</p>
+<a class="footer__link" href="/pt-BR/roadmap/">Roteiro público</a>
+<a class="footer__link" href="/pt-BR/devlog/">Registro de desenvolvimento</a>
+<a class="footer__link" href="/pt-BR/about/">Sobre o desenvolvedor</a>
+<a class="footer__link" href="/pt-BR/faq">Perguntas frequentes</a>
+<a class="footer__link" href="/pt-BR/privacy">Privacidade</a>
+<a class="footer__link" href="/pt-BR/contact">Contato</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

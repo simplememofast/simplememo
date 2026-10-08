@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/guides/gmail-star-todo/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>用Gmail星将收件箱ToDo化 — 给自己的备忘录的自动分配术 | SimpleMemo</title>
+  <meta name="description" content="SimpleMemo的备忘录用Gmail的星号固定在前面，结束后取下即可的ToDo管理术。 此外，还解说了在PC版Gmail的发件人过滤器中设置“自动星+标签分配”的步骤。 设置会反映在所有终端上。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="用Gmail星将收件箱ToDo化 — 给自己的备忘录的自动分配术 | SimpleMemo">
+  <meta property="og:description" content="用星星固定在前面→结束后取下=ToDo管理。 此外，通过发件人过滤器自动分配星星+标签。 使自己的备忘录难以被埋没的运用术。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/guides/gmail-star-todo/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/guides-gmail-star-todo.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="用Gmail星将收件箱ToDo化 — 给自己的备忘录的自动分配术 | SimpleMemo">
+  <meta name="twitter:description" content="用星星固定在前面→结束后取消=ToDo管理。 通过发件人过滤器自动分配星号+标签。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/guides-gmail-star-todo.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/guides/gmail-star-todo/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/gmail-star-todo/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "设置指南",
+      "item": "https://simplememofast.com/zh/guides/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "用 Gmail 星标把收件箱变成待办清单",
+      "item": "https://simplememofast.com/zh/guides/gmail-star-todo/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/guides/gmail-star-todo/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "用Gmail星将收件箱ToDo化 — 给自己的备忘录的自动分配术",
+  "description": "SimpleMemo的备忘录用Gmail的星形固定在前面，结束后取下即可的ToDo管理术。 此外，还解说了在PC版Gmail的发件人过滤器中设置自动星+标签分配的步骤。",
+  "url": "https://simplememofast.com/zh/guides/gmail-star-todo/",
+  "datePublished": "2026-05-30",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/guides-gmail-star-todo.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/guides/gmail-star-todo/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/guides/gmail-star-todo/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "为什么要用星星？ 文件夹移动不行吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "星星的优点是可以“留在收件箱里”标记。 带星的聚集在Gmail的“带星的”视图中，在收件箱的开头随时都能找到。 轻轻一按就可以取下，完成后只需取下即可。 仅凭这一点，就变成了未完成=带星星的简单ToDo管理。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone的Gmail应用程序就可以吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在iPhone的Gmail应用程序上也可以取下星星。 但是发送者过滤器（自动星形+自动标签）的制作，只能通过电脑或浏览器版的Gmail进行。 制作一次的话，设置会反映在所有终端上。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "过滤器的发件人（From）要输入什么？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "输入noreply@mail.simplememofast.com。 这是SimpleMemo发来的邮件的发件人地址。 因为发件人名显示为“SimpleMemo”，所以搜索收件箱也能很快找到。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "明星运用和ToDo管理是如何联系在一起的？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "有星星=还要做，只是决定而已。 完成后去掉星号，在带星号的视图中留下的只有未完成的备忘录。 不增加专用应用程序，Gmail的收件箱直接成为ToDo列表。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "转移到专用标签（文件夹）后会从收件箱中消失吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "如果只是用过滤器“贴标签”的话，只要添加标签就会留在收件箱里。 如果想从收件箱中取出的话，也可以在过滤器中选择“跳过收件箱（存档）”。 如果想把备忘录留在收件箱里整理的话，推荐星号+标签并用。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/guides/gmail-star-todo/#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "用Gmail星将收件箱ToDo化 — 给自己的备忘录的自动分配术 | SimpleMemo",
+  "url": "https://simplememofast.com/zh/guides/gmail-star-todo/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/"><span>方法</span></a></li>
+        <li><a href="/zh/blog/"><span>博客</span></a></li>
+        <li><a href="/zh/glossary/"><span>术语集</span></a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/guides/gmail-star-todo/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/guides/gmail-star-todo/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/guides/gmail-star-todo/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/guides/gmail-star-todo/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/guides/gmail-star-todo/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/guides/gmail-star-todo/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/guides/gmail-star-todo/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/guides/gmail-star-todo/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/guides/gmail-star-todo/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>使用方法 · 收件箱ToDo化</span>
+
+        </div>
+        <h1 class="lp-hero__title"> <span>Gmail的明星，将收件箱变成ToDo。 </span> </h1>
+        <p class="lp-hero__sub"> <span>发给自己的备忘录，用Gmail的<strong>星固定在开头</strong>。 结束后只去掉星星，剩下的只有“要做的事情”。 此外，如果制作一次<strong>发件人过滤器</strong>，收到的备忘录会自动加上星号和标签，很难被其他邮件埋没。 不需要专用应用程序和特别的设置。 </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者：<a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+      </div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>为什么是“明星”</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>步骤1・2 — 明星ToDo管理</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>步骤3 — 自动星标&amp;标签（Gmail过滤器）</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Answer-first -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span>要做的只有3</span></div>
+          <p><strong>用1个星固定在前面</strong> → 在收到的备忘录上加上星号，通过Gmail的“带星号”随时都能找到。 <strong>2结束后取下</strong> → 附星=未完成。 完成后只要取下就可以进行ToDo管理。 <strong>3自动分配</strong> → 用电脑的Gmail制作一次发件人过滤器，之后会自动加上星号&amp;标签。 设置会反映在所有终端上。</p>
+
+        </div>
+      </section>
+
+      <!-- Why stars -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>为什么是“明星”</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>写给自己的备忘录，如果放任不管的话，会混入其他邮件中丢失。 转移到文件夹的话，这次“去看”的麻烦会增加。 明星的优势是<strong>可以留在收件箱中标记</strong>。 轻轻一按就能取下，整理成专用视图——最轻的整理术。 </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">⭐ <span>在最前面找到</span></div>
+            <div class="reason-card__desc"><span>带有星号的视图集中到“带星号”视图中，不会与其他邮件混为一谈。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">✅ <span>原封不动ToDo</span></div>
+            <div class="reason-card__desc"><span>附星=未完成。 摘掉就结束了。 不需要新的应用程序。</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📱 <span>所有终端同步</span></div>
+            <div class="reason-card__desc"><span>星星和标签都是Gmail的功能。 iPhone、PC、平板电脑相同的状态。</span></div>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- Step 1 & 2: manual stars -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>步骤1・2 — 用星星管理ToDo</span> </h2></div><div class="ce-chapter__body">
+        <ol class="steps-list">
+          <li><strong>在收到的备忘录上加星</strong>在<br>邮件应用程序中，在SimpleMemo收到的备忘录上点击星号（☆）。 仅凭这个就可以整理成收件箱的“带星”。</li>
+          <li><strong>将“带星号”作为ToDo列表查看</strong>打开<br>Gmail的“带星号”视图，对应备忘录一览。 决定了有星星=还有事情要做。</li>
+          <li><strong>结束后去掉星号</strong><br>对应完毕的备忘录去掉星号。 留在带星号的视图中只有未完成的备忘录。 光是这个就变成了简单的ToDo管理。</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>提示</span></div>
+          <p>这个运用，与<a href="/zh/methods/inbox-zero/" style="color:var(--accent);">收件箱・零</a>也很相配。 1日的目标是将带星星（未完成）归零。</p>
+
+        </div>
+      </div></section>
+
+      <!-- Step 3: auto filter -->
+      <section class="lp-section ce-chapter sd-chapter" id="filter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>步骤3 — 自动星标&amp;标签（Gmail过滤器）</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>在电脑或浏览器版的Gmail上制作一次发件人过滤器，就可以在SimpleMemo收到的邮件上自动加星号，也可以整理成专用标签（文件夹）。 设置反映在所有终端（包括iPhone）上。 </span> </p>
+        <ol class="steps-list">
+          <li><strong>打开过滤器制作画面</strong><br>电脑或浏览器版的Gmail，从搜索窗口右侧的设置图标打开“制作过滤器”。</li>
+          <li><strong>输入发件人地址</strong><br>在“From（发件人）”中粘贴<code>noreply@mail.simplememofast.com</code>，制作过滤器。</li>
+          <li><strong>选择星号和标签</strong><br>勾选“加星号”和“加标签（例：备忘录）”。</li>
+          <li><strong>也适用于现有邮件完成</strong><br>选择“对匹配的线程也应用过滤器”完成。 之后，收到的备忘录上会自动加上星号和标签。</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>关于发件人</span></div>
+          <p>发件人名是“SimpleMemo”，地址是<code>noreply@mail.simplememofast.com</code>。 在收件箱的搜索栏中输入<code>from:noreply@mail.simplememofast.com</code>，就可以只搜索备忘录的全文。</p>
+
+        </div>
+      </div></section>
+
+      <!-- iPhone only -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>仅使用iPhone的情况</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>发送者过滤器的制作需要电脑/浏览器版Gmail，但是没有过滤器也可以操作。 打开收到的备忘录，从菜单中手动添加星号或标签，同样更容易找到。 </span> </p>
+        <p class="lp-section__lead"> <span>Gmail以外的邮件软件也可以将发件人登记为“VIP”“收藏”“明星”，或者制定作为发件人分配的规则，自动移动到专用文件夹（例：备忘录），也可以做同样的事情。 </span> </p>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>常见问题</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">为什么要用星星？ 文件夹移动不行吗？</summary><div class="faq-answer"><p>星星的优点是可以“留在收件箱里”标记。 带星的聚集在Gmail的“带星的”视图中，在收件箱的开头随时都能找到。 轻轻一按就可以取下，完成后只需取下即可。 仅凭这一点，就变成了未完成=带星星的简单ToDo管理。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">iPhone的Gmail应用程序就可以吗？</summary><div class="faq-answer"><p>在iPhone的Gmail应用程序上也可以取下星星。 但是发送者过滤器（自动星形+自动标签）的制作，只能通过电脑或浏览器版的Gmail进行。 制作一次的话，设置会反映在所有终端上。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">过滤器的发件人（From）要输入什么？</summary><div class="faq-answer"><p>输入<code>noreply@mail.simplememofast.com</code>。 这是SimpleMemo发来的邮件的发件人地址。 因为发件人名显示为“SimpleMemo”，所以搜索收件箱也能很快找到。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">明星运用和ToDo管理是如何联系在一起的？</summary><div class="faq-answer"><p>有星星=还要做，只是决定而已。 完成后去掉星号，在带星号的视图中留下的只有未完成的备忘录。 不增加专用应用程序，Gmail的收件箱直接成为ToDo列表。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">转移到专用标签（文件夹）后会从收件箱中消失吗？</summary><div class="faq-answer"><p>如果只是用过滤器“贴标签”的话，只要添加标签就会留在收件箱里。 如果想从收件箱中取出的话，也可以在过滤器中选择“跳过收件箱（存档）”。 如果想把备忘录留在收件箱里整理的话，推荐星号+标签并用。</p></div></details></div>
+        </div>
+
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>不易埋没备忘录</span>
+
+        </div>
+        <div class="cta-box__desc">
+          <span>免费下载。</span>
+
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="从App Store下载"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="从App Store下载" loading="lazy"> </a>
+
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>相关页面</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/zh/guides/gmail/"><span>Gmail设置指南</span></a>
+          <a href="/zh/guides/inbox-memo-organization/"><span>备忘录堆积后的整理术</span></a>
+          <a href="/zh/methods/inbox-zero/"><span>收件箱・零</span></a>
+          <a href="/zh/obsidian/"><span>Obsidian合作</span></a>
+          <a href="/zh/guides/draft-autosave/"><span>草稿自动保存</span></a>
+          <a href="/zh/blog/email-self-task-management"><span>通过邮件管理任务</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container ce-chapter sd-chapter">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-07" data-ce-number="07"> <span>参考文献</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://support.google.com/mail/answer/6579" target="_blank" rel="noopener" style="color:var(--accent);">Gmail — 过滤器的制作和使用 / Create rules to filter emails</a> — <span>通过发件人过滤器自动赋予星号标签的官方步骤</span></li>
+    <li><a href="https://support.google.com/mail/answer/5904" target="_blank" rel="noopener" style="color:var(--accent);">Gmail — 加星 / Star your emails</a> — <span>加星的方法和“加星”视图的官方指南</span></li>
+    <li><a href="https://support.google.com/mail/answer/7190" target="_blank" rel="noopener" style="color:var(--accent);">Gmail — 搜索运算符 / Search operators</a> — <span>from: 等缩小自己的备忘录的搜索运算符</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="guide" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>App Store的下载页面</span></li>
+  </ul>
+  </div></div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="method" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接着阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>把写下的笔记存入 Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在 iPhone 中设置笔记库访问权限和追加位置，就能把写下的笔记也保存到 Obsidian。</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>方法一览</span></a></li>
+    <li><a href="/zh/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>博客文章一览</span></a></li>
+    <li><a href="/zh/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>设置指南一览</span></a></li>
+    <li><a href="/zh/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常见问题</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较与迁移</p>
+        <a href="/zh/captio-alternative/" class="footer__link"><span>Captio替代</span></a>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

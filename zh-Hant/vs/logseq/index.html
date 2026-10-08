@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/vs/logseq/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>與Logseq的比較 — SimpleMemo | 備忘錄應用程式比較</title>
+  <meta name="description" content="Logseq和SimpleMemo，根據保管處和輸入的作用進行比較。 以往的檔案版Logseq OG和使用SQLite的DB版的區別、Quick add、同步、包含附加的備份、Markdown匯出的限制、轉移前確認的步驟在官方資料中確認。">
+  <meta name="robots" content="max-snippet:-1, max-image-preview:large">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="SimpleMemo vs Logseq — 備忘錄應用程式徹底比較">
+  <meta property="og:description" content="Logseq和SimpleMemo，根據保管處和輸入的作用進行比較。 以往的檔案版Logseq OG和使用SQLite的DB版的區別、Quick add、同步、包含附加的備份、Markdown匯出的限制、轉移前確認的步驟在官方資料中確認。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/vs/logseq/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="SimpleMemo vs Logseq — 備忘錄應用程式徹底比較">
+  <meta name="twitter:description" content="Logseq和SimpleMemo，根據保管處和輸入的作用進行比較。 以往的檔案版Logseq OG和使用SQLite的DB版的區別、Quick add、同步、包含附加的備份、Markdown匯出的限制、轉移前確認的步驟在官方資料中確認。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-logseq.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/vs/logseq/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/logseq/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/vs/logseq/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/vs/logseq/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/vs/logseq/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/vs/logseq/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/vs/logseq/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/vs/logseq/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/vs/logseq/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/vs/logseq/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/logseq/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/vs/logseq/#article",
+  "inLanguage": "zh-Hant",
+  "image": "https://simplememofast.com/assets/img/og/vs-logseq.png",
+  "headline": "SimpleMemo vs Logseq — 備忘錄應用程式徹底比較",
+  "description": "Logseq和SimpleMemo，根據保管處和輸入的作用進行比較。 以往的檔案版Logseq OG和使用SQLite的DB版的區別、Quick add、同步、包含附加的備份、Markdown匯出的限制、轉移前確認的步驟在官方資料中確認。",
+  "url": "https://simplememofast.com/zh-Hant/vs/logseq/",
+  "datePublished": "2026-03-06",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/vs/logseq/"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "備忘錄應用程式比較",
+      "item": "https://simplememofast.com/zh-Hant/vs/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "vs Logseq",
+      "item": "https://simplememofast.com/zh-Hant/vs/logseq/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/vs/logseq/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "SimpleMemo vs Logseq 比較",
+  "url": "https://simplememofast.com/zh-Hant/vs/logseq/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}.compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}.compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}.compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}.compare-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap}.compare-table .yes{color:#3fb950}.compare-table .no{color:#f85149}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.diff-list{list-style:none;margin:1.5rem 0 2rem;padding:0}.diff-list li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}.diff-list li .diff-num{position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}.diff-list li strong{color:var(--text)}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}@media(max-width:600px){.choose-grid{grid-template-columns:1fr}}.choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}.choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}.choose-card ul{list-style:none;padding:0;margin:0;font-size:.87rem;color:var(--text-secondary);line-height:1.8}.choose-card ul li::before{content:"&#10003; ";color:#3fb950;font-weight:700}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  .logseq-scroll{max-width:100%;overflow-x:auto;margin:1.5rem 0}.logseq-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.logseq-scroll table{width:100%;min-width:680px;border-collapse:collapse;font-size:.93rem}.logseq-scroll th,.logseq-scroll td{padding:.8rem;border:1px solid var(--border);vertical-align:top;text-align:left;line-height:1.9}.logseq-scroll th{background:var(--surface)}.logseq-scroll caption{text-align:left;padding:.5rem 0;color:var(--text-muted);font-size:.85rem}.lp-section>p,.lp-section>ol{line-height:1.9;color:var(--text-secondary)}.lp-section li{margin:.8rem 0}.lp-section .faq-details{padding:1rem 0;border-bottom:1px solid var(--border)}.lp-section .faq-summary{font-weight:700;cursor:pointer;line-height:1.8}.lp-section .faq-answer{padding:1rem 0;line-height:1.9;color:var(--text-secondary)}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<link rel="stylesheet" href="/assets/css/capture-sixth.css?v=384c55dbee"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh-Hant/vs/logseq/#faq","inLanguage":"zh-Hant","mainEntity":[{"@type":"Question","name":"Logseq全部用Markdown檔案儲存嗎？","acceptedAnswer":{"@type":"Answer","text":"不。 傳統的檔案版分為Logseq OG，DB版使用SQLite資料庫。 DB版的Markdown匯出不是保留所有屬性和時間戳的形式。"}},{"@type":"Question","name":"在用現有圖表測試DB版之前要做什麼？","acceptedAnswer":{"@type":"Answer","text":"保留原圖的獨立副本，用不重要的小測試圖進行嘗試。 不僅需要SQLite，還需要附件時，選擇包含SQLite DB和assets的匯出，確認匯入到其他圖表中。"}},{"@type":"Question","name":"DB版可以原樣使用以前的外掛嗎？","acceptedAnswer":{"@type":"Answer","text":"單獨確認相容性。 官方市場的“Supports DB?” 請檢視DB對應顯示，確認使用的外掛是否支援DB圖表。"}},{"@type":"Question","name":"Logseq的快速輸入必須插入嗎？","acceptedAnswer":{"@type":"Answer","text":"DB版的官方資料中，有將簡短的備忘錄傳送到當前期刊的內建“Quick add”。 因為版本和終端的入口不同，所以在尋找附加外掛之前請在現在的應用程式上確認。"}},{"@type":"Question","name":"使用官方同步的話，資料丟失會消失嗎？","acceptedAnswer":{"@type":"Answer","text":"同步不能代替備份。 官方README將DB版作為測試版，新移動版和RTC作為阿爾法版，介紹資料丟失的可能性和獨立的備份。 確認使用的版本和同步路線。"}},{"@type":"Question","name":"使用SimpleMemo的話會自動補充到Logseq嗎？","acceptedAnswer":{"@type":"Answer","text":"本頁面的並用例子是，根據需要將收到郵件收件箱的文章轉寫到Logseq的方法。 沒有顯示自動寫入Logseq的DB和圖表的功能，也沒有顯示整個圖表轉移的功能。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth capture-sixth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="主導航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh-Hant/guides/">使用指南</a></li>
+<li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+<li><a href="/zh-Hant/vs/">比較</a></li>
+<li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+<li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+<li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+<li><a href="/zh-Hant/faq">常見問題</a></li>
+<li><a href="/zh-Hant/about/">關於開發者</a></li>
+<li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/vs/logseq/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/vs/logseq/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/vs/logseq/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/vs/logseq/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/vs/logseq/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/vs/logseq/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/vs/logseq/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/vs/logseq/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/vs/logseq/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="vs" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下載</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label"><span>備忘錄應用程式比較</span></div>
+<h1 class="lp-hero__title"><span>SimpleMemo和Logseq<br/>輸入、儲存、轉移的差異</span></h1>
+<p class="lp-hero__sub"><span>用Logseq培養知識時，首先要確認正在使用的版本。 處理Markdown檔案的OG和使用SQLite的DB版，儲存和轉移的步驟不同。 SimpleMemo作為將必要文章留在收件箱等的入口進行比較。 </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者：<a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公開：<time datetime="2026-03-06">2026年3月6日</time> ・ 更新：<time datetime="2026-09-09">2026年9月9日</time></span> </p>
+<a class="ce-read-link" href="#heading-logseq-versions">閱讀正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="從想讀的內容中選擇" class="ce-routes"><a class="ce-route" href="#heading-logseq-versions"><span>01</span><b>首先區分OG和DB版</b></a><a class="ce-route" href="#heading-logseq-capture"><span>02</span><b>從每日備忘錄和Quick add開始</b></a><a class="ce-route" href="#heading-logseq-sync"><span>03</span><b>分開準備同步和備份</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">LOGSEQ/現場指南</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>OG和DB版</strong></div><div class="cn-concept-row"><span>02</span><strong>同步和備份</strong></div><div class="cn-concept-row"><span>03</span><strong>嘗試少量轉移</strong></div></div><figcaption class="ce-stage-foot">運用前的確認要點</figcaption></figure></header><div class="ce-article">
+
+<!-- 意図の分岐: このページはSimpleMemo vs Logseq。Obsidian vs Logseqを探して
+         着地した検索者（「logseq obsidian 比較」系クエリ）を実験記事へ送る。 -->
+<div style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:8px;padding:1rem 1.25rem;margin:0 0 1rem;font-size:.92rem;line-height:1.8;">
+<span><strong>Obsidian和Logseq的比較</strong>嗎？ 透過兩個應用程式開啟同一資料夾的實驗和外掛數量的實際計數進行了比較 <a href="/zh-Hant/obsidian/compare/logseq/" style="color:var(--accent);">Obsidian vs Logseq 比較驗證【2026】</a> 。 這個頁面是SimpleMemo和Logseq的比較。</span>
+</div>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-versions"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-logseq-versions"><span>首先區分OG和DB版</span></h2></div><div class="ce-chapter__body"><p><span>在官方儲存庫中，檔案圖分為Logseq OG。 2026年7月13日公開的2.0.1是DB版的測試版。 舊版的檔案儲存、Org、外掛的說明，不要直接適用於DB版。 </span></p><div aria-labelledby="heading-logseq-versions" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-versions-caption"><span>檔案版和DB版分開確認。 可以橫向滾動。 </span></caption><thead><tr><th scope="col"><span>專案</span></th><th scope="col">Logseq OG</th><th scope="col">Logseq資料庫</th></tr></thead><tbody><tr><th scope="row"><span>儲存中心</span></th><td><span>Markdown・Org的檔案圖</span></td><td><span>SQLite的DB圖。 附件也處理assets</span></td></tr><tr><th scope="row"><span>文字的取出</span></th><td><span>檔案。 確認固有語法</span></td><td><span>標準Markdown匯出時會丟失一部分資訊</span></td></tr><tr><th scope="row"><span>現有功能</span></th><td><span>確認正在使用的版本、外掛</span></td><td><span>Org不支援等變更。 確認DB對應外掛</span></td></tr><tr><th scope="row"><span>嘗試前的準備</span></th><td><span>留下整個圖表和附加的獨立副本</span></td><td><span>不重要的測試圖和DB・附加的匯出</span></td></tr></tbody></table></div><p><a href="https://github.com/logseq/docs/blob/master/db-version-changes.md" rel="noopener" target="_blank"><span>官方：DB版的變化</span></a></p><p><a href="https://github.com/logseq/logseq/releases/tag/2.0.1" rel="noopener" target="_blank"><span>官方：2.0.1測試版的釋出</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-capture"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-logseq-capture"><span>從每日備忘錄和Quick add開始</span></h2></div><div class="ce-chapter__body"><p><span>Logseq是用專案符號的塊和參考來構建思考的工具。 從一開始就不需要給所有連結，在每日備忘錄中寫下簡短的記錄後，在使用場景中可以關聯。 </span></p><p><span>DB版正式介紹了傳送到當前期刊的內建Quick add。“ 快速輸入必須需要外掛”這樣的解釋是不恰當的。 在使用的終端上開啟入口，嘗試輸入、儲存、重新顯示。 </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#search-commands" rel="noopener" target="_blank"><span>官方：Quick add的說明</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-sync"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-logseq-sync"><span>分開準備同步和備份</span></h2></div><div class="ce-chapter__body"><p><span>官方README說明了DB版的測試版，新的移動版和RTC是阿爾法，介紹了資料丟失的可能性和備份。 僅僅啟用同步並不能防止錯誤刪除和資料丟失。 首先用不包含實際內容的小圖表進行測試。 </span></p><p><span>不混合檔案版和DB版的同步設定，確認使用版的指南。 能否在同步目的地找到記錄，能否讀取獨立的副本，是另外的確認。 </span></p><p><a href="https://github.com/logseq/logseq#-database-version" rel="noopener" target="_blank"><span>官方：開發階段和考試用圖表的介紹</span></a></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-export"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-logseq-export"><span>區分使用DB的備份和Markdown匯出</span></h2></div><div class="ce-chapter__body"><p><span>在DB版的Export graph中，可以選擇將DB和附件彙總的“Export both SQLite DB and assets”。 標準Markdown匯出是匯出易於閱讀的文字的用途，但不保留所有屬性和時間戳。 不要只把轉移用的Markdown作為唯一的備份。 </span></p><p><span>保留原圖，在新的其他圖中嘗試Import → SQLite + assets (.zip)，確認必要的內容是否可以開啟。 將舊檔案圖轉換為DB時，請確認不支援Org、任務狀態的轉換、多個查詢和嵌入的匯入限制。 </span></p><p><a href="https://github.com/logseq/docs/blob/master/db-version.md#graph-export" rel="noopener" target="_blank"><span>官方：匯出和匯入形式</span></a></p></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="logseq-checks"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-logseq-checks"><span>轉移前少量看6專案</span></h2></div><div class="ce-chapter__body"><div aria-labelledby="heading-logseq-checks" class="logseq-scroll ce-table-scroll" role="region" tabindex="0"><table><caption id="logseq-checks-caption"><span>少量轉移看到的6專案。 可以橫向滾動。 </span></caption><thead><tr><th scope="col"><span>確認專案</span></th><th scope="col"><span>確認內容</span></th></tr></thead><tbody><tr><th scope="row"><span>正文・層次</span></th><td><span>段落、專案符號、子塊能讀懂嗎</span></td></tr><tr><th scope="row"><span>參考和連結</span></th><td><span>頁面和塊的參考是否進入預定的位置</span></td></tr><tr><th scope="row"><span>屬性・任務</span></th><td><span>值、日期、狀態是如何轉換的</span></td></tr><tr><th scope="row"><span>附件</span></th><td><span>開啟PDF、影象、音訊的真實檔案嗎</span></td></tr><tr><th scope="row"><span>搜尋和外掛</span></th><td><span>是否可以使用必要的搜尋、DB對應外掛</span></td></tr><tr><th scope="row"><span>回讀</span></th><td><span>是否可以從匯入到其他圖表中重新顯示必要的記錄</span></td></tr></tbody></table></div><p><span>這個表是確認轉移的。 不是驗證所有圖表結果相同的表。 原始資料會保留到確認結束為止。 </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-trial"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-logseq-trial"><span>改變運用前的5步驟</span></h2></div><div class="ce-chapter__body"><ol><li><span>記錄正在使用的Logseq的版本和儲存方式，將原始圖表備份到獨立的地方。 </span></li><li><span>在不重要的小測試圖上，準備正文、任務、附加、連結各1件。 </span></li><li><span>上面的6專案，將必要的匯出匯入其他圖表後開啟。 </span></li><li><span>如果想同時使用的話，做一個簡短的備忘錄，確認在最終的Logseq的儲存處是否能找到。 </span></li><li><span>記錄不一致或不足的功能後，判斷實際資料的處理。 </span></li></ol></div></section>
+<section class="lp-section ce-chapter" id="logseq-memo"><div class="ce-chapter__head"><h2 data-ce-number="07" id="heading-logseq-memo"><span>同時使用SimpleMemo的情況</span></h2></div><div class="ce-chapter__body"><p><span>如果平時回看郵件收件箱的話，可以在那裡留下短文，只把需要的東西轉寫到Logseq的每日備忘錄上。 在影印的時候，確認是否知道正文和返回目的地。 郵件到達和儲存到Logseq是另外的操作，不以自動補充為前提。 </span></p><p><span>輸入的入口進行嘗試的話，可以設定<a data-cta-cluster="vs" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a>的收件人，從1件到達開始確認。 不用於圖表的替換和轉移。 </span></p><p><span><a href="/zh-Hant/note-to-email/">傳送第一個郵件的步驟</a>和<a href="/zh-Hant/obsidian/compare/logseq/">過去的檔案版比較</a>也請參考。 </span></p></div></section>
+<section class="lp-section ce-chapter" id="logseq-faq"><div class="ce-chapter__head"><h2 data-ce-number="08" id="heading-logseq-faq"><span>常見問題</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Logseq全部用Markdown檔案儲存嗎？</summary><div class="faq-answer"><p>不。 傳統的檔案版分為Logseq OG，DB版使用SQLite資料庫。 DB版的Markdown匯出不是保留所有屬性和時間戳的形式。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">在用現有圖表測試DB版之前要做什麼？</summary><div class="faq-answer"><p>保留原圖的獨立副本，用不重要的小測試圖進行嘗試。 不僅需要SQLite，還需要附件時，選擇包含SQLite DB和assets的匯出，確認匯入到其他圖表中。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">DB版可以原樣使用以前的外掛嗎？</summary><div class="faq-answer"><p>單獨確認相容性。 官方市場的“Supports DB?” 請檢視DB對應顯示，確認使用的外掛是否支援DB圖表。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Logseq的快速輸入必須插入嗎？</summary><div class="faq-answer"><p>DB版的官方資料中，有將簡短的備忘錄傳送到當前期刊的內建“Quick add”。 因為版本和終端的入口不同，所以在尋找附加外掛之前請在現在的應用程式上確認。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">使用官方同步的話，資料丟失會消失嗎？</summary><div class="faq-answer"><p>同步不能代替備份。 官方README將DB版作為測試版，新移動版和RTC作為阿爾法版，介紹資料丟失的可能性和獨立的備份。 確認使用的版本和同步路線。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">使用SimpleMemo的話會自動補充到Logseq嗎？</summary><div class="faq-answer"><p>本頁面的並用例子是，根據需要將收到郵件收件箱的文章轉寫到Logseq的方法。 沒有顯示自動寫入Logseq的DB和圖表的功能，也沒有顯示整個圖表轉移的功能。</p></div></details></div></div></div></section>
+<section class="lp-section ce-chapter" id="logseq-scope"><div class="ce-chapter__head"><h2 data-ce-number="09" id="heading-logseq-scope"><span>確認範圍</span></h2></div><div class="ce-chapter__body"><p><span>2026年9月9日確認了官方儲存庫、DB版的說明、變更點、2.0.1釋出。 這篇報道的步驟不是這次用實機完成轉移的報告。 筆者是SimpleMemo的開發者。 </span></p></div></section>
+<div class="cta-box">
+<div class="cta-box__title"><span>用郵件回看的備忘錄入口</span></div>
+<div class="cta-box__desc"><span>設定收件人，確認簡短的備忘錄到達後開始使用。</span></div>
+<a aria-label="從App Store下載" class="app-store-badge" data-cta-cluster="vs" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="從App Store下載" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a>
+<div class="cta-qr">
+<img alt="App Store下載二維碼" height="132" loading="lazy" src="/assets/img/qr-vs-logseq-ja.svg?v=977b245661" width="132"/>
+<small><span>PC使用者用智慧手機讀取</span></small>
+</div>
+</div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="chapter-10"><span>相關頁面</span></h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh-Hant/vs/"><span>備忘錄應用程式比較一覽</span></a>
+<a href="/zh-Hant/obsidian/compare/logseq/"><span>Obsidian vs Logseq 比較驗證</span></a>
+<a href="/zh-Hant/vs/obsidian/"><span>vs Obsidian</span></a>
+<a href="/zh-Hant/vs/roam-research/"><span>vs Roam Research</span></a>
+<a href="/zh-Hant/vs/notion/"><span>vs Notion</span></a>
+<a href="/zh-Hant/vs/anytype/"><span>vs Anytype</span></a>
+<a href="/zh-Hant/vs/tana/"><span>vs Tana</span></a>
+<a href="/zh-Hant/captio-alternative/"><span>Captio替代指南</span></a>
+</div>
+</div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/zh-Hant/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>比較之後，檢視實際測量值</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>主要備忘錄應用程式的啟動和輸入開始的實際測量表。 </span> </span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="11" id="chapter-11"> <span>相關內容</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+<li><a href="/zh-Hant/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>給自己發郵件的方法</span></a></li>
+<li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+<li><a href="/zh-Hant/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使用方法指南</span></a></li>
+</ul>
+</div></section></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="頁尾導航" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">產品</p>
+<a class="footer__link" href="/zh-Hant/download/">下載</a>
+<a class="footer__link" href="/zh-Hant/">首頁</a>
+<a class="footer__link" href="/zh-Hant/use-cases/">使用情境</a>
+<a class="footer__link" href="/zh-Hant/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比較與遷移</p>
+<a class="footer__link" href="/zh-Hant/captio-alternative/"><span>Captio替代</span></a>
+<a class="footer__link" href="/zh-Hant/note-to-email/">將筆記傳送至信箱</a>
+<a class="footer__link" href="/zh-Hant/vs/">比較</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支援</p>
+<a class="footer__link" href="/zh-Hant/roadmap/">公開路線圖</a>
+<a class="footer__link" href="/zh-Hant/devlog/">開發日誌</a>
+<a class="footer__link" href="/zh-Hant/about/">關於開發者</a>
+<a class="footer__link" href="/zh-Hant/faq">常見問題</a>
+<a class="footer__link" href="/zh-Hant/privacy">隱私</a>
+<a class="footer__link" href="/zh-Hant/contact">聯絡我們</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

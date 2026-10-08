@@ -1,0 +1,556 @@
+<!DOCTYPE html><html lang="es"><head>
+<script src="/js/i18n/es/messages.9e920a4fb007.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note-plugins/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Plug-in para mejorar las notas diarias — Calendario/Notas periódicas | SimpleMemo</title>
+  <meta name="description" content="Cómo crear un conjunto de diario/revista semanal en Notas periódicas a partir de la fecha y el número de semana del calendario. Compruebe la creación, reflexión de plantillas, guardado y reapertura de versiones diarias y semanales en la versión de Linux de Obsidian. Se publicará el valor de configuración, la pantalla original, la entrada Markdown y el ejemplo de guardado real.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Plug-in para mejorar las notas diarias — Calendario/Notas periódicas | SimpleMemo">
+  <meta property="og:description" content="Cómo crear un conjunto de diario/revista semanal en Notas periódicas a partir de la fecha y el número de semana del calendario. Compruebe la creación, reflexión de plantillas, guardado y reapertura de versiones diarias y semanales en la versión de Linux de Obsidian. Se publicará el valor de configuración, la pantalla original, la entrada Markdown y el ejemplo de guardado real.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Plug-in para mejorar las notas diarias — Calendario/Notas periódicas | SimpleMemo">
+  <meta name="twitter:description" content="Cómo crear un conjunto de diario/revista semanal en Notas periódicas a partir de la fecha y el número de semana del calendario. Compruebe la creación, reflexión de plantillas, guardado y reapertura de versiones diarias y semanales en la versión de Linux de Obsidian. Se publicará el valor de configuración, la pantalla original, la entrada Markdown y el ejemplo de guardado real.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/daily-note-plugins/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/daily-note-plugins/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  
+<style>.plugin-answer{font-size:1.06rem;line-height:1.9;border-left:3px solid #65d6e8;padding-left:1.1rem}.hero-graphic{width:100%;height:auto;display:block;border-radius:14px;margin:1.7rem auto 0;max-width:54rem}.shot{margin:1.5rem 0;border:1px solid var(--border);background:var(--surface);border-radius:12px;overflow:hidden}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:.9rem 1rem;color:var(--text-secondary);font-size:.9rem;line-height:1.8}.shot figcaption a{display:inline-flex;min-height:44px;align-items:center;color:var(--accent-bright)}.plugin-table{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.95rem}.plugin-table th,.plugin-table td{border:1px solid var(--border);padding:.8rem;text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}.plugin-table th{background:var(--surface)}.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1525;border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.8;font-size:.92rem;box-sizing:border-box;max-width:100%}.capture-code code{background:none;border:0;padding:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1em}.code-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}.copy-button{min-height:44px;border-radius:8px;padding:.55rem .9rem;border:1px solid #4589d6;color:#fff;background:#165bac;font:inherit;cursor:pointer}.download-row{display:flex;gap:.65rem;flex-wrap:wrap;margin:1rem 0}.download-row a{min-height:44px;display:inline-flex;align-items:center;padding:.45rem .8rem;color:var(--accent-bright);border:1px solid var(--border);border-radius:8px;font-size:.9rem;overflow-wrap:anywhere}.scope-note{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;line-height:1.85}.proof-details{margin:1rem 0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px}.proof-details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700}.proof-details p{line-height:1.85}.faq-item summary{min-height:44px}.source-list li{line-height:1.85;margin:.65rem 0}.receipt-line{overflow-wrap:anywhere;color:var(--text-secondary);font-size:.88rem}.toc-links{display:flex;flex-wrap:wrap;gap:.8rem;margin:1.2rem 0}.toc-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--accent-bright)}@media(max-width:600px){.plugin-table,.plugin-table tbody,.plugin-table tr,.plugin-table th,.plugin-table td{display:block;width:auto}.plugin-table thead{display:none}.plugin-table tr{margin-bottom:1rem}.plugin-table td:before{content:attr(data-label);display:block;font-size:.82rem;color:var(--text-secondary);font-weight:700}.capture-code{font-size:.85rem;padding:.8rem}.lp-hero{padding-top:2.3rem}.lp-hero__title{font-size:1.85rem}}.lp-section{scroll-margin-top:72px}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/es/obsidian/daily-note-plugins/#article",
+  "headline": "Plug-in para mejorar las notas diarias — Calendario/Notas periódicas",
+  "description": "Cómo crear un conjunto de diario/revista semanal en Notas periódicas a partir de la fecha y el número de semana del calendario. Compruebe la creación, reflexión de plantillas, guardado y reapertura de versiones diarias y semanales en la versión de Linux de Obsidian. Se publicará el valor de configuración, la pantalla original, la entrada Markdown y el ejemplo de guardado real.",
+  "url": "https://simplememofast.com/es/obsidian/daily-note-plugins/",
+  "mainEntityOfPage": "https://simplememofast.com/es/obsidian/daily-note-plugins/",
+  "image": "https://simplememofast.com/assets/img/og/obsidian-daily-note-plugins.png",
+  "inLanguage": "es",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    }
+  }
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Nota diaria",
+      "item": "https://simplememofast.com/es/obsidian/daily-note/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Calendario/Notas Periódicas",
+      "item": "https://simplememofast.com/es/obsidian/daily-note-plugins/"
+    }
+  ]
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Necesito tanto el calendario como las notas periódicas?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Utilice estos dos ejemplos cuando desee combinar la entrada para seleccionar la fecha y la configuración diaria y semanal del cuaderno. El calendario es la entrada al calendario, y las notas periódicas es la que configura carpetas, formatos y plantillas para Diario/Semanal. Si desea conocer la configuración estándar diaria, puede comenzar con la explicación de la nota diaria del artículo principal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué pasa si no se muestra el número de la semana?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "En este Calendar1.5.10, cuando activé el número de semana Mostrar en el Calendario de Configuración, se mostró una columna de número de semana en el borde izquierdo. Seleccione la pestaña Calendario porque se puede seleccionar otra pestaña, como Backlinks, simplemente abriendo la barra lateral derecha."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué pasa si hago clic en la fecha y no puedo pasar al texto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Esta vez, la confirmación de la creación de la nueva nota diaria y la nueva nota semanal se mostró en una ventana separada de Configuración que estaba abierta, no en la pantalla principal. Mira ambas pantallas, confirma el nombre del archivo de destino y selecciona Crear en la pantalla de confirmación. El resultado de presionar la misma fecha muchas veces antes de la confirmación no ha sido verificado."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué formato semanal es YYYY o gggg?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El valor utilizado en este ejemplo fijo es gggg-[W]ww, y 2026-W40 se creó en el entorno 2026-09-30. El formato que representa el año de la semana y el año de la fecha puede no coincidir en el límite, así que no mezcle el formato, y también verifique la fecha de inicio de la semana y la ubicación de la aplicación. No se han verificado los resultados de todos los límites, ubicaciones y zonas horarias del año."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿También usas variables de plantilla y Templater?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El {{date:YYYY-MM-DD}} nativo de Obsidian se utilizó para la entrada diaria, y el reemplazo de 2026-09-30 se confirmó en la creación real. El texto semanal es el texto estático del autor. La ejecución de Templater, JavaScript, variables arbitrarias y todos los tokens de formato no está incluida en este ejemplo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone, SimpleMemo, ¿funciona de la misma manera en sincronía?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "El autor de la versión Linux de Obsidian1.13.7 fue Vault quien confirmó la operación real. iOS, Android, otros sistemas operativos, cooperación con Obsidian Sync, SimpleMemo, sincronización entre terminales, velocidad, productividad y efectos de entrada no se verifican en este registro. Para la ruta para agregar al diario de iPhone, consulte otro artículo de nota diaria."
+      }
+    }
+  ],
+  "inLanguage": "es",
+  "@id": "https://simplememofast.com/es/obsidian/daily-note-plugins/#faq"
+}</script><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/obsidian/daily-note-plugins/#webpage",
+  "name": "Plug-in para mejorar las notas diarias — Calendario/Notas periódicas",
+  "url": "https://simplememofast.com/es/obsidian/daily-note-plugins/",
+  "inLanguage": "es",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/obsidian/daily-note-plugins/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/daily-note-plugins/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/daily-note-plugins/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/daily-note-plugins/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/daily-note-plugins/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/obsidian/daily-note-plugins/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/daily-note-plugins/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/daily-note-plugins/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/daily-note-plugins/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><article class="container"><header class="lp-hero sd-hero sd-hero--media"><p class="lp-hero__label">Obsidian · Notas diarias y semanales</p><h1 class="lp-hero__title">Plug-in para mejorar las notas diarias — Calendario/Notas periódicas</h1><p class="lp-hero__sub">Prepare una entrada para abrir el cuaderno que desea mirar hacia atrás desde la fecha y el número de la semana. Este es un ejemplo de combinar Calendario y Notas Periódicas, crear y guardar diarios y diarios semanales, y abrirlos de nuevo en la misma aplicación.</p><p>Fecha de verificación: 2026 año 9 mes 30 (UTC) · Versión de Linux Obsidian 1.13.7</p><img class="hero-graphic sd-hero-media" src="/assets/img/og/obsidian-daily-note-plugins.png" width="1200" height="630" fetchpriority="high" decoding="async" alt="Un mapa guía desde la fecha del calendario hasta el diario y la revista semanal desde el número de la semana. La pantalla GUI original se publica en cada procedimiento"></header>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="choose"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Si separas los dos roles, es fácil de configurar</h2></div><div class="ce-chapter__body"><p class="plugin-answer"><strong>Calendario es la entrada a "cuándo abrir el cuaderno", y Notas periódicas es la configuración de "dónde crearlo con qué nombre y texto". </strong> Esta vez, hice un 2026-09-30 diario y un 2026-W40 semanal, y agregué la confirmación del autor al cuerpo de la plantilla y la guardé.</p><p>Obsidian notas diarias estándar y rutas para agregar notas de iPhone al diario se manejan en <a href="/es/obsidian/daily-note/"> notas diarias artículo principal</a>. Este artículo se limita a las operaciones del calendario de escritorio y a la configuración diaria y semanal.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente"><table class="plugin-table"><thead><tr><th>Función</th><th>Rol</th><th>El rango confirmado en este ejemplo</th></tr></thead><tbody>
+<tr><th scope="row">Notas diarias básicas</th><td data-label="Rol">Función de nota diaria estándar Obsidian.</td><td data-label="Rango confirmado">Activar con la GUI real. Los siguientes dos se combinan, separados de la creación diaria usando solo funciones estándar.</td></tr>
+<tr><th scope="row">Calendario 1.5.10</th><td data-label="Rol">Una barra lateral que va a una nota de la fecha y el número de la semana.</td><td data-label="Rango confirmado">Fecha 30, número de semana 40, confirmación de creación, transferencia del mes anterior y del mes actual.</td></tr>
+<tr><th scope="row">Notas Periódicas 0.0.17</th><td data-label="Rol">Destino, formato y plantilla de almacenamiento diario/semanal.</td><td data-label="Rango confirmado">Configuración del diario y del diario semanal, texto de creación real, guardado, reapertura en la misma aplicación.</td></tr></tbody></table></div>
+<p class="scope-note">Las versiones utilizadas aquí son el Calendario 1.5.10 y las Notas Periódicas 0.0.17 seleccionadas de las etiquetas oficiales no beta. Este no es un registro que garantice el mismo resultado en las últimas y actuales versiones recomendadas y otras versiones. La versión de la interfaz de usuario operada también se comprueba en la pantalla original a continuación.</p>
+<nav class="toc-links" aria-label="Tabla de contenido de este artículo"><a href="#setup">versión y activación</a><a href="#settings">Valor de configuración</a><a href="#daily">Haz un diario</a><a href="#weekly">Haz una revista semanal</a><a href="#faq">Tropezar y preguntas frecuentes</a><a href="#next">Siguiente paso</a></nav></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Prepara una versión verificada y habilítala</h2></div><div class="ce-chapter__body"><p>En este ejemplo, el archivo de lanzamiento oficial se colocó manualmente en el autor aislado Vault, y la activación y operación posteriores se realizaron desde la GUI. Esta no es una verificación introducida al hacer clic en Examinar → Instalar en los complementos de la comunidad.</p><ol class="steps-list"><li>Prepara las carpetas vacías <strong translate="no">日誌</strong>, <strong translate="no">週誌</strong> y <strong translate="no">テンプレート</strong> para practicar en Vault. La entrada de este ejemplo utiliza el Markdown a continuación.</li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/releases/tag/1.5.10" target="_blank" rel="noopener">Calendar 1.5.10 versión oficial</a> y <a href="https://github.com/liamcain/obsidian-periodic-notes/releases/tag/0.0.17" target="_blank" rel="noopener">Periodic Notes 0.0.17 versión oficial</a>. La configuración de la colocación manual se muestra a continuación.</li><li>Configuración → Activar las notas diarias con los complementos de Core. En esta operación, la paleta de comandos también estaba ON, y el conmutador rápido comprobó el estado de ON.</li><li>Después de confirmar la confianza del Vault que usted mismo preparó, active Notas periódicas y Calendario en Configuración → Complementos de la comunidad. La pantalla original a continuación es la pantalla después de que estos dos se activen realmente.</li><li>Abra la barra lateral derecha y seleccione la <strong>Pestaña Calendario</strong>. Si lo deja en una pestaña separada, como Backlinks, no podrá ver la pantalla de fecha.</li></ol>
+<pre class="capture-code" tabindex="0"><code>.obsidian/plugins/calendar/
+  manifest.json
+  main.js
+.obsidian/plugins/periodic-notes/
+  manifest.json
+  main.js
+  styles.css</code></pre><p>En esta versión de Calendar, los estilos se incluyen en main.js y no se obtienen otros styles.css. Lo anterior es la configuración del archivo real. El complemento en sí no está incluido en el código postal de distribución de esta página.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener" aria-label="Abra la pantalla de la versión real del calendario y las notas periódicas y la pantalla de configuración ON en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/plugins.png" width="900" height="700" loading="lazy" decoding="async" alt="Visualización de la versión real del calendario y las notas periódicas y la pantalla de configuración ON"></a><figcaption>La pantalla real activada por el nuevo autor Vault. Se observó el calendario v1.5.10, la visualización de notas periódicas v0.0.17 y ON. <a href="/assets/img/obsidian-daily-note-plugins/plugins.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Alinee la dirección de almacenamiento del diario y la revista semanal por adelantado</h2></div><div class="ce-chapter__body"><p>Configuración → Activa las notas diarias y las notas semanales en las notas periódicas e introduce los siguientes valores. Las carpetas y plantillas se prepararán en Vault con antelación. Esta entrada de configuración se combinó con la visualización de la GUI real y el JSON guardado.</p>
+<div class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente"><table class="plugin-table"><thead><tr><th>Configuración</th><th>Notas diarias</th><th>Notas semanales</th></tr></thead><tbody>
+<tr><th scope="row">Formato</th><td data-label="Notas diarias"><code>YYYY-MM-DD</code></td><td data-label="Notas semanales"><code>gggg-[W]ww</code></td></tr>
+<tr><th scope="row">Carpeta de notas</th><td data-label="Notas diarias"><code>日誌</code></td><td data-label="Notas semanales"><code>週誌</code></td></tr>
+<tr><th scope="row">Plantilla de nota</th><td data-label="Notas diarias"><code>テンプレート/日</code></td><td data-label="Notas semanales"><code>テンプレート/週</code></td></tr></tbody></table></div>
+<p>Configuración → Calendario, <strong>Mostrar número de semana</strong> y <strong>Confirmar antes de crear una nueva nota</strong> están activados. La fecha de inicio de esta semana es la configuración regional predeterminada (domingo), la configuración regional de la aplicación es en y la zona horaria del entorno es UTC. No es el resultado de verificar todos los límites semanales y las combinaciones locales.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener" aria-label="La configuración real de la GUI de Notas Periódicas, las plantillas de formato de carpeta diaria y semanal se abren en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/settings.png" width="900" height="700" loading="lazy" decoding="async" alt="Notas periódicas Configuración real de la GUI, plantillas de formato de carpeta diaria y semanal"></a><figcaption>La pantalla original del intento independiente antes de introducir el valor fijo de la GUI real con el encendido diario y semanal. Me hice cargo de este JSON guardado con los mismos bytes a la nueva verificación de creación. <a href="/assets/img/obsidian-daily-note-plugins/settings.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure><details class="proof-details"><summary>La pantalla original de la configuración del número semanal del calendario</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener" aria-label="Abra la interfaz gráfica de usuario real con el número de la semana del calendario ON en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/week-number.png" width="900" height="700" loading="lazy" decoding="async" alt="GUI real con el número de la semana del programa del calendario ENCENDIdo"></a><figcaption>La pantalla original con el número de la semana de mostrar activado con la interfaz gráfica de usuario real. Nos hicimos cargo de la misma configuración de guardado en el intento de creación. <a href="/assets/img/obsidian-daily-note-plugins/week-number.png" target="_blank" rel="noopener">Abre la imagen original</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">Crea un diario y vuelve a abrirlo a partir de la fecha 30</h2></div><div class="ce-chapter__body"><p>Guarde la entrada diaria en <strong>テンプレート/日.md</strong>. La variable de fecha utilizada aquí es el formato nativo de Obsidian.</p><div class="code-heading"><strong>Texto completo de la entrada diaria de la plantilla</strong><button type="button" class="copy-button" data-copy="daily-template">Copia el texto</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-template"># {{date:YYYY-MM-DD}}
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="daily-template" href="/assets/downloads/obsidian-daily-note-plugins/daily-template.md" download="daily-template.md">Obtenga Markdown (170 bytes)</a></div><ol class="steps-list"><li>Seleccione el calendario 2026 año 9 mes 30 día. Esta vez, la pantalla de confirmación apareció en otra ventana de Configuración que estaba abierta.</li><li>Comprueba el objetivo 2026-09-30 en <strong>New Daily Note</strong> y selecciona <strong>Create</strong> en esa pantalla. 日誌/2026-09-30.md se ha abierto al editor en la pantalla principal.</li><li>Agregué una línea de confirmación al texto donde el encabezado fue reemplazado por 2026-09-30 y lo guardé con Ctrl+S.</li><li>Seleccione el índice y mueva a otro texto, y vuelva a seleccionar 日誌/2026-09-30.md de la lista de archivos de la izquierda. El texto de los bytes 235 guardados coincidía incluso después de la reapertura.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener" aria-label="Abra la pantalla real en su tamaño original después de reabrir el diario creado a partir de la fecha del calendario"><img src="/assets/img/obsidian-daily-note-plugins/daily.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Pantalla real después de reabrir el diario creado a partir de la fecha del Calendario"></a><figcaption>Crear a partir de la fecha clic, guardar la confirmación del autor y abrir la misma nota de nuevo desde la lista de archivos en la pantalla original. El encabezado de la fecha y el texto se han acopieado con el archivo guardado. <a href="/assets/img/obsidian-daily-note-plugins/daily.png" target="_blank" rel="noopener">Abre la imagen original</a></figcaption></figure><details class="proof-details"><summary>El texto completo del diario y la pantalla de confirmación de la creación</summary><div class="code-heading"><strong>El texto completo del texto diario guardado en la interfaz gráfica de usuario y vuelto a abrir</strong><button type="button" class="copy-button" data-copy="daily-saved">Copia el texto</button></div><pre class="capture-code" tabindex="0"><code data-code="daily-saved"># 2026-09-30
+
+これは著者作成のデイリーノート用テンプレートです。
+
+## 確認
+
+- [ ] 保存した本文をもう一度開く
+- [[索引]]
+
+著者確認: Calendarの日付クリックで開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="daily-saved" href="/assets/downloads/obsidian-daily-note-plugins/daily-saved.md" download="daily-saved.md">Obtenga Markdown (235 bytes)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener" aria-label="Abra la pantalla de confirmación real para crear 2026-09-30 en New Daily Note en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Pantalla de confirmación real para crear 2026-09-30 en New Daily Note"></a><figcaption>Confirmación de la creación real que se muestra en la ventana de Configuración, que es diferente de la principal. Elegí ese Crear e hice un diario. <a href="/assets/img/obsidian-daily-note-plugins/daily-confirm.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="weekly"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">A partir del número de la semana 40, haz una revista semanal y vuelve a abrirla</h2></div><div class="ce-chapter__body"><p>Guardar la entrada semanal en <strong>テンプレート/週.md</strong>. El texto de la semana es una plantilla de autor estática. No se trata como un ejemplo de sustitución de variables semanales arbitrarias.</p><div class="code-heading"><strong>Texto completo de la entrada semanal de la plantilla</strong><button type="button" class="copy-button" data-copy="weekly-template">Copia el texto</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-template"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+</code></pre><div class="download-row"><a class="md-download" data-file="weekly-template" href="/assets/downloads/obsidian-daily-note-plugins/weekly-template.md" download="weekly-template.md">Obtenga Markdown (151 bytes)</a></div><ol class="steps-list"><li>Seleccione <strong>40</strong> en el Calendario que muestra la columna del número de la semana. En este entorno, el nombre objetivo era 2026-W40.</li><li>Comprueba el 2026-W40 de <strong>Nueva nota semanal</strong> en otra ventana de Configuración y selecciona el <strong>Crear</strong> real.</li><li>Agregué una línea de confirmación al texto abierto en 週誌/2026-W40.md y lo guardé con Ctrl+S. Este es el resultado de agregar esta línea a la plantilla semanal estática original.</li><li>Me moví al índice y volví a seleccionar 週誌/2026-W40.md de la lista de archivos de la izquierda. El texto de los bytes 219 guardados coincidía incluso después de abrirlo de nuevo.</li></ol><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener" aria-label="Abra la pantalla real en su tamaño original después de reabrir la revista semanal creada a partir del número de semana del calendario 40"><img src="/assets/img/obsidian-daily-note-plugins/weekly.png" width="1720" height="1000" loading="lazy" decoding="async" alt="Pantalla real después de reabrir la revista semanal creada a partir del número de la semana 40 del Calendario"></a><figcaption>Crear a partir del número de la semana, guardar la confirmación del autor y abrir la pantalla original de nuevo desde la lista de archivos. Se observó el número de semana 40 y el texto estático y el texto de confirmación añadido. <a href="/assets/img/obsidian-daily-note-plugins/weekly.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure><details class="proof-details"><summary>El texto completo de la revista semanal y la pantalla de confirmación de creación</summary><div class="code-heading"><strong>El texto completo del texto semanal guardado en la GUI y vuelto a abrir</strong><button type="button" class="copy-button" data-copy="weekly-saved">Copia el texto</button></div><pre class="capture-code" tabindex="0"><code data-code="weekly-saved"># 週の確認
+
+これは著者作成の週間ノート用テンプレートです。
+
+## 確認
+
+- [ ] 一週間の対象を記録する
+- [[索引]]
+
+著者確認: Calendarの週番号から開いた本文を保存。</code></pre><div class="download-row"><a class="md-download" data-file="weekly-saved" href="/assets/downloads/obsidian-daily-note-plugins/weekly-saved.md" download="weekly-saved.md">Obtenga Markdown (219 bytes)</a></div><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener" aria-label="Abra la pantalla de confirmación real para crear 2026-W40 en la Nueva Nota Semanal en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" width="900" height="700" loading="lazy" decoding="async" alt="Pantalla de confirmación real para crear 2026-W40 en Nueva Nota Semanal"></a><figcaption>Confirmación de la creación semanal que salió con un clic real diferente del diario. El objetivo es 2026-W40. <a href="/assets/img/obsidian-daily-note-plugins/weekly-confirm.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure></details>
+<details class="proof-details"><summary>La pantalla original se trasladó al mes anterior y volvió al mes actual</summary><p>En otro intento fijo, seleccioné el mes anterior del calendario una vez y me moví de septiembre 2026 a agosto 2026, y seleccioné el próximo mes una vez para volver a septiembre 2026. No es el resultado de confirmar el funcionamiento de todos los límites mensuales y anuales.</p><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener" aria-label="Abre la pantalla original que muestra el mes anterior 2026 año 8 mes en Calendario en su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/august.png" width="1720" height="1000" loading="lazy" decoding="async" alt="La pantalla original que mostraba el mes anterior 2026 año 8 mes en Calendar"></a><figcaption>El encabezado de la pantalla real que se ha movido una vez al mes anterior es Aug 2026. <a href="/assets/img/obsidian-daily-note-plugins/august.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener" aria-label="Abra la pantalla original que ha regresado al mes actual 2026 año 9 mes en el calendario con su tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/september.png" width="1720" height="1000" loading="lazy" decoding="async" alt="La pantalla original que regresó al mes actual 2026 año 9 mes en el Calendario"></a><figcaption>El encabezado de la pantalla real que moví una vez al mes siguiente y devolví es Sep 2026. <a href="/assets/img/obsidian-daily-note-plugins/september.png" target="_blank" rel="noopener">Abre la imagen original</a></figcaption></figure></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="downloads"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">Entrada para practicar y obtener ejemplos guardados reales</h2></div><div class="ce-chapter__body"><p>El índice de entrada, la plantilla 3 y el ejemplo guardado 2 hecho con la GUI están separados. El cuerpo del plug-in y la configuración JSON no están incluidos. Es una configuración que coloca la entrada en su práctica Vault para no sobrescribir el cuaderno existente. La operación de importación del lector en Vault no ha sido verificada.</p><div class="download-row"><a class="md-download" data-file="index" href="/assets/downloads/obsidian-daily-note-plugins/index.md" download="index.md">Índice de entrada Markdown (bytes 214)</a><a class="zip-download" href="/assets/downloads/obsidian-daily-note-plugins/author-inputs-and-saved-examples.zip" download="author-inputs-and-saved-examples.zip">Entrada 3 + ejemplo de guardado real 2 ZIP</a></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Comprobación y preguntas frecuentes cuando tropiezas</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">¿Necesito tanto el calendario como las notas periódicas?</summary><div class="faq-answer">Utilice estos dos ejemplos cuando desee combinar la entrada para seleccionar la fecha y la configuración diaria y semanal del cuaderno. El calendario es la entrada al calendario, y las notas periódicas es la que configura carpetas, formatos y plantillas para Diario/Semanal. Si desea conocer la configuración estándar diaria, puede comenzar con la explicación de la nota diaria del artículo principal.</div></details><details class="faq-item"><summary class="faq-summary">¿Qué pasa si no se muestra el número de la semana?</summary><div class="faq-answer">En este Calendar1.5.10, cuando activé el número de semana Mostrar en el Calendario de Configuración, se mostró una columna de número de semana en el borde izquierdo. Seleccione la pestaña Calendario porque se puede seleccionar otra pestaña, como Backlinks, simplemente abriendo la barra lateral derecha.</div></details><details class="faq-item"><summary class="faq-summary">¿Qué pasa si hago clic en la fecha y no puedo pasar al texto?</summary><div class="faq-answer">Esta vez, la confirmación de la creación de la nueva nota diaria y la nueva nota semanal se mostró en una ventana separada de Configuración que estaba abierta, no en la pantalla principal. Mira ambas pantallas, confirma el nombre del archivo de destino y selecciona Crear en la pantalla de confirmación. El resultado de presionar la misma fecha muchas veces antes de la confirmación no ha sido verificado.</div></details><details class="faq-item"><summary class="faq-summary">¿Qué formato semanal es YYYY o gggg?</summary><div class="faq-answer">El valor utilizado en este ejemplo fijo es gggg-[W]ww, y 2026-W40 se creó en el entorno 2026-09-30. El formato que representa el año de la semana y el año de la fecha puede no coincidir en el límite, así que no mezcle el formato, y también verifique la fecha de inicio de la semana y la ubicación de la aplicación. No se han verificado los resultados de todos los límites, ubicaciones y zonas horarias del año.</div></details><details class="faq-item"><summary class="faq-summary">¿También usas variables de plantilla y Templater?</summary><div class="faq-answer">El {{date:YYYY-MM-DD}} nativo de Obsidian se utilizó para la entrada diaria, y el reemplazo de 2026-09-30 se confirmó en la creación real. El texto semanal es el texto estático del autor. La ejecución de Templater, JavaScript, variables arbitrarias y todos los tokens de formato no está incluida en este ejemplo.</div></details><details class="faq-item"><summary class="faq-summary">iPhone, SimpleMemo, ¿funciona de la misma manera en sincronía?</summary><div class="faq-answer">El autor de la versión Linux de Obsidian1.13.7 fue Vault quien confirmó la operación real. iOS, Android, otros sistemas operativos, cooperación con Obsidian Sync, SimpleMemo, sincronización entre terminales, velocidad, productividad y efectos de entrada no se verifican en este registro. Para la ruta para agregar al diario de iPhone, consulte otro artículo de nota diaria.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Alcance realmente confirmado y materiales oficiales</h2></div><div class="ce-chapter__body"><ul><li>Versión oficial de Linux Obsidian 1.13.7/Installer 1.13.7, interfaz de usuario en inglés. Calendario 1.5.10/Notas del período 0.0.17 visualización de la versión real.</li><li>Autor la configuración real de la interfaz gráfica de usuario de Vault, confirmación de creación diaria y semanal, texto, guardado y reapertura en la misma aplicación. El movimiento mensual fue confirmado por otro intento fijo.</li><li>Los activos de lanzamiento oficial del complemento se colocan manualmente. El código auxiliar se utilizó para preparar el entorno inicial, leer el estado y guardar archivos, y copiar el original. API no reemplaza la creación, edición, guardado y reapertura de notas.</li><li>El PNG y Markdown publicados mantienen los bytes del archivo original. iOS, otro sistema operativo, SimpleMemo, Sync, todas las fechas, semanas, meses, horas, zonas horarias, productividad y efectos de entrada no se han verificado.</li></ul>
+<p>Se conservan como fallos los problemas de arranque durante la preparación, la discrepancia entre la pantalla beta y los ajustes guardados, el clic en una pestaña oculta y la confirmación de otra ventana que pasó inadvertida. Los ejemplos de creación y guardado de este artículo se basan en otros intentos fijados. Ctrl+O no permitió observar Quick switcher; la reapertura solo se logró con un clic real en la lista de archivos del mismo destino. Los detalles y su relación con los originales están en el <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/daily-note-plugins-20260930.md" target="_blank" rel="noopener">registro de verificación</a>.</p>
+<details class="proof-details"><summary>Pantalla de la versión general real</summary><figure class="shot"><a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener" aria-label="Abra la versión Obsidian real 1.13.7 y la versión del instalador 1.13.7 que se muestra en General en el tamaño original"><img src="/assets/img/obsidian-daily-note-plugins/version.png" width="900" height="700" loading="lazy" decoding="async" alt="La versión Obsidian real 1.13.7 y la versión del instalador 1.13.7 se muestran en General"></a><figcaption>Después de procesar la confirmación de creación dejada en una ventana separada, seleccioné General una vez de la GUI real y observé el 1.13.7 de la aplicación y el instalador. <a href="/assets/img/obsidian-daily-note-plugins/version.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure></details>
+<ul class="source-list"><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/README.md" target="_blank" rel="noopener">Compromitación fija del calendario 1.5.10・Official README</a></li><li><a href="https://github.com/liamcain/obsidian-calendar-plugin/blob/7d2aebda7f4a280bedc6da6d25f4da611d1625ef/src/settings.ts" target="_blank" rel="noopener">Fuente de configuración fija del calendario</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/README.md" target="_blank" rel="noopener">Notas periódicas La confirmación fija de 0.0.17・Official README</a></li><li><a href="https://github.com/liamcain/obsidian-periodic-notes/blob/5b96e4f14130b0c024edb5ddb7871d01d61d9522/src/settings/SettingsTab.svelte" target="_blank" rel="noopener">Notas de referencia fija de notas de la interfaz de usuario</a></li></ul>
+<p class="receipt-line">El original, la configuración y los registros de operación real se corrigen por separado. No hemos verificado la reproducción de la misma compilación del archivo de lanzamiento oficial y la fuente.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="next"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">A continuación, decide la entrada para dejar una nota en el diario</h2></div><div class="ce-chapter__body"><p>Después de preparar el formulario para abrir desde el número de fecha y semana, puede elegir dónde agregar notas diarias cortas. La ruta para agregar desde iPhone al diario de Obsidian, y la confirmación de la nota diaria estándar y el formato de fecha se cubren en el artículo principal.</p><div class="internal-links"><a data-next-step="daily-note" href="/es/obsidian/daily-note/">Al artículo principal del Daily Note</a><a href="/es/obsidian/plugins/templater/">Cómo usar Templater</a></div></div></section></article></main><script>document.querySelectorAll('[data-copy]').forEach(function(b){b.addEventListener('click',async function(){var k=b.getAttribute('data-copy'),e=document.querySelector('[data-code="'+k+'"]');try{await navigator.clipboard.writeText(e.textContent);b.textContent=globalThis.SimpleMemoI18n.text("コピーしました");setTimeout(function(){b.textContent=globalThis.SimpleMemoI18n.text("本文をコピー")},1600)}catch(err){b.textContent=globalThis.SimpleMemoI18n.text("コピーできませんでした")}})});</script><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/es/obsidian/" class="footer__link">Integración con Obsidian</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

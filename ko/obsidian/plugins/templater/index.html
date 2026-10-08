@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/templater/">
+  <title>Templater 사용 방법 — 실행 방법 및 데일리 노트 설정 | SimpleMemo</title>
+  <meta name="description" content="Obsidian의 Templater에서 날짜와 제목을 입력하는 방법을 소개합니다. 템플릿을 삽입하는 작업과 데일리 노트를 생성할 때 실행하는 설정을 구분하고, 변수가 남아 있는 경우의 확인 대상을 정리합니다. Linux 버전 Obsidian 1.13.7와 Templater 2.25.1에서 확인한 범위, iOS 및 동기화 등 미검증 범위도 명시합니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Templater 사용 방법 — 실행 방법 및 데일리 노트 설정">
+  <meta property="og:description" content="Obsidian의 Templater에서 날짜와 제목을 입력하는 방법을 소개합니다. 템플릿을 삽입하는 작업과 데일리 노트를 생성할 때 실행하는 설정을 구분하고, 변수가 남아 있는 경우의 확인 대상을 정리합니다. Linux 버전 Obsidian 1.13.7와 Templater 2.25.1에서 확인한 범위, iOS 및 동기화 등 미검증 범위도 명시합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Templater 사용 방법 — 실행 방법 및 데일리 노트 설정">
+  <meta name="twitter:description" content="Obsidian의 Templater에서 날짜와 제목을 입력하는 방법을 소개합니다. 템플릿을 삽입하는 작업과 데일리 노트를 생성할 때 실행하는 설정을 구분하고, 변수가 남아 있는 경우의 확인 대상을 정리합니다. Linux 버전 Obsidian 1.13.7와 Templater 2.25.1에서 확인한 범위, iOS 및 동기화 등 미검증 범위도 명시합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/templater/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/templater/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.template-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.template-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.template-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.template-code{max-width:100%;min-width:0;font-size:.9rem}.template-toc a{min-height:44px;display:inline-flex;align-items:center}.template-results{display:grid;gap:1rem}.template-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.template-results{grid-template-columns:1fr 1fr}}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/plugins/templater/#article",
+  "inLanguage": "ko",
+  "headline": "Templater 사용 방법 — 실행 방법 및 데일리 노트 설정",
+  "description": "Obsidian의 Templater에서 날짜와 제목을 입력하는 방법을 소개합니다. 템플릿을 삽입하는 작업과 데일리 노트를 생성할 때 실행하는 설정을 구분하고, 변수가 남아 있는 경우의 확인 대상을 정리합니다. Linux 버전 Obsidian 1.13.7와 Templater 2.25.1에서 확인한 범위, iOS 및 동기화 등 미검증 범위도 명시합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/plugins/templater/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-templater.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/obsidian/plugins/templater/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/ko/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "플러인 입문",
+      "item": "https://simplememofast.com/ko/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "템플레이터",
+      "item": "https://simplememofast.com/ko/obsidian/plugins/templater/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/ko/obsidian/plugins/templater/#faq",
+  "inLanguage": "ko",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Templater 템플릿을 저장하면 자동으로 실행됩니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "저장만 해서 모든 노트에 자동으로 적용되는 것은 아닙니다. 저장한 템플릿을 현재 노트에 넣을 때는 “Templater: Open insert template modal”을 사용합니다. 새 파일을 생성할 때의 처리는 “Trigger Templater on new file creation”이라는 별도의 설정입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "데일리 노트에서는 Folder 템플릿도 필요합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 확인에서는 core Daily notes에 Templates/Daily.md을 지정하고, Templater의 Trigger를 ON으로, Template matching mode를 None으로 설정하여, 새로운 날짜 노트 내의 명령이 전개되었습니다. None은 템플릿을 자동으로 할당하지 않는 설정이지만, 새로운 본문에 이미 있는 Templater 명령은 처리합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "트리거를 켜면 기존 데일리 노트도 고쳐지나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번에 OFF로 만든 노트를 ON 후에 Daily notes 명령으로 다시 열어도 저장 내용은 변하지 않았습니다. 미전개 명령을 포함하는 동일한 노트에서는 “Templater: Replace templates in the active file”으로 확장할 수 있었습니다. 이는 이번 설정의 결과이며, 시작 시 Daily note를 여는 설정이나 일괄 처리는 검증하지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone에서도 같은 절차를 사용할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Templater 2.25.1의 공식 매니페스트는 데스크톱 전용이 아닌 설정이지만, 이번 실제 조작 확인은 Linux 버전 Obsidian 1.13.7에만 해당됩니다. iPhone의 화면 및 템플릿 전개, 단말 간 동기화, SimpleMemo에서의 입력은 검증하지 않았습니다. Trigger 설정 화면에도 기기별로 활성화하는 설정이 표시되어 있습니다."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="전 세계 탐색" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/ko/guides/">사용 가이드</a></li><li><a href="/ko/use-cases/">활용 사례</a></li><li><a href="/ko/vs/">비교</a></li><li><a href="/ko/blog/">블로그</a></li><li><a href="/ko/about/">개발자 소개</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">다운로드</a><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/plugins/templater/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/templater/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/plugins/templater/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/plugins/templater/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/plugins/templater/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/templater/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/templater/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/templater/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/templater/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · 템플릿 실행</div><h1 class="lp-hero__title">Templater 사용법<br> 실행 방법 및 데일리 노트 설정</h1><p class="lp-hero__sub">Templater는 노트 내의 변수와 함수를 실행하여 그 결과를 본문에 삽입하는 플러그인입니다. 먼저 1장을 수동으로 삽입하고, 다음으로 데일리 노트를 생성할 때 설정으로 진행합니다. 여기에서는 변수가 남아 있는 상태와 설정 후 결과를 동일한 템플릿으로 확인했습니다.</p><p class="article-meta">저자: <a href="/ko/about/">SimpleMemo Developer</a> ・ 공개·검증: <time datetime="2026-09-30">2026년 9월 30일</time></p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Templater를 준비하고, 표기법을 구분합니다</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>먼저, 템플릿을 현재 노트에 삽입합니다</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>새로운 데일리 노트에서 Templater를 실행합니다</span><span aria-hidden="true">↗</span></a></nav></header>
+<aside class="tip-box"><strong>확인한 환경:</strong>격리된 Linux 버전 Obsidian 1.13.7과 Templater 2.25.1. 2026년 9월 30일 10:49〜10:50 UTC(일본 시간 19:49〜19:50)의 데일리 노트 검증을 포함합니다. iPhone, 동기화, SimpleMemo에서의 도착 및 속도·음성 품질은 아직 검증되지 않았습니다.<a href="#evidence">확인 방법 및 범위</a>를 기사 끝에 표시합니다.</aside>
+<nav class="template-toc" aria-label="이 기사 목차"><a href="#prepare">준비와 표기</a><a href="#insert">수동으로 삽입</a><a href="#daily-note">데일리 노트 설정</a><a href="#not-applied">적용되지 않을 때</a><a href="#faq">자주 묻는 질문</a><a href="#evidence">검증 및 출처</a></nav>
+<section class="lp-section ce-chapter sd-chapter" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Templater를 준비하고, 표기법을 구분합니다</h2></div><div class="ce-chapter__body"><p>공식 도입 안내에서는 Obsidian의 Community plugins에서 “Templater”를 검색하여 설치합니다. 이번 검증에서는 공식 2.25.1의 배포 파일을 Vault에 격리하고, 설정 화면에서 플러그인을 활성화했습니다. 사용 중인 Obsidian이나 Templateer 버전이 다를 경우, 화면 이름 및 동작도 자신의 환경에서 확인해 주세요.</p><p>Templater의 <strong>Template folder location</strong>에, 예에서는 <code>Templates</code>을 지정합니다. 명령은 <code>&lt;%</code>로 시작하고 <code>%&gt;</code>로 끝납니다. <code>tp.file.title</code>은 대상 노트의 제목이며, <code>tp.date.now("YYYY-MM-DD HH:mm")</code>는 실행 시 날짜와 시간을 사용하는 예시입니다. 손으로 날짜를 쓰는 <a href="/ko/obsidian/journaling/#starter"> 저널링 템플릿</a>이나 core Templates의 <code>{{date}}</code> 표기법과 혼동하지 않도록 합니다.</p><p>코어 Templates의 제목·날짜 교체 및 저장 결과를 확인하고자 하는 경우, <a href="/ko/obsidian/templates/">전체 10종을 실제로 삽입하여 다시 표시한 Markdown 템플릿집</a>도 참고하십시오.</p><aside class="tip-box">Templater는 JavaScript 및 시스템 명령도 실행할 수 있는 플러그인입니다. 공식 README는 이해할 수 있는 코드를 신뢰할 수 있는 출처에서 사용하도록 안내하고 있습니다. 이 문서의 짧은 예에서는 외부 통신·사용자 스크립트·시스템 명령을 사용하지 않습니다.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="insert"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">먼저, 템플릿을 현재 노트에 삽입합니다</h2></div><div class="ce-chapter__body"><p>검증에 사용한 <code>Templates/Simple.md</code>의 원문은 다음과 같습니다. 영어 메모 부분은 개인 정보를 포함하지 않는 검증용 허구의 내용입니다.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="simple-template"># &lt;% tp.file.title %&gt;
+
+created: &lt;% tp.date.now(&quot;YYYY-MM-DD HH:mm&quot;) %&gt;
+result: templater-simple-expanded
+
+## Capture
+- Sample thought from isolated verification.
+</code></pre>
+<ol><li><code>Templates/Simple.md</code>을 준비하고, 삽입된 노트를 엽니다.</li><li>명령 팔레트에서 <strong>Templater: Open insert template modal</strong>을 선택하고, 목록에서 <code>Simple</code>을 선택합니다.</li><li>삽입된 헤드라인과 날짜를 확인합니다. 이번 <code>Normal</code> 노트에서는 <code>tp.file.title</code>이 <code>Normal</code>로, 시각 식이 <code>2026-09-30 10:46</code>으로 전개되었습니다.</li></ol><p><code>result: templater-simple-expanded</code>은 원문에 있는 고정 문자입니다. 이 행이 보이는 것을 성공 판정에 사용하지 않습니다. <strong><code>&lt;% … %&gt;</code>이 실제 값으로 교체된 것을 확인합니다</strong>. 날짜와 시간은 이 Linux 환경의 UTC이며, 일본 시간으로는 19:46입니다.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/insert-template.png" alt="Linux 버전 Obsidian의 Normal 노트에서 Simple 템플릿의 제목과 날짜가 펼쳐진 화면" width="1024" height="800" loading="lazy"><figcaption>2026년9월30일10:46 UTC（19:46 JST）。 실제 템플릿 선택 화면에서 Simple을 선택하고 현재 노트에 삽입했습니다.</figcaption></figure>
+<p>이미 본문에 붙여넣은 Templater 명령을 확장하는<strong>Replace templates in the active file</strong>은 별도의 작업입니다. 데일리 노트에서의 복구 예는 <a href="#not-applied"> 후의 절</a>에 표시됩니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="daily-note"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">새로운 일일 노트에서 Templater를 실행합니다</h2></div><div class="ce-chapter__body"><p>먼저 core Daily notes가 템플릿 본문을 삽입하고, 그 본문에 있는 Templater 명령을 처리하는 구성을 시도했습니다. 사용한 <code>Templates/Daily.md</code>은 다음 원문입니다.</p>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-template"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre>
+<p>이번 설정값은 다음과 같습니다. Core Daily notes와 Templater 설정을 구분하여 확인합니다.</p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th>설정할 위치</th><th>표시되는 항목</th><th>이번 값</th></tr></thead><tbody><tr><th>코어 일일 노트</th><td data-label="항목">일자 형식</td><td data-label="값"><code>YYYY-MM-DD</code></td></tr><tr><th>코어 일일 노트</th><td data-label="항목">새 파일 위치</td><td data-label="값"><code>Daily</code></td></tr><tr><th>코어 일일 노트</th><td data-label="항목">템플릿 파일 위치</td><td data-label="값"><code>Templates/Daily.md</code></td></tr><tr><th>템플레이터</th><td data-label="항목">템플릿 폴더 위치</td><td data-label="값"><code>Templates</code></td></tr><tr><th>템플레이터</th><td data-label="항목">새 파일 생성 시 Templater 트리거</td><td data-label="값">OFF와 ON을 비교</td></tr><tr><th>템플레이터</th><td data-label="항목">템플릿 매칭 모드</td><td data-label="값"><code>None</code></td></tr></tbody></table></div>
+<p><strong>Trigger를 ON으로 하고, Template matching mode를 None</strong>으로 설정한 설정 화면입니다. <code>None</code>은 템플릿을 자동으로 할당하지 않는 설정이지만, 새로운 노트 본문에 이미 있는 Templater 명령은 처리합니다. 이 예에서는 Daily notes 측에서 템플릿을 지정하고 있기 때문에 Folder templates 및 File regex templates를 추가하지 않았습니다.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/trigger-on-settings.png" alt="Templater의 Trigger Templater on new file creation이 ON이고, Template matching mode가 None 설정 화면" width="900" height="700" loading="lazy"><figcaption>실제로 조작한 Templater 2.25.1의 설정. Trigger는 이 기기에만 저장되며, 기기별로 활성화해야 한다는 주석도 표시됩니다.</figcaption></figure>
+<p>같은 템플릿, 날짜 형식, <code>Daily/2026-09-30.md</code>이라는 저장 대상에서 새로 만든 노트를 비교했습니다.</p><div class="template-results"><div><h3>Trigger OFF：식이 남아 있습니다</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-off"># Daily &lt;% tp.date.now(&quot;YYYY-MM-DD&quot;) %&gt;
+
+note-title: &lt;% tp.file.title %&gt;
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div><div><h3>Trigger ON+None：값으로 전개되었습니다</h3>
+<pre class="template-code" tabindex="0"><code data-evidence="daily-on"># Daily 2026-09-30
+
+note-title: 2026-09-30
+result: templater-daily-expanded
+
+## Inbox
+- Sample daily capture.
+</code></pre></div></div>
+<p>여기에서도 <code>result: templater-daily-expanded</code>은 양쪽에 있는 고정 문자입니다. 차이는 헤드라인의 <code>tp.date.now</code>과 <code>note-title</code>의 <code>tp.file.title</code>이 값으로 바뀐 것입니다.</p>
+<figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-off.png" alt="Trigger OFF로 만든 날짜 노트에 tp.date.now와 tp.file.title 명령이 남아 있는 화면" width="1024" height="800" loading="lazy"><figcaption>OFF에서는 Daily notes의 템플릿 본문이 들어갔지만, Templater의 식은 아직 전개되지 않은 상태였습니다.</figcaption></figure><figure class="shot"><img src="/assets/img/obsidian-templater/daily-trigger-on.png" alt="Trigger ON과 None으로 새로 만든 Daily 노트에 날짜와 note-title이 펼쳐진 화면" width="1024" height="800" loading="lazy"><figcaption>ON+None으로 같은 경로에 새로 만들면, 제목은 Daily 2026-09-30, note-title은 2026-09-30로 확장되었습니다.</figcaption></figure>
+<aside class="tip-box"><strong>비교 방법:</strong>ON의 신규 생성을 확인하기 위해, 격리된 Vault의 가상 시험 노트만 삭제하고 동일한 이름으로 다시 만들었습니다. 독자의 기록된 일일 노트를 삭제하는 절차가 아닙니다. 직접 시험할 때는 검증용 Vault이나 복사본을 사용하고, 기존 기록을 남겨 주세요.</aside></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="not-applied"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">템플릿이 적용되지 않을 때, 무엇을 확인합니까?</h2></div><div class="ce-chapter__body"><p><strong> 노트 본문이 포함되지 않은 경우와 본문에 Templater 식만 남는 경우를 구분합니다. </strong>이번 OFF 노트에서는 본문 자체를 포함했습니다. Trigger를 ON으로 한 뒤 Daily notes 명령으로 동일한 기존 노트를 다시 열어도, 저장된 내용인 SHA256이 앞뒤로 일치하고 식이 남아 있었습니다.</p><p>그 기존 노트를 연 상태에서 <strong>Templater: Replace templates in the active file</strong>을 실행하면 날짜와 제목의 식을 펼칠 수 있었습니다. 기록이 포함된 노트에서는 내용과 템플릿 코드를 확인하고, 복사하여 시도한 후에 작업합니다. 이는 이번 조건에 따른 결과입니다. 시작 시 Daily note를 여는 설정 등, 다른 경로로 일반화하고 있지 않습니다.</p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th>보이는 상태</th><th>확인할 항목</th><th>근거와 범위</th></tr></thead><tbody><tr><th>본문에 식이 남아 있습니다</th><td data-label="확인">Trigger의 ON/OFF, 새로 만든 건가요, 기존 노트인가요</td><td data-label="근거">이번 OFF/ON 대조, 기존 노트를 다시 열고, 수동 Replace로 확인</td></tr><tr><th>모자 형태의 본문도 없습니다</th><td data-label="확인">Daily notes의 Template file location</td><td data-label="근거">None은 템플릿을 자동으로 선택하지 않습니다. 본문을 넣는 측의 지정도 확인합니다</td></tr><tr><th>특정 폴더에서 동작하지 않음</th><td data-label="확인">Excluded folders、템플릿 원본 폴더</td><td data-label="근거">공식 2.25.1의 사양. 제외 폴더와 템플릿 원본은 새로 생성할 때의 처리 대상에서 제외됩니다. 이 케이스 자체는 실제 측정하지 않았습니다</td></tr><tr><th>다른 기기에서 설정이 작동하지 않습니다</th><td data-label="확인">그 단말기의 트리거 설정</td><td data-label="근거">설정 화면의 기기별 저장에 대한 주석. 이번에는 다른 단말기의 동작 및 동기화가 아직 검증되지 않았습니다</td></tr><tr><th>추가된 노트가 없습니다·다릅니다</th><td data-label="확인">날짜, 저장 폴더, 파일을 만드는 경로</td><td data-label="근거"><a href="/ko/obsidian/daily-note/#missing">기존의 데일리 노트 추가 문제</a>로. Templater의 전개와는 별도로 확인하겠습니다</td></tr></tbody></table></div><p>Templater 설정만으로는 외부 입력 접수, 다른 앱에서의 추가, 기기 간 동기화까지 완료되는 것은 아닙니다. 이 기사에서는 Obsidian 내에서 템플릿 처리를 확인했습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">자주 묻는 질문</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">Templater 템플릿을 저장하면 자동으로 실행됩니까?</summary><div class="faq-answer">저장만 해서 모든 노트에 자동으로 적용되는 것은 아닙니다. 저장한 템플릿을 현재 노트에 넣을 때는 “Templater: Open insert template modal”을 사용합니다. 새 파일을 생성할 때의 처리는 “Trigger Templater on new file creation”이라는 별도의 설정입니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">데일리 노트에서는 Folder 템플릿도 필요합니까?</summary><div class="faq-answer">이번 확인에서는 core Daily notes에 Templates/Daily.md을 지정하고, Templater의 Trigger를 ON으로, Template matching mode를 None으로 설정하여, 새로운 날짜 노트 내의 명령이 전개되었습니다. None은 템플릿을 자동으로 할당하지 않는 설정이지만, 새로운 본문에 이미 있는 Templater 명령은 처리합니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">트리거를 켜면 기존 데일리 노트도 고쳐지나요?</summary><div class="faq-answer">이번에 OFF로 만든 노트를 ON 후에 Daily notes 명령으로 다시 열어도 저장 내용은 변하지 않았습니다. 미전개 명령을 포함하는 동일한 노트에서는 “Templater: Replace templates in the active file”으로 확장할 수 있었습니다. 이는 이번 설정의 결과이며, 시작 시 Daily note를 여는 설정이나 일괄 처리는 검증하지 않았습니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">iPhone에서도 같은 절차를 사용할 수 있습니까?</summary><div class="faq-answer">Templater 2.25.1의 공식 매니페스트는 데스크톱 전용이 아닌 설정이지만, 이번 실제 조작 확인은 Linux 버전 Obsidian 1.13.7에만 해당됩니다. iPhone의 화면 및 템플릿 전개, 단말 간 동기화, SimpleMemo에서의 입력은 검증하지 않았습니다. Trigger 설정 화면에도 기기별로 활성화하는 설정이 표시되어 있습니다.</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">검증 환경과, 이 기사를 사용할 수 있는 범위</h2></div><div class="ce-chapter__body"><ul><li><strong>실작：</strong>Linux 격리 Vault, Obsidian 1.13.7, Templater 2.25.1. 설정 화면을 조작하고, 앱에 등록된 명령으로 노트 생성 및 전개를 확인합니다. 수동 삽입에서는 GUI 목록에서 템플릿을 선택했습니다.</li><li><strong>데일리 노트 대조：</strong>2026년9월30일10:49〜10:50 UTC（19:49〜19:50 JST）。 동일한 템플릿·저장 대상·날짜 형식으로 OFF와 ON+None 저장 Markdown을 비교합니다. 기존 OFF 노트의 재개방과 명시적인 Replace에 의한 복구도 확인했습니다.</li><li><strong>공식 원본：</strong>2.25.1의 배포 파일·manifest·공식 docs/source를 확인하십시오. Manifest의 최소 Obsidian 버전은 1.13.0입니다. 이는 모든 버전 및 단말기의 작동 보증이 아닙니다.</li><li><strong>미검증：</strong>iPhone/Android/Mac, Obsidian을 닫은 상태 및 외부에서 파일 생성, 시작 시 Daily note, 동기화, SimpleMemo 연동, 속도·음성 품질·Siri·Watch.</li></ul><p>이 Linux 데스크톱 작업은 iOS 시뮬레이터나 iPhone 실제 기기에서의 확인이 아닙니다. 이미지에 보이는 가상 메모와 저장 Markdown이 표시하는 범위에 한해 실제 작업의 결과로 기재하고 있습니다.</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/templater-20260930.md" target="_blank" rel="noopener">검증 기록·원본 및 확인 범위</a></p><h3>공식 자료</h3><ul class="source-list">
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/installation.md" target="_blank" rel="noopener">Templater의 도입 방법</a> — 공식 2.25.1 원본</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/settings.md" target="_blank" rel="noopener">설정: 트리거, None, 제외 폴더</a> — 공식 2.25.1 원본</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/docs/src/syntax.md" target="_blank" rel="noopener">기법: 명령과 날짜 함수</a> — 공식 2.25.1 원본</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/README.md" target="_blank" rel="noopener">README：기능 및 코드 실행 주의</a> — 공식 2.25.1 원본</li>
+<li><a href="https://github.com/SilentVoid13/Templater/blob/0ffe956a58360aee949df114ded2fd7431447ebb/manifest.json" target="_blank" rel="noopener">2.25.1의 매니페스트</a> — 공식 2.25.1 원본</li>
+</ul><div class="internal-links"><a href="/ko/obsidian/plugins/">Obsidian의 플러그인 총람</a><a href="/ko/obsidian/daily-note/">데일리 노트에 추가</a><a href="/ko/obsidian/journaling/">날짜 노트의 기록 예시</a></div><p class="template-note">본 사이트는 YURIKA, K.K.가 운영하며, 독립 앱 “SimpleMemo”을 소개하고 있습니다. Obsidian 공식에 의한 기사가 아닙니다.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">다음 읽기</span><strong>Obsidian 연동 및 저장 대상 설정을 확인합니다</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴"><div class="footer__col"><p class="footer__col-title">프로덕트</p><a href="/ko/download/" class="footer__link">다운로드</a><a href="/ko/" class="footer__link">홈</a><a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a></div><div class="footer__col"><p class="footer__col-title">비교·전환</p><a href="/ko/vs/" class="footer__link">비교</a><a href="/ko/obsidian/compare/" class="footer__link">Obsidian 비교</a></div><div class="footer__col"><p class="footer__col-title">지원</p><a href="/ko/about/" class="footer__link">개발자 소개</a><a href="/ko/faq" class="footer__link">자주 묻는 질문</a><a href="/ko/privacy" class="footer__link">개인정보 보호</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

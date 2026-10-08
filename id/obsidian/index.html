@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<script src="/js/i18n/id/messages.5a1bc321b521.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Cara mengirim catatan dari iPhone ke Obsidian — Ditambahkan otomatis tanpa plugin</title>
+  <meta name="description" content="Tambahkan catatan dari iPhone secara otomatis ke catatan harian atau Inbox dengan SimpleMemo. Panduan integrasi folder tanpa plugin ini mencakup pemilihan lokasi penyimpanan, uji penulisan, dan pemeriksaan catatan pertama, serta penanganan lokasi yang salah atau kegagalan penulisan.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Cara mengirim catatan dari iPhone ke Obsidian — Ditambahkan otomatis tanpa plugin">
+  <meta property="og:description" content="Tambahkan catatan ke file di vault Obsidian yang dipilih. Jika penulisan langsung ke folder berhasil, Anda dapat mencatat tanpa membuka aplikasi Obsidian.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/obsidian/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Cara mengirim catatan dari iPhone ke Obsidian — Ditambahkan otomatis tanpa plugin">
+  <meta name="twitter:description" content="Tambahkan catatan yang dikirim ke catatan Obsidian pilihan Anda. Penulisan langsung tidak memerlukan plugin atau pembukaan aplikasi Obsidian.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/obsidian/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Integrasi Obsidian",
+      "item": "https://simplememofast.com/id/obsidian/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/id/obsidian/#article",
+  "inLanguage": "id",
+  "headline": "Cara mengirim catatan dari iPhone ke Obsidian — Ditambahkan otomatis tanpa plugin",
+  "description": "Integrasi SimpleMemo dengan Obsidian. Catatan yang dikirim ditambahkan ke file dalam folder vault yang dipilih. Jika penulisan langsung berhasil, tidak perlu plugin komunitas atau membuka aplikasi Obsidian. Catatan direkam dengan cap waktu dalam catatan harian atau Inbox.",
+  "url": "https://simplememofast.com/id/obsidian/",
+  "datePublished": "2026-05-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-banner.jpg",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/obsidian/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/id/obsidian/#faq",
+  "inLanguage": "id",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Apakah perlu plugin Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Penulisan langsung ke folder tidak memerlukan plugin komunitas. Aplikasi menulis ke folder yang dipilih di iCloud Drive atau “Di iPhone Saya”. Metode ini juga tidak memerlukan pengaktifan Daily Notes. Pastikan lokasi penyimpanan terlebih dahulu melalui “Uji penulisan Obsidian” di pengaturan."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah Obsidian terbuka setiap kali saya mengirim catatan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jika penulisan langsung ke folder yang dipilih berhasil, catatan dapat ditambahkan tanpa membuka Obsidian. Dalam mode normal, jika folder belum dipilih atau penulisan langsung gagal, aplikasi mungkin membuka Obsidian melalui skema URL untuk mencoba menambahkan catatan. Uji penulisan di pengaturan hanya memeriksa penulisan langsung ke folder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Catatan mana yang diperbarui, dan dalam format apa?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "“Catatan harian” menambahkan teks ke yyyy-MM-dd.md untuk hari itu di folder yang dipilih. “Catatan tertentu” menambahkannya ke file dengan nama yang diatur, dengan Inbox.md sebagai nama bawaan. Format bawaannya adalah - HH:mm catatan. Dalam “Format penambahan”, Anda dapat mengubah cap waktu serta templat awal dan akhir teks, dengan pengaturan terpisah untuk iPhone dan Apple Watch. Isi catatan yang sudah ada tidak dihapus."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah bisa digunakan jika saya hanya menyinkronkan dengan Obsidian Sync?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Folder tujuan harus berada di iCloud Drive atau “Di iPhone Saya” dan dapat diakses melalui aplikasi File. Vault yang hanya menggunakan Obsidian Sync mungkin tidak muncul di pemilih folder. Dalam kondisi itu, aplikasi beralih ke metode skema URL."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah bisa digunakan di Android atau komputer?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "SimpleMemo yang menjalankan integrasi saat ini merupakan aplikasi untuk iPhone dengan iOS 16 atau lebih baru. Jika vault tujuan Obsidian disinkronkan melalui iCloud Drive atau Obsidian Sync, catatan yang sama dapat dibuka di Obsidian pada Mac, iPad, dan perangkat lainnya."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah catatan disimpan di server?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Penambahan ke Obsidian adalah proses lokal yang selesai di perangkat. Jalur pengiriman dan enkripsi yang sudah ada tidak diubah. Isi email hanya melewati server saat dikirim dan tidak disimpan secara permanen di server kami."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bagaimana dengan pengiriman email yang selama ini saya gunakan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Dalam mode normal, catatan tersimpan di email dan Obsidian. Saat tidak ada sinyal, email disimpan di Outbox, sedangkan penambahan ke folder yang telah dipilih dilakukan di perangkat. Pada Premium, setelah memilih folder vault dan menyelesaikan uji penulisan, Anda dapat mengaktifkan “Simpan hanya di Obsidian (tanpa mengirim email)”. Selama mode ini aktif, catatan hanya disimpan di vault dan tidak dikirim lewat email. Meski Premium berakhir, mode ini tetap berjalan dengan batas gratis 3 catatan per 1 hari."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah catatan tetap ditambahkan ke Obsidian saat offline atau tanpa sinyal?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jika folder tujuan sudah diunduh ke iPhone dan dapat ditulisi oleh aplikasi, catatan dapat ditambahkan ke file lokal tanpa internet. Pastikan terlebih dahulu melalui uji penulisan. Email dalam mode normal menunggu di Outbox, sedangkan sinkronisasi iCloud ke perangkat lain memerlukan koneksi yang pulih."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bisakah semua catatan dikumpulkan dalam catatan Inbox di Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bisa. Pilih “Catatan tertentu” pada “Tujuan”, lalu atur “Nama catatan”. Jika kosong, aplikasi menggunakan Inbox.md. Teks ditambahkan ke file yang sama dalam folder yang dipilih, jadi periksa nama file dan isinya melalui uji penulisan terlebih dahulu. Anda dapat beralih ke catatan harian melalui pengaturan."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apakah catatan tetap tersimpan di Obsidian jika email saya menggunakan Gmail, Outlook, atau iCloud?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Penambahan ke Obsidian berjalan tanpa bergantung pada tujuan email, baik Gmail, Outlook, iCloud, maupun lainnya. Penambahan ke Obsidian merupakan proses lokal di perangkat yang terpisah dari pengiriman email. Dalam mode normal, email tiba di kotak masuk biasa dan catatan yang sama juga tersimpan di Obsidian. Saat “Simpan hanya di Obsidian” aktif, catatan tidak dikirim lewat email."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bisakah saya mengirim dari Apple Watch ke Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Saat Anda mengirim catatan kepada diri sendiri dari Apple Watch, integrasi di iPhone menambahkan catatan yang sama ke Obsidian. Penambahan dilakukan oleh iPhone; Watch tidak menulis langsung ke vault. Lihat halaman dukungan Apple Watch untuk penjelasan lebih lanjut."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/obsidian/#webpage",
+  "inLanguage": "id",
+  "name": "Cara mengirim catatan dari iPhone ke Obsidian — Ditambahkan otomatis tanpa plugin",
+  "url": "https://simplememofast.com/id/obsidian/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-delta.woff2?v=978e976ab9" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-delta.woff2?v=4548bd5607" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" type="image/webp" href="/assets/img/obsidian-banner-ja.webp" imagesrcset="/assets/img/obsidian-banner-ja.webp 1200w, /assets/img/obsidian-banner-ja@2x.webp 1448w" imagesizes="(max-width: 760px) 100vw, 760px">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn,.lang-switcher__link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em;text-decoration:none;display:inline-block}
+    .lang-switcher__btn:hover,.lang-switcher__link:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Obsidian feature page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(100,180,255,.10);border:1px solid rgba(100,180,255,.2);color:var(--text)}
+    .flow-arrow{color:var(--accent);font-weight:700}
+    .note-preview{margin-top:1.25rem;background:#0d1117;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.9;color:#c9d1d9;overflow-x:auto}
+    .note-preview .nt-h{color:#79c0ff;font-weight:700}
+    .note-preview .nt-time{color:#6ab4ff}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn,.lang-switcher__link{transition:none}}
+
+    /* Header and footer share the landing page's palette and control states.
+       Scoped !important rules override the shared legacy navigation theme. */
+    body.lpr-page{--chrome-bg:#07070b;--chrome-surface:#0d0e14;--chrome-ink:#e9e9f1;--chrome-muted:#b5b5c7;--chrome-accent:#c4b5fd;--chrome-line:rgba(167,139,250,.22)}
+    .lpr-page .global-nav,.lpr-page .footer{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-page .global-nav{position:sticky;top:0;z-index:1000;background:rgba(7,7,11,.94)!important;border-bottom:1px solid var(--chrome-line)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+    .lpr-page .global-nav__inner{max-width:1120px;margin:0 auto;padding:0 24px!important;min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .lpr-page .global-nav__logo,.lpr-page .lpr-footer-brand{display:inline-flex;align-items:center;gap:12px;min-height:48px;color:#fff!important;text-decoration:none;flex-shrink:0}
+    .lpr-page .global-nav__logo img{width:36px;height:36px;border-radius:11px;box-shadow:0 0 0 1px var(--chrome-line),0 4px 20px rgba(139,92,246,.18)!important}
+    .lpr-page .lpr-brand-name{display:flex!important;flex-direction:column;gap:3px;overflow:visible;line-height:1.25}
+    .lpr-page .lpr-brand-name small{font-size:10px;font-weight:500;letter-spacing:.1em;color:var(--chrome-accent)}
+    .lpr-page .lpr-brand-name strong{font-size:16px;font-weight:750;letter-spacing:.02em;color:#fff}
+    .lpr-page .global-nav__links{display:flex;align-items:center;gap:0;list-style:none;margin:0;padding:0}
+    .lpr-page .global-nav__links a{display:flex;align-items:center;min-height:44px;padding:8px;color:var(--chrome-muted)!important;font-size:12px;font-weight:500;text-decoration:none;border-radius:10px;transition:background .18s,color .18s}
+    .lpr-page .global-nav__links a:hover{background:rgba(139,92,246,.12)!important;color:#fff!important}
+    .lpr-page .global-nav__links a::after{display:none}
+    .lpr-page .global-nav__actions{display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .lpr-page .global-nav__cta{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;border:1px solid #fff;border-radius:12px;background:#fff!important;color:#07070b!important;box-shadow:none!important;font-size:12px;font-weight:700;text-decoration:none;transition:background .18s,border-color .18s}
+    .lpr-page .global-nav__cta:hover{background:#ede9fe!important;border-color:#ede9fe;box-shadow:none!important}
+    .lpr-page .lang-switcher--nav{background:var(--chrome-surface)!important;border-color:var(--chrome-line)!important;border-radius:12px!important;margin-right:0!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn{min-width:40px;min-height:40px!important;padding:4px 8px!important;border-radius:9px!important;color:var(--chrome-muted)!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn.active{background:rgba(139,92,246,.2)!important;border-color:rgba(167,139,250,.32);color:#fff!important;box-shadow:none!important}
+    .lpr-page .lang-switcher--nav .lang-switcher__btn:hover{color:#fff!important;background:rgba(139,92,246,.12)!important}
+    .lpr-page .global-nav__hamburger{display:none;width:44px;height:44px;padding:11px;border:1px solid var(--chrome-line);border-radius:12px;background:var(--chrome-surface);color:var(--chrome-ink)!important;cursor:pointer}
+    .lpr-page .global-nav__hamburger svg{display:block;width:20px;height:20px;overflow:visible}
+    .lpr-page .global-nav__hamburger path{transform-box:fill-box;transform-origin:center;transition:transform .18s}
+    .lpr-page .global-nav__hamburger[aria-expanded="true"] path:first-child{transform:translateY(4px) rotate(45deg)}
+    .lpr-page .global-nav__hamburger[aria-expanded="true"] path:last-child{transform:translateY(-4px) rotate(-45deg)}
+    .lpr-page .global-nav :is(a,button):focus-visible,.lpr-page .footer a:focus-visible{outline:2px solid var(--chrome-accent)!important;outline-offset:4px}
+    .lpr-page .nav-cta-mobile{display:none}
+
+    .lpr-page .footer{position:relative;margin-top:48px;padding:64px 24px 140px;border-top:1px solid var(--chrome-line);background:radial-gradient(ellipse at 10% 0,rgba(139,92,246,.14),transparent 55%),var(--chrome-bg);color:var(--chrome-ink)}
+    .lpr-page .footer > .container{display:grid;grid-template-columns:minmax(180px,.85fr) minmax(0,2fr);align-items:start;gap:40px 64px;max-width:1120px;padding:0}
+    .lpr-page .lpr-footer-brand{align-self:start;justify-self:start;padding-top:4px}
+    .lpr-page .lpr-footer-brand img{width:48px;height:48px;border:1px solid var(--chrome-line);border-radius:14px;box-shadow:0 8px 32px rgba(139,92,246,.15)}
+    .lpr-page .lpr-footer-brand .lpr-brand-name strong{font-size:20px}
+    .lpr-page .footer__nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:32px;width:100%;max-width:none;margin:0}
+    .lpr-page .footer__col-title{margin:0 0 14px;color:var(--chrome-accent);font-size:12px;font-weight:600;letter-spacing:.08em}
+    .lpr-page .footer__col .footer__link{min-height:44px;padding:10px 0;color:var(--chrome-muted);font-size:13px;border-radius:6px;line-height:1.6}
+    .lpr-page .footer__link:hover{color:#fff;background:rgba(139,92,246,.1)}
+    .lpr-page .footer__copyright{grid-column:1/-1;margin:0;padding-top:24px;border-top:1px solid var(--chrome-line);text-align:left;font-size:11px;line-height:1.8;color:var(--chrome-muted)}
+    @media(max-width:1199px){
+      .lpr-page .global-nav__links:not(.open){display:none!important}
+      .lpr-page .global-nav__hamburger{display:block!important}
+      .lpr-page .global-nav__links.open{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));position:absolute!important;top:100%;left:24px;right:24px;max-width:640px;margin:8px auto 0;padding:16px!important;gap:8px!important;max-height:calc(100dvh - 100px);overflow-y:auto;border:1px solid var(--chrome-line)!important;border-radius:20px;background:#0d0e14!important;box-shadow:0 24px 64px rgba(0,0,0,.45);backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+      .lpr-page .global-nav__links.open a{padding:12px 16px;font-size:13px;color:var(--chrome-ink)!important;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06)}
+      .lpr-page .global-nav__links.open .nav-cta-mobile{display:block!important;grid-column:1/-1;margin:4px 0 0;padding:0;border-radius:12px;background:#fff!important}
+      .lpr-page .global-nav__links.open .nav-cta-mobile a{justify-content:center;background:#fff!important;color:#07070b!important;border-radius:12px;font-weight:700}
+      .lpr-page .global-nav__links.open .nav-cta-mobile a:hover{background:#ede9fe!important}
+    }
+    @media(max-width:767px){
+      .lpr-page .global-nav__inner{min-height:72px;padding:0 16px!important;gap:12px}
+      .lpr-page .global-nav__logo{gap:8px}
+      .lpr-page .global-nav__logo img{width:32px;height:32px;border-radius:10px}
+      .lpr-page .global-nav__actions{gap:8px}
+      .lpr-page .global-nav__cta{display:none!important}
+      .lpr-page .global-nav__links.open{left:12px;right:12px;padding:12px!important;max-height:calc(100dvh - 96px)}
+      .lpr-page .footer{margin-top:32px;padding:40px 24px 140px}
+      .lpr-page .footer > .container{grid-template-columns:minmax(0,1fr);gap:32px}
+      .lpr-page .footer__nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 24px}
+      .lpr-page .footer__col:last-child{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px}
+      .lpr-page .footer__col:last-child .footer__col-title{grid-column:1/-1}
+    }
+    @media(prefers-reduced-motion:reduce){.lpr-page .global-nav *,.lpr-page .footer *{transition:none!important}}
+
+    /* =========================================================
+       LP Redesign (obsidian) — scoped under .lpr
+       Install CVR focused, mobile-first scroll narrative.
+       Added 2026-10-05. Removable in one block.
+       ========================================================= */
+    .lpr{--lpr-accent:#8b5cf6;--lpr-accent-2:#a78bfa;--lpr-accent-3:#c4b5fd;--lpr-good:#34d399;--lpr-ink-0:#fff;--lpr-ink-1:#e9e9f1;--lpr-ink-2:#9c9db0;--lpr-ink-3:#a3a3b7;--lpr-line:rgba(255,255,255,.08);--lpr-line-2:rgba(255,255,255,.14);--lpr-bg-0:#07070b;--lpr-bg-1:#0d0e14;max-width:430px;margin:0 auto;position:relative;color:var(--lpr-ink-1);font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;line-height:1.6}
+    .lpr *,.lpr *::before,.lpr *::after{box-sizing:border-box}
+    .lpr a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+    .lpr section{padding:72px 20px;position:relative;overflow:hidden;background:var(--lpr-bg-0)}
+    .lpr-prog{position:fixed;top:0;left:0;right:0;z-index:70;height:2px;pointer-events:none}
+    .lpr-prog-bar{height:100%;width:0;background:linear-gradient(90deg,var(--lpr-accent),#60a5fa,var(--lpr-good));transition:width .1s linear;box-shadow:0 0 8px rgba(139,92,246,.5)}
+    .lpr-chapter{padding:16px 20px 0}
+    .lpr-chap-num{font-size:11px;letter-spacing:.3em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:4px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .lpr-chap-title{font-size:12px;color:var(--lpr-accent-3);font-weight:700;margin-bottom:12px;letter-spacing:.04em}
+    .lpr-section-h{font-size:34px;line-height:1.15;letter-spacing:-.02em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:16px}
+    .lpr-section-h .q{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;color:var(--lpr-accent-3)}
+    .lpr-section-sub{color:var(--lpr-ink-2);font-size:15px;line-height:1.75;margin-bottom:28px}
+
+    .lpr-hero{padding:40px 20px 48px;min-height:92vh;display:flex;flex-direction:column;justify-content:space-between;background:radial-gradient(ellipse 90% 60% at 50% 0%, rgba(139,92,246,.3) 0%, transparent 55%),radial-gradient(ellipse 60% 40% at 80% 30%, rgba(96,165,250,.18) 0%, transparent 50%),var(--lpr-bg-0)}
+    .lpr-hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 1px,transparent 0);background-size:20px 20px;mask-image:linear-gradient(180deg,transparent,#000 20%,#000 80%,transparent);pointer-events:none}
+    .lpr-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--lpr-accent-3);padding:6px 10px;border:1px solid rgba(139,92,246,.35);border-radius:999px;background:rgba(139,92,246,.08);margin-bottom:20px;width:fit-content;position:relative;z-index:2}
+    .lpr-eyebrow .dot{width:6px;height:6px;background:var(--lpr-accent);border-radius:50%;animation:lprPulse 2s infinite}
+    @keyframes lprPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(1.25)}}
+    .lpr-hero-h{font-size:52px;line-height:.98;letter-spacing:-.035em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:18px;position:relative;z-index:2;text-shadow:0 2px 24px rgba(139,92,246,.15)}
+    .lpr-hero-h .accent{color:transparent;background:linear-gradient(135deg,#c4b5fd 0%,#8b5cf6 50%,#60a5fa 100%);-webkit-background-clip:text;background-clip:text}
+    .lpr-hero-h .em{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;font-weight:700;color:var(--lpr-accent-3)}
+    .lpr-hero-sub{font-size:16px;line-height:1.7;color:var(--lpr-ink-2);margin-bottom:28px;position:relative;z-index:2;max-width:360px}
+    .lpr-hero-sub strong{color:var(--lpr-ink-0)}
+
+    .lpr-phone-stage{position:relative;margin:0 auto 32px;width:260px;aspect-ratio:1/2;perspective:1200px;z-index:1}
+    .lpr-phone{position:relative;width:100%;height:100%;border-radius:34px;background:linear-gradient(145deg,#1a1b26,#0b0c13);border:1.5px solid rgba(255,255,255,.07);box-shadow:0 40px 80px -20px rgba(139,92,246,.35),0 20px 40px -15px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);padding:14px;transform:rotateX(8deg) rotateY(-8deg) rotateZ(2deg);transition:transform .6s cubic-bezier(.2,.9,.3,1.1)}
+    .lpr-phone-screen{width:100%;height:100%;border-radius:22px;background:#fff;color:#111;display:flex;flex-direction:column;position:relative;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif}
+    .lpr-phone-status{height:32px;flex-shrink:0;padding:10px 16px 0;background:#000;color:#fff;display:flex;justify-content:space-between;font-size:9px;font-weight:600;line-height:1}
+    .lpr-phone-status svg{width:36px;height:10px}
+    .lpr-app-nav{display:grid;grid-template-columns:36px 1fr 40px;align-items:center;gap:6px;background:#000;color:#fff;padding:8px 10px 10px;flex-shrink:0}
+    .lpr-app-settings{width:28px;height:28px;border:1px solid #333;border-radius:50%;display:grid;place-items:center;background:#151515}
+    .lpr-app-settings svg{width:17px;height:17px}
+    .lpr-app-title{font-size:12px;font-weight:600;text-align:center;white-space:nowrap}
+    .lpr-app-send{background:#006cf1;color:#fff;border-radius:999px;padding:7px 0;font-size:11px;font-weight:600;text-align:center;line-height:1.2}
+    .lpr-phone-content{padding:12px 10px 10px;flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+    .lpr-memo-input{font-size:12px;line-height:1.65;color:#111;min-height:4em;overflow-wrap:anywhere}
+    .lpr-caret{display:inline-block;width:2px;height:1em;background:#0070fb;margin-left:1px;vertical-align:text-bottom;animation:lprCaret 1s infinite}
+    @keyframes lprCaret{0%,49%{opacity:1}50%,100%{opacity:0}}
+    .lpr-app-mic{margin-top:auto;align-self:flex-end;width:38px;height:38px;border-radius:50%;background:#0070fb;color:#fff;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.18);flex-shrink:0}
+    .lpr-app-mic svg{width:23px;height:23px}
+    .lpr-keyboard{background:#e2e3e8;padding:8px 5px 6px;flex-shrink:0;border-radius:14px 14px 0 0;color:#111}
+    .lpr-keyboard-suggestions{display:flex;justify-content:space-around;font-size:11px;padding:0 0 8px}
+    .lpr-keyboard-keys{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(4,29px);gap:4px}
+    .lpr-keyboard-keys span{display:grid;place-items:center;background:#fff;border-radius:6px;font-size:16px;line-height:1}
+    .lpr-keyboard-keys .small{font-size:10px}
+    .lpr-keyboard-keys .return{grid-column:5;grid-row:3/5;font-size:24px}
+    .lpr-keyboard-foot{display:flex;justify-content:space-between;padding:8px 9px 5px}
+    .lpr-keyboard-foot svg{width:17px;height:17px}
+    .lpr-home-indicator{height:3px;width:36%;margin:2px auto 0;border-radius:3px;background:#111}
+    .lpr-obs-badge{position:absolute;right:-10px;bottom:-14px;background:#15131f;border:1px solid rgba(139,92,246,.35);padding:10px 12px;border-radius:12px;font-size:11px;color:var(--lpr-accent-3);display:flex;align-items:center;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.5);animation:lprFloat 2.2s ease-out .6s both}
+    .lpr-obs-mark{width:18px;height:18px;border-radius:4px;background:linear-gradient(135deg,#a78bfa,#5b21b6);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff}
+    @keyframes lprFloat{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    .lpr-ctas{display:flex;flex-direction:column;gap:10px;position:relative;z-index:2}
+    a.lpr-btn-primary{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:#07070b;padding:16px 20px;border-radius:14px;font-weight:700;font-size:16px;box-shadow:0 10px 30px -8px rgba(255,255,255,.25);transition:transform .15s ease;position:relative;overflow:hidden}
+    .lpr :is(a,button,summary,[tabindex]):focus-visible{outline:3px solid #c4b5fd;outline-offset:4px}
+    .lpr .lpr-faq-q:focus-visible{outline-offset:-4px}
+    .lpr-btn-primary:active{transform:scale(.98)}
+    .lpr-btn-primary .apple{width:22px;height:22px}
+    .lpr-btn-secondary{display:flex;align-items:center;justify-content:center;gap:8px;color:var(--lpr-ink-1);font-size:14px;font-weight:600;padding:12px 16px;border-radius:12px;border:1px solid var(--lpr-line-2);background:rgba(255,255,255,.02)}
+    .lpr-note{font-size:12px;color:var(--lpr-ink-3);margin-top:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;position:relative;z-index:2}
+    .lpr-note .dot{width:3px;height:3px;background:var(--lpr-ink-3);border-radius:50%;display:inline-block}
+    .lpr-stars{color:#fcd34d;font-size:12px;letter-spacing:.1em}
+    .lpr-trust-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px;position:relative;z-index:2}
+    .lpr-trust-pill{font-size:10px;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--lpr-line);color:var(--lpr-ink-2);font-weight:500;letter-spacing:.02em;display:inline-flex;align-items:center;gap:4px}
+    .lpr-trust-fine{font-size:12px;color:var(--lpr-ink-3);text-align:center;margin-top:8px;position:relative;z-index:2;letter-spacing:.02em}
+    .lpr-trust-fine a{color:var(--lpr-ink-2);text-decoration:underline}
+
+    .lpr-friction{display:flex;flex-direction:column;gap:12px;margin-top:24px}
+    .lpr-friction-item{display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line)}
+    .lpr-friction-item .ic{flex-shrink:0;width:36px;height:36px;border-radius:10px;background:rgba(239,68,68,.1);color:#f87171;display:flex;align-items:center;justify-content:center;font-size:17px}
+    .lpr-friction-item .t{font-size:14px;color:var(--lpr-ink-1);line-height:1.6;font-weight:500}
+    .lpr-friction-item .s{font-size:12px;color:var(--lpr-ink-3);margin-top:3px;line-height:1.55}
+
+    .lpr-flow-visual{display:flex;flex-direction:column;gap:16px;margin:28px 0 8px}
+    .lpr-flow-card{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:18px;padding:18px;display:flex;align-items:center;gap:14px;position:relative;transition:border-color .4s ease}
+    .lpr-flow-ic{width:46px;height:46px;border-radius:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(139,92,246,.05));border:1px solid rgba(139,92,246,.2)}
+    .lpr-flow-step{font-size:10px;letter-spacing:.3em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:3px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-flow-t{font-size:15px;font-weight:700;color:var(--lpr-ink-0);line-height:1.3}
+    .lpr-flow-s{font-size:12px;color:var(--lpr-ink-2);margin-top:4px;line-height:1.5}
+    .lpr-flow-arrow-v{width:1px;height:14px;background:linear-gradient(180deg,var(--lpr-line-2),transparent);margin:-10px auto;position:relative;z-index:0}
+
+    .lpr-demo-stage{background:#0a0a13;border-radius:24px;padding:20px;margin:24px 0;border:1px solid var(--lpr-line);box-shadow:0 20px 60px -20px rgba(139,92,246,.25);position:relative;overflow:hidden}
+    .lpr-demo-row{display:flex;gap:12px;margin-bottom:12px;align-items:center}
+    .lpr-demo-tab{all:unset;min-height:44px;flex:1;padding:10px 8px;text-align:center;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;background:rgba(255,255,255,.03);color:var(--lpr-ink-2);border:1px solid var(--lpr-line);transition:all .25s ease;box-sizing:border-box}
+    .lpr-demo-tab.on{background:var(--lpr-accent);color:#fff;border-color:transparent;box-shadow:0 6px 18px -4px rgba(139,92,246,.5)}
+    .lpr-demo-content{background:#06060a;border-radius:14px;padding:14px;min-height:200px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--lpr-ink-2);line-height:1.7}
+    .lpr-demo-content .md-h{color:var(--lpr-accent-3);font-weight:700;font-size:13px;margin-bottom:8px}
+    .lpr-demo-content .md-line{display:flex;gap:6px;padding:2px 0;align-items:flex-start}
+    .lpr-demo-content .md-line .t{color:var(--lpr-accent-2);font-weight:600;flex-shrink:0}
+    .lpr-demo-content .md-line .c{color:var(--lpr-ink-1)}
+    .lpr-demo-content .md-dash{color:var(--lpr-ink-3);margin-right:4px}
+    .lpr-demo-content .new{animation:lprSlideIn .5s ease-out both;background:rgba(139,92,246,.08);border-radius:4px;padding:2px 4px;margin-left:-4px}
+    @keyframes lprSlideIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+    .lpr-demo-foot{margin-top:12px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--lpr-ink-3)}
+    .lpr-demo-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--lpr-good);font-weight:600;font-size:10px}
+
+    .lpr-dialog{display:flex;flex-direction:column;gap:10px;margin-top:20px;max-width:360px;margin-left:auto;margin-right:auto}
+    .lpr-bubble{padding:14px 16px;border-radius:18px;position:relative;max-width:85%;animation:lprBubbleIn .5s ease-out both}
+    .lpr-bubble .label{display:block;font-size:9px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;margin-bottom:2px;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-bubble.you{background:linear-gradient(135deg,var(--lpr-accent),#5b21b6);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .lpr-bubble.siri{background:rgba(255,255,255,.05);color:var(--lpr-ink-1);align-self:flex-start;border-bottom-left-radius:4px;border:1px solid var(--lpr-line)}
+    .lpr-bubble.siri.done{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.06)}
+    .lpr-bubble p{font-size:14px;line-height:1.4}
+    @keyframes lprBubbleIn{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+    .lpr-dialog .lpr-bubble:nth-child(1){animation-delay:.05s}
+    .lpr-dialog .lpr-bubble:nth-child(2){animation-delay:.6s}
+    .lpr-dialog .lpr-bubble:nth-child(3){animation-delay:1.15s}
+    .lpr-dialog .lpr-bubble:nth-child(4){animation-delay:1.75s}
+
+    .lpr-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+    .lpr-compare-col{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:16px;padding:16px}
+    .lpr-compare-col.hero{background:linear-gradient(180deg,rgba(139,92,246,.1),rgba(139,92,246,.02));border-color:rgba(139,92,246,.35)}
+    .lpr-compare-h{font-size:13px;font-weight:700;color:var(--lpr-ink-0);margin-bottom:10px}
+    .lpr-compare-h.hero{color:var(--lpr-accent-3)}
+    .lpr-compare-list{font-size:12px;color:var(--lpr-ink-2);display:flex;flex-direction:column;gap:8px;line-height:1.5}
+    .lpr-compare-list .ok{color:var(--lpr-good);margin-right:4px}
+    .lpr-compare-list .no{color:#f87171;margin-right:4px}
+
+    .lpr-proof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
+    .lpr-proof-stat{text-align:center;padding:16px 8px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:14px}
+    .lpr-proof-stat .n{font-size:22px;font-weight:800;color:var(--lpr-ink-0);letter-spacing:-.02em;line-height:1;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-proof-stat .l{font-size:10px;color:var(--lpr-ink-3);margin-top:4px;letter-spacing:.05em}
+    .lpr-reviews{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+    .lpr-review{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:16px;padding:16px}
+    .lpr-review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .lpr-review-stars{color:#fcd34d;font-size:12px;letter-spacing:.1em}
+    .lpr-review-src{font-size:10px;color:var(--lpr-ink-3);letter-spacing:.05em}
+    .lpr-review-t{font-weight:700;color:var(--lpr-ink-0);font-size:14px;margin-bottom:6px}
+    .lpr-review-q{font-size:13px;color:var(--lpr-ink-2);line-height:1.7;font-style:italic}
+
+    .lpr-setup-anchor{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--lpr-good);font-size:12px;font-weight:700;margin-bottom:16px}
+    .lpr-setup-steps{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+    .lpr-setup-step{display:flex;gap:14px;padding:16px;background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:16px}
+    .lpr-step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--lpr-accent),#5b21b6);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 4px 12px rgba(139,92,246,.4);font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-step-t{font-size:14px;font-weight:700;color:var(--lpr-ink-0);margin-bottom:4px}
+    .lpr-step-s{font-size:12px;color:var(--lpr-ink-2);line-height:1.6}
+
+    .lpr-price-cards{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+    .lpr-price-card{background:rgba(255,255,255,.03);border:1px solid var(--lpr-line);border-radius:20px;padding:20px;position:relative}
+    .lpr-price-card.highlight{background:linear-gradient(180deg,rgba(139,92,246,.08),rgba(139,92,246,.02));border-color:rgba(139,92,246,.4)}
+    .lpr-price-tag{position:absolute;top:14px;right:14px;padding:4px 10px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.08em;background:var(--lpr-accent);color:#fff}
+    .lpr-price-name{font-size:12px;letter-spacing:.1em;color:var(--lpr-ink-3);text-transform:uppercase;margin-bottom:6px}
+    .lpr-price-v{display:flex;align-items:baseline;gap:4px;margin-bottom:10px}
+    .lpr-price-v .n{font-size:30px;font-weight:800;color:var(--lpr-ink-0);letter-spacing:-.02em;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+    .lpr-price-v .u{font-size:13px;color:var(--lpr-ink-2)}
+    .lpr-price-l{font-size:12px;color:var(--lpr-ink-2);line-height:1.6;margin-bottom:12px}
+    .lpr-price-f{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--lpr-ink-2)}
+    .lpr-price-f .k{color:var(--lpr-good);margin-right:4px}
+
+    .lpr-faq-list{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+    .lpr-faq-item{background:rgba(255,255,255,.025);border:1px solid var(--lpr-line);border-radius:14px;overflow:hidden}
+    .lpr-faq-q{padding:16px;font-size:14px;font-weight:600;color:var(--lpr-ink-0);display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none}
+    .lpr-faq-q::-webkit-details-marker{display:none}
+    .lpr-faq-q .ic{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:14px;transition:transform .3s ease;flex-shrink:0}
+    .lpr-faq-item[open] .lpr-faq-q .ic{transform:rotate(45deg)}
+    .lpr-faq-a{padding:0 16px 16px;font-size:13px;color:var(--lpr-ink-2);line-height:1.7}
+
+    .lpr-final{background:radial-gradient(circle at 50% 0%,rgba(139,92,246,.4) 0%,transparent 50%),var(--lpr-bg-0);padding:80px 20px 120px;text-align:center}
+    .lpr-final-h{font-size:36px;line-height:1.15;letter-spacing:-.02em;font-weight:900;color:var(--lpr-ink-0);margin-bottom:14px}
+    .lpr-final-h .em{font-family:"Didot","Hoefler Text",Georgia,serif;font-style:italic;color:var(--lpr-accent-3)}
+    .lpr-final-sub{color:var(--lpr-ink-2);font-size:14px;margin-bottom:28px;line-height:1.7}
+    .lpr-final .lpr-btn-primary{margin:0 auto 16px;max-width:320px}
+    .lpr-risk-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:var(--lpr-ink-2);margin-top:12px}
+    .lpr-risk-item{display:inline-flex;align-items:center;gap:4px}
+    .lpr-risk-item .k{color:var(--lpr-good);font-weight:800}
+
+    /* Sticky bottom CTA */
+    .lpr-sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(7,7,11,.85);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-top:1px solid var(--lpr-line);transform:translateY(100%);transition:transform .4s cubic-bezier(.2,.9,.3,1);max-width:430px;margin:0 auto}
+    .lpr-sticky-cta.show{transform:translateY(0)}
+    .lpr-sticky-cta .lpr-btn-primary{padding:14px;font-size:15px;max-width:none}
+    .lpr-sticky-cta .meta{font-size:10px;color:var(--lpr-ink-3);text-align:center;margin-top:6px;letter-spacing:.03em}
+
+    /* Film grain overlay (scoped to body when LPR is present) */
+    body.lpr-page::before{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.04;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/></svg>")}
+
+    .lpr-reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.9,.3,1.1)}
+    .lpr-reveal.in{opacity:1;transform:translateY(0)}
+
+    @media (prefers-reduced-motion:reduce){.lpr *,.lpr *::before,.lpr *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+    @media (min-width:430px){.lpr-hero-h{font-size:56px}.lpr-section-h{font-size:36px}}
+
+    /* Ensure page content takes over container styles cleanly */
+    body.lpr-page main.page-content{padding:0}
+    body.lpr-page main.page-content > .container{max-width:430px;padding:0}
+    body.lpr-page .references, body.lpr-page .related-links{max-width:430px;margin-left:auto;margin-right:auto}
+
+    /* Wider screens use the available space while keeping mobile styles intact. */
+    @media (min-width:768px){
+      body.lpr-page main.page-content > .container{width:calc(100% - 48px);max-width:1120px}
+      .lpr{max-width:none}
+      .lpr section{padding:80px 40px}
+      .lpr-chapter{padding:0;margin-bottom:20px}
+      .lpr-section-h{font-size:clamp(36px,4vw,48px)}
+      .lpr-section-sub{max-width:42em;font-size:17px}
+
+      .lpr .lpr-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);grid-template-areas:"eyebrow phone" "title phone" "copy phone" "ctas ctas";column-gap:40px;min-height:0;padding:64px 40px}
+      .lpr-eyebrow{grid-area:eyebrow;align-self:start}
+      .lpr-hero-h{grid-area:title;font-size:clamp(52px,5.5vw,72px);line-height:1.08;margin-bottom:24px}
+      .lpr-hero-sub{grid-area:copy;max-width:none;font-size:18px;margin-bottom:0}
+      .lpr-phone-stage{grid-area:phone;width:100%;max-width:280px;margin:0;align-self:center;justify-self:center}
+      .lpr-ctas{grid-area:ctas;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;width:100%;max-width:760px;margin:40px auto 0}
+      .lpr-ctas > :not(.lpr-btn-primary):not(.lpr-btn-secondary){grid-column:1/-1}
+      .lpr-ctas .lpr-note,.lpr-ctas .lpr-trust-row{margin-top:4px}
+
+      .lpr-friction,.lpr-setup-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+      .lpr-friction-item,.lpr-setup-step{flex-direction:column;padding:24px}
+      .lpr-friction-item .t,.lpr-step-t,.lpr-flow-t{font-size:16px}
+      .lpr-friction-item .s,.lpr-step-s,.lpr-flow-s{font-size:14px}
+      .lpr-flow-visual{display:grid;grid-template-columns:minmax(0,1fr) 20px minmax(0,1fr) 20px minmax(0,1fr);gap:12px}
+      .lpr-flow-card{flex-direction:column;align-items:flex-start;padding:24px}
+      .lpr-flow-arrow-v{width:20px;height:1px;margin:auto 0;background:linear-gradient(90deg,var(--lpr-line-2),var(--lpr-accent-2))}
+      .lpr-demo-stage{max-width:840px;margin:32px auto;padding:28px}
+      .lpr-demo-tab{font-size:14px}
+      .lpr-demo-content{font-size:14px;min-height:240px;padding:24px}
+      .lpr-dialog{max-width:560px;margin-top:32px}
+      .lpr-bubble p{font-size:16px}
+      .lpr-compare-grid,.lpr-price-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-compare-col,.lpr-price-card{padding:28px}
+      .lpr-compare-h,.lpr-review-t{font-size:17px}
+      .lpr-compare-list,.lpr-review-q,.lpr-price-l,.lpr-price-f{font-size:15px}
+      .lpr-proof-stat{padding:24px}
+      .lpr-proof-stat .n{font-size:32px}
+      .lpr-proof-stat .l{font-size:12px}
+      .lpr-reviews{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+      .lpr-review{padding:24px}
+      .lpr-price-v .n{font-size:40px}
+      .lpr-faq-list{max-width:860px;margin:32px auto 0}
+      .lpr-faq-q{padding:20px 24px;font-size:16px}
+      .lpr-faq-a{padding:0 24px 24px;font-size:15px}
+      .lpr-final-h{font-size:56px}
+      .lpr-final-sub{font-size:17px}
+      .lpr-final .lpr-btn-primary{max-width:360px}
+
+      body.lpr-page .lp-video{width:calc(100% - 80px);max-width:840px!important}
+      body.lpr-page .lp-section{padding-left:40px;padding-right:40px}
+      .lpr-sticky-cta{display:flex;align-items:center;justify-content:space-between;gap:24px;width:calc(100% - 48px);max-width:1120px;padding:14px 24px calc(14px + env(safe-area-inset-bottom))}
+      .lpr-sticky-cta .lpr-btn-primary{width:320px;flex-shrink:0}
+      .lpr-sticky-cta .meta{margin-top:0;font-size:12px;color:#9c9db0}
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- app-schema: managed by scripts/inject_app_schema.py -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://simplememofast.com/#app",
+  "name": "SimpleMemo",
+  "alternateName": [
+    "Simple Memo - for Obsidian",
+    "Captio式シンプルメモ",
+    "シンプルメモ",
+    "SimpleMemoFast",
+    "Simple Memo"
+  ],
+  "url": "https://simplememofast.com/",
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "iOS 16.0+, watchOS",
+  "softwareVersion": "5.9.12",
+  "isAccessibleForFree": true,
+  "inLanguage": "id",
+  "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "JPY",
+      "description": "maksimal 3 pesan per hari (tanpa batas masa penggunaan)",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Monthly",
+      "price": "500",
+      "priceCurrency": "JPY",
+      "description": "500 yen per bulan · Pengiriman tanpa batas",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Yearly",
+      "price": "5000",
+      "priceCurrency": "JPY",
+      "description": "5,000 yen per tahun · Pengiriman tanpa batas",
+      "availability": "https://schema.org/InStock"
+    }
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="lpr-page capture-full site-designed" data-design-family="refined">
+  <!-- Scroll progress (LP redesign) -->
+  <div class="lpr-prog" aria-hidden="true"><div class="lpr-prog-bar" id="lprProgBar"></div></div>
+
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/obsidian/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/obsidian/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- =================================================================
+           LP Redesign (obsidian) — mobile-first scroll narrative
+           Added 2026-10-05 (PR: feature/obsidian-page-redesign)
+           CTA campaign tokens: ct=web_obsidian_v1 (preserved for existing analytics)
+             + sub-variants hero / sticky / final via data-cta-placement
+           ================================================================= -->
+      <div class="lpr">
+        <!-- Hero (redesigned) -->
+        <section class="lpr-hero">
+          <span class="lpr-eyebrow" aria-hidden="true"><span class="dot"></span>Obsidian × iPhone</span>
+          <h1 class="lpr-hero-h"> <span class="em">Ucapkan</span>.<br>Catatan tiba<br>di <span class="accent">vault</span>. </h1>
+          <p class="lpr-hero-sub"> Catatan yang Anda ucapkan di iPhone <strong>ditambahkan secara otomatis</strong> ke vault <br> Obsidian. <br> Tanpa plugin, kirim dengan satu ketukan. </p>
+
+          <!-- Decorative illustration of the compose screen; not interactive app controls. -->
+          <div class="lpr-phone-stage" aria-hidden="true">
+            <div class="lpr-phone" id="lprPhone">
+              <div class="lpr-phone-screen">
+                <div class="lpr-phone-status">
+                  <span>9:41</span>
+                  <svg viewBox="0 0 36 10" fill="currentColor"><path d="M0 7h2v3H0zm4-2h2v5H4zm4-2h2v7H8zm4-3h2v10h-2z"/><rect x="20" y="1" width="13" height="8" rx="2" fill="none" stroke="currentColor"/><rect x="22" y="3" width="9" height="4" rx="1"/><path d="M34 3h2v4h-2z"/></svg>
+                </div>
+                <div class="lpr-app-nav">
+                  <span class="lpr-app-settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="m9 3 1-2h4l1 2 2 1 2-1 3 3-1 2 1 2 2 1v4l-2 1-1 2 1 2-3 3-2-1-2 1-1 2h-4l-1-2-2-1-2 1-3-3 1-2-1-2-2-1v-4l2-1 1-2-1-2 3-3 2 1z" transform="translate(2 1) scale(.8)"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+                  <span class="lpr-app-title">新しいメモ</span>
+                  <span class="lpr-app-send">送信</span>
+                </div>
+                <div class="lpr-phone-content">
+                  <div class="lpr-memo-input">
+                    <span class="lpr-typed" id="lprTyped">買い物: コーヒー豆、牛乳</span><span class="lpr-caret"></span>
+                  </div>
+                  <span class="lpr-app-mic"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+                </div>
+                <div class="lpr-keyboard">
+                  <div class="lpr-keyboard-suggestions"><span>こと</span><span>から</span><span>けど</span><span>かも</span><span>⌄</span></div>
+                  <div class="lpr-keyboard-keys">
+                    <span>→</span><span>あ</span><span>か</span><span>さ</span><span>⌫</span>
+                    <span>↶</span><span>た</span><span>な</span><span>は</span><span class="small">空白</span>
+                    <span class="small">ABC</span><span>ま</span><span>や</span><span>ら</span><span class="return">↵</span>
+                    <span>☺</span><span>^</span><span>わ</span><span class="small">、。?!</span>
+                  </div>
+                  <div class="lpr-keyboard-foot">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><path d="M2 12h20M4 6h16M4 18h16"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M6 10v3a6 6 0 0 0 12 0v-3M12 19v3m-4 0h8"/></svg>
+                  </div>
+                  <div class="lpr-home-indicator"></div>
+                </div>
+              </div>
+            </div>
+            <div class="lpr-obs-badge" aria-hidden="true">
+              <span class="lpr-obs-mark">◆</span>
+              <span>追記完了</span>
+            </div>
+          </div>
+
+          <div class="lpr-ctas">
+            <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="hero" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="Unduh gratis di App Store">
+              <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> Unduh gratis di App Store </a>
+            <a class="lpr-btn-secondary" href="#lpr-demo">Lihat demo 30 detik ↓</a>
+            <div class="lpr-note">
+              <span class="lpr-stars" aria-label="4.1 dari 5 bintang">★★★★☆</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>App Store 4.1 · 27 ulasan</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>Tidak perlu kartu kredit</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>Batalkan kapan saja</span>
+            </div>
+            <div class="lpr-trust-row">
+              <span class="lpr-trust-pill">🔒 Enkripsi AES-GCM di perangkat</span>
+              <span class="lpr-trust-pill">📵 Mendukung penggunaan offline</span>
+              <span class="lpr-trust-pill">⚡ Terbuka dalam 0.4 detik<sup>※</sup></span>
+            </div>
+            <p class="lpr-trust-fine">※ Median pengukuran saat aplikasi dibuka kembali (warm start) pada iPhone 16e (<a href="/id/blog/benchmark-methodology">metode pengukuran</a>)</p>
+            <p style="font-size:10px;color:var(--lpr-ink-3);text-align:center;margin-top:12px;line-height:1.6">Aplikasi ini dikembangkan oleh YURIKA, K.K. sebagai aplikasi independen, bukan aplikasi atau plugin resmi Obsidian. Obsidian adalah merek dagang Dynalist Inc.</p>
+            <p class="article-meta" style="font-size:11px;color:var(--lpr-ink-3);margin-top:12px;text-align:center;"> Penulis: <a href="/id/about/" style="color:var(--lpr-accent-3);text-decoration:underline">AI ATAKA</a> · Diperbarui: <time datetime="2026-09-30">30/9/2026</time> </p>
+          </div>
+        </section>
+
+        <!-- 01 FRICTION -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">01 / HAMBATAN</div>
+            <div class="lpr-chap-title">Ide mudah menghilang</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"> <span class="q">“Rasanya repot</span><br>untuk menulis.”<br>Saat Anda berpikir begitu,<br>idenya sudah hilang. </h2>
+          <p class="lpr-section-sub lpr-reveal"> 3 hambatan yang dihadapi pengguna Obsidian setiap hari. Jika Anda pernah mengalami setidaknya 1 di antaranya, Anda akan merasakan manfaatnya. </p>
+          <div class="lpr-friction">
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">⛔</div>
+              <div>
+                <div class="t">Obsidian lambat terbuka di iPhone</div>
+                <div class="s">Ide terlewat saat Anda menunggu vault dimuat.</div>
+              </div>
+            </div>
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">🎙️</div>
+              <div>
+                <div class="t">Catatan suara praktis. Masalahnya, ingatkah Anda di mana menyimpannya?</div>
+                <div class="s">Aplikasi perekam → Transkripsi → Tempel. Terlalu banyak langkah.</div>
+              </div>
+            </div>
+            <div class="lpr-friction-item lpr-reveal">
+              <div class="ic">📵</div>
+              <div>
+                <div class="t">Di kereta bawah tanah, jalan pegunungan, atau tempat tidur pagi hari — khawatir saat offline</div>
+                <div class="s">Menunggu sinkronisasi, mencoba lagi, catatan menghilang. Sulit terus memakai aplikasi catatan yang tidak bisa dipercaya.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 02 RESOLUTION -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">02 / SOLUSI</div>
+            <div class="lpr-chap-title">Ucapkan → Tiba. Selesai.</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"> <span class="q">Jalan terpendek</span><br>menuju vault<br>adalah suara Anda. </h2>
+          <p class="lpr-section-sub lpr-reveal"> SimpleMemo hanya perlu 3 langkah: buka → tulis atau ucapkan → kirim dengan satu ketukan. Catatan yang dikirim tersimpan sekaligus di email dan Obsidian. </p>
+          <div class="lpr-flow-visual">
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">🎙️</div>
+              <div>
+                <div class="lpr-flow-step">Langkah 01</div>
+                <div class="lpr-flow-t">Ucapkan atau tulis</div>
+                <div class="lpr-flow-s">Langsung mulai mengetik saat aplikasi terbuka. Transkripsi dilakukan sepenuhnya di perangkat.</div>
+              </div>
+            </div>
+            <div class="lpr-flow-arrow-v" aria-hidden="true"></div>
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">⚡</div>
+              <div>
+                <div class="lpr-flow-step">Langkah 02</div>
+                <div class="lpr-flow-t">Kirim dengan satu ketukan</div>
+                <div class="lpr-flow-s">Kolom input dikosongkan setelah pengiriman. Anda dapat langsung beralih ke catatan berikutnya.</div>
+              </div>
+            </div>
+            <div class="lpr-flow-arrow-v" aria-hidden="true"></div>
+            <div class="lpr-flow-card lpr-reveal">
+              <div class="lpr-flow-ic">📥</div>
+              <div>
+                <div class="lpr-flow-step">Langkah 03</div>
+                <div class="lpr-flow-t">Ditambahkan ke email dan Obsidian</div>
+                <div class="lpr-flow-s">Ditambahkan otomatis ke catatan harian atau Inbox dalam format HH:mm.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 03 DEMO (interactive tabs) -->
+        <section id="lpr-demo">
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">03 / DEMO</div>
+            <div class="lpr-chap-title">Begitu dikirim, isi catatan bertambah</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal">Coba rasakan<br><span class="q">dalam 30 detik.</span></h2>
+          <p class="lpr-section-sub lpr-reveal">Beralihlah antar-tab untuk mencoba alur penambahan catatan yang dikirim ke catatan di vault.</p>
+          <div class="lpr-demo-stage lpr-reveal">
+            <div class="lpr-demo-row" role="tablist">
+              <button class="lpr-demo-tab on" data-tab="daily" id="lpr-tab-daily" role="tab" aria-controls="lprDemoContent" tabindex="0" aria-selected="true">Catatan harian</button>
+              <button class="lpr-demo-tab" data-tab="inbox" id="lpr-tab-inbox" role="tab" aria-controls="lprDemoContent" tabindex="-1" aria-selected="false">Kotak masuk</button>
+              <button class="lpr-demo-tab" data-tab="mail" id="lpr-tab-mail" role="tab" aria-controls="lprDemoContent" tabindex="-1" aria-selected="false">Email</button>
+            </div>
+            <div class="lpr-demo-content" id="lprDemoContent" role="tabpanel" aria-labelledby="lpr-tab-daily" tabindex="0" aria-live="polite">
+              <div class="md-h"># 2026-10-05</div>
+              <div class="md-line"><span class="t">- 07:12</span><span class="c"><span class="md-dash">—</span>Ide judul artikel saat berjalan pagi</span></div>
+              <div class="md-line"><span class="t">- 09:34</span><span class="c"><span class="md-dash">—</span>Belanja: biji kopi, susu</span></div>
+              <div class="md-line"><span class="t">- 12:48</span><span class="c"><span class="md-dash">—</span>Cari tahu nanti tentang fitur baru pesaing yang dibicarakan saat makan siang</span></div>
+              <div class="md-line new"><span class="t">- 14:21</span><span class="c"><span class="md-dash">—</span>Catatan yang baru dikirim dengan suara ditambahkan di sini</span></div>
+            </div>
+            <div class="lpr-demo-foot">
+              <span class="lpr-demo-badge">● Penulisan lokal</span>
+              <span>iCloud Drive · yyyy-MM-dd.md</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- EXTRA: Siri hands-free -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">TAMBAHAN</div>
+            <div class="lpr-chap-title">Dengan AirPods, tanpa menyentuh ponsel</div>
+          </div>
+          
+<p class="lpr-section-sub" data-translation-example-note="">Frasa perintah suara di bawah ini adalah contoh dalam bahasa Jepang. Periksa bahasa Siri dan pintasan yang terdaftar di perangkat Anda.</p>
+<h2 class="lpr-section-h lpr-reveal"><span class="q">“Hey Siri,</span><br>シンプルメモで残す”</h2>
+          <p class="lpr-section-sub lpr-reveal">Biarkan iPhone di saku. Percakapan 2 giliran mengantarkan catatan ke vault. Gunakan frasa yang telah diuji pada perangkat nyata.</p>
+          <div class="lpr-dialog lpr-reveal">
+            <div class="lpr-bubble you"><span class="label">ANDA</span><p>Hey Siri、シンプルメモで残す</p></div>
+            <div class="lpr-bubble siri"><span class="label">SIRI</span><p>Apa yang ingin Anda catat?</p></div>
+            <div class="lpr-bubble you"><span class="label">ANDA</span><p>Ide judul artikel yang terlintas saat berangkat kerja</p></div>
+            <div class="lpr-bubble siri done"><span class="label">SIRI</span><p>Catatan terkirim ✓</p></div>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--lpr-ink-3);margin-top:16px"><a href="/id/siri/" style="color:var(--lpr-accent-3);text-decoration:underline">Lihat frasa yang dapat digunakan dan pengaturannya →</a></p>
+        </section>
+
+        <!-- 04 COMPARISON -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">04 / PERBEDAAN</div>
+            <div class="lpr-chap-title">Aplikasi seluler resmi Obsidian vs SimpleMemo</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Tujuan sama,</span><br>kecepatan berbeda.</h2>
+          <p class="lpr-section-sub lpr-reveal">Dirancang untuk menangkap catatan tanpa membuka aplikasi seluler Obsidian. Kelola di Obsidian, kumpulkan melalui SimpleMemo.</p>
+          <div class="lpr-compare-grid">
+            <div class="lpr-compare-col lpr-reveal">
+              <div class="lpr-compare-h">Hanya aplikasi seluler Obsidian</div>
+              <div class="lpr-compare-list">
+                <div><span class="no">×</span>Menunggu vault dimuat</div>
+                <div><span class="no">×</span>Catatan suara memerlukan plugin</div>
+                <div><span class="no">×</span>Tidak ada aplikasi Apple Watch</div>
+                <div><span class="no">×</span>Tidak dapat menambahkan catatan melalui Siri</div>
+              </div>
+            </div>
+            <div class="lpr-compare-col hero lpr-reveal">
+              <div class="lpr-compare-h hero">SimpleMemo</div>
+              <div class="lpr-compare-list">
+                <div><span class="ok">✓</span>Langsung menulis saat dibuka</div>
+                <div><span class="ok">✓</span>Input suara di perangkat</div>
+                <div><span class="ok">✓</span>Mendukung Apple Watch</div>
+                <div><span class="ok">✓</span>「Hey Siri、シンプルメモで残す」</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 05 VOICES -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">05 / ULASAN</div>
+            <div class="lpr-chap-title">Kata para pengguna</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">“Sudah tidak bisa lepas darinya”</span></h2>
+          <div class="lpr-proof-stats lpr-reveal">
+            <div class="lpr-proof-stat"><div class="n">4.1<span style="font-size:14px">★</span></div><div class="l">Penilaian App Store</div></div>
+            <div class="lpr-proof-stat"><div class="n">27</div><div class="l">ulasan</div></div>
+            <div class="lpr-proof-stat"><div class="n">AES-GCM</div><div class="l">Enkripsi di perangkat</div></div>
+          </div>
+          <div class="lpr-reviews">
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/06</span></div>
+              <div class="lpr-review-t">Menulis terasa sangat lancar!</div>
+              <div class="lpr-review-q">“Begitu menekan tombol kirim, layar baru langsung muncul. Jarang sekali saya bisa terus menuangkan pikiran tanpa memutus alurnya seperti ini.”</div>
+            </div>
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/06</span></div>
+              <div class="lpr-review-t">Integrasi Obsidian!</div>
+              <div class="lpr-review-q">“Dengan integrasi Obsidian, catatan suara saya terus terkumpul! Saya menantikan fitur-fitur berikutnya!”</div>
+            </div>
+            <div class="lpr-review lpr-reveal">
+              <div class="lpr-review-head"><span class="lpr-review-stars">★★★★★</span><span class="lpr-review-src">App Store · 2026/07</span></div>
+              <div class="lpr-review-t">Saya ingin tombol hapus</div>
+              <div class="lpr-review-q">“Saya memakainya setiap hari sampai tidak bisa lepas lagi!”</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 06 START -->
+        <section id="setup">
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">06 / MULAI</div>
+            <div class="lpr-chap-title">Sekitar 3 menit setelah memasang aplikasi</div>
+          </div>
+          <span class="lpr-setup-anchor">⏱ Rata-rata pengaturan 3 menit</span>
+          <h2 class="lpr-section-h lpr-reveal">Sampai catatan pertama<br>tiba di vault.</h2>
+          <div class="lpr-setup-steps">
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">1</div>
+              <div>
+                <div class="lpr-step-t">Unduh gratis di App Store</div>
+                <div class="lpr-step-s">Tidak perlu mendaftar akun. Cukup atur alamat email tujuan.</div>
+              </div>
+            </div>
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">2</div>
+              <div>
+                <div class="lpr-step-t">Pilih folder vault pada “Obsidian” di pengaturan</div>
+                <div class="lpr-step-s">Pilih vault di iCloud Drive atau “Di iPhone Saya” melalui aplikasi File.</div>
+              </div>
+            </div>
+            <div class="lpr-setup-step lpr-reveal">
+              <div class="lpr-step-num">3</div>
+              <div>
+                <div class="lpr-step-t">Uji penulisan → Kirim catatan pertama</div>
+                <div class="lpr-step-s">Jika berhasil, kiriman berikutnya akan langsung ditambahkan ke catatan.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 07 PRICING -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">07 / HARGA</div>
+            <div class="lpr-chap-title">Mulai gratis. Jika perlu, 500 yen per bulan</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Tanpa kartu kredit.</span><br>Batalkan kapan saja.</h2>
+          <div class="lpr-price-cards">
+            <div class="lpr-price-card lpr-reveal">
+              <div class="lpr-price-name">Free</div>
+              <div class="lpr-price-v"><span class="n">¥0</span><span class="u">/ tanpa batas masa penggunaan</span></div>
+              <div class="lpr-price-l">maksimal 3 pesan per hari (tanpa batas masa penggunaan)</div>
+              <div class="lpr-price-f">
+                <div><span class="k">✓</span>Semua fitur integrasi Obsidian</div>
+                <div><span class="k">✓</span>Input suara dan pemberian tag AI</div>
+                <div><span class="k">✓</span>Outbox offline</div>
+              </div>
+            </div>
+            <div class="lpr-price-card highlight lpr-reveal">
+              <span class="lpr-price-tag">Pengiriman tanpa batas</span>
+              <div class="lpr-price-name">Premium</div>
+              <div class="lpr-price-v"><span class="n">¥500</span><span class="u">/ bulan, termasuk pajak</span></div>
+              <div class="lpr-price-l">Tahunan ¥5,000, termasuk pajak. Batalkan kapan saja melalui App Store.</div>
+              <div class="lpr-price-f">
+                <div><span class="k">✓</span>Jumlah pengiriman tanpa batas</div>
+                <div><span class="k">✓</span>Mode “Simpan hanya di Obsidian”</div>
+                <div><span class="k">✓</span>Dukung pengembangan secara langsung</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 08 FAQ -->
+        <section>
+          <div class="lpr-chapter">
+            <div class="lpr-chap-num">08 / PERTANYAAN UMUM</div>
+            <div class="lpr-chap-title">Mulai dari pertanyaan yang sering muncul</div>
+          </div>
+          <h2 class="lpr-section-h lpr-reveal"><span class="q">Semua hal</span><br>yang sering membingungkan.</h2>
+          <div class="lpr-faq-list">
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah perlu plugin Obsidian?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Penulisan langsung ke folder tidak memerlukan plugin komunitas. Aplikasi menulis ke folder yang dipilih di iCloud Drive atau “Di iPhone Saya”. Metode ini juga tidak memerlukan pengaktifan Daily Notes. Pastikan lokasi penyimpanan terlebih dahulu melalui “Uji penulisan Obsidian” di pengaturan.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah Obsidian terbuka setiap kali saya mengirim catatan?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Jika penulisan langsung ke folder yang dipilih berhasil, catatan dapat ditambahkan tanpa membuka Obsidian. Dalam mode normal, jika folder belum dipilih atau penulisan langsung gagal, aplikasi mungkin membuka Obsidian melalui skema URL untuk mencoba menambahkan catatan. Uji penulisan di pengaturan hanya memeriksa penulisan langsung ke folder.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Catatan mana yang diperbarui, dan dalam format apa?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">“Catatan harian” menambahkan teks ke yyyy-MM-dd.md untuk hari itu di folder yang dipilih. “Catatan tertentu” menambahkannya ke file dengan nama yang diatur, dengan Inbox.md sebagai nama bawaan. Format bawaannya adalah - HH:mm catatan. Dalam “Format penambahan”, Anda dapat mengubah cap waktu serta templat awal dan akhir teks, dengan pengaturan terpisah untuk iPhone dan Apple Watch. Isi catatan yang sudah ada tidak dihapus.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah bisa digunakan jika saya hanya menyinkronkan dengan Obsidian Sync?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Folder tujuan harus berada di iCloud Drive atau “Di iPhone Saya” dan dapat diakses melalui aplikasi File. Vault yang hanya menggunakan Obsidian Sync mungkin tidak muncul di pemilih folder. Dalam kondisi itu, aplikasi beralih ke metode skema URL.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah bisa digunakan di Android atau komputer?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">SimpleMemo yang menjalankan integrasi saat ini merupakan aplikasi untuk iPhone dengan iOS 16 atau lebih baru. Jika vault tujuan Obsidian disinkronkan melalui iCloud Drive atau Obsidian Sync, catatan yang sama dapat dibuka di Obsidian pada Mac, iPad, dan perangkat lainnya.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah catatan disimpan di server?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Penambahan ke Obsidian adalah proses lokal yang selesai di perangkat. Jalur pengiriman dan enkripsi yang sudah ada tidak diubah. Isi email hanya melewati server saat dikirim dan tidak disimpan secara permanen di server kami.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Bagaimana dengan pengiriman email yang selama ini saya gunakan?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Dalam mode normal, catatan tersimpan di email dan Obsidian. Saat tidak ada sinyal, email disimpan di Outbox, sedangkan penambahan ke folder yang telah dipilih dilakukan di perangkat. Pada Premium, setelah memilih folder vault dan menyelesaikan uji penulisan, Anda dapat mengaktifkan “Simpan hanya di Obsidian (tanpa mengirim email)”. Selama mode ini aktif, catatan hanya disimpan di vault dan tidak dikirim lewat email. Meski Premium berakhir, mode ini tetap berjalan dengan batas gratis 3 catatan per 1 hari.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah catatan tetap ditambahkan ke Obsidian saat offline atau tanpa sinyal?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Jika folder tujuan sudah diunduh ke iPhone dan dapat ditulisi oleh aplikasi, catatan dapat ditambahkan ke file lokal tanpa internet. Pastikan terlebih dahulu melalui uji penulisan. Email dalam mode normal menunggu di Outbox, sedangkan sinkronisasi iCloud ke perangkat lain memerlukan koneksi yang pulih.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Bisakah semua catatan dikumpulkan dalam catatan Inbox di Obsidian?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Bisa. Pilih “Catatan tertentu” pada “Tujuan”, lalu atur “Nama catatan”. Jika kosong, aplikasi menggunakan Inbox.md. Teks ditambahkan ke file yang sama dalam folder yang dipilih, jadi periksa nama file dan isinya melalui uji penulisan terlebih dahulu. Anda dapat beralih ke catatan harian melalui pengaturan.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Apakah catatan tetap tersimpan di Obsidian jika email saya menggunakan Gmail, Outlook, atau iCloud?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Penambahan ke Obsidian berjalan tanpa bergantung pada tujuan email, baik Gmail, Outlook, iCloud, maupun lainnya. Penambahan ke Obsidian merupakan proses lokal di perangkat yang terpisah dari pengiriman email. Dalam mode normal, email tiba di kotak masuk biasa dan catatan yang sama juga tersimpan di Obsidian. Saat “Simpan hanya di Obsidian” aktif, catatan tidak dikirim lewat email.</div>
+            </details>
+            <details class="lpr-faq-item">
+              <summary class="lpr-faq-q">Bisakah saya mengirim dari Apple Watch ke Obsidian?<span class="ic" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 1v10M1 6h10"/></svg></span></summary>
+              <div class="lpr-faq-a">Saat Anda mengirim catatan kepada diri sendiri dari Apple Watch, integrasi di iPhone menambahkan catatan yang sama ke Obsidian. Penambahan dilakukan oleh iPhone; Watch tidak menulis langsung ke vault. Lihat halaman dukungan Apple Watch untuk penjelasan lebih lanjut.</div>
+            </details>
+          </div>
+          <p style="text-align:center;font-size:12px;color:var(--lpr-ink-3);margin-top:16px"><a href="/id/faq" style="color:var(--lpr-accent-3);text-decoration:underline">Lihat semua pertanyaan umum →</a></p>
+        </section>
+
+        <!-- Final CTA -->
+        <section class="lpr-final">
+          <h2 class="lpr-final-h">Bawa ide Anda<br>ke <span class="em">vault</span>.</h2>
+          <p class="lpr-final-sub">Unduh gratis.<br>Catatan pertama Anda bisa siap dalam 3 menit.</p>
+          <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="Unduh gratis di App Store">
+            <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> Unduh gratis di App Store </a>
+          <div class="lpr-risk-row">
+            <span class="lpr-risk-item"><span class="k">✓</span>Tidak perlu kartu kredit</span>
+            <span class="lpr-risk-item"><span class="k">✓</span>Tidak perlu mendaftar</span>
+            <span class="lpr-risk-item"><span class="k">✓</span>Batalkan kapan saja</span>
+          </div>
+          <p style="margin-top:20px"><img src="/assets/img/qr-obsidian-ja.svg?v=d3f9ab0299" width="92" height="92" alt="Kode QR untuk mengunduh melalui App Store" loading="lazy" style="background:#fff;padding:6px;border-radius:10px"></p>
+          <small style="color:var(--lpr-ink-3);font-size:11px">Pindai dengan ponsel</small>
+        </section>
+      </div>
+      <!-- /.lpr -->
+
+      <!-- Explainer video — preserved for SEO (VideoObject schema) -->
+      <figure class="lp-video" style="margin:2rem auto;max-width:430px;">
+        <video controls preload="none" playsinline muted width="1280" height="720"
+               poster="/assets/video/obsidian-append-poster.jpg?v=3da21cf677"
+               style="width:100%;height:auto;border-radius:12px;display:block;background:#0b1020;">
+          <source src="/assets/video/obsidian-append.mp4?v=d0b8612871" type="video/mp4"> Browser Anda tidak mendukung pemutaran video. </video>
+        <figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;"> Alur pengiriman catatan melalui email dalam mode normal dan penambahan terpisah ke vault Obsidian. Isi email dikirim melalui SMTP biasa, bukan dengan enkripsi ujung ke ujung. Penulisan langsung ke folder memerlukan pemilihan lokasi penyimpanan dan penulisan yang berhasil. </figcaption>
+      </figure>
+      <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "@id": "https://simplememofast.com/id/obsidian/#video",
+  "name": "Sampai catatan ditambahkan ke catatan Obsidian",
+  "description": "Video penjelasan tentang pengiriman catatan melalui email dalam mode normal dan penambahan terpisah ke vault Obsidian. Ini bukan sistem penerusan ke vault melalui email. Isi email dikirim dengan SMTP biasa, tanpa enkripsi ujung ke ujung.",
+  "thumbnailUrl": [
+    "https://simplememofast.com/assets/video/obsidian-append-poster.jpg?v=3da21cf677"
+  ],
+  "uploadDate": "2026-08-11T13:42:48+09:00",
+  "duration": "PT14S",
+  "contentUrl": "https://simplememofast.com/assets/video/obsidian-append.mp4?v=d0b8612871",
+  "encodingFormat": "video/mp4",
+  "inLanguage": "id",
+  "isFamilyFriendly": true,
+  "publisher": {
+    "@id": "https://simplememofast.com/#organization"
+  },
+  "mainEntityOfPage": {
+    "@id": "https://simplememofast.com/id/obsidian/#webpage"
+  }
+}</script>
+
+      <!-- Legacy content below is replaced by the LP redesign above.
+           Removed: tip-box summary, "この連携で変わること", "どう動くのか",
+           "設定手順", "活用アイデア", "動作条件と注意点",
+           "うまくいかないとき", 旧FAQ, 旧CTA box.
+           Internal Links section preserved for SEO. -->
+
+      <!-- What you get: removed (redundant with LP hero + flow) -->
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title"> <span>Halaman terkait</span> </h2>
+        <div class="internal-links">
+          <a href="/id/obsidian/what-is-vault/"><span>Mengenal Vault — Pada dasarnya hanya sebuah folder</span></a>
+          <a href="/id/obsidian/sync/"><span>Metode sinkronisasi — Membandingkan iCloud, Sync resmi, Git, dan Syncthing</span></a>
+          <a href="/id/obsidian/pricing/"><span>Harga Obsidian — Sejauh mana bisa digunakan gratis</span></a>
+          <a href="/id/obsidian/plugins/"><span>Pengantar plugin — 10 teratas dari hasil pengukuran 6,812 plugin</span></a>
+          <a href="/id/obsidian/compare/"><span>Pusat perbandingan Obsidian — Apa yang perlu dibandingkan</span></a>
+          <a href="/id/apple-watch-obsidian/"><span>Integrasi Apple Watch × Obsidian</span></a>
+          <a href="/id/guides/"><span>Daftar panduan pengaturan</span></a>
+          <a href="/id/guides/draft-autosave/"><span>Cara menggunakan penyimpanan otomatis draf</span></a>
+          <a href="/id/guides/gmail-star-todo/"><span>Jadikan kotak masuk daftar tugas dengan bintang Gmail</span></a>
+          <a href="/id/methods/second-brain/"><span>Otak kedua</span></a>
+          <a href="/id/methods/zettelkasten/"><span>Zettelkasten</span></a>
+          <a href="/id/obsidian/getting-started/"><span>Memulai Obsidian dengan panduan layar nyata</span></a>
+          <a href="/id/obsidian/compare/logseq/"><span>Perbandingan dan pengujian Obsidian vs Logseq</span></a>
+          <a href="/id/obsidian/compare/capacities/"><span>Obsidian dan Capacities — Perbedaan tipe dan file</span></a>
+          <a href="/id/obsidian/second-brain/"><span>Otak kedua dengan Obsidian — 4 folder PARA dan layar nyata</span></a>
+          <a href="/id/obsidian/journaling/"><span>Menulis jurnal di Obsidian — Catatan bertanggal dan templat manual</span></a>
+          <a href="/id/obsidian/compare/memos/"><span>Obsidian dan memos — Perbedaan file dan hosting mandiri</span></a>
+          <a href="/id/vs/obsidian/"><span>Perbandingan dengan Obsidian</span></a>
+          <a href="/id/vs/obsidian-share-sheet/"><span>Perbandingan jujur dengan lembar berbagi resmi</span></a>
+          <a href="/id/privacy-architecture/"><span>Desain privasi: alur data</span></a>
+          <a href="/id/note-to-email/"><span>Cara kerja catatan → email</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Referensi</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/help/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — <span>Bantuan resmi Obsidian sebagai rujukan tentang vault, catatan harian, dan sinkronisasi</span></li>
+    <li><a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian URI</a> — <span>Dokumentasi resmi URI standar obsidian:// yang digunakan sebagai jalur cadangan</span></li>
+    <li><a href="https://support.apple.com/icloud" target="_blank" rel="noopener" style="color:var(--accent);">Apple — iCloud</a> — <span>Dukungan resmi tentang sinkronisasi file melalui iCloud Drive</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>Halaman unduhan App Store</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar metode</span></a></li>
+    <li><a href="/id/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Daftar artikel blog</span></a></li>
+    <li><a href="/id/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Contoh penggunaan</span></a></li>
+    <li><a href="/id/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Pertanyaan umum</span></a></li>
+    <li><a href="/id/blog/email-to-obsidian" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cara mengirim ke Obsidian melalui email (Gmail/Outlook/iCloud)</span></a></li>
+  </ul>
+  </div>
+</section>
+<aside style="max-width:900px;margin:2rem auto;padding:1.25rem;border:1px solid var(--border,#31445f);border-radius:12px"><p><a href="/id/resources/obsidian-inbox/">Coba Markdown untuk Inbox</a> · <a href="/id/press/">Materi pengenalan dan liputan</a></p></aside>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/obsidian/" class="footer__link">Integrasi Obsidian</a>
+        <a href="/id/use-cases/" class="footer__link">Contoh penggunaan</a>
+        <a href="/id/guides/" class="footer__link">Panduan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/note-to-email/" class="footer__link">Catatan ke email</a>
+        <a href="/id/vs/" class="footer__link">Bandingkan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/faq" class="footer__link">Pertanyaan umum</a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <!-- Sticky bottom CTA (LP redesign) -->
+  <div class="lpr-sticky-cta" id="lprStickyCta" role="complementary" aria-label="Tombol tindakan tetap">
+    <a class="lpr-btn-primary" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" aria-label="Unduh gratis di App Store">
+      <svg class="apple" viewBox="0 0 384 512" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> Mulai gratis </a>
+    <div class="meta">★ 4.1 · 3 pesan per hari gratis · Tanpa kartu kredit</div>
+  </div>
+
+  <!-- LP redesign scripts (inline, no external deps) -->
+  <script>
+  (function(){
+    // Typed hero text
+    var el = document.getElementById('lprTyped');
+    if(el && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      var phrases = ["朝の散歩で思いついた記事タイトル","買い物: コーヒー豆、牛乳","打ち合わせでSarahが言ってた案","読んだ本の一節"];
+      var i=0,j=0,forward=true;
+      function tick(){
+        var p = phrases[i];
+        if(forward){ j++; el.textContent = p.slice(0,j); if(j>=p.length){forward=false;setTimeout(tick,1400);return;} setTimeout(tick, 48 + Math.random()*40); }
+        else { j--; el.textContent = p.slice(0,j); if(j<=0){forward=true; i=(i+1)%phrases.length; setTimeout(tick,400);return;} setTimeout(tick, 22); }
+      }
+      tick();
+    }
+    // Scroll reveal
+    if('IntersectionObserver' in window){
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, {threshold:.12, rootMargin:'0px 0px -40px 0px'});
+      document.querySelectorAll('.lpr-reveal').forEach(function(x){ io.observe(x); });
+    } else {
+      document.querySelectorAll('.lpr-reveal').forEach(function(x){ x.classList.add('in'); });
+    }
+    // Sticky CTA show after hero
+    var sticky = document.getElementById('lprStickyCta');
+    var hero = document.querySelector('.lpr-hero');
+    if(sticky && hero && 'IntersectionObserver' in window){
+      var io2 = new IntersectionObserver(function(entries){
+        entries.forEach(function(e){ if(e.isIntersecting){ sticky.classList.remove('show'); } else { sticky.classList.add('show'); } });
+      }, {threshold:0.1});
+      io2.observe(hero);
+    }
+    // Demo tab switch
+    var tabs = document.querySelectorAll('.lpr-demo-tab');
+    var content = document.getElementById('lprDemoContent');
+    if(tabs.length && content){
+      var data = {
+        daily: globalThis.SimpleMemoI18n.text("<div class=\"md-h\"># 2026-10-05</div><div class=\"md-line\"><span class=\"t\">- 07:12</span><span class=\"c\"><span class=\"md-dash\">—</span>朝の散歩で浮かんだ記事見出し案</span></div><div class=\"md-line\"><span class=\"t\">- 09:34</span><span class=\"c\"><span class=\"md-dash\">—</span>買い物: コーヒー豆、牛乳</span></div><div class=\"md-line\"><span class=\"t\">- 12:48</span><span class=\"c\"><span class=\"md-dash\">—</span>ランチで聞いた競合の新機能をあとで調べる</span></div><div class=\"md-line new\"><span class=\"t\">- 14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>いま声で送ったメモがここに追記される</span></div>"),
+        inbox: globalThis.SimpleMemoI18n.text("<div class=\"md-h\"># Inbox.md</div><div class=\"md-line\"><span class=\"t\">- 10/03 09:12</span><span class=\"c\"><span class=\"md-dash\">—</span>FY26計画のドラフト書き出し</span></div><div class=\"md-line\"><span class=\"t\">- 10/04 20:48</span><span class=\"c\"><span class=\"md-dash\">—</span>ジムで思いついた新機能のUI</span></div><div class=\"md-line new\"><span class=\"t\">- 10/05 14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>固定ノートに全部まとめる派ならInboxが楽</span></div>"),
+        mail:  globalThis.SimpleMemoI18n.text("<div class=\"md-h\">📬 受信箱</div><div class=\"md-line\"><span class=\"t\">14:21</span><span class=\"c\"><span class=\"md-dash\">—</span>件名: AI生成タイトル「散歩メモ」</span></div><div class=\"md-line\"><span class=\"c\" style=\"padding-left:10px\">本文: いま声で送ったメモがここに追記される #walk #idea</span></div><div class=\"md-line new\"><span class=\"t\">👤</span><span class=\"c\"><span class=\"md-dash\">—</span>From: noreply@mail.simplememofast.com</span></div>")
+      };
+      tabs.forEach(function(tab, index){
+        tab.addEventListener('keydown', function(e){
+          var next;
+          if(e.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          else if(e.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+          else if(e.key === 'Home') next = 0;
+          else if(e.key === 'End') next = tabs.length - 1;
+          else return;
+          e.preventDefault();
+          tabs[next].focus();
+          tabs[next].click();
+        });
+        tab.addEventListener('click', function(){
+          tabs.forEach(function(t){ t.classList.remove('on'); t.setAttribute('aria-selected','false'); t.tabIndex = -1; });
+          tab.classList.add('on');
+          tab.setAttribute('aria-selected','true');
+          tab.tabIndex = 0;
+          content.setAttribute('aria-labelledby', tab.id);
+          var k = tab.getAttribute('data-tab');
+          content.innerHTML = data[k] || '';
+          if('vibrate' in navigator){ try{ navigator.vibrate(8); }catch(e){} }
+        });
+      });
+    }
+    // Phone parallax tilt
+    var phone = document.getElementById('lprPhone');
+    if(phone){
+      var raf = null;
+      function updatePhone(){
+        var y = Math.min(window.scrollY, 400);
+        var t = y / 400;
+        phone.style.transform = 'rotateX(' + (8 - t*6) + 'deg) rotateY(' + (-8 + t*8) + 'deg) rotateZ(' + (2 - t*4) + 'deg) scale(' + (1 - t*0.08) + ')';
+        raf = null;
+      }
+      window.addEventListener('scroll', function(){ if(!raf) raf = requestAnimationFrame(updatePhone); }, {passive:true});
+    }
+    // Scroll progress bar
+    var bar = document.getElementById('lprProgBar');
+    if(bar){
+      var raf2 = null;
+      function updateBar(){
+        var h = document.documentElement.scrollHeight - window.innerHeight;
+        var p = h > 0 ? (window.scrollY / h) * 100 : 0;
+        bar.style.width = Math.min(100, p) + '%';
+        raf2 = null;
+      }
+      window.addEventListener('scroll', function(){ if(!raf2) raf2 = requestAnimationFrame(updateBar); }, {passive:true});
+      updateBar();
+    }
+  })();
+  </script>
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

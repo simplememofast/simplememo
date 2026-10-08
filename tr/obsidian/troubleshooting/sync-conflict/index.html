@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <title>Obsidian'in senkronizasyon çakışması - Git çakışmalarının orijinal metni nasıl kaydedilir ve düzeltilir | SimpleMemo</title>
+  <meta name="description" content="Obsidian içinde açılan notta Git çakışma işaretleri görüldüğünde kurtarma örneği. Yazarın oluşturduğu iki özgün metin elle korundu, farklı öğeler karşılaştırılarak seçildi ve gerçek düzenleyicide kaydedildi. Linux Obsidian 1.13.7 ekranlarının özgün görüntüleri, Markdown, yerel Git merge işleminin tamamlanması ve yeniden açma kontrolü yer alır. Her eşitleme hizmeti için doğrulanmamış kapsam da açıklanır.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian&#x27;in senkronizasyon çakışması - Git çakışmalarının orijinal metni nasıl kaydedilir ve düzeltilir">
+  <meta property="og:description" content="Obsidian içinde açılan notta Git çakışma işaretleri görüldüğünde kurtarma örneği. Yazarın oluşturduğu iki özgün metin elle korundu, farklı öğeler karşılaştırılarak seçildi ve gerçek düzenleyicide kaydedildi. Linux Obsidian 1.13.7 ekranlarının özgün görüntüleri, Markdown, yerel Git merge işleminin tamamlanması ve yeniden açma kontrolü yer alır. Her eşitleme hizmeti için doğrulanmamış kapsam da açıklanır.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="tr_TR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian&#x27;in senkronizasyon çakışması - Git çakışmalarının orijinal metni nasıl kaydedilir ve düzeltilir">
+  <meta name="twitter:description" content="Obsidian içinde açılan notta Git çakışma işaretleri görüldüğünde kurtarma örneği. Yazarın oluşturduğu iki özgün metin elle korundu, farklı öğeler karşılaştırılarak seçildi ve gerçek düzenleyicide kaydedildi. Linux Obsidian 1.13.7 ekranlarının özgün görüntüleri, Markdown, yerel Git merge işleminin tamamlanması ve yeniden açma kontrolü yer alır. Her eşitleme hizmeti için doğrulanmamış kapsam da açıklanır.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.reader-flow{list-style:none;counter-reset:flow;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;padding:0!important;margin:1.5rem 0}.reader-flow li{counter-increment:flow;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.875rem;color:var(--text-secondary);margin-top:.5rem}@media(max-width:900px){.reader-flow{grid-template-columns:1fr}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/#article",
+  "inLanguage": "tr",
+  "headline": "Obsidian'in senkronizasyon çakışması - Git çakışmalarının orijinal metni nasıl kaydedilir ve düzeltilir",
+  "description": "Obsidian içinde açılan notta Git çakışma işaretleri görüldüğünde kurtarma örneği. Yazarın oluşturduğu iki özgün metin elle korundu, farklı öğeler karşılaştırılarak seçildi ve gerçek düzenleyicide kaydedildi. Linux Obsidian 1.13.7 ekranlarının özgün görüntüleri, Markdown, yerel Git merge işleminin tamamlanması ve yeniden açma kontrolü yer alır. Her eşitleme hizmeti için doğrulanmamış kapsam da açıklanır.",
+  "url": "https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Ana sayfa",
+      "item": "https://simplememofast.com/tr/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/tr/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Git çakışmasını geri yükle",
+      "item": "https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/#faq",
+  "inLanguage": "tr",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Metindeki çakışan işaretler ve çakışan kopya aynı mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu çalışmada, Git tarafından üzerinde çalışılan Markdown gövdesine eklenen çakışma işaretleri incelendi. Özgün metinlerin kopyalarını yazar elle hazırladı. Eşitleme yönteminin otomatik ayrı dosya oluşturma davranışı bu kurtarma örneğinde doğrulanmadı. Kullandığınız yöntemin yönergelerini kontrol edin."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Her iki cümleyi de bırakırsam çözebilir miyim?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu örnekteki iki onay öğesi uyumludur, bu nedenle yazar bunları ayrı satırlar olarak bırakmaya karar verdi. İçerik tutarsızsa veya aynı açıklama çakışıyorsa, lütfen anlamı ve gerekli bilgileri kontrol edin ve yeniden seçin. Her ikisini de eklemek her zaman bir prosedür değildir."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Çakışma işaretçisini silip kaydedersem, Git birleştirme tamamlanacak mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bu alıştırmada, Obsidian ile kaydettikten sonra bile Git durumu UU idi. İçeriği kontrol ettikten, hedef notu ekleyen git ve bir birleştirme taahhüdü oluşturduktan sonra, çözülmemiş dizinin boş olduğunu ve Git durumunun temiz olduğunu doğruladım. Lütfen metnin düzenlenmesini ve Git tarafının tamamlanmasını ayırın."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bu prosedür Obsidian Sync ve iCloud'de doğrulandı mı?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Doğrulama, Linux Obsidian 1.13.7 ve tek bir çevrimdışı yerel Git deposuyla sınırlıdır. Obsidian Sync, iCloud, diğer eşitleme hizmetleri, iki cihaz, iPhone veya SimpleMemo entegrasyonu denenmedi. Geçmiş ve çakışma mekanizmalarını gerçekten kullandığınız yönteme göre kontrol edin."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="conflict-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Genel gezinme" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/tr/guides/">Kılavuzlar</a></li><li><a href="/tr/use-cases/">Kullanım örnekleri</a></li><li><a href="/tr/vs/">Karşılaştır</a></li><li><a href="/tr/blog/">Blog</a></li><li><a href="/tr/about/">Geliştirici hakkında</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">İndir</a><details class="site-languages"><summary aria-label="Türkçe · Dil seçin"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>TR</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="tr" dir="ltr"><p class="site-language-title">Dil seçin</p><div class="site-language-grid"><a href="/obsidian/troubleshooting/sync-conflict/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/troubleshooting/sync-conflict/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/troubleshooting/sync-conflict/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/troubleshooting/sync-conflict/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/troubleshooting/sync-conflict/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/troubleshooting/sync-conflict/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/troubleshooting/sync-conflict/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="tr" aria-current="page"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true">✓</span></span></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/tr/obsidian/">Obsidian</a> / Git çakışma kurtarma örneği</p><span class="lp-hero__label">Orijinal metni bırakın ve içeriği seçin</span><h1 class="lp-hero__title">Obsidian'in Git çakışmasını düzeltmek, karşılaştırmak ve kaydetmek için <br>'in orijinal metnini okuyun</h1><p class="lp-hero__sub">Metinde bir çakışma işareti varsa, her iki orijinal metni de ayrı ayrı bırakın ve hangi içeriğin kullanılacağını kontrol edin. Bu küçük alıştırmada iki onay öğesi seçtik ve bunları Obsidian'e kaydettik ve yerel Git birleştirmenin tamamlandığını ve yeniden görüntülendiğini doğruladık.</p><p class="article-meta">Yazma: <a href="/tr/about/">SimpleMemo Developer</a> · Gerçek işlem onayı: <time datetime="2026-09-30">2026 9 30</time> · Linux / Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="Bu sayfanın içeriği"><p>Bu sayfanın içeriği</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Onay sırası orijinal metin, seçilen içerik ve kaydetme sonuçlarıdır</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Öncelikle, yarışmanızın şeklini kontrol edin</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1. İki orijinal metni ayrı ayrı elinizin altında bırakın</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">Onay sırası orijinal metin, seçilen içerik ve kaydetme sonuçlarıdır</h2></div><div class="ce-chapter__body"><p>Bu seferki hedef <strong> Git birleştirmede aynı Markdown metnine rakip bir işaretleyici dahil edildiğinde</strong>. Yazar tarafından oluşturulan notlardan birini yerel Git'in iki dalı ile düzenledim ve gerçek birleştirme hatasını, orijinal metnin karşılaştırılmasını ve manuel düzeltmeyi doğruladım. Birden fazla terminalle senkronizasyonun sonucu değildir.</p><ol class="reader-flow" aria-label="Geri yükleme sırası bu sefer onaylandı"><li><strong>Her iki orijinal metni de manuel olarak bırakın</strong><span>Hangisinin içerik olduğunu ayırt edebilecek bir kopya hazırlayın</span></li><li><strong>Farkı karşılaştırın</strong><span>Olağandışı çizgiyi ve ortak parçayı kontrol edin</span></li><li><strong>İçeriğin benimsenmesine karar verin</strong><span>Bu örnekte iki uyumlu öğe ayrı satırlara yer verilmektedir</span></li><li><strong>Düzenle ve kayde</strong><span>Metin ve Git tarafında birleştirmenin tamamlandığını onaylayın</span></li><li><strong>Yeniden görüntüle ve onayla</strong><span>Seçilen içeriği yakalayın ve Markdown'i kaydedin</span></li></ol><p class="source-note">Bu sıra, bu alıştırmayı düzenleyen bir diyagramdır. Otomatik restorasyon ve kayıp önleme garantisini ve her senkronizasyon hizmeti için çalışma prosedürünü gösteren bir diyagram değildir.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="identify"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">İlk olarak, yarışmanızın formunu kontrol edin</h2></div><div class="ce-chapter__body"><p>Bu örnekte, Git'in birleştirmesi 1 bitiş kodunda durdu ve 作業メモ.md <code>UU</code> oldu. Git dizininin ortak bir orijinal sürümü ve iki düzenlenmiş sürümü vardır ve <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>, <code>=======</code> ve <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b</code> notun gövdesine dahil edilmiştir.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/conflict-markers.png" alt="Obsidian ile açılan iş notu, Git çakışma işaretçisini ve iki onay öğesini gösterir" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>Çakışma durumundaki notlar aslında Git tarafından çıktı. Orijinal metnin bir kopyası ayrı olarak saklanır. <a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><p>Ortamınızda bir takma ad çakışma dosyaları veya geçmişi ekranı varsa, lütfen senkronizasyon yöntemine göre kontrol edin. Yöntemi kontrol etmek için giriş <a href="/tr/obsidian/sync/">Obsidian'in senkronizasyon yöntemi kılavuzudur</a>. Bu makaledeki Git'in sonuçları Obsidian Sync veya iCloud'nin davranışına okunamaz.</p><p>Bu yarışma durumunda kaydedilen metin aşağıdaki gibidir. İşaretleyici de dahil olmak üzere gerçek dosyanın tam metni yayınlanır.</p><pre class="capture-code" data-evidence="conflicted-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 確認する項目: 見出しの順番を確認する。
+=======
+- 確認する項目: 内部リンクの保存先を確認する。
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b
+</code></pre></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="preserve"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1. İki orijinal metni ayrı ayrı elinizin altında bırakın</h2></div><div class="ce-chapter__body"><p>Düzenlemeye başlamadan önce, elinizdeki her sürümü orijinal sürümü gösteren bir adla ayrı ayrı kaydedin. Elinizde yalnızca biri varsa, diğerini kaydedebiliyormuş gibi davranmayın ve Git'in durumunu ve kullandığınız yöntemin geçmişini kontrol edin. Bu sefer her hizmetin geçmişinden geri almaya çalışmadım.</p><p>Çakışmayı düzeltmeden önce önceki metne geri dönme hazırlığınızı kontrol etmek istiyorsanız, lütfen <a href="/tr/obsidian/backup/">Git, Dosya Kurtarma ve mağaza dışı kopya kurtarma örneğine</a> bakın.</p><p>Bu alıştırmada, yazar <strong>birleştirmeden</strong> önce taslak A ve taslak B'nin bir kopyasını manuel olarak sakladı. Karşılaştırma için, depoya <code>原文の控え/案A.md</code> ve <code>原文の控え/案B.md</code>'i de koydum ve açtım. Bunlar, senkronizasyon aracı tarafından otomatik olarak oluşturulan çakışan kopyalar değildir.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/preserved-originals.png" alt="Obsidian&#x27;in sol ve sağ bölmelerindeki orijinal metin A ve B&#x27;yi karşılaştırma" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>Orijinal metin A・B yazar tarafından manuel olarak saklanır. Sol ve sağ ekrana API uygulaması yardımcı olur. <a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table class="rt-table"><thead><tr><th scope="col">sürüm</th><th scope="col">Değişen onay öğesi</th><th scope="col">Ortak parça</th></tr></thead><tbody><tr><th scope="row">Plan A</th><td data-label="Onay öğesi">Başlıkların sırasını kontrol edin</td><td data-label="Ortak parça">Başlık, uygulama notlarının açıklaması, bir sonraki onay için başlık</td></tr><tr><th scope="row">Taslak B</th><td data-label="Onay öğesi">Dahili bağlantının nereye kaydedileceğini kontrol edin</td><td data-label="Ortak parça">Plan A ile aynı</td></tr></tbody></table></div><p>Yalnızca güncelleme zamanına göre değerlendirmek yerine, metni okuyun ve gerekli bilgileri kontrol edin. İkisi bu sefer ayrı onay öğeleri olarak uyumlu olduğundan, yazar her iki satırı da <strong>A ve B</strong> sırasına göre benimsemeye karar verdi. Gerçek cümle çelişkili veya yinelenmişse, içeriğe göre seçim yapmanız gerekir.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="save"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2. Obsidian ile karar verdiğiniz içeriği düzenleyin ve kaydetmeyi onaylayın</h2></div><div class="ce-chapter__body"><p>作業メモ.md'i gerçek Obsidian düzenleyicisinde açtım ve seçilen metni girdim. Bu örnekte ortak bir açıklama bıraktık, iki öğeyi ayrı satırlara koyduk ve çakışma işaretlerini kaldırdık. Otomatik kaydetmeyi bekleyin ve aşağıdaki tam metnin gerçek dosyaya kaydedildiğini onaylayın.</p><pre class="capture-code" data-evidence="resolved-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+- 確認する項目: 見出しの順番を確認する。
+- 確認する項目: 内部リンクの保存先を確認する。
+</code></pre><p>Not defterinizdeki işaretleyicinin kaybolmasına ek olarak, seçilen içeriği, satırların sırasını ve bırakmaya karar verdiğiniz ortak parçaları yeniden okuyun. Metni özetleme kararı ve birleştirmeyi Git tarafında tamamlama işlemi ayrı olarak onaylanacaktır.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="git"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3. Git'in çözülmemiş durumunu kontrol edin ve birleştirmeyi tamamlayın</h2></div><div class="ce-chapter__body"><p>Bu alıştırmada, metni Obsidian ile kaydettikten sonra bile Git durumu <code>UU</code> idi. Bundan sonra, açıkça <code>git add</code>'yi yalnızca hedef notla yaptım ve yerel olarak bir birleştirme taahhüdü yaptım. İki orijinal taahhüt ebeveyn olarak kalır, <code>git ls-files -u</code> boştur ve Git durumu temizdir.</p><p>Aşağıda, yerel Git'teki hedef dosyayı kontrol etmek için bir komut örneği verilmiştir. Kullanmadan önce gerçek not adını ve depoyu kontrol edin. <code>git add</code>'den önce, lütfen kabul edilecek metni ve diğer çalışma durumunu kontrol edin.</p><pre class="capture-code" tabindex="0"><code>git status --short -- "作業メモ.md"
+git ls-files -u -- "作業メモ.md"
+# 採用する本文を確認した後、対象ノートをstageする
+git add -- "作業メモ.md"
+git commit
+# merge完了後の未解決indexと状態を確認する
+git ls-files -u
+git status --short</code></pre><p class="source-note">Git işlemi yerel bir komutla gerçekleştirildi. Obsidian Git eklentisi kullanılmadı ve uzak, itme/çekme ve diğer terminallerdeki yansıma doğrulanmadı. Durumun temiz olması, yedeklemenin veya tüm terminallere teslimatın dayanıklılığını kanıtlamaz.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="reopen"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">4. Not defterini yeniden açın ve seçilen içeriği okuyun</h2></div><div class="ce-chapter__body"><p>Bir birleştirme işlemi oluşturduktan sonra, gerçek dosya gezgininden 作業メモ.md'i yeniden açtım. Okuma görünümünde iki öğe görüntülendi ve çakışma işaretleri yoktu. Yeniden gösterimden önce ve sonra Markdown aynı SHA256 idi ve orijinal A/B kopyası ve her taahhüdün metni de korundu.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/resolved-reopened.png" alt="İş notunu yeniden açan okuma görünümünde seçilen iki onay öğesi görüntülenir" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>Yerel birleştirme tamamlandıktan sonra gerçek dosya gezgininden yeniden görüntülenen bir not. <a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener">Orijinal resmi açın</a></figcaption></figure><p>Bu sonuç, bu yazarın notu ve bir yerel geri yükleme ile doğrulandı. Tüm çakışmalarda ve tüm senkronizasyon yöntemlerinde bilgilerin kaybolmayacağını gösteren bir sonuç değildir.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Orijinal metni, yarışma durumunu ve kaydedilen sonuçları indirin</h2></div><div class="ce-chapter__body"><p>Dört Markdown dosyası, özgün A/B metinleri, çakışma durumu ve son kaydedilen sonucun asıllarıdır. Dağıtım adları durumları ayırmak için verilmiştir; gerçek çalışma notunun adı 作業メモ.md idi. İçeriği karşılaştırma alıştırmasında bunları farklı adlarla kaydedin ve kendi notlarınızla aynı adlı dosyaların üzerine yazmayacağınız bir konumda kontrol edin.</p><div class="sd-table" tabindex="0" role="region" aria-label="Yatay olarak kaydırılabilen tablo"><table class="rt-table"><thead><tr><th scope="col">Durum</th><th scope="col">Dağıtım dosyası</th></tr></thead><tbody><tr><th scope="row">Orijinal A</th><td data-label="Dağıtım dosyası"><a href="/assets/downloads/obsidian-sync-conflict/original-a.md" download="original-a.md">original-a.md</a></td></tr><tr><th scope="row">Orijinal B</th><td data-label="Dağıtım dosyası"><a href="/assets/downloads/obsidian-sync-conflict/original-b.md" download="original-b.md">original-b.md</a></td></tr><tr><th scope="row">Çekişme durumu</th><td data-label="Dağıtım dosyası"><a href="/assets/downloads/obsidian-sync-conflict/conflicted-note.md" download="conflicted-note.md">conflicted-note.md</a></td></tr><tr><th scope="row">Sonuçları kaydet</th><td data-label="Dağıtım dosyası"><a href="/assets/downloads/obsidian-sync-conflict/resolved-note.md" download="resolved-note.md">resolved-note.md</a></td></tr></tbody></table></div><p class="source-note">Okuyucu tarafındaki dağıtılmış dosyanın yakalama ve geri yükleme işlemi bu gerçek uygulama doğrulamasına dahil değildir.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Sık sorulan sorular</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">Metindeki çakışan işaretler ve çakışan kopya aynı mı?</summary><div class="faq-answer">Bu çalışmada, Git tarafından üzerinde çalışılan Markdown gövdesine eklenen çakışma işaretleri incelendi. Özgün metinlerin kopyalarını yazar elle hazırladı. Eşitleme yönteminin otomatik ayrı dosya oluşturma davranışı bu kurtarma örneğinde doğrulanmadı. Kullandığınız yöntemin yönergelerini kontrol edin.</div></details>
+<details class="faq-item"><summary class="faq-summary">Her iki cümleyi de bırakırsam çözebilir miyim?</summary><div class="faq-answer">Bu örnekteki iki onay öğesi uyumludur, bu nedenle yazar bunları ayrı satırlar olarak bırakmaya karar verdi. İçerik tutarsızsa veya aynı açıklama çakışıyorsa, lütfen anlamı ve gerekli bilgileri kontrol edin ve yeniden seçin. Her ikisini de eklemek her zaman bir prosedür değildir.</div></details>
+<details class="faq-item"><summary class="faq-summary">Çakışma işaretçisini silip kaydedersem, Git birleştirme tamamlanacak mı?</summary><div class="faq-answer">Bu alıştırmada, Obsidian ile kaydettikten sonra bile Git durumu UU idi. İçeriği kontrol ettikten, hedef notu ekleyen git ve bir birleştirme taahhüdü oluşturduktan sonra, çözülmemiş dizinin boş olduğunu ve Git durumunun temiz olduğunu doğruladım. Lütfen metnin düzenlenmesini ve Git tarafının tamamlanmasını ayırın.</div></details>
+<details class="faq-item"><summary class="faq-summary">Bu prosedür Obsidian Sync ve iCloud'de doğrulandı mı?</summary><div class="faq-answer">Doğrulama, Linux Obsidian 1.13.7 ve tek bir çevrimdışı yerel Git deposuyla sınırlıdır. Obsidian Sync, iCloud, diğer eşitleme hizmetleri, iki cihaz, iPhone veya SimpleMemo entegrasyonu denenmedi. Geçmiş ve çakışma mekanizmalarını gerçekten kullandığınız yönteme göre kontrol edin.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">Doğrulama ortamı ve onay aralığı</h2></div><div class="ce-chapter__body"><ul><li><strong>Gerçek uygulama: </strong> 2026 yıl 9 ay 30 Linux sürümü Obsidian 1.13.7. Yazar tarafından oluşturulan Japonca notlar, bir çevrimdışı yerel Git deposu, topluluk eklentisi yok.</li><li><strong>Gerçek Git sonuçları: </strong>birleştirme hatası, UU, üç çözülmemiş dizin seviyesi, çakışma işaretçisi, açık hedef aşama ve iki ebeveyn ile birleştirme taahhüdü, çözülmemiş dizin boş, durum temiz.</li><li><strong>Gerçek GUI: </strong> Orijinal metin A, çakışma notları, kaydedilmiş notlar, gerçek dosya gezgini işlemi, seçilen metnin gerçek düzenleyiciye girişi ve kaydedilmesi, görüntüleme okuma, kontrol notu yeniden görüntülenmesi.</li><li><strong>Yardımcı: </strong> Bileşik not ve orijinal metnin kopyası doğrudan bir dosya olarak hazırlanmıştır. Sola ve sağa bölmek, B'yi, kenar çubuğunu, ayar penceresini görüntülemek ve durumu okumak için API uygulamasını kullandım. Git yerel bir kabuk işlemidir.</li><li><strong>Doğrulanmayanlar:</strong> otomatik conflicted-copy oluşturma, Obsidian Sync, iCloud, diğer eşitleme hizmetleri, remote, iki cihazda eşzamanlı düzenleme, iOS/Android/Mac, SimpleMemo teslimi, uzun süreli yedekleme, hız, üretkenlik ve trafik etkisi.</li></ul><p>Orijinal görüntü, işlenmemiş gerçek Obsidian ekranıdır ve Markdown gerçek dosyanın orijinalidir. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/sync-conflict-20260930.md" target="_blank" rel="noopener">Doğrulama kaydı ve orijinal yazışmalar</a> gerçek işlemi, yardımı ve sınırları açıklar.</p><h3>Yöntemi kontrol etmek için giriş</h3><p><a href="/tr/obsidian/sync/">Eşitleme yöntemleri karşılaştırması</a>, yöntem seçmeye yönelik mevcut yazıdır. Bu sayfanın konusu ise özgün metinleri karşılaştırarak geri yükleme örneğidir. Burada SimpleMemo giriş veya teslimi denenmedi.</p><p class="source-note">Bu site YURIKA, K.K. tarafından işletilmektedir ve bağımsız "SimpleMemo" uygulamasını tanıtmaktadır. Bu, Obsidian'nin resmi bir makalesi değildir.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/tr/obsidian/sync/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Sonrakini okuyun</span><strong>Kullandığınız senkronizasyon yöntemini kontrol edin</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="tr" dir="ltr"><a class="site-brand" href="/tr/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian için</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Küçük bir not. Bir sonraki adım.</p><p class="site-footer-description">iPhone'unuzdan Obsidian'a ve e-postaya not gönderin.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Alt bilgi gezinmesi"><div class="footer__col"><p class="footer__col-title">Ürün</p><a href="/tr/download/" class="footer__link">İndir</a><a href="/tr/" class="footer__link">Ana sayfa</a><a href="/tr/obsidian/" class="footer__link">Obsidian entegrasyonu</a></div><div class="footer__col"><p class="footer__col-title">Karşılaştırmalar ve geçiş</p><a href="/tr/vs/" class="footer__link">Karşılaştır</a><a href="/tr/obsidian/compare/" class="footer__link">Obsidian karşılaştırması</a></div><div class="footer__col"><p class="footer__col-title">Destek</p><a href="/tr/about/" class="footer__link">Geliştirici hakkında</a><a href="/tr/faq" class="footer__link">Sık sorulan sorular</a><a href="/tr/privacy" class="footer__link">Gizlilik</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / İşleten: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

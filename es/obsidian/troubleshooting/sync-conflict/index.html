@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <title>Conflicto de sincronización de Obsidian - Cómo guardar y corregir el texto original de los conflictos de Git | SimpleMemo</title>
+  <meta name="description" content="Un ejemplo de recuperación cuando aparece un marcador de conflicto de Git en un cuaderno abierto con Obsidian. Dejé manualmente ambos textos originales creados por el autor, comparé y seleccioné diferentes elementos, y los guardé en el editor real. Se publica la imagen original de la versión de Linux de Obsidian 1.13.7 y Markdown, la finalización de la fusión local de Git y la confirmación de la revisualización. También explicaremos el rango no verificado para cada servicio de sincronización.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="conflicto de sincronización Obsidian - Cómo guardar y arreglar el texto original de los conflictos de Git">
+  <meta property="og:description" content="Un ejemplo de recuperación cuando aparece un marcador de conflicto de Git en un cuaderno abierto con Obsidian. Dejé manualmente ambos textos originales creados por el autor, comparé y seleccioné diferentes elementos, y los guardé en el editor real. Se publica la imagen original de la versión de Linux de Obsidian 1.13.7 y Markdown, la finalización de la fusión local de Git y la confirmación de la revisualización. También explicaremos el rango no verificado para cada servicio de sincronización.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="conflicto de sincronización Obsidian - Cómo guardar y arreglar el texto original de los conflictos de Git">
+  <meta name="twitter:description" content="Un ejemplo de recuperación cuando aparece un marcador de conflicto de Git en un cuaderno abierto con Obsidian. Dejé manualmente ambos textos originales creados por el autor, comparé y seleccioné diferentes elementos, y los guardé en el editor real. Se publica la imagen original de la versión de Linux de Obsidian 1.13.7 y Markdown, la finalización de la fusión local de Git y la confirmación de la revisualización. También explicaremos el rango no verificado para cada servicio de sincronización.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.reader-flow{list-style:none;counter-reset:flow;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;padding:0!important;margin:1.5rem 0}.reader-flow li{counter-increment:flow;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.875rem;color:var(--text-secondary);margin-top:.5rem}@media(max-width:900px){.reader-flow{grid-template-columns:1fr}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/#article",
+  "inLanguage": "es",
+  "headline": "conflicto de sincronización Obsidian - Cómo guardar y arreglar el texto original de los conflictos de Git",
+  "description": "Un ejemplo de recuperación cuando aparece un marcador de conflicto de Git en un cuaderno abierto con Obsidian. Dejé manualmente ambos textos originales creados por el autor, comparé y seleccioné diferentes elementos, y los guardé en el editor real. Se publica la imagen original de la versión de Linux de Obsidian 1.13.7 y Markdown, la finalización de la fusión local de Git y la confirmación de la revisualización. También explicaremos el rango no verificado para cada servicio de sincronización.",
+  "url": "https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/es/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Restaurar conflicto de Git",
+      "item": "https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/#faq",
+  "inLanguage": "es",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Los marcadores de conflicto en el texto y la copia conflictiva son los mismos?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "En este ejemplo comprobamos los marcadores de conflicto que Git insertó en el texto Markdown de la nota de trabajo. El autor creó manualmente las copias de los originales. Este ejemplo de recuperación no comprueba si un método de sincronización genera automáticamente otro archivo. Consulta las instrucciones del método que utilizas."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo resolverlo si dejo ambas oraciones?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Los dos elementos de este ejemplo son compatibles, por lo que el autor decidió conservarlos en líneas separadas. Si el contenido es contradictorio o repite la misma explicación, revisa el significado y la información necesaria antes de elegir. El procedimiento no consiste en añadir siempre ambas versiones."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Si borro y guardo el marcador de conflicto, ¿se completará la fusión de Git?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "En este ejercicio, el estado de Git era UU incluso después de guardarlo con Obsidian. Después de comprobar el contenido, agregar la nota de destino y crear una confirmación de fusión, confirmé que el índice no resuelto estaba vacío y que el estado de Git estaba limpio. Por favor, separe la edición del texto y la finalización del lado de Git."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Se ha verificado este procedimiento en Obsidian Sync y iCloud?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Se verificaron la versión Linux de Obsidian 1.13.7 y un repositorio Git local fuera de línea. Obsidian Sync, iCloud, otros servicios de sincronización, dos terminales, iPhone, los enlaces SimpleMemo no se han probado. Por favor, compruebe el historial y el mecanismo de conflicto de acuerdo con el método real."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="conflict-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="Naugación global" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/es/guides/">Guías</a></li><li><a href="/es/use-cases/">Casos de uso</a></li><li><a href="/es/vs/">Comparar</a></li><li><a href="/es/blog/">Blog</a></li><li><a href="/es/about/">Sobre el desarrollador</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">Descargar</a><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/obsidian/troubleshooting/sync-conflict/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/troubleshooting/sync-conflict/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/troubleshooting/sync-conflict/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/obsidian/troubleshooting/sync-conflict/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/troubleshooting/sync-conflict/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/troubleshooting/sync-conflict/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/troubleshooting/sync-conflict/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/es/obsidian/">Obsidian</a> / Ejemplo de recuperación de conflictos de Git</p><span class="lp-hero__label">Conserva los originales y elige el contenido</span><h1 class="lp-hero__title">Resuelve los conflictos de Git en Obsidian<br>Conserva, compara y guarda los originales</h1><p class="lp-hero__sub">Si aparecen marcadores de conflicto en una nota, conserva por separado las dos versiones originales y decide qué contenido mantener. En este pequeño ejercicio elegimos dos elementos, los guardamos en Obsidian y comprobamos que la fusión local de Git terminara y que la nota volviera a mostrarse correctamente.</p><p class="article-meta">Escrito: <a href="/es/about/">SimpleMemo Developer</a> · Confirmación de operación real: <time datetime="2026-09-30">2026 año 9 mes 30 día</time> · Linux / Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="Contenido de esta página"><p>Contenido de esta página</p><a href="#reading-01"><span aria-hidden="true">01</span><span>El orden de confirmación es el texto original, el contenido seleccionado y los resultados guardados</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Primero, compruebe la forma de su conflicto</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1. Deje los dos textos originales a mano por separado</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">El orden de confirmación es el texto original, el contenido seleccionado y los resultados de guardado</h2></div><div class="ce-chapter__body"><p>El objetivo esta vez es <strong>cuando se incluye un marcador de la competencia en el mismo texto Markdown en la fusión de Git</strong>. Edité una de las notas creadas por el autor con dos ramas del Git local, y confirmé el fallo de fusión real, la comparación del texto original y la corrección manual. No es el resultado de la sincronización con múltiples terminales.</p><ol class="reader-flow" aria-label="El orden de restauración confirmado esta vez"><li><strong>Deje manualmente ambos textos originales</strong><span>Prepare una copia que pueda distinguir cuál es el contenido</span></li><li><strong>Compare la diferencia</strong><span>Compruebe la línea inusual y las partes comunes</span></li><li><strong>Decida el contenido a adoptar</strong><span>Este ejemplo coloca dos elementos compatibles en líneas separadas</span></li><li><strong>Editar y guardar</strong><span>Compruebe la finalización de la fusión en el texto y el lado de Git</span></li><li><strong>Volver a mostrar y confirmar</strong><span>Encolar el contenido seleccionado y guardar Markdown</span></li></ol><p class="source-note">Este orden es un diagrama que organiza este ejercicio. No es un diagrama que muestre la garantía de restauración automática y prevención de pérdidas, y el procedimiento de operación para cada servicio de sincronización.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="identify"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">Primero, compruebe la forma de su competencia</h2></div><div class="ce-chapter__body"><p>En este ejemplo, Git merge se detuvo con el código de salida 1 y 作業メモ.md quedó marcado como <code>UU</code>. El índice de Git conservó la base común y ambas versiones editadas. En el texto aparecieron los marcadores <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>, <code>=======</code> y <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b</code>.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/conflict-markers.png" alt="La nota de trabajo abierta con Obsidian muestra el marcador de conflicto de Git y dos elementos de confirmación" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>La nota con los marcadores de conflicto que generó Git. Se guardan copias de los originales por separado. <a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure><p>Si hay una pantalla de archivos de conflicto de alias o historial en su entorno, verifique de acuerdo con el método de sincronización. La entrada para comprobar el método es <a href="/es/obsidian/sync/">la guía de métodos de sincronización de Obsidian</a>. Los resultados de Git en este artículo no se pueden leer en el comportamiento de Obsidian Sync o iCloud.</p><p>El texto guardado en este estado competitivo es el siguiente. Se publica el texto completo del archivo real, incluido el marcador.</p><pre class="capture-code" data-evidence="conflicted-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 確認する項目: 見出しの順番を確認する。
+=======
+- 確認する項目: 内部リンクの保存先を確認する。
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b
+</code></pre></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="preserve"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1. Deje los dos textos originales a mano por separado</h2></div><div class="ce-chapter__body"><p>Antes de comenzar a editar, guarde cada versión a mano por separado con un nombre que muestre la versión original. Si solo tiene uno de ellos a mano, no trate al otro como si pudiera guardarlo, y compruebe el estado de Git y el historial del método que está utilizando. Esta vez no he intentado recuperar el historial de cada servicio.</p><p>Si desea comprobar la preparación para volver al texto anterior antes de solucionar el conflicto, consulte también <a href="/es/obsidian/backup/">Git, recuperación de archivos y recuperación de copias fuera de la tienda</a>.</p><p>En este ejercicio, <strong>el autor conservó manualmente copias de las versiones A y B antes de la fusión</strong>. Para compararlas, también colocó y abrió <code>原文の控え/案A.md</code> y <code>原文の控え/案B.md</code> dentro de la bóveda. No son copias en conflicto generadas automáticamente por una herramienta de sincronización.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/preserved-originals.png" alt="Comparando el texto original A y B en los paneles izquierdo y derecho de Obsidian" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>El texto original A y B retenido manualmente por el autor. La pantalla izquierda y derecha está asistida por la aplicación API. <a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener">Abrir la imagen original</a></figcaption></figure><div class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente"><table class="rt-table"><thead><tr><th scope="col">versión</th><th scope="col">Cambió el elemento de confirmación</th><th scope="col">Parte común</th></tr></thead><tbody><tr><th scope="row">Plan A</th><td data-label="Artículo de confirmación">Compruebe el orden de los encabezados</td><td data-label="Parte común">Título, explicación de las notas de práctica, encabezado para la siguiente confirmación</td></tr><tr><th scope="row">Borrador B</th><td data-label="Artículo de confirmación">Compruebe dónde guardar el enlace interno</td><td data-label="Parte común">Igual que el Plan A</td></tr></tbody></table></div><p>En lugar de juzgar solo por el tiempo de actualización, lea el texto y verifique la información necesaria. Dado que los dos son compatibles como elementos de confirmación separados esta vez, el autor decidió adoptar ambas líneas en el orden de <strong>A y B</strong>. Si la oración real es contradictoria o duplicada, debe elegir según el contenido.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="save"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2. Edita el contenido acordado en Obsidian y comprueba que se haya guardado</h2></div><div class="ce-chapter__body"><p>Abrimos 作業メモ.md en el editor real de Obsidian e introdujimos el texto elegido. En este ejemplo mantuvimos la explicación común, colocamos los dos elementos en líneas separadas y eliminamos los marcadores de conflicto. Esperamos al guardado automático y verificamos que el archivo real contuviera todo el texto siguiente.</p><pre class="capture-code" data-evidence="resolved-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+- 確認する項目: 見出しの順番を確認する。
+- 確認する項目: 内部リンクの保存先を確認する。
+</code></pre><p>Además de la desaparición del marcador, releeré el contenido seleccionado, el orden de las líneas y las partes comunes que decidí dejar en mi cuaderno. La decisión de resumir el texto y la operación para completar la fusión en el lado de Git se confirmará por separado.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="git"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3. Compruebe el estado no resuelto de Git y complete la fusión</h2></div><div class="ce-chapter__body"><p>En este ejercicio, incluso después de guardar el texto con Obsidian, el estado de Git era <code>UU</code>. Después de eso, hice explícitamente <code>git add</code> con solo la nota de destino e hice una confirmación de fusión localmente. Las dos confirmaciones originales permanecen como padres, el <code>git ls-files -u</code> está vacío y el estado de Git está limpio.</p><p>El siguiente es un ejemplo del comando para comprobar el archivo de destino en el Git local. Compruebe el nombre real de la nota y el repositorio antes de usarlo. Antes de <code>git add</code>, compruebe el texto a adoptar y el otro estado de trabajo.</p><pre class="capture-code" tabindex="0"><code>git status --short -- "作業メモ.md"
+git ls-files -u -- "作業メモ.md"
+# 採用する本文を確認した後、対象ノートをstageする
+git add -- "作業メモ.md"
+git commit
+# merge完了後の未解決indexと状態を確認する
+git ls-files -u
+git status --short</code></pre><p class="source-note">La operación Git se realizó con un comando local. El plug-in Obsidian Git no se utiliza, y el control remoto, el empuje/pull y la reflexión en otros terminales no han sido confirmados. El hecho de que la condición esté limpia no prueba la durabilidad de la copia de seguridad o la entrega a todas las terminales.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="reopen"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">4. Vuelve a abrir el cuaderno y lee el contenido seleccionado</h2></div><div class="ce-chapter__body"><p>Tras crear el commit de merge, volvimos a abrir 作業メモ.md desde el explorador real de archivos. La vista de lectura mostró ambos elementos sin marcadores de conflicto. El archivo Markdown conservó el mismo SHA256 antes y después de abrirlo, y se mantuvieron las copias originales A y B y el contenido de cada commit.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/resolved-reopened.png" alt="Se muestran dos elementos de confirmación seleccionados en la vista de lectura que volvió a abrir la nota de trabajo" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>Notas que se muestran de nuevo desde el explorador de archivos real después de que se complete la fusión local. <a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener">Abre la imagen original</a></figcaption></figure><p>Este resultado fue confirmado con la nota de este autor y una restauración local. No es un resultado que muestre que la información no se perderá en todos los conflictos y en todos los métodos de sincronización.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">Descarga los originales, el estado en conflicto y el resultado guardado</h2></div><div class="ce-chapter__body"><p>Los cuatro archivos Markdown son los originales de las versiones A y B, el estado en conflicto y el resultado final guardado. Los nombres de descarga distinguen cada estado; la nota de trabajo se llamaba 作業メモ.md. Para practicar la comparación, guarda cada archivo con un nombre diferente en un lugar donde no sobrescriba tus notas del mismo nombre.</p><div class="sd-table" tabindex="0" role="region" aria-label="Tabla que se puede desplazar horizontalmente"><table class="rt-table"><thead><tr><th scope="col">Estado</th><th scope="col">File de distribución</th></tr></thead><tbody><tr><th scope="row">Original A</th><td data-label="File de distribución"><a href="/assets/downloads/obsidian-sync-conflict/original-a.md" download="original-a.md">original-a.md</a></td></tr><tr><th scope="row">Texto original B</th><td data-label="File de distribución"><a href="/assets/downloads/obsidian-sync-conflict/original-b.md" download="original-b.md">original-b.md</a></td></tr><tr><th scope="row">Estado de la competencia</th><td data-label="File de distribución"><a href="/assets/downloads/obsidian-sync-conflict/conflicted-note.md" download="conflicted-note.md">conflicted-note.md</a></td></tr><tr><th scope="row">Guardar resultados</th><td data-label="File de distribución"><a href="/assets/downloads/obsidian-sync-conflict/resolved-note.md" download="resolved-note.md">resolved-note.md</a></td></tr></tbody></table></div><p class="source-note">La operación de captura y recuperación en el lado del lector del archivo distribuido no está incluida en esta verificación real de la aplicación.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">Preguntas frecuentes</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">¿Los marcadores de conflicto en el texto y la copia conflictiva son los mismos?</summary><div class="faq-answer">En este ejemplo comprobamos los marcadores de conflicto que Git insertó en el texto Markdown de la nota de trabajo. El autor creó manualmente las copias de los originales. Este ejemplo de recuperación no comprueba si un método de sincronización genera automáticamente otro archivo. Consulta las instrucciones del método que utilizas.</div></details>
+<details class="faq-item"><summary class="faq-summary">¿Puedo resolverlo si dejo ambas oraciones?</summary><div class="faq-answer">Los dos elementos de este ejemplo son compatibles, por lo que el autor decidió conservarlos en líneas separadas. Si el contenido es contradictorio o repite la misma explicación, revisa el significado y la información necesaria antes de elegir. El procedimiento no consiste en añadir siempre ambas versiones.</div></details>
+<details class="faq-item"><summary class="faq-summary">Si borro y guardo el marcador de conflicto, ¿se completará la fusión de Git?</summary><div class="faq-answer">En este ejercicio, el estado de Git era UU incluso después de guardarlo con Obsidian. Después de comprobar el contenido, agregar la nota de destino y crear una confirmación de fusión, confirmé que el índice no resuelto estaba vacío y que el estado de Git estaba limpio. Por favor, separe la edición del texto y la finalización del lado de Git.</div></details>
+<details class="faq-item"><summary class="faq-summary">¿Se ha verificado este procedimiento en Obsidian Sync y iCloud?</summary><div class="faq-answer">Se verificaron la versión Linux de Obsidian 1.13.7 y un repositorio Git local fuera de línea. Obsidian Sync, iCloud, otros servicios de sincronización, dos terminales, iPhone, los enlaces SimpleMemo no se han probado. Por favor, compruebe el historial y el mecanismo de conflicto de acuerdo con el método real.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">Entorno de verificación y rango de confirmación</h2></div><div class="ce-chapter__body"><ul><li><strong>Aplicación real: </strong> 2026 año 9 mes 30 Linux versión Obsidian 1.13.7. Notas japonesas creadas por el autor, un repositorio Git local fuera de línea, sin complemento de la comunidad.</li><li><strong>Resultados reales de Git: </strong>fallo de fusión, tres niveles de UU, índice no resuelto, marcadores de conflicto, confirmación de fusión con etapa objetivo explícita y dos padres, el índice no resuelto está vacío, estado limpio.</li><li><strong>GUI real: </strong> Compruebe la operación del explorador de archivos real del texto original A, las notas de la competencia y las notas guardadas, introduzca y guarde el texto seleccionado en el editor real, lea la vista y vuelva a mostrar las notas.</li><li><strong>Auxiliario: </strong> La nota compuesta y la copia del texto original se prepararon directamente como archivos. Usé la aplicación API para dividir izquierda y derecha, mostrar B, barra lateral, ventana de configuración y leer el estado. Git es una operación de shell local.</li><li><strong>No verificado:</strong> Generación automática de copia en conflicto, Obsidian Sync, iCloud, otros servicios de sincronización, remoto, edición simultánea en dos dispositivos, iOS/Android/Mac, entrega SimpleMemo, copia de seguridad a largo plazo, velocidad, productividad, efecto de entrada.</li></ul><p>La imagen original es la pantalla del Obsidian real que no se ha procesado, y el Markdown es el original del archivo real. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/sync-conflict-20260930.md" target="_blank" rel="noopener">El registro de verificación y la correspondencia original</a> describen la operación real, la asistencia y los límites.</p><h3>Entrada para comprobar el método</h3><p><a href="/es/obsidian/sync/">La guía de comparación de métodos de sincronización</a> es un artículo existente para elegir un método. Esta página divide el tema como ejemplo de comparación y restauración del texto original. En este artículo, no he probado la entrada y entrega de SimpleMemo.</p><p class="source-note">Este sitio es operado por YURIKA, K.K. e introduce la aplicación independiente "SimpleMemo". Este no es un artículo oficial de Obsidian.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/es/obsidian/sync/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">Lea a continuación</span><strong>Compruebe el método de sincronización que está utilizando</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Navegación del pie de página"><div class="footer__col"><p class="footer__col-title">Producto</p><a href="/es/download/" class="footer__link">Descargar</a><a href="/es/" class="footer__link">Inicio</a><a href="/es/obsidian/" class="footer__link">Integración con Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Comparar y cambiar</p><a href="/es/vs/" class="footer__link">Comparar</a><a href="/es/obsidian/compare/" class="footer__link">Comparación de Obsidian</a></div><div class="footer__col"><p class="footer__col-title">Soporte</p><a href="/es/about/" class="footer__link">Sobre el desarrollador</a><a href="/es/faq" class="footer__link">Preguntas frecuentes</a><a href="/es/privacy" class="footer__link">Privacidad</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

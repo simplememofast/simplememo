@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/benchmark-methodology">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Transparansi metode pengukuran — Ukuran tolok ukur SimpleMemo sebagai berikut</title>
+  <meta name="description" content="Bagaimana Anda mengukur 0.4 mulai kedua (mulai hangat) dan transmisi satu ketukan dari SimpleMemo? Ini adalah dokumen metodologi pengukuran E-E-A-T yang secara transparan mengungkapkan lingkungan pengujian, cara mengukur kecepatan startup dan kecepatan transmisi, data mentah, prosedur perbandingan dengan aplikasi lain, dan pembatasan.">
+  <meta name="theme-color" content="#070b14">
+
+  <meta property="og:title" content="Transparansi metode pengukuran — Ukuran tolok ukur SimpleMemo sebagai berikut">
+  <meta property="og:description" content="Bagaimana &quot;0.4 mulai kedua&quot; (mulai hangat) &quot;transmisi satu ketukan&quot; dari SimpleMemo diukur? Lingkungan pengujian, metode pengukuran, dan pembatasan diungkapkan secara transparan.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/blog/benchmark-methodology">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Transparansi metode pengukuran — Ukuran tolok ukur SimpleMemo sebagai berikut">
+  <meta name="twitter:description" content="Bagaimana &quot;0.4 mulai kedua&quot; (mulai hangat) &quot;transmisi satu ketukan&quot; dari SimpleMemo diukur? Lingkungan pengujian, metode pengukuran, dan pembatasan diungkapkan secara transparan.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/benchmark-methodology">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/benchmark-methodology">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/id/blog/benchmark-methodology#article",
+  "inLanguage": "id",
+  "image": "https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png",
+  "headline": "Transparansi metode pengukuran — Ukuran tolok ukur SimpleMemo sebagai berikut",
+  "description": "Bagaimana pembukaan SimpleMemo dalam 0.4 detik saat aplikasi sudah dimuat dan pengiriman satu ketukan diukur? Lingkungan uji, metode, dan keterbatasannya dijelaskan secara transparan.",
+  "url": "https://simplememofast.com/id/blog/benchmark-methodology",
+  "datePublished": "2026-03-16",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/blog/benchmark-methodology"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/id/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Transparansi metode pengukuran",
+      "item": "https://simplememofast.com/id/blog/benchmark-methodology"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/blog/benchmark-methodology#webpage",
+  "inLanguage": "id",
+  "name": "Transparansi metode pengukuran - Metodologi patokan",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  },
+  "url": "https://simplememofast.com/id/blog/benchmark-methodology"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.app-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.app-card__name{font-size:1.05rem;font-weight:700}.app-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.app-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}
+    .disclosure{background:rgba(245,180,60,.06);border:1px solid rgba(245,180,60,.2);border-left:3px solid rgba(245,180,60,.5);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+    .citation-notice{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:2rem 0;font-size:.875rem;color:var(--text-muted);line-height:1.7;text-align:center}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .comparison-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .comparison-table th,.comparison-table td{padding:.75rem 1rem;text-align:center;border-bottom:1px solid var(--border)}
+    .comparison-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .comparison-table td:first-child{font-weight:700;color:var(--text-secondary);white-space:nowrap;text-align:left}
+    .comparison-table thead th{border-bottom:2px solid var(--border)}
+    .comparison-table .highlight{color:var(--accent);font-weight:700}
+    .video-note{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1rem 1.25rem;margin:1.5rem 0;font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/blog/benchmark-methodology" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/benchmark-methodology" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/benchmark-methodology" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/benchmark-methodology" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/benchmark-methodology" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/benchmark-methodology" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/benchmark-methodology" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/blog/benchmark-methodology" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/benchmark-methodology" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+
+<main class="page-content"><div class="container">
+
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+      <div class="lp-hero__label"><span>Metodologi Pengukuran</span></div>
+      <h1 class="lp-hero__title"><span>Transparansi metode pengukuran —<br>SimpleMemo ukuran patokan seperti ini</span></h1>
+      <p class="lp-hero__sub"><span>Bagaimana jumlah "0.4 second start" dan "one-tap transmission" yang diterbitkan oleh SimpleMemo diukur? Semua lingkungan pengujian, prosedur pengukuran, dan pembatasan akan diungkapkan secara transparan. Saya pikir klaim kinerja tanpa metodologi tidak ada artinya. </span></p>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Penulis: <a href="/id/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Tanggal Publikasi: <time datetime="2026-03-16">2026 tahun 03 bulan 16 hari</time></span> </p>
+    </div><nav class="sd-hero-index" aria-label="Isi halaman ini"><p>Isi halaman ini</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Mengapa Anda menerbitkan metode pengukuran</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Lingkungan Pengukuran</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Cara mengukur kecepatan mulai</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+      <p style="color:var(--text-secondary);margin:0;">Waktu 0.4 detik dari ketukan hingga SimpleMemo siap mengetik diukur melalui rekaman layar dan analisis bingkai pada iPhone 16e (A18) dengan iOS 26.5.2, saat aplikasi sudah dimuat, sebagai median 5 percobaan. Sebelumnya kami mencantumkan waktu bolak-balik permintaan pengiriman yang diukur dengan Charles Proxy. Angka tersebut telah ditarik karena catatan tanggal, waktu, dan hasil tiap percobaan tidak tersimpan (2026-09-30). Ini adalah pengukuran pada satu perangkat, bukan pengujian laboratorium yang ketat secara statistik.</p>
+
+    </div>
+
+    <!-- Disclosure -->
+    <div class="disclosure">
+      <span><strong>Pengungkapan informasi:</strong> Penulis (AI ATAKA) adalah pengembang SimpleMemo. Artikel ini mengungkapkan metode pengukuran untuk klaim kinerja produk kami sendiri. Harap dicatat bahwa karena ini adalah pengujian mandiri oleh pengembang, ini berbeda dari verifikasi pihak ketiga.</span>
+
+    </div>
+
+    <!-- Section 1: Why We Publish Our Methodology -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>Mengapa Anda mempublikasikan metode pengukuran</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Komitmen terhadap transparansi</span><span class="app-card__rank">E-E-A-T</span></div>
+          <div class="app-card__desc">
+            <p>Sangat mudah untuk mengklaim kinerja aplikasi. Siapa pun dapat melakukannya jika mereka hanya menulis "mulai 0.4 detik" dan "transmisi satu ketukan". Namun, klaim kinerja yang tidak menentukan metode pengukuran secara inheren tidak berarti.</p>
+            <p style="margin-top:.75rem">Kami percaya bahwa pengguna harus dapat memahami proses pengukuran di balik nomor tersebut. Pada perangkat mana, dalam kondisi apa, berapa kali diuji, dan statistik mana yang diadopsi. Tidak tulus untuk mengklaim menjadi "yang tercepat" tanpa informasi ini.</p>
+            <p style="margin-top:.75rem">Dalam artikel ini, kami akan secara transparan mengungkapkan bagaimana semua nomor patokan SimpleMemo diturunkan. Karena itu diukur dalam metode yang dapat direproduksi, adalah mungkin untuk memverifikasinya dalam kondisi yang sama.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 2: Test Environment -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>Lingkungan Pengukuran</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Detail lingkungan pengujian</span><span class="app-card__rank">Lingkungan</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Terminal:</strong> iPhone 16e (chip A18)</li>
+              <li><strong>OS:</strong> iOS 26.5.2</li>
+              <li><strong>penyimpanan:</strong> 256GB, gratis 14.29GB</li>
+              <li><strong>Jaringan:</strong> Wi-Fi (selama pengujian transmisi), mode dalam penerbangan (selama pengujian antrian offline)</li>
+              <li><strong>Versi SimpleMemo:</strong> 5.7.3 (Versi Rilis App Store)</li>
+              <li><strong>Tanggal implementasi tes terbaru:</strong> 2026 tahun 8 bulan 11 hari</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3: Launch Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>Cara mengukur kecepatan startup</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Dasar dari 0.4 detik</span><span class="app-card__rank">Kecepatan membuka aplikasi</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Metode Pengukuran:</strong> Rekaman layar 60fps direkam dan dianalisis dengan bingkai</li>
+              <li><strong>Interval Pengukuran:</strong> Dari saat Anda mengetuk ikon aplikasi (bingkai tempat jari Anda terpisah) hingga kursor berkedip di bidang teks</li>
+              <li><strong>Kondisi mulai:</strong> Tutup paksa dari pengalih aplikasi dan tunggu lebih dari 5 detik sebelum memulai. Namun, di iOS 26.5.2, bahkan jika Anda mengikuti prosedur ini, itu benar-benar akan <strong>st dengan hangat</strong> (konfirmasi visual dari semua startup dengan merekam). Nilai yang dipublikasikan adalah nilai startup yang hangat</li>
+              <li><strong>Jumlah percobaan:</strong> 5 kali diukur dan nilai median diadopsi</li>
+              <li><strong>Hasil:</strong> 0.4 detik (18 frame pada 60fps)</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Koreksi (2026-08-11):</strong> Sebelumnya kami menulis bahwa pembukaan saat aplikasi sudah dimuat lebih cepat, tetapi angka yang dipublikasikan berasal dari pembukaan dari kondisi belum dimuat yang lebih konservatif. <strong>Pernyataan itu keliru.</strong> Aplikasi memang dihentikan paksa dan ditunggu setidaknya 5 detik setiap kali, tetapi pada iOS 26.5.2 aplikasi sebenarnya tetap dibuka dalam kondisi sudah dimuat. Jadi, angka yang dipublikasikan adalah hasil warm start. Semua aplikasi diuji dalam kondisi yang sama sehingga tetap dapat dibandingkan, tetapi angka tersebut bukan nilai konservatif.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 3.5: Raw Data Table -->
+    <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>Data Rat sampai awal input</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Pengukuran aktual dengan iPhone 16e (A18) dan iOS 26.5.2 (2026 tahun 8 bulan 11, mulai hangat (dipaksa dari pengalih aplikasi dan tunggu lebih dari 5 detik sebelum memulai, tetapi iOS 26.5.2 secara visual mengonfirmasi bahwa itu benar-benar berdiri dengan hangat)). Angkanya adalah detik. <strong>"Sampai awal input"</strong> adalah dari mengetuk ikon hingga keyboard keluar dan Anda benar-benar dapat mengetik, termasuk ketukan yang diperlukan di tengah.</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">Aplikasi</th><th scope="col">Nilai pengukuran aktual dari setiap episode</th><th scope="col">Nilai yang diposting</th><th scope="col">Jumlah kali</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 0.37–0.43)</span></td><td class="highlight">0.40</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>0.90<span style="color:var(--text-muted)">(nilai tercepat)</span></td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">0.95 / 0.93 / 0.92 / 0.92 / 0.92</td><td>0.92</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 1.20–2.37)</span></td><td>1.73</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 1.97–2.23)</span></td><td>2.07</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 2.30–5.10)</span></td><td>2.50</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 2.20–3.30)</span></td><td>2.60</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">Tidak disimpan (kisaran 2.50–3.50)</span></td><td>2.80</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.8rem;color:var(--text-muted);line-height:1.7;margin:.75rem 0 1.5rem">Bear dan Drafts diukur ulang sesuai dengan kondisi karena variasi besar dalam pengukuran 1, dan nilai setiap waktu tetap ada. Aplikasi 6 lainnya hanya menyimpan median dan jangkauan, sehingga ditampilkan seperti itu. <strong>Jangan mengisi tabel dengan nomor yang tidak Anda miliki. </strong></p>
+
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Referensi: <strong>sampai karakter pertama muncul di layar</strong> (menambahkan jumlah 1 kali ke "sampai awal input" di atas). Di sini, nilai setiap episode tetap ada di semua aplikasi. Penekanan tombol bervariasi antara aplikasi dari 0.2 hingga 0.5 detik - itu adalah waktu tangan, bukan waktu aplikasi, jadi itu tidak diadopsi untuk nilai publik.</p>
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal">
+          <table class="comparison-table">
+            <thead>
+              <tr><th scope="col" style="text-align:left">Aplikasi</th><th scope="col">Nilai pengukuran aktual dari setiap episode</th><th scope="col">median</th><th scope="col">Jumlah kali</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">SimpleMemo</th><td style="font-variant-numeric:tabular-nums">1.00 / 0.50 / 0.60 / 0.53 / 0.67</td><td class="highlight">0.60</td><td>5</td></tr>
+              <tr><th scope="row">Drafts</th><td style="font-variant-numeric:tabular-nums">1.33 / 1.75 / 1.62 / 1.67 / 1.73</td><td>1.67</td><td>5</td></tr>
+              <tr><th scope="row">Bear</th><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
+              <tr><th scope="row">Apple Notes</th><td style="font-variant-numeric:tabular-nums">2.20 / 2.80 / 1.30 / 1.70 / 2.70 / 2.14 / 2.88 / 1.47 / 1.68 / 2.73</td><td>2.17</td><td>10</td></tr>
+              <tr><th scope="row">Google Keep</th><td style="font-variant-numeric:tabular-nums">2.44 / 2.43 / 2.17 / 2.09</td><td>2.30</td><td>4</td></tr>
+              <tr><th scope="row">Evernote</th><td style="font-variant-numeric:tabular-nums">2.70 / 5.40 / 2.80 / 2.90 / 2.60</td><td>2.80</td><td>5</td></tr>
+              <tr><th scope="row">OneNote</th><td style="font-variant-numeric:tabular-nums">3.30 / 3.50 / 3.00 / 2.60 / 2.80</td><td>3.00</td><td>5</td></tr>
+              <tr><th scope="row">Notion</th><td style="font-variant-numeric:tabular-nums">3.10 / 3.30 / 2.80 / 3.80 / 3.80</td><td>3.30</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="video-note">
+          <strong>Tentang video pengukuran:</strong> File video yang direkam di layar saat ini tidak tersedia. </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 4: Send Speed Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>Cara mengukur kecepatan transmisi</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Waktu perjalanan pulang pergi untuk mengirim permintaan</span><span class="app-card__rank">Kecepatan transmisi</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>Metode pengukuran:</strong> Pengukuran waktu jaringan oleh Charles Proxy</li>
+              <li><strong>Bagian Pengukuran:</strong> Dari mengetuk tombol kirim ke respons konfirmasi server (HTTP 200)</li>
+              <li><strong>Jaringan:</strong> Latensi ke Cloudflare Edge 15ms Wi-Fi Lingkungan</li>
+              <li><strong>Jumlah percobaan:</strong> 10 kali diukur dan nilai median diadopsi</li>
+              <li><strong>Hasil:</strong> Nomor telah berhenti diposting. Ini karena tidak ada catatan tanggal dan waktu pengukuran ini dan nilai setiap waktu, dan itu tidak dapat dikonfirmasi ulang (2026-09-30. "Waktu permintaan kirim (perjalanan pulang pergi API)" di halaman atas telah dihapus)</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Tambahan:</strong> Nomor ini tidak termasuk waktu pengiriman ke kotak masuk surat. Waktu yang dibutuhkan untuk mencapai kotak masuk Anda tergantung pada penyedia email dan status komunikasi, dan tidak diukur.</p>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 5: Competitor Measurement -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>Pengukuran perbandingan dengan aplikasi lain</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Untuk perbandingan yang adil</span><span class="app-card__rank">Metode perbandingan</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li><strong>perangkat yang sama:</strong> Uji semua aplikasi di iPhone 16e (A18) yang sama</li>
+              <li><strong>Kondisi yang sama:</strong> Diukur pada hari yang sama dan di lingkungan jaringan yang sama</li>
+              <li><strong>Versi terbaru:</strong>Diperbarui ke versi terbaru yang tersedia pada tanggal pengujian</li>
+              <li><strong>Samakan kondisi pembukaan:</strong> sebelum setiap pengukuran, hentikan paksa aplikasi dan tunggu setidaknya 5 detik. Dalam praktiknya, aplikasi tetap terbuka dalam kondisi sudah dimuat.</li>
+              <li><strong>Jumlah percobaan:</strong> Ukur 5 kali per aplikasi dan gunakan nilai median (Apple Notes 10 kali, Google Keep 4 kali)</li>
+              <li><strong>Penginstalan aktual:</strong> Laporkan hanya aplikasi yang telah Anda instal dan uji sendiri</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Section 6: Limitations and Caveats -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>Pembatasan dan tindakan pencegahan</span></h2></div><div class="ce-chapter__body">
+
+      <div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Yang perlu Anda ketahui</span><span class="app-card__rank">Perhatian</span></div>
+          <div class="app-card__desc">
+            <ul style="padding-left:1.2rem;line-height:2.2;">
+              <li>Hasil dapat bervariasi tergantung pada model perangkat, versi iOS, status penyimpanan</li>
+              <li>Diuji hanya pada perangkat 1 dan bukan tes laboratorium yang ketat secara statistik</li>
+              <li>Pembaruan dapat meningkatkan kinerja aplikasi pesaing</li>
+              <li>Angka dalam tabel adalah pengukuran 2026 tahun 8 bulan 11 hari. iOS berikutnya dan pembaruan aplikasi dapat mengubah hasilnya</li>
+              <li><strong>Terakhir diperbarui: 2026-10-03</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div></section>
+
+    <!-- Citation Notice -->
+    <div class="citation-notice">
+      <span>Anda dapat dengan bebas menggunakan metodologi pengukuran ini dengan tautan sumber. Sumber: simplememofast.com/blog/benchmark-methodology</span>
+
+    </div>
+
+    <!-- CTA Box -->
+    <div class="cta-box">
+      <div class="cta-box__title"><span>Mulai menulis dalam 0.4 detik</span></div>
+      <div class="cta-box__desc"><span>Aplikasi catatan dengan waktu terpendek hingga siap mengetik dalam perbandingan 8 aplikasi saat semuanya sudah dimuat. Metode pengukurannya dipublikasikan. Unduh gratis.</span></div>
+      <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Unduh dari App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Unduh dari App Store" loading="lazy"></a>
+
+    </div>
+
+    <!-- Related Articles -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"><span>Artikel terkait</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/id/blog/fastest-memo-app-benchmark"> <span>Tolok Ukur Kecepatan Startup 2026</span> </a>
+        <a href="/id/blog/memo-app-speed-test-2026"> <span>Uji Kecepatan Aplikasi Memo 2026</span> </a>
+        <a href="/id/blog/best-memo-apps-2026"> <span>Aplikasi memo yang direkomendasikan 10 pilihan 2026</span> </a>
+      </div>
+    </div></section>
+
+    <!-- Related Pages -->
+    <section class="lp-section ce-chapter sd-chapter">
+      <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>Halaman terkait</span></h2></div><div class="ce-chapter__body">
+      <div class="internal-links">
+        <a href="/id/vs/"><span>Daftar perbandingan aplikasi</span></a>
+        <a href="/id/devlog/"><span>Catatan pengembangan</span></a>
+        <a href="/id/captio-alternative/"><span>Alternatif Captio</span></a>
+        <a href="/id/blog/"><span>Daftar Blog</span></a>
+      </div>
+    </div></section>
+
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/id/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"><span>Baca selanjutnya</span></span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"><span>Siapkan tempat untuk mengumpulkan catatan dengan integrasi Obsidian</span></span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"><span>Atur integrasi dan tujuan penyimpanan di iPhone agar catatan yang dikirim juga tersimpan di Obsidian.</span></span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/blog/fastest-memo-app-benchmark" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tolok Ukur Kecepatan Startup 2026</span></a></li>
+    <li><a href="/id/blog/memo-app-speed-test-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Tes Kecepatan Aplikasi Memo 2026</span></a></li>
+    <li><a href="/id/devlog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Catatan pengembangan</span></a></li>
+    <li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - untuk Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>Pengembang SimpleMemo. Dari iPhone, kami sedang mengembangkan sebuah aplikasi yang meninggalkan teks di catatan alamat email yang ditetapkan dan mitra. </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/id/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">Profil</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+<section class="related-links ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 id="reading-10" data-ce-number="10"><span>Metode agregasi terkait</span></h2></div><div class="ce-chapter__body"><p><a href="/id/data/voice-shift/">Metode agregasi dan status publikasi dari survei titik tetap "pergeseran suara"</a> menjelaskan cara menghitung catatan penggunaan dan kondisi konfirmasi sebelum publikasi. Angka survei yang dikonfirmasi tidak diposting.</p></div></section>
+</main>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/use-cases/" class="footer__link">Contoh penggunaan</a>
+        <a href="/id/guides/" class="footer__link">Panduan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/captio-alternative/" class="footer__link"><span>Alternatif Captio</span></a>
+        <a href="/id/note-to-email/" class="footer__link">Catatan ke email</a>
+        <a href="/id/vs/" class="footer__link">Bandingkan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bacaan</p>
+        <a href="/id/blog/" class="footer__link"><span>Blog</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/faq" class="footer__link">Pertanyaan umum</a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

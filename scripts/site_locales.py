@@ -3,6 +3,7 @@ from html import escape
 from pathlib import Path
 from functools import lru_cache
 from i18n_config import TOP_CLUSTER, JA_EN_PAIRS
+from localization_registry import alternates_for
 
 ROOT = Path(__file__).resolve().parent.parent
 NAMES = {
@@ -47,6 +48,9 @@ def page_url(rel):
     return "/" + (rel[:-10] if rel.endswith("index.html") else rel[:-5])
 
 def translations(rel, locale):
+    registered = alternates_for(rel)
+    if registered:
+        return registered
     for loc, url in TOP_CLUSTER:
         if file_for(url) == rel:
             return dict(TOP_CLUSTER)
@@ -56,10 +60,10 @@ def translations(rel, locale):
             return {"ja": ja, "en": en}
     return {locale: page_url(rel)}
 
-def language_menu(rel, locale):
+def language_menu(rel, locale, available=None):
     title, same, other = LABELS[locale]
     code, name = NAMES[locale]
-    available = translations(rel, locale)
+    available = translations(rel, locale) if available is None else available
     globe = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>'
     def link(loc, url, is_page):
         current = ' aria-current="page"' if loc == locale and is_page else ''
@@ -76,3 +80,20 @@ def language_menu(rel, locale):
     if homes:
         groups += f'<p class="site-language-group site-language-group--homes">{other}</p><div class="site-language-grid">{homes}</div>'
     return f'<details class="site-languages"><summary aria-label="{name} · {title}">{globe}<span>{code}</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="{locale}" dir="{"rtl" if locale == "ar" else "ltr"}"><p class="site-language-title">{title}</p>{groups}</div></details>'
+
+UI = {
+    "ja": ("メニュー", "このページの内容", "横にスクロールできる表"),
+    "en": ("Explore", "On this page", "Scrollable table"),
+    "zh-Hans": ("菜单", "本页内容", "可横向滚动的表格"),
+    "zh-Hant": ("選單", "本頁內容", "可橫向捲動的表格"),
+    "ko": ("메뉴", "이 페이지의 내용", "가로로 스크롤할 수 있는 표"),
+    "es": ("Menú", "En esta página", "Tabla con desplazamiento horizontal"),
+    "pt-BR": ("Menu", "Nesta página", "Tabela com rolagem horizontal"),
+    "id": ("Menu", "Di halaman ini", "Tabel yang dapat digulir secara horizontal"),
+    "ar": ("القائمة", "محتويات هذه الصفحة", "جدول قابل للتمرير أفقيًا"),
+    "tr": ("Menü", "Bu sayfada", "Yatay kaydırılabilir tablo"),
+}
+
+def unprefixed_file(rel):
+    prefixes = [url.lstrip('/') for locale, url in TOP_CLUSTER if locale != 'ja'] + ['ja/']
+    return next((rel[len(prefix):] for prefix in prefixes if rel.startswith(prefix)), rel)

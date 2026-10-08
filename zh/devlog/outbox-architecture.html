@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/outbox-architecture">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Outbox架构：为了不漏掉信息而设计 | SimpleMemo 开发日志</title>
+  <meta name="description" content="按下发送按钮的瞬间UI清除，但是未发送的信息会留在终端上，重新发送。 Outbox模式的设计流程、SendManager的实施、AES-GCM加密、自动重新发送、NWPathMonitor的线路恢复检测等，全貌进行解说。">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Outbox架构：为了不漏掉信息而设计 | SimpleMemo 开发日志">
+  <meta property="og:description" content="按下发送按钮的瞬间UI清除，但是未发送的信息会留在终端上，重新发送。 AES-GCM加密、自动重新发送、NWPathMonitor线路回归检测的Outbox架构的全貌。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/devlog/outbox-architecture">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Outbox架构：为了不漏掉信息而设计 | SimpleMemo 开发日志">
+  <meta name="twitter:description" content="按下发送按钮的瞬间UI清除，但是未发送的信息会留在终端上，重新发送。 AES-GCM加密、自动重新发送、NWPathMonitor线路回归检测的Outbox架构的全貌。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/outbox-architecture">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/devlog/outbox-architecture#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "Outbox架构：防止溢出的设计",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/devlog/outbox-architecture"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .flow-list { list-style: none; padding: 0; counter-reset: flow; }
+    .flow-list li { counter-increment: flow; padding: 10px 0 10px 40px; position: relative; border-left: 2px solid rgba(82, 160, 255, 0.2); margin-left: 12px; }
+    .flow-list li::before { content: counter(flow); position: absolute; left: -14px; top: 8px; width: 26px; height: 26px; background: rgba(82, 160, 255, 0.15); border: 1px solid rgba(82, 160, 255, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "@id": "https://simplememofast.com/zh/devlog/outbox-architecture#article",
+  "inLanguage": "zh-Hans",
+  "headline": "Outbox架构：为了不溢出信息而设计",
+  "description": "按下发送按钮的瞬间UI清除，但是未发送的信息会留在终端上，重新发送。 AES-GCM加密、自动重新发送、NWPathMonitor线路回归检测的Outbox架构的全貌。",
+  "url": "https://simplememofast.com/zh/devlog/outbox-architecture",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-04",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-outbox-architecture.png?v=7e2bb21d30",
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/devlog/outbox-architecture"
+  },
+  "keywords": [
+    "Outbox 图案",
+    "离线 第一 iOS",
+    "离线第一架构",
+    "AES-GCM iOS加密",
+    "信息 溢出 对策"
+  ],
+  "proficiencyLevel": "Expert",
+  "dependencies": "Apple CryptoKit, Network.framework, BackgroundTasks"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "开发日志",
+      "item": "https://simplememofast.com/zh/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Outbox架构",
+      "item": "https://simplememofast.com/zh/devlog/outbox-architecture"
+    }
+  ]
+}</script>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/"><span>方法</span></a></li>
+        <li><a href="/zh/blog/"><span>博客</span></a></li>
+        <li><a href="/zh/glossary/"><span>术语集</span></a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/devlog/outbox-architecture" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/outbox-architecture" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/devlog/outbox-architecture" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/devlog/outbox-architecture" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/outbox-architecture" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/outbox-architecture" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/outbox-architecture" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/outbox-architecture" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/outbox-architecture" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+  <!-- Header -->
+<!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Outbox架构：为了不漏掉信息而设计</span> </h1>
+      <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者：<a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> </p>
+
+      <!-- ======================== -->
+      <!-- Japanese Content         -->
+      <!-- ======================== -->
+      <div class="">
+        <p class="page-content__date">2026年2月13日</p>
+        <div class="page-content__body">
+
+          <!-- Section 1 -->
+          <h2 id="reading-01" data-ce-number="01">课题：即使发送即清除，也不会漏掉信息</h2>
+          <p>在SimpleMemo中，用户点击发送按钮的瞬间UI被清除，可以马上开始写下一个备忘录。 这就是Captio风格的根基UX。</p>
+          <p>但是现实的网络有300ms~2秒的延迟，也会失败，可能本来就离线。 很多应用程序在等待网络响应后才清除UI。 虽然安全，但是UX不好。 相反，如果立即清除的话，有丢失信息的风险。</p>
+          <p><strong>Outbox模式</strong>同时解决了这个相反的要求。 在发送点击的瞬间将信息永久保存在本地的加密存储（Outbox）中，立即清除UI，在后台进行网络发送。 发送成功后从Outbox中删除，失败后自动重试。 因此<strong>将未发送的信息留在终端上并重新发送</strong>，体感延迟接近零。</p>
+
+          <!-- Section 2 -->
+          <h2 id="reading-02" data-ce-number="02">Outbox图案的设计流程</h2>
+          <p>以下是从点击发送按钮到发送信息的全部流程。</p>
+          <ol class="flow-list">
+            <li><strong>发送点击→首先Outbox对AES-GCM进行加密并永久保存</strong><br>用户点击发送按钮的瞬间，信息被AES-GCM 256bit加密，永久保存到设备的本地存储中。 在这个步骤完成之前，不会进行UI清除。 也就是说，Outbox保存成为防止溢出的第一个防波堤。</li>
+            <li><strong>立即清除UI（用户可以开始写下一个备忘录）</strong><br>Outbox保存成功时，清除文本视图，播放发送动画。 从用户的角度来看，与“发送了”是同义。 完全没有等待网络响应。 Send-to-Reset的目标是感觉不到等待的短（包括动画0.25秒）。</li>
+            <li><strong>在后台通过Relay API发送邮件</strong>与<br>UI清除并行，SendManager向Cloudflare Workers上的Relay API发送HTTP请求。 这个处理不阻止主线程的完全异步。</li>
+            <li><strong>成功后从Outbox中删除</strong><br>Relay 从API收到200响应后，从Outbox安全地删除对应信息。 这样信息的生命周期就完成了。</li>
+            <li><strong>失败后自动重新发送</strong><br>网络错误或服务器错误时，留待发送，线路恢复时、打开应用程序时、后台处理（BGTaskScheduler。 执行的时机由iOS决定）为契机重新发送。 自动重新发送有次数上限。</li>
+            <li><strong>离线时用NWPathMonitor检测线路恢复并自动重新发送</strong><br>发送时离线时，Network.framework的NWPathMonitor监视线路状态，检测到Wi-Fi和蜂窝网络恢复时，自动重新发送Outbox的未发送信息（和上面的5一样，自动重新发送有次数上限）。</li>
+          </ol>
+
+          <!-- Section 3 -->
+          <h2 id="reading-03" data-ce-number="03">SendManager的代码</h2>
+          <p>SendManager的<code>send()</code>函数是Outbox模式的入口点。 首先保存在Outbox，没有网络连接就排队，有连接就立即执行发送。</p>
+<pre tabindex="0"><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+    // まずOutboxに保存（クラッシュや圏外で失わないように）
+    let outboxMessage: OutboxMessage
+    do {
+        outboxMessage = try OutboxManager.shared.add(body: message)
+    } catch {
+        DispatchQueue.main.async { completion(.failure(error)) }
+        return
+    }
+
+    // ネットワーク接続がない場合はキューに入れたことを通知
+    guard NetworkMonitor.shared.isConnected else {
+        BackgroundTaskManager.shared.scheduleRetryTask()
+        DispatchQueue.main.async { completion(.queued) }
+        return
+    }
+
+    // 送信処理を実行
+    performSend(message: message, outboxId: outboxMessage.id, ...)
+}</code></pre>
+          <p>重要的一点是，<code>OutboxManager.shared.add(body:)</code>同步写入永久存储。 这个调用成功的时候，信息会安全地保存在终端上。 无论网络发送结果如何，信息都会一直留在Outbox。</p>
+
+          <!-- Section 4 -->
+          <h2 id="reading-04" data-ce-number="04">AES-GCM加密的实施</h2>
+          <p>Outbox中保存的信息是用户的私人备忘录。 虽说是本地存储，但不能用平文保存。 使用Apple CryptoKit的AES-GCM，在加密方面完全不通过外部SDK的实现。</p>
+          <ul>
+            <li><strong>Apple CryptoKit</strong> — iOS 13以后可以使用。 加密处理不通过外部SDK（仅限Apple纯正）。</li>
+            <li><strong>256-bit对称键</strong> — 保存在Keychain中。</li>
+            <li><strong>认证加密</strong> — AES-GCM同时保证数据的机密性和完整性。 被篡改的数据在解密时会被检测到。</li>
+          </ul>
+<pre tabindex="0"><code>enum OutboxEncryption {
+    private static var encryptionKey: SymmetricKey {
+        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
+            return SymmetricKey(data: existingKey)
+        }
+        let newKey = SymmetricKey(size: .bits256)
+        let keyData = newKey.withUnsafeBytes { Data($0) }
+        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
+        return newKey
+    }
+
+    static func encrypt(_ plainText: String) throws -&gt; Data {
+        guard let data = plainText.data(using: .utf8) else {
+            throw OutboxError.encryptionFailed
+        }
+        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
+        guard let combined = sealedBox.combined else {
+            throw OutboxError.encryptionFailed
+        }
+        return combined
+    }
+}</code></pre>
+          <p>钥匙在第一次需要时自动制作，并保存在Keychain中。 保存的设置是“只有这个终端・第一次解锁后才能读取”（kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly），不能从其他应用程序读取，也不会从备份转移到其他终端。 重启后解锁一次，从锁定中的后台处理中也能读取。 另外，上面的代码例子是写报道时的简略版，现在的代码在钥匙链读取失败时，不会处理“没有钥匙”来制作新的钥匙。</p>
+
+          <!-- Section 5 -->
+          <h2 id="reading-05" data-ce-number="05">数据路径只由Apple纯正构成的意义</h2>
+          <p>Outbox架构中使用的框架都是Apple原生的。</p>
+          <ul>
+            <li><strong>CryptoKit</strong> — AES-GCM加密。 不需要第三方的加密库。</li>
+            <li><strong>Network.framework</strong> — 通过NWPathMonitor监控线路状态。 不需要Reachability库。</li>
+            <li><strong>BackgroundTasks</strong> — BGTaskScheduler的后台重试。</li>
+          </ul>
+          <p>等待发送的路径中没有外部库，有以下含义。</p>
+          <ul>
+            <li><strong>不受外部更新的影响</strong> — 等待发送的处理不会因为第三方库的更新或提供终止而停止运行。</li>
+            <li><strong>安全</strong> — 接触等待发送的备忘录正文的处理（加密、保存、发送）中，第三方的代码无法进入。</li>
+          </ul>
+          <p>另外，整个应用程序也使用外部的SDK（Google登录、Firebase、AppsFlyer）（参考<a href="/zh/devlog/privacy-first-design">隐私第一设计</a>）。 这里所说的“只有Apple纯正”是关于等待发送的数据路径。</p>
+
+          <!-- Section 6 -->
+          <h2 id="reading-06" data-ce-number="06">UI清除和网络发送的分离</h2>
+          <p>Outbox模式的真正价值在于UI层和网络层的完全分离。 看看发送按钮的点击处理程序吧。</p>
+<pre tabindex="0"><code>@objc private func sendButtonTapped() {
+    PerformanceLogger.shared.beginSendToReset()
+    let message = textView.text ?? ""
+    isSending = true
+    sendBarButton.isEnabled = false
+
+    // Animation → UI clear (does NOT wait for network!)
+    performSendAnimation {
+        self.clearTextView()
+        PerformanceLogger.shared.endSendToReset()
+    }
+
+    // Send is async. Does not block UI.
+    SendManager.shared.send(message: message) { [weak self] result in
+        self?.isSending = false
+        self?.updateSendButtonState()
+        switch result {
+        case .success:
+            PerformanceLogger.shared.logEvent(name: "SendSuccess")
+        case .failure(let error):
+            self?.handleSendError(error)
+        case .queued:
+            self?.showQueuedFeedback()
+        }
+    }
+}</code></pre>
+          <p><code>performSendAnimation</code>和<code>SendManager.shared.send</code>完全独立执行。 动画在0.25秒内完成，文本视图被清除。 网络发送在后台异步进行，完全不屏蔽UI。</p>
+          <p>Send-to-Reset的目标是<strong>感觉不到等待的短</strong>。 包括动画也是0.25秒。 用户在点击发送按钮后，就可以开始写下一个备忘录。 这就是Captio风格的UX。</p>
+
+          <!-- FAQ -->
+          <h2 id="reading-07" data-ce-number="07">常见问题</h2>
+
+          <h3>问。 离线发送的备忘录会怎么样？</h3>
+          <p>Outbox加密保存，线路恢复（NWPathMonitor检测）・打开应用程序时・以后台处理为契机，自动重新发送。 自动重新发送有次数上限，达到上限的备忘录在“履历”中长按并选择“重新发送”。</p>
+
+          <h3>问。 关闭应用程序也不会丢失备忘录吗？</h3>
+          <p>Outbox是永久存储。 即使关闭应用程序，重启iPhone也会保留。 下次启动应用程序时，或者通过后台任务自动重试。</p>
+
+          <h3>问。 为什么选择AES-GCM？</h3>
+          <p>Apple CryptoKit原生支持，通过认证加密（Authenticated Encryption）也可以检测篡改。 处理加密不需要外部库这一点也是优点。</p>
+
+          <h3>问。 发送失败时的重试次数是多少？</h3>
+          <p>自动重新发送。 契机是，线路恢复时，打开应用程序时，后台处理（BGTaskScheduler。 执行的时间由iOS决定）。 无法发送的备忘录不会从等待发送中删除，而是重新发送，但自动重新发送有次数上限。</p>
+
+          <!-- Related Articles -->
+          <h2 id="reading-08" data-ce-number="08">相关报道</h2>
+          <div class="related-grid">
+            <a href="/zh/devlog/day1" class="related-card">
+              <div class="related-card__title">【Day1】Captio太喜欢了，想再做一次“那个体验”</div>
+              <div class="related-card__desc">一键发送和防止溢出的设计。 一切都从这里开始。</div>
+            </a>
+            <a href="/zh/devlog/" class="related-card">
+              <div class="related-card__title">开发日志一览</div>
+              <div class="related-card__desc">技术决策和Captio的体验再现的全部记录。</div>
+            </a>
+            <a href="/zh/devlog/uikit-vs-swiftui" class="related-card">
+              <div class="related-card__title">UIKit vs SwiftUI：启动速度的选择</div>
+              <div class="related-card__desc">2026年选择UIKit的理由。 以Time-to-Text 500ms以下为目标的架构设计。</div>
+            </a>
+            <a href="/zh/devlog/relay-api-design" class="related-card">
+              <div class="related-card__title">Relay API：用Cloudflare Workers构建邮件发送基础</div>
+              <div class="related-card__desc">不依赖邮箱的OAuth配合发送。 从在边缘移动的转播API（Cloudflare Workers）用Resend发送。</div>
+            </a>
+            <a href="/zh/devlog/privacy-first-design" class="related-card">
+              <div class="related-card__title">隐私第一设计：偏执的执着</div>
+              <div class="related-card__desc">ephemeral URLSession、日志的处理、应用程序切换器的现行规格。</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- English Content          -->
+      <!-- ======================== -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09"> <span>参考文献</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit/aes/gcm" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — AES.GCM (CryptoKit)</a> — <span>Outbox用于数据加密的带有AES-GCM认证的加密的官方参考</span></li>
+    <li><a href="https://developer.apple.com/documentation/network/nwpathmonitor" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — NWPathMonitor (Network Framework)</a> — <span>用于离线检测和网络状态监视</span></li>
+    <li><a href="https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — BGTaskScheduler</a> — <span>用于后台的再发送处理调度</span></li>
+    <li><a href="https://microservices.io/patterns/data/transactional-outbox.html" target="_blank" rel="noopener" style="color:var(--accent);">Chris Richardson — Pattern: Transactional outbox (microservices.io)</a> — <span>交易Outbox模式的解说（发送的消息在同一处理中写在等待发送的表中，其他处理发送）</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>通过Obsidian合作，创建保存备忘录的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中设置合作和保存地址，发送的备忘录也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代应用程序比较</span></a></li>
+    <li><a href="/zh/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>博客文章一览</span></a></li>
+    <li><a href="/zh/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>备忘录应用程序比较一览</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <!-- Footer -->
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/how-to/" class="footer__link"><span>使用方法</span> </a>
+        <a href="/zh/templates/" class="footer__link"><span>模板</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较与迁移</p>
+        <a href="/zh/captio/" class="footer__link"><span>Captio式</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">读物</p>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+        <a href="/zh/terms" class="footer__link"><span>使用规则</span> </a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

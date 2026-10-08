@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/privacy-architecture/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>프라이버시 설계 — 메모 본문은 어디를 통과하고, 어디에 남지 않는가</title>
+  <meta name="description" content="SimpleMemo의 데이터 경로를 전부 공개합니다. Vault 추가는 로컬 완결이며, AI 태그 지정은 온 디바이스에서 본문을 외부 서버로 전송하지 않으며, 메일 전송은 표준 SMTP이며 E2EE가 아닙니다——할 수 있는 것과 할 수 없는 것을 숨기지 않고 명확히 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="프라이버시 설계 — 메모 본문은 어디를 통과하고, 어디에 남지 않는가">
+  <meta property="og:description" content="Vault추가는 로컬에서 완료됩니다. AI 태그 지정은 온 디바이스에 있습니다. E2EE가 아닌 이유도 포함하여, 데이터의 경로를 전부 공개합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/privacy-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="프라이버시 설계 — 메모 본문은 어디를 통과하고, 어디에 남지 않는가">
+  <meta name="twitter:description" content="Vault추가는 로컬에서 완료됩니다. AI 태그 지정은 온 디바이스에 있습니다. E2EE가 아닌 이유도 포함하여, 데이터의 경로를 전부 공개합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/privacy-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy-architecture/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy-architecture/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy-architecture/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy-architecture/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy-architecture/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy-architecture/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy-architecture/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/privacy-architecture/#article",
+  "inLanguage": "ko",
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "headline": "프라이버시 설계 — 메모 본문은 어디를 통과하고, 어디에 남지 않는가",
+  "description": "SimpleMemo의 데이터 경로를 전부 공개합니다. Vault 추가는 로컬 완결이며, AI 태그 지정은 온디바이스이며, 메일 배송은 표준 SMTP이며 E2EE가 아닙니다——할 수 있는 일과 할 수 없는 것을 숨기지 않고 명문화합니다.",
+  "url": "https://simplememofast.com/ko/privacy-architecture/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/privacy-architecture/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "프라이버시 설계",
+      "item": "https://simplememofast.com/ko/privacy-architecture/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/privacy-architecture/#webpage",
+  "inLanguage": "ko",
+  "name": "프라이버시 설계",
+  "url": "https://simplememofast.com/ko/privacy-architecture/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .flow-steps{list-style:none;margin:1.5rem 0 2rem;padding:0;counter-reset:flow}
+    .flow-steps li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .flow-steps li::before{counter-increment:flow;content:counter(flow);position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .flow-step__title{display:block;font-weight:700;color:var(--text);margin-bottom:.3rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary)}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .honest-box{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0;font-size:.92rem;line-height:1.8;color:var(--text-secondary)}
+    .honest-box strong{color:var(--text)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ko/privacy-architecture/#faq","inLanguage":"ko","mainEntity":[{"@type":"Question","name":"Obsidian Vault에 대한 추가에 외부 서버가 관여합니까?","acceptedAnswer":{"@type":"Answer","text":"관여하지 않습니다. Vault 추가는 단말기 내 Vault 폴더에 파일을 직접 쓰는 것(불가인 경우 URI 폴백)이며, 플러그인도 네트워크도 사용하지 않습니다. 메일 전송을 동반하지 않는 초안의 로컬 저장도 기기 내에서 완료됩니다."}},{"@type":"Question","name":"AI 태그 지정으로 메모 내용이 Apple이나 외부 서버로 전송되지 않나요?","acceptedAnswer":{"@type":"Answer","text":"전송되지 않습니다. 태깅은 Apple Foundation Models에 의한 온 디바이스 AI가 iPhone 내부에서만 수행되며, 네트워크 통신을 동반하지 않습니다. Apple Intelligence 비지원 기종에서는 단말 내부의 경량 정형에 자동으로 폴백되며, 그 경우에도 외부 전송이 없습니다. 자세한 내용은 AI 태그 자동 추가에 대한 해설을(를) 참조하십시오."}},{"@type":"Question","name":"왜 E2EE로 하지 않으시나요?","acceptedAnswer":{"@type":"Answer","text":"메모의 수신지를 “평소의 메일 수신함”으로 설정했기 때문입니다. 수신함에서 읽을 수 있는=수신 서버가 복호될 수 있으므로 E2EE는 구조적으로 성립하지 않습니다. E2EE를 우선시하는 경우 전용 클라이언트가 필수가 되며, 이는 “어느 기기의 메일 앱에서도 읽을 수 있다”는 본 앱의 가치와 교환됩니다. E2EE가 필수인 용도에는 Standard Notes 등을 추천합니다."}},{"@type":"Question","name":"이 내용은 개인정보 처리방침과 어떻게 다른가요?","acceptedAnswer":{"@type":"Answer","text":"법적 취급에 관한 전체 텍스트는 개인정보 처리방침(특히 §12「암호화에 관한 기술적 정보」)에 있습니다. 이 페이지는 그 기술적 내용을 Obsidian 사용자의 관심(로컬 완결 여부)에 따라 경로도로 재구성한 것입니다. 모순이 있는 경우에는 개인정보 처리방침이 우선합니다."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/privacy-architecture/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/privacy-architecture/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/privacy-architecture/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/privacy-architecture/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/privacy-architecture/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/privacy-architecture/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/privacy-architecture/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/privacy-architecture/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy-architecture/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>프라이버시 설계</span>
+        </div>
+        <h1 class="lp-hero__title"> <span>메모 본문은 어디를 통과하고, <br> 어디에 남지 않는지</span> </h1>
+        <p class="lp-hero__sub"> <span>「로컬 Vault에 쓰는 도구인데, 외부 서버를 통과하나요？」——Obsidian 사용자들로부터 가장 많이 받는 질문에 경로도로 답변하는 페이지입니다. 가능한 것(Vault 추가의 로컬 완결·온디바이스 AI·서버 비저장)과 수행되지 않은 것(E2EE가 아님)을 동일한 해상도로 작성합니다. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>저자: <a href="/ko/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 공개일: <time datetime="2026-08-11">2026년 08월 11일</time> · 분석 조건 확인: <time datetime="2026-09-30">2026년 09월 30일</time></span> </p>
+      </div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>메모1통의 데이터 통로</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>서버에 남는 것·남지 않는 것</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>메모 본문의 보호 및 활용 분석</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Data path -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>메모 1통의 데이터 통로</span> </h2></div><div class="ce-chapter__body">
+        <ol class="flow-steps">
+          <li><span class="flow-step__title">단말기 내에서 생성 — AES-GCM-256로 보호</span> 작성한 메모는 먼저 단말기 내부의 Outbox(미전송 큐)에 들어갑니다. Outbox와 전송 기록은 Apple 순정 CryptoKit에 의해 <strong>AES-GCM-256</strong>으로 암호화되며, 256-bit 대칭 키는 Apple Keychain에 보관됩니다. 키는 다른 단말기로 이전되지 않도록 설정되어 있으며, 앱이 암호화·복호화할 때 읽어냅니다. 백업에 포함된 키 복사본도 다른 기기에서는 사용할 수 없습니다. 기종 변경 전에 필요한 메모가 저장 위치에 도착했는지 확인해 주세요. <a href="/ko/privacy">키 관리의 상세 내용과 Apple에 대한 설명</a>. 오프라인인 경우 여기에서 대기하고, 회선이 복구된 후 자동으로 재송부됩니다.</li>
+          <li><span class="flow-step__title">Obsidian Vault에 대한 추가 기록 — 여기서는 완전 로컬</span>Obsidian 연동을 활성화한 경우, Vault에 대한 추가는 <strong>단말기 내 Vault 폴더에 파일을 직접 쓰기</strong>(열 수 없을 경우 URI 폴백)으로 수행되며, 플러그인도 외부 서버도 사용하지 않습니다. Vault 추가 경로에 네트워크가 등장하지 않습니다.</li>
+          <li><span class="flow-step__title">AI 태그 지정 — 온 디바이스에서 완결</span>제목(20자 이내)·태그(1〜3개)·종류(todo/idea/log)의 자동 부여는 <strong>Apple Foundation Models에 의한 디바이스 온 디바이스 AI</strong>가 iPhone 내부에서만 수행됩니다. <strong>태깅을 위해 메모 본문이 외부 서버로 전송되지 않습니다. </strong>Apple Intelligence 비지원 기종은 단말기 내 경량 포맷에 자동으로 폴백합니다.</li>
+          <li><span class="flow-step__title">메일 전송 — TLS으로 통과, 영구 저장 없음</span>전송 시에만 본문은 TLS(HTTPS)으로 당사의 릴레이 API(Cloudflare Workers)와 외부 전송 기반(Resend)을 <strong>통과</strong>합니다. 지속적인 저장은 하지 않으며, 로그에도 기록하지 않습니다. 클라이언트는 <code>URLSessionConfiguration.ephemeral</code>을 사용하며, 쿠키·캐시를 남기지 않습니다.</li>
+          <li><span class="flow-step__title">자신의 받은 편지함으로 — 표준 SMTP으로 배달(=E2EE가 아닙니다)</span>최종 배달은 표준 SMTP입니다. 그렇기 때문에 평소 메일 앱에서 그대로 읽을 수 있지만, <strong>엔드투엔드 암호화(E2EE)가 아닙니다</strong>. 이 설계 판단에 대해서는 아래의 “정직하게 작성해 두는 것”을 참고하십시오.</li>
+        </ol>
+      </div></section>
+
+      <!-- What stays / what doesn't -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>서버에 남는 것·남지 않는 것</span> </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표">
+          <table class="compare-table">
+            <thead><tr><th scope="col">데이터</th><th scope="col">어디에</th><th scope="col">남을까요</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">메모 본문</th><td>당사 서버(Relay/전송 기반)</td><td class="yes">남지 않음(전송 시 통과만·로그 비기록)</td></tr>
+              <tr><th scope="row">메모 본문</th><td>귀하의 메일 수신함</td><td>남다(그것이 목적입니다)</td></tr>
+              <tr><th scope="row">메모 본문</th><td>귀하의 Obsidian Vault(설정 시)</td><td>남는(단말기 내 로컬)</td></tr>
+              <tr><th scope="row">Outbox·전송 기록</th><td>단말기 내에서만</td><td>AES-GCM-256로 암호화 저장</td></tr>
+              <tr><th scope="row">이메일 주소</th><td>Cloudflare D1</td><td class="yes">전송 ID와 대상 해시의 대응을 저장합니다. 리마인더의 옵트인과는 별도로 기록하고, 35일을 초과한 것을 정기적으로 삭제합니다</td></tr>
+              <tr><th scope="row">이용 이벤트·단말기 식별자·진단 정보</th><td>Cloudflare D1</td><td>90일을 초과한 항목을 정기적으로 삭제합니다. 전송 ID를 통해 대상 해시와 연동 가능</td></tr>
+              <tr><th scope="row">AI 태그 지정 입력(본문)</th><td>외부 서버</td><td class="yes">전송되지 않습니다(온디바이스 처리)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></section>
+
+      <!-- Memo protection and analytics -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>메모 본문 보호 및 이용 분석</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>iOS 앱 내에서는 메모 본문 암호화에 CryptoKit을, 키 보관에 Keychain을, 본문 전송에 URLSession을 사용합니다. GoogleSignIn와 Firebase Authentication은 임의의 메일 자동 입력에 사용하고, Firebase App Check는 백엔드 API의 보호에 사용합니다. <strong>자사의 이용 분석과 AppsFlyer는 앱 버전과 분석 선택에 따라 다르게 취급됩니다. </strong></span> </p>
+          <p class="lp-section__lead"> <span>설정에 “이용 상황 분석” 선택이 있는 버전에서는 자사 이용 이벤트와 기기에서 오는 구독 상태 분석이 기본적으로 꺼져 있으며, 동의 후에 시작됩니다. 이러한 버전의 AppsFlyer SDK는 별도의 획득 측정 선택이 제공될 때까지 중단됩니다. 선택 화면이 없는 버전도 자사 이용 이벤트와 기기에서 오는 구독 상태 분석을 전송합니다. 9월 28일부터 적용했던, 이전 방식의 요청을 저장하지 않는 서버 측 제한을 폐지하며, 수집하지 못한 과거 이벤트를 소급해 복원하지 않습니다. AppsFlyer의 획득·이용 측정 조건은 개인정보 처리방침을 확인해 주세요.</span> <span> 유효한 동의가 있는 대응 버전의 자체 분석은 설치·세션 식별자 및 이용 이벤트, 전송 결과 등을 처리합니다.  구버전 AppsFlyer에는 최초 메모 전송 성공, 인증 성공, 과금 화면 표시, 플랜 선택, 구매 성공을 전송하고, 동일한 설치 식별자를 Customer User ID로 설정합니다. 앱에서 설정하는 이벤트 항목에 이메일 주소·메모 본문·인증 코드는 직접 포함하지 않지만, 당사 전송 ID는 수신 해시와 연동되며, 획득 정보와 이용 기록도 연계됩니다. 완전히 익명인 분석이 아닙니다. 동의 철회 및 버전에 따른 조건은 <a href="/ko/privacy">정책 1(E)</a>이며, 항목의 자세한 내용은 <a href="/ko/privacy#technical">개인정보 처리방침</a>을 참조하십시오. </span> </p>
+      </div></section>
+
+      <!-- Honest limitations -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>솔직히 적어 두세요 — E2EE가 아닙니다</span> </h2></div><div class="ce-chapter__body">
+        <div class="honest-box">
+          <p style="margin-bottom:.75rem;"><strong>SimpleMemo는 엔드투엔드 암호화(E2EE)가 아닙니다. </strong>메일 본문은 표준 SMTP로 귀하의 수신함으로 전달됩니다.「 일상적인 메일 앱에서 그대로 읽을 수 있는 것과 경로의 말단까지 암호키를 자신만 보유하는 것은 양립할 수 없으므로 전자를 선택한 설계입니다.</p>
+          <p style="margin-bottom:.75rem;">단말기 내 Outbox 및 전송 기록은 AES-GCM-256로 암호화하고 있지만, 이는 <strong>단말 내부 보호</strong>이며, E2EE를 대신할 수 없습니다（<a href="/ko/glossary/e2e-encryption/" style="color:var(--accent);">E2EE가 무엇인지·왜 본 앱이 해당되지 않는지</a>).</p>
+          <p>기밀성이 최우선이며 E2EE가 필수인 분께는 Standard Notes과 같은 E2EE 설계의 노트 앱이 더 적합합니다. 이를 명시한 뒤, “본문을 서버에 남기지 않음”, “태깅을 단말기 내에서 완료하기”, “Vault 추가를 로컬에서 수행”이 본 앱의 방어 범위입니다.</p>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>자주 묻는 질문</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian Vault에 대한 추가에 외부 서버가 관여합니까?</summary><div class="faq-answer"><p>관여하지 않습니다. Vault 추가는 단말기 내 Vault 폴더에 파일을 직접 쓰는 것(불가인 경우 URI 폴백)이며, 플러그인도 네트워크도 사용하지 않습니다. 메일 전송을 동반하지 않는 초안의 로컬 저장도 기기 내에서 완료됩니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AI 태그 지정으로 메모 내용이 Apple이나 외부 서버로 전송되지 않나요?</summary><div class="faq-answer"><p>전송되지 않습니다. 태깅은 Apple Foundation Models에 의한 온 디바이스 AI가 iPhone 내부에서만 수행되며, 네트워크 통신을 동반하지 않습니다. Apple Intelligence 비지원 기종에서는 단말 내부의 경량 정형에 자동으로 폴백되며, 그 경우에도 외부 전송이 없습니다. 자세한 내용은 <a href="/ko/ai-tags/" style="color:var(--accent);">AI 태그 자동 추가에 대한 해설</a>을(를) 참조하십시오.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">왜 E2EE로 하지 않으시나요?</summary><div class="faq-answer"><p>메모의 수신지를 “평소의 메일 수신함”으로 설정했기 때문입니다. 수신함에서 읽을 수 있는=수신 서버가 복호될 수 있으므로 E2EE는 구조적으로 성립하지 않습니다. E2EE를 우선시하는 경우 전용 클라이언트가 필수가 되며, 이는 “어느 기기의 메일 앱에서도 읽을 수 있다”는 본 앱의 가치와 교환됩니다. E2EE가 필수인 용도에는 Standard Notes 등을 추천합니다.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">이 내용은 개인정보 처리방침과 어떻게 다른가요?</summary><div class="faq-answer"><p>법적 취급에 관한 전체 텍스트는 <a href="/ko/privacy" style="color:var(--accent);">개인정보 처리방침</a>(특히 §12「암호화에 관한 기술적 정보」)에 있습니다. 이 페이지는 그 기술적 내용을 Obsidian 사용자의 관심(로컬 완결 여부)에 따라 경로도로 재구성한 것입니다. 모순이 있는 경우에는 개인정보 처리방침이 우선합니다.</p></div></details></div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>통로를 확인한 후에 시도하십시오</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>무료 3통/일. Vault 추가는 로컬이며, 본문은 서버에 남지 않습니다.</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="App Store에서 다운로드"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="App Store에서 다운로드" loading="lazy"> </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>관련 페이지</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/ko/privacy"><span>개인정보 처리방침(본문)</span></a>
+          <a href="/ko/devlog/privacy-first-design"><span>개발 기록: 프라이버시 퍼스트 설계</span></a>
+          <a href="/ko/glossary/e2e-encryption/"><span>E2EE란(왜 이 앱은 해당되지 않는가)</span></a>
+          <a href="/ko/glossary/aes-gcm/"><span>AES-GCM이란</span></a>
+          <a href="/ko/ai-tags/"><span>AI 태그 자동 추가(온 디바이스)</span></a>
+          <a href="/ko/obsidian/"><span>Obsidian 연동의 구조</span></a>
+          <a href="/ko/vs/obsidian-share-sheet/"><span>Obsidian 공유 시트와의 성실한 비교</span></a>
+          <a href="/ko/faq"><span>자주 묻는 질문</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="devlog" href="/ko/devlog/privacy-first-design" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> 다음에 읽기 </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> 왜 이 설계를 했는지 — 개발 기록 </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> 프라이버시 퍼스트 설계의 의사결정 과정을 개발자가 설명하고 있습니다. </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자신에게 이메일을 보내는 방법</span></a></li>
+    <li><a href="/ko/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>자주 묻는 질문</span></a></li>
+    <li><a href="/ko/blog/memo-app-encryption-comparison" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 암호화 비교</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span></a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

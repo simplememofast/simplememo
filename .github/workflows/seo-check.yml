@@ -149,6 +149,11 @@ jobs:
       - name: Public pages use the shared reading design
         run: python3 scripts/sync_page_design.py --check
 
+      - name: Static translation safeguards fire (self-test)
+        run: python3 scripts/build_site_translations.py --selftest
+      - name: All public topics have complete current translations
+        run: python3 scripts/build_site_translations.py --check
+
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
 

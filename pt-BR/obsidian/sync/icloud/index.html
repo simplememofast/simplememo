@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/icloud/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Procedimento de configuração para sincronizar Obsidian com iCloud — iPhone e Mac [2026] | SimpleMemo</title>
+  <meta name="description" content="Etapas de configuração para sincronizar o iPhone e o Obsidian do Mac com o iCloud Drive. Verifique a mesma conta Apple, a localização do armazenamento e o status de download do arquivo. Também explicaremos as configurações de link e os testes de gravação no SimpleMemo e a confirmação da sincronização de outros terminais.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Procedimento de configuração para sincronizar Obsidian com iCloud — iPhone e Mac [2026] | SimpleMemo">
+  <meta property="og:description" content="Etapas de configuração para sincronizar o iPhone e o Obsidian do Mac com o iCloud Drive. Verifique a mesma conta Apple, a localização do armazenamento e o status de download do arquivo. Também explicaremos as configurações de link e os testes de gravação no SimpleMemo e a confirmação da sincronização de outros terminais.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-27T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/pt-BR/obsidian/sync/icloud/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="pt_BR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Procedimento de configuração para sincronizar Obsidian com iCloud — iPhone e Mac [2026] | SimpleMemo">
+  <meta name="twitter:description" content="Etapas de configuração para sincronizar o iPhone e o Obsidian do Mac com o iCloud Drive. Verifique a mesma conta Apple, a localização do armazenamento e o status de download do arquivo. Também explicaremos as configurações de link e os testes de gravação no SimpleMemo e a confirmação da sincronização de outros terminais.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/pt-BR/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/sync/icloud/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/sync/icloud/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Início",
+      "item": "https://simplememofast.com/pt-BR/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Integração com Obsidian",
+      "item": "https://simplememofast.com/pt-BR/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Resumo dos métodos de sincronização",
+      "item": "https://simplememofast.com/pt-BR/obsidian/sync/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "Sincronizar com iCloud",
+      "item": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/#article",
+  "inLanguage": "pt-BR",
+  "headline": "Configurando etapas para sincronizar Obsidian com iCloud — iPhone e Mac",
+  "description": "Etapas de configuração para sincronizar o iPhone e o Obsidian do Mac com o iCloud Drive. Verifique a mesma conta Apple, a localização do armazenamento e o status de download do arquivo. Também explicaremos as configurações de link e os testes de gravação no SimpleMemo e a confirmação da sincronização de outros terminais.",
+  "url": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/",
+  "datePublished": "2026-08-27",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/#faq",
+  "inLanguage": "pt-BR",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Onde devo colocar a sala de armazenamento na unidade iCloud?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Não diretamente abaixo da Unidade iCloud, mas na pasta \"Obsidian\" na Unidade iCloud. O documento oficial é iCloud Drive/Obsidian/[保管庫名] como local e orienta a usar a pasta com o ícone do aplicativo Obsidian, sem usar uma pasta comum que não tenha esse ícone. No app Arquivos, abra ‘Explorar → iCloud Drive’ e confira se o cofre está dentro da pasta Obsidian."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O caderno do iPhone está vazio ou não está atualizado",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Verifique não apenas o arquivo não baixado, mas também a localização da conta, a localização do armazenamento e o status da Unidade iCloud. O oficial do Obsidian explica que a evacuação de arquivos pode causar problemas de sincronização. No lado do Mac, verifique as configurações de \"Manter Downloads\" para macOS 15 ou posterior e \"Otimizar Armazenamento do Mac\" para 14 e anterior. Alterar as configurações apenas para Mac nem sempre resolve o problema no lado do iPhone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso usar tanto o iCloud quanto o Obsidian Sync oficial?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O documento oficial \"evita misturar serviços de sincronização\" e orienta você a não sincronizar o mesmo armazenamento com vários serviços (por exemplo, uso simultâneo de Obsidian Sync e iCloud). A razão é evitar conflitos e corrupção de dados. Por favor, mantenha os armazenamentos 1 nos métodos de sincronização 1. A comparação do método em si éResumo dos métodos de sincronização."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Posso sincronizar com o iCloud Drive no Windows?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "O documento oficial especifica que o sistema recomendado para iCloud é macOS, iOS e iPadOS, e que o iCloud Drive no Windows pode causar duplicação e corrupção de arquivos. Se você quiser incluir Windows e Android, escolha um método de sincronização diferente do iCloud."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "O SimpleMemo pode ser gravado no armazenamento no iCloud?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "É necessário acessar o armazenamento correspondente, vincular Obsidian e configurações adicionais de destino. Se você puder escrever diretamente na pasta, adicione Obsidian sem abri-la. Primeiro, verifique o texto do destino salvo no \"teste de gravação Obsidian\" e, em seguida, abra a mesma nota em outro terminal para verificar o reflexo do iCloud. O sucesso na escrita, no tempo de sincronização e na edição simultânea não são uniformemente garantidos."
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/#webpage",
+  "inLanguage": "pt-BR",
+  "name": "Procedimento de configuração para sincronizar Obsidian com iCloud — iPhone e Mac [2026] | SimpleMemo",
+  "url": "https://simplememofast.com/pt-BR/obsidian/sync/icloud/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/pt-BR/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 注意ブロック（つまずきどころを並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:28%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">Pular para o conteúdo</a>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navegação principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/pt-BR/guides/">Guias</a><a href="/pt-BR/use-cases/">Casos de uso</a><a href="/pt-BR/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/pt-BR/guides/">Guias</a></li>
+        <li><a href="/pt-BR/use-cases/">Casos de uso</a></li>
+        <li><a href="/pt-BR/vs/">Comparar</a></li>
+        <li><a href="/pt-BR/methods/"><span>Métodos</span></a></li>
+        <li><a href="/pt-BR/blog/"><span>Blog</span></a></li>
+        <li><a href="/pt-BR/glossary/"><span>Glossário</span></a></li>
+        <li><a href="/pt-BR/faq">Perguntas frequentes</a></li>
+        <li><a href="/pt-BR/about/">Sobre o desenvolvedor</a></li>
+        <li><a href="/pt-BR/devlog/">Registro de desenvolvimento</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Baixar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Português · Escolher idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>PT</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="pt-BR" dir="ltr"><p class="site-language-title">Escolher idioma</p><div class="site-language-grid"><a href="/obsidian/sync/icloud/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/sync/icloud/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/sync/icloud/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/sync/icloud/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/sync/icloud/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/sync/icloud/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="pt-BR" aria-current="page"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/id/obsidian/sync/icloud/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/sync/icloud/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/sync/icloud/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Baixar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+<div class="ce-hero-copy">
+        <div class="lp-hero__label">
+          <span>Obsidian × iCloud procedimento de configuração</span>
+        </div>
+        <h1 class="lp-hero__title"><span class="ce-title-line">Obsidian</span><span class="ce-title-line"><span class="ce-title-accent">iCloud</span></span><span class="ce-title-line">Etapas de configuração</span></h1>
+        <p class="lp-hero__sub"> <span>Este é o procedimento para conectar o iPhone e o Obsidian do Mac ao mesmo armazenamento na unidade iCloud. Verifique a mesma conta Apple, a localização do armazenamento e os arquivos no terminal. Se você adicionar do SimpleMemo, também defina o link e salve o destino e verifique a sincronização da gravação e para outro terminal, respectivamente. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>Autor: <a href="/pt-BR/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> ・ Publicado: <time datetime="2026-08-27">2026 ano 8 mês 27 dia</time></span> </p>
+      <a class="ce-read-link" href="#guide-section-1">Ler o artigo <span aria-hidden="true">↓</span></a></div>
+<div class="ce-stage" aria-hidden="true"><p class="ce-stage-label">iPHONE ↔ MAC</p><div class="ce-window"><div class="ce-window-top"><i></i><i></i><i></i><span>Abra o mesmo armazenamento</span></div><div class="ce-chip-grid"><div class="ce-chip">iPhone / iPad</div><div class="ce-chip">Mac</div></div><div class="ce-connector">↕</div><div class="ce-folder"><div class="ce-note">iCloud Unidade /<br>Obsidian /<br>Sua sala de armazenamento</div></div></div><p>Apple Verifique a conta, o local de armazenamento e os arquivos no terminal.</p><p class="ce-stage-foot">Configurando imagem</p></div>
+</div>
+<div class="ce-routes" aria-label="Escolha o assunto que deseja ler"><a class="ce-route" href="#guide-section-2"><span>01</span><b>Prepare a Unidade iCloud</b></a><a class="ce-route" href="#guide-section-3"><span>02</span><b>Coloque o armazenamento</b></a><a class="ce-route" href="#guide-section-4"><span>03</span><b>2 Abrir na unidade</b></a></div>
+<div class="ce-article"><details class="ce-index"><summary>Índice desta página</summary><nav aria-label="Índice da página"><a href="#guide-section-1">Como posso sincronizar 01 Obsidian com iCloud?</a><a href="#guide-section-2">02 Procedimento 1: iCloud Ligue a unidade</a><a href="#guide-section-3">03 Procedimento 2: Crie uma sala de armazenamento dentro de iCloud</a><a href="#guide-section-4">04 Procedimento 3: Abra o mesmo armazenamento com unidades 2</a><a href="#guide-section-5">05 3 itens a serem confirmados no procedimento oficial</a><a href="#guide-section-6">06 iCloud carrega "pasta inteira"</a><a href="#guide-section-7">07 Escopo dos documentos oficiais e confirmação real da máquina</a><a href="#guide-section-8">Escreva do lado de fora para o armazenamento no 08 iCloud</a><a href="#guide-section-9">09 Perguntas Frequentes</a><a href="#guide-section-10">10 páginas relacionadas</a></nav></details>
+
+
+      <!-- Answer block (AIO) -->
+      <section class="lp-section ce-chapter" data-answer-block="obsidian-icloud-sync" style="padding-top:1rem;">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-1" data-ce-number="01"><span>Como sincronizo Obsidian com iCloud? </span></h2></header><div class="ce-chapter__body">
+        <div class="tip-box">
+          <div class="tip-box__title">Em poucas palavras</div>
+          <p style="margin:0 0 .6rem;"><strong>Ligue a Unidade iCloud e crie uma sala de armazenamento na pasta "iCloud Unidade → Obsidian". </strong> Com iPhone, basta ativar "Salvar para iCloud" ao criar um novo repositório e, para Mac, basta selecionar a pasta Obsidian na Unidade iCloud no seletor de arquivos.</p>
+          <p style="margin:0;">Na unidade 2, especifique a mesma pasta de "Abrir pasta como armazenamento". O documento oficial avisa sobre o <strong>local</strong>, e se você sair do <code>iCloud Drive/Obsidian/[保管庫名]</code>, pode haver um problema de sincronização.</p>
+        </div>
+
+      </div></section>
+
+      <!-- Step 0: enable iCloud Drive -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-2" data-ce-number="02"> <span>Passo 1: Ligue a Unidade iCloud</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span> Entre na mesma conta Apple no terminal sincronizado e ative a Unidade iCloud. O nome da tela de configuração varia dependendo da versão do sistema operacional, portanto, verifique também o <a href="https://support.apple.com/ja-jp/118443" target="_blank" rel="noopener">Apple guia de configuração</a>. </span> </p>
+        <ol class="steps-list">
+          <li><strong><span>iPhone / iPad</span></strong><br><span>"Configurações" → Abra o Drive em sua conta → "iCloud" e ative "Sincronizar este iPhone" ou "Sincronizar este iPad". </span></li>
+          <li><strong><span>Mac</span></strong><br><span>Ative "Sincronizar este Mac" em "Configurações do Sistema" → Sua Conta → "iCloud" → "Drive". </span></li>
+        </ol>
+      </div></section>
+
+      <!-- Step: create vault -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-3" data-ce-number="03"> <span>Passo 2: Crie uma sala de armazenamento dentro do iCloud</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>Faça com o primeiro 1. Não importa se você faz isso a partir do iPhone ou do Mac, mas <strong>como fazê-lo é diferente</strong>. iPhone é um 1 de alternância, e o Mac seleciona sua própria pasta. </span> </p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span>Ao fazer com iPhone / iPad</span></h3>
+        <ol class="steps-list">
+          <li><span>Obsidian e toque em <strong>"Criar novo armazenamento"</strong>. </span></li>
+          <li><span>Digite o nome do armazenamento. </span></li>
+          <li><span><strong>Ative "Salvar em iCloud". </strong>Este é o corpo principal. Se você conseguir desligar, o armazenamento permanecerá apenas no terminal. </span></li>
+          <li><span> Toque em "Criar". </span></li>
+        </ol>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span>Ao fazer isso no Mac</span></h3>
+        <ol class="steps-list">
+          <li><span>Obsidian e selecione <strong>"Criar um novo repositório"</strong>. </span></li>
+          <li><span>Vá para <strong>iCloud Drive → Obsidian</strong> com o seletor de arquivos. </span></li>
+          <li><span>Crie uma pasta para o armazenamento e nomeie-a. </span></li>
+          <li><span>Selecione "Criar" e pronto. </span></li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span>Por que está na pasta "Obsidian"</span></div>
+          <p style="margin:0;"><span>No iCloud Drive, há uma área que o aplicativo tem para você. A pasta "Obsidian" com o ícone do aplicativo Obsidian é isso, e a versão iOS do Obsidian lê e grava. Pastas simples criadas por você mesmo com o mesmo nome são diferentes, e o documento oficial avisa <strong> "Não use pastas simples sem ícones de aplicativos"</strong> pelo nome. </span></p>
+        </div>
+      </div></section>
+
+      <!-- Step: open on second device -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-4" data-ce-number="04"> <span>Etapa 3: Abra o mesmo armazenamento na unidade 2</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>2 não <strong>cria um novo</strong>. Vá para abrir a pasta existente. Se você criar um novo aqui, o 2 será alinhado com o mesmo nome. </span> </p>
+        <ol class="steps-list">
+          <li><span>Abra Obsidian no Mac 2th ou iPhone. </span></li>
+          <li><span>Abra o comutador de armazenamento e selecione <strong>"Abrir pasta como armazenamento"</strong>. </span></li>
+          <li><span><strong>iCloud Drive → Obsidian</strong> e selecione a pasta de armazenamento criada com a unidade 1nd. </span></li>
+        </ol>
+      </div></section>
+
+      <!-- Pitfalls -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-5" data-ce-number="05"> <span>3 itens a serem confirmados pelo procedimento oficial</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>O guia oficial adverte que <strong>a localização do armazenamento, evacuação de arquivos e uma mistura de métodos de sincronização</strong>. Verifique os seguintes itens e verifique o reflexo na mesma nota após a operação. </span> </p>
+
+        <div class="cz">
+          <div class="cz__n"><span>Tropeçar 1</span></div>
+          <p class="cz__t"><span>O armazenamento está fora da pasta "Obsidian"</span></p>
+          <p><span>O local correto é <code>iCloud Drive/Obsidian/[保管庫名]</code>. O armazenamento criado diretamente abaixo da Unidade iCloud ou em "Documentos" pode não ser visto na versão iOS do Obsidian ou causar problemas de sincronização. A maneira de verificar é a seguinte. </span></p>
+          <ol>
+            <li><span>Abra o aplicativo "Arquivo" no iPhone. </span></li>
+            <li><span> Toque em Procurar e selecione <strong>iCloud Drive</strong> em "Localização". </span></li>
+            <li><span> esteja na pasta <strong>Obsidian</strong>. Antes de alterar o local, faça backup para outro local e certifique-se de não substituir o armazenamento com o mesmo nome. Após a alteração, abra-o com Obsidian e verifique a sincronização do notebook com outro terminal. </span></li>
+          </ol>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>Tropeçar 2</span></div>
+          <p class="cz__t"><span>iCloud está evacuando arquivos do terminal</span></p>
+          <p><span>iCloud tem um mecanismo que conduz a entidade de arquivos não utilizados do terminal e os deixa apenas na nuvem. <strong>Obsidian acessa diretamente o conteúdo do cofre, portanto, se não houver substância, o arquivo não será encontrado. </strong>O FAQ no documento oficial especifica que essa evacuação causará problemas de sincronização. O manuseio é diferente dependendo da versão macOS. </span></p>
+          <div style="overflow-x:auto" class="ce-table-scroll" role="region" tabindex="0" aria-label="Tabela de comparação (pode ser rolada horizontalmente)">
+            <table class="rt-table">
+            <thead>
+              <tr>
+                <th scope="col"><span>ambiente</span></th>
+                <th scope="col"><span>para fazer</span></th>
+                <th scope="col"><span>Faixa de influência</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><span>macOS 15 (Sequoia) ou posterior</span></th>
+                <td data-label="Para fazer">Clique com o botão direito do mouse na pasta <strong>Obsidian</strong> na unidade <span>iCloud e selecione <strong>"Manter download"</strong></span></td>
+                <td data-label="Escopo de influência"><span class="mk-yes"><span>Somente pasta Obsidian</span></span></td>
+              </tr>
+              <tr>
+                <th scope="row"><span>macOS 14 (Sonoma) antes</span></th>
+                <td data-label="Para fazer"><span>Desligue <strong>"Otimizar Armazenamento do Mac" na configuração iCloud</strong></span></td>
+                <td data-label="Escopo de influência"><span class="mk-part"><span>Todo o armazenamento iCloud no terminal</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <p><span> O documento oficial posiciona isso como "opcional, mas fortemente recomendado para manter o carregamento rápido". <strong>macOS 14 e as configurações anteriores funcionarão além de Obsidian</strong>, então você precisa estar ciente disso antes de cortar. </span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span>Tropeçar 3</span></div>
+          <p class="cz__t"><span>O método de sincronização é sobreposto</span></p>
+          <p><span>A documentação oficial inclui a seção <strong>‘Evite misturar serviços de sincronização’</strong> e orienta a não sincronizar o mesmo cofre com vários serviços, como Obsidian Sync e iCloud ao mesmo tempo. O objetivo é evitar conflitos e corrupção de dados. Se o iCloud gratuito já atende às suas necessidades, mas você quiser experimentar o Sync oficial, <strong>concentre a sincronização em apenas um dos serviços antes</strong> de fazer a troca.</span></p>
+          <p><span>Pelo mesmo motivo, <strong>Windows iCloud Drive evita</strong>. O documento oficial afirma claramente que o sistema recomendado do iCloud é macOS, iOS e iPadOS, e que o iCloud Drive no Windows pode <strong> duplicar ou danificar o arquivo</strong>. Se você também usa Windows e Android, escolherá um método diferente do iCloud. </span></p>
+        </div>
+      </div></section>
+
+      <!-- What actually syncs -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-6" data-ce-number="06"> <span>iCloud carrega "a pasta inteira"</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>O armazenamento é <a href="/pt-BR/obsidian/what-is-vault/">apenas uma pasta</a> e, além do arquivo Markdown que você escreveu, há uma pasta <code>.obsidian</code> com configurações. A unidade iCloud é sincronizada por pasta, então não apenas <strong>notas, mas também configurações são transportadas juntas</strong>. Este é um padrão conveniente para muitas pessoas (temas e teclas de atalho estão disponíveis na unidade 2). </span> </p>
+        <p class="lp-section__lead"> <span>Se você quiser dividir as configurações para cada terminal, o documento oficial <strong> o orienta através da função de alterar a pasta de configurações para cada terminal</strong> (Na seção Syncthing, está escrito que "Se você quiser dividir as configurações para cada terminal, remova <code>.obsidian</code> do destino de sincronização", e presume-se que as configurações estejam no repositório). Não há designação de exclusão para iCloud, portanto, se você quiser dividi-lo, use esta função. </span> </p>
+      </div></section>
+
+      <section class="lp-section ce-chapter"><header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-7" data-ce-number="07"><span>Escopo dos materiais oficiais e confirmação real da máquina</span></h2></header><div class="ce-chapter__body"><p><span> Eu reli o guia oficial de sincronização em inglês e japonês do Obsidian no 2026 ano 9 mês 30. Consulte as informações sobre a localização do armazenamento, o status do download e a mistura de métodos de sincronização. O tempo de atualização da tradução pode variar de acordo com o idioma, portanto, se a operação não corresponder, verifique também a versão em inglês. <strong>Ler materiais e implementações e ser capaz de sincronizar entre terminais é outra confirmação. </strong>Nesta atualização, o tempo de sincronização do iCloud e o comportamento durante a edição simultânea não são realmente medidos. </span></p></div></section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section ce-chapter ce-chapter--wide">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-8" data-ce-number="08"> <span>Escreva de fora para o armazenamento no iCloud</span> </h2></header><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>SimpleMemo pode ser adicionado diretamente às notas no armazenamento que permitiu o acesso. Escrever no iPhone e refletir em outro terminal através do iCloud são estágios diferentes. Primeiro, verifique a gravação no destino de armazenamento e, em seguida, verifique as mesmas notas no Mac, etc. </span> </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">📁 <span>Defina o acesso ao link e armazenamento</span></div>
+            <div class="reason-card__desc"><span>Ative a integração Obsidian com iPhone e selecione a pasta de armazenamento que pode ser usada no aplicativo de arquivos para permitir o acesso. As informações de acesso serão retidas, mas você pode precisar selecionar novamente depois de mover ou alterar suas permissões. Se você puder escrever diretamente na pasta selecionada, poderá adicioná-la sem abrir Obsidian.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📝 <span>Escreva para</span></div>
+            <div class="reason-card__desc"><span>O pós-escrito é a nota diária ou a nota de caixa de entrada que você definiu. Verifique o nome do arquivo e o destino do armazenamento, abra a nota exibida em "Obsidian Write Test" e verifique o texto do teste.<a href="/pt-BR/obsidian/daily-note/">Detalhes das notas adicionais à nota diária</a>.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🤝 <span>Processo de escrita em ordem</span></div>
+            <div class="reason-card__desc"><span>Na implementação<code>NSFileCoordinator</code>e processe gravações sequencialmente na fila. Esta é uma contramedida contra a concorrência e não é uma garantia de que os derramamentos não ocorrerão em todo o processo, incluindo a edição simultânea de outros terminais e a sincronização iCloud.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">⏳ <span>A parte que eu não consegui escrever</span></div>
+            <div class="reason-card__desc"><span>Itens que não podem ser gravados imediatamente serão mantidos no terminal na rota correspondente e tentarão novamente ao retornar à frente do aplicativo. O texto pendente é uma implementação que é criptografada e salva com AES-GCM. Por favor, verifique a exibição pendente/falha e as notas onde você a salvou. O tempo refletido em outro terminal no iCloud muda dependendo do estado da comunicação e do arquivo, e não é necessariamente um certo número de segundos.</span></div>
+          </div>
+        </div>
+        <div class="cta-box">
+          <div class="cta-box__title"><span>Verifique a escrita no cofre</span></div>
+          <p class="cta-box__desc"><span> Ative o link, defina o endereço de armazenamento e adição e verifique o texto curto do teste. O teste de gravação não envia um e-mail, e a sincronização do iCloud com outro terminal será confirmada depois disso. </span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="app-store-badge" aria-label="Baixar na App Store"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Baixar na App Store" loading="lazy"> </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-icloud-ja.svg?v=bb2961b2c1" width="132" height="132" alt="Código QR para baixar pela App Store" loading="lazy">
+
+            <small><span>Usuários de PC podem ler com seus smartphones</span></small>
+          </div>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-9" data-ce-number="09"> <span>Perguntas Frequentes</span> </h2></header><div class="ce-chapter__body">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Onde devo colocar a sala de armazenamento na unidade iCloud? </span></summary>
+            <div class="faq-answer"><span>Não diretamente abaixo da Unidade iCloud, mas na pasta "Obsidian" na Unidade iCloud. O documento oficial é <code>iCloud Drive/Obsidian/[保管庫名]</code> como local e orienta a usar a pasta com o ícone do aplicativo Obsidian, sem usar uma pasta comum que não tenha esse ícone. No app Arquivos, abra ‘Explorar → iCloud Drive’ e confira se o cofre está dentro da pasta Obsidian.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>O caderno do iPhone está vazio ou não está atualizado</span></summary>
+            <div class="faq-answer"><span>Verifique não apenas o arquivo não baixado, mas também a localização da conta, a localização do armazenamento e o status da Unidade iCloud. O oficial do Obsidian explica que a evacuação de arquivos pode causar problemas de sincronização. No lado do Mac, verifique as configurações de "Manter Downloads" para macOS 15 ou posterior e "Otimizar Armazenamento do Mac" para 14 e anterior. Alterar as configurações apenas para Mac nem sempre resolve o problema no lado do iPhone.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span> Posso usar tanto o iCloud quanto o Obsidian Sync oficial? </span></summary>
+            <div class="faq-answer"><span>O documento oficial "evita misturar serviços de sincronização" e orienta você a não sincronizar o mesmo armazenamento com vários serviços (por exemplo, uso simultâneo de Obsidian Sync e iCloud). A razão é evitar conflitos e corrupção de dados. Por favor, mantenha os armazenamentos 1 nos métodos de sincronização 1. A comparação do método em si é<a href="/pt-BR/obsidian/sync/">Resumo dos métodos de sincronização</a>.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>Posso sincronizar com o iCloud Drive no Windows? </span></summary>
+            <div class="faq-answer"><span>O documento oficial especifica que o sistema recomendado para iCloud é macOS, iOS e iPadOS, e que o iCloud Drive no Windows pode causar duplicação e corrupção de arquivos. Se você quiser incluir Windows e Android, escolha um método de sincronização diferente do iCloud.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span>O SimpleMemo pode ser gravado no armazenamento no iCloud? </span></summary>
+            <div class="faq-answer"><span>É necessário acessar o armazenamento correspondente, vincular Obsidian e configurações adicionais de destino. Se você puder escrever diretamente na pasta, adicione Obsidian sem abri-la. Primeiro, verifique o texto do destino salvo no "teste de gravação Obsidian" e, em seguida, abra a mesma nota em outro terminal para verificar o reflexo do iCloud. O sucesso na escrita, no tempo de sincronização e na edição simultânea não são uniformemente garantidos.</span></div>
+          </details>
+        </div>
+      </div></section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span>Ambiente de verificação e escopo de verificação</span></div>
+          <p style="margin:0;"><span> Confirmação de atualização: 2026 ano 9 mês 30. O guia oficial de sincronização Obsidian, o guia de configuração da unidade iCloud para Apple e a fonte de acesso, gravação e processamento de armazenamento SimpleMemo foram comparados. <strong> Não medimos a máquina real. </strong> O tempo de sincronização, os resultados da edição simultânea e a operação de todas as condições na versão de distribuição não podem ser confirmados apenas por esta comparação. A comparação de material no Linux descrita em 2026 8 mês 27 também não é uma verificação física de iCloud.   Depois de alterar as configurações, verifique o armazenamento do texto de teste curto e a reflexão em outro terminal. </span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter">
+        <header class="ce-chapter__head"><h2 class="lp-section__title" id="guide-section-10" data-ce-number="10"> <span>Páginas relacionadas</span> </h2></header><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/pt-BR/obsidian/sync/official-sync/"><span>Configurações e uso de Obsidian Sync</span></a>
+          <a href="/pt-BR/obsidian/sync/"><span>Resumo do método de sincronização (comparação do método 4)</span></a>
+          <a href="/pt-BR/obsidian/"><span>Detalhes da integração com Obsidian</span></a>
+          <a href="/pt-BR/obsidian/daily-note/"><span>Como adicionar às notas diárias</span></a>
+          <a href="/pt-BR/obsidian/what-is-vault/"><span>O que é um cofre (Vault)? Na prática, é uma pasta</span></a>
+          <a href="/pt-BR/obsidian/getting-started/"><span>Como começar com o Obsidian (guia de tela real)</span></a>
+          <a href="/pt-BR/obsidian/pricing/"><span>Preços do Obsidian — O que é possível fazer gratuitamente</span></a>
+          <a href="/pt-BR/faq"><span>Perguntas frequentes</span></a>
+        </div>
+      </div></section>
+
+    </div>
+</div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>Referências</span> </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Getting%20started/Sync%20your%20notes%20across%20devices.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync your notes across devices, fonte original em inglês</a> — <span>Repositório-fonte da documentação oficial. O texto original foi conferido novamente em 30/9/2026. A versão pública está em help.obsidian.md/sync-notes.</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/ja/%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB/%E3%83%87%E3%83%90%E3%82%A4%E3%82%B9%E9%96%93%E3%81%A7%E3%83%8E%E3%83%BC%E3%83%88%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%99%E3%82%8B.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Ajuda - Sincronizar notas entre dispositivos (versão japonesa)</a> — <span>versão japonesa do mesmo repositório. Usado para combinar com a versão em inglês</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-help</a> — <span>Fonte da política de tradução que "o inglês está correto, e todas as páginas serão preparadas em 1 vs. 1 em cada idioma"</span></li>
+    <li><a href="/pt-BR/obsidian/sync/" style="color:var(--accent);"><span>Comparação do método de sincronização do Obsidian (este site)</span></a> — <span> Um artigo que realmente mede a quebra quando Git e Syncthing competem. Clique aqui para a posição de comparação com iCloud. Para um exemplo de correção manual de conflitos de texto Git, consulte <a href="/pt-BR/obsidian/troubleshooting/sync-conflict/">Etapas para deixar o texto original e comparar</a>. </span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">SimpleMemo — App Store</a> — <span>Página de download App Store</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/pt-BR/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>Leia a seguir</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Crie um lugar para suas notas com a integração Obsidian</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Configure a integração e o destino no iPhone para guardar as notas enviadas também no Obsidian.</span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Conteúdo relacionado</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/pt-BR/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Lista de Métodos</span></a></li>
+    <li><a href="/pt-BR/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span> Diário</span></a></li>
+    <li><a href="/pt-BR/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Artigos do blog</span></a></li>
+    <li><a href="/pt-BR/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perguntas frequentes</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="pt-BR" dir="ltr"><a class="site-brand" href="/pt-BR/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Uma pequena nota. Um próximo passo.</p><p class="site-footer-description">Envie notas do seu iPhone para o Obsidian e por e-mail.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+
+      <nav class="footer__nav" aria-label="Navegação do rodapé">
+      <div class="footer__col">
+        <p class="footer__col-title">Produto</p>
+        <a href="/pt-BR/download/" class="footer__link">Baixar</a>
+        <a href="/pt-BR/" class="footer__link">Início</a>
+        <a href="/pt-BR/apple-watch/" class="footer__link">Apple Watch</a>
+        <a href="/pt-BR/obsidian/" class="footer__link">Integração com Obsidian</a>
+        <a href="/pt-BR/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/pt-BR/guides/" class="footer__link">Guias</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparações e migração</p>
+        <a href="/pt-BR/note-to-email/" class="footer__link">Notas por e-mail</a>
+        <a href="/pt-BR/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Suporte</p>
+        <a href="/pt-BR/roadmap/" class="footer__link">Roteiro público</a>
+        <a href="/pt-BR/devlog/" class="footer__link">Registro de desenvolvimento</a>
+        <a href="/pt-BR/about/" class="footer__link">Sobre o desenvolvedor</a>
+        <a href="/pt-BR/faq" class="footer__link">Perguntas frequentes</a>
+        <a href="/pt-BR/privacy" class="footer__link">Privacidade</a>
+        <a href="/pt-BR/contact" class="footer__link">Contato</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -145,7 +145,11 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 </body></html>"""
     if tool and lang == "ja":
         html = capture_inbox_page(html, body, copyright_line)
-    return replace_i18n_lines(html, build_block(lang, BASE + path, [("ja", BASE + ja), ("en", BASE + en)], BASE + ja))
+    from localization_registry import alternates_for
+    rel = path.lstrip('/') + ('index.html' if path.endswith('/') else '.html')
+    alternatives = alternates_for(rel) or {"ja": ja, "en": en}
+    return replace_i18n_lines(html, build_block(lang, BASE + path,
+        [(locale, BASE + url) for locale, url in alternatives.items()], BASE + ja))
 
 
 def csv_text(headers, records):

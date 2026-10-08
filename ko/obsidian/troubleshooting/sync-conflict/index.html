@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <title>Obsidian의 동기화 충돌 — Git 경쟁의 원문 저장 및 수정 방법 | SimpleMemo</title>
+  <meta name="description" content="Obsidian으로 연 노트에 Git 충돌 마커가 나타난 경우의 복원 예시. 저자 작성의 양쪽 원문을 수동으로 남겨두고, 서로 다른 항목을 비교하여 선택한 뒤, 실제 편집기로 저장했습니다. Linux 버전 Obsidian 1.13.7의 원본 이미지와 Markdown, 로컬 Git 병합 완료 및 재표시 확인을 게시합니다. 동기화 서비스별 미검증 범위도 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian의 동기화 충돌 — Git 경쟁의 원문 저장 및 수정 방법">
+  <meta property="og:description" content="Obsidian으로 연 노트에 Git 충돌 마커가 나타난 경우의 복원 예시. 저자 작성의 양쪽 원문을 수동으로 남겨두고, 서로 다른 항목을 비교하여 선택한 뒤, 실제 편집기로 저장했습니다. Linux 버전 Obsidian 1.13.7의 원본 이미지와 Markdown, 로컬 Git 병합 완료 및 재표시 확인을 게시합니다. 동기화 서비스별 미검증 범위도 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian의 동기화 충돌 — Git 경쟁의 원문 저장 및 수정 방법">
+  <meta name="twitter:description" content="Obsidian으로 연 노트에 Git 충돌 마커가 나타난 경우의 복원 예시. 저자 작성의 양쪽 원문을 수동으로 남겨두고, 서로 다른 항목을 비교하여 선택한 뒤, 실제 편집기로 저장했습니다. Linux 버전 Obsidian 1.13.7의 원본 이미지와 Markdown, 로컬 Git 병합 완료 및 재표시 확인을 게시합니다. 동기화 서비스별 미검증 범위도 설명합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/troubleshooting/sync-conflict/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/troubleshooting/sync-conflict/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.reader-flow{list-style:none;counter-reset:flow;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;padding:0!important;margin:1.5rem 0}.reader-flow li{counter-increment:flow;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.875rem;color:var(--text-secondary);margin-top:.5rem}@media(max-width:900px){.reader-flow{grid-template-columns:1fr}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/#article",
+  "inLanguage": "ko",
+  "headline": "Obsidian의 동기화 충돌 — Git 경쟁의 원문 저장 및 수정 방법",
+  "description": "Obsidian으로 연 노트에 Git 충돌 마커가 나타난 경우의 복원 예시. 저자 작성의 양쪽 원문을 수동으로 남겨두고, 서로 다른 항목을 비교하여 선택한 뒤, 실제 편집기로 저장했습니다. Linux 버전 Obsidian 1.13.7의 원본 이미지와 Markdown, 로컬 Git 병합 완료 및 재표시 확인을 게시합니다. 동기화 서비스별 미검증 범위도 설명합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-sync-conflict.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/ko/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Git 충돌 복원",
+      "item": "https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/ko/obsidian/troubleshooting/sync-conflict/#faq",
+  "inLanguage": "ko",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "본문의 경쟁 마커와 conflicted copy는 동일합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번에 확인한 것은 Git이 작업 중인 Markdown 본문에 넣은 경쟁 마커입니다. 원문의 사본은 저자가 수동으로 만들었습니다. 동기화 방식이 자동으로 별도의 파일을 생성하는 동작은 이 복원 예시에서 검증되지 않았습니다. 사용하고 있는 방식의 안내를 확인해 주세요."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "두 문장을 모두 남기면 해결할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 예시의 두 확인 항목은 병행하기 위해 저자가 별개의 행으로 남기기로 결정했습니다. 내용이 모순되거나 같은 설명이 겹치는 경우에는 의미와 필요한 정보를 확인하고 다시 선택해 주세요. 항상 양쪽을 더하면 된다는 절차는 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "경쟁 마커를 삭제하고 저장하면 Git 병합도 완료됩니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 연습에서는 Obsidian으로 저장한 후에도 Git의 상태가 UU였습니다. 내용을 확인하고 대상 노트를 git add한 뒤, merge commit을 생성한 후, 해결되지 않은 인덱스가 비어 있고 Git 상태가 clean이 되었는지 확인했습니다. 본문의 편집과 Git 측의 완료를 구분해서 확인해 주세요."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "이 절차는 Obsidian Sync 및 iCloud에서도 검증되었습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "검증한 것은 Linux 버전 Obsidian 1.13.7과 하나의 오프라인 로컬 Git 저장소입니다. Obsidian Sync, iCloud, 기타 동기화 서비스, 두 대의 단말기, iPhone, SimpleMemo 연동은 시도하지 않았습니다. 이력 및 경쟁 메커니즘은 실제 방식에 맞게 확인해 주세요."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="conflict-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="전 세계 탐색" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/ko/guides/">사용 가이드</a></li><li><a href="/ko/use-cases/">활용 사례</a></li><li><a href="/ko/vs/">비교</a></li><li><a href="/ko/blog/">블로그</a></li><li><a href="/ko/about/">개발자 소개</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">다운로드</a><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/troubleshooting/sync-conflict/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/troubleshooting/sync-conflict/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/troubleshooting/sync-conflict/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/troubleshooting/sync-conflict/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/troubleshooting/sync-conflict/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/troubleshooting/sync-conflict/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/troubleshooting/sync-conflict/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/troubleshooting/sync-conflict/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/ko/obsidian/">Obsidian</a> / Git 충돌 복원 예시</p><span class="lp-hero__label">원문을 남기고, 내용을 선택하십시오</span><h1 class="lp-hero__title">Obsidian의 Git 경쟁을 수정하고 <br> 원문을 남겨 비교하여 저장합니다</h1><p class="lp-hero__sub">본문에 경쟁 마커가 나타나면, 손에 있는 두 원문을 각각 남겨두고, 어떤 내용을 채택할지 확인합니다. 이 작은 연습에서는 두 개의 확인 항목을 선택하여 Obsidian에 저장하고, 로컬 Git의 병합 완료와 재표시까지 확인했습니다.</p><p class="article-meta">집필: <a href="/ko/about/">SimpleMemo Developer</a> · 실제 작업 확인: <time datetime="2026-09-30">2026년9월30일</time> · Linux / Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>확인 순서는 원문·선택 내용·저장 결과</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>우선, 자신의 경쟁 형태를 확인합니다</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1. 손에 있는 두 개의 원문을 각각 남겨두세요</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">확인 순서는 원문·선택 내용·저장 결과</h2></div><div class="ce-chapter__body"><p>이번 대상은 Git 병합에서 <strong> 동일한 Markdown 본문에 경쟁 마커가 포함된 경우</strong>입니다. 저자가 만든 하나의 노트를 로컬 Git의 두 브랜치에서 편집하고, 실제 병합 실패, 원문 비교, 수동 수정을 확인했습니다. 여러 기기에서 동기화한 결과가 아닙니다.</p><ol class="reader-flow" aria-label="이번에 확인한 복원 순서"><li><strong>양쪽 원문을 수동으로 남깁니다</strong><span>어떤 내용인지 구분할 수 있는 사본을 준비하십시오</span></li><li><strong>차이를 비교합니다</strong><span>특이한 한 줄과 공통 부분을 확인합니다</span></li><li><strong>채택할 내용을 결정합니다</strong><span>이 예는 양립할 수 있는 두 항목을 각각 다른 행으로 이동합니다</span></li><li><strong>편집하고 저장합니다</strong><span>본문과 Git 측의 병합 완료를 확인합니다</span></li><li><strong>다시 표시하고 확인합니다</strong><span>선택한 내용과 저장 Markdown을 대조합니다</span></li></ol><p class="source-note">이 순서는 이번 연습을 정리한 도표입니다. 자동 복원 및 소실 방지 보증, 동기화 서비스별 작업 절차를 보여주는 도표가 아닙니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="identify"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">우선, 자신의 경쟁 형태를 확인합니다</h2></div><div class="ce-chapter__body"><p>이 예에서는 Git 병합이 종료 코드 1에서 멈추고, 作業メモ.md이 <code>UU</code>가 되었습니다. Git의 인덱스에는 공통 원본 버전과 두 개의 편집 버전이 남아 있으며, 노트 본문에는 <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b</code>가 포함되어 있습니다.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/conflict-markers.png" alt="Obsidian으로 연 작업 메모에 Git의 경쟁 마커와 두 개의 확인 항목이 표시되고 있습니다" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>Git이 실제로 출력한 경쟁 상태의 노트. 원문의 사본은 별도로 보관하고 있습니다. <a href="/assets/img/obsidian-sync-conflict/conflict-markers.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure><p>귀하의 환경에서 별칭 충돌 파일이나 기록 화면이 표시되는 경우, 해당 동기화 방식에 맞추어 확인해 주시기 바랍니다. 방식을 조사하는 입구는 <a href="/ko/obsidian/sync/">Obsidian의 동기화 방법 가이드</a>입니다. 이 기사의 Git 결과를 Obsidian Sync이나 iCloud의 동작으로 바꿀 수 없습니다.</p><p>이번 경쟁 상태로 저장된 본문은 다음과 같습니다. 마커를 포함하여 실제 파일의 전체를 게시하고 있습니다.</p><pre class="capture-code" data-evidence="conflicted-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 確認する項目: 見出しの順番を確認する。
+=======
+- 確認する項目: 内部リンクの保存先を確認する。
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; draft-b
+</code></pre></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="preserve"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1. 손에 있는 두 개의 원문을 각각 남겨두다</h2></div><div class="ce-chapter__body"><p>편집을 시작하기 전에, 손에 있는 각각의 버전을 원본 버전을 알 수 있는 이름으로 별도로 저장합니다. 하나만 가지고 있는 경우에는, 다른 쪽도 저장한 것으로 간주하지 말고, Git 상태와 사용 중인 방식의 기록을 확인하십시오. 각 서비스의 기록에서 복구하는 작업은 이번에 시도하지 않았습니다.</p><p>경합을 수정하기 전에 이전 본문으로 되돌릴 준비를 확인하려면, <a href="/ko/obsidian/backup/">Git·File Recovery·보관함 외부 복사 복원 예시</a>도 참고하십시오.</p><p>이 연습에서는, <strong>merge 전에 저자가 안 A·안 B의 사본을 수동으로 보관</strong>했습니다. 비교를 위해 보관함 안에도 <code>原文の控え/案A.md</code>과 <code>原文の控え/案B.md</code>을 놓고 열었습니다. 이것들은 동기화 도구가 자동으로 생성한 conflicted copy가 아닙니다.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/preserved-originals.png" alt="Obsidian의 좌우 페인으로 원문의 예비 A와 B를 비교하고 있습니다" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>저자가 수동으로 유지한 원문 A·B. 좌우 표시를 앱 API로 지원했습니다. <a href="/assets/img/obsidian-sync-conflict/preserved-originals.png" target="_blank" rel="noopener">원본 이미지를 엽니다</a></figcaption></figure><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th scope="col">버전</th><th scope="col">특이한 확인 항목</th><th scope="col">공통 부분</th></tr></thead><tbody><tr><th scope="row">안 A</th><td data-label="확인 항목">제목 순서를 확인합니다</td><td data-label="공통 부분">제목, 연습용 노트 설명, 다음 확인이라는 제목</td></tr><tr><th scope="row">안 B</th><td data-label="확인 항목">내부 링크의 저장 대상을 확인합니다</td><td data-label="공통 부분">안 A와 동일</td></tr></tbody></table></div><p>업데이트 시각만으로 판단하지 않고, 문장을 읽어 필요한 정보를 확인합니다. 이번 두 항목은 별도의 확인 항목으로 병행되므로, 저자는 <strong>A·B 순서대로 두 줄 모두 채택하기로 결정했습니다</strong> 실제 문장이 모순되거나 중복되는 경우에는 그 내용에 맞추어 선택해야 합니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="save"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2. 결정한 내용을 Obsidian에서 편집하고, 저장을 확인합니다</h2></div><div class="ce-chapter__body"><p>실제 Obsidian 편집기에서 作業メモ.md을 열고, 선택한 본문을 입력했습니다. 이 예에서는 공통 설명을 남기고, 두 항목을 별도의 행으로 만들며, 충돌 마커를 제거했습니다. 자동 저장을 기다리며, 실제 파일에 다음 전체가 저장되었는지 확인하고 있습니다.</p><pre class="capture-code" data-evidence="resolved-note" tabindex="0"><code># 作業メモ
+
+ローカルの競合を確かめるために著者が作った練習用ノートです。
+
+## 次の確認
+- 確認する項目: 見出しの順番を確認する。
+- 確認する項目: 内部リンクの保存先を確認する。
+</code></pre><p>자신의 노트에서도 마커가 사라진 것에 더해, 선택한 내용, 행 순서, 남기기로 결정한 공통 부분을 다시 읽습니다. 본문을 정리하는 판단과 Git 측에서 머지를 완료하는 작업은 별도로 확인합니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="git"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3. Git의 미해결 상태를 확인하고, 병합을 완료합니다</h2></div><div class="ce-chapter__body"><p>이 연습에서는 Obsidian으로 본문을 저장한 후에도 Git의 상태는 <code>UU</code>이었습니다. 그 후, 대상 노트만 명시하고 <code>git add</code>를 적용한 뒤 로컬에서 merge 커밋을 만들었습니다. 두 개의 원본 커밋이 부모로 남아 있으며, <code>git ls-files -u</code>은 비어 있으며, Git의 상태는 clean이 되었습니다.</p><p>다음은 로컬 Git에서 대상 파일을 확인하는 명령 예시입니다. 실제 노트 이름과 리포지토리를 확인하여 사용합니다. <code>git add</code> 이전에 채택할 본문과 다른 작업 상태를 확인해 주세요.</p><pre class="capture-code" tabindex="0"><code>git status --short -- "作業メモ.md"
+git ls-files -u -- "作業メモ.md"
+# 採用する本文を確認した後、対象ノートをstageする
+git add -- "作業メモ.md"
+git commit
+# merge完了後の未解決indexと状態を確認する
+git ls-files -u
+git status --short</code></pre><p class="source-note">Git 작업은 로컬 명령으로 수행했습니다. Obsidian Git 플러그인은 사용하고 있지 않으며, remote, push/pull, 다른 기기에 반영되는 것을 확인하지 않았습니다. 상태가 clean인 것조차도 백업의 내구성이나 모든 단말기로의 배송을 증명하지 않습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="reopen"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">4. 노트를 다시 열고, 선택한 내용을 읽습니다</h2></div><div class="ce-chapter__body"><p>merge commit을 만든 후, 실제 파일 탐색기에서 作業メモ.md을 다시 열었습니다. 읽기 뷰에 두 개의 항목이 표시되고, 충돌 마커는 없었습니다. 재표시 전후의 Markdown은 동일한 SHA256이며, 원본 A·B의 사본과 각 커밋 본문도 유지되었습니다.</p><figure class="shot"><a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-sync-conflict/resolved-reopened.png" alt="작업 메모를 다시 연 읽기 뷰에 선택한 두 개의 확인 항목이 표시되고 있습니다" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>로컬 병합이 완료된 후 실제 파일 탐색기에서 다시 표시한 노트. <a href="/assets/img/obsidian-sync-conflict/resolved-reopened.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure><p>이 결과는 이 저자 작성 노트와 한 번의 로컬 복원으로 확인한 것입니다. 모든 경쟁 및 모든 동기화 방식에서 정보가 손실되지 않음을 나타내는 결과는 아닙니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">원문·경합 상태·저장 결과를 다운로드하기</h2></div><div class="ce-chapter__body"><p>네 개의 Markdown은 원문 A/B, 경쟁 상태, 최종 저장 결과의 원본입니다. 배포명은 상태를 구분하기 위한 별명이며, 실제 작업 노트명은 作業メモ.md이었습니다. 내용을 비교하는 연습에서는 서로 다른 이름으로 저장하고, 자신의 노트에 있는 동일한 이름 파일을 덮어쓰지 않는 곳에서 확인해 주세요.</p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th scope="col">상태</th><th scope="col">배포 파일</th></tr></thead><tbody><tr><th scope="row">원문 A</th><td data-label="배포 파일"><a href="/assets/downloads/obsidian-sync-conflict/original-a.md" download="original-a.md">original-a.md</a></td></tr><tr><th scope="row">원문 B</th><td data-label="배포 파일"><a href="/assets/downloads/obsidian-sync-conflict/original-b.md" download="original-b.md">original-b.md</a></td></tr><tr><th scope="row">경합 상태</th><td data-label="배포 파일"><a href="/assets/downloads/obsidian-sync-conflict/conflicted-note.md" download="conflicted-note.md">conflicted-note.md</a></td></tr><tr><th scope="row">저장 결과</th><td data-label="배포 파일"><a href="/assets/downloads/obsidian-sync-conflict/resolved-note.md" download="resolved-note.md">resolved-note.md</a></td></tr></tbody></table></div><p class="source-note">배포 파일의 독자 측에서의 가져오기·복원 작업은 이번 실앱 검증에 포함되지 않습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">자주 묻는 질문</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">본문의 경쟁 마커와 conflicted copy는 동일합니까?</summary><div class="faq-answer">이번에 확인한 것은 Git이 작업 중인 Markdown 본문에 넣은 경쟁 마커입니다. 원문의 사본은 저자가 수동으로 만들었습니다. 동기화 방식이 자동으로 별도의 파일을 생성하는 동작은 이 복원 예시에서 검증되지 않았습니다. 사용하고 있는 방식의 안내를 확인해 주세요.</div></details>
+<details class="faq-item"><summary class="faq-summary">두 문장을 모두 남기면 해결할 수 있습니까?</summary><div class="faq-answer">이 예시의 두 확인 항목은 병행하기 위해 저자가 별개의 행으로 남기기로 결정했습니다. 내용이 모순되거나 같은 설명이 겹치는 경우에는 의미와 필요한 정보를 확인하고 다시 선택해 주세요. 항상 양쪽을 더하면 된다는 절차는 아닙니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">경쟁 마커를 삭제하고 저장하면 Git 병합도 완료됩니까?</summary><div class="faq-answer">이번 연습에서는 Obsidian으로 저장한 후에도 Git의 상태가 UU였습니다. 내용을 확인하고 대상 노트를 git add한 뒤, merge commit을 생성한 후, 해결되지 않은 인덱스가 비어 있고 Git 상태가 clean이 되었는지 확인했습니다. 본문의 편집과 Git 측의 완료를 구분해서 확인해 주세요.</div></details>
+<details class="faq-item"><summary class="faq-summary">이 절차는 Obsidian Sync 및 iCloud에서도 검증되었습니까?</summary><div class="faq-answer">검증한 것은 Linux 버전 Obsidian 1.13.7과 하나의 오프라인 로컬 Git 저장소입니다. Obsidian Sync, iCloud, 기타 동기화 서비스, 두 대의 단말기, iPhone, SimpleMemo 연동은 시도하지 않았습니다. 이력 및 경쟁 메커니즘은 실제 방식에 맞게 확인해 주세요.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">검증 환경 및 확인 범위</h2></div><div class="ce-chapter__body"><ul><li><strong>실제 앱:</strong>2026년9월30일의 Linux 버전 Obsidian 1.13.7. 저자가 만든 일본어 노트, 하나의 오프라인 로컬 Git 리포지토리, 커뮤니티 플러그인 없음.</li><li><strong>실제 Git 결과:</strong>merge 실패, UU, 미해결 인덱스의 3단계, 충돌 마커, 명시된 대상의 stage와 두 개의 부모를 가진 merge 커밋, 미해결 인덱스가 비어 있음, 상태 clean.</li><li><strong>실 GUI：</strong>원문 A·경합 노트·저장 후 노트의 실제 파일 탐색기 작업, 실제 편집기에서 선택한 본문 입력 및 저장, 읽기 뷰, 노트 재표시 확인.</li><li><strong>보조:</strong>합성 노트와 원문 사본을 파일로 직접 준비했습니다. 좌우 분할 및 B 표시, 사이드바, 설정 창, 상태 읽기에는 앱 API를 사용했습니다. Git은 로컬 셸 작업입니다.</li><li><strong>미검증:</strong>자동conflicted-copy 생성, Obsidian Sync, iCloud, 기타 동기화 서비스, remote, 두 대에서 동시 편집, iOS/Android/Mac, SimpleMemo 배송, 장기 백업, 속도, 생산성, 유입 효과.</li></ul><p>원본 이미지는 가공되지 않은 실제 Obsidian 화면이며, Markdown은 실제 파일의 원본입니다. <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/sync-conflict-20260930.md" target="_blank" rel="noopener">검증 기록과 원본 대응</a>에 실제 조작·보조·한계를 기재하고 있습니다.</p><h3>방식을 확인하는 입구</h3><p><a href="/ko/obsidian/sync/">동기 방법 비교 가이드</a>는 방식을 선택하기 위한 기존 기사입니다. 이 페이지는 원문을 비교하여 복원하는 사례로서 주제를 구분하고 있습니다. 이 기사에서는 SimpleMemo의 입력 및 배송을 시도하지 않았습니다.</p><p class="source-note">본 사이트는 YURIKA, K.K.가 운영하며, 독립 앱 “SimpleMemo”을 소개하고 있습니다. Obsidian 공식에 의한 기사가 아닙니다.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/ko/obsidian/sync/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">다음에 읽기</span><strong>사용 중인 동기화 방식을 확인합니다</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴"><div class="footer__col"><p class="footer__col-title">프로덕트</p><a href="/ko/download/" class="footer__link">다운로드</a><a href="/ko/" class="footer__link">홈</a><a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a></div><div class="footer__col"><p class="footer__col-title">비교·전환</p><a href="/ko/vs/" class="footer__link">비교</a><a href="/ko/obsidian/compare/" class="footer__link">Obsidian 비교</a></div><div class="footer__col"><p class="footer__col-title">지원</p><a href="/ko/about/" class="footer__link">개발자 소개</a><a href="/ko/faq" class="footer__link">자주 묻는 질문</a><a href="/ko/privacy" class="footer__link">개인정보 보호</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

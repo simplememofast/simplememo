@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/relay-api-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Relay API設計：Cloudflare Workers構建郵件傳送基礎 | SimpleMemo 開發日誌</title>
+  <meta name="description" content="不依賴郵箱的OAuth配合的傳送。 關於Cloudflare Workers + Resend API的邊緣計算郵件傳送基礎，解說郵箱地址驗證（6位數程式碼方式）、多層速率限制、不重複傳送相同備忘錄的冪等性的實現。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- SEO keywords targeting -->
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="Relay API設計：Cloudflare Workers構建郵件傳送基礎 | SimpleMemo 開發日誌">
+  <meta property="og:description" content="不依賴郵箱的OAuth配合傳送。 Cloudflare Workers + Resend API的邊緣計算郵件傳送基礎。 郵箱地址驗證、多層速率限制、冪等性的實施詳情。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/devlog/relay-api-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Relay API設計：Cloudflare Workers構建郵件傳送基礎 | SimpleMemo 開發日誌">
+  <meta name="twitter:description" content="不依賴郵箱的OAuth配合傳送。 Cloudflare Workers + Resend API的邊緣計算郵件傳送基礎。 郵箱地址驗證、多層速率限制、冪等性的實施詳情。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/devlog/relay-api-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/relay-api-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/relay-api-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/relay-api-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/relay-api-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/relay-api-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/relay-api-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/relay-api-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/relay-api-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/relay-api-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/relay-api-design#article",
+  "headline": "Relay API設計：用Cloudflare Workers構建郵件傳送基礎",
+  "description": "不依賴郵箱的OAuth配合傳送。 Cloudflare Workers + Resend API的邊緣計算郵件傳送基礎。 郵箱地址驗證、多層速率限制、冪等性的實施詳情。",
+  "url": "https://simplememofast.com/zh-Hant/devlog/relay-api-design",
+  "inLanguage": "zh-Hant",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-10-02",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-relay-api-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/devlog/relay-api-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "開發日誌",
+      "item": "https://simplememofast.com/zh-Hant/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Relay API設計",
+      "item": "https://simplememofast.com/zh-Hant/devlog/relay-api-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/devlog/relay-api-design#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "Relay API：用Cloudflare Workers構建郵件傳送基礎",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  },
+  "url": "https://simplememofast.com/zh-Hant/devlog/relay-api-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .page-content__body h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-content__body h3 {
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .page-content__body p {
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .page-content__body ul,
+    .page-content__body ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    .page-content__body li {
+      line-height: 1.8;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    pre code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      color: #c8d6e5;
+      background: none;
+      padding: 0;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem;
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: #a8d8ff;
+    }
+    .code-comment { color: #5c6773; }
+    .code-keyword { color: #c678dd; }
+    .code-string { color: #98c379; }
+    .code-number { color: #d19a66; }
+    .code-type { color: #61afef; }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 1.5rem 0;
+      text-align: center;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.85rem;
+      color: #a8d8ff;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .arch-diagram .arrow {
+      color: rgba(82, 160, 255, 0.6);
+    }
+    .arch-diagram .node {
+      display: inline-block;
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      border-radius: 8px;
+      padding: 6px 14px;
+      margin: 4px;
+      color: #c8d6e5;
+      white-space: nowrap;
+    }
+
+    /* Feature / Info Cards */
+    .info-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .info-card__label {
+      font-size: 0.875rem;
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .info-card__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .info-card__desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Related Card Grid */
+    .related-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 1.2rem 0;
+    }
+    @media (min-width: 600px) {
+      .related-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Cross Links */
+    .cross-links {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .cross-links h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .cross-links__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .cross-links__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .cross-links__item {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .cross-links__item:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .cross-links__item-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .cross-links__item-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* CTA Box */
+    .cta-box {
+      background: rgba(82, 160, 255, 0.06);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .cta-box p {
+      margin-bottom: 0.8rem;
+    }
+    .cta-box a {
+      display: inline-block;
+      background: rgba(82, 160, 255, 0.15);
+      border: 1px solid rgba(82, 160, 255, 0.3);
+      border-radius: 20px;
+      padding: 10px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.9rem;
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+    .cta-box a:hover {
+      background: rgba(82, 160, 255, 0.25);
+      box-shadow: 0 0 16px rgba(82, 160, 255, 0.15);
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主導航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh-Hant/guides/">使用指南</a></li>
+        <li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+        <li><a href="/zh-Hant/vs/">比較</a></li>
+        <li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+        <li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+        <li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+        <li><a href="/zh-Hant/faq">常見問題</a></li>
+        <li><a href="/zh-Hant/about/">關於開發者</a></li>
+        <li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/devlog/relay-api-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/relay-api-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/relay-api-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/devlog/relay-api-design" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/devlog/relay-api-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/relay-api-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/relay-api-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/relay-api-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/relay-api-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下載</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+  <!-- Header -->
+<!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>Relay API設計：用Cloudflare Workers構建郵件傳送基礎</span> </h1>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <p class="article-meta">2026年2月13日 公開</p>
+        <div class="page-content__body">
+
+          <h2 id="reading-01">1。 為什麼沒有使用外部郵件提供商的API</h2>
+          <p>製作透過電子郵件傳送備忘錄的應用程式時，首先想到的是大型郵件提供商的傳送API。 但是，對於個人開發者來說，Google OAuth審查的門檻非常高。</p>
+          <p>Google OAuth未透過審查的應用程式會顯示“此應用程式未在Google上確認”的警告畫面。 對於備忘錄應用程式來說，這個警告是致命的。 使用者將自己的想法和個人資訊作為備忘錄傳送。 如果第一次體驗顯示“未經驗證”，誰會信任這個應用程式呢？</p>
+          <p>Google OAuth審查的申請過程，對於個人開發者來說是一條艱難的道路。 隱私政策的準備、範圍的正當性說明、安全評估——對於大公司的團隊來說，對於一個人開發的應用程式來說，為了郵件傳送這一單一功能而支付的成本太大了。</p>
+          <p>需要的是，沒有OAuth審查的複雜性，在不損害使用者信任的情況下可以傳送郵件的解決方案。 答案是自己的Relay API。</p>
+
+          <h2 id="reading-02">2。 Cloudflare Workers + Resend API架構</h2>
+          <p>Relay API的架構既簡單又堅固。 收到來自iOS應用程式的請求，轉播到郵件傳送服務——這是專門設計。</p>
+
+          <div class="arch-diagram" tabindex="0">
+            <span class="node">iOS應用程式</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">繼電器API（Cloudflare工人）</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Resend API</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">電子郵件傳送</span>
+          </div>
+
+          <p><strong>Cloudflare Workers</strong>是在全世界的邊緣位置執行TypeScript程式碼的無伺服器平臺。 在Cloudflare的說明中，因為在名為isolate的輕度執行環境中執行程式碼，所以沒有虛擬機器型的無伺服器發生的冷啟動。</p>
+          <p><strong>Resend API</strong>是現代郵件傳送服務。 SPF/DKIM/DMARC易於設定，可以從TypeScript輕鬆呼叫。</p>
+          <p>在費用方面，Cloudflare Workers的免費計劃可以使用到1日100000請求，Resend的免費計劃可以使用1日100通·月3,000通（2026年10月時點各公司的收費頁面）。 從小開始，根據傳送量轉為收費方案的構成。</p>
+
+          <h2 id="reading-03">3。 郵箱地址驗證（6數字程式碼方式）</h2>
+          <p>Relay API只向已驗證的郵箱地址傳送備忘錄。 這是防止濫用的最基本的防禦層。</p>
+          <p>在開始傳送備忘錄之前，需要驗證傳送地址的郵箱地址。</p>
+          <ul>
+            <li>使用者在應用程式中輸入郵箱地址</li>
+            <li>Relay API將6位數的驗證碼傳送到該地址</li>
+            <li>將使用者收到的6數字程式碼輸入應用程式</li>
+            <li>驗證完成。 之後，允許向該郵箱地址傳送備忘錄</li>
+          </ul>
+          <p>透過這個機制，防止擅自向他人的郵箱傳送備忘錄。 驗證碼會傳送到該地址的收件箱，所以看不到收件箱的人，無法確認該地址作為傳送地址。</p>
+          <p>每個郵箱地址只驗證一次。 一旦驗證完成，以後無需輸入程式碼就可以繼續傳送備忘錄。</p>
+
+          <h2 id="reading-04">4。 多層速率限制的實施</h2>
+          <p>為了防止郵件傳送API的濫用，在多個層中實施了速率限制。</p>
+
+<pre tabindex="0"><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+  <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
+  <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
+  <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
+  <span class="code-string">globalPerDay</span>: <span class="code-number">300</span>,
+};</code></pre>
+
+          <div class="info-card">
+            <div class="info-card__label">裝置級別</div>
+            <div class="info-card__title">裝置單位的限制</div>
+            <div class="info-card__desc">防止1臺裝置過度傳送。 設定每1分鐘30件，1每天200件的上限。 雖然是正常使用備忘錄無法達到的閾值，但是透過自動化停止大量傳送。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">IP級別</div>
+            <div class="info-card__title">IP地址單位的限制</div>
+            <div class="info-card__desc">限制來自同一網路的大量請求。 1每小時120件。 保護基礎設施免受使用多個裝置的攻擊。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">全球</div>
+            <div class="info-card__title">全球限制</div>
+            <div class="info-card__desc">基礎設施整體的保護。 1每天300件的全球上限，作為最後的制止（每個上限的數值是設計時的，可能會發生變化）。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">2026-09 補充</div>
+            <div class="info-card__title">現在的上限</div>
+            <div class="info-card__desc">每個終端的上限和整體1天的上限，在2026年6月拆除了。 現在的傳送上限是每個IP地址的1小時的上限。</div>
+          </div>
+
+          <p>計數器儲存在Cloudflare KV中，每個時間視窗都會重置。 在透過正常的傳送的同時，抑制了不正當的大量訪問。</p>
+
+          <h2 id="reading-05">5。 冪等性：為了不重複傳送相同的備忘錄而設計</h2>
+          <p>網路通訊必然存在不確定性。 從按下傳送按鈕到回覆之間，通訊可能會中斷。 應用程式判斷為超時，嘗試重新傳送，但實際上第一個請求已經到達了伺服器——這是常見的場景。</p>
+          <p>在這個場景中，用冪等性（idempotency）來準備。</p>
+          <ul>
+            <li>給每個備忘錄賦予唯一的UUID（資訊ID）</li>
+            <li>Relay API將該訊息ID作為郵件傳送服務（Resend）要求的冪等鍵（Idempotency-Key）傳遞</li>
+            <li>Resend記住了相同的按鍵24時間，如果再次收到相同內容的請求，不傳送郵件而是返回與之前相同的回覆</li>
+            <li>應用程式會返回成功的響應（2次也與1次相同的響應）</li>
+          </ul>
+          <p>透過這種設計，即使網路不穩定而發生重試，在24時間內也不會重複傳送相同的備忘錄（Resend記住按鍵的期間）。 因為無法分辨之後的重新傳送，所以在此期間可以停止重複。</p>
+
+          <h2 id="reading-06">6。 邊緣計算的優點</h2>
+          <p>採用Cloudflare Workers作為郵件傳送基礎的最大原因在於邊緣計算的本質優勢。</p>
+
+          <div class="info-card">
+            <div class="info-card__label">延遲</div>
+            <div class="info-card__title">全世界的邊緣位置=低延遲</div>
+            <div class="info-card__desc">Cloudflare在世界300以上的城市設有據點。 因為請求是在靠近使用者的據點處理的，所以與往返遙遠的1處的伺服器相比，通訊距離會更短（回覆的時間，包括郵件傳送服務的處理也會發生變化）。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">冷啟動</div>
+            <div class="info-card__title">沒有虛擬機器型的冷啟動</div>
+            <div class="info-card__desc">在虛擬機器和容器中執行的無伺服器，暫時不使用後的第一個請求是等待啟動（冷啟動）。 Cloudflare解釋說，因為Cloudflare Workers在isolate中執行，所以不會發生這種等待。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">運營</div>
+            <div class="info-card__title">無需基礎設施管理的自動縮放</div>
+            <div class="info-card__desc">伺服器的管理、容量規劃、縮放設定——所有這些都不需要。 請求增加的話會自動縮放，閒置時不會產生成本。</div>
+          </div>
+
+          <p>對於備忘錄應用程式來說，這個組合是容易處理的選擇。 在靠近使用者的據點開始處理，不需要管理伺服器，規模小的話費用也能控制。 這就是用邊緣計算製作Relay API的理由。</p>
+
+          <div class="cta-box">
+            <p>在此技術基礎上構建的“SimpleMemo”，請一定要試試。</p>
+            <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" target="_blank" rel="noopener noreferrer">在App Store下載</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+      <!-- FAQ Section (visible, mirrors JSON-LD) -->
+      <div>
+        <div class="page-content__body cross-links">
+          <h2 id="reading-07" data-ce-number="07">常見問題</h2>
+
+          <h3>問。 為什麼選擇Cloudflare Workers？</h3>
+          <p>沒有虛擬機器型的冷啟動，可以在靠近使用者的據點進行處理，因為規模小的話可以從免費方案開始。</p>
+
+          <h3>問。 郵件的送達率是多少？</h3>
+          <p>傳送源的域名設定了SPF・DKIM・DMARC。 即便如此，根據收件人郵件服務的判斷，也有被轉為垃圾郵件的情況。 沒有收到時，請檢視垃圾郵件資料夾和傳送地址是否已確認。</p>
+
+          <h3>問。 備忘錄的內容會儲存在伺服器上嗎？</h3>
+          <p>Relay API是透過型。 不會定期儲存備忘錄內容。 只在傳送處理所需的範圍內暫時處理。</p>
+
+          <h3>問。 如果陷入匯率限制會怎麼樣？</h3>
+          <p>備忘錄留在終端的傳送等待（Outbox），以恢復線路、開啟應用程式時、後臺處理為契機，自動重新傳送（自動重新傳送有次數上限）。</p>
+        </div>
+      </div>
+
+      <!-- Cross Links -->
+      <div>
+        <div class="cross-links">
+          <h2 id="reading-08" data-ce-number="08">相關報道</h2>
+          <div class="cross-links__grid">
+            <a href="/zh-Hant/devlog/day1" class="cross-links__item">
+              <div class="cross-links__item-title">【Day1】Captio太喜歡了，想再做一次“那個體驗”</div>
+              <div class="cross-links__item-desc">一鍵傳送和防止溢位的設計——首次開發日誌的全文。</div>
+            </a>
+            <a href="/zh-Hant/devlog/" class="cross-links__item">
+              <div class="cross-links__item-title">開發日誌一覽</div>
+              <div class="cross-links__item-desc">所有開發日誌和技術話題一覽頁面。</div>
+            </a>
+            <a href="/zh-Hant/devlog/outbox-architecture" class="cross-links__item">
+              <div class="cross-links__item-title">Outbox架構：防止溢位的設計</div>
+              <div class="cross-links__item-desc">傳送即UI清除，但是未傳送的資訊會留在終端上，重新傳送。 AES-GCM加密Outbox模式的全貌。</div>
+            </a>
+            <a href="/zh-Hant/devlog/uikit-vs-swiftui" class="cross-links__item">
+              <div class="cross-links__item-title">UIKit vs SwiftUI：啟動速度的選擇</div>
+              <div class="cross-links__item-desc">2026年選擇UIKit的理由。 以Time-to-Text 500ms以下為目標的架構設計。</div>
+            </a>
+            <a href="/zh-Hant/devlog/privacy-first-design" class="cross-links__item">
+              <div class="cross-links__item-title">隱私第一設計：偏執的執著</div>
+              <div class="cross-links__item-desc">ephemeral URLSession、日誌的處理、應用程式切換器的現行規格（自動隱藏備忘錄的功能無效）。</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-09" data-ce-number="09"> <span>參考文獻</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span>繼電器API的無伺服器執行基礎。 用於邊緣的請求處理</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span>郵件傳送的基本協議規格。 繼電器API符合的SMTP標準</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener" style="color:var(--accent);">RFC 6376 — DomainKeys Identified Mail (DKIM)</a> — <span>用於防止篡改郵件和傳送方認證的電子簽名規格</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener" style="color:var(--accent);">RFC 7208 — Sender Policy Framework (SPF)</a> — <span>傳送域認證。 驗證從允許的IP地址傳送郵件</span></li>
+    <li><a href="https://resend.com/docs/introduction" target="_blank" rel="noopener" style="color:var(--accent);">Resend API Documentation</a> — <span>郵件傳送API提供商。 從Cloudflare Workers呼叫的郵件傳送服務</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>透過Obsidian合作，建立儲存備忘錄的地方</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定合作和儲存地址，傳送的備忘錄也可以留在Obsidian中。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh-Hant/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代應用程式比較</span></a></li>
+    <li><a href="/zh-Hant/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>部落格文章一覽</span></a></li>
+    <li><a href="/zh-Hant/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>備忘錄應用程式比較一覽</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <!-- Footer -->
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="頁尾導航">
+      <div class="footer__col">
+        <p class="footer__col-title">產品</p>
+        <a href="/zh-Hant/download/" class="footer__link">下載</a>
+        <a href="/zh-Hant/" class="footer__link">首頁</a>
+        <a href="/zh-Hant/how-to/" class="footer__link"><span>使用方法</span> </a>
+        <a href="/zh-Hant/templates/" class="footer__link"><span>模板</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較與遷移</p>
+        <a href="/zh-Hant/captio/" class="footer__link"><span>Captio式</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">讀物</p>
+        <a href="/zh-Hant/devlog/" class="footer__link">開發日誌</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支援</p>
+        <a href="/zh-Hant/roadmap/" class="footer__link">公開路線圖</a>
+        <a href="/zh-Hant/about/" class="footer__link">關於開發者</a>
+        <a href="/zh-Hant/terms" class="footer__link"><span>使用規則</span> </a>
+        <a href="/zh-Hant/privacy" class="footer__link">隱私</a>
+        <a href="/zh-Hant/contact" class="footer__link">聯絡我們</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

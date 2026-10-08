@@ -7,11 +7,14 @@ generated from the same translation registry as the SEO alternates.
 """
 from pathlib import Path
 from html.parser import HTMLParser
+from html import escape
+from site_navigation_labels import label_for
 import argparse
 import hashlib
 import re
 import subprocess
-from site_locales import language_menu, LABELS, CHROME
+from site_locales import language_menu, LABELS, CHROME, UI, unprefixed_file
+from i18n_config import TOP_CLUSTER
 
 ROOT = Path(__file__).resolve().parent.parent
 LEGACY_NAV_HASHES = {'819e1ccab4904eec4087983fd8c627ae6697a5c4d8be7e37e51d2a832d2b5d47', '6964d51af27f64b1c9e550081764a9b45be93aaf11c65c0090452fef09dcbe1b', 'e0b42976d9f50f5556a7e736778a8045cdb4c51e1d23da48f990775143aac214', 'fbee48f90f2ab147491909454cbbf56a7af5ce4b02d05f006f53cb13ada361ed', '1378be4ab4d6fdfd34e55913673b57ff15f255d7b293652df1fb852048d26681'}
@@ -70,7 +73,7 @@ def sync_languages(source, rel):
             new = '<header data-site-header=""><div class="site-language-utility">'+inside+snippet+'</div></header>'
             return source[:old[2]] + new + source[old[4]:]
         body = next(e for e in els if e[0] == "body")
-        home = "/" if locale == "ja" else "/en/"
+        home = dict(TOP_CLUSTER)[locale]
         new = '<header data-site-header=""><div class="site-language-utility">'+brand(home,locale)+snippet+'</div></header>'
         return source[:body[3]]+new+source[body[3]:]
     controls = sorted((e for e in els if header[2]<e[2]<header[4] and any(has(e,c) for c in ("site-languages","lang-dropdown","lang-switcher","languages"))),key=lambda e:e[2])
@@ -89,7 +92,8 @@ def sync_languages(source, rel):
 
 def transform(source, rel):
     if rel.startswith(("fixtures/", "admin/", "docs/")): return source
-    utility = rel in ("404.html", "compose.html", "verify.html", "memo-inbox/index.html", "memo-inbox/guide.html")
+    base_rel = unprefixed_file(rel)
+    utility = base_rel in ("404.html", "compose.html", "verify.html", "memo-inbox/index.html", "memo-inbox/guide.html")
     # Rebuild managed pieces so later design updates have one source of truth.
     source = re.sub(r'<!-- site-chrome:bootstrap -->.*?<!-- /site-chrome:bootstrap -->', '', source, flags=re.S)
     source = re.sub(r'<!-- site-chrome:quick -->.*?<!-- /site-chrome:quick -->', '', source, flags=re.S)
@@ -98,12 +102,28 @@ def transform(source, rel):
     source = re.sub(r'\s*<script src="/js/site-chrome.js[^"]*"[^>]*></script>', '', source)
     els = Elements(source).elements
     nav = next((e for e in els if has(e,"global-nav")), None)
-    header = nav or next((e for e in els if e[0]=="header" and (has(e,"resource-nav") or rel.startswith("obsidian/"))), None)
+    header = nav or next((e for e in els if e[0]=="header" and (has(e,"resource-nav") or base_rel.startswith("obsidian/") or (utility and not base_rel.startswith('memo-inbox/')))), None)
     footer = None if utility else next((e for e in els if e[0]=="footer"),None)
     if not header and not footer and not utility: return source
     locale = next(e for e in els if e[0]=="html")[1].get("lang", "ja")
     ja = locale == "ja"
-    home = "/" if ja else "/en/"
+    home = dict(TOP_CLUSTER)[locale]
+    # Update reviewed link labels before deriving quick links from the menu.
+    label_changes=[]
+    for element in els:
+        if element[0] != "a" or not any(region and region[2] < element[2] < region[4] for region in (header, footer)):
+            continue
+        if any(has(element, cls) for cls in ("global-nav__logo", "resource-brand", "site-brand", "brand")):
+            continue
+        label=label_for(element[1].get("href", ""), locale)
+        if label and "data-cta-placement" not in element[1] and "data-site-locale" not in element[1]:
+            label_changes.append((element[3], element[4]-4, escape(label)))
+    if label_changes:
+        for start,end,value in sorted(label_changes,reverse=True): source=source[:start]+value+source[end:]
+        els=Elements(source).elements
+        nav=next((e for e in els if has(e,"global-nav")),None)
+        header=nav or next((e for e in els if e[0]=="header" and (has(e,"resource-nav") or base_rel.startswith("obsidian/") or (utility and not base_rel.startswith('memo-inbox/')))),None)
+        footer=None if utility else next((e for e in els if e[0]=="footer"),None)
     changes=[]
     if header:
         changes.append((header[2],header[3],re.sub(r' data-site-header=""','',source[header[2]:header[3]])[:-1]+' data-site-header="">'))
@@ -123,7 +143,7 @@ def transform(source, rel):
         menu = next((e for e in els if e[1].get("id")=="navLinks"),None)
         toggle = next((e for e in els if has(e,"global-nav__hamburger")),None)
         if menu and toggle:
-            label="メニュー" if ja else "Explore"
+            label=UI[locale][0]
             links=[e for e in els if e[0]=="a" and menu[2]<e[2]<menu[4] and "data-cta-placement" not in e[1]][:3]
             quick=''.join(source[e[2]:e[4]] for e in sorted(links,key=lambda e:e[2]))
             changes.append((menu[2],menu[2],f'<!-- site-chrome:quick --><div class="site-quick-links">{quick}</div><!-- /site-chrome:quick -->'))
@@ -176,7 +196,7 @@ def selftest():
             before=self.fixture(); after=transform(before,"index.html")
             for pattern in [r'<main>.*?</main>',r'<script type="application/ld\+json">.*?</script>',r'<a href="https://apps.apple.com/.*?</a>']:
                 self.assertEqual(re.findall(pattern,before),re.findall(pattern,after))
-            self.assertIn('<a href="/privacy">Privacy</a>',after)
+            self.assertIn('<a href="/privacy">プライバシー</a>',after)
         def test_legacy_script_replaced(self):
             after=transform(self.fixture(),"index.html")
             self.assertNotIn('onclick="old()"',after)
@@ -193,13 +213,17 @@ def selftest():
             self.assertIn('A small note. A next step.',en)
             self.assertNotIn('思いついたこと',en)
         def test_language_pairs_and_homes(self):
-            after=transform(self.fixture(),"guides/index.html")
+            from unittest.mock import patch
+            with patch('site_locales.alternates_for', return_value={'ja':'/guides/','en':'/en/guides/'}):
+                after=transform(self.fixture(),"guides/index.html")
             self.assertIn('href="/en/guides/" hreflang="en"',after)
             self.assertIn('他の言語のトップページ',after)
             self.assertIn('href="/ar/" hreflang="ar"',after)
             self.assertNotIn('data-lang="ar"',after)
         def test_untranslated_page_does_not_invent_pair(self):
-            after=transform(self.fixture(),"blog/business-memo-kakikata.html")
+            from unittest.mock import patch
+            with patch('site_locales.alternates_for', return_value={'ja':'/blog/business-memo-kakikata'}):
+                after=transform(self.fixture(),"blog/business-memo-kakikata.html")
             self.assertNotIn('/en/blog/business-memo-kakikata',after)
             self.assertIn('href="/en/" hreflang="en"',after)
         def test_language_control_replaced_once(self):

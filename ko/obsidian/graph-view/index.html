@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/graph-view/">
+  <title>Obsidian의 그래프 뷰 — 표시 범위를 좁혀 사용하는 방법 | SimpleMemo</title>
+  <meta name="description" content="Obsidian의 그래프 뷰를 저장 노트와 표시 조건으로 확인하는 실전 가이드. Linux 버전 1.13.7에서 저자가 만든 노트에 GUI를 추가하고, 폴더·태그 검색, 고립 노트, 색상 그룹, 로컬 그래프 깊이 1·2을 확인했습니다. 실제 화면과 저장 Markdown, 폴더 구성을 유지한 연습용 ZIP, 확인 범위를 게시합니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian의 그래프 뷰 — 표시 범위를 좁혀 사용하는 방법">
+  <meta property="og:description" content="Obsidian의 그래프 뷰를 저장 노트와 표시 조건으로 확인하는 실전 가이드. Linux 버전 1.13.7에서 저자가 만든 노트에 GUI를 추가하고, 폴더·태그 검색, 고립 노트, 색상 그룹, 로컬 그래프 깊이 1·2을 확인했습니다. 실제 화면과 저장 Markdown, 폴더 구성을 유지한 연습용 ZIP, 확인 범위를 게시합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/graph-view/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-graph-view.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian의 그래프 뷰 — 표시 범위를 좁혀 사용하는 방법">
+  <meta name="twitter:description" content="Obsidian의 그래프 뷰를 저장 노트와 표시 조건으로 확인하는 실전 가이드. Linux 버전 1.13.7에서 저자가 만든 노트에 GUI를 추가하고, 폴더·태그 검색, 고립 노트, 색상 그룹, 로컬 그래프 깊이 1·2을 확인했습니다. 실제 화면과 저장 Markdown, 폴더 구성을 유지한 연습용 ZIP, 확인 범위를 게시합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-graph-view.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/graph-view/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/graph-view/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/graph-view/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/graph-view/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/graph-view/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/graph-view/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/graph-view/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/graph-view/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/graph-view/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/graph-view/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.graph-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.graph-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.graph-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.graph-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.graph-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.graph-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.graph-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.graph-guide h2,.graph-guide h3{scroll-margin-top:76px}@media(max-width:720px){.graph-guide .note-flow{grid-template-columns:1fr}.graph-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.graph-guide .source-note{font-size:.85rem;line-height:1.8;color:var(--text-muted)}.graph-guide .raw-link{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 0}.graph-guide .rt-table code{overflow-wrap:anywhere}.graph-guide h2,.graph-guide h3{scroll-margin-top:76px}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/graph-view/#article",
+  "inLanguage": "ko",
+  "headline": "Obsidian의 그래프 뷰 — 표시 범위를 좁혀 사용하는 방법",
+  "description": "Obsidian의 그래프 뷰를 저장 노트와 표시 조건으로 확인하는 실전 가이드. Linux 버전 1.13.7에서 저자가 만든 노트에 GUI를 추가하고, 폴더·태그 검색, 고립 노트, 색상 그룹, 로컬 그래프 깊이 1·2을 확인했습니다. 실제 화면과 저장 Markdown, 폴더 구성을 유지한 연습용 ZIP, 확인 범위를 게시합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/graph-view/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-graph-view.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/obsidian/graph-view/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/ko/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "그래프 뷰",
+      "item": "https://simplememofast.com/ko/obsidian/graph-view/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/ko/obsidian/graph-view/#faq",
+  "inLanguage": "ko",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "그래프에 노트가 보이지 않을 때, 무엇을 확인합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이번 예에서는 Search files의 검색 문자열과 Orphans의 ON/OFF에 따라 대상이 변경되었습니다. 대상 노트를 열어 저장 내용을 확인하고, 검색 문자열을 비우며, 고립된 노트도 확인하려면 Orphans를 ON으로 설정하십시오. 태그, 첨부 파일, 기존 파일만 해당 등의 조건도 공식 도움말에서 확인할 수 있습니다. 모든 설정의 조합을 시도하지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "글로벌 그래프와 로컬 그래프는 어떻게 다릅니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "글로벌 그래프는 저장소의 노트 전체를 대상으로 하고, 로컬 그래프는 열린 노트와 연결되는 범위를 대상으로 합니다. 이번 입구 노트에서는 Incoming links와 Outgoing links를 ON으로, Neighbor links를 OFF로 설정했으며, 깊이 1에서 3 노트·2 링크, 깊이 2에서 4 노트·3 링크였습니다. 다른 연결 성분이나 고립 노트는 포함되지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Tags 전환과 tag: 검색은 같은 작업인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "공식 도움말의 Tags는 태그를 그래프에 표시하기 위한 전환입니다. Tag: 검색은 지정한 태그를 포함하는 노트를 좁혀 검색합니다. 이번에 태그는 꺼 둔 채로, tag:#研究으로 4 노트를 표시했습니다. 태그 자체를 노드로 표시하는 작업은 이 예에서 시도하지 않았습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "노드와 선이 많다면, 지식과 생산성이 높다고 판단할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 기사에서 확인한 것은 저장된 노트, 내부 링크, 지정한 표시 조건에 따른 구조 차이입니다. 지식의 정확성, 이해의 깊이, 생산성 및 속도는 측정하지 않습니다. 본문에서 링크의 이유를 확인하는 연습은 Zettelkasten의 노트와 링크 실천 가이드에서 소개하고 있습니다."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="graph-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="전 세계 탐색" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/ko/guides/">사용 가이드</a></li><li><a href="/ko/use-cases/">활용 사례</a></li><li><a href="/ko/vs/">비교</a></li><li><a href="/ko/blog/">블로그</a></li><li><a href="/ko/about/">개발자 소개</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">다운로드</a><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/graph-view/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/graph-view/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/graph-view/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/graph-view/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/graph-view/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/graph-view/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/graph-view/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/graph-view/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/graph-view/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/ko/obsidian/">Obsidian</a> / 그래프 뷰</p><span class="lp-hero__label">표시 범위를 선택하고 본문으로 돌아갑니다</span><h1 class="lp-hero__title">Obsidian의 그래프 뷰를 사용하여 <br> 표시 범위를 좁혀 연결을 확인합니다</h1><p class="lp-hero__sub">그래프를 열면, 보고 싶은 노트의 범위를 먼저 선택합니다. 폴더 태그에 의한 검색, 고립된 노트 표시, 색상 그룹, 로컬 그래프의 깊이를 작은 저자 제작 보관함에서 확인했습니다.</p><p class="article-meta">저자: <a href="/ko/about/">SimpleMemo Developer</a> · 실제 작업 확인: <time datetime="2026-10-01">2026년 10월 1일(일본 시간)</time> · Linux 버전 Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>보고 싶은 범위에 맞추어 전체와 가까운 노트를 선택합니다</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>이 예시의 저장 내용 및 표시 조건</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1. 노트를 추가하고 저장 내용과 그래프를 비교합니다</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">보고 싶은 범위에 맞춰 전체와 가까운 노트를 선택합니다</h2></div><div class="ce-chapter__body"><p><strong>보관함 전체를 볼 때는 전역 그래프로 검색을 사용하고, 열린 노트 주변을 볼 때는 로컬 그래프의 깊이를 선택합니다. </strong>색 그룹은 선택한 조건에 맞는 노트를 구분하는 표시입니다. 본문 및 내부 링크가 저장되어 있는지는 노트를 열어 확인합니다.</p><nav class="capture-toc" aria-label="이 기사 확인 항목"><a href="#grow">노트 추가 전후</a><a href="#filter">폴더와 태그</a><a href="#orphans">고립 노트</a><a href="#groups">색 그룹</a><a href="#local">로컬의 깊이</a><a href="#raw">연습용 파일</a></nav><p class="source-note">예시의 노트명·문장·태그는 저자가 만든 것입니다. 연구 및 생활의 실제 기록은 이용자의 보관함에서 채취한 것이 아닙니다. 표시 위치는 레이아웃이며, 소요 시간이나 이해 정도를 나타내는 값이 아닙니다.</p><p>카드를 직접 배열하여 관계를 나타내는 절차는 <a href="/ko/obsidian/canvas/">Canvas에서 생성·연결·이동·재표시하는 예시</a>를 참조하십시오.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">이 예시의 저장 내용 및 표시 조건</h2></div><div class="ce-chapter__body"><p>처음에 여섯 개의 Markdown을 준비했습니다。「 '연구'의 세 노트는 입구→가설→검증이며, '생활'의 두 노트는 쇼핑→식사와 내부 링크로 연결되고, 고립된 노트에는 다른 노트에 대한 링크가 없습니다. 두 개의 연결 성분과 하나의 고립된 노트를 구분할 수 있는 연습용 구성입니다.</p><pre class="capture-code" tabindex="0"><code>研究/入口.md → 研究/仮説.md → 研究/検証.md
+生活/買い物.md → 生活/食事.md
+孤立.md
+
+後からGUIで追加: 追加メモ.md → 研究/入口.md</code></pre><p>첫 번째 여섯 개 파일은 앱 실행 전에 준비하고, 일곱 번째 파일만 실제 편집기로 만들었습니다. '연구' 폴더의 세 노트와 추가 메모에는 <code>#研究</code>을, 생활의 두 노트에는 <code>#生活</code>을 적어 두었습니다.</p><p>글로벌 그래프의 초기 조건은 Search files 공란, Tags OFF, Attachments OFF, Existing files only OFF, Orphans ON입니다. 해결되지 않은 링크는 없었습니다. 이후 비교에서는 설명한 검색·Orphans·색상 그룹만 전환했습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="grow"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1. 노트를 추가하고, 저장 내용과 그래프를 비교합니다</h2></div><div class="ce-chapter__body"><p>왼쪽 리본에서 <strong>Open graph view</strong>를 엽니다. 처음에는 6노트·3링크였습니다. 다음으로 <code>Ctrl＋N</code>에서 “추가 메모”를 만들고, 이름과 본문을 실제 편집기에 입력했습니다. 저장한 전체 텍스트는 다음 92 바이트입니다.</p><pre class="capture-code" data-evidence="追加メモ.md" tabindex="0"><code># 追加メモ
+
+GUIで追加する著者作成ノートです。 [[研究/入口]]
+
+#研究
+</code></pre><p>자동 저장을 기다렸다가 그래프를 열면 일곱 노트·네 링크가 되었습니다. 추가 메모에서 研究/ 입력으로의 하나가 증가했으며, 저장된 Markdown과 내부 링크의 해결 결과도 일치했습니다.</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/global-before.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/global-before.png" width="1024" height="800" loading="lazy" decoding="async" alt="6개의 초기 노트 그래프와 Filters 설정의 실제 화면"></a><figcaption>추가 전. 6 노트·3 링크는 실제 렌더러의 읽기값입니다. 설정 패널이 일부를 덮습니다. <a href="/assets/img/obsidian-graph-view/global-before.png" target="_blank" rel="noopener">원본 이미지를 엽니다</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-graph-view/global-after.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/global-after.png" width="1024" height="800" loading="lazy" decoding="async" alt="추가 메모 작성 후의 글로벌 그래프 실제 화면"></a><figcaption>추가 후. 7 노트·4 링크는 실제 렌더러의 읽기값입니다. 추가 메모에서 입구에 대한 링크를 저장했습니다. <a href="/assets/img/obsidian-graph-view/global-after.png" target="_blank" rel="noopener">원본 이미지를 엽니다</a></figcaption></figure><p class="source-note">설정 패널이 일부 노드를 덮고 있습니다. 이 두 이미지의 건수는 실제 Graph 렌더러에서 노드 이름과 링크 끝점을 읽어 확인한 값입니다. 이미지 안에 모든 원을 볼 수 있다는 계산 방법은 아닙니다. 이미지는 그대로 보존하고 있습니다.</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/added-note-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/added-note-reopened.png" width="1024" height="800" loading="lazy" decoding="async" alt="추가 메모를 다시 표시한 읽기 뷰에 본문과 연구 태그가 표시됩니다"></a><figcaption>추가 메모를 파일 목록에서 다시 펼친 실제 화면. 오른쪽에 링크된 로컬 그래프는 추가 메모를 대상으로 변경되었습니다. <a href="/assets/img/obsidian-graph-view/added-note-reopened.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure><p>마지막으로 파일 목록에서 추가 메모를 다시 열어 본문과 태그를 읽었습니다. 추가 시·재표시 후·앱 정상 종료 후의 저장 Markdown은 동일한 내용이었습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="filter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2. 폴더와 태그에서 서로 다른 범위를 선택합니다</h2></div><div class="ce-chapter__body"><p>Graph settings의 <strong>Filters → Search files</strong>에 검색 문자열을 입력합니다. 폴더 내의 노트를 선택하는 예는 <code>path:"研究/"</code>이며, 태그가 포함된 노트를 선택하는 예는 <code>tag:#研究</code>입니다. 이번 결과는 다음과 같이 달랐습니다.</p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th scope="col">입력한 조건</th><th scope="col">대상 노트</th><th scope="col">확인한 구조</th></tr></thead><tbody><tr><th scope="row"><code>path:"研究/"</code></th><td data-label="대상">研究 폴더의 입구·가설·검증</td><td data-label="구조">3노트 / 2링크</td></tr><tr><th scope="row"><code>tag:#研究</code></th><td data-label="대상">위의 세 노트와 보관함 바로 아래에 있는 추가 메모</td><td data-label="구조">4노트 / 3링크</td></tr><tr><th scope="row">검색 문자열을 비우기</th><td data-label="대상">이번 일곱 노트 전부</td><td data-label="구조">7노트 / 4링크</td></tr></tbody></table></div><figure class="shot"><a href="/assets/img/obsidian-graph-view/path-filter.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/path-filter.png" width="1024" height="800" loading="lazy" decoding="async" alt="Search files에 path 연구를 입력하고 입구 가설 검증만 표시한 실제 화면"></a><figcaption>경로 검색에서 研究 폴더의 세 노트와 두 링크를 선택한 실제 화면. <a href="/assets/img/obsidian-graph-view/path-filter.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure><p>추가 메모는 보관함 바로 아래에 있기 때문에 研究 폴더의 통과 조건에 포함되지 않습니다. <code>#研究</code>을 가지고 있기 때문에 태그 조건에 포함됩니다. 여기에서는 태그 전환을 OFF 상태로 유지하고, 태그 자체를 노드로 표시하는 작업은 시도하지 않았습니다.</p><p>필터링을 마칠 때는 Search files를 비워 둡니다. 이번에 검색 후보가 작업과 겹쳤을 때는 <code>Esc</code>으로 닫은 후 다음 전환을 클릭했습니다. 폴더 이름과 태그 이름은 자신의 저장 내용에 맞춥니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="orphans"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3. 고립된 노트도 보려면 Orphans를 ON으로 설정하십시오</h2></div><div class="ce-chapter__body"><p>검색 문자열을 비워 둔 상태에서 Filters의 <strong>Orphans</strong>를 OFF하면 孤立.md이 사라지고, 6노트·4링크가 되었습니다. ON으로 되돌리면, 孤立.md을 포함한 7노트·4링크로 돌아갔습니다. 두 경우 모두 링크 끝점은 동일합니다.</p><p>이 예에서는 저장된 고립된 노트에 내부 링크가 없었기 때문에 전환 시 표시 대상이 변경되었습니다. 노트가 보이지 않을 때는 본문이 저장되어 있는지 현재 그래프의 검색·표시 조건을 각각 확인합니다. 미해결 링크와 모든 필터 조합을 시도한 결과가 아닙니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="groups"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06">4. 색 그룹으로 조건에 맞는 노트를 구별하기</h2></div><div class="ce-chapter__body"><p><strong>Groups → New group</strong>에서 그룹을 추가하고, 첫 번째에 <code>path:"研究/"</code>을, 두 번째에 <code>tag:#生活</code>을 입력했습니다. 그룹의 색상 원을 클릭하고, Linux 색상 선택 화면에서 첫 번째를 RGB <code>30 / 140 / 220</code>(<code>#1e8cdc</code>)로 변경하고 있습니다. 두 번째 할당 색상은 <code>#d6ad5c</code>였습니다.</p><figure class="shot"><a href="/assets/img/obsidian-graph-view/native-color-choice.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/native-color-choice.png" width="1280" height="900" loading="lazy" decoding="async" alt="실제 색상 선택 화면의 RGB란에 30 140 220를 입력한 화면"></a><figcaption>Linux의 실제 색상 선택 화면. RGB 30 / 140 / 220를 선택하고, 닫은 후의 renderer 색상과 대조했습니다. <a href="/assets/img/obsidian-graph-view/native-color-choice.png" target="_blank" rel="noopener">원본 이미지를 엽니다</a></figcaption></figure><p>研究 폴더의 세 노트는 파란색이고, 생활 태그의 두 노트는 금색이 되었습니다. 보관함 바로 아래에 있는 추가 메모와 孤立.md은 이 두 조건에 해당하지 않으므로, 그룹 색상이 적용되지 않았습니다. 노드명·색상의 읽기도 대조했으며, 전체의 일곱 노트와 네 개의 링크는 변하지 않았습니다.</p><p class="source-note">원본 이미지는 실제 색상 선택 화면이며, GUI 입력에는 기존의 X11 마우스·키보드 보조를 사용했습니다. 앱 API 및 DOM의 값 대입에서 색상을 설정하지 않았습니다. 색 그룹의 중복, 정렬, 다른 색상 및 OS 선택 화면은 시도하지 않았습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="local"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07">5. 로컬 그래프의 깊이에서 가까운 노트를 선택합니다</h2></div><div class="ce-chapter__body"><p>파일 목록에서 研究/入口.md을 열고, 노트의 <strong>More options → Open linked view → Open local graph</strong>를 선택했습니다. 로컬 그래프의 Filters에는 깊이 슬라이더가 있습니다. 이번 조건은 Incoming links ON, Outgoing links ON, Neighbor links OFF입니다.</p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th scope="col">깊이</th><th scope="col">입구 주변에 포함된 노트</th><th scope="col">확인한 구조</th></tr></thead><tbody><tr><th scope="row">1</th><td data-label="범대">입구, 입구에서 참조하는 가설, 입구를 참조하는 추가 메모</td><td data-label="구조">3노트 / 2링크</td></tr><tr><th scope="row">2</th><td data-label="범대">위에 가설에서 참조하는 검증이 추가됩니다</td><td data-label="구조">4노트 / 3링크</td></tr></tbody></table></div><figure class="shot"><a href="/assets/img/obsidian-graph-view/local-depth-1.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/local-depth-1.png" width="1024" height="800" loading="lazy" decoding="async" alt="입구 노트의 로컬 그래프에 입구 가설 추가 메모의 세 노트가 표시됩니다"></a><figcaption>입구의 Depth 1. 설정 패널을 닫은 원본 이미지에서 세 개의 노트와 두 개의 링크가 보입니다. <a href="/assets/img/obsidian-graph-view/local-depth-1.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure> <figure class="shot"><a href="/assets/img/obsidian-graph-view/local-depth-2.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-graph-view/local-depth-2.png" width="1024" height="800" loading="lazy" decoding="async" alt="입구 노트의 Depth2 로컬 그래프에 검증이 추가되고 네 개의 노트가 표시됩니다"></a><figcaption>입구의 Depth 2. 검증이 추가된 사노트·삼링크의 원본 이미지. <a href="/assets/img/obsidian-graph-view/local-depth-2.png" target="_blank" rel="noopener">원본 이미지 열기</a></figcaption></figure><p>Depth를 실제 슬라이더 조작으로 1에서 2로 변경하고, 노드명과 링크 엔드포인트를 확인했습니다. 생활의 두 노트와 孤立.md는 입구에 연결되지 않았기 때문에 이 두 깊이에 들어가지 못했습니다.</p><p class="source-note">두 이미지는 설정을 선택한 후 패널을 닫고 촬영한 원본 이미지입니다. 입구를 대상으로 한 깊이 1·2의 기록입니다. 다른 노트를 열면, 링크된 로컬 그래프의 대상도 변경됩니다. 깊이 3~5 및 Incoming/Outgoing/Neighbor links의 다른 조합은 시도하지 않았습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">연습용 일곱 개의 Markdown을 다운로드합니다</h2></div><div class="ce-chapter__body"><p>일곱 파일은 GUI 추가 후 저장한 Markdown 원본과 동일한 바이트입니다. ZIP은 이 기사 준비 시 만든 배포용 패키지이며, 일곱 개의 본문과 상대 경로를 유지하고 있습니다. 개별 다운로드에서는 표의 폴더 이름과 파일 이름을 함께 배치합니다.</p><p><a class="raw-link" href="/assets/downloads/obsidian-graph-view/obsidian-graph-fixture.zip" download="obsidian-graph-fixture.zip" data-download-kind="zip">7개의 파일을 한 번에 저장합니다(ZIP)</a></p><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th scope="col">보관함 내의 상대 경로</th><th scope="col">원 Markdown</th></tr></thead><tbody><tr><th scope="row"><code>孤立.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E5%AD%A4%E7%AB%8B.md" download="孤立.md" data-source-path="孤立.md">孤立.md을 저장</a></td></tr><tr><th scope="row"><code>生活/買い物.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%94%9F%E6%B4%BB/%E8%B2%B7%E3%81%84%E7%89%A9.md" download="買い物.md" data-source-path="生活/買い物.md">買い物.md을 저장</a></td></tr><tr><th scope="row"><code>生活/食事.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%94%9F%E6%B4%BB/%E9%A3%9F%E4%BA%8B.md" download="食事.md" data-source-path="生活/食事.md">食事.md을 저장</a></td></tr><tr><th scope="row"><code>研究/仮説.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E4%BB%AE%E8%AA%AC.md" download="仮説.md" data-source-path="研究/仮説.md">仮説.md을 저장</a></td></tr><tr><th scope="row"><code>研究/入口.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E5%85%A5%E5%8F%A3.md" download="入口.md" data-source-path="研究/入口.md">入口.md을 저장</a></td></tr><tr><th scope="row"><code>研究/検証.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E7%A0%94%E7%A9%B6/%E6%A4%9C%E8%A8%BC.md" download="検証.md" data-source-path="研究/検証.md">検証.md을 저장</a></td></tr><tr><th scope="row"><code>追加メモ.md</code></th><td data-label="원 Markdown"><a class="raw-link" href="/assets/downloads/obsidian-graph-view/%E8%BF%BD%E5%8A%A0%E3%83%A1%E3%83%A2.md" download="追加メモ.md" data-source-path="追加メモ.md">追加メモ.md을 저장</a></td></tr></tbody></table></div><p class="source-note">ZIP을 확장한 일곱 파일의 상대 경로와 본문인 SHA256을 원본과 대조했습니다. 독자 측에서의 ZIP 가져오기, 다른 보관함에 배치, 공개 서버에서의 배송은 실제 애플리케이션 검증에 포함되지 않습니다.</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">자주 묻는 질문</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">그래프에 노트가 보이지 않을 때, 무엇을 확인합니까?</summary><div class="faq-answer">이번 예에서는 Search files의 검색 문자열과 Orphans의 ON/OFF에 따라 대상이 변경되었습니다. 대상 노트를 열어 저장 내용을 확인하고, 검색 문자열을 비우며, 고립된 노트도 확인하려면 Orphans를 ON으로 설정하십시오. 태그, 첨부 파일, 기존 파일만 해당 등의 조건도 공식 도움말에서 확인할 수 있습니다. 모든 설정의 조합을 시도하지 않았습니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">글로벌 그래프와 로컬 그래프는 어떻게 다릅니까?</summary><div class="faq-answer">글로벌 그래프는 저장소의 노트 전체를 대상으로 하고, 로컬 그래프는 열린 노트와 연결되는 범위를 대상으로 합니다. 이번 입구 노트에서는 Incoming links와 Outgoing links를 ON으로, Neighbor links를 OFF로 설정했으며, 깊이 1에서 3 노트·2 링크, 깊이 2에서 4 노트·3 링크였습니다. 다른 연결 성분이나 고립 노트는 포함되지 않았습니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">Tags 전환과 tag: 검색은 같은 작업인가요?</summary><div class="faq-answer">공식 도움말의 Tags는 태그를 그래프에 표시하기 위한 전환입니다. Tag: 검색은 지정한 태그를 포함하는 노트를 좁혀 검색합니다. 이번에 태그는 꺼 둔 채로, tag:#研究으로 4 노트를 표시했습니다. 태그 자체를 노드로 표시하는 작업은 이 예에서 시도하지 않았습니다.</div></details>
+<details class="faq-item"><summary class="faq-summary">노드와 선이 많다면, 지식과 생산성이 높다고 판단할 수 있습니까?</summary><div class="faq-answer">이 기사에서 확인한 것은 저장된 노트, 내부 링크, 지정한 표시 조건에 따른 구조 차이입니다. 지식의 정확성, 이해의 깊이, 생산성 및 속도는 측정하지 않습니다. 본문에서 링크의 이유를 확인하는 연습은 Zettelkasten의 노트와 링크 실천 가이드에서 소개하고 있습니다.</div></details></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-10" data-ce-number="10">검증 환경 및 확인 범위</h2></div><div class="ce-chapter__body"><ul><li><strong>실제 앱:</strong>Linux 버전 Obsidian 1.13.7, 설치 프로그램 1.13.7. 커뮤니티 플러그인 없이, 저자가 만든 작은 일본어 보관함.</li><li><strong>실 GUI：</strong>그래프 열기, 노트 새로 만들기·입력·저장, 검색 입력, Orphans 전환, 그룹 생성 및 색상 선택, 파일 목록 및 메뉴에서 로컬 그래프 열기, Depth 슬라이더, 재표시, General 설정, 정상 종료.</li><li><strong>보조:</strong>초기 6 Markdown을 실행하기 전에 준비하고, 저장 파일·내부 링크 해결 결과·렌더러의 노드명·선수·색상·설정을 읽어들였습니다. 노트 추가 및 표시 조건 변경은 실제 GUI입니다.</li><li><strong>이미지:</strong>실제 화면의 원본 PNG를 가공하지 않고 게재합니다. 설정 패널 및 좁은 표시 영역이 일부 노드를 덮는 기록이 있으며, 건수는 명시된 API 판독값으로 대조하고 있습니다.</li><li><strong>미검증：</strong>iOS/Android/Windows/macOS、Sync、SimpleMemo 연동、별도 기기、대형 보관함、모든 검색·표시 설정、속도、학습·생산성、유입 효과。</li></ul><p>실제 작업의 날짜는 2026년 10월 1일(일본 시간)이며, 기록된 UTC 날짜는 2026년 9월 30일입니다. 원본 읽기 기록 및 보조 코드 수정, 저장 파일·원본 이미지의 대응은 <a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/graph-view-20260930.md" target="_blank" rel="noopener">검증 기록</a>에 정리합니다.</p><h3>공식 설명 확인처</h3><ul class="source-list"><li><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Plugins/Graph%20view.md" target="_blank" rel="noopener">Obsidian 공식 도움말: Graph view</a> — Filters, Groups, Local Graph에 대한 설명.</li><li><a href="https://github.com/obsidianmd/obsidian-help/blob/9cf8c2913e56830e75c13f33ba198d7e70b6d9ef/en/Plugins/Search.md" target="_blank" rel="noopener">Obsidian 공식 도움말: Search</a> — path:와 tag:에 대한 설명.</li></ul><p class="source-note">고정된 공식 소스 설명과 이 Linux에서의 제한된 실제 작업을 구분하고 있습니다. 공식 설명에 있는 모든 기능을 실제로 시험해 본 결과가 아닙니다. 본 사이트는 독립 앱 “SimpleMemo”을 소개하는 개발자 사이트이며, Obsidian 공식 기사(문서)가 아닙니다.</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/ko/obsidian/zettelkasten/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">다음에 읽을</span><strong>노트 본문에 링크와 그 이유를 남기는 연습</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴"><div class="footer__col"><p class="footer__col-title">프로덕트</p><a href="/ko/download/" class="footer__link">다운로드</a><a href="/ko/" class="footer__link">홈</a><a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a></div><div class="footer__col"><p class="footer__col-title">비교·전환</p><a href="/ko/vs/" class="footer__link">비교</a><a href="/ko/obsidian/compare/" class="footer__link">Obsidian 비교</a></div><div class="footer__col"><p class="footer__col-title">지원</p><a href="/ko/about/" class="footer__link">개발자 소개</a><a href="/ko/faq" class="footer__link">자주 묻는 질문</a><a href="/ko/privacy" class="footer__link">개인정보 보호</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

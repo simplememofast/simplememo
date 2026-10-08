@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian</title>
+  <meta name="description" content="离线优先备忘录应用程序的比较。 分析了Simple Memo的Outbox队列、Apple Notes、Obsidian、Joplin、Standard Notes、Bear和Google Keep离线模式。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian">
+  <meta property="og:description" content="离线优先备忘录应用程序的全面比较，包括Simple Memo-适用于Obsidian Outbox架构、Apple Notes、Obsidian、Joplin等。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/blog/offline-first-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian">
+  <meta name="twitter:description" content="离线优先备忘录应用程序的全面比较，包括Simple Memo-适用于Obsidian Outbox架构、Apple Notes、Obsidian、Joplin等。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/offline-first-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/offline-first-comparison">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh/blog/offline-first-comparison#article",
+  "inLanguage": "zh-Hans",
+  "headline": "离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian",
+  "description": "离线优先备忘录应用程序的比较。 分析了Simple Memo的Outbox队列、Apple Notes、Obsidian、Joplin、Standard Notes、Bear和Google Keep离线模式。",
+  "image": "https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png",
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-09-30",
+  "url": "https://simplememofast.com/zh/blog/offline-first-comparison",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Simple Memo - 用于Obsidian",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Obsidian連携シンプルメモ"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/blog/offline-first-comparison"
+  },
+  "keywords": "离线优先，备忘录应用程序，Simple Memo - 适用于Obsidian，离线同步，飞行模式，隐私，Obsidian，Joplin"
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "博客",
+      "item": "https://simplememofast.com/zh/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian",
+      "item": "https://simplememofast.com/zh/blog/offline-first-comparison"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with SpeakableSpecification -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/blog/offline-first-comparison#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "离线-第一个备忘录应用程序2026：Simple Memo vs Apple Notes vs Obsidian",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/blog/offline-first-comparison"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
+  <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/">方法</a></li>
+        <li><a href="/zh/blog/">博客</a></li>
+        <li><a href="/zh/glossary/">詞彙表</a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下载</a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/blog/offline-first-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/offline-first-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/blog/offline-first-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/offline-first-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/offline-first-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/offline-first-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/offline-first-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/offline-first-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/offline-first-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <div class="container">
+
+      <div class="page-header" style="text-align:center;padding:3rem 0 2rem;">
+        <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:.5rem;"> <a href="/zh/" style="color:var(--accent);text-decoration:none;">主页</a> &gt; <a href="/zh/blog/" style="color:var(--accent);text-decoration:none;">博客</a> &gt; 离线-第一个备忘录应用程序 2026 </p>
+        <h1 class="page-content__title sd-title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">离线-第一个备忘录应用程序2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
+        <p style="font-size:.875rem;color:var(--text-muted);">作者：<a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 发布时间：<time datetime="2026-03-21">三月 21，2026</time> · 最后更新：<time datetime="2026-09-30">九月 30，2026</time> · 阅读时间：~10分钟</p>
+      </div>
+
+      <div class="page-content__body" style="max-width:780px;margin:0 auto;line-height:1.8;">
+
+        <!-- TL;DR Summary for AI Citation. Answer-first, self-contained: the
+             conclusion of the matrix and the verdict section, stated up front. -->
+        <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+          <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+          <p style="color:var(--text-secondary);margin:0;">“离线”不是一个属性。<strong>离线优先</strong>应用程序将您的设备视为真相的来源（Obsidian，Standard Notes）；<strong>离线功能</strong>应用程序允许您离线工作，但通过云同步（Apple Notes，Bear，Google Keep的移动应用程序）；有些应用程序主要在线工作，离线访问有限（Notion，在2025中添加了离线模式）。 具体来说，对于捕获，问题不在于您是否可以在没有信号的情况下键入，而在于您键入的内容会发生什么。<strong>Simple Memo-对于Obsidian</strong>（SimpleMemoFast，iOS）用Outbox回答：备忘录在设备上用AES-GCM加密，排队，一旦网络返回就自行发送——准备在启动后键入0.4s，3免费发送一天，您发送的内容会自己附加到您的Obsidian库中。</p>
+        </div>
+
+        <h2 id="reading-01" data-ce-number="01">简介：为什么离线很重要</h2>
+
+        <p>我们大部分时间都生活在连接中，但不是所有时间。 你在飞机上。 你在地铁的地下。 徒步旅行时，你处于死区。 你故意离线以集中精力。 在这些时刻，您的笔记应用程序很重要。</p>
+
+        <p>但“离线”不是二进制。 有些应用程序是真正先离线的（您的设备是真相的来源）。 其他人可以离线使用（您可以离线使用它们，但云同步是主要的）。 有些只在线，假装不是。</p>
+
+        <p>本文剖析了七款备忘录应用程序及其实际的离线功能。 我们将解释Simple Memo-Obsidian的Outbox架构，比较同步策略，并帮助您根据实际用例进行选择。</p>
+
+        <h2 id="reading-02" data-ce-number="02">定义条款</h2>
+
+        <h3>离线优先架构</h3>
+        <p>您的设备是真理的来源。 所有数据都以本地开始。 同步到云是次要的。 如果云关闭或您失去连接，什么都不会损坏。 您可以无限期地离线工作，然后在重新连接时同步。 示例：Obsidian，乔普林。</p>
+
+        <h3>离线架构</h3>
+        <p>云是真理的主要来源，但应用程序可以在没有它的情况下工作。 您可以离线创建笔记，但需要同步才能获得全部功能。 如果离线时间过长，可能会出现同步冲突。 示例：Apple Notes、Bear（通过iCloud同步）。</p>
+
+        <h3>仅限在线架构</h3>
+        <p>该应用程序需要网络连接才能运行。 您可能能够离线查看缓存的内容，但无法创建或编辑。 示例：大多数基于 Web 的笔记 app。 （Notion在2025中添加了离线模式，该模式涵盖了下载的离线使用页面。）</p>
+
+        <h3>混合/Outbox架构</h3>
+        <p>一种较新的模式：您可以自由地离线工作（本地是真理的来源），但当触发特定操作（发送、保存到云）时，应用程序会排队操作并重新尝试重新连接。 示例：Simple Memo - 对于Obsidian的Outbox，通过电子邮件向客户发送草稿文件夹。</p>
+
+        <h2 id="reading-03" data-ce-number="03">Simple Memo - 适用于Obsidian：Outbox模式解释</h2>
+
+        <p>Simple Memo - 对于Obsidian，使用值得自己解释的Outbox架构。 它不是完全离线优先（Obsidian的模型），但它比离线能力更复杂。</p>
+
+        <h3>Simple Memo - Obsidian的Outbox如何工作</h3>
+
+        <ol>
+          <li>用户点击编写并在本地创建笔记</li>
+          <li>用户类型和编辑——所有更改都是本地的（离线工作）</li>
+          <li>用户点击“发送”——备忘录被保存到设备上的Outbox，用AES-GCM加密</li>
+          <li>应用程序尝试发送到电子邮件</li>
+          <li>如果已连接：立即发送</li>
+          <li>如果离线：备忘录在Outbox（存储在设备上）中等待，并在连接恢复、打开应用程序或从后台任务中再次发送</li>
+          <li>一旦发送被接受，它将被记录在发送历史记录中，并离开Outbox（收到您的收件箱仍然取决于电子邮件的发送）</li>
+        </ol>
+
+        <p><strong>主要优势：</strong>您可以完全离线创建和编辑笔记。 当您点击“发送”时，如果您离线，它会对消息进行排队。 当您重新上线时（飞机降落、地铁出现、WiFi返回），下次您打开应用程序或在后台时，应用程序会自动重新尝试排队的笔记。</p>
+
+        <p><strong>隐私：</strong>当备忘录在Outbox中等待时，它存储在使用AES-GCM加密的设备上。 发送后，备忘录正文通过Simple Memo的中继（Cloudflare Workers）和电子邮件发送服务到达您的收件箱。 他们不保留备忘录正文，但这不是端到端加密（请参阅<a href="/zh/privacy">隐私政策</a>）。</p>
+
+        <h3>Simple Memo - 用于Obsidian Outbox 强度</h3>
+        <ul>
+          <li>真正的离线创建和编辑</li>
+          <li>本地Outbox和发送历史记录的设备上AES-GCM加密（交付本身不是端到端加密的）</li>
+          <li>重新连接时自动重试（对用户透明）</li>
+          <li>没有同步冲突需要解决（每个备忘录都作为自己的电子邮件发送）</li>
+          <li>与任何电子邮件提供商合作</li>
+        </ul>
+
+        <h3>Simple Memo - 适用于Obsidian Outbox限制</h3>
+        <ul>
+          <li>“发送”是故意操作（不是自动后台同步）</li>
+          <li>对某些人来說，基于电子邮件的检索感觉已经过时</li>
+          <li>Outbox是设备本地的（不跨设备同步）</li>
+          <li>无实时同步（仅电子邮件发送）</li>
+        </ul>
+
+        <h2 id="reading-04" data-ce-number="04">比较：离线功能矩阵</h2>
+
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可滚动表">
+          <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
+          <thead>
+            <tr>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">应用程序</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">先离线？</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">离线创建</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">离线编辑</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">重新连接时同步</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">冲突解决</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Simple Memo - 用于Obsidian</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Outbox</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">自动重试</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">不适用（电子邮件）</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Apple Notes</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">可离线</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud同步</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最后写-胜利</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Obsidian</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">真正的离线优先</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">取决于同步方式</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">文件級別</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>乔普林</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">先离线</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">自动同步</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">冲突副本</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">可离线</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">E2EE同步</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最后同步获胜</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">可离线</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud (Bear Pro)</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">最后同步获胜</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">支持离线（移动应用程序）</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">未测试</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">是的（根据Keep帮助）</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">在线时</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">“编辑冲突”通知</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h2 id="reading-05" data-ce-number="05">深度潜水：每个应用程序如何处理离线</h2>
+
+        <h3>Apple Notes：iCloud与本地缓存同步</h3>
+
+        <p>Apple Notes使用离线架构：iCloud是主设备，您的设备具有本地缓存。 您可以离线创建和编辑笔记。 重新连接时，更改会同步回iCloud，然后传播到其他设备。</p>
+
+        <p><strong>功能：</strong>无缝离线创建，透明的iCloud同步，适用于iPhone、iPad、Mac和网络、手写和富媒体离线。</p>
+
+        <p><strong>弱点：</strong>多设备同步需要iCloud，如果离线时间过长，可能会发生同步冲突，无法查看同步状态，并且只有当您打开高级数据保护时，iCloud上的注释才会进行端到端加密（标准保护在传输和静态时加密，密钥由Apple持有）。</p>
+
+        <h3>Obsidian：真正的离线优先，本地文件</h3>
+
+        <p>Obsidian将所有内容存储在本地降价文件中。 您的库在设备上是100%。 同步是可选的，通过外部服务（iCloud、Dropbox或Obsidian Sync）。 这是最纯粹的离线优先实现。</p>
+
+        <p><strong>特点：</strong>完全离线独立，您拥有您的文件（可以访问原始.md文件），没有云供应商锁定，同步是可选的。</p>
+
+        <p><strong>弱点：</strong>设备之间的同步需要设置（iCloud，第三方服务，或付费的Obsidian Sync），同步冲突可能需要手动解决。 官方移动应用程序需要将同步方法在手机上工作的地方存储库。</p>
+
+        <h3>Joplin：先离线，内置同步</h3>
+
+        <p>Joplin是离线优先的，包括电池。 笔记存储在本地数据库中，可以同步到Joplin Cloud、Dropbox、Nextcloud或S3。 用于同步的端到端加密是可选的，并手动打开。 当同步冲突发生时，Joplin 会将本地笔记复制到冲突笔记本中。</p>
+
+        <p><strong>特点：</strong>真正的离线优先设计，多同步后端，同步的可选端到端加密，笔记历史记录，冲突副本而不是无声覆盖，跨平台（iOS，Android，Mac，Windows，Linux）。</p>
+
+        <p><strong>弱点：</strong>iOS应用程序不像原生选项那样精炼，大型数据库的同步速度可能会很慢，以桌面为重点（移动是次要的）。</p>
+
+        <h3>Standard Notes：与离线的加密同步</h3>
+
+        <p>Standard Notes 在同步前对所有笔记进行端到端加密。你可以离线创建和编辑笔记，联网后自动或手动同步。加密在设备上完成，因此 Standard Notes 无法看到明文。</p>
+
+        <p><strong>强度：</strong>端到端加密（Standard Notes无法读取您的笔记），离线创建和编辑，跨平台，开源服务器选项。</p>
+
+        <p><strong>弱点：</strong>高级功能需要订阅（付费计划从$90/年起），社区比竞争对手小，组织功能更弱。</p>
+
+        <h3>Bear：离线笔记，iCloud与Bear Pro同步</h3>
+
+        <p>您可以在Bear中离线创建和编辑笔记。 跨设备同步使用iCloud，需要Bear Pro（$2.99/月或$29.99/年）。 Bear支持Apple的高级数据保护；没有它，iCloud数据不会进行端到端加密。</p>
+
+        <h3>Google Keep：在手机上离线编辑</h3>
+
+        <p>Google Keep的帮助指出，如果您在不同设备上编辑相同的笔记，而其中一个设备处于离线状态，您可能会看到“发现冲突编辑”通知——离线编辑将保留并稍后同步。 我们尚未测试在Keep中离线创建笔记，因此在依赖它之前，请先在您的设备上检查。</p>
+
+        <h2 id="reading-06" data-ce-number="06">用例：离线优先时</h2>
+
+        <h3>飞行模式（数小时不上网）</h3>
+        <p><strong>最佳选择：Simple Memo - 适用于Obsidian、Obsidian或Joplin。</strong>你在空中待了6小时。 你想记录会议记录、想法、头脑风暴。 使用离线优先的应用程序，您可以自由地进行创作。 落地后，重新连接，一切都会自动同步。</p>
+
+        <h3>地下通勤（连接不连）</h3>
+        <p><strong>最佳选择：Apple Notes或Simple Memo - 适用于Obsidian。</strong>您的地铁偶尔会有WiFi。 你不想担心同步状态。 这些应用程序优雅地处理离线，并投机同步。</p>
+
+        <h3>偏远地区/徒步旅行（无信号）</h3>
+        <p><strong>最佳选择：Simple Memo-Obsidian或Obsidian。</strong>你在山上待了一周，没有信号。 离线优先应用程序允许您在本地捕获所有内容。 当你回到文明时，同步会自动发生。</p>
+
+        <h3>以隐私为重点的捕获（离线设计）</h3>
+        <p><strong>最佳选择：Simple Memo - 适用于Obsidian或Joplin。</strong>您希望在没有网络传输的情况下捕获敏感信息。 离线优先的应用程序将数据保留在本地，直到您明确决定同步/发送。</p>
+
+        <h3>内容创建者（Drafts发布前）</h3>
+        <p><strong>最佳选择：Obsidian、Simple Memo-用于Obsidian或Joplin。</strong>您离线写作、评论、编辑，然后发布。 在进行任何云交互之前，离线优先将您的工作保持在设备上。</p>
+
+        <h3>最小设置/仅限Apple生态系统</h3>
+        <p><strong>最佳选择：Apple Notes。</strong>如果您完全使用Apple设备，Apple Notes是内置的，速度快，并通过iCloud无缝处理离线。</p>
+
+        <h2 id="reading-07" data-ce-number="07">判决：哪个建筑获胜？</h2>
+
+        <p><strong>Simple Memo - Obsidian的Outbox</strong>模式具有创新性，因为它连接了两个世界：离线优先的速度和隐私，以及基于电子邮件的同步的清晰度。 您将获得在设备上等待的备忘录的AES-GCM加密（不是端到端加密），无需解决同步冲突，并在重新连接时自动重试。 它是为快速捕捉而量身定制的。</p>
+
+        <p><strong>Obsidian</strong>是最灵活的。 你的文件是你的。 同步是可选的。 但跨设备同步需要设置。</p>
+
+        <p><strong>Joplin</strong>是最好的全方位离线优先选项：成熟、跨平台、内置同步、版本历史记录。 它专为认真做笔记而设计，而不是快速捕捉。</p>
+
+        <p><strong>Apple Notes</strong>如果您已经在Apple生态系统中，最好使用。 iCloud同步是无缝的，离线运行良好，它是内置的。</p>
+
+        <p><strong>Google Keep</strong>的移动应用程序会保留离线编辑并稍后同步；如果您在多个设备上使用它，请检查是否有冲突的编辑。</p>
+
+        <h2 id="reading-08" data-ce-number="08">推荐矩阵</h2>
+
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="可滚动表">
+          <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
+          <thead>
+            <tr>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">您的优先权</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">最佳选择</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">为什么</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">快速离线捕获</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - 用于Obsidian</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Outbox排队+AES-GCM加密+电子邮件发送</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">完全离线独立</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Obsidian</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">100%本地文件，无需云</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">内置同步的离线优先</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">乔普林</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">多同步后端、冲突解决、跨平台</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Apple-仅生态系统</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">原生iOS，无缝iCloud，无设置</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">隐私+离线</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - 用于Obsidian或Joplin</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">E2E加密+本地优先架构</td>
+            </tr>
+            <tr>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">簡單</th>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
+              <td style="padding:.6rem .5rem;border:1px solid var(--border);">无配置，开箱即用</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <h2 id="reading-09" data-ce-number="09">结论</h2>
+
+        <p>离线优先不是奢侈品——而是必需品。 如果您的笔记应用程序需要互联网连接，您将依赖其他人的基础设施。 如果您的应用程序可以离线或先离线，则您拥有您的数据和工作流程。</p>
+
+        <p><strong>Simple Memo - Obsidian的Outbox模式</strong>是一个明智的中间地带：通过电子邮件的简单性，您可以获得离线独立性。<strong>Obsidian</strong>和<strong>Joplin</strong>适用于想要完全离线优先和高级同步的使用者。<strong>Apple Notes</strong>是iPhone使用者阻力最小的路径。</p>
+
+        <p>有关速度和自动化功能的比较，请参阅我们的相关文章：<a href="/zh/blog/ios-quick-capture-comparison">最佳iOS快速捕获应用程序：速度和自动化的比较</a>。</p>
+
+      </div>
+    </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="compare" href="/zh/blog/best-memo-apps-2026" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">阅读下一篇</span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">下一篇：测量数字</span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">主要应用程序的实际发布和输入时间测量表。</span> </a>
+  </aside>
+
+  </main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/send-email-to-yourself/" class="footer__link">通过电子邮件发送自己的应用程序</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较和切换</p>
+        <a href="/zh/captio-alternative/" class="footer__link">Captio替代</a>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">阅读</p>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/memos/">
+  <title>Obsidian과 memos의 비교 — 셀프 호스트 파의 갈림길【2026】 | SimpleMemo</title>
+  <meta name="description" content="Obsidian과 memos를, Markdown 파일과 셀프호스트 SQLite라는 정품의 차이점을 기준으로 비교합니다. Memos 0.30.0를 Apple Silicon Mac에서 실행하고, 일본어 메모, 태그, 작업, 타임라인 저장을 실제 기기에서 확인했습니다.">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian과 memos의 비교 — 셀프호스트 파의 갈림길">
+  <meta property="og:description" content="파일을 직접 보유한 Obsidian과, 직접 서버를 운영하는 memos. Memos 0.30.0의 실제 화면을 기반으로 관리 대상의 차이를 정리합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-08T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian과 memos의 비교 — 셀프호스트 파의 갈림길">
+  <meta name="twitter:description" content="파일을 직접 보유한 Obsidian과, 직접 서버를 운영하는 memos. 실제 기기에서 저장까지 확인했습니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-memos.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/compare/memos/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/compare/memos/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/ko/obsidian/compare/memos/#article",
+  "inLanguage": "ko",
+  "headline": "Obsidian과 memos의 비교 — 셀프호스트 파의 갈림길",
+  "description": "Obsidian과 memos를 저장 방식과 운영 책임으로 비교합니다. Memos 0.30.0의 실기 확인을 포함합니다.",
+  "url": "https://simplememofast.com/ko/obsidian/compare/memos/",
+  "datePublished": "2026-09-08",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-memos.png"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian 비교",
+      "item": "https://simplememofast.com/ko/obsidian/compare/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Obsidian과 memos",
+      "item": "https://simplememofast.com/ko/obsidian/compare/memos/"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian과 memos는 어느 것을 선택해야 합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Markdown 파일을 직접 관리하고 싶다면 Obsidian, 직접 구동하는 웹 애플리케이션에 짧게 기록하고 타임라인에 되돌아보고 싶다면 memos가 후보입니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "memos는 Obsidian의 보관함을 그대로 사용할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "사용할 수 없습니다. 이번 표준 시작에서는 SQLite가 초기화되었습니다. Obsidian의 Markdown 폴더를 직접 편집하는 메커니즘이 아닙니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "memos는 무료인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "본체는 오픈소스입니다. 다만, 공개 운영 서버나 도메인 등의 비용과 업데이트·백업·보안을 관리하는 시간은 별도로 필요합니다."
+      }
+    }
+  ],
+  "inLanguage": "ko",
+  "@id": "https://simplememofast.com/ko/obsidian/compare/memos/#faq"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="전 세계 탐색" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/ko/guides/">사용 가이드</a></li><li><a href="/ko/use-cases/">활용 사례</a></li><li><a href="/ko/vs/">비교</a></li><li><a href="/ko/blog/">블로그</a></li><li><a href="/ko/about/">개발자 소개</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">다운로드</a><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/obsidian/compare/memos/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/compare/memos/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/compare/memos/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/obsidian/compare/memos/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/obsidian/compare/memos/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/compare/memos/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/compare/memos/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/compare/memos/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/compare/memos/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><div class="container" style="max-width:880px">
+  <header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian × 메모</div><h1 class="lp-hero__title">Obsidian과 memos의 비교<br> 셀프 호스트 파의 갈림길</h1><p class="lp-hero__sub">두 경우 모두 “직접 가질 수 있는” 노트이지만, 가지고 있는 것이 다릅니다. Obsidian에서는 Markdown 파일을, memos에서는 웹 애플리케이션과 데이터베이스를 직접 관리합니다. Memos 0.30.0를 Mac에서 실제로 실행하고, 짧은 메모를 저장하여 차이를 확인했습니다.</p><p class="article-meta">저자: <a href="/ko/about/">AI ATAKA</a> ・ 공개·확인일: <time datetime="2026-09-08">2026년9월8일</time></p></div><nav class="sd-hero-index" aria-label="이 페이지의 내용"><p>이 페이지의 내용</p><a href="#reading-01"><span aria-hidden="true">01</span><span>결론: 파일을 보유할지, 서비스를 실행할지</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>비교표: 비슷한 것은 소유감, 다른 것은 정품</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Memos 0.30.0을 로컬에서 실행하여 저장까지 시도했습니다</span><span aria-hidden="true">↗</span></a></nav></header>
+  <aside class="tip-box">이 페이지는<strong>Obsidian과 memos의 저장·운용 비교</strong>입니다。「 셀프 호스트라면 동일하다고 요약하지 않고, 실제로 관리하는 대상을 구분하여 판단합니다.</aside>
+  <section class="lp-section ce-chapter sd-chapter" style="padding-top:1rem"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">결론: 파일을 보유할지, 서비스를 실행할지</h2></div><div class="ce-chapter__body"><p class="lp-section__lead"><strong>노트의 원본을 일반 파일로 직접 다루고 싶다면 Obsidian. 브라우저에서 짧게 작성하고 타임라인, 태그, 공개 범위를 하나의 웹 애플리케이션으로 다루고 싶다면 memos가 후보입니다. </strong></p><p>memos를 셀프호스팅하더라도, 원본이 Obsidian과 동일한 Markdown 폴더가 되는 것은 아닙니다. 이번 실행에서는 Memos가 지정한 데이터 디렉터리에 SQLite를 초기화했습니다. 자유도 대신, 백업 및 업데이트까지 포함하는 서비스 운영을 맡습니다.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">비교표: 비슷한 것은 소유감, 다른 것은 정품</h2></div><div class="ce-chapter__body"><div class="sd-table" tabindex="0" role="region" aria-label="가로 스크롤할 수 있는 표"><table class="rt-table"><thead><tr><th>판단축</th><th>Obsidian</th><th>메모</th></tr></thead><tbody>
+    <tr><th>정본</th><td data-label="Obsidian">보관함 내의 Markdown 파일</td><td data-label="메모">웹 애플리케이션이 다루는 데이터베이스. 이번 표준 시작은 SQLite</td></tr>
+    <tr><th>주요 입구</th><td data-label="Obsidian">데스크톱/모바일 앱에서 노트를 엽니다</td><td data-label="메모">브라우저의 컴포저에서 타임라인으로 게시</td></tr>
+    <tr><th>정리</th><td data-label="Obsidian">폴더, 링크, 속성, 플러그인</td><td data-label="메모">태그, 검색, 캘린더, 핀, 관계, 저장된 조회수</td></tr>
+    <tr><th>공유</th><td data-label="Obsidian">Publish 등을 별도로 선택</td><td data-label="메모">메모마다 공개 범위를 갖습니다</td></tr>
+    <tr><th>스스로 관리하는 것</th><td data-label="Obsidian">파일 배치 및 동기화 방법</td><td data-label="메모">서버, 데이터, 업데이트, 백업, 공개 시의 HTTPS</td></tr>
+    <tr><th>이번 확인</th><td data-label="Obsidian">공식 저장 사양</td><td data-label="메모">0.30.0의 로컬 시작, 관리자 생성, 일본어 메모 저장</td></tr>
+  </tbody></table></div><p>memos의 구성 및 운영 책임은 <a href="https://usememos.com/docs/deploy/binary" target="_blank" rel="noopener">공식 Binary 가이드</a>, 편집·태그·Relations·공개 범위는 <a href="https://usememos.com/docs/usage/memos" target="_blank" rel="noopener">공식 Usage 가이드</a>에서 확인했습니다.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="hands-on"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">Memos 0.30.0을 로컬로 실행하여 저장까지 시도했습니다</h2></div><div class="ce-chapter__body"><p class="lp-section__lead">공식 GitHub 릴리스의 Apple 실리콘용 아카이브를 가져와, 공개 체크섬과 SHA-256가 일치함을 확인한 후, 외부에 공개하지 않는 로컬 환경에서 실행했습니다.</p><ol class="steps-list">
+    <li><strong>새로운 데이터 영역에서 시작합니다. </strong><br> 작업 전용 임시 디렉터리를 지정하면 SQLite가 초기화되고 private access로 실행되었습니다.</li>
+    <li><strong>첫 번째 관리자를 생성합니다. </strong><br> 초기 화면에서 로컬 검증용 관리자를 만들었습니다. 홈에는 검색, 캘린더, 태그, 공개 범위, 입력란이 나열됩니다.</li>
+    <li><strong>일본어의 짧은 메모를 저장합니다. </strong><br> 태그, 미완료 체크 항목, 항목, 본문을 하나의 메모에 입력했습니다.</li>
+    <li><strong> 타임라인에 반영을 확인합니다. </strong><br> 저장 직후에 메모가 표시되고, 태그가 왼쪽에 추가되었으며, 당일 캘린더에 1건으로 표시되었습니다.</li>
+  </ol>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-home.png"><img src="/assets/img/obsidian/memos-home.png" alt="Memos 0.30.0을 로컬로 시작하고, 관리자가 생성한 후 표시된 빈 타임라인" width="1200" height="649" loading="lazy"></a><figcaption>실기 촬영: 관리자 생성 직후의 홈. 로컬의 빈 인스턴스에서는 개인 데이터가 포함되지 않습니다.</figcaption></figure>
+  <figure class="shot"><a href="/assets/img/obsidian/memos-note.png"><img src="/assets/img/obsidian/memos-note.png" alt="Memos 0.30.0에서 일본어 태그, 체크 항목, 항목을 저장한 타임라인" width="1200" height="649" loading="lazy"></a><figcaption>실기 촬영: 비교용 메모를 저장한 후. 태그, 작업, 날짜별 건수를 확인했습니다.</figcaption></figure>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="storage"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">셀프 호스트라도 “Markdown을 직접 보유한다”는 보장은 없습니다</h2></div><div class="ce-chapter__body"><p>Obsidian에서는 보관함을 파일 관리 앱으로 열면 노트의 실체를 확인할 수 있습니다. 다른 편집기에서 동일한 Markdown을 읽을 수 있다는 것은 도구를 교체할 때 탈출구가 됩니다.</p><p>memos는 서버가 데이터베이스를 읽고 쓰는 화면을 제공합니다. 공식 문서에서는 표준이 SQLite이며, MySQL과 PostgreSQL도 선택할 수 있습니다. 이는 데이터를 자신의 관리 하에 둘 수 있다는 의미에서는 강하지만, Obsidian의 보관함을 그대로 열어 함께 사용하는 형태는 아닙니다. 마이그레이션을 전제로 한다면, 본판 투입 전에 백업 및 복원, 필요한 형식으로의 내보내기를 소량으로 시도해야 합니다. 이번에는 그것들이 아직 검증되지 않았습니다.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="operations"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">memos를 선택하면 증가하는 것은 노트 기능보다 운영 책임입니다</h2></div><div class="ce-chapter__body"><p>집이나 사내에서만 사용하는 경우에도 업데이트와 백업이 필요합니다. 인터넷에 공개한다면, 도메인, 리버스 프록시, HTTPS, 접근 제어, 장애 시 복구를 추가로 다룹니다. 공식 가이드에서도 바이너리 사용자가 업그레이드, 롤백, 프로세스 모니터링, 데이터 권한, HTTPS을 관리한다고 설명하고 있습니다.</p><p><strong>서버 운영 자체를 즐길 수 있거나 이미 운영 기반이 있다면, memos의 셀프 호스트는 자연스러운 선택입니다. </strong>노트에만 집중하고 싶다면, 로컬 파일을 다루는 Obsidian이 책임 범위를 좁히기 쉽습니다.</p></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">어느 쪽을 선택하든, 이동 중인 입구는 별도로 고려합니다</h2></div><div class="ce-chapter__body"><p>Obsidian은 지식을 보관하고 연결하는 도구이며, memos는 짧은 기록을 타임라인에 흐르게 하는 도구로 설계되었습니다. 다만, Apple Watch이나 Siri에서 한 마디를 남기는 속도는 별개의 과제입니다. SimpleMemo는 Obsidian 연동을 켜두면, 메일을 보류하면서 Obsidian의 데일리 노트 등에 추가합니다. <strong>memos에 직접 게시하는 기능은 없습니다. </strong>배송지가 Obsidian이라면 보조 입구로 사용할 수 있습니다.</p><aside class="tip-box"><strong>역할을 섞지 않음:</strong> memos의 셀프 호스트와 SimpleMemo는 직접 연동되지 않습니다. 연동할 수 있도록 읽을 수 있는 표현은 피하고, 실제 저장 위치를 먼저 결정해 주세요.</aside></div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">자주 묻는 질문</h2></div><div class="ce-chapter__body">
+    <div class="faq-item"><details><summary class="faq-summary">Obsidian과 memos는 어느 것을 선택해야 합니까?</summary><div class="faq-answer">Markdown 파일을 직접 관리하고 싶다면 Obsidian, 직접 구동하는 웹 애플리케이션에 짧게 기록하고 타임라인에 되돌아보고 싶다면 memos가 후보입니다.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">memos는 Obsidian의 보관함을 그대로 사용할 수 있습니까?</summary><div class="faq-answer">사용할 수 없습니다. 이번 표준 시작에서는 SQLite가 초기화되었습니다. Obsidian의 Markdown 폴더를 직접 편집하는 메커니즘이 아닙니다.</div></details></div>
+    <div class="faq-item"><details><summary class="faq-summary">memos는 무료인가요?</summary><div class="faq-answer">본체는 오픈소스입니다. 다만, 공개 운영 서버나 도메인 등의 비용과 업데이트·백업·보안을 관리하는 시간은 별도로 필요합니다.</div></details></div>
+  </div></section>
+  <section class="lp-section ce-chapter sd-chapter" id="verification"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">검증 환경 및 범위</h2></div><div class="ce-chapter__body"><div class="tip-box"><p><strong>실기 확인:</strong> 2026년 9월 8일, Apple Silicon Mac/macOS 26.4.1/Memos 0.30.0. 공식 darwin arm64 아카이브를 공개하고 SHA‐256과 대조하여 로컬 전용으로 실행합니다. SQLite 초기화, private access, 관리자 생성, 일본어 메모·태그·작업 저장을 확인했습니다.</p><p><strong>미검증:</strong> 외부 공개, HTTPS, 다중 사용자, Spaces, SSO, 별도 기기와의 사용, 백업 복원, 업그레이드, 가져오기/내보내기, 모바일, Obsidian 이전, SimpleMemo와 직접 연동. 검증되지 않은 동작은 보증하지 않습니다.</p></div><p>비교 대상과의 제휴에 의한 기사가 아닙니다. 본 사이트는 YURIKA, K.K.가 운영하고 있으며, 독립 앱 “SimpleMemo”에 대한 정보도 게재하고 있습니다.</p></div></section>
+  <aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">다음에 읽습니다</span><strong>Obsidian을 메모의 발송처로 보내는 방법</strong><span style="display:block;margin-top:.5rem">보관지를 정하면, 걸을 때의 입구를 정돈합니다. </span></a></aside>
+  <nav class="internal-links" aria-label="관련 페이지"><a href="/ko/obsidian/compare/">Obsidian 비교 허브</a><a href="/ko/obsidian/compare/logseq/">Logseq와의 비교</a><a href="/ko/obsidian/compare/capacities/">Capacities와의 비교</a><a href="/ko/obsidian/getting-started/">Obsidian의 시작 방법</a></nav>
+</div></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="푸터 탐색 메뉴"><div class="footer__col"><p class="footer__col-title">프로덕트</p><a href="/ko/download/" class="footer__link">다운로드</a><a href="/ko/" class="footer__link">홈</a><a href="/ko/obsidian/" class="footer__link">Obsidian 연동</a></div><div class="footer__col"><p class="footer__col-title">비교·전환</p><a href="/ko/vs/" class="footer__link">비교</a><a href="/ko/obsidian/compare/" class="footer__link">Obsidian 비교</a></div><div class="footer__col"><p class="footer__col-title">지원</p><a href="/ko/about/" class="footer__link">개발자 소개</a><a href="/ko/faq" class="footer__link">자주 묻는 질문</a><a href="/ko/privacy" class="footer__link">개인정보 보호</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

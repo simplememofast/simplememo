@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/obsidian-voice-input">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Obsidian에 음성 입력으로 메모하는 방법 4 선택【iPhone】플러그는 필요 없는 방법도</title>
+  <meta name="description" content="Obsidian에서 음성 입력을 사용하는 4의 방법을 비교합니다. 모바일 음성 입력, 공식 Capture·URI 단축키, 녹음 문자 전사, SimpleMemo에서의 보관함 추가를 설정·통신·무료 슬롯 조건에 따라 정리합니다. 짧은 메모를 남기는 용도와 긴 녹음을 처리하는 용도로 구분하여 선택 방법을 설명합니다.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian에 음성 입력으로 메모하는 방법 4 선택【iPhone】플러그는 필요 없는 방법도">
+  <meta property="og:description" content="Obsidian에서 음성 입력을 사용하는 4의 방법을 비교합니다. 모바일 음성 입력, 공식 Capture·URI 단축키, 녹음 문자 전사, SimpleMemo에서의 보관함 추가를 설정·통신·무료 슬롯 조건에 따라 정리합니다. 짧은 메모를 남기는 용도와 긴 녹음을 처리하는 용도로 구분하여 선택 방법을 설명합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-07-10T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/blog/obsidian-voice-input">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian에 음성 입력으로 메모하는 방법 4 선택【iPhone】플러그는 필요 없는 방법도">
+  <meta name="twitter:description" content="Obsidian에서 음성 입력을 사용하는 4의 방법을 비교합니다. 모바일 음성 입력, 공식 Capture·URI 단축키, 녹음 문자 전사, SimpleMemo에서의 보관함 추가를 설정·통신·무료 슬롯 조건에 따라 정리합니다. 짧은 메모를 남기는 용도와 긴 녹음을 처리하는 용도로 구분하여 선택 방법을 설명합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/obsidian-voice-input">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "ko",
+  "headline": "Obsidian에 음성 입력으로 메모하는 방법 4 선택【iPhone】플러그는 필요 없는 방법도",
+  "description": "Obsidian에서 음성 입력을 사용하는 4의 방법을 비교합니다. 모바일 음성 입력, 공식 Capture·URI 단축키, 녹음 문자 전사, SimpleMemo에서의 보관함 추가를 설정·통신·무료 슬롯 조건에 따라 정리합니다. 짧은 메모를 남기는 용도와 긴 녹음을 처리하는 용도로 구분하여 선택 방법을 설명합니다.",
+  "image": "https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png",
+  "url": "https://simplememofast.com/ko/blog/obsidian-voice-input",
+  "datePublished": "2026-07-10",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "keywords": "Obsidian, 음성 입력, 음성 메모, 문자 전사, iPhone, Whisper, 음성 메모, 받아쓰기"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "블로그",
+      "item": "https://simplememofast.com/ko/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Obsidian의 음성 입력",
+      "item": "https://simplememofast.com/ko/blog/obsidian-voice-input"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/blog/obsidian-voice-input#webpage",
+  "inLanguage": "ko",
+  "name": "Obsidian에 음성 입력으로 메모하는 방법 4 선택【iPhone】플러그는 필요 없는 방법도",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/blog/obsidian-voice-input"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "ko",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Obsidian만으로 음성 입력이 가능합니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "모바일 버전이라면 iOS 키보드의 음성 입력을 그대로 사용할 수 있습니다. 다만 “녹음을 자동으로 문자 전사하는” 기능은 Obsidian 본체에 없으며, 코어 플러그인인 Audio recorder도 녹음 파일을 저장·매립할 수 있습니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "녹음 데이터를 문자 전사하여 Obsidian에 넣으려면 어떻게 해야 하나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Whisper 계열의 커뮤니티 플러그인 및 외부 문자 전사 도구를 함께 사용합니다. 회의나 강의 등 장시간 녹음에 이 구성이 적합합니다. 대화하면서 바로 텍스트화하고 싶다면, 방법 1이나 방법 4이 더 편리합니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "플러그인 없이 “말하기 → Obsidian에 남는”을 자동화할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "할 수 있습니다. 단축키의 음성 입력과 Obsidian의 공식 캡처를 결합하는 방법이 있습니다. SimpleMemo에서도 iOS 26 이후에 음성 자동 입력을 설정하고, 접근을 허용한 보관함에 직접 추가할 수 있습니다. 모두 저장 대상 설정과 최초 저장 확인이 필요하며, 음성 입력 권한·지원 언어·준비 상태에 따라 동작이 달라집니다."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apple Watch에서 음성으로 Obsidian에 메모할 수 있습니까?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "할 수 있습니다. SimpleMemo의 Watch 앱에서 페어링된 iPhone을 거쳐 설정된 보관함에 추가합니다. iPhone 측의 연동 설정 및 저장처에 대한 접근이 필요합니다. 메일 배송에는 통신이 필요하며, Watch만으로 보관함 설정까지 완료되는 것은 아닙니다. 절차는 Apple Watch×Obsidian의 해설 페이지에서 설명하고 있습니다."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/ko/blog/obsidian-voice-input#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .voice-table-wrap{overflow-x:auto;}
+    .voice-table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body .voice-table-wrap table{min-width:44rem;}
+    .article-body .voice-table-hint{font-size:.85rem;color:var(--text-secondary);}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+    /* アプリ画面スクショの横スクロール帯。/siri/ のアプリ内ガイド節（#428）と同じ形。
+       ⚠️ あちらは実機、こちらは Simulator 撮影（ArticleScreenshotUITests）。
+       manifest の verification は "simulator" 固定で、音声認識の精度・AirPods・
+       Watch連携は Simulator では再現できない。本文に「実機確認済み」と書かないこと。
+       ⚠️ フレックスとスナップは img 側に掛ける。<picture> で包むとフレックスの
+       子が picture に変わって並びが崩れる（webp は Safari 14 以降で通るため
+       フォールバックは置いていない）。 */
+    .article-body .shot-strip{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;
+      -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+    .article-body .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;
+      border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000;}
+</style>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">본문으로 건너뛰기</a>
+<nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/blog/obsidian-voice-input" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/obsidian-voice-input" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/obsidian-voice-input" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/obsidian-voice-input" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/blog/obsidian-voice-input" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/obsidian-voice-input" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/obsidian-voice-input" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/obsidian-voice-input" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/obsidian-voice-input" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <header class="ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><p class="ce-eyebrow">Obsidian · 음성으로 남기기</p><h1 class="page-content__title"><span class="ce-title-line">Obsidian에</span><span class="ce-title-line"><span class="ce-title-accent">음성 입력</span>으로 메모하기</span><span class="ce-title-line">방법4 선택【iPhone】</span></h1>
+
+      <p class="article-meta"> 저자: <a href="/ko/about/">AI ATAKA</a> ・ 최종 업데이트: <time datetime="2026-09-30">2026년 9월 30일</time> ・ 읽음：약 6분 </p><a class="ce-read-link" href="#guide-section-1">본문 읽기 <span aria-hidden="true">↓</span></a></div><nav class="ce-routes" aria-label="읽고 싶은 내용 중에서 선택하세요"><a class="ce-route" href="#guide-section-2"><span>01</span><b>지금 바로 시도해 볼 수 있는 방법</b></a><a class="ce-route" href="#guide-section-5"><span>02</span><b>SimpleMemo로 남깁니다</b></a><a class="ce-route" href="#voice-methods-table"><span>03</span><b>4두 가지 방법을 비교</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO / iPHONE</p><div class="ce-device"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" alt="SimpleMemo의 입력 화면. 위쪽에는 전송 버튼, 오른쪽 아래에는 음성 입력 버튼이 있습니다." decoding="async" fetchpriority="high"></div><figcaption class="ce-stage-foot">SimpleMemo의 실제 입력 화면</figcaption></figure></header>
+
+<div class="ce-article"><details class="ce-index"><summary>이 페이지의 목차</summary><nav aria-label="페이지 내 목차"><a href="#guide-section-1">01 입력 중의 음성 인식과 녹음 파일의 문자 전사를 구분합니다</a><a href="#guide-section-2">02 방법1：Obsidian 모바일+iOS의 음성 입력(무료·즉시 체험 가능)</a><a href="#guide-section-3">03 방법2: 바로 가기(공식 캡처 또는 Obsidian URI)</a><a href="#guide-section-4">04 방법3：Whisper 계열 플러그인(녹음 전사에 강함)</a><a href="#guide-section-5">05 방법4：SimpleMemo에서 설정된 보관함에 추가(플러인 불필요)</a><a href="#voice-methods-table">06 4 두 가지 방법을 비교</a><a href="#guide-section-7">07 사용 구분 기준</a><a href="#guide-section-8">08 자주 묻는 질문</a></nav></details>
+
+
+      <div class="page-content__body article-body">
+
+        <div class="callout ce-lede">
+          <strong>결론.</strong>iPhone에서 Obsidian에 음성 메모를 남기는 입구는,<strong>1 모바일 버전+iOS의 음성 입력</strong>、<strong>2 음성 입력 바로가기+공식 캡처 또는 URI</strong>、<strong>3 녹음을 문자 전사하는 플러그인</strong>、<strong>4SimpleMemo에서 설정된 보관함에 추가</strong>의 4으로 나눌 수 있습니다. 추가 앱 없이 시도한다면 1 또는 2, 녹음된 파일을 처리하려면 3. 입력 화면과 저장 대상을 정하고 반복 이용을 원할 경우 4개도 후보입니다. SimpleMemo의 앱 내 음성 입력은 iOS 26 이후를 대상으로 하며, 권한·지원 언어·저장처 준비가 필요합니다. </div>
+
+        <section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-1" data-ce-number="01">입력 중의 음성 인식과 녹음 파일의 문자 전사를 구분하기</h2></header><div class="ce-chapter__body">
+        <p>Obsidian에는 녹음용 코어 플러그인 “Audio recorder”가 있지만, 할 수 있는 것은 오디오 파일을 저장하고 노트에 삽입하는 것까지이며, 문자 전사는 하지 않습니다. 모바일 버전에서 “음성으로 작성”하는 경우에는 iOS 키보드의 마이크(음성 입력)를 사용하게 됩니다. 즉, Obsidian에서 음성 메모를 구현하려면, <strong>입력의 입력과 저장 대상을 어떻게 조합할지</strong>을 결정합니다. 아래에서 4가지 방법을 소개합니다.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-2" data-ce-number="02">방법1：Obsidian 모바일+iOS의 음성 입력(무료·즉시 체험 가능)</h2></header><div class="ce-chapter__body">
+        <ol>
+          <li>Obsidian 모바일에서 노트를 엽니다(데일리 노트를 시작점으로 하면 길을 잃지 않습니다)</li>
+          <li>키보드의 마이크 아이콘을 탭하십시오</li>
+          <li>말하기——구두점은 “마루”, “텐”이라고 발음하거나 나중에 정리합니다</li>
+        </ol>
+        <p>추가 도구 없이 오늘부터 사용할 수 있다는 것이 장점입니다. 약점은 <strong>수</strong>입니다. 앱을 실행하고, 보관함이 로드된 뒤, 노트를 열고 마이크를 탭합니다—여기까지 몇 번 탭해야 하므로, 보행 중의 생각이 중간에 사라지기 쉽습니다. 자리 잡은 추가 기록은 충분히 실용적입니다.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-3" data-ce-number="03">방법 2: 바로 가기(공식 캡처 또는 Obsidian URI)</h2></header><div class="ce-chapter__body">
+        <p>단축키의 “텍스트를 음성 입력”으로 문자로 변환한 후, Obsidian에 전달합니다. <a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener">모바일 버전 1.11부터의 공식 캡처 액션</a>이라면, Obsidian 앱을 열지 않고 노트의 시작과 끝에 추가할 수 있습니다. 단축키 내에서 저장 대상을 설정하고, 짧은 텍스트가 의도한 노트에 들어가는지 확인하십시오.</p>
+        <p><a href="https://obsidian.md/help/uri" target="_blank" rel="noopener">Obsidian URI</a>（<code>obsidian://new</code>）은 다른 전달 방식입니다. 보관함·파일·추가 지정 및 파라미터 인코딩을 조립합니다. 공식 캡처와 URI를 혼동하지 않고, 사용할 루트 설정, 음성 입력이 중단된 경우의 처리, 단말기·언어에 따른 통신 조건을 확인합니다.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-4" data-ce-number="04">방법3：Whisper 계열 플러그인(녹음 전사에 강함)</h2></header><div class="ce-chapter__body">
+        <p>커뮤니티 플러그인에는 녹음한 음성을 Whisper 계열의 음성 인식으로 문자 전사하여 노트화하는 기능이 있습니다. 회의·강의·긴 독백 등, <strong>정리된 녹음을 텍스트 자산으로 변환</strong> 용도에 적합한 구성입니다.</p>
+        <p>한편, API 키의 획득 및 이용료, 플러그인 설정과 같은 도입 비용이 발생하며, 클라우드 API형은 오프라인에서는 사용할 수 없습니다. '매일의 짧은 메모'보다 '녹음 아카이브 처리'를 위한 것입니다.</p>
+
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-5" data-ce-number="05">방법 4: SimpleMemo에서 설정된 보관함에 추가(플러인 불필요)</h2></header><div class="ce-chapter__body">
+        <p>「생각난 순간에 말하고, 나머지는 Obsidian에 남아 있기를 바랍니다」——이 용도에 특화된 것이 <a href="/ko/obsidian/">SimpleMemo</a>입니다.</p>
+        <ul class="ce-benefits">
+          <li><h3>음성으로 입력하기</h3>「시작 시 음성 입력 자동 켜기」를 활성화하면, 실행 시 앱 내 음성 입력을 시작할 수 있습니다. iOS 26 이후·지원 언어가 대상이며, 마이크와 음성 인식에 대한 허가가 필요합니다. 인식은 단말기 내에서 처리하지만, 최초 언어 모델 획득에는 통신 및 준비 시간이 필요할 수 있습니다</li>
+          <li><h3>보관함에 직접 추가</h3>전송 시, 폴더 지정으로 접근을 허용한 보관함의<strong>Inbox 노트 또는 데일리 노트에 타임스탬프를 사용하여 직접 추가</strong>합니다. 메일이 도착하기를 기다렸다가 가져오는 메커니즘이 아닙니다</li>
+          <li><h3>통신이 없을 때</h3>폴더에 직접 추가하는 방식은, 대상 파일이 iPhone에서 사용 가능하면 오프라인에서도 저장할 수 있습니다. 메일은 통신이 복구될 때까지 전송 대기 상태이며, 다른 기기와의 동기화는 별도입니다. Obsidian에만 저장하는 모드(프리미엄)도 선택할 수 있습니다</li>
+          <li><h3>시작 시간 측정</h3><strong>약 0.4초는 워밍 시작부터 본문에 입력할 수 있을 때까지의 측정값</strong>입니다. 8월 11일의 5회 측정의 중앙값이며, 음성 인식 시작·이메일 전송·보관함에 저장 완료까지의 시간이 아닙니다.<a href="/ko/blog/benchmark-methodology">측정 조건</a>을(를) 함께 기재하고 있습니다</li>
+          <li><h3>무료로 사용할 수 있는 범위</h3>Free는 하루 최대 3건(이용 기간 제한 없음). 계속 이용 조건은<a href="/ko/faq#pricing-ja">요금·플랜 설명</a>에서 확인할 수 있습니다</li>
+        </ul>
+        <pre tabindex="0" role="region" aria-label="텍스트 예시(가로 스크롤할 수 있습니다)"><code>- 09:14 会議メモ：見積もりは金曜まで
+- 09:31 音声で：帰りに電池を買う
+- 12:05 アイデア：オンボーディングを3画面に</code></pre>
+        <p>먼저 음성 입력 권한과 준비 상태를 확인하고, 이메일을 사용할 경우 수신자를 등록합니다. 다음으로 Obsidian 연동에서 보관함 폴더와 저장처를 지정하고, 짧은 메모가 추가되었는지 확인해 주세요. 폴더에 직접 접근할 수 없고 URI로 전환되는 경우, 동작 및 설정 조건이 다릅니다. <a href="/ko/obsidian/getting-started/">설정 및 최초 추가 확인</a>、<a href="/ko/voice-input/">음성 입력 기능 페이지</a>、<a href="/ko/blog/email-to-obsidian">메일×Obsidian 연동 해설</a>에 절차를 정리하고 있습니다.</p>
+
+        <p>화면 예시는 생성 화면·메일 설정·Obsidian 연동 설정의 3입니다. 메일 설정은 메일도 사용할 경우에 필요합니다(가로 스크롤할 수 있습니다).</p>
+        <div class="shot-strip ce-screen-gallery" role="region" tabindex="0" aria-label="SimpleMemo의 화면 예시(가로 스크롤할 수 있습니다)">
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" loading="lazy" alt="SimpleMemo의 생성 화면。「 다음 기획 회의에서 “음성 입력 흐름을 개선한다”라고 입력된 상태에서 오른쪽 하단에 음성 입력 버튼, 오른쪽 상단에 전송 버튼이 표시되고 있습니다"></div><figcaption><span>01</span> 생성 화면</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/02-settings.webp" width="640" height="1389" loading="lazy" alt="SimpleMemo의 설정 화면 상단. 언어, 이메일 수신자·제목·서명, 테스트 전송, 프리미엄 플랜 항목이 나열되어 있습니다"></div><figcaption><span>02</span> 메일 설정</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/03-obsidian-settings.webp" width="640" height="1389" loading="lazy" alt="SimpleMemo 설정 화면의 상세 설정. Obsidian 연동이 켜져 있으며, 폴더에 QAObsidianVault가, 보내는 곳에 데일리 노트와 타임스탬프를 붙여 추가 기록이 켜져 있습니다"></div><figcaption><span>03</span> Obsidian 연동</figcaption></figure>
+        </div>
+
+        <p style="margin:1.75rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.95rem;line-height:1.85;">방법 4을 실제로 시험해 보신다면, <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">SimpleMemo</a>는 설정 후 음성으로 입력한 메모를 보관함에 직접 추가할 수 있습니다. Free는 하루 최대 3건(이용 기간 제한 없음)입니다. 약 0.4초는 웜 실행부터 본문 입력이 가능해질 때까지의 측정이며, 음성 인식 시작이나 저장 완료까지의 시간은 아닙니다.</p>
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="voice-methods-table" data-ce-number="06">4개의 방법을 비교</h2></header><div class="ce-chapter__body">
+        <p class="voice-table-hint" id="voice-table-hint">표는 가로로 스크롤할 수 있습니다. 오른쪽에서 통신 조건과 비용을 확인해 주세요.</p>
+        <div class="voice-table-wrap ce-table-scroll" tabindex="0" role="region" aria-labelledby="voice-methods-table" aria-describedby="voice-table-hint">
+          <table>
+          <tr><th scope="col">방법</th><th scope="col">생각→저장 횟수</th><th scope="col">특기 용도</th><th scope="col">오프라인</th><th scope="col">추가 비용</th></tr>
+          <tr><th scope="row">1. 모바일+iOS 음성 입력</th><td>수 탭(시작→노트→마이크)</td><td>책상 위에서의 추가</td><td>△（단말기·언어 설정에 따라）</td><td>없음</td></tr>
+          <tr><th scope="row">2. 단축키</th><td>음성 입력→공식 캡처 또는 URI(설정 필요)</td><td>정형 캡처</td><td>△（음성 입력·저장 대상·구성에 따라)</td><td>추가 앱 구매는 필요하지 않습니다</td></tr>
+          <tr><th scope="row">3. Whisper계 플러그인</th><td>녹음 후 일괄 처리</td><td>긴 녹음 전사</td><td>×〜△（API형은 불가）</td><td>API 이용료 등</td></tr>
+          <tr><th scope="row">4. SimpleMemo</th><td>설정 후 열기→말하기→전송</td><td>정한 저장 대상에 짧은 메모를 남깁니다</td><td>△（모델 준비와 로컬 파일에 대한 접근이 필요합니다. 메일은 통신 대기 중)</td><td>Free는 하루 최대 3건</td></tr>
+        </table>
+        </div>
+
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-7" data-ce-number="07">사용 구분 기준</h2></header><div class="ce-chapter__body">
+        <ul>
+          <li><strong>지금 바로 무료로 체험하고 싶습니다</strong> → 방법 1</li>
+          <li><strong>홈 화면을 원탭으로, 직접 만들기도 즐기고 싶습니다</strong> → 방법2</li>
+          <li><strong>녹음 데이터의 문자 전사가 목적입니다</strong> → 방법3</li>
+          <li><strong>일상의 생각을 놓치고 싶지 않습니다</strong> → 방법4</li>
+        </ul>
+        <p><strong>방법 4을 선택한다면, 입구도 미리 정해 두세요</strong>하면 손수가 더욱 줄어듭니다. Apple Watch에게 말하기 → <a href="/ko/apple-watch-obsidian/">Watch×Obsidian의 절차</a>, AirPods에서 화면을 보지 않고 → <a href="/ko/siri/">Siri로 Obsidian에 보내기</a>, 액션 버튼으로 열기 → <a href="/ko/fastest-voice-memo/">입구 설정</a>, 이동 중에 열기만 하면 녹음(자동 켜기 설정 시) → <a href="/ko/hands-free/">핸즈프리</a>. 입구에 따라 조작 및 통신 조건이 다릅니다. 선택한 경로에서 의도한 저장 대상에 도달하는지 한 번 확인해 주세요.</p>
+        <p>참고로 “캡처(포획)”와 “라이팅(키우는)”을 구분하는 것이 Obsidian 운용의 요령입니다. 잡는 방법의 전체 모습은 <a href="/ko/blog/obsidian-iphone-memo">iPhone부터 Obsidian으로 메모를 보내는 방법 6 선택</a>, 필기 처리 기술은 <a href="/ko/blog/fleeting-notes">프리팅 노트 작성법</a>을 참고하십시오.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-8" data-ce-number="08">자주 묻는 질문</h2></header><div class="ce-chapter__body">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">Obsidian만으로 음성 입력이 가능합니까?</summary><div class="faq-answer">모바일 버전이라면 iOS 키보드의 음성 입력을 그대로 사용할 수 있습니다. 다만 “녹음을 자동으로 문자 전사하는” 기능은 Obsidian 본체에 없으며, 코어 플러그인인 Audio recorder도 녹음 파일을 저장·매립할 수 있습니다.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">녹음 데이터를 문자 전사하여 Obsidian에 넣으려면 어떻게 해야 하나요?</summary><div class="faq-answer">Whisper 계열의 커뮤니티 플러그인 및 외부 문자 전사 도구를 함께 사용합니다. 회의나 강의 등 장시간 녹음에 이 구성이 적합합니다. 대화하면서 바로 텍스트화하고 싶다면, 방법 1이나 방법 4이 더 편리합니다.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">플러그인 없이 “말하기 → Obsidian에 남는”을 자동화할 수 있습니까?</summary><div class="faq-answer">할 수 있습니다. 단축키의 음성 입력과 Obsidian의 공식 캡처를 결합하는 방법이 있습니다. SimpleMemo에서도 iOS 26 이후에 음성 자동 입력을 설정하고, 접근을 허용한 보관함에 직접 추가할 수 있습니다. 모두 저장 대상 설정과 최초 저장 확인이 필요하며, 음성 입력 권한·지원 언어·준비 상태에 따라 동작이 달라집니다.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">Apple Watch에서 음성으로 Obsidian에 메모할 수 있습니까?</summary><div class="faq-answer">할 수 있습니다. SimpleMemo의 Watch 앱에서 페어링된 iPhone을 거쳐 설정된 보관함에 추가합니다. iPhone 측의 연동 설정 및 저장처에 대한 접근이 필요합니다. 메일 배송에는 통신이 필요하며, Watch만으로 보관함 설정까지 완료되는 것은 아닙니다. 절차는 Apple Watch×Obsidian의 해설 페이지에서 설명하고 있습니다.</div></details></div>
+
+        <p style="margin-top:2rem;">방법 4을 구현하고 있는 것이 <a href="/ko/obsidian/">SimpleMemo</a>입니다. Apple Watch에서의 음성 캡처는 <a href="/ko/apple-watch-obsidian/">Watch×Obsidian의 해설 페이지</a>에서 소개하고 있습니다.</p>
+
+      </div></section>
+</div>
+    </div>
+</div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="feature" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> 다음에 읽는 </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> 음성으로 남긴 메모의 목적지를 결정하는 </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> 저장처 설정과 최초 추가 확인에 대해 설명합니다. </span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro --><div class="container">
+      <nav class="footer__nav capture-footer-wide" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/use-cases/" class="footer__link">활용 사례</a>
+        <a href="/ko/guides/" class="footer__link">사용 가이드</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio-alternative/" class="footer__link"><span>Captio 대체</span></a>
+        <a href="/ko/note-to-email/" class="footer__link">메모를 이메일로</a>
+        <a href="/ko/vs/" class="footer__link">비교</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/blog/" class="footer__link"><span>블로그</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/faq" class="footer__link">자주 묻는 질문</a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

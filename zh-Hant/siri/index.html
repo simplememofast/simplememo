@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/siri/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>用AirPods語音備忘錄 — 不開啟應用程式用Siri傳送到Obsidian | SimpleMemo</title>
+  <meta name="description" content="從AirPods向Siri傳遞備忘錄的設定和條件。 確認傳送目的地的認證、保管庫資料夾、鎖定中的執行，分別確認郵件接收、Obsidian儲存、其他終端同步。 與開啟應用程式的語音捷徑的區別，也說明了離線等待的條件。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="用AirPods語音備忘錄 — 不開啟應用程式用Siri傳送到Obsidian | SimpleMemo">
+  <meta property="og:description" content="從AirPods向Siri傳遞備忘錄的設定和條件。 確認傳送目的地的認證、保管庫資料夾、鎖定中的執行，分別確認郵件接收、Obsidian儲存、其他終端同步。 與開啟應用程式的語音捷徑的區別，也說明了離線等待的條件。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/siri/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <meta property="og:image:width" content="256">
+  <meta property="og:image:height" content="256">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="用AirPods語音備忘錄 — 不開啟應用程式用Siri傳送到Obsidian | SimpleMemo">
+  <meta name="twitter:description" content="從AirPods向Siri傳遞備忘錄的設定和條件。 確認傳送目的地的認證、保管庫資料夾、鎖定中的執行，分別確認郵件接收、Obsidian儲存、其他終端同步。 與開啟應用程式的語音捷徑的區別，也說明了離線等待的條件。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/app-icon-256.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/siri/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/siri/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/siri/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/siri/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/siri/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/siri/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/siri/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/siri/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/siri/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/siri/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/siri/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/siri/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Siri語音備忘錄",
+      "item": "https://simplememofast.com/zh-Hant/siri/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/siri/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "用AirPods語音備忘錄—不開啟APP用Siri傳送到Obsidian",
+  "description": "從AirPods向Siri傳遞備忘錄的設定和條件。 確認傳送目的地的認證、保管庫資料夾、鎖定中的執行，分別確認郵件接收、Obsidian儲存、其他終端同步。 與開啟應用程式的語音捷徑的區別，也說明了離線等待的條件。",
+  "url": "https://simplememofast.com/zh-Hant/siri/",
+  "datePublished": "2026-08-05",
+  "dateModified": "2026-10-03",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/siri/"
+  }
+}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/siri/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "即使長按AirPods的閥杆也不會出現Siri",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AirPods Pro（第1・第2代）和AirPods 4（搭載降噪），長按杆的初始設定是“噪音控制切換”，Siri不啟動。 長按的話會發出聲音，所以很難注意到失敗，這是棘手的一點。 設定→Bluetooth→請更改為您使用的AirPods的i→“長按時的操作”→Siri（左右各有設定）。 如果想在不改變設定的情況下使用的話，請說“Hey Siri、シンプルメモで残す”，確認是否在您使用的終端上輸入正文。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Siri沒有反應/被告知“找不到為此的應用程式”",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "捷徑App，在“SimpleMemo”的捷徑設定中確認Siri是否開啟（關閉的話無法識別所有短語）。 開啟後請說“Hey Siri、シンプルメモで残す”。 措辭請從“〜で残す”開始嘗試。 安裝後註冊可能需要幾分鐘，請啟動應用程式，稍等片刻再嘗試。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "一說“シンプルメモにメモ”就做了不同的動作",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "請嘗試“シンプルメモで残す”，確認Siri是否進入聽正文的傳送操作。 如果選擇了其他應用程式或操作，請確認Siri的語言設定和捷徑的註冊。 僅使用應用程式名稱的發話，是啟動應用程式還是註冊的傳送操作，請確認Siri的指南。 現行版的所有終端都不一定有相同的解釋。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "不開啟應用程式，怎麼傳送呢？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Siri的“で残す”是將正文傳遞給應用程式的傳送處理的入口。 需要傳送郵件的認證等初始設定。 正常模式的郵件傳送和Obsidian的補充是不同的途徑，僅Siri的“已傳送”無法確認保管庫儲存。 請分別確認直接寫入所選資料夾是否成功，以及同步到其他終端。“ 声でメモ”是開啟應用程式的另一個入口。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "離線（圈外）和Siri說話會怎麼樣？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "從Siri將正文傳遞到應用程式，正常模式的郵件處於待機狀態時，儲存到加密的Outbox，恢復通訊後嘗試重新傳送。 Siri的呼叫和語音識別本身不一定在訊號範圍外也能使用。 直接寫入保管庫，需要終端上的目標資料夾和寫入許可權。 請另外確認郵件等待、保管庫儲存、其他終端同步。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "僅用AirPods完成嗎？ 有必要看畫面嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在具備必要設定的環境中，可以透過與Siri的語音交流傳遞備忘錄。 根據鎖定中的Siri使用設定、選擇的捷徑、終端狀態，可能需要解除或進行畫面操作。 開啟應用程式的“声でメモ”和將正文傳遞給傳送處理的“で残す”是不同的入口。 不能保證所有終端狀態都不需要操作，請在第一個備忘錄中確認收件箱和保管庫的正文。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什麼是“高音質錄音”？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "“高音質錄音”是為了在應用程式內的語音輸入中使用AirPods的麥克風的設定。 需要對應的iOS・AirPods，在設定→詳細設定中切換。 與從Siri傳遞正文的傳送捷徑是不同的功能。 這裡沒有實際測量麥克風切換導致的開始時間的差異。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Siri傳送也可以在免費計劃中使用嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "可以使用。 透過Siri的傳送也和從應用內傳送一樣，共享免費計劃的1日的傳送範圍。 用完框架時，Siri會告知達到上限。 是語音還是畫面取決於終端的狀態。"
+      }
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh-Hant/siri/#webpage",
+  "inLanguage": "zh-Hant",
+  "name": "用AirPods語音備忘錄 — 不開啟應用程式用Siri傳送到Obsidian | SimpleMemo",
+  "url": "https://simplememofast.com/zh-Hant/siri/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh-Hant/#website"
+  }
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    /* カードは各セクション4枚。auto-fit だと広い画面で3列＋1枚だけ余る
+       ので2×2に固定する。列が広いぶん文節折返しの行末も揃いやすい。 */
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.95rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.6rem;position:relative;line-height:1.8}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#54cf68;font-weight:700}
+
+    /* ── 会話フロー図 ──────────────────────────────────
+       注意: 上の [data-lang].active{display:revert} は詳細度 (0,2,0) で、
+       .flow-steps{display:grid} (0,1,0) に勝ってしまう。言語切替後に
+       display が block へ戻され、チップがインラインに落ちて矢印だけが
+       行末に取り残される（旧 .flow-row の崩れの原因）。表示指定は必ず
+       [data-lang].active より強い詳細度で書くこと。
+       矢印は擬似要素にしてあるので、単独で行送りされることはない。 */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
+    .flow-card .flow-steps,
+    .flow-card .flow-steps[data-lang].active{display:grid;grid-template-columns:1fr;gap:2rem;list-style:none;margin:0 auto;padding:0;max-width:30rem}
+    .flow-step{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
+    .flow-step--siri{background:rgba(122,120,255,.14);border-color:rgba(139,124,255,.34)}
+    .flow-step__who{font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#4fdcf0}
+    .flow-step--siri .flow-step__who{color:#b0a5ff}
+    .flow-step__say{font-size:.95rem;font-weight:700;line-height:1.7;color:var(--text)}
+
+    /* 言語で画像を出し分けるため data-lang を載せる。上の注意書きのとおり
+       [data-lang].active{display:revert} (0,2,0) が display:flex に勝つので、
+       .flow-steps と同じく詳細度を上げた指定を併記する。これが無いと
+       言語切替後に block へ戻り、横スクロール帯が縦積みになる。 */
+    .shot-strip,
+    .shot-strip[data-lang].active{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+    .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000}
+    /* 縦つなぎ: 線 + 三角の矢じり */
+    .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
+    .flow-step + .flow-step::after{content:'';position:absolute;left:50%;top:-.6rem;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(34,211,238,.85);border-bottom:0}
+    @media(min-width:900px){
+      .flow-card .flow-steps,
+      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,1fr);gap:1.75rem;max-width:none;align-items:stretch}
+      /* 横つなぎ: 同じ擬似要素を回転させて使う */
+      .flow-step + .flow-step::before{left:auto;right:calc(100% + .45rem);top:50%;width:.9rem;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.8))}
+      .flow-step + .flow-step::after{left:auto;right:calc(100% + .1rem);top:50%;transform:translateY(-50%);border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid rgba(34,211,238,.85);border-right:0}
+    }
+
+    .phrase-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .phrase-table th,.phrase-table td{padding: .8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.7;vertical-align:top}
+    .phrase-table th{background:rgba(100,180,255,.06);font-weight:700;white-space:nowrap}
+    .phrase-table td:first-child{width:38%}
+    .phrase-mark{font-weight:700;white-space:nowrap}
+    .phrase-mark--best{color:#54cf68}
+    .phrase-mark--ok{color:#ffb734}
+    .phrase-mark--ng{color:#ff7089}
+    /* 狭い画面では2列を縦に割ると1列目が潰れて「シン|プルメモで残|す」と
+       語中で折り返す。行ごとのカードに組み替えて全幅を使わせる。 */
+    @media(max-width:700px){
+      .phrase-table,.phrase-table tbody,.phrase-table tr,.phrase-table td{display:block;width:auto}
+      .phrase-table{border-collapse:separate;border-spacing:0}
+      .phrase-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .phrase-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .phrase-table td{border:0;padding:.55rem 1rem}
+      .phrase-table td:first-child{width:auto;font-size:1rem;padding-bottom:.15rem}
+      .phrase-table td+td{color:var(--text-secondary);padding-top:0}
+      .phrase-table td+td::before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- app-schema: managed by scripts/inject_app_schema.py -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "@id": "https://simplememofast.com/#app",
+  "name": "SimpleMemo",
+  "alternateName": [
+    "Simple Memo - for Obsidian",
+    "Captio式シンプルメモ",
+    "シンプルメモ",
+    "SimpleMemoFast",
+    "Simple Memo"
+  ],
+  "url": "https://simplememofast.com/",
+  "image": "https://simplememofast.com/assets/img/app-icon-256.png",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "iOS 16.0+, watchOS",
+  "softwareVersion": "5.9.12",
+  "isAccessibleForFree": true,
+  "inLanguage": "zh-Hant",
+  "downloadUrl": "https://apps.apple.com/jp/app/id6758438948",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "JPY",
+      "description": "每天最多3則（使用期限不限）",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Monthly",
+      "price": "500",
+      "priceCurrency": "JPY",
+      "description": "每月500日元・無限傳送",
+      "availability": "https://schema.org/InStock"
+    },
+    {
+      "@type": "Offer",
+      "name": "Premium Yearly",
+      "price": "5000",
+      "priceCurrency": "JPY",
+      "description": "年額5,000日元・無限傳送",
+      "availability": "https://schema.org/InStock"
+    }
+  ],
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  }
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">跳到正文</a>
+  <!-- Global Navigation -->
+  <nav aria-label="主導航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh-Hant/guides/">使用指南</a><a href="/zh-Hant/use-cases/">使用情境</a><a href="/zh-Hant/vs/">比較</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh-Hant/guides/">使用指南</a></li>
+<li><a href="/zh-Hant/use-cases/">使用情境</a></li>
+<li><a href="/zh-Hant/vs/">比較</a></li>
+<li><a href="/zh-Hant/methods/"><span>方法</span></a></li>
+<li><a href="/zh-Hant/blog/"><span>部落格</span></a></li>
+<li><a href="/zh-Hant/glossary/"><span>術語集</span></a></li>
+<li><a href="/zh-Hant/faq">常見問題</a></li>
+<li><a href="/zh-Hant/about/">關於開發者</a></li>
+<li><a href="/zh-Hant/devlog/">開發日誌</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下載</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/siri/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/siri/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/siri/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/siri/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/siri/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/siri/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/siri/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/siri/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/siri/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="voice" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8">下載</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="選單"><span>選單</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content" id="main-content">
+<div class="container">
+<!-- Hero -->
+<div class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy">
+<div class="lp-hero__label">
+<span>AirPods × Siri（確認設定和傳送結果）</span>
+</div>
+<h1 class="lp-hero__title"> <span>從AirPods到Obsidian的備忘錄。 </span> </h1>
+<p class="guide-note" data-translation-example-note="">下方的語音指令為日語範例。請確認 Siri 的語言設定，以及裝置上已註冊的捷徑。</p>
+
+<p class="lp-hero__sub"> <span>AirPods透過“<strong><span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span></strong>”可以傳遞備忘錄。 調整初次設定和Siri的使用條件，確認現在的傳送地址後使用。 正常模式的郵件傳送和<a href="/zh-Hant/obsidian/" style="color:var(--accent);">Obsidian</a>的補充是不同的路徑。 <strong>完成通知後，也請分別確認收件箱和指定筆記本</strong>。 也有要求解鎖的情況。 </span> </p>
+<p class="lp-hero__sub">第一次使用Siri的人，<a href="/zh-Hant/siri/iphone/">與iPhone交談併傳送備忘錄，可以從3步驟的圖解指南</a>開始。</p>
+<!-- Existing app icon; guide conditions are described in the text. -->
+
+<div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+<a aria-label="從App Store下載" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="hero" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="從App Store下載" class="badge-img" height="40" loading="eager" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<a class="hero-cta-secondary" href="#setup" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(34,211,238,.3);border-radius:24px;color:#22d3ee;text-decoration:none;font-size:.9rem;"> <span>檢視設定</span> </a>
+</div>
+<div class="cta-qr">
+<img alt="App Store下載二維碼" height="132" loading="lazy" src="/assets/img/qr-siri-hero-ja.svg?v=4c228ff48a" width="132"/>
+<small><span>PC使用者用智慧手機讀取</span></small>
+</div>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;"> <span>作者: <a href="/zh-Hant/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a></span> <span> · 條件確認: 2026年9月30日</span></p>
+<a class="ce-read-link" href="#capture-section-1">閱讀正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="從想讀的內容中選擇" class="ce-routes"><a class="ce-route" href="#capture-section-1"><span>01</span><b>交流的例子</b></a><a class="ce-route" href="#capture-section-6"><span>02</span><b>3步驟設定</b></a><a class="ce-route" href="#capture-section-7"><span>03</span><b>沒有反應時</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO/iPhone</p><div class="ce-device"><img alt="SimpleMemo的應用程式內Siri介紹畫面。 從AirPods輸入和儲存地址的指南。" decoding="async" fetchpriority="high" height="1385" src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640"/></div><figcaption class="ce-stage-foot">SimpleMemo的應用內介紹畫面</figcaption></figure></div><div class="ce-article"><details class="ce-index"><summary>本頁目錄</summary><nav aria-label="目錄"><a href="#capture-section-1">Siri和2轉彎的交流例子</a><a href="#capture-section-2">應用內的介紹畫面示例</a><a href="#capture-section-3">Siri傳送確認</a><a href="#capture-section-4">確認傳遞給Siri的短語和操作</a><a href="#capture-section-5">設定3步驟</a><a href="#capture-section-6">沒有反應的時候</a><a href="#capture-section-7">在這樣的場合</a><a href="#capture-section-8">常見問題</a><a href="#capture-section-9">相關頁面</a></nav></details>
+<!-- Answer-first -->
+<!-- Explainer video — generated by scripts/build-videos.py; see
+           docs/SEO_AIO_PLAN_2026-08.md §4 P0-3. One VideoObject per page: the same
+           contentUrl on several URLs makes them compete to be the watch page. -->
+<figure class="lp-video" style="margin:2rem 0;">
+<video controls="" height="720" muted="" playsinline="" poster="/assets/video/siri-airpods-poster.jpg?v=dc9aaca588" preload="none" style="width:100%;height:auto;border-radius:var(--radius-sm);display:block;background:#0b1020;" width="1280">
+<source src="/assets/video/siri-airpods.mp4?v=3f3b2078bf" type="video/mp4"/>
+<span>您的瀏覽器不支援影片播放。</span>
+</video>
+<figcaption style="font-size:.875rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem;"><span>這是使用現有應用內指南影象的說明用幻燈片。 不是顯示儲存、郵件接收的實機測量，以及同時到達2個收件人的影像。 請在本文中確認現在的條件。 影片內的應用程式畫面中的“iPhone還放在口袋裡”“郵件和Obsidian同時送達”等以往的表達方式也不是現在的無條件執行保證。 根據許可權、認證、終端狀態需要解除和畫面操作。 </span></figcaption>
+</figure>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "@id": "https://simplememofast.com/zh-Hant/siri/#video",
+  "name": "用Siri和現場的AirPods擴音留言",
+  "description": "這是使用現有的應用程式內指南影象的說明用幻燈片。 不是顯示儲存、郵件接收的實機測量，以及同時到達2個收件人的影像。 請在本文中確認現在的條件。 影片內的應用程式畫面中的“iPhone還放在口袋裡”“郵件和Obsidian同時送達”等以往的表達方式也不是現在的無條件執行保證。 根據許可權、認證、終端狀態需要解除和畫面操作。",
+  "thumbnailUrl": [
+    "https://simplememofast.com/assets/video/siri-airpods-poster.jpg?v=dc9aaca588"
+  ],
+  "uploadDate": "2026-08-11T13:42:48+09:00",
+  "duration": "PT24S",
+  "contentUrl": "https://simplememofast.com/assets/video/siri-airpods.mp4?v=3f3b2078bf",
+  "encodingFormat": "video/mp4",
+  "inLanguage": "zh-Hant",
+  "isFamilyFriendly": true,
+  "publisher": {
+    "@id": "https://simplememofast.com/#organization"
+  },
+  "mainEntityOfPage": {
+    "@id": "https://simplememofast.com/zh-Hant/siri/#webpage"
+  }
+}</script>
+<section class="lp-section" style="padding-top:0;">
+<div class="tip-box" style="font-size:.95rem;">
+<div class="tip-box__title"><span>一言以蔽之</span></div>
+<p><span>“<strong><span lang="ja" translate="no">シンプルメモで残す</span></strong>”是Siri聽到正文，傳遞給應用程式的傳送處理的入口。 在正常模式下，郵件傳送的結果和Obsidian的補充是分開處理的。 <strong>僅透過Siri的“已傳送”，無法確認儲存到保管庫或同步到其他終端。 </strong>確認保管庫資料夾和關聯設定，確認指定筆記的正文。“ 僅儲存Obsidian”有效期間不會傳送備忘錄的郵件。 </span></p>
+</div>
+</section>
+<!-- The flow -->
+<section class="lp-section ce-chapter" style="padding-top:0;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="01" id="capture-section-1"> <span>Siri和2轉的交流例子</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>號召後，對Siri的問題回答正文的使用方法的例子。 響應、認證的要求會根據終端的狀態和設定而變化。 以下是操作指南，不是現行分發版的新實機測試。 </span> </p>
+<div class="flow-card">
+<ol class="flow-steps">
+<li class="flow-step"><span class="flow-step__who">🎧你</span><span class="flow-step__say">“<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>”</span></li>
+<li class="flow-step flow-step--siri"><span class="flow-step__who">Siri</span><span class="flow-step__say">“要記什麼？” </span></li>
+<li class="flow-step"><span class="flow-step__who">💬 你</span><span class="flow-step__say">說正文</span></li>
+<li class="flow-step flow-step--siri"><span class="flow-step__who">Siri</span><span class="flow-step__say">“已傳送備忘錄”</span></li>
+</ol>
+</div>
+<p style="font-size:.9rem;color:var(--text-muted);line-height:1.85;max-width:44rem;"> <span>Siri的響應是語音還是畫面取決於使用情況。 <a href="https://support.apple.com/guide/shortcuts/run-shortcuts-with-siri-apd07c25bb38/ios" rel="noopener" style="color:var(--accent);" target="_blank">Apple的指南</a>中，在鎖定中執行開啟應用程式的捷徑後，會要求解除。“ <span lang="ja" translate="no">声でメモ</span>”是開啟應用程式的入口，與“<span lang="ja" translate="no">で残す</span>”的傳送不同。 </span> </p>
+</div></section>
+<!-- In-app guide screenshots -->
+<section class="lp-section ce-chapter ce-chapter--wide" style="padding-top:0;"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="02" id="capture-section-2"> <span>應用內的引導畫面示例</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>這是現有的應用內指南6畫面操作的說明例子。 影象內有“同時送達”“任何AirPods都一樣”“iPhone保持在口袋裡”等傳統的表現。 不是現在的執行保證，而是為了分別確認許可權、認證、語音識別和各儲存目的地的結果的說明例子。 接收、終端內儲存、其他終端同步請分別確認。 </span> </p>
+<div class="shot-strip" role="region" aria-label="Siri聯動的設定畫面（可以橫向滾動）" tabindex="0">
+<img alt="現有的Siri操作指南畫面示例 1。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-1.png?v=7cf0e090a5" width="640"/>
+<img alt="現有的Siri操作指南畫面示例 2。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-2.png?v=750f4525e5" width="640"/>
+<img alt="現有的Siri操作指南畫面示例 3。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-3.png?v=7eb70fae13" width="640"/>
+<img alt="現有的Siri操作指南畫面示例 4。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-4.png?v=3d1e3ec928" width="640"/>
+<img alt="現有的Siri操作指南畫面示例 5。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-5.png?v=096968ffa9" width="640"/>
+<img alt="現有的Siri操作指南畫面示例 6。 實際的接收、儲存、同步根據本文的條件進行確認。" height="1385" loading="lazy" src="/assets/img/siri/onboarding-6.png?v=6ef777e921" width="640"/>
+</div>
+</div></section>
+<!-- Why it matters -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="03" id="capture-section-3"> <span>Siri傳送確認</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title">👖 <span>確認鎖定中的執行條件</span></div>
+<div class="reason-card__desc"><span>Siri的呼叫和鎖定中允許使用，執行所需的設定齊全時的入口。 如果被要求解除或操作畫面，請聽從終端的指示。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📬 <span>確認現在的儲存位置</span></div>
+<div class="reason-card__desc"><span>正常模式的<a href="/zh-Hant/note-to-email/" style="color:var(--accent);">郵件傳送</a>和<a href="/zh-Hant/obsidian/" style="color:var(--accent);">對保管庫的補充</a>是另一個結果。“ 如果“只有Obsidian”有效的話，就不發郵件了。 傳送前確認當前模式和儲存地址。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">📵 <span>郵件待機時</span></div>
+<div class="reason-card__desc"><span>應用程式接受正文，正常模式的郵件處於待機狀態時儲存到Outbox，恢復通訊後嘗試重新傳送。 Siri的語音識別本身不能保證在訊號範圍外使用，也不能保證保管庫儲存成功。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title">🔒 <span>即使失敗也不會沉默</span></div>
+<div class="reason-card__desc"><span>未設定、上限、等待、錯誤等，確認返回的Siri的指南。 僅憑這個回覆，並不能確認所有儲存目的地的到達。</span></div>
+</div>
+</div>
+</div></section>
+<!-- Phrases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="04" id="capture-section-4"> <span>確認傳遞給Siri的短語和操作</span> </h2></div><div class="ce-chapter__body">
+
+<p class="lp-section__lead"> <span>Siri的措辭，訣竅是選擇與iPhone標準功能不衝突的東西。 首先嚐試<strong>“<span lang="ja" translate="no">で残す</span>”</strong>，確認終端上顯示、朗讀的操作。 </span> </p>
+<div>
+<div aria-labelledby="capture-section-4" class="ce-table-scroll" role="region" tabindex="0">
+<table class="phrase-table">
+<thead><tr><th scope="col">發話</th><th scope="col">結果</th></tr></thead>
+<tbody>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--best">◎</span> 「<span lang="ja" translate="no">シンプルメモ<strong>で残す</strong></span>」</th><td data-label="結果"><strong>推薦。 </strong>確認是否是聽正文的傳送操作。</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ok">△</span> 「<span lang="ja" translate="no">シンプルメモ<strong>に送信</strong></span>」</th><td data-label="結果">有時會出現與資訊App的兩種選擇。 請選擇要執行的操作，確認Siri的響應。</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> 「<span lang="ja" translate="no">シンプルメモ<strong>にメモ</strong></span>」</th><td data-label="結果">很容易被解釋為iPhone標準備忘錄功能的指示，有時無法送達。</td></tr>
+<tr><th scope="row"><span class="phrase-mark phrase-mark--ng">×</span> “SimpleMemo”（僅名字）</th><td data-label="結果">確認是啟動應用程式還是註冊的傳送操作，Siri的指南。</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div></section>
+<!-- Setup -->
+<section class="lp-section ce-chapter" id="setup"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="05" id="capture-section-5"> <span>設定3步</span> </h2></div><div class="ce-chapter__body">
+
+<ul class="prereq-list">
+<li>iPhone（iOS 16.4以後。 控制中心的1點選語音備忘錄是iOS 18以後）</li>
+<li>SimpleMemo的初始設定（傳送郵件的認證）已經完成</li>
+<li>在AirPods中使用Siri時，請確認使用許可和終端的執行條件（即使沒有iPhone本體的Siri可以使用）</li>
+</ul>
+<ol class="steps-list">
+<li><strong>完成應用程式的初始設定</strong><br/>傳送地址郵件認證，使其處於可以正常傳送的狀態。 使用<a href="/zh-Hant/obsidian/" style="color:var(--accent);">Obsidian聯動</a>時，請設定終端內的保管庫資料夾和寫入許可權，確認第一個備忘錄是否儲存在指定筆記本中。</li>
+<li><strong>在捷徑App中確認“Siri”是否開啟</strong><br/>捷徑App，確認在“SimpleMemo”的設定中開啟了Siri切換。 如果這裡關閉，就不會對任何短語做出反應（這是不順利時最重要的檢查點）。</li>
+<li><strong>與“<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>”對話</strong><br/>“要記下什麼？” 回答本文，確認返回的傳送、儲存、等待、初始設定等指南。 除了Siri的完成指南以外，請確認收件箱和指定筆記的正文。</li>
+</ol>
+<div class="tip-box">
+<div class="tip-box__title"><span>高音質錄音（選項・iOS 26以後）</span></div>
+<p style="margin:0;">“高音質錄音”是為了在應用程式內的語音輸入中使用AirPods的麥克風的設定。 需要對應的iOS・AirPods，在設定→詳細設定中切換。 與從Siri傳遞正文的傳送捷徑是不同的功能。 這裡沒有實際測量麥克風切換導致的開始時間的差異。</p>
+</div>
+</div></section>
+<!-- Troubleshooting -->
+<section class="lp-section ce-chapter" id="troubleshooting"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="06" id="capture-section-6"> <span>沒有反應的時候</span> </h2></div><div class="ce-chapter__body">
+
+<div class="tip-box">
+<div class="tip-box__title"><span>首先確認：AirPods Pro・AirPods 4的杆長按，在初始設定中不是Siri</span></div>
+<p style="margin:0;">AirPods Pro（第1・第2代）和AirPods 4（搭載降噪），長按閥杆時的動作是初始設定<strong>“噪音控制切換”</strong>。 長按會發出聲音，但是Siri不會啟動。 要修復<br/><strong>設定→Bluetooth→正在使用的AirPods的i→“長按時的操作”→Siri</strong>。 因為左右各有設定，所以兩個都設定為Siri就確定了。 不想更改<br/>設定時，可以透過<strong>“Hey Siri”</strong>呼叫（也請確認機型的Siri設定）。</p>
+</div>
+<ol class="steps-list">
+<li><strong>嘗試用“Hey Siri”能不能叫</strong><br/>設定→在Siri中確認“聽"Hey Siri"”是否開啟，是否允許在鎖定中使用。 不管莖的設定如何，都可以呼叫，所以切割速度很快。</li>
+<li><strong>捷徑App中“SimpleMemo”的Siri是否開啟</strong><br/>這裡關閉的話，對任何短語都沒有反應。 安裝後註冊可能需要幾分鐘時間，請啟動應用程式後再嘗試。</li>
+<li><strong>Siri的語言是日語嗎</strong><br/>設定→Siri→語言。 英語的Siri沒有日語的口令。</li>
+<li><strong>口令是“<span lang="ja" translate="no">シンプルメモで残す</span>”嗎</strong><br/>“~二備忘錄”作為iPhone標準備忘錄App的指示。“ 請嘗試<span lang="ja" translate="no">〜で残す</span>”，確認要執行的操作。</li>
+<li><strong>傳送郵件的認證是否已完成</strong>即使<br/>Siri回覆，如果收件人未設定的話，也收不到備忘錄。 請開啟應用程式完成初始設定。</li>
+</ol>
+</div></section>
+<!-- Use cases -->
+<section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="07" id="capture-section-7"> <span>在這樣的場合</span> </h2></div><div class="ce-chapter__body">
+
+<div class="reason-cards">
+<div class="reason-card">
+<div class="reason-card__title"><span>散步、跑步中</span></div>
+<div class="reason-card__desc"><span>出發前確認Siri的使用設定和儲存位置。 傳遞出想到的想法後，請在可以安全確認的場合確認實際到達。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>一邊做家務、做飯</span></div>
+<div class="reason-card__desc"><span>從已設定好的Siri傳遞簡短想法的使用方法。 被要求認證時，按照終端的指示，確認儲存地址的結果。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>睡前・起床前</span></div>
+<div class="reason-card__desc"><span>在終端允許執行的條件下，將想法交給Siri。 請確認回覆，實際儲存也請稍後確認。</span></div>
+</div>
+<div class="reason-card">
+<div class="reason-card__title"><span>移動中擴音</span></div>
+<div class="reason-card__desc"><span>在通勤、上學的間隙。 駕駛、行駛中的使用<a href="/zh-Hant/hands-free/" style="color:var(--accent);">擴音語音備忘錄安全指南</a>請務必看一下。</span></div>
+</div>
+</div>
+</div></section>
+<!-- FAQ -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="08" id="capture-section-8"> <span>常見問題</span> </h2></div><div class="ce-chapter__body">
+
+<div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">即使長按AirPods的閥杆也不會出現Siri</summary><div class="faq-answer"><p>AirPods Pro（第1・第2代）和AirPods 4（搭載降噪），長按杆的初始設定是<strong>“噪音控制切換”</strong>，Siri不啟動。 長按的話會發出聲音，所以很難注意到失敗，這是棘手的一點。 <strong>設定→Bluetooth→請更改為您使用的AirPods的i→“長按時的操作”→Siri</strong>（左右各有設定）。 如果想在不改變設定的情況下使用的話，請說“<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>”，確認是否在您使用的終端上輸入正文。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri沒有反應/被告知“找不到為此的應用程式”</summary><div class="faq-answer"><p>捷徑App，在“SimpleMemo”的捷徑設定中確認<strong>Siri是否開啟</strong>（關閉的話無法識別所有短語）。 開啟後請說“<span lang="ja" translate="no">Hey Siri、シンプルメモで残す</span>”。 措辭請從<strong>“<span lang="ja" translate="no">〜で残す</span>”</strong>開始嘗試。 安裝後註冊可能需要幾分鐘，請啟動應用程式，稍等片刻再嘗試。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">一說“<span lang="ja" translate="no">シンプルメモにメモ</span>”就做了不同的動作</summary><div class="faq-answer"><p>請嘗試“<span lang="ja" translate="no">シンプルメモで残す</span>”，確認Siri是否進入聽正文的傳送操作。 如果選擇了其他應用程式或操作，請確認Siri的語言設定和捷徑的註冊。 僅使用應用程式名稱的發話，是啟動應用程式還是註冊的傳送操作，請確認Siri的指南。 現行版的所有終端都不一定有相同的解釋。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">不開啟應用程式，怎麼傳送呢？</summary><div class="faq-answer"><p>Siri的“<span lang="ja" translate="no">で残す</span>”是將正文傳遞給應用程式的傳送處理的入口。 需要傳送郵件的認證等初始設定。 正常模式的郵件傳送和Obsidian的補充是不同的途徑，僅Siri的“已傳送”無法確認保管庫儲存。 請分別確認直接寫入所選資料夾是否成功，以及同步到其他終端。“ <span lang="ja" translate="no">声でメモ</span>”是開啟應用程式的另一個入口。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">離線（圈外）和Siri說話會怎麼樣？</summary><div class="faq-answer"><p>從Siri將正文傳遞到應用程式，正常模式的郵件處於待機狀態時，儲存到加密的Outbox，恢復通訊後嘗試重新傳送。 Siri的呼叫和語音識別本身不一定在訊號範圍外也能使用。 直接寫入保管庫，需要終端上的目標資料夾和寫入許可權。 請另外確認郵件等待、保管庫儲存、其他終端同步。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">僅用AirPods完成嗎？ 有必要看畫面嗎？</summary><div class="faq-answer"><p>在具備必要設定的環境中，可以透過與Siri的語音交流傳遞備忘錄。 根據鎖定中的Siri使用設定、選擇的捷徑、終端狀態，可能需要解除或進行畫面操作。 開啟應用程式的“<span lang="ja" translate="no">声でメモ</span>”和將正文傳遞給傳送處理的“<span lang="ja" translate="no">で残す</span>”是不同的入口。 不能保證所有終端狀態都不需要操作，請在第一個備忘錄中確認收件箱和保管庫的正文。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">什麼是“高音質錄音”？</summary><div class="faq-answer"><p>“高音質錄音”是為了在應用程式內的語音輸入中使用AirPods的麥克風的設定。 需要對應的iOS・AirPods，在設定→詳細設定中切換。 與從Siri傳遞正文的傳送捷徑是不同的功能。 這裡沒有實際測量麥克風切換導致的開始時間的差異。</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Siri傳送也可以在免費計劃中使用嗎？</summary><div class="faq-answer"><p>可以使用。 透過Siri的傳送也和從應用內傳送一樣，共享免費計劃的1日的傳送範圍。 用完框架時，Siri會告知達到上限。 是語音還是畫面取決於終端的狀態。</p></div></details></div>
+</div>
+</div></section>
+<!-- CTA -->
+<div class="cta-box">
+<div class="cta-box__title">
+<span>傳遞想法，確認儲存目的地的到達</span>
+</div>
+<div class="cta-box__desc">
+<span>下載免費。 Siri傳送是iOS 16.4以後，控制中心是iOS 18以後，高音質錄音是iOS 26以後。</span>
+</div>
+<a aria-label="從App Store下載" class="app-store-badge" data-cta-cluster="voice" data-cta-placement="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=45b35116-b5b3-4b97-9256-0c97289681b6&amp;pt=128498560&amp;ct=web_other_v1&amp;mt=8"> <img alt="從App Store下載" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/> </a>
+<div class="cta-qr">
+<img alt="App Store下載二維碼" height="132" loading="lazy" src="/assets/img/qr-siri-ja.svg?v=0d8ca41daa" width="132"/>
+<small><span>PC使用者用智慧手機讀取</span></small>
+</div>
+</div>
+<!-- Internal Links -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" data-ce-number="09" id="capture-section-9"> <span>相關頁面</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh-Hant/voice-input/"><span>語音輸入（語音自動輸入）</span></a>
+<a href="/zh-Hant/hands-free/"><span>擴音語音備忘錄（移動中・安全指南）</span></a>
+<a href="/zh-Hant/fastest-voice-memo/"><span>透過動作按鈕進行語音備忘錄</span></a>
+<a href="/zh-Hant/obsidian/"><span>Obsidian合作</span></a>
+<a href="/zh-Hant/obsidian/shortcuts-not-working/"><span>捷徑不動的時候</span></a>
+<a href="/zh-Hant/obsidian/daily-note/"><span>在每日筆記中補充的方法</span></a>
+<a href="/zh-Hant/note-to-email/"><span>備忘錄→郵件的構造</span></a>
+<a href="/zh-Hant/apple-watch-obsidian/"><span>Apple Watch × Obsidian配合</span></a>
+<a href="/zh-Hant/faq"><span>常見問題</span></a>
+</div>
+</div></section>
+</div></div>
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+<div class="container">
+<h2 style="font-size:1.1rem;margin-bottom:1rem;"> <span>參考文獻</span> </h2>
+<ul style="font-size:.9rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.9;">
+<li><a href="https://developer.apple.com/documentation/appintents" rel="noopener" style="color:var(--accent);" target="_blank">Apple — App Intents</a> — <span>從Siri直接呼叫應用程式功能的機制的官方文件</span></li>
+<li><a href="https://developer.apple.com/documentation/appintents/app-shortcuts" rel="noopener" style="color:var(--accent);" target="_blank">Apple — App Shortcuts</a> — <span>無需設定即可提供Siri短語的機制的官方文件</span></li>
+<li><a data-cta-cluster="voice" data-cta-placement="reference" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948" rel="noopener" style="color:var(--accent);" target="_blank">SimpleMemo — App Store</a> — <span>App Store的下載頁面</span></li>
+</ul>
+</div>
+</section>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="feature" href="/zh-Hant/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下來閱讀</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>決定語音留下的備忘錄的目的地</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>在iPhone中設定連線和儲存地址後，語音備忘錄可以在郵件和Obsidian上留下。 </span> </span> </a>
+</aside>
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+<div class="container">
+<h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相關內容</span> </h3>
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh-Hant/voice-input/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>語音輸入</span></a></li>
+<li><a href="/zh-Hant/hands-free/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>擴音</span></a></li>
+<li><a href="/zh-Hant/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>設定指南</span></a></li>
+<li><a href="/zh-Hant/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>常見問題</span></a></li>
+</ul>
+</div>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro -->
+<div class="container">
+<nav aria-label="頁尾導航" class="footer__nav">
+<div class="footer__col">
+<p class="footer__col-title">產品</p>
+<a class="footer__link" href="/zh-Hant/download/">下載</a>
+<a class="footer__link" href="/zh-Hant/">首頁</a>
+<a class="footer__link" href="/zh-Hant/voice-input/"><span>語音輸入</span></a>
+<a class="footer__link" href="/zh-Hant/obsidian/">Obsidian 整合</a>
+<a class="footer__link" href="/zh-Hant/use-cases/">使用情境</a>
+<a class="footer__link" href="/zh-Hant/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比較與遷移</p>
+<a class="footer__link" href="/zh-Hant/note-to-email/">將筆記傳送至信箱</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支援</p>
+<a class="footer__link" href="/zh-Hant/roadmap/">公開路線圖</a>
+<a class="footer__link" href="/zh-Hant/devlog/">開發日誌</a>
+<a class="footer__link" href="/zh-Hant/about/">關於開發者</a>
+<a class="footer__link" href="/zh-Hant/faq">常見問題</a>
+<a class="footer__link" href="/zh-Hant/privacy">隱私</a>
+<a class="footer__link" href="/zh-Hant/contact">聯絡我們</a>
+</div>
+</nav>
+<p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p>
+</div>
+</footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

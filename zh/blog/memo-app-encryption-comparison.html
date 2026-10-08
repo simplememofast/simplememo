@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>比较备忘录应用程序的加密|可以安全地保留的是哪一个</title>
+  <meta name="description" content="备忘录应用程序10种类，在终端内、通信中、云存储的加密范围和密钥管理进行比较。 除了AES-GCM和CBC、E2EE的区别之外，还整理了Bear的附加加密、Joplin的新方式、Apple备忘录的高级数据保护。 也解说设置条件和备份、导出目的地的确认方法。">
+  <meta property="og:title" content="比较备忘录应用程序的加密|可以安全地保留的是哪一个">
+  <meta property="og:description" content="备忘录应用程序10种类，在终端内、通信中、云存储的加密范围和密钥管理进行比较。 除了AES-GCM和CBC、E2EE的区别之外，还整理了Bear的附加加密、Joplin的新方式、Apple备忘录的高级数据保护。 也解说设置条件和备份、导出目的地的确认方法。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/blog/memo-app-encryption-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="比较备忘录应用程序的加密|可以安全地保留的是哪一个">
+  <meta name="twitter:description" content="备忘录应用程序10种类，在终端内、通信中、云存储的加密范围和密钥管理进行比较。 除了AES-GCM和CBC、E2EE的区别之外，还整理了Bear的附加加密、Joplin的新方式、Apple备忘录的高级数据保护。 也解说设置条件和备份、导出目的地的确认方法。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison#article",
+  "inLanguage": "zh-Hans",
+  "image": "https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png?v=9d06fe45e8",
+  "headline": "比较备忘录应用程序的加密|可以安全地保留的是哪一个",
+  "description": "备忘录应用程序10种类，在终端内、通信中、云存储的加密范围和密钥管理进行比较。 除了AES-GCM和CBC、E2EE的区别之外，还整理了Bear的附加加密、Joplin的新方式、Apple备忘录的高级数据保护。 也解说设置条件和备份、导出目的地的确认方法。",
+  "url": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison",
+  "datePublished": "2026-03-21",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "博客",
+      "item": "https://simplememofast.com/zh/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "备忘录应用程序的加密比较",
+      "item": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "备忘录应用程序的加密比较【2026年】",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison"
+}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .encryption-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:1.5rem 0;overflow-x:auto;display:block}
+    .encryption-table th,.encryption-table td{padding:.6rem .5rem;border:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
+    .encryption-table th{background:rgba(100,180,255,.08);color:var(--accent);font-weight:700;position:sticky;top:0}
+    .encryption-table td:first-child{font-weight:700;color:#fff}
+    .encryption-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+    .badge-e2e{background:rgba(52,199,89,.15);color:#34c759;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-partial{background:rgba(255,159,10,.15);color:#ff9f0a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-none{background:rgba(255,69,58,.1);color:#ff453a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    @media(max-width:768px){.encryption-table{font-size:.7rem}.encryption-table th,.encryption-table td{padding:.4rem .3rem}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .encryption-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a,.encryption-callout a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .encryption-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.encryption-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .encryption-table{display:table;width:100%;min-width:1000px;font-size:.85rem;margin:0;table-layout:fixed}
+    .encryption-table th,.encryption-table td{white-space:normal;overflow-wrap:anywhere;padding:.8rem;line-height:1.75}
+    .encryption-table th:first-child{width:14%}.encryption-table th:last-child{width:15%}.encryption-table tbody th{background:transparent;color:var(--text);position:static}
+    .encryption-table caption{text-align:left;padding:1rem;font-weight:700;color:var(--text)}
+    .encryption-steps{padding-left:1.4rem;line-height:1.9}.encryption-steps li{margin:1rem 0}
+    .encryption-callout{margin:1.75rem 0;padding:1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;line-height:1.85}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/memo-app-encryption-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+
+  <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/blog/memo-app-encryption-comparison#faq",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AES-256的话是E2EE吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不。 AES-256表示密码和密钥长度。 是否是E2EE，取决于在哪里加密、解密，谁可以使用钥匙。 服务器管理密钥的AES-256保存和仅在用户的终端上解密的设计是不同的。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "AES-GCM和AES-CBC有什么不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GCM结合了加密和认证。 CBC仅通过加密无法检测篡改，因此需要适当地组合认证机制。 不能仅凭方式名来排名应用程序整体的安全性。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "E2EE的话终端内的文件也会加密吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不一定。 Obsidian Sync和Joplin的同步加密不会对终端内的本地文件和数据库进行同样的加密。 请另外确认终端的磁盘加密、应用程序的本地保护、备份。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Bear可以加密包含图像和PDF的笔记吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Bear 2.4以后可以用Bear Pro加密包含附件的个别笔记。 在目标笔记中添加密码，同步目的地的应用程序也更新到对应版。 标题显示和未加密的笔记需要另外确认。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Day One的旧期刊也自动变成了E2EE吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "新的期刊默认为4.2以后的E2EE，但旧的需要单独确认。 目前的官方FAQ介绍了将条目复制到新的E2EE日志的方法，而不是直接切换标准加密的日志。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "SimpleMemo发给自己的邮件是E2EE吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不。 Outbox和发送记录的终端内加密和邮件发送是分开的。 本文通过发送API和外部发送基础，邮件服务方也会留下副本。 也请确认收件箱和关联对象的保护、共享设置。"
+      }
+    }
+  ],
+  "inLanguage": "zh-Hans"
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2"/>
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be"/>
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640"/>
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc"/>
+<link rel="stylesheet" href="/assets/css/capture-fourth.css?v=b5c0888897"/>
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third capture-fourth site-designed" data-design-family="refined">
+  <!-- Global Navigation -->
+  <nav aria-label="主导航" class="global-nav" data-site-header="">
+<div class="global-nav__inner">
+<a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+<!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+<li><a href="/zh/guides/">使用指南</a></li>
+<li><a href="/zh/use-cases/">使用场景</a></li>
+<li><a href="/zh/vs/">对比</a></li>
+<li><a href="/zh/methods/"><span>方法</span></a></li>
+<li><a href="/zh/blog/"><span>博客</span></a></li>
+<li><a href="/zh/glossary/"><span>术语集</span></a></li>
+<li><a href="/zh/faq">常见问题</a></li>
+<li><a href="/zh/about/">关于开发者</a></li>
+<li><a href="/zh/devlog/">开发日志</a></li>
+<li class="nav-cta-mobile"><a data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+</ul>
+<div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/blog/memo-app-encryption-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/memo-app-encryption-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/blog/memo-app-encryption-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/memo-app-encryption-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/memo-app-encryption-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/memo-app-encryption-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/memo-app-encryption-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/memo-app-encryption-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/memo-app-encryption-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+<a class="global-nav__cta" data-cta-cluster="blog" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">下载</a>
+<button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+</div>
+</div>
+</nav>
+
+<main class="page-content"><div class="container"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label"><span>加密・安全</span></div><h1 class="lp-hero__title"><span>备忘录应用程序的加密比较<br/>【2026年】</span></h1><p class="lp-hero__sub"><span>“AES-256对应”和“运营者也无法阅读本文”是不同的条件。 根据10应用程序的官方资料，比较哪些副本被加密，谁处理解密密钥，什么自己生效。 </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者: <a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公开日: <time datetime="2026-03-21">2026年03月21日</time></span> </p><a class="ce-read-link" href="#encryption-scopes">阅读正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="从想读的内容中选择" class="ce-routes"><a class="ce-route" href="#heading-encryption-scopes"><span>01</span><b>了解保护范围</b></a><a class="ce-route" href="#heading-ten-apps"><span>02</span><b>10应用程序比较</b></a><a class="ce-route" href="#heading-check-your-copy"><span>03</span><b>确认设置</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">安全/三层</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>通信中</strong></div><div class="cn-concept-row"><span>02</span><strong>保存时</strong></div><div class="cn-concept-row"><span>03</span><strong>E2EE</strong></div></div><figcaption class="ce-stage-foot">分开确认加密的保护范围</figcaption></figure></header><div class="ce-article">
+
+<div class="tldr ce-lede"><p><span><strong>先确认：</strong>通信的TLS、终端和服务器的加密保存、E2EE保护的场景不同。 即使同步是E2EE，终端的本地文件和导出的PDF也不一定会持续相同的加密。 </span></p></div>
+<p class="encryption-review"><span>最终确认: <time datetime="2026-09-09">2026年9月9日</time>。 笔者是SimpleMemo的开发者。 其他公司的产品比较了官方资料，并不是对各个应用程序进行入侵测试和独立安全审计的结果。 </span></p>
+<nav aria-label="报道中的目录" class="internal-links"><a href="#encryption-scopes"><span>加密范围</span></a><a href="#ten-apps"><span>10应用程序比较</span></a><a href="#check-your-copy"><span>确认自己的设置</span></a><a href="#simplememo-scope"><span>SimpleMemo的范围</span></a></nav>
+<section class="lp-section ce-chapter" id="encryption-scopes"><div class="ce-chapter__head"><h2 data-ce-number="01" id="heading-encryption-scopes"><span>TLS・保存时加密・E2EE有什么不同？ </span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>通信中：保护到连接目的地的路径</h3><p>TLS保护应用程序和服务器等的通信路。 连接对象处理的正文，不是从连接对象那里隐藏的结构。 与服务搜索、发送HTTPS发送的备忘录不矛盾。</p></div>
+<div class="tip-card"><h3>保存时：用谁的密钥加密哪个文件</h3><p>终端内的数据库、同步服务器、备份是分开的副本。 即使服务器的磁盘被加密，只要服务管理密钥，在必要的处理时也可以解密。 也区分了终端整体的加密和应用程序对每个备忘录进行加密的机制。</p></div>
+<div class="tip-card"><h3>E2EE：同步前不传递正文的解密密钥</h3><p>在端到端加密中，在对应的终端端进行加密、解密。 但是，标题和时间等元数据、公开链接、向AI功能发送、解密后的导出需要另外确认。 即使应用程序有E2EE功能，也不一定在自己的笔记本上有效。</p></div></div></div></section>
+<section class="lp-section ce-chapter" id="cipher-and-keys"><div class="ce-chapter__head"><h2 data-ce-number="02" id="heading-cipher-and-keys"><span>AES-GCM・AES-CBC・读取零知识</span></h2></div><div class="ce-chapter__body"><div><p><strong>AES-GCM</strong>结合了加密和认证，生成用于篡改检测的认证标签。 <strong>AES-CBC</strong>是提供保密性的模式，仅凭这一点不进行篡改检测。 认证需要与MAC等其他机制适当结合。 仅凭CBC这个名字无法判断产品被破坏了。 <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">NIST的GCM规格</a>、<a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">包含CBC的加密模式规格</a>。</p><p>“256”是钥匙长度，不说明谁会拿着钥匙和备份设置。 使用AES-GCM的E2EE也有AES-GCM只保护终端内的设计。</p><p><strong>零知识</strong>是存储产品中“企业无法解密本文”设计的说明词。 不能保证加密方式的名字和所有数据都不会被收集。 因为也有将加密的密钥保存在服务器上的设计，所以不会仅仅判断“密钥在服务器上不存在”，而是确认可以解密的主体和目标数据。</p></div></div></section>
+<section class="lp-section ce-chapter ce-chapter--wide" id="ten-apps"><div class="ce-chapter__head"><h2 data-ce-number="03" id="heading-ten-apps"><span>10应用程序：在方式之前，比较范围和设置</span></h2></div><div class="ce-chapter__body"><div><p class="table-hint">可以横向滚动确认“条件”和“另外确认的副本”。 表在键盘上也可以横向移动。</p><div aria-labelledby="ten-apps" class="encryption-scroll ce-table-scroll" role="region" tabindex="0"><table class="encryption-table"><caption>官方资料的比较（2026年9月9日确认）</caption><thead><tr><th scope="col">应用程序</th><th scope="col">加密范围</th><th scope="col">激活・确认条件</th><th scope="col">另外确认的副本・权限</th><th scope="col">依据</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>在终端端加密内容并同步。 公开规格是XChaCha20-Poly1305。</td><td>使用账户时，本地数据也会加密。 在没有账户的情况下使用时，需要另外设置密码等的保护。</td><td>导出的文件和复制到其他应用程序的文章确认保存目的地的条件。</td><td><a href="https://standardnotes.com/help/security/encryption">加密范围</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">方式</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>默认设置用E2EE加密远程Vault。 AES-256-GCM。</td><td>选择标准加密的远程Vault由Obsidian侧管理钥匙。 确认设置和加密密码。</td><td>本地Vault的Markdown文件不能被Obsidian本身加密。 终端的磁盘加密和备份是不同的。</td><td><a href="https://obsidian.md/help/sync/security">Sync的安全</a></td></tr><tr><th scope="row">Notion</th><td>通信是TLS 1.2以上，保存时是AES-256。</td><td>官方资料说明的是服务方的加密。 与只有使用者拥有解密密钥的笔记本整体的E2EE不同。</td><td>也确认了传递给公开页面、嘉宾、合作服务的权限。 仅靠加密并不限制公开范围。</td><td><a href="https://www.notion.com/help/security-and-privacy">安全方针</a></td></tr><tr><th scope="row">Evernote</th><td>通过TLS通信和Google管理密钥保存AES-256。 选择的文本中也有密码短语加密。</td><td>选择文本的公开方式是AES-128-CBC。 与将整个笔记、附件一次性E2EE化的功能不同。</td><td>加密范围之外的正文、标题、附件不作为相同的密码短语保护。</td><td><a href="https://evernote.com/en-us/security">保存和通信</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">文本加密</a></td></tr><tr><th scope="row">Apple备忘录 / Apple Notes</th><td>通常的iCloud保护是通信、保存时的加密。 在高级数据保护（ADP）中，iCloud备忘录成为E2EE的对象。</td><td>确认ADP的有效状态和恢复手段。 为了在共享备忘录中维持ADP的E2EE，所有参与者都需要ADP。</td><td>部分元数据是标准保护。 导出的PDF和邮件附件是与原来的iCloud备忘录不同的副本。</td><td><a href="https://support.apple.com/en-us/102651">iCloud的保护范围</a></td></tr><tr><th scope="row">Google Keep</th><td>通信中和保存时加密。 为了提供搜索等功能而处理内容。</td><td>官方资料的保护，不能与只有使用者拥有钥匙的E2EE交换。</td><td>确认共享对象和Google账户的保护。 在广告中不使用内容的方针和不处理内容的设计是不同的。</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Keep的隐私和保护</a></td></tr><tr><th scope="row">Bear</th><td>用Bear Pro对个别笔记进行密码加密。 2.4以后的图片、PDF等附件也是对象。</td><td>在目标笔记中添加密码，同步终端的应用程序也更新。 与应用程序整体的锁不同。</td><td>标题显示在笔记一览表中。 iCloud的ADP也包括标题、标签等范围在内进行确认。</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">笔记本的加密</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">2.4的附加对应</a> · <a href="https://bear.app/faq/syncing-privacy/">同步范围</a></td></tr><tr><th scope="row">乔普林</th><td>激活的同步E2EE。 来自v3.2的新原生方式是AES-256-GCM。</td><td>在一台上激活加密，等待同步完成，使用其他终端设置密钥的官方程序。</td><td>本地数据不受这种同步加密的保护。 也确认了终端的磁盘加密。</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">设置步骤</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">新方式</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">终端内数据</a></td></tr><tr><th scope="row">第一天</th><td>4.2以后新制作的期刊默认为E2EE。 对象是文章和媒体。</td><td>旧的期刊单独确认状态。 现在的官方FAQ不能直接从标准加密切换，而是复制到新的E2EE日志。</td><td>也确认了钥匙的保管处。 iCloud Keychain是E2EE，但Day One独有的iCloud钥匙备份即使激活ADP也不会成为E2EE。 写出来的日记也是另外的复印件。</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">E2EE的FAQ</a></td></tr><tr><th scope="row">SimpleMemo / Simple Memo</th><td>终端内的Outbox・发送记录用CryptoKit的AES-GCM加密。 新密钥用256-bit保存在Keychain中。</td><td>邮件发送不是E2EE。 通过发送API・外部发送基础，在收件箱中留下副本。</td><td>终端内保护并不能保证邮件服务和合作的Obsidian Vault的保管方法。</td><td><a href="/zh/privacy#technical">技术说明</a></td></tr></tbody></table></div></div></div></section>
+<p class="encryption-callout"><span>如果是在自己的收件箱里留下简短的备忘录的话，<a data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8">SimpleMemo</a>也是选择。 请分别确认终端内的加密和发送邮件的保管、共享设置。 </span></p>
+<section class="lp-section ce-chapter" id="check-your-copy"><div class="ce-chapter__head"><h2 data-ce-number="04" id="heading-check-your-copy"><span>使用前，5点确认设置和副本</span></h2></div><div class="ce-chapter__body"><div><ol class="encryption-steps"><li><strong>打开现有数据的设置。 </strong>不要只根据应用程序名称来判断，而是使用Vault、日志、共享笔记来确认加密是否有效。 新数据的默认值不一定也适用于旧数据。</li><li><strong>确保恢复方法。 </strong>同步密码、加密密钥、恢复联系方式等，确认产品介绍的方法。 请避免在丢失钥匙的状态下删除终端进行尝试。</li><li><strong>确认公开、共享、合作的范围。 </strong>向公开链接和外部服务发送与保存时加密是分开的。 工作信息与所属单位认可的保存地址、共享范围保持一致。</li><li><strong>用虚拟的1件确认同步和附加。 </strong>内容不使用机密信息，确认是否在其他终端上打开、附件是否对、加密状态如何显示。 仅凭这一点并不能证明加密实施的安全性。</li><li><strong>确认导出目的地和备份。 </strong>Markdown、PDF、邮件、下载文件夹的副本，可能会出现在原应用程序的E2EE之外。 转移确认结束前请不要删除原始数据。</li></ol></div></div></section>
+<section class="lp-section ce-chapter" id="simplememo-scope"><div class="ce-chapter__head"><h2 data-ce-number="05" id="heading-simplememo-scope"><span>SimpleMemo保护的范围和发送后留下的东西</span></h2></div><div class="ce-chapter__body"><div><p>SimpleMemo用AES-GCM对终端内的发送等待备忘录（Outbox）和发送记录进行加密。 在已公开的应用程序的通用密码器中，新制作的密钥用256-bit保存在Keychain中，用CryptoKit进行加密、解密。 这是保护终端内目标数据的实现。</p><p><strong>不是邮件路径整体的E2EE。 </strong>从应用程序发送API到HTTPS，通过外部的邮件发送基础到达收件箱。“ 终端内的未发送备忘录被加密”并不是“在发送处理中不处理正文”“不通过外部服务器”的意思。</p><p>即使已经发送，Outbox的目标项目被排除在外，发送记录、接收邮件、连接目的地的笔记也不会消失。 文件的删除操作，也不称为存储介质的完全删除。 保存地址和保留期限可以在<a href="/zh/privacy#technical">隐私政策的技术说明</a>和<a href="/zh/privacy-architecture/">数据通道</a>中确认。</p><p>使用Obsidian保存时，与本地Vault同步、备份的保护也取决于自己的设置。 对于企业无法解密本文的用途，请先选择符合该条件的E2EE的保存地址和运用。</p></div></div></section>
+<section class="lp-section ce-chapter" id="encryption-faq"><div class="ce-chapter__head"><h2 data-ce-number="06" id="heading-encryption-faq"><span>常见问题</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-256的话是E2EE吗？</summary><div class="faq-answer"><p>不。 AES-256表示密码和密钥长度。 是否是E2EE，取决于在哪里加密、解密，谁可以使用钥匙。 服务器管理密钥的AES-256保存和仅在用户的终端上解密的设计是不同的。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCM和AES-CBC有什么不同？</summary><div class="faq-answer"><p>GCM结合了加密和认证。 CBC仅通过加密无法检测篡改，因此需要适当地组合认证机制。 不能仅凭方式名来排名应用程序整体的安全性。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EE的话终端内的文件也会加密吗？</summary><div class="faq-answer"><p>不一定。 Obsidian Sync和Joplin的同步加密不会对终端内的本地文件和数据库进行同样的加密。 请另外确认终端的磁盘加密、应用程序的本地保护、备份。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Bear可以加密包含图像和PDF的笔记吗？</summary><div class="faq-answer"><p>Bear 2.4以后可以用Bear Pro加密包含附件的个别笔记。 在目标笔记中添加密码，同步目的地的应用程序也更新到对应版。 标题显示和未加密的笔记需要另外确认。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Day One的旧期刊也自动变成了E2EE吗？</summary><div class="faq-answer"><p>新的期刊默认为4.2以后的E2EE，但旧的需要单独确认。 目前的官方FAQ介绍了将条目复制到新的E2EE日志的方法，而不是直接切换标准加密的日志。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimpleMemo发给自己的邮件是E2EE吗？</summary><div class="faq-answer"><p>不。 Outbox和发送记录的终端内加密和邮件发送是分开的。 本文通过发送API和外部发送基础，邮件服务方也会留下副本。 也请确认收件箱和关联对象的保护、共享设置。</p></div></details></div></div></div></section>
+<!-- Related Articles -->
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="chapter-7"> <span>相关报道</span> </h2></div><div class="ce-chapter__body">
+
+<div class="internal-links">
+<a href="/zh/blog/memo-app-security-comparison"> <span>备忘录应用程序的安全比较</span> </a>
+<a href="/zh/blog/memo-app-privacy"> <span>备忘录应用程序的隐私比较</span> </a>
+<a href="/zh/vs/standard-notes/"> <span>SimpleMemo vs Standard Notes</span> </a>
+<a href="/zh/vs/obsidian/"> <span>SimpleMemo vs Obsidian</span> </a>
+<a href="/zh/vs/notion/"> <span>SimpleMemo vs Notion</span> </a>
+<a href="/zh/vs/evernote/"> <span>SimpleMemo vs Evernote</span> </a>
+</div>
+</div></section>
+<div class="cta-box"><div class="cta-box__title"><span>在收件箱中留下备忘录</span></div><div class="cta-box__desc"><span>加密终端内的Outbox和发送记录。 也可以确认邮件路径和保存地址的保护范围后使用。</span></div><a aria-label="从App Store下载" class="app-store-badge" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><img alt="从App Store下载" class="badge-img" height="40" loading="lazy" src="/assets/img/app-store-badge-en.svg" width="109"/></a></div>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="chapter-8"><span>相关页面</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/zh/blog/free-memo-apps-ranking"><span>免费备忘录应用程序排行榜</span></a><a href="/zh/blog/offline-memo-apps"><span>离线备忘录应用程序</span></a><a href="/zh/blog/memo-taking-tips"><span>记笔记方法诀窍10选</span></a><a href="/zh/blog/best-memo-apps-2026"><span>推荐备忘录应用程序20选</span></a><a href="/zh/blog/business-memo-apps-2026"><span>商务备忘录应用程序7选</span></a><a href="/zh/glossary/e2e-encryption/"><span>用语：E2E加密</span></a><a href="/zh/glossary/aes-gcm/"><span>用语：AES-GCM</span></a><a href="/zh/blog/"><span>博客一览</span></a></div></div></section>
+<aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+<a data-next-step="compare" href="/zh/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>比较之后，查看实际测量值</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>主要备忘录应用程序的启动和输入开始的实际测量表。 </span> </span> </a>
+</aside><section class="related-links ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="chapter-9"> <span>相关内容</span> </h2></div><div class="ce-chapter__body">
+
+<ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+<li><a href="/zh/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代应用程序比较</span></a></li>
+<li><a href="/zh/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>给自己发邮件的方法</span></a></li>
+<li><a href="/zh/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>备忘录应用程序比较一览</span></a></li>
+<li><a href="/zh/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使用方法指南</span></a></li>
+<li><a href="/zh/comparison/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>比较指南综合</span></a></li>
+<li><a href="/zh/blog/business-memo-apps-2026" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>面向商务的备忘录应用程序2026</span></a></li>
+</ul>
+</div></section><aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+<img alt="Simple Memo - 用于Obsidian" height="48" loading="lazy" src="/assets/img/app-icon-56.png" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;" width="48"/>
+<div>
+<p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo的开发者。 从iPhone开始，正在开发在设定的邮箱地址和连接对象的笔记上留下文章的应用程序。 </span></p>
+<div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+<a href="/zh/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">简介</a>
+<a href="https://x.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">X/推特</a>
+<a href="https://github.com/simplememofast" rel="me noopener" style="font-size:.8rem;color:var(--accent);text-decoration:none;" target="_blank">GitHub</a>
+</div>
+</div>
+</aside></div></div>
+<!-- SEO: Auto-generated related content links -->
+<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+
+
+<!-- Author Bio -->
+
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener">NIST（2007）。 SP 800-38D：块密码操作模式的建议：伽罗瓦/计数器模式（GCM）和GMAC。</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla，E。 （2018）。 RFC 8446：传输层安全（TLS）协议版本1.3。 IETF。</a></li>
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/a/final" target="_blank" rel="noopener">NIST（2001）。 SP 800-38A：块密码操作模式（CBC、CFB、OFB、CTR）的建议。</a></li>
+        <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener">Apple公司 Apple CryptoKit文档。</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="页脚导航" class="footer__nav capture-footer-wide">
+<div class="footer__col">
+<p class="footer__col-title">产品</p>
+<a class="footer__link" href="/zh/download/">下载</a>
+<a class="footer__link" href="/zh/">首页</a>
+<a class="footer__link" href="/zh/use-cases/">使用场景</a>
+<a class="footer__link" href="/zh/guides/">使用指南</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">比较与迁移</p>
+<a class="footer__link" href="/zh/captio-alternative/"><span>Captio替代</span></a>
+<a class="footer__link" href="/zh/note-to-email/">将笔记发送到邮箱</a>
+<a class="footer__link" href="/zh/vs/">对比</a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">读物</p>
+<a class="footer__link" href="/zh/blog/"><span>博客</span></a>
+</div>
+<div class="footer__col">
+<p class="footer__col-title">支持</p>
+<a class="footer__link" href="/zh/roadmap/">公开路线图</a>
+<a class="footer__link" href="/zh/devlog/">开发日志</a>
+<a class="footer__link" href="/zh/about/">关于开发者</a>
+<a class="footer__link" href="/zh/faq">常见问题</a>
+<a class="footer__link" href="/zh/privacy">隐私</a>
+<a class="footer__link" href="/zh/contact">联系我们</a>
+</div>
+</nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

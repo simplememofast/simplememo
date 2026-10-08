@@ -303,6 +303,8 @@ for (const slug of [
 await notFound("/docs/seo/FULL-AUDIT-REPORT-2026-07-07.md");
 await notFound("//docs//seo/FULL-AUDIT-REPORT-2026-07-07.md");
 await notFound("/scripts/seo-check.js");
+await notFound("/data/i18n/pages.json");
+await notFound("/data/i18n/translations/en.json");
 await notFound("/tools/");
 await notFound("/CLAUDE.md");
 // growth/ carries committed GSC snapshots and App Store exports. Pages deploys

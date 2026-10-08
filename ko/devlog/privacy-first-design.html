@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/devlog/privacy-first-design">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>프라이버시 퍼스트 설계: 메모 앱에 대한 편집증적인 고집 | SimpleMemo 개발 일지</title>
+  <meta name="description" content="iPhone 버전 SimpleMemo의 프라이버시 설계를 해설합니다. AES-GCM의 기기 내 암호화, 통신 캐시, 진단 로그, 이용 분석 범위와 앱 스위처에서 메모를 숨기지 않는 현행 사양 및 메일 전송 제한을 설명합니다. 키체인의 키 관리, 저장처에 남는 정보, AppsFlyer와 자체 분석 식별자를 통한 연관도 명시합니다.">
+  <meta name="theme-color" content="#070b14">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- OGP -->
+  <meta property="og:title" content="프라이버시 우선 설계: 메모 앱에 대한 편집증적인 고집">
+  <meta property="og:description" content="iPhone 버전 SimpleMemo의 프라이버시 설계를 해설합니다. AES-GCM의 기기 내 암호화, 통신 캐시, 진단 로그, 이용 분석 범위와 앱 스위처에서 메모를 숨기지 않는 현행 사양 및 메일 전송 제한을 설명합니다. 키체인의 키 관리, 저장처에 남는 정보, AppsFlyer와 자체 분석 식별자를 통한 연관도 명시합니다.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="프라이버시 우선 설계: 메모 앱에 대한 편집증적인 고집">
+  <meta name="twitter:description" content="iPhone 버전 SimpleMemo의 프라이버시 설계를 해설합니다. AES-GCM의 기기 내 암호화, 통신 캐시, 진단 로그, 이용 분석 범위와 앱 스위처에서 메모를 숨기지 않는 현행 사양 및 메일 전송 제한을 설명합니다. 키체인의 키 관리, 저장처에 남는 정보, AppsFlyer와 자체 분석 식별자를 통한 연관도 명시합니다.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/devlog/privacy-first-design">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/ko/devlog/privacy-first-design#article",
+  "headline": "프라이버시 우선 설계: 메모 앱에 대한 편집증적인 고집",
+  "description": "iPhone 버전 SimpleMemo의 프라이버시 설계를 해설합니다. AES-GCM의 기기 내 암호화, 통신 캐시, 진단 로그, 이용 분석 범위와 앱 스위처에서 메모를 숨기지 않는 현행 사양 및 메일 전송 제한을 설명합니다. 키체인의 키 관리, 저장처에 남는 정보, AppsFlyer와 자체 분석 식별자를 통한 연관도 명시합니다.",
+  "url": "https://simplememofast.com/ko/devlog/privacy-first-design",
+  "inLanguage": "ko",
+  "datePublished": "2026-02-13",
+  "dateModified": "2026-09-24",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/ko/devlog/privacy-first-design#webpage"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "홈",
+      "item": "https://simplememofast.com/ko/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "개발 일지",
+      "item": "https://simplememofast.com/ko/devlog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "프라이버시 퍼스트 설계",
+      "item": "https://simplememofast.com/ko/devlog/privacy-first-design"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/ko/devlog/privacy-first-design#webpage",
+  "inLanguage": "ko",
+  "name": "프라이버시 퍼스트 설계: 편집증적인 고집",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/ko/#website"
+  },
+  "url": "https://simplememofast.com/ko/devlog/privacy-first-design"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(18, 26, 46, 0.95);
+      border: 1px solid rgba(82, 160, 255, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: #c9d4ec;
+      padding: 0.75rem 1.1rem;
+      min-height: 48px;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 400;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: #f2f6ff;
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #4da3ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(82, 160, 255, 0.25);
+      border: 1px solid rgba(82, 160, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(82, 160, 255, 0.1);
+    }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(18, 26, 46, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(82, 160, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .philosophy-highlight {
+      background: rgba(82, 160, 255, 0.08);
+      border: 1px solid rgba(82, 160, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="메인 내비게이션" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/ko/guides/">사용 가이드</a><a href="/ko/use-cases/">활용 사례</a><a href="/ko/vs/">비교</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/ko/guides/">사용 가이드</a></li>
+        <li><a href="/ko/use-cases/">활용 사례</a></li>
+        <li><a href="/ko/vs/">비교</a></li>
+        <li><a href="/ko/methods/"><span>메소드</span></a></li>
+        <li><a href="/ko/blog/"><span>블로그</span></a></li>
+        <li><a href="/ko/glossary/"><span>용어집</span></a></li>
+        <li><a href="/ko/faq">자주 묻는 질문</a></li>
+        <li><a href="/ko/about/">개발자 소개</a></li>
+        <li><a href="/ko/devlog/">개발 기록</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>다운로드</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="한국어 · 언어 선택"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>KO</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="ko" dir="ltr"><p class="site-language-title">언어 선택</p><div class="site-language-grid"><a href="/devlog/privacy-first-design" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/devlog/privacy-first-design" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/devlog/privacy-first-design" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/devlog/privacy-first-design" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="ko" aria-current="page"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/es/devlog/privacy-first-design" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/devlog/privacy-first-design" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/devlog/privacy-first-design" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/devlog/privacy-first-design" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/devlog/privacy-first-design" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">다운로드</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="메뉴"><span>메뉴</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Meta Templates for JS -->
+
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title sd-title"> <span>프라이버시 퍼스트 설계: 메모 앱에 대한 편집증적인 고집</span> </h1>
+
+      <div class="article-meta">
+        <span>2026년2월13일 공개 ・ 보호·이용 분석 설명 업데이트：2026년9월6일</span>
+
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="">
+        <div class="article-body">
+
+          <h2 id="reading-01">1. 왜 메모 앱에서 프라이버시가 중요한가</h2>
+          <p>업무 아이디어, 개인 초안, 일일 기록. 메모 앱에는 사람에게 보여주기 전의 정보가 모여 있습니다. 빠르게 쓸 수 있는 것만큼, 어디에 저장되고 어디로 전송되는지를 이해할 수 있는 것이 중요합니다.</p>
+          <p>이 기사에서는 단말기 내 암호화, 통신 캐시, 화면 표시, 진단 로그 및 이용 분석을 구분하여 설명합니다. 하나의 보호가 다른 경로의 보호도 보장하는 것은 아닙니다.</p>
+          <div class="philosophy-highlight">
+            <strong>2026년9월6일 업데이트：</strong>공개 버전과 동일한 버전(5.8.17)의 소스를 대조하고, 화면 보호·로그·이용 분석에 대한 설명을 수정했습니다. 가능한 일과 제한을 모두 기록합니다. </div>
+
+          <h2 id="reading-02">2. 앱 스위처에서 메모를 자동으로 숨기는 기능이 활성화되어 있지 않습니다</h2>
+          <p>iOS은 앱이 백그라운드로 이동한 후의 화면을 스냅샷으로 사용합니다. Apple은 화면에 기밀 정보가 있는 경우 배경으로 이동할 때 제거하도록 안내하고 있습니다.</p>
+          <p>확인한 5.8.17의 소스에서는 <code>sceneWillResignActive</code>과 <code>sceneDidEnterBackground</code>가 초안 저장을 수행하며, 프라이버시 오버레이 표시 처리를 호출하지 않습니다. 이전 표시용 함수는 남아 있지만, 유효한 보호로 작동하는 경로는 아닙니다.</p>
+          <p><strong> 표시 중인 메모가 앱 스위처 이미지에 남아 있을 가능성이 있습니다. </strong>Outbox을 암호화하고 있더라도 화면 이미지가 가려지는 것은 아닙니다. 이 기사의 구버전에 있던 “항상 메모 내용을 숨긴다”는 설명을 수정합니다.</p>
+
+          <h2 id="reading-03">3. 임시 URL 세션：통신 캐시의 디스크 저장을 억제</h2>
+          <p>표준 <code>URLSession</code>은 캐시, 쿠키, 인증 정보를 디스크에 저장합니다. 일반적인 앱에서는 이것이 편리한 기능이지만, 메모 앱에서는 불필요하고 위험이 될 수 있습니다.</p>
+          <p>통신 캐시가 단말기에 남는다는 것은, 어느 URL에 언제 접속했는지에 대한 흔적이 디스크에 존재한다는 뜻입니다. 쿠키가 저장된다는 것은 세션 정보가 단말기에 남는다는 의미입니다.</p>
+          <p>이 앱에서는 <code>URLSessionConfiguration.ephemeral</code>을 사용합니다.</p>
+          <pre tabindex="0"><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>디스크 캐시 없음:</strong>이 URL 세션의 캐시를 디스크에 저장하지 않음</li>
+            <li><strong>쿠키 이용을 비활성화:</strong>이 URL 세션에서는 쿠키를 허용하지 않으며, 요청에도 설정하지 않습니다</li>
+            <li><strong>URL 캐시 비활성화:</strong>캐시 스토리지 자체를 <code>nil</code>로 설정</li>
+            <li><strong>영구 스토리지를 사용하지 않는 구성:</strong>URLSession의 세션 정보를 디스크에 저장하지 않음</li>
+          </ul>
+          <p>이는 URLSession의 캐시 등에 관한 보호이며, 앱이 별도로 저장·전송하는 이용 이벤트나 서버 측의 전송 기록을 없애는 기능이 아닙니다. 이용 분석의 식별자에 의한 연관도 이 설정과 별도로 수행됩니다.</p>
+
+          <h2 id="reading-04">4. 성능 측정 로그의 출력 범위</h2>
+          <p><code>PerformanceLogger</code>의 로그 출력은 <code>#if DEBUG</code>로 둘러싸여 있습니다. DEBUG가 정의되지 않은 빌드에서는 이 로거의 로그 출력 처리가 포함되지 않습니다.</p>
+          <p>이 로거의 <code>logError</code>은 오류 상세 문장이 아니라 유형을 기록합니다. 예를 들어 <code>URLError</code>이라는 종류를 사용하고, 파일 경로나 사용자 입력을 포함할 가능성이 있는 <code>localizedDescription</code>를 그대로 내보내지 않습니다.</p>
+          <p>한편, <code>logEvent</code>에 전달되는 이벤트 이름 및 추가 문자열을 자동으로 모두 무해하게 만드는 구조가 아닙니다. 호출원에서 이메일 주소·메모 본문·인증 정보를 전달하지 않아야 합니다.</p>
+          <p><strong>이 설명을 앱·외부 SDK·OS 전체에 대한 “로그 제로”라는 보증에 확대하지 않겠습니다. </strong>자사의 이용 이벤트 전송과 AppsFlyer는 별도의 시스템으로 활성화되어 있습니다. 획득 범위는 본 기사 이용 분석 FAQ와 <a href="/ko/privacy#technical">개인정보 처리방침</a>에서 설명합니다.</p>
+
+          <h2 id="reading-05">5. AES-GCM 암호화 Outbox의 보호 범위</h2>
+          <p>전송 대기 메모는 단말기 내 Outbox이라는 큐에서 관리합니다. 저장 시에는 Apple의 CryptoKit을 사용하여 AES-GCM로 암호화합니다. 새로운 암호키는 256비트로 생성합니다.</p>
+          <p>키는 Keychain에 보관하고, <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>을 사용합니다. 이 설정에서는 재부팅 후 최초 잠금 해제부터 다음 재부팅까지 접근할 수 있으며, 다른 기기로의 백업 복원에서는 키가 이동되지 않습니다. 앱은 암호화 및 복호화를 위해 키를 읽어옵니다.</p>
+          <p>이는 저장 데이터 보호이며, 표시 중인 화면을 숨기거나 모든 단말기 침해로부터 안전을 보장하는 것이 아닙니다. 기기 교체 전에, 필요한 메모가 저장처에 도착했는지 확인해 주시기 바랍니다.</p>
+          <p>메일 전송을 사용할 경우, 본문은 당사의 Relay API와 배송 기반으로 처리되며, 받은 편지함에는 메일로 남습니다. <strong>단말 내 암호화는 메일 전송의 엔드투엔드 암호화(E2EE)를 의미하지 않습니다. </strong>자세한 내용은 <a href="/ko/privacy#technical">개인정보 처리방침</a>와 <a href="/ko/privacy-architecture/">데이터 경로</a>에서 설명하고 있습니다.</p>
+          <p>전송 대기 큐에 대해서는 <a href="/ko/devlog/outbox-architecture">Outbox 아키텍처의 해설</a>을 참조하십시오.</p>
+
+          <h2 id="reading-06">6. 메모 본문의 보호와 외부 SDK의 역할</h2>
+          <p>iOS 앱 내에서는 메모 본문 암호화에 CryptoKit을 사용하고, 키 보관에는 Keychain을 사용하며, 본문 전송에는 URLSession을 사용합니다. Network.framework은 연결 상태를 모니터링하고, BackgroundTasks는 백그라운드 전송 스케줄링을 담당합니다.</p>
+          <p>한편, 앱은 외부 SDK도 사용합니다. GoogleSignIn와 Firebase Authentication은 Google 계정에 의한 임의의 이메일 자동 입력에 사용되며, Firebase App Check는 실행 시 초기화되어 백엔드 API를 보호합니다. AppsFlyer는 획득·이용 분석에 사용되며, 자체 분석과 공통 설치 식별자를 설정합니다.</p>
+          <p>메모 본문을 이벤트 항목에 포함하지 않는 설계라도 식별자와 전송 기록의 연관이 남아 있습니다. SDK를 포함한 사용 분석 범위는 본문의 암호화와 별도로 확인해야 합니다. 항목과 용도는 <a href="/ko/privacy#technical">개인정보 처리방침</a>에 설명되어 있습니다.</p>
+
+          <h2 id="reading-07">7. 보호 범위를 명시한다</h2>
+          <p>단말기 내 암호화, 통신 캐시의 처리, 이용 분석은 각각 다른 역할을 가지고 있습니다. Outbox의 암호화나 일시적인 URL 세션이 있더라도, 이용 이벤트의 수집이 사라지는 것은 아닙니다.</p>
+          <p>메모를 신속하게 남길 수 있는 것과, 획득하는 정보를 이해할 수 있는 것 모두를 중요하게 여깁니다. 이용 분석의 전송 대상, 식별자, 연관 범위를 설명하고, 앱 변경에 맞춰 검토합니다.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2 id="reading-08" data-ce-number="08">자주 묻는 질문</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 메모 내용이 서버에 저장됩니까?</div>
+              <div class="faq-item__answer">메일 전송 시, 본문은 당사의 Relay API와 배송 기반을 통과합니다. 당사의 Relay API에서는 법령 대응이나 장애 대응 등 정당한 필요가 있는 경우를 제외하고는 본문을 지속적으로 저장하지 않습니다. 배송지 메일함에 저장하는 것과는 별개입니다. 저장처별 설명은<a href="/ko/privacy-architecture/">프라이버시 설계</a>을(를) 보시기 바랍니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 앱이 통신을 암호화하고 있습니까?</div>
+              <div class="faq-item__answer">예. API 통신에는 HTTPS을 사용합니다. Ephemeral URLSession은 해당 세션의 캐시·쿠키·인증 정보를 디스크에 영구적으로 저장하지 않는 구성입니다. 별도로 수행하는 이용 분석이나 서버 측 기록까지 없애는 것이 아닙니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 단말기를 분실한 경우, 메모는 안전합니까?</div>
+              <div class="faq-item__answer">Outbox은 AES-GCM로 암호화하여 저장하고, 새로운 키는 256비트로 생성합니다. 키는 다른 단말기로 이전되지 않는 키체인의 보호 클래스를 사용합니다. 단, 표시 중인 화면이나 배송지 이메일까지 보호하는 시스템은 아닙니다. 단말기 내 암호화만으로는 분실 시 모든 정보의 안전을 보장하지 않습니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 분석 및 트래킹이 있습니까?</div>
+              <div class="faq-item__answer">네. 당사는 자체 이용 분석과 AppsFlyer SDK를 사용하고 있습니다. 당사 분석에는 무작위 설치 식별자, 세션 식별자, 이벤트 종류·시간, 앱 버전, 전송 결과 등을 전송합니다. AppsFlyer에는 최초 메모 전송 성공, 인증 성공, 과금 화면 표시, 플랜 선택, 구매 성공 이벤트가 전송되며, 구매 시 금액·통화·기간 등이 표시될 수 있습니다. 동일한 설치 식별자를 AppsFlyer의 Customer User ID에도 설정하기 위해, 획득 정보와 사용 이벤트를 연관시킵니다. 앱에서 설정하는 이벤트 항목에는 이메일 주소·메모 본문·인증 코드를 직접 포함하지 않지만, 자체 분석 전송 ID는 수신 이메일 주소의 해시와 연결되므로 완전히 익명인 정보는 아닙니다. 자세히는<a href="/ko/privacy#technical">개인정보 보호정책의 기술적 대책</a>을(를) 보시기 바랍니다.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Apple 순정 프레임워크와 외부 SDK를 어떻게 구분해서 사용하고 계십니까?</div>
+              <div class="faq-item__answer">iOS 앱 내 메모 본문의 암호화와 키 보관은 CryptoKit과 Keychain을 사용하고, 본문 전송은 URLSession으로 진행합니다. 한편, Google 로그인, Firebase에 의한 백엔드 보호, AppsFlyer에 의한 획득·이용 분석에는 외부 SDK를 사용합니다. 본문의 보호와 식별자를 동반한 이용 분석을 구분하여 설명하고 있습니다.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title" id="reading-09" data-ce-number="09">관련 기사</h2>
+            <div class="related-grid">
+              <a href="/ko/devlog/day1" class="related-card">
+                <div class="related-card__title">【Day1】Captio를 너무 좋아해서, 다시 한 번 "그 체험"을 만들고 싶어졌습니다</div>
+                <div class="related-card__desc">Captio의 체험을 재현하기 위해 수행한 최초 개발 시 기술 판단 기록.</div>
+              </a>
+              <a href="/ko/devlog/" class="related-card">
+                <div class="related-card__title">개발 일지 목록</div>
+                <div class="related-card__desc">SimpleMemo의 기술적 의사결정 기록.</div>
+              </a>
+              <a href="/ko/devlog/outbox-architecture" class="related-card">
+                <div class="related-card__title">Outbox 아키텍처: 누수 방지 설계</div>
+                <div class="related-card__desc">전송 대기 메모를 관리하는 큐와 AES-GCM으로 암호화하는 Outbox 설계에 대한 해설.</div>
+              </a>
+              <a href="/ko/devlog/relay-api-design" class="related-card">
+                <div class="related-card__title">Relay API：Cloudflare Workers로 메일 전송 기반을 구축</div>
+                <div class="related-card__desc">Cloudflare Workers를 사용한 메일 전송 기반과 본문을 중계하는 설계에 대한 해설.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+
+    </div>
+
+<section class="references ce-chapter sd-chapter" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="ce-chapter__head"><h2 style="font-size:1.1rem;margin-bottom:1rem;" id="reading-10" data-ce-number="10"> <span>참고문헌</span> </h2></div><div class="ce-chapter__body">
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span>AES-GCM 암호화에 의한 Outbox 데이터 보호 구현에 사용</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span>일시적(일시적) 세션에 의한 네트워크 통신으로 프라이버시를 확보</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — 보안이 취약한 네트워크 연결 방지 (앱 전송 보안)</a> — <span>TLS 통신 강제에 의한 데이터 전송 시 보안 확보</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — Generating Log Messages from Your Code</a> — <span>로그의 저장 범위와 기밀 정보의 취급</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — UI를 백그라운드에서 실행하기 위해 준비</a> — <span>앱 스위처용 스냅샷 및 화면상의 정보</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple 개발자 — 첫 잠금 해제 후 키체인 접근, 이 장치 전용</a> — <span>키 접근 조건 및 다른 단말기로의 이전 제한</span></li>
+  </ul>
+</div></section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/ko/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>다음에 읽기</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>Obsidian 연동으로 메모를 저장할 장소를 만들 수 있습니다</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>Obsidian 연동을 활성화하고 저장 위치를 설정하는 절차를 확인할 수 있습니다. </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>관련 콘텐츠</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/ko/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio 대체 앱 비교</span></a></li>
+    <li><a href="/ko/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span> 블로그 기사 목록</span></a></li>
+    <li><a href="/ko/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>메모 앱 비교 목록</span></a></li>
+  </ul>
+</section>
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="ko" dir="ltr"><a class="site-brand" href="/ko/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 연동</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">작은 메모, 다음 한 걸음.</p><p class="site-footer-description">iPhone에서 Obsidian과 이메일로 메모를 보내세요.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="푸터 탐색 메뉴">
+      <div class="footer__col">
+        <p class="footer__col-title">프로덕트</p>
+        <a href="/ko/download/" class="footer__link">다운로드</a>
+        <a href="/ko/" class="footer__link">홈</a>
+        <a href="/ko/how-to/" class="footer__link"><span>사용 방법</span> </a>
+        <a href="/ko/templates/" class="footer__link"><span>템플릿</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">비교·전환</p>
+        <a href="/ko/captio/" class="footer__link"><span>Captio식</span> </a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">읽을거리</p>
+        <a href="/ko/devlog/" class="footer__link">개발 기록</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">지원</p>
+        <a href="/ko/roadmap/" class="footer__link">공개 로드맵</a>
+        <a href="/ko/about/" class="footer__link">개발자 소개</a>
+        <a href="/ko/terms" class="footer__link"><span>이용 약관</span> </a>
+        <a href="/ko/privacy" class="footer__link">개인정보 보호</a>
+        <a href="/ko/contact" class="footer__link">문의</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 운영: YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

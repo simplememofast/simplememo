@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/memo-app-security-comparison">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script><title>备忘录应用程序的安全比较|共享、锁定、恢复的确认点</title>
+  <meta name="description" content="备忘录应用程序的安全性，不仅是加密，还有共享权限、笔记的锁定、恢复方法的比较。 用官方资料整理Apple备忘录、Google Keep、Notion、OneNote、CryptPad和SimpleMemo的差异，解说防止错误共享的确认、删除后的恢复、机型变更前的准备。">
+  <meta property="og:title" content="备忘录应用程序的安全比较|共享、锁定、恢复的确认点">
+  <meta property="og:description" content="备忘录应用程序的安全性，不仅是加密，还有共享权限、笔记的锁定、恢复方法的比较。 用官方资料整理Apple备忘录、Google Keep、Notion、OneNote、CryptPad和SimpleMemo的差异，解说防止错误共享的确认、删除后的恢复、机型变更前的准备。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-02-27T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/blog/memo-app-security-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="备忘录应用程序的安全比较|共享、锁定、恢复的确认点">
+  <meta name="twitter:description" content="备忘录应用程序的安全性，不仅是加密，还有共享权限、笔记的锁定、恢复方法的比较。 用官方资料整理Apple备忘录、Google Keep、Notion、OneNote、CryptPad和SimpleMemo的差异，解说防止错误共享的确认、删除后的恢复、机型变更前的准备。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03">
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "@id": "https://simplememofast.com/zh/blog/memo-app-security-comparison#article",
+  "inLanguage": "zh-Hans",
+  "image": "https://simplememofast.com/assets/img/og/blog-memo-app-security-comparison.png?v=60b357fb03",
+  "headline": "备忘录应用程序的安全比较|共享、锁定、恢复的确认点",
+  "description": "备忘录应用程序的安全性，不仅是加密，还有共享权限、笔记的锁定、恢复方法的比较。 用官方资料整理Apple备忘录、Google Keep、Notion、OneNote、CryptPad和SimpleMemo的差异，解说防止错误共享的确认、删除后的恢复、机型变更前的准备。",
+  "url": "https://simplememofast.com/zh/blog/memo-app-security-comparison",
+  "datePublished": "2026-02-27",
+  "dateModified": "2026-09-09",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/blog/memo-app-security-comparison"
+  }
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "博客",
+      "item": "https://simplememofast.com/zh/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "备忘录应用程序的安全比较",
+      "item": "https://simplememofast.com/zh/blog/memo-app-security-comparison"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/zh/blog/memo-app-security-comparison#webpage",
+  "inLanguage": "zh-Hans",
+  "name": "备忘录应用程序的安全比较|共享、锁定、恢复的确认点",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/zh/#website"
+  },
+  "url": "https://simplememofast.com/zh/blog/memo-app-security-comparison"
+}</script>  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .security-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .security-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.security-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .security-table{width:100%;min-width:860px;border-collapse:collapse;table-layout:fixed;font-size:.875rem}.security-table th,.security-table td{padding:.85rem;border:1px solid var(--border);text-align:left;vertical-align:top;line-height:1.8;overflow-wrap:anywhere}
+    .security-table th{background:rgba(100,180,255,.08);color:var(--accent)}.security-table th:first-child{width:17%}.security-table th:last-child{width:18%}.security-table tbody th{background:var(--surface);color:var(--text);position:sticky;left:0;z-index:1}.security-table caption{text-align:left;padding:1rem;font-weight:700}
+    .security-steps{padding-left:1.4rem;line-height:1.9}.security-steps li{margin:1rem 0}
+</style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/memo-app-security-comparison">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-security-comparison">
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh/blog/memo-app-security-comparison#faq","inLanguage":"zh-Hans","mainEntity":[{"@type":"Question","name":"备忘录应用程序的安全性只能通过加密来比较吗？","acceptedAnswer":{"@type":"Answer","text":"不。 确认共享对象和权限、账户登录、终端和笔记的锁定、恢复方法、导出的副本。 仅凭密码方式的名字，无法判断可以防止错误共享和数据丢失。"}},{"@type":"Question","name":"有E2EE和实时共同编辑兼顾的服务吗？","acceptedAnswer":{"@type":"Answer","text":"CryptPad可以用E2EE共同编辑文件。 请确认阅览、编辑权限、所有者、共享链接、访问列表。 即使是E2EE，也不能回收许可的对方制作的副本。"}},{"@type":"Question","name":"Apple备忘录的锁和共同编辑可以同时使用吗？","acceptedAnswer":{"@type":"Answer","text":"有锁定设置的备忘录不能共同编辑，所以在共享之前从菜单中删除锁定设置本身。 仅仅用Face ID暂时打开是不一样的。 iCloud的高级数据保护和共享条件另行确认。"}},{"@type":"Question","name":"为什么只用Notion浏览的人可以编辑？","acceptedAnswer":{"@type":"Answer","text":"有可能在其他途径上获得广泛的权限。 Notion在适用的权限中优先于宽的，所以也会确认来自工作空间、父页面、组等的访问。"}},{"@type":"Question","name":"重置密码的话，可以恢复加密的备忘录吗？","acceptedAnswer":{"@type":"Answer","text":"取决于产品和钥匙的管理方式。 即使重置了Apple备忘录的独立密码，也无法打开旧的已锁定备忘录。 OneNote的部分密码即使是Microsoft也无法解除。 请先确认正在使用的产品的恢复手段。"}},{"@type":"Question","name":"更换机型之前至少应该确认什么？","acceptedAnswer":{"@type":"Answer","text":"同步完成，在新终端上打开正文和附件，确认手边有必要的锁和恢复方法。 确认导出的数据内容和保护状态，不要先删除仅保留数据和钥匙的旧终端。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="主导航" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/zh/guides/">使用指南</a></li>
+        <li><a href="/zh/use-cases/">使用场景</a></li>
+        <li><a href="/zh/vs/">对比</a></li>
+        <li><a href="/zh/methods/"><span>方法</span></a></li>
+        <li><a href="/zh/blog/"><span>博客</span></a></li>
+        <li><a href="/zh/glossary/"><span>术语集</span></a></li>
+        <li><a href="/zh/faq">常见问题</a></li>
+        <li><a href="/zh/about/">关于开发者</a></li>
+        <li><a href="/zh/devlog/">开发日志</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>下载</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/blog/memo-app-security-comparison" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/memo-app-security-comparison" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/blog/memo-app-security-comparison" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/memo-app-security-comparison" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/blog/memo-app-security-comparison" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/blog/memo-app-security-comparison" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/memo-app-security-comparison" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/memo-app-security-comparison" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/memo-app-security-comparison" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">下载</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content"><div class="container">
+    <div class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label"><span>安全</span></div><h1 class="lp-hero__title"><span>备忘录应用程序的<br>安全比较</span></h1><p class="lp-hero__sub"><span>要保护备忘录，除了加密之外，还需要确认“与谁共享”“删除后能不能恢复”“钥匙和终端丢失怎么办”。 根据日常操作和恢复的条件比较6个应用程序・服务。 </span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>作者: <a href="/zh/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · 公开日: <time datetime="2026-03-06">2026年03月06日</time></span> </p></div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>6服务，根据共享和恢复的条件进行比较</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>账户、终端、笔记本的锁分别确认</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>为了防止错误共享，发送前确认</span><span aria-hidden="true">↗</span></a></nav></div>
+
+    <div class="tldr"><p><span><strong>选择方法：</strong>如果是家人的共同列表的话，先确认共享对象的编辑范围，如果是个人备忘录的话，先确认终端和笔记本的锁定，如果是工作资料的话，先确认组织的权限、恢复规则。 虽然也有兼顾E2EE和共同编辑的服务，但连共享方制作的副本都不能回收。 </span></p></div>
+<p class="security-review"><span>最终确认：<time datetime="2026-09-09">2026年9月9日</time>。 笔者是SimpleMemo的开发者。 这是基于官方资料的功能和程序的比较，不是对其他公司应用程序的审计结果或安全性的认定。 </span></p><nav class="internal-links" aria-label="报道中的目录"><a href="#security-comparison"><span>6服务比较</span></a><a href="#sharing-check"><span>共享前的确认</span></a><a href="#recovery-check"><span>删除・机型变更</span></a><a href="#secure-collaboration"><span>共同编辑和E2EE</span></a></nav>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="security-comparison"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"><span>6服务，根据共享和恢复的条件进行比较</span></h2></div><div class="ce-chapter__body"><div><p class="table-hint">表格可以横向滚动。 键盘也可以确认右边的条件和出处。</p><div class="security-scroll sd-table" role="region" aria-label="6服务的安全对比表" tabindex="0"><table class="security-table"><caption>用途和确认条件（2026年9月9日）</caption><thead><tr><th scope="col">应用程序・服务</th><th scope="col">使用的场景</th><th scope="col">确认条件</th><th scope="col">官方资料</th></tr></thead><tbody><tr><th scope="row">Apple备忘录 / Apple Notes</th><td>个人备忘录有笔记本的锁。 共同编辑的备忘录需要取消锁定设置。</td><td>在iCloud备忘录中确认ADP的设置。 通过共享备忘录的ADP，E2EE需要所有参加者的激活。 独自密码的重置无法打开旧的已锁定的备忘录。</td><td><a href="https://support.apple.com/en-ie/102537">锁定和恢复</a> · <a href="https://support.apple.com/en-us/102462">共享条件</a> · <a href="https://support.apple.com/en-us/102651">ADP</a></td></tr><tr><th scope="row">Google Keep</th><td>共同列表和备忘录一起编辑的用途。 共同编辑可以编辑备忘录的内容。</td><td>如果只想看就交的话，要区分邀请共同编辑和向其他应用程序发送副本的操作。 档案不是删除的。</td><td><a href="https://support.google.com/keep/answer/6101196?co=GENIE.Platform%3DiOS&amp;hl=en">共享的规格</a> · <a href="https://support.google.com/keep/answer/6262765?co=GENIE.Platform%3DDesktop&amp;hl=en">存档和删除</a></td></tr><tr><th scope="row">Notion</th><td>使用页面、嘉宾、工作空间单位的权限进行共同作业的用途。</td><td>在多个路径上附加的权限越宽越优先。 即使将父页面转移到Private，也要另外确认子页面已经授予的权限。</td><td><a href="https://www.notion.com/en-gb/help/sharing-and-permissions">共享和继承权限</a></td></tr><tr><th scope="row">OneNote</th><td>笔记本中，将密码保护部分分开的用途。</td><td>部分的密码，Microsoft也无法解除。 因为锁定中的内容不在搜索对象之列，所以在判断“消失”之前确认状态。</td><td><a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/protect-your-notes-with-a-password">部分的保护</a> · <a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/find-onenote-notes-pages-or-tabs">找不到的笔记</a></td></tr><tr><th scope="row">Crypt Pad</th><td>用E2EE共同编辑文件的用途。 可以使用阅览、编辑的权限和所有者设置的访问列表。</td><td>确认共享链接和接收者。 因为共享对象也能看到编辑记录，所以如果不想传递过去的内容的话，可以制作新的副本进行共享。 没有所有者的文件以后无法管理所有权，账户密码也管理员无法重置。</td><td><a href="https://docs.cryptpad.org/en/user_guide/share_and_access.html">共享和所有者</a> · <a href="https://docs.cryptpad.org/en/user_guide/security.html">保护的前提</a> · <a href="https://docs.cryptpad.org/en/FAQ.html">密码丢失</a></td></tr><tr><th scope="row">SimpleMemo / Simple Memo</th><td>个人将短文留在已设置好的收件箱或联系地址的用途。 没有共同编辑功能。</td><td>Outbox和发送记录在终端内加密，但邮件发送不是E2EE。 确认收件人、收件箱、关联对象的共享、保存状态。</td><td><a href="/zh/privacy#technical">技术说明</a></td></tr></tbody></table></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="account-and-lock"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"><span>账户、终端、笔记的锁分别确认</span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>确认加入账户的人</h3><p>在对应的服务中设置多要素认证和密码，重新审查恢复用邮件、电话号码、登录中的终端、外部应用程序的访问许可。 仅通过Face ID打开应用程序的设置，并不能限制从其他终端登录账户。</p></div><div class="tip-card"><h3>区分屏幕锁定和加密</h3><p>终端的密码、应用程序整体的锁定、个别笔记的加密对象不同。 确认关闭屏幕时的重新锁定和通知、标题的显示。 在OneNote中可以设置密码保护部分保持打开的时间。 <a href="https://support.microsoft.com/en-us/onenote/onenote-help-and-learning/protect-your-notes-with-a-password">OneNote的锁定设置</a>。</p></div><p>加密方式和E2EE的对象范围，在另一篇报道的<a href="/zh/blog/memo-app-encryption-comparison">10应用程序的加密比较</a>中总结。 仅靠AES的密钥长度是无法解决错误共享和恢复的。</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="sharing-check"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"><span>为了防止错误共享，请在发送前确认</span></h2></div><div class="ce-chapter__body"><div><ol class="security-steps"><li><strong>选择“共同编辑”和“发送副本”。 </strong>在共同编辑中，以后的变更也会反映在同一份文件中。 通过PDF或邮件发送的副本会变成其他保存物，即使停止原来的共享也不一定可以回收。</li><li><strong>确认对方和权限。 </strong>如果只浏览就足够了，就不添加编辑权限，只分享给需要的人。 Keep的共同编辑是对方也可以编辑的方式，所以与只看的共享不同。</li><li><strong>也看亲子页面和公开链接。 </strong>Notion等不仅会影响个人设置，还会影响工作区和父页面的权限。 请不要只看移至非公开的父页面，判断子页面也全部关闭。</li><li><strong>通过虚拟内容确认外观。 </strong>公开链接是未登录的浏览器，限定共享在允许的接收者方面，确认可见的范围和可以编辑的范围。 仅仅在自己的管理员画面上打开是无法确认的。</li></ol></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="recovery-check"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"><span>删除的备忘录、钥匙丢失、机型变更的准备</span></h2></div><div class="ce-chapter__body"><div><div class="tip-card"><h3>区分删除和存档</h3><p>Google Keep删除后7天内可以恢复。 iCloud备忘录是“最近删除的项目”中，删除后30天内的备忘录为对象。 并不是说完全删除的东西一定能恢复。 首先确认账户和保存地址是否正确，是否在存档或锁定中的部分。 <a href="https://support.google.com/keep/answer/6262765?co=GENIE.Platform%3DDesktop&amp;hl=en">Keep的步骤</a>、<a href="https://support.apple.com/en-gb/guide/icloud/mm2f42f05cb9/icloud">iCloud备忘录的步骤</a>。</p></div><div class="tip-card"><h3>导出与“可以恢复原状”不一样</h3><p>Notion根据计划引导恢复和导出编辑履历，但仅仅重新上传导出的数据并不能立即再现工作空间。 用少量的样品确认是否以需要附加、层次、链接的形式保留。 <a href="https://www.notion.com/help/back-up-your-data">Notion的备份说明</a>、<a href="https://www.notion.com/help/export-your-content">导出步骤</a>。</p></div><div class="tip-card"><h3>在删除旧终端之前，在新终端上打开1件</h3><p>完成同步，确认是否在新的终端上打开正文和附件。 还准备了加密密码和恢复手段，导出的副本请确认保存地址的权限和加密。 在唯一的钥匙和数据留在旧终端的状态下，请不要初始化该终端。</p></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="secure-collaboration"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"><span>能兼顾安全和共同编辑的备忘录软件是什么？ </span></h2></div><div class="ce-chapter__body"><div><p><strong>CryptPad是用E2EE共同编辑文件的选择。 </strong>确认阅览、编辑权限、所有者、访问列表后使用。 因为编辑履历也会共享，所以如果需要隐藏过去的内容的话，制作新的副本后再共享。 但是，在信任提供方的Web应用程序和终端的前提下，共享链接的处理，允许的对方复制仍然存在。 <a href="https://docs.cryptpad.org/en/user_guide/security.html">CryptPad的保护前提</a>、<a href="https://docs.cryptpad.org/en/FAQ.html#how-secure-is-cryptpad">关于历史共享的FAQ</a>和<a href="https://docs.cryptpad.org/en/user_guide/share_and_access.html">共享・访问说明</a>请确认。</p><p>Notion的权限管理、Apple备忘录的共享、OneNote的部分保护分别是不同的机制。 在组织中使用时，根据必要的共同编辑、参与者的终端、管理者的恢复、外部共享规则是否合适来选择。“ 不能断言E2EE和共同编辑是不兼容的”“无论什么用途，一个产品都是最安全的”。</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="personal-capture"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"><span>即使是写给自己的备忘录，也要确认收件人和到达地址</span></h2></div><div class="ce-chapter__body"><div><p>SimpleMemo是将文章留到个人的收件箱或设定的关联对象的应用程序。 首次发送不包含机密信息的1件，在收件箱中确认收件人和正文。 使用Obsidian连接时，请确认是否也收到了设置的Vault・笔记本。</p><p>Outbox和发送记录在终端内进行加密，但邮件正文通过发送API和外部发送基础，作为接收邮件保存。 邮件账户的共享和自动转发，Vault的同步、共享需要另外确认。 <a href="/zh/note-to-email/#delivery-check">邮件到达确认</a>、<a href="/zh/privacy-architecture/">数据通道</a>。</p></div></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="security-faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07"><span>常见问题</span></h2></div><div class="ce-chapter__body"><div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">备忘录应用程序的安全性只能通过加密来比较吗？</summary><div class="faq-answer"><p>不。 确认共享对象和权限、账户登录、终端和笔记的锁定、恢复方法、导出的副本。 仅凭密码方式的名字，无法判断可以防止错误共享和数据丢失。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">有E2EE和实时共同编辑兼顾的服务吗？</summary><div class="faq-answer"><p>CryptPad可以用E2EE共同编辑文件。 请确认阅览、编辑权限、所有者、共享链接、访问列表。 即使是E2EE，也不能回收许可的对方制作的副本。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple备忘录的锁和共同编辑可以同时使用吗？</summary><div class="faq-answer"><p>有锁定设置的备忘录不能共同编辑，所以在共享之前从菜单中删除锁定设置本身。 仅仅用Face ID暂时打开是不一样的。 iCloud的高级数据保护和共享条件另行确认。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">为什么只用Notion浏览的人可以编辑？</summary><div class="faq-answer"><p>有可能在其他途径上获得广泛的权限。 Notion在适用的权限中优先于宽的，所以也会确认来自工作空间、父页面、组等的访问。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">重置密码的话，可以恢复加密的备忘录吗？</summary><div class="faq-answer"><p>取决于产品和钥匙的管理方式。 即使重置了Apple备忘录的独立密码，也无法打开旧的已锁定备忘录。 OneNote的部分密码即使是Microsoft也无法解除。 请先确认正在使用的产品的恢复手段。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">更换机型之前至少应该确认什么？</summary><div class="faq-answer"><p>同步完成，在新终端上打开正文和附件，确认手边有必要的锁和恢复方法。 确认导出的数据内容和保护状态，不要先删除仅保留数据和钥匙的旧终端。</p></div></details></div></div></div></section>
+<section class="lp-section ce-chapter sd-chapter">
+  <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08"> <span>相关报道</span> </h2></div><div class="ce-chapter__body">
+  <div class="internal-links">
+    <a href="/zh/blog/best-memo-apps-2026"> <span>【2026年】推荐备忘录应用程序10选 按目的进行彻底比较</span> </a>
+    <a href="/zh/blog/how-to-choose-memo-app"> <span>备忘录应用程序的选择方法 完全指南 5个标准不会失败</span> </a>
+    <a href="/zh/blog/free-memo-apps-ranking"> <span>免费使用的备忘录软件 排行榜2026</span> </a>
+  </div>
+</div></section>
+
+<div class="cta-box"><div class="cta-box__title"><span>在自己的保存位置，留下简短的备忘录</span></div><div class="cta-box__desc"><span>首先设置收件人，确认1件的到达。 可以开始在收件箱和Obsidian中留下的使用方法。</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="从App Store下载"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="从App Store下载" loading="lazy"></a></div>
+
+    <section class="lp-section ce-chapter sd-chapter"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09"><span>相关页面</span></h2></div><div class="ce-chapter__body"><div class="internal-links"><a href="/zh/blog/memo-app-encryption-comparison"><span>比较备忘录应用程序的加密</span></a><a href="/zh/blog/free-memo-apps-ranking"><span>免费备忘录应用程序排行榜</span></a><a href="/zh/blog/offline-memo-apps"><span>离线备忘录应用程序</span></a><a href="/zh/blog/memo-taking-tips"><span>记笔记方法诀窍10选</span></a><a href="/zh/blog/minimalist-digital-memo"><span>极简主义的笔记术</span></a><a href="/zh/blog/productivity-methods-comparison"><span>生产力方法比较</span></a><a href="/zh/glossary/e2e-encryption/"><span>用语：E2E加密</span></a><a href="/zh/glossary/aes-gcm/"><span>用语：AES-GCM</span></a><a href="/zh/blog/"><span>博客一览</span></a></div></div></section>
+  </div>
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="compare" href="/zh/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> <span>接下来阅读</span> </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> <span>比较之后，查看实际测量值</span> </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> <span>主要备忘录应用程序的启动和输入开始的实际测量表。 </span> </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>相关内容</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/zh/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio替代应用程序比较</span></a></li>
+    <li><a href="/zh/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>给自己发邮件的方法</span></a></li>
+    <li><a href="/zh/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>备忘录应用程序比较一览</span></a></li>
+    <li><a href="/zh/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使用方法指南</span></a></li>
+  </ul>
+</section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="Simple Memo - 用于Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI ATAKA</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;"><span>SimpleMemo的开发者。 从iPhone开始，正在开发在设定的邮箱地址和连接对象的笔记上留下文章的应用程序。 </span></p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/zh/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">简介</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X/推特</a>
+      <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
+</main>
+
+      <section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/pubs/sp/800/38/d/final" target="_blank" rel="noopener">NIST（2007）。 SP 800-38D：GCM操作模式。 国家标准与技术研究所。</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla，E。 （2018）。 RFC 8446：传输层安全（TLS）协议版本1.3。 IETF。</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="页脚导航">
+      <div class="footer__col">
+        <p class="footer__col-title">产品</p>
+        <a href="/zh/download/" class="footer__link">下载</a>
+        <a href="/zh/" class="footer__link">首页</a>
+        <a href="/zh/use-cases/" class="footer__link">使用场景</a>
+        <a href="/zh/guides/" class="footer__link">使用指南</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比较与迁移</p>
+        <a href="/zh/captio-alternative/" class="footer__link"><span>Captio替代</span></a>
+        <a href="/zh/note-to-email/" class="footer__link">将笔记发送到邮箱</a>
+        <a href="/zh/vs/" class="footer__link">对比</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">读物</p>
+        <a href="/zh/blog/" class="footer__link"><span>博客</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">支持</p>
+        <a href="/zh/roadmap/" class="footer__link">公开路线图</a>
+        <a href="/zh/devlog/" class="footer__link">开发日志</a>
+        <a href="/zh/about/" class="footer__link">关于开发者</a>
+        <a href="/zh/faq" class="footer__link">常见问题</a>
+        <a href="/zh/privacy" class="footer__link">隐私</a>
+        <a href="/zh/contact" class="footer__link">联系我们</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body></html>

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/obsidian-voice-input">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Cómo tomar notas en Obsidian mediante la entrada de voz 4 selección [iPhone] Cómo hacerlo sin plug-in</title>
+  <meta name="description" content="Compare los métodos 4 de uso de entrada de voz con Obsidian. La entrada de voz móvil, los accesos directos oficiales de captura y URI, la transcripción de grabaciones y los registros de almacenamiento de SimpleMemo se organizan de acuerdo con las condiciones de configuración, comunicación y fotogramas libres. Explicaré cómo elegir entre el uso de dejar notas cortas y el uso de procesar grabaciones largas.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Cómo tomar notas en Obsidian mediante la entrada de voz 4 selección [iPhone] Cómo hacerlo sin plug-in">
+  <meta property="og:description" content="Compare los métodos 4 de uso de entrada de voz con Obsidian. La entrada de voz móvil, los accesos directos oficiales de captura y URI, la transcripción de grabaciones y los registros de almacenamiento de SimpleMemo se organizan de acuerdo con las condiciones de configuración, comunicación y fotogramas libres. Explicaré cómo elegir entre el uso de dejar notas cortas y el uso de procesar grabaciones largas.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-07-10T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/es/blog/obsidian-voice-input">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="es_ES">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Cómo tomar notas en Obsidian mediante la entrada de voz 4 selección [iPhone] Cómo hacerlo sin plug-in">
+  <meta name="twitter:description" content="Compare los métodos 4 de uso de entrada de voz con Obsidian. La entrada de voz móvil, los accesos directos oficiales de captura y URI, la transcripción de grabaciones y los registros de almacenamiento de SimpleMemo se organizan de acuerdo con las condiciones de configuración, comunicación y fotogramas libres. Explicaré cómo elegir entre el uso de dejar notas cortas y el uso de procesar grabaciones largas.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/es/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/blog/obsidian-voice-input">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/obsidian-voice-input">
+
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "inLanguage": "es",
+  "headline": "Cómo tomar notas en Obsidian mediante la entrada de voz 4 selección [iPhone] Cómo hacerlo sin plug-in",
+  "description": "Compare los métodos 4 de uso de entrada de voz con Obsidian. La entrada de voz móvil, los accesos directos oficiales de captura y URI, la transcripción de grabaciones y los registros de almacenamiento de SimpleMemo se organizan de acuerdo con las condiciones de configuración, comunicación y fotogramas libres. Explicaré cómo elegir entre el uso de dejar notas cortas y el uso de procesar grabaciones largas.",
+  "image": "https://simplememofast.com/assets/img/og/blog-obsidian-voice-input.png",
+  "url": "https://simplememofast.com/es/blog/obsidian-voice-input",
+  "datePublished": "2026-07-10",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "keywords": "Obsidian, entrada de voz, nota de voz, transcripción, iPhone, susurro, nota de voz, dictado"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Inicio",
+      "item": "https://simplememofast.com/es/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://simplememofast.com/es/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Entrada de audio Obsidian",
+      "item": "https://simplememofast.com/es/blog/obsidian-voice-input"
+    }
+  ]
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/es/blog/obsidian-voice-input#webpage",
+  "inLanguage": "es",
+  "name": "Cómo tomar notas en Obsidian mediante la entrada de voz 4 selección [iPhone] Cómo hacerlo sin plug-in",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/es/#website"
+  },
+  "url": "https://simplememofast.com/es/blog/obsidian-voice-input"
+}</script>
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "es",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Puedo introducir voz solo con Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "En la versión móvil, puede usar la entrada de voz del teclado iOS tal como está. Sin embargo, la función \"Transcripción automática de grabación\" no está disponible en el propio Obsidian, y la grabadora de audio enchufable central también guarda e incrusta archivos de grabación."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Cómo transcribir los datos de grabación y ponerlos en Obsidian?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Utilice juntos los complementos de la comunidad basados en Whisper y las herramientas de transcripción externas. Esta configuración es adecuada para grabaciones a largo plazo, como reuniones y conferencias. Si solo quieres enviar mensajes de texto en el acto mientras hablas, el método 1 o el método 4 es más fácil."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo automatizar \"talk → stay in Obsidian\" sin un plug-in?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "se puede hacer. Hay una manera de combinar la entrada de voz del acceso directo con la captura oficial del Obsidian. Incluso con SimpleMemo, puede configurar la entrada de voz automática en iOS 26 o posterior y agregarla directamente a la sala de almacenamiento que permite el acceso. Ambos requieren establecer el destino de almacenamiento y la confirmación inicial del guardado, y la operación cambia dependiendo de la autoridad, el idioma compatible y el estado de preparación de la entrada de voz."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Puedo tomar notas sobre Obsidian por voz desde Apple Watch?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "se puede hacer. Desde la aplicación SimpleMemo Watch, añádala a la bóveda configurada a través del iPhone emparejado. Se requiere el acceso a la configuración del enlace y al destino de almacenamiento en el lado iPhone. La entrega de correo electrónico requiere comunicación, y solo el reloj no completa la configuración del almacenamiento. El procedimiento se explica en la página de explicación de Apple Watch×Obsidian."
+      }
+    }
+  ],
+  "@id": "https://simplememofast.com/es/blog/obsidian-voice-input#faq"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .voice-table-wrap{overflow-x:auto;}
+    .voice-table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+    .article-body .voice-table-wrap table{min-width:44rem;}
+    .article-body .voice-table-hint{font-size:.85rem;color:var(--text-secondary);}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+    /* アプリ画面スクショの横スクロール帯。/siri/ のアプリ内ガイド節（#428）と同じ形。
+       ⚠️ あちらは実機、こちらは Simulator 撮影（ArticleScreenshotUITests）。
+       manifest の verification は "simulator" 固定で、音声認識の精度・AirPods・
+       Watch連携は Simulator では再現できない。本文に「実機確認済み」と書かないこと。
+       ⚠️ フレックスとスナップは img 側に掛ける。<picture> で包むとフレックスの
+       子が picture に変わって並びが崩れる（webp は Safari 14 以降で通るため
+       フォールバックは置いていない）。 */
+    .article-body .shot-strip{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;
+      -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+    .article-body .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;
+      border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000;}
+</style>
+  <link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+  <link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+  <noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full site-designed" data-design-family="refined">
+  <a class="ce-skip" href="#main-content">Saltar al texto</a>
+<nav class="global-nav" aria-label="Navegación principal" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/es/guides/">Guías</a><a href="/es/use-cases/">Casos de uso</a><a href="/es/vs/">Comparar</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/es/guides/">Guías</a></li>
+        <li><a href="/es/use-cases/">Casos de uso</a></li>
+        <li><a href="/es/vs/">Comparar</a></li>
+        <li><a href="/es/methods/"><span>Método</span></a></li>
+        <li><a href="/es/blog/"><span>Blog</span></a></li>
+        <li><a href="/es/glossary/"><span>Glosario</span></a></li>
+        <li><a href="/es/faq">Preguntas frecuentes</a></li>
+        <li><a href="/es/about/">Sobre el desarrollador</a></li>
+        <li><a href="/es/devlog/">Registro de desarrollo</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8"><span>Descargar</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Español · Elegir idioma"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ES</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="es" dir="ltr"><p class="site-language-title">Elegir idioma</p><div class="site-language-grid"><a href="/blog/obsidian-voice-input" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/blog/obsidian-voice-input" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/blog/obsidian-voice-input" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/blog/obsidian-voice-input" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/blog/obsidian-voice-input" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="es" aria-current="page"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/pt-BR/blog/obsidian-voice-input" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/blog/obsidian-voice-input" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/blog/obsidian-voice-input" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/blog/obsidian-voice-input" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8" class="global-nav__cta">Descargar</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menú"><span>Menú</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content" id="main-content">
+    <div class="container">
+
+      <header class="ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><p class="ce-eyebrow">Obsidian · Salir con audio</p><h1 class="page-content__title"><span class="ce-title-line">Obsidian</span><span class="ce-title-line"><span class="ce-title-accent">Nota con entrada de voz</span></span><span class="ce-title-line">Método 4 selección [iPhone]</span></h1>
+
+      <p class="article-meta"> Autor: <a href="/es/about/">AI ATAKA</a> ・ Última actualización: <time datetime="2026-09-30">2026 año 9 mes 30 día</time> ・ Leer: sobre 6 minutos </p><a class="ce-read-link" href="#guide-section-1">Lee el texto <span aria-hidden="true">↓</span></a></div><nav class="ce-routes" aria-label="Elige el contenido que quieres leer"><a class="ce-route" href="#guide-section-2"><span>01</span><b>Cómo probarlo ahora</b></a><a class="ce-route" href="#guide-section-5"><span>02</span><b>Deja con SimpleMemo</b></a><a class="ce-route" href="#voice-methods-table"><span>03</span><b>4Comparar métodos</b></a></nav><figure class="ce-stage ce-stage--phone"><p class="ce-stage-label">SIMPLEMEMO / iPHONE</p><div class="ce-device"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" alt="Pantalla de entrada SimpleMemo. Enviar en la parte superior, botón de entrada de voz en la parte inferior derecha." decoding="async" fetchpriority="high"></div><figcaption class="ce-stage-foot">La pantalla de entrada real de SimpleMemo</figcaption></figure></header>
+
+<div class="ce-article"><details class="ce-index"><summary>Tabla de contenido de esta página</summary><nav aria-label="Tabla de contenido en la página"><a href="#guide-section-1">01 Separando el reconocimiento de voz durante la entrada y la transcripción de archivos de grabación</a><a href="#guide-section-2">02 Método 1: Obsidian Móvil + iOS Entrada de voz (prueba gratuita e inmediata)</a><a href="#guide-section-3">03 Método 2: Acceso directo (Captura oficial o URI Obsidian)</a><a href="#guide-section-4">04 Método 3: Plug-in de susurro (fuerte para la transcripción de la grabación)</a><a href="#guide-section-5">05 Método 4: Añadir desde SimpleMemo al almacenamiento configurado (no se requiere plug-in)</a><a href="#voice-methods-table">Comparar los métodos de 06 4</a><a href="#guide-section-7">Pautas de uso de 07</a><a href="#guide-section-8">Preguntas frecuentes sobre 08</a></nav></details>
+
+
+      <div class="page-content__body article-body">
+
+        <div class="callout ce-lede">
+          <strong>Conclusión.</strong>La entrada para dejar una nota de voz en Obsidian con iPhone es<strong>1 versión móvil + entrada de voz iOS</strong>、<strong>2 accesos directos de entrada de voz + captura oficial o URI</strong>、<strong>3 Plug-in para transcribir grabaciones</strong>、<strong>Añadir de 4SimpleMemo a la sala de almacenamiento del conjunto</strong>Se puede dividir en 4. 1 o 2 si quieres probar sin una aplicación adicional, 3 si quieres procesar archivos grabados. Si desea decidir sobre la pantalla de entrada y el destino guardado y usarlo repetidamente, 4 también es un candidato. La entrada de voz en la aplicación de SimpleMemo es para iOS 26 y posteriores, y necesita preparar permisos, idiomas compatibles y destinos de almacenamiento. </div>
+
+        <section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-1" data-ce-number="01">Separar el reconocimiento de voz durante la entrada y la transcripción de los archivos grabados</h2></header><div class="ce-chapter__body">
+        <p>Obsidian tiene un complemento básico "Grabadora de audio" para grabar, pero todo lo que puedes hacer es guardar archivos de audio e incrustarlos en notas, y no transcribirlos. Si "escribes con voz" en la versión móvil, utilizarás el micrófono (entrada de voz) del teclado iOS. En otras palabras, para realizar notas de voz con Obsidian, <strong> decide cómo combinar la entrada de entrada y el destino de almacenamiento</strong>. A continuación, presentaremos los métodos 4.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-2" data-ce-number="02">Método 1: Obsidian móvil + iOS entrada de voz (gratis, listo para probar)</h2></header><div class="ce-chapter__body">
+        <ol>
+          <li>Abre el cuaderno en el móvil Obsidian (no te perderás si empiezas con el cuaderno diario)</li>
+          <li>Toque el icono del micrófono en el teclado</li>
+          <li>Habla - los signos de puntuación se pronunciarán como "maru" y "ten" o se organizarán más tarde</li>
+        </ol>
+        <p>La ventaja es que se puede usar a partir de hoy sin herramientas adicionales. La debilidad es <strong>número de movimientos</strong>. Inicie la aplicación, cargue la bóveda, abra el portátil y toque el micrófono - se necesitan unos pocos toques para llegar aquí, por lo que la idea mientras se camina tiende a desaparecer en el medio. Es lo suficientemente práctico para un posdata.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-3" data-ce-number="03">Método 2: Acceso directo (Captura oficial o URI Obsidian)</h2></header><div class="ce-chapter__body">
+        <p>Texto con "Entrada de texto" en el acceso directo, y luego páselo a Obsidian. <a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener">La acción oficial de captura de la versión móvil 1.11</a> le permite agregarla al principio y al final de la nota sin abrir la aplicación Obsidian. Establezca el destino en el acceso directo y compruebe si el texto corto está incluido en la nota prevista.</p>
+        <p><a href="https://obsidian.md/help/uri" target="_blank" rel="noopener">Obsidian URI</a>(<code>obsidian://new</code>) es un método de entrega diferente. Reúna la codificación de almacenamiento, archivos y especificaciones y parámetros adicionales. No confunda la captura oficial y el URI, establezca la ruta a utilizar, cómo manejar cuando se interrumpe la entrada de voz y verifique las condiciones de comunicación de acuerdo con el terminal y el idioma.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-4" data-ce-number="04">Método 3: Plug-in de susurro (fuerte para la transcripción de grabaciones)</h2></header><div class="ce-chapter__body">
+        <p>Algunos complementos de la comunidad transcriben y anota el audio grabado con el reconocimiento de voz basado en Whisper. Esta configuración es adecuada para <strong> convertir grabaciones organizadas en activos de texto</strong> aplicaciones como reuniones, conferencias y monólogos largos.</p>
+        <p>Por otro lado, hay costos de introducción como la obtención de la clave API, la tarifa de uso y la configuración del complemento, y el tipo de nube API no se puede usar sin conexión. " Es más para "procesar archivos de grabación" que para "notas cortas diarias".</p>
+
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-5" data-ce-number="05">Método 4: Añadir al conjunto de almacenamiento desde SimpleMemo (no se requiere plug-in)</h2></header><div class="ce-chapter__body">
+        <p>"Quiero que me hables en el momento en que lo pienses, y el resto permanecerá en Obsidian" - <a href="/es/obsidian/">SimpleMemo</a> está especializado en esta aplicación.</p>
+        <ul class="ce-benefits">
+          <li><h3>Entrada por voz</h3>Si habilitas "Entrada de voz automática al inicio", puedes iniciar la entrada de voz en la aplicación al inicio. iOS 26 o posterior, los idiomas admitidos son elegibles y se requiere permiso para el micrófono y el reconocimiento de voz. El reconocimiento se procesa dentro del terminal, pero la comunicación y el tiempo de preparación pueden ser necesarios para adquirir el modelo de lenguaje por primera vez</li>
+          <li><h3>Añadir directamente a la sala de almacenamiento</h3>En el momento de la transmisión, el trastero que permitía el acceso especificando una carpeta<strong>Añadir directamente a la nota de la bandeja de entrada o a la nota diaria con una marca de tiempo</strong>. No es un mecanismo esperar la llegada del correo electrónico e importarlo</li>
+          <li><h3>Cuando no hay comunicación</h3>le permite guardarlo sin conexión si el archivo de destino está disponible en iPhone. Los correos electrónicos están esperando ser enviados hasta que se devuelva la comunicación, y la sincronización con otros dispositivos es diferente. También puedes elegir el modo (Premium) para guardar solo en Obsidian</li>
+          <li><h3>Medición del tiempo de inicio</h3><strong>Alrededor de 0.4 segundos es el valor de medición desde el inicio cálido hasta el texto</strong>. Es la mediana de 5 mediciones realizadas el día 11 del mes 8; no es el tiempo hasta el inicio del reconocimiento de voz, la entrega del correo ni la finalización del guardado en la bóveda.<a href="/es/blog/benchmark-methodology">Condiciones de medición</a>también está escrito</li>
+          <li><h3>Alcance de uso gratuito</h3>Free es hasta 3 mensajes al día (sin límite de período de uso). Las condiciones para continuar con el uso son<a href="/es/faq#pricing-ja">Explicación de tarifas y planes</a>Puedes comprobarlo en</li>
+        </ul>
+        <pre tabindex="0" role="region" aria-label="Ejemplo de texto (se puede desplazar horizontalmente)"><code>- 09:14 会議メモ：見積もりは金曜まで
+- 09:31 音声で：帰りに電池を買う
+- 12:05 アイデア：オンボーディングを3画面に</code></pre>
+        <p>Primero, compruebe la autoridad de entrada de voz y el estado de preparación, y registre al destinatario cuando use el correo electrónico. A continuación, especifique la carpeta de almacenamiento y la dirección de almacenamiento en el enlace Obsidian, y asegúrese de que se haya agregado una nota corta. Si no puede acceder a la carpeta directamente y cambiar al URI, las condiciones de operación y configuración son diferentes. <a href="/es/obsidian/getting-started/">La configuración y la primera confirmación adicional</a>, <a href="/es/voice-input/">Página de función de entrada de voz</a>, <a href="/es/blog/email-to-obsidian">Explicación del correo electrónico x cooperación Obsidian</a> se resumen.</p>
+
+        <p>El ejemplo de la pantalla es el 3 de la pantalla de creación, la configuración de correo electrónico y la configuración de enlace Obsidian. La configuración del correo electrónico es necesaria si también utiliza el correo electrónico (puede desplazarse horizontalmente).</p>
+        <div class="shot-strip ce-screen-gallery" role="region" tabindex="0" aria-label="Ejemplo de pantalla SimpleMemo (se puede desplazar horizontalmente)">
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/01-compose.webp" width="640" height="1389" loading="lazy" alt="Pantalla de creación de SimpleMemo. &quot; Con el botón de entrada de voz que se muestra en la esquina inferior derecha y el botón de enviar en la esquina superior derecha se muestran mientras se introduce &quot;Mejora el flujo de entrada de voz en la próxima reunión de planificación&quot;"></div><figcaption><span>01</span> Pantalla de creación</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/02-settings.webp" width="640" height="1389" loading="lazy" alt="La parte superior de la pantalla de configuración de SimpleMemo. Idioma, destinatario de correo electrónico, asunto, firma, transmisión de prueba, artículos del plan premium están alineados"></div><figcaption><span>02</span> Configuración de correo electrónico</figcaption></figure>
+          <figure><div class="ce-screen-frame"><img src="/assets/img/obsidian-voice-input/03-obsidian-settings.webp" width="640" height="1389" loading="lazy" alt="Configuración detallada en la pantalla de configuración de SimpleMemo. El enlace Obsidian está activado, QAObsidianVault en la carpeta, la nota diaria en el destino, la marca de tiempo y el postscript están activados"></div><figcaption><span>03</span> cooperación Obsidian</figcaption></figure>
+        </div>
+
+        <p style="margin:1.75rem 0;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.95rem;line-height:1.85;">Para probar el método 4, <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">SimpleMemo</a> permite añadir directamente a la bóveda las notas dictadas, una vez configurado. Free ofrece hasta 3 mensajes al día (sin límite de duración). La cifra de aproximadamente 0.4 segundos mide el tiempo desde un inicio en caliente hasta que se puede escribir; no mide el inicio del reconocimiento de voz ni la finalización del guardado.</p>
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="voice-methods-table" data-ce-number="06">Compare los métodos de 4</h2></header><div class="ce-chapter__body">
+        <p class="voice-table-hint" id="voice-table-hint">La tabla se puede desplazar horizontalmente. Por favor, compruebe las condiciones de comunicación y las tarifas a la derecha.</p>
+        <div class="voice-table-wrap ce-table-scroll" tabindex="0" role="region" aria-labelledby="voice-methods-table" aria-describedby="voice-table-hint">
+          <table>
+          <tr><th scope="col">Método</th><th scope="col">Se me ocurrió la idea → el número de guardados</th><th scope="col">Buen uso</th><th scope="col">Fuera de línea</th><th scope="col">Coste adicional</th></tr>
+          <tr><th scope="row">1. Entrada de voz móvil + iOS</th><td>Número de toques (inicio → nota → micrófono)</td><td>Postscript en el escritorio</td><td>△(dependiendo de la configuración del terminal y del idioma)</td><td>Ninguno</td></tr>
+          <tr><th scope="row">2. Acceso directo</th><td>Entrada de voz → Captura oficial o URI (se requiere configuración)</td><td>Captura del estándar</td><td>△(dependiendo de la entrada de voz, el destino de almacenamiento y la configuración)</td><td>No es necesario comprar aplicaciones adicionales</td></tr>
+          <tr><th scope="row">3. Plug-in de susurros</th><td>Procesados juntos después de la grabación</td><td>Transcripción de grabación larga</td><td>×~△ (el tipo API no está disponible)</td><td>Tarifa de uso de API, etc.</td></tr>
+          <tr><th scope="row">4. SimpleMemo</th><td>Abrir después de configurar → Hablar → Enviar</td><td>Deje una breve nota sobre el destino de almacenamiento elegido</td><td>△(Se requiere la preparación del modelo y el acceso a los archivos locales. El correo electrónico está esperando comunicación)</td><td>Free es hasta 3 mensajes al día</td></tr>
+        </table>
+        </div>
+
+        </div></section>
+<section class="ce-chapter ce-chapter--wide"><header class="ce-chapter__head"><h2 id="guide-section-7" data-ce-number="07">Directrices de uso</h2></header><div class="ce-chapter__body">
+        <ul>
+          <li><strong>Quiero probarlo gratis ahora mismo</strong> → Método 1</li>
+          <li><strong>Quiero disfrutar haciendo el mío propio con un solo toque en la pantalla de inicio</strong> → Método 2</li>
+          <li><strong>El propósito es transcribir los datos de grabación</strong> → Método 3</li>
+          <li><strong>No quiero perderme las ideas cotidianas</strong> → Método 4</li>
+        </ul>
+        <p><strong>Si eliges el método 4, decide la entrada primero</strong> y el número de movimientos se reducirá aún más. Hable con Apple Watch → <a href="/es/apple-watch-obsidian/">Ver x procedimiento Obsidian</a>, sin mirar la pantalla con AirPods → <a href="/es/siri/">enviar a Obsidian con Siri</a>, abrir desde el botón de acción → <a href="/es/fastest-voice-memo/">configurar la entrada</a>, grabar solo ábrelo mientras se mueve (cuando se enciende automáticamente) → <a href="/es/hands-free/">manos libres</a>. Las condiciones de operación y comunicación varían dependiendo de la entrada. Por favor, compruebe una vez para ver si la ruta seleccionada llega al destino de almacenamiento previsto.</p>
+        <p>Además, el truco de la operación Obsidian es separar "captura" e "iluminación (nutrición)". Para ver la imagen general de cómo atrapar, consulte <a href="/es/blog/obsidian-iphone-memo">Cómo enviar una nota de iPhone a la selección Obsidian 6</a>, y <a href="/es/blog/fleeting-notes">cómo escribir una nota de liberación</a> para la técnica de procesamiento de garabatos.</p>
+
+        </div></section>
+<section class="ce-chapter"><header class="ce-chapter__head"><h2 id="guide-section-8" data-ce-number="08">Preguntas frecuentes</h2></header><div class="ce-chapter__body">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">¿Puedo introducir voz solo con Obsidian?</summary><div class="faq-answer">En la versión móvil, puede usar la entrada de voz del teclado iOS tal como está. Sin embargo, la función "Transcripción automática de grabación" no está disponible en el propio Obsidian, y la grabadora de audio enchufable central también guarda e incrusta archivos de grabación.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">¿Cómo transcribir los datos de grabación y ponerlos en Obsidian?</summary><div class="faq-answer">Utilice juntos los complementos de la comunidad basados en Whisper y las herramientas de transcripción externas. Esta configuración es adecuada para grabaciones a largo plazo, como reuniones y conferencias. Si solo quieres enviar mensajes de texto en el acto mientras hablas, el método 1 o el método 4 es más fácil.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">¿Puedo automatizar "talk → stay in Obsidian" sin un plug-in?</summary><div class="faq-answer">se puede hacer. Hay una manera de combinar la entrada de voz del acceso directo con la captura oficial del Obsidian. Incluso con SimpleMemo, puede configurar la entrada de voz automática en iOS 26 o posterior y agregarla directamente a la sala de almacenamiento que permite el acceso. Ambos requieren establecer el destino de almacenamiento y la confirmación inicial del guardado, y la operación cambia dependiendo de la autoridad, el idioma compatible y el estado de preparación de la entrada de voz.</div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-question">¿Puedo tomar notas sobre Obsidian por voz desde Apple Watch?</summary><div class="faq-answer">se puede hacer. Desde la aplicación SimpleMemo Watch, añádala a la bóveda configurada a través del iPhone emparejado. Se requiere el acceso a la configuración del enlace y al destino de almacenamiento en el lado iPhone. La entrega de correo electrónico requiere comunicación, y solo el reloj no completa la configuración del almacenamiento. El procedimiento se explica en la página de explicación de Apple Watch×Obsidian.</div></details></div>
+
+        <p style="margin-top:2rem;">Es <a href="/es/obsidian/">SimpleMemo</a> el que implementa el método 4. La captura de audio de Apple Watch se introduce en la página de comentarios de <a href="/es/apple-watch-obsidian/">Watch x Obsidian</a>.</p>
+
+      </div></section>
+</div>
+    </div>
+</div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="feature" href="/es/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Siguiente lectura </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Determinar el destino de las notas dejadas por voz </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> Explicaré la configuración del destino de almacenamiento y la primera confirmación adicional. </span> </a>
+  </aside>
+
+  </main>
+
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="es" dir="ltr"><a class="site-brand" href="/es/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>para Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Una pequeña nota. Un paso más.</p><p class="site-footer-description">Envía notas desde tu iPhone a Obsidian y por correo electrónico.</p></div></div><!-- /site-chrome:intro --><div class="container">
+      <nav class="footer__nav capture-footer-wide" aria-label="Navegación del pie de página">
+      <div class="footer__col">
+        <p class="footer__col-title">Producto</p>
+        <a href="/es/download/" class="footer__link">Descargar</a>
+        <a href="/es/" class="footer__link">Inicio</a>
+        <a href="/es/use-cases/" class="footer__link">Casos de uso</a>
+        <a href="/es/guides/" class="footer__link">Guías</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Comparar y cambiar</p>
+        <a href="/es/captio-alternative/" class="footer__link"><span>Alternativas a Captio</span></a>
+        <a href="/es/note-to-email/" class="footer__link">Notas por correo</a>
+        <a href="/es/vs/" class="footer__link">Comparar</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Lecturas</p>
+        <a href="/es/blog/" class="footer__link"><span>Blog</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Soporte</p>
+        <a href="/es/roadmap/" class="footer__link">Hoja de ruta pública</a>
+        <a href="/es/devlog/" class="footer__link">Registro de desarrollo</a>
+        <a href="/es/about/" class="footer__link">Sobre el desarrollador</a>
+        <a href="/es/faq" class="footer__link">Preguntas frecuentes</a>
+        <a href="/es/privacy" class="footer__link">Privacidad</a>
+        <a href="/es/contact" class="footer__link">Contacto</a>
+      </div>
+      </nav><p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Operado por YURIKA, K.K.</p></div></footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

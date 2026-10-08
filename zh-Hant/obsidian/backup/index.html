@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/backup/">
+  <title>Obsidian的備份設計 — 區分使用Git・File Recovery・別儲存 | SimpleMemo</title>
+  <meta name="description" content="Obsidian的備份設計，用Git的過去版、File Recovery、保管庫外複製的例項進行解說。 在Linux版1.13.7上確認舊文字的選擇、恢復、儲存、重新顯示，刊登原始影象和Markdown。 包括設定、附加在內的計劃、與同期的關係、獨立的儲存裝置和保留期間的未驗證範圍也分開。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidian的備份設計 — 區分使用Git・File Recovery・其他儲存">
+  <meta property="og:description" content="Obsidian的備份設計，用Git的過去版、File Recovery、保管庫外複製的例項進行解說。 在Linux版1.13.7上確認舊文字的選擇、恢復、儲存、重新顯示，刊登原始影象和Markdown。 包括設定、附加在內的計劃、與同期的關係、獨立的儲存裝置和保留期間的未驗證範圍也分開。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-10-01">
+  <meta property="og:url" content="https://simplememofast.com/zh-Hant/obsidian/backup/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-backup.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_TW">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian的備份設計 — 區分使用Git・File Recovery・其他儲存">
+  <meta name="twitter:description" content="Obsidian的備份設計，用Git的過去版、File Recovery、保管庫外複製的例項進行解說。 在Linux版1.13.7上確認舊文字的選擇、恢復、儲存、重新顯示，刊登原始影象和Markdown。 包括設定、附加在內的計劃、與同期的關係、獨立的儲存裝置和保留期間的未驗證範圍也分開。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-backup.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh-Hant/obsidian/backup/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/backup/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/backup/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/backup/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/backup/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/backup/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/backup/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/backup/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/backup/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/backup/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/backup/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/backup/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+
+<style>.zettel-guide .sample-code{max-width:100%;padding:1rem 1.15rem;border:1px solid var(--border);border-radius:8px;background:var(--surface);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.9}.zettel-guide :not(pre)>code{white-space:normal;overflow-wrap:anywhere}.zettel-guide .note-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin:1.5rem 0}.zettel-guide .note-flow>div{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8}.zettel-guide .note-flow strong{display:block;color:var(--accent-bright);margin-bottom:.5rem}.zettel-guide .source-note{font-size:.85rem;color:var(--text-muted);line-height:1.8}.zettel-guide .raw-link{display:inline-block;padding:.5rem 0;min-height:44px}.zettel-guide h2,.zettel-guide h3{scroll-margin-top:76px}@media(max-width:720px){.zettel-guide .note-flow{grid-template-columns:1fr}.zettel-guide .sample-code{padding:.85rem;font-size:.85rem}}</style>
+<style>.reader-flow{list-style:none;counter-reset:flow;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;padding:0!important;margin:1.5rem 0}.reader-flow li{counter-increment:flow;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.reader-flow strong,.reader-flow span{display:block}.reader-flow strong:before{content:counter(flow)". ";color:var(--accent-bright)}.reader-flow span{font-size:.875rem;color:var(--text-secondary);margin-top:.5rem}@media(max-width:900px){.reader-flow{grid-template-columns:1fr}}</style><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/backup/#article",
+  "inLanguage": "zh-Hant",
+  "headline": "Obsidian的備份設計 — 區分使用Git・File Recovery・其他儲存",
+  "description": "Obsidian的備份設計，用Git的過去版、File Recovery、保管庫外複製的例項進行解說。 在Linux版1.13.7上確認舊文字的選擇、恢復、儲存、重新顯示，刊登原始影象和Markdown。 包括設定、附加在內的計劃、與同期的關係、獨立的儲存裝置和保留期間的未驗證範圍也分開。",
+  "url": "https://simplememofast.com/zh-Hant/obsidian/backup/",
+  "datePublished": "2026-10-01",
+  "dateModified": "2026-10-01",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-backup.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh-Hant/obsidian/backup/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主頁",
+      "item": "https://simplememofast.com/zh-Hant/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "備份設計",
+      "item": "https://simplememofast.com/zh-Hant/obsidian/backup/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh-Hant/obsidian/backup/#faq",
+  "inLanguage": "zh-Hant",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "如果同步在移動的話，不需要確認備份嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "僅憑設定了同步的事實，不知道能不能回到以前的正文，或者有沒有獨立的儲存處。 確認使用方式的履歷、可恢復的範圍、儲存地點。 這個練習沒有使用同步，也沒有嘗試恢復Obsidian Sync和iCloud。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Git和File Recovery，實際使用確認了嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "在Git中，製作了一個練習用Markdown的兩個commit，將以前的blob放回新的別名檔案，實際用Obsidian讀取。 在File Recovery中，用實際編輯器儲存的A・B透過自然的計時器進入歷史記錄，在螢幕上選擇舊的A進行Restore，確認儲存和重新顯示。 自動Git備份、remote、長期保留尚未驗證。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "您確認了整個保管庫和故障時的恢復嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "複製例子只有三個Markdown，不包括設定和附加。 儲存地址也是同一個執行檔案系統內。 沒有嘗試過獨立的物理裝置、雲、故障和災難、歷史保留期、整個保管庫的恢復。 將Git和File Recovery的區域性恢復結果和保管庫整體的恢復分開確認。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "分發Markdown，以什麼名字和位置儲存？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "複製例子放置索引.md，ノート 資料夾內放置観察メモ.md和確認メモ.md。 瀏覽器不會自動建立資料夾。 變更後的比較檔案，Git和File Recovery的例子以可區分的別名儲存，不覆蓋恢復集。 使用英文的分發名稱時，也請確認本文的連結。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="backup-guide site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球導航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh-Hant/guides/">使用指南</a></li><li><a href="/zh-Hant/use-cases/">使用情境</a></li><li><a href="/zh-Hant/vs/">比較</a></li><li><a href="/zh-Hant/blog/">部落格</a></li><li><a href="/zh-Hant/about/">關於開發者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下載</a><details class="site-languages"><summary aria-label="繁體中文 · 選擇語言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>繁中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hant" dir="ltr"><p class="site-language-title">選擇語言</p><div class="site-language-grid"><a href="/obsidian/backup/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/backup/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/obsidian/backup/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hant" aria-current="page"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ko/obsidian/backup/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/backup/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/backup/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/backup/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/backup/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/backup/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><p class="quickadd-crumb"><a href="/zh-Hant/obsidian/">Obsidian</a> / 備份設計和恢復確認</p><span class="lp-hero__label">決定剩餘的範圍和可以恢復的狀態</span><h1 class="lp-hero__title">Obsidian的備份設計<br>Git・File Recovery・單獨儲存的作用</h1><p class="lp-hero__sub">在丟失筆記之前，決定要留下哪些正文和設定，從哪個位置可以返回。 透過作者製作的小例子，確認了Git的舊版本、File Recovery的舊正文、保管庫外的副本的恢復。 將三種方法所發揮的作用和在這個練習中沒有確認的範圍分開。</p><p class="article-meta">寫作: <a href="/zh-Hant/about/">SimpleMemo Developer</a> · 實際操作: <time datetime="2026-09-30">2026年9月30日 UTC</time>（日本時間10月1日） · Linux / Obsidian 1.13.7</p></div><nav class="sd-hero-index" aria-label="本頁內容"><p>本頁內容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>將“恢復到以前的版本”和“其他儲存場所”分開設計</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>先決定留下的範圍和儲存地點</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>1。 Git：將commit的正文以前的版本，取出別名</span><span aria-hidden="true">↗</span></a></nav></header>
+<section class="lp-section ce-chapter sd-chapter" id="answer"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">將“恢復到以前的版本”和“其他儲存場所”分開設計</h2></div><div class="ce-chapter__body"><p>在備份計劃中，<strong>決定留下什麼，恢復到哪個時間點，儲存目的地在哪裡，如何確認實際恢復的內容</strong>。 僅僅因為有同步設定，或者現在能看到檔案，就不知道必要的舊版和儲存範圍是否齊全。</p><ol class="reader-flow" aria-label="這次確認的三個角色"><li><strong>Git的過去版</strong><span>commit中包含的一個正文，提取到別名檔案</span></li><li><strong>File Recovery</strong><span>從應用程式的本地歷史中選擇舊的正文，恢復並重新顯示</span></li><li><strong>保管庫外的影印件</strong><span>選擇的三個Markdown，在新的其他地方開啟</span></li></ol><p class="source-note">三個都是實際確認的區域性例子。 保管庫外的副本也不是在同一檔案系統中使用獨立物理裝置或雲的結果。 不把有三種方法作為儲存在三個獨立的媒介中的證據來處理。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="design"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">首先決定留下的範圍和儲存地址</h2></div><div class="ce-chapter__body"><p>將自己的保管庫中需要的東西列為列表，並連線到在復原處確認的專案。 以下是用於計劃的專案，不是這個練習儲存、恢復所有內容的表格。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">決定的專案</th><th scope="col">確認的內容</th><th scope="col">這次的實演</th></tr></thead><tbody><tr><th scope="row">筆記正文</th><td data-label="設計">需要的Markdown的名字、相對路徑、哪個時間點的正文</td><td data-label="實演">三個副本恢復，一個Git履歷，另一個File Recovery筆記</td></tr><tr><th scope="row">附件和參考</th><td data-label="設計">影象、PDF等的儲存地點和可以從正文中參考</td><td data-label="實演">附件未驗證。 內部連結只有複製例中的三個Markdown</td></tr><tr><th scope="row">設定・外掛</th><td data-label="設計"><code>.obsidian</code>的設定，包含必要的外掛及其資料的範圍</td><td data-label="實演">設定和外掛資料的備份、恢復尚未驗證</td></tr><tr><th scope="row">儲存地點</th><td data-label="設計">與原來的儲存裝置的獨立性、可以讀取的許可權、保管方法</td><td data-label="實演">保管庫外也是同樣的執行檔案系統。 獨立媒體、雲未驗證</td></tr><tr><th scope="row">頻率和保持</th><td data-label="設計">想要恢復的時間點，保留的舊版，刪除舊版的方針</td><td data-label="實演">單發副本和兩個Git commit，File Recovery的兩次自然儲存。 長期保留和定期運用尚未驗證</td></tr><tr><th scope="row">恢復練習</th><td data-label="設計">其他復原目的地、正文、設定、附加、連結的核對步驟和日程</td><td data-label="實演">確認選擇的正文、相對路徑、真實連結、重新顯示。 恢復所需時間和故障時的恢復未測量</td></tr></tbody></table></div><p>還應按自己的用途確定“需要保留到什麼時間點的更改”以及“恢復所需的時間”。本次沒有測量是否達到 RPO/RTO 或恢復時間目標。確定製作副本的頻率，與確認能否將舊版本保留一定時間，是兩項獨立的檢查。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="git"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03">1。 Git：將commit的正文之前的版本，取出別名</h2></div><div class="ce-chapter__body"><p>Git的例子，以一個練習用<code>Git履歴メモ.md</code>為物件。 第一個正文commit，在實際的Obsidian編輯器中更改並儲存確認專案後，製作了第二個commit。 在此基礎上，<strong>將上一個commit的實blob取出到新的<code>Git復元メモ.md</code></strong>，用實軟體開啟。 保留變更後的原始檔案。</p><p>兩個commit有親子關係，本文的blob也不同。 在Git上追蹤的只有這個Markdown，恢復目的地的新筆記，File Recovery用筆記，設定未被追蹤。 並不是整個保管庫都進入了履歷的結果。</p>
+<figure class="shot"><a href="/assets/img/obsidian-backup/git-previous-blob-restored.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/git-previous-blob-restored.png" alt="開啟Git恢復備忘錄，在過去的Git履歷備忘錄中顯示閱讀儲存前的正文的專案" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>用新的別名筆記本，實際顯示以前的commit的正文。 上部的檔名和正文的標題不同，是因為沒有改變正文，而是用別名取出來。 <a href="/assets/img/obsidian-backup/git-previous-blob-restored.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>返回的實Markdown的全文。 演示之前的blob、恢復檔案、分發原件是相同的98位元組的UTF-8。</p><pre class="capture-code" data-evidence="git-previous-note" tabindex="0"><code># Git履歴メモ
+
+著者作成の練習です。
+
+- 確認項目: 保存前の本文を読む。
+</code></pre><p>在手邊確認時，首先讀取目標的狀態和履歷，選擇想要返回的commit和路徑。 接下來是顯示讀取形式的例子。 <code>&lt;commit&gt;</code>替換為自己的履歷值。</p><pre class="capture-code" tabindex="0"><code>git status --short -- "Git履歴メモ.md"
+git log --oneline -- "Git履歴メモ.md"
+git show "&lt;commit&gt;:Git履歴メモ.md"</code></pre><p>取出的目的地是選擇可以與原來的筆記本區分的<strong>未使用的新名字</strong>，閱讀舊的正文後決定採用的內容。 這個演示的Git操作是本地shell，沒有嘗試Obsidian Git外掛、remote、push/pull、自動commit、其他終端的反映。 不處理沒有包含在commit中的檔案可以恢復。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="file-recovery"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04">2。 File Recovery：選擇本地歷史的舊正文並恢復</h2></div><div class="ce-chapter__body"><p>補充演示的設定畫面是英文UI。 實際上啟用了<code>Settings → Core plugins → File recovery</code>的開關，開啟了File recovery的設定。 <code>Snapshot interval</code>的初始值5分，為了驗證暫時改為0.05分，之後改為<strong>0.5分</strong>。 <code>History length</code>顯示為7天，但是沒有驗證七天的保留。</p><figure class="shot"><a href="/assets/img/obsidian-backup/file-recovery-settings.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/file-recovery-settings.png" alt="File recovery設定畫面的Snapshot interval是0.5，History length是7，顯示View按鈕" width="900" height="700" loading="lazy" decoding="async"></a><figcaption>實際設定UI。 0.5分是這次練習中更改的數值。 沒有作為預設值或推薦設定提出。 <a href="/assets/img/obsidian-backup/file-recovery-settings.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>0.5分鐘設定的是歷史記錄之間的最短間隔，不能理解為一定每30秒儲存一次。該版本的核心有一個60秒的待處理儲存重試計時器。本次確認了：在實際編輯器中儲存的A、B進入待處理狀態，然後由正常執行的計時器加入歷史記錄。測試者沒有寫入歷史資料庫，也沒有呼叫建立歷史記錄的API。</p><ol class="steps-list"><li><strong>A在實際編輯器中儲存。 </strong>輸入包含“先確認留下的正文”的A。 核對了儲存檔案，確認了保留狀態和還沒有A的履歷。</li><li><strong>確認自然儲存。 </strong>大約60秒後A進入了履歷。 接下來對B進行實際編輯並儲存，大約58秒後的另一個自然儲存進入了B。 兩次觀測不能保證普遍的所需時間。</li><li><strong>在畫面上選擇舊的正文。 </strong>按<code>View</code>搜尋恢復備忘錄，分別選擇最新的B和以前的A閱讀了正文。</li><li><strong>恢復後重新顯示。 </strong>在選擇A的狀態下按下了實際的<code>Restore</code>。 儲存檔案與A一致，移動到其他筆記後，在實際檔案瀏覽器中重新開啟恢復備忘錄也是同樣的正文。</li></ol>
+<figure class="shot"><a href="/assets/img/obsidian-backup/file-recovery-latest-b.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/file-recovery-latest-b.png" alt="選擇File Recovery的最新B行，顯示確認有意變更後的正文的文章" width="900" height="700" loading="lazy" decoding="async"></a><figcaption>在實畫面中選擇最新B。 作者製作變更後的正文。 <a href="/assets/img/obsidian-backup/file-recovery-latest-b.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-backup/file-recovery-earlier-a.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/file-recovery-earlier-a.png" alt="選擇File Recovery前面的A行，顯示確認先留下的正文的文章和Restore按鈕" width="900" height="700" loading="lazy" decoding="async"></a><figcaption>在實際畫面中選擇了前面的A，恢復了本文。 <a href="/assets/img/obsidian-backup/file-recovery-earlier-a.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p class="source-note">UI顯示A為“44 B”，B為“47 B”。 用於核對分發檔案的實際UTF-8是A是110位元組，B是119位元組。 UI的顯示值沒有作為UTF-8的byte數使用。 Restore之後，恢復的A也被新增到了新的履歷行中。 這個附加行是恢復操作的結果，與前面A・B的自然儲存證據有區別。</p><figure class="shot"><a href="/assets/img/obsidian-backup/file-recovery-restored-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/file-recovery-restored-reopened.png" alt="在File Recovery中恢復後重新開啟恢復備忘錄，顯示確認先留下的正文的文章" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>用實檔案瀏覽器重新開啟的A。 復原前選擇的正文、儲存原件、重新顯示後的SHA256一致。 <a href="/assets/img/obsidian-backup/file-recovery-restored-reopened.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>復原的A的實Markdown全文。 顯示的舊A和最終儲存的檔案是相同的110位元組。</p><pre class="capture-code" data-evidence="recovery-version-a" tabindex="0"><code># 回復メモ
+
+著者作成の練習です。
+
+- 保存する項目: 先に残した本文を確認する。
+</code></pre><p>這個結果是從這次本地profile中存在的履歷中返回的正文。 File Recovery的履歷不是可以儲存到獨立的備份裝置的結果。 沒有嘗試過profile的轉移、應用程式的重新安裝、歷史DB損壞、長期保留、刪除的檔案的恢復。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="copy"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05">3。 保管庫外的影印件：在其他地方確認正文、層次、連結</h2></div><div class="ce-chapter__body"><p>在原始副本演示中，將作者製作的三個Markdown儲存在保管庫外，回到與原始不同的新復原處。 從<code>索引.md</code>到<code>ノート/観察メモ.md</code>和<code>ノート/確認メモ.md</code>的連線構成。 保留了檔名和相對路徑。</p><pre class="capture-code" tabindex="0"><code>索引.md
+ノート/
+  観察メモ.md
+  確認メモ.md</code></pre><p>複製完成後，驗證者僅在自己的練習用筆記庫中修改了一份正文並刪除了一條筆記，副本中的三份原始正文均予以保留。恢復在另一個新位置進行，沒有覆蓋原有狀態。讀者練習時也可以保留原始筆記，另行準備練習副本和恢復位置。</p><figure class="shot"><a href="/assets/img/obsidian-backup/restored-original-content.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/restored-original-content.png" alt="其他恢復目的地的觀察備忘錄中顯示著複製前的正文和確認備忘錄的連結" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>複製前的觀察備忘錄的正文，在另一個復原處實際顯示。 三個復原Markdown的初始原件和bytes/hash一致。 <a href="/assets/img/obsidian-backup/restored-original-content.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>這是恢復的觀察備忘錄的全文。</p><pre class="capture-code" data-evidence="observation-note" tabindex="0"><code># 観察メモ
+
+コピー前の本文です。これは実際の利用者のデータではありません。
+
+関連する確認は [[ノート/確認メモ|確認メモ]] に残します。
+</code></pre><p>點選從索引到確認備忘錄的真實連結，原來刪除的物件顯示在恢復目的地。“ 按“返回索引”可以返回索引。 之後，從真實檔案瀏覽器重新開啟索引，確認了三個儲存Markdown沒有變化。</p><figure class="shot"><a href="/assets/img/obsidian-backup/restored-link-target.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/restored-link-target.png" alt="在恢復目的地的確認備忘錄中顯示確認原始文章和連結的文章以及返回索引的連結" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>從恢復目的地的索引中透過真實連結開啟的確認備忘錄。 正在確認相對路徑和連結。 <a href="/assets/img/obsidian-backup/restored-link-target.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><figure class="shot"><a href="/assets/img/obsidian-backup/restored-index-reopened.png" target="_blank" rel="noopener"><img src="/assets/img/obsidian-backup/restored-index-reopened.png" alt="重新開啟復原目的地的索引，顯示著三個筆記和兩個內部連結" width="1024" height="800" loading="lazy" decoding="async"></a><figcaption>從實際檔案瀏覽器重新顯示索引。 儲存的三個正文沒有改變。 <a href="/assets/img/obsidian-backup/restored-index-reopened.png" target="_blank" rel="noopener">開啟原始影象</a></figcaption></figure><p>索引的實Markdown也刊登全文。</p><pre class="capture-code" data-evidence="index-note" tabindex="0"><code># 索引
+
+著者作成の復元練習です。
+
+- [[ノート/観察メモ|観察メモを開く]]
+- [[ノート/確認メモ|確認メモを開く]]
+</code></pre><p class="source-note">物件只有三個Markdown，沒有複製設定和附件。 副本在保管庫外也同樣在執行檔案系統中。 獨立的儲存裝置、雲、故障、災害的確認可以恢復，是備份計劃中單獨留下的專案。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="reader-check"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">在自己的保管庫裡練習復原的順序</h2></div><div class="ce-chapter__body"><ol class="steps-list"><li><strong>列出要儲存的專案。</strong>決定只儲存 Markdown，還是同時包含設定、附件及所需的歷史記錄，並記下檔名和相對路徑。</li><li><strong>確認儲存地址和舊版。 </strong>確認留在哪裡，是否獨立於原來的裝置，是否保留想要恢復的時間點的版本。</li><li><strong>保留元在別的地方嘗試。 </strong>在新的恢復目的地，讀取是否回到需要選擇的正文、設定、附加的狀態。</li><li><strong>確認連結和重新顯示。 </strong>從正文中開啟參考地址，重新開啟檔案，核對儲存的內容。</li><li><strong>留下結果和未確認專案。 </strong>記錄使用的版本、儲存範圍、儲存地點、恢復的時間點、需要的時間，決定定期確認的日程。</li></ol><p>這是讀者自己計劃的步驟。 讀者的保管庫、定期備份、同步服務、獨立媒體不能透過這個練習進行驗證。 調查與同期的組合的入口是<a href="/zh-Hant/obsidian/sync/">Obsidian的同步方式指南</a>。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="raw"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">儲存原件，比較版本和正文</h2></div><div class="ce-chapter__body"><p>八個Markdown是各個演示的儲存原件。 複製例子中的三個以原來的日語名字儲存，觀察備忘錄、確認備忘錄放在<strong>ノート 資料夾內</strong>。 瀏覽器不會自動建立那個資料夾。 比較用檔案和Git・File Recovery的例子用別名儲存，在不覆蓋三個恢復集的地方進行比較。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以橫向滾動的表格"><table class="rt-table"><thead><tr><th scope="col">演示・狀態</th><th scope="col">分發原件和儲存名</th></tr></thead><tbody><tr><th scope="row">複製恢復：索引.md</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/index-note.md" download="索引.md">索引.md</a></td></tr><tr><th scope="row">複製恢復：ノート/観察メモ.md</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/observation-note.md" download="観察メモ.md">観察メモ.md</a></td></tr><tr><th scope="row">複製恢復：ノート/確認メモ.md</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/check-note.md" download="確認メモ.md">確認メモ.md</a></td></tr><tr><th scope="row">比較專用：變更後的觀察備忘錄</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/changed-original-note.md" download="変更後-観察メモ.md">変更後-観察メモ.md</a></td></tr><tr><th scope="row">Git：從過去的blob恢復到別名的正文</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/git-previous-note.md" download="Git復元メモ.md">Git復元メモ.md</a></td></tr><tr><th scope="row">Git：第二個commit變更後的正文</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/git-changed-note.md" download="Git変更後-履歴メモ.md">Git変更後-履歴メモ.md</a></td></tr><tr><th scope="row">File Recovery：舊的A（與最終恢復一致）</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/recovery-version-a.md" download="FileRecovery旧版-回復メモ.md">FileRecovery旧版-回復メモ.md</a></td></tr><tr><th scope="row">File Recovery：變更後B</th><td data-label="儲存名"><a href="/assets/downloads/obsidian-backup/recovery-version-b.md" download="FileRecovery変更後-回復メモ.md">FileRecovery変更後-回復メモ.md</a></td></tr></tbody></table></div><p class="source-note">英文字母的分發URL是區分狀態的別名。 複製例的正文內wikilink保留日語的原始相對路徑。 如果原封不動地放英文名字的話，也會確認連結。 沒有將分發檔案匯入到讀者實際應用程式的操作和Git的履歷本身的分發。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">常見問題</h2></div><div class="ce-chapter__body"><details class="faq-item"><summary class="faq-summary">如果同步在移動的話，不需要確認備份嗎？</summary><div class="faq-answer">僅憑設定了同步的事實，不知道能不能回到以前的正文，或者有沒有獨立的儲存處。 確認使用方式的履歷、可恢復的範圍、儲存地點。 這個練習沒有使用同步，也沒有嘗試恢復Obsidian Sync和iCloud。</div></details><details class="faq-item"><summary class="faq-summary">Git和File Recovery，實際使用確認了嗎？</summary><div class="faq-answer">在Git中，製作了一個練習用Markdown的兩個commit，將以前的blob放回新的別名檔案，實際用Obsidian讀取。 在File Recovery中，用實際編輯器儲存的A・B透過自然的計時器進入歷史記錄，在螢幕上選擇舊的A進行Restore，確認儲存和重新顯示。 自動Git備份、remote、長期保留尚未驗證。</div></details><details class="faq-item"><summary class="faq-summary">您確認了整個保管庫和故障時的恢復嗎？</summary><div class="faq-answer">複製例子只有三個Markdown，不包括設定和附加。 儲存地址也是同一個執行檔案系統內。 沒有嘗試過獨立的物理裝置、雲、故障和災難、歷史保留期、整個保管庫的恢復。 將Git和File Recovery的區域性恢復結果和保管庫整體的恢復分開確認。</div></details><details class="faq-item"><summary class="faq-summary">分發Markdown，以什麼名字和位置儲存？</summary><div class="faq-answer">複製例子放置索引.md，ノート 資料夾內放置観察メモ.md和確認メモ.md。 瀏覽器不會自動建立資料夾。 變更後的比較檔案，Git和File Recovery的例子以可區分的別名儲存，不覆蓋恢復集。 使用英文的分發名稱時，也請確認本文的連結。</div></details></div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-09" data-ce-number="09">驗證方法和結果範圍</h2></div><div class="ce-chapter__body"><ul><li><strong>實際應用：</strong>Linux版Obsidian 1.13.7。 在設定的General畫面中確認app/installer，使用作者製作的日語筆記。 沒有使用社群外掛。</li><li><strong>複製示例：</strong>選擇的Markdown的準備、複製、練習用正文的更改、刪除、複製到其他恢復目的地是shell操作。 用實際GUI確認了正文、連結、重新顯示。</li><li><strong>Git：</strong>seed和本地Git的commit/過去的blob的取出是shell。 變更在實際編輯器中儲存，從實際檔案瀏覽器中開啟並讀取了恢復地址。 Git外掛和remote沒有使用。</li><li><strong>File Recovery：</strong>啟用和設定是實UI。 A/B在實際編輯器中輸入、儲存，在實際畫面中選擇自然核心計時器的履歷，確認了Restore、儲存和重新顯示。</li><li><strong>輔助和原件：</strong>profile初期構成直接設定，應用程式狀態、保留狀態、履歷內容的核對讀取API。 沒有由驗證者建立履歷API和DB寫入。 刊登的PNG是未經加工的實畫面，Markdown是和原件一樣的bytes。</li><li><strong>剩餘範圍：</strong>保管庫整體、設定、附加、獨立裝置、雲、長期保留、故障、同步、多個終端、iOS/Android/macOS、SimpleMemo配送、速度、生產力、流入效果未驗證。</li></ul><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/backup-20260930.md" target="_blank" rel="noopener">驗證記錄和原件的對應</a>中，記錄了複製演示和補充演示的原件、實際UI和輔助、初期操作selector的問題和結束確認的範圍。 保持正常結束的試驗，沒有追溯到沒有結束程式碼的初期試驗。</p><p class="source-note">本網站由YURIKA, K.K.運營，介紹獨立應用程式“SimpleMemo”。 不是Obsidian官方的報道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh-Hant/obsidian/sync/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下來閱讀</span><strong>選擇確認同步方式和履歷的入口</strong></a></aside></article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hant" dir="ltr"><a class="site-brand" href="/zh-Hant/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 整合</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">記下一點想法，邁出下一步。</p><p class="site-footer-description">從 iPhone 將筆記傳送至 Obsidian 和電子郵件。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="頁尾導航"><div class="footer__col"><p class="footer__col-title">產品</p><a href="/zh-Hant/download/" class="footer__link">下載</a><a href="/zh-Hant/" class="footer__link">首頁</a><a href="/zh-Hant/obsidian/" class="footer__link">Obsidian 整合</a></div><div class="footer__col"><p class="footer__col-title">比較與遷移</p><a href="/zh-Hant/vs/" class="footer__link">比較</a><a href="/zh-Hant/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">支援</p><a href="/zh-Hant/about/" class="footer__link">關於開發者</a><a href="/zh-Hant/faq" class="footer__link">常見問題</a><a href="/zh-Hant/privacy" class="footer__link">隱私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 營運：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

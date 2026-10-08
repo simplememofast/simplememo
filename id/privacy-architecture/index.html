@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/privacy-architecture/">
+  <script>
+    (function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+      window.addEventListener('load', function() {
+        var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+        ric(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      });
+    })();
+  </script>
+  <title>Desain privasi - di mana badan memo pergi dan di mana tidak tinggal</title>
+  <meta name="description" content="Semua jalur data SimpleMemo dirilis. Vault postscript diselesaikan secara lokal, penandaan AI tidak mengirim teks ke server eksternal di perangkat, dan pengiriman surat adalah standar SMTP dan bukan E2EE - jelas tanpa menyembunyikan apa yang dapat dan tidak dapat dilakukan.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Desain privasi - di mana badan memo pergi dan di mana tidak tinggal">
+  <meta property="og:description" content="Vault postscript diselesaikan secara lokal. Penandaan AI ada di perangkat. Semua jalur data diungkapkan, termasuk alasan mengapa itu bukan E2EE.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/id/privacy-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Desain privasi - di mana badan memo pergi dan di mana tidak tinggal">
+  <meta name="twitter:description" content="Vault postscript diselesaikan secara lokal. Penandaan AI ada di perangkat. Semua jalur data diungkapkan, termasuk alasan mengapa itu bukan E2EE.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/id/privacy-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/privacy-architecture/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/privacy-architecture/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/privacy-architecture/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/privacy-architecture/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/privacy-architecture/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/privacy-architecture/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/privacy-architecture/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/privacy-architecture/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy-architecture/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/id/privacy-architecture/#article",
+  "inLanguage": "id",
+  "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
+  "headline": "Desain privasi - di mana badan memo pergi dan di mana tidak tinggal",
+  "description": "Semua jalur data SimpleMemo dirilis. Vault postscript diselesaikan secara lokal, penandaan AI ada di perangkat, dan pengiriman email adalah standar SMTP, bukan E2EE - budaya yang jelas tanpa menyembunyikan apa yang dapat dan tidak dapat Anda lakukan.",
+  "url": "https://simplememofast.com/id/privacy-architecture/",
+  "datePublished": "2026-08-11",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "@id": "https://simplememofast.com/about/#person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "@id": "https://simplememofast.com/#organization",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "alternateName": [
+      "Captio式シンプルメモ",
+      "シンプルメモ",
+      "SimpleMemoFast",
+      "Simple Memo",
+      "Simple Memo - for Obsidian"
+    ]
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/id/privacy-architecture/"
+  }
+}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Beranda",
+      "item": "https://simplememofast.com/id/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Desain privasi",
+      "item": "https://simplememofast.com/id/privacy-architecture/"
+    }
+  ]
+}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/id/privacy-architecture/#webpage",
+  "inLanguage": "id",
+  "name": "Desain privasi",
+  "url": "https://simplememofast.com/id/privacy-architecture/",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/id/#website"
+  }
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=7c9688959a" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .flow-steps{list-style:none;margin:1.5rem 0 2rem;padding:0;counter-reset:flow}
+    .flow-steps li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .flow-steps li::before{counter-increment:flow;content:counter(flow);position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .flow-step__title{display:block;font-weight:700;color:var(--text);margin-bottom:.3rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary)}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .honest-box{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0;font-size:.92rem;line-height:1.8;color:var(--text-secondary)}
+    .honest-box strong{color:var(--text)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/id/privacy-architecture/#faq","inLanguage":"id","mainEntity":[{"@type":"Question","name":"Obsidian Apakah server eksternal terlibat dalam penambahan ke Vault?","acceptedAnswer":{"@type":"Answer","text":"Tidak terlibat. Postscript Vault adalah untuk menulis file langsung ke folder Vault di terminal (URI fallback jika tidak memungkinkan), dan tidak menggunakan plug-in atau jaringan. Penyimpanan draf lokal tanpa transmisi email juga selesai di terminal."}},{"@type":"Question","name":"Tidak bisakah isi memo dikirim ke Apple atau server eksternal dengan penandaan AI?","acceptedAnswer":{"@type":"Answer","text":"tidak dapat dikirim. AI pada perangkat oleh Apple Foundation Models hanya dilakukan di iPhone dan tidak melibatkan komunikasi jaringan. Model yang tidak kompatibel dengan Apple Intelligence secara otomatis mundur ke bentuk ringan di terminal, dan tidak ada transmisi eksternal dalam kasus itu. Untuk detailnya, silakan lihat Penjelasan penambahan otomatis tag AI."}},{"@type":"Question","name":"Mengapa Anda tidak memilih E2EE?","acceptedAnswer":{"@type":"Answer","text":"Ini karena alamat pengiriman memo adalah \"Kotak Masuk Surat Biasa\". Dapat dibaca di kotak masuk = server penerima dapat didekripsi, jadi E2EE tidak ditetapkan secara struktural. Jika Anda memberikan prioritas ke E2EE, klien khusus akan diperlukan, yang akan ditukar dengan nilai aplikasi ini yang \"dapat dibaca di aplikasi email terminal mana pun\". Standard Notes dll. direkomendasikan untuk aplikasi di mana E2EE sangat penting."}},{"@type":"Question","name":"Bagaimana konten ini berbeda dari kebijakan privasi?","acceptedAnswer":{"@type":"Answer","text":"Teks lengkap penanganan hukum ada di Kebijakan Privasi (khususnya §12 \"Informasi teknis tentang enkripsi\"). Halaman ini merekonstruksi konten teknis sebagai peta rute sesuai dengan minat pengguna Obsidian (apakah itu diselesaikan secara lokal). Jika ada konflik, kebijakan privasi akan diutamakan."}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Navigasi utama" data-site-header="">
+    <div class="global-nav__inner">
+      <a class="global-nav__logo site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a>
+      <!-- site-chrome:quick --><div class="site-quick-links"><a href="/id/guides/">Panduan</a><a href="/id/use-cases/">Contoh penggunaan</a><a href="/id/vs/">Bandingkan</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks">
+        <li><a href="/id/guides/">Panduan</a></li>
+        <li><a href="/id/use-cases/">Contoh penggunaan</a></li>
+        <li><a href="/id/vs/">Bandingkan</a></li>
+        <li><a href="/id/methods/"><span>Metode</span></a></li>
+        <li><a href="/id/blog/"><span>Blog</span></a></li>
+        <li><a href="/id/glossary/"><span>Glosarium</span></a></li>
+        <li><a href="/id/faq">Pertanyaan umum</a></li>
+        <li><a href="/id/about/">Tentang pengembang</a></li>
+        <li><a href="/id/devlog/">Catatan pengembangan</a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8"><span>Unduh</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><details class="site-languages"><summary aria-label="Bahasa Indonesia · Pilih bahasa"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>ID</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="id" dir="ltr"><p class="site-language-title">Pilih bahasa</p><div class="site-language-grid"><a href="/privacy-architecture/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/privacy-architecture/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh/privacy-architecture/" hreflang="zh-Hans" data-site-locale="zh-Hans"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/zh-Hant/privacy-architecture/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/privacy-architecture/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/privacy-architecture/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/privacy-architecture/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="id" aria-current="page"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/ar/privacy-architecture/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/privacy-architecture/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="global-nav__cta">Unduh</a>
+        <button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="Menu"><span>Menu</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero sd-hero"><div class="sd-hero-copy">
+        <div class="lp-hero__label">
+          <span>Desain privasi</span>
+        </div>
+        <h1 class="lp-hero__title"> <span>Di mana teks memo itu masuk, dan di mana <br> berada?</span> </h1>
+        <p class="lp-hero__sub"> <span> "Meskipun ini adalah alat untuk menulis di Vault lokal, apakah itu melalui server eksternal?" - Ini adalah halaman yang menjawab pertanyaan yang paling sering diajukan dari pengguna Obsidian dengan peta rute. Tuliskan apa yang telah dilakukan (penyelesaian lokal, AI pada perangkat, server non-simpan dari postscript Vault) dan apa yang belum dilakukan (bukan E2EE) pada resolusi yang sama. </span> </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;"> <span>Penulis: <a href="/id/about/" style="color:var(--accent);text-decoration:none;">AI ATAKA</a> · Tanggal publikasi: <time datetime="2026-08-11">2026 tahun 08 bulan 11 hari</time> · Konfirmasi kondisi analisis: <time datetime="2026-09-30">2026 tahun 09 bulan 30 hari</time></span> </p>
+      </div><nav class="sd-hero-index" aria-label="Isi halaman ini"><p>Isi halaman ini</p><a href="#reading-01"><span aria-hidden="true">01</span><span>Bagian data Memo 1</span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>Apa yang tersisa dan tidak tersisa di server</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>Analisis perlindungan dan pemanfaatan teks memo</span><span aria-hidden="true">↗</span></a></nav></div>
+
+      <!-- Data path -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01"> <span>Jalur data Memo 1</span> </h2></div><div class="ce-chapter__body">
+        <ol class="flow-steps">
+          <li><span class="flow-step__title">Dibuat di perangkat dan dilindungi dengan AES-GCM-256</span>Catatan terlebih dahulu masuk ke Outbox, antrean kiriman tertunda di perangkat. Outbox dan riwayat pengiriman dienkripsi dengan <strong>AES-GCM-256</strong> melalui CryptoKit bawaan Apple. Kunci simetris 256-bit disimpan di Apple Keychain, dengan pengaturan agar tidak berpindah perangkat, dan dibaca aplikasi saat mengenkripsi atau mendekripsi. Salinan kunci dalam cadangan pun tidak dapat dipakai di perangkat lain. Sebelum mengganti perangkat, pastikan catatan yang dibutuhkan sudah tiba di tujuan. Lihat <a href="/id/privacy">detail pengelolaan kunci dan penjelasan Apple</a>. Saat offline, catatan menunggu di sini dan dikirim ulang otomatis setelah koneksi kembali.</li>
+          <li><span class="flow-step__title">Obsidian Tambahan ke Vault - Di sini, jika tautan lokal</span>Obsidian penuh diaktifkan, penambahan ke Vault dilakukan dengan <strong>menulis file langsung ke folder Vault di terminal</strong> (back URI jika Anda tidak dapat membukanya), dan tidak ada plug-in atau server eksternal yang digunakan. Jaringan tidak muncul di rute postscript Vault.</li>
+          <li><span class="flow-step__title">AI tagging - Lengkapi di perangkat</span> Judul (dalam karakter 20), tag (1~3), dan jenis (todo/idea/log) secara otomatis ditetapkan oleh <strong>Apple On-device AI</strong> oleh Foundation Models hanya di iPhone. <strong> Teks memo tidak akan dikirim ke server eksternal untuk penandaan. </strong>Apple Intelligence model yang tidak kompatibel secara otomatis kembali ke bentuk ringan di terminal.</li>
+          <li><span class="flow-step__title">Transmisi surat - Lulus dengan TLS, tidak ada penyimpanan permanen</span>Hanya saat mengirim, teks <strong> melewati</strong> melalui Relay API kami (Cloudflare Workers) dan basis transmisi eksternal (Resend) dengan TLS (HTTPS). Itu tidak akan disimpan secara permanen dan tidak akan dicatat dalam log. Klien menggunakan <code>URLSessionConfiguration.ephemeral</code> dan tidak meninggalkan cookie atau cache.</li>
+          <li><span class="flow-step__title">Ke kotak masuk Anda — Pengiriman dengan standar SMTP (=bukan E2EE)</span>Pengiriman akhir adalah standar SMTP. Itulah mengapa Anda dapat membacanya seperti dengan aplikasi email biasa Anda, tetapi itu bukan <strong>enkripsi ujung ke ujung (E2EE)</strong>. Untuk keputusan desain ini, silakan lihat "Tulis dengan jujur" di bawah ini.</li>
+        </ol>
+      </div></section>
+
+      <!-- What stays / what doesn't -->
+      <section class="lp-section ce-chapter sd-chapter ce-chapter--wide">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02"> <span>Apa yang tersisa di server dan apa yang tidak</span> </h2></div><div class="ce-chapter__body">
+        <div style="overflow-x:auto" class="sd-table" tabindex="0" role="region" aria-label="Tabel yang dapat digulir secara horizontal">
+          <table class="compare-table">
+            <thead><tr><th scope="col">Data</th><th scope="col">Dimana</th><th scope="col">Apakah akan tetap</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Teks memo</th><td>Server kami (platform Relay/transmisi)</td><td class="yes">Tidak tersisa (hanya dilewatkan saat mengirim, tidak dicatat)</td></tr>
+              <tr><th scope="row">Teks memo</th><td>Kotak masuk surat Anda</td><td>Restin (itulah tujuannya)</td></tr>
+              <tr><th scope="row">Teks memo</th><td>Obsidian Vault Anda (di pengaturan)</td><td>Tetap (lokal di terminal)</td></tr>
+              <tr><th scope="row">Outbox・Riwayat transmisi</th><td>Hanya di terminal</td><td>Penyimpanan terenkripsi dengan AES-GCM-256</td></tr>
+              <tr><th scope="row">Alamat email</th><td>Cloudflare D1</td><td class="yes">Simpan korespondensi antara ID pengirim dan hash tujuan. Rekam secara terpisah dari pengingat opt-in, dan hapus secara berkala yang melebihi 35 hari</td></tr>
+              <tr><th scope="row">Peristiwa pemakaan, pengidentifikasi terminal, dan informasi diagnostik</th><td>Cloudflare D1</td><td>90 secara teratur menghapus yang telah melebihi hari. Dapat ditautkan ke hash tujuan melalui ID pengirim</td></tr>
+              <tr><th scope="row">Masukan penandaan AI (teks)</th><td>Server eksternal</td><td class="yes">Tidak terkirim (pemrosesan pada perangkat)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></section>
+
+      <!-- Memo protection and analytics -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03"> <span>Perlindungan teks memo dan analisis pemanfaatan</span> </h2></div><div class="ce-chapter__body">
+        <p class="lp-section__lead"> <span>Di aplikasi iOS, gunakan CryptoKit untuk mengenkripsi isi memo, Keychain untuk penyimpanan kunci, dan Sesi URL untuk mengirimkan teks. GoogleSignIn dan Otentikasi Firebase digunakan untuk secara otomatis memasukkan email sewenang-wenang, dan Pemeriksaan Aplikasi Firebase digunakan untuk melindungi back-end API. <strong>Analisis penggunaan perusahaan dan AppsFlyer ditangani secara berbeda tergantung pada pilihan versi dan analisis aplikasi. </strong></span> </p>
+          <p class="lp-section__lead"> <span>Pada versi yang memiliki pilihan “Analisis penggunaan” di Pengaturan, peristiwa penggunaan pihak pertama dan analisis status langganan dari perangkat dinonaktifkan secara bawaan dan dimulai setelah persetujuan diberikan. Versi ini tetap menonaktifkan AppsFlyer SDK hingga tersedia pilihan terpisah untuk pengukuran akuisisi. Versi tanpa layar pilihan ini juga mengirim peristiwa penggunaan pihak pertama dan analisis status langganan dari perangkat. Kami mencabut pembatasan sisi server yang berlaku sejak 28/9 dan mencegah penyimpanan permintaan dengan metode lama; peristiwa terdahulu yang tidak terkumpul tidak direkonstruksi secara retroaktif. Lihat kebijakan privasi untuk ketentuan pengukuran akuisisi dan penggunaan AppsFlyer.</span> <span>Analisis pihak pertama pada versi yang didukung dan memiliki persetujuan sah menangani pengenal instalasi dan sesi, peristiwa penggunaan, hasil pengiriman, serta data terkait. Versi lama mengirim ke AppsFlyer peristiwa keberhasilan pengiriman memo pertama, keberhasilan autentikasi, tampilan layar pembayaran, pemilihan paket, dan keberhasilan pembelian, serta menetapkan pengenal instalasi yang sama sebagai Customer User ID. Kolom peristiwa yang diatur aplikasi tidak secara langsung memuat alamat email, isi memo, atau kode verifikasi, tetapi ID pengiriman kami terhubung dengan hash penerima, dan informasi akuisisi juga dapat dikaitkan dengan catatan penggunaan. Analisis ini tidak sepenuhnya anonim. Untuk pencabutan persetujuan dan ketentuan menurut versi, lihat <a href="/id/privacy">bagian 1(E) kebijakan</a>; untuk rincian kolom, lihat <a href="/id/privacy#technical">kebijakan privasi</a>.</span> </p>
+      </div></section>
+
+      <!-- Honest limitations -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04"> <span>Untuk menulis dengan jujur - bukan E2EE</span> </h2></div><div class="ce-chapter__body">
+        <div class="honest-box">
+          <p style="margin-bottom:.75rem;"><strong>SimpleMemo bukan enkripsi ujung ke ujung (E2EE). </strong>Badan email akan dikirimkan ke kotak masuk Anda menggunakan standar SMTP. " Ini adalah desain yang memilih yang pertama karena dapat dibaca seperti dengan aplikasi email biasa dan "hanya Anda yang memiliki kunci enkripsi ke ujung jalur" tidak kompatibel.</p>
+          <p style="margin-bottom:.75rem;">Outbox dan riwayat transmisi di terminal dienkripsi dengan AES-GCM-256, tetapi ini adalah <strong>perlindungan dalam terminal</strong> dan tidak menggantikan E2EE (<a href="/id/glossary/e2e-encryption/" style="color:var(--accent);">Apa itu E2EE dan mengapa aplikasi ini tidak berlaku</a>).</p>
+          <p>Bagi mereka yang memiliki kerahasiaan sebagai prioritas utama dan membutuhkan E2EE, aplikasi notebook dengan desain E2EE seperti Standard Notes lebih cocok. Setelah menentukan ini, "jangan tinggalkan teks di server", "selesaikan penandaan di terminal", dan "lakukan postscript Vault secara lokal" adalah ruang lingkup pertahanan dari aplikasi ini.</p>
+        </div>
+      </div></section>
+
+      <!-- FAQ -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05"> <span>Pertanyaan yang Sering Diajukan</span> </h2></div><div class="ce-chapter__body">
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian Apakah server eksternal terlibat dalam penambahan ke Vault?</summary><div class="faq-answer"><p>Tidak terlibat. Postscript Vault adalah untuk menulis file langsung ke folder Vault di terminal (URI fallback jika tidak memungkinkan), dan tidak menggunakan plug-in atau jaringan. Penyimpanan draf lokal tanpa transmisi email juga selesai di terminal.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Tidak bisakah isi memo dikirim ke Apple atau server eksternal dengan penandaan AI?</summary><div class="faq-answer"><p>tidak dapat dikirim. AI pada perangkat oleh Apple Foundation Models hanya dilakukan di iPhone dan tidak melibatkan komunikasi jaringan. Model yang tidak kompatibel dengan Apple Intelligence secara otomatis mundur ke bentuk ringan di terminal, dan tidak ada transmisi eksternal dalam kasus itu. Untuk detailnya, silakan lihat <a href="/id/ai-tags/" style="color:var(--accent);">Penjelasan penambahan otomatis tag AI</a>.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mengapa Anda tidak memilih E2EE?</summary><div class="faq-answer"><p>Ini karena alamat pengiriman memo adalah "Kotak Masuk Surat Biasa". Dapat dibaca di kotak masuk = server penerima dapat didekripsi, jadi E2EE tidak ditetapkan secara struktural. Jika Anda memberikan prioritas ke E2EE, klien khusus akan diperlukan, yang akan ditukar dengan nilai aplikasi ini yang "dapat dibaca di aplikasi email terminal mana pun". Standard Notes dll. direkomendasikan untuk aplikasi di mana E2EE sangat penting.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Bagaimana konten ini berbeda dari kebijakan privasi?</summary><div class="faq-answer"><p>Teks lengkap penanganan hukum ada di <a href="/id/privacy" style="color:var(--accent);">Kebijakan Privasi</a> (khususnya §12 "Informasi teknis tentang enkripsi"). Halaman ini merekonstruksi konten teknis sebagai peta rute sesuai dengan minat pengguna Obsidian (apakah itu diselesaikan secara lokal). Jika ada konflik, kebijakan privasi akan diutamakan.</p></div></details></div>
+        </div>
+      </div></section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>Periksa jalurnya dan coba</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>Gratis 3/hari. Vault postscript bersifat lokal, dan teksnya tidak tertinggal di server.</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=web_other_v1&amp;mt=8" class="app-store-badge" aria-label="Unduh dari App Store"> <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="109" height="40" alt="Unduh dari App Store" loading="lazy"> </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section ce-chapter sd-chapter">
+        <div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06"> <span>Halaman terkait</span> </h2></div><div class="ce-chapter__body">
+        <div class="internal-links">
+          <a href="/id/privacy"><span>Kebijakan Privasi (teks)</span></a>
+          <a href="/id/devlog/privacy-first-design"><span>Catatan Pengembangan: Desain Pertama Privasi</span></a>
+          <a href="/id/glossary/e2e-encryption/"><span>Apa itu E2EE (mengapa aplikasi ini tidak berlaku)</span></a>
+          <a href="/id/glossary/aes-gcm/"><span>Apa itu AES-GCM</span></a>
+          <a href="/id/ai-tags/"><span>Penambahan otomatis tag AI (pada perangkat)</span></a>
+          <a href="/id/obsidian/"><span>Mekanisme kerja sama Obsidian</span></a>
+          <a href="/id/vs/obsidian-share-sheet/"><span>Perbandingan yang tulus dengan lembar bersama Obsidian</span></a>
+          <a href="/id/faq"><span>Pertanyaan umum</span></a>
+        </div>
+      </div></section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="devlog" href="/id/devlog/privacy-first-design" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"> <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;"> Baca selanjutnya </span> <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;"> Mengapa Anda memilih desain ini - Catatan pengembangan </span> <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;"> Pengembang menjelaskan proses pengambilan keputusan desain yang mengutamakan privasi. </span> </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;"> <span>Konten terkait</span> </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/id/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Aplikasi Alternatif Captio</span></a></li>
+    <li><a href="/id/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Cara mengirim email ke diri sendiri</span></a></li>
+    <li><a href="/id/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Pertanyaan umum</span></a></li>
+    <li><a href="/id/blog/memo-app-encryption-comparison" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Perbandingan Enkripsi Aplikasi Memo</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="id" dir="ltr"><a class="site-brand" href="/id/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>untuk Obsidian</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">Catatan kecil. Langkah berikutnya.</p><p class="site-footer-description">Kirim catatan dari iPhone ke Obsidian dan email.</p></div></div><!-- /site-chrome:intro -->
+    <div class="container">
+      <nav class="footer__nav" aria-label="Navigasi footer">
+      <div class="footer__col">
+        <p class="footer__col-title">Produk</p>
+        <a href="/id/download/" class="footer__link">Unduh</a>
+        <a href="/id/" class="footer__link">Beranda</a>
+        <a href="/id/use-cases/" class="footer__link">Contoh penggunaan</a>
+        <a href="/id/guides/" class="footer__link">Panduan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Perbandingan dan perpindahan aplikasi</p>
+        <a href="/id/captio-alternative/" class="footer__link"><span>Alternatif Captio</span></a>
+        <a href="/id/note-to-email/" class="footer__link">Catatan ke email</a>
+        <a href="/id/vs/" class="footer__link">Bandingkan</a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Bantuan</p>
+        <a href="/id/roadmap/" class="footer__link">Rencana pengembangan</a>
+        <a href="/id/devlog/" class="footer__link">Catatan pengembangan</a>
+        <a href="/id/about/" class="footer__link">Tentang pengembang</a>
+        <a href="/id/faq" class="footer__link">Pertanyaan umum</a>
+        <a href="/id/privacy" class="footer__link">Privasi</a>
+        <a href="/id/contact" class="footer__link">Hubungi kami</a>
+      </div>
+      </nav>
+      <p class="footer__copyright"> © 2026 Simple Memo - for Obsidian / Dikelola oleh YURIKA, K.K.</p>
+    </div>
+  </footer>
+
+
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

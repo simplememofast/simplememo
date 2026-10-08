@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/second-brain/">
+  <title>用Obsidian制作第二脑 — PARA的4文件夹和链接的实现例子 | SimpleMemo</title>
+  <meta name="description" content="用Obsidian启动PARA的安装步骤。 4的文件夹、发表用笔记、内部链接、移动到Archive在Mac版的实画面中解说。 介绍CODE的填写例子和手动Markdown模板。 检查状态和移动后确认链接的步骤，无需添加插件即可尝试。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="用Obsidian制作第二脑 — PARA的4文件夹和链接的实现例子">
+  <meta property="og:description" content="用Obsidian启动PARA的安装步骤。 4的文件夹、发表用笔记、内部链接、移动到Archive在Mac版的实画面中解说。 介绍CODE的填写例子和手动Markdown模板。 检查状态和移动后确认链接的步骤，无需添加插件即可尝试。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-15T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/second-brain/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="用Obsidian制作第二脑 — PARA的4文件夹和链接的实现例子">
+  <meta name="twitter:description" content="用Obsidian启动PARA的安装步骤。 4的文件夹、发表用笔记、内部链接、移动到Archive在Mac版的实画面中解说。 介绍CODE的填写例子和手动Markdown模板。 检查状态和移动后确认链接的步骤，无需添加插件即可尝试。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-second-brain.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/second-brain/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/second-brain/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/second-brain/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/second-brain/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/second-brain/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/second-brain/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/second-brain/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/second-brain/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/second-brain/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/second-brain/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.journal-sample{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.journal-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.journal-note{color:var(--text-secondary);font-size:.9rem}</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/second-brain/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "用Obsidian制作第二脑 — PARA的4文件夹和链接的实现例子",
+  "description": "用Obsidian启动PARA的安装步骤。 4的文件夹、发表用笔记、内部链接、移动到Archive在Mac版的实画面中解说。 介绍CODE的填写例子和手动Markdown模板。 检查状态和移动后确认链接的步骤，无需添加插件即可尝试。",
+  "url": "https://simplememofast.com/zh/obsidian/second-brain/",
+  "datePublished": "2026-09-15",
+  "dateModified": "2026-09-15",
+  "author": {
+    "@type": "Person",
+    "name": "AI ATAKA",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-second-brain.png"
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "第二脑",
+      "item": "https://simplememofast.com/zh/obsidian/second-brain/"
+    }
+  ]
+}</script>
+<style>.para-body{line-height:1.95}.para-body h2{font-size:clamp(1.45rem,4vw,2rem);margin:3rem 0 1rem;line-height:1.5}.para-body h3{margin:1.8rem 0 .7rem}.para-body p{margin:1rem 0}.para-body a{color:var(--accent)}.para-body pre{overflow-x:auto;padding:1.2rem;border:1px solid var(--border);border-radius:12px;background:var(--surface);font-size:.86rem;line-height:1.7}.para-body code{overflow-wrap:anywhere}.para-body pre code{overflow-wrap:normal}.para-body img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--border);margin:1.5rem auto}.para-body ul,.para-body ol{padding-left:1.5rem}.para-body th,.para-body td{text-align:left;border-bottom:1px solid var(--border);padding:.8rem;min-width:130px}.para-body table{border-collapse:collapse;width:100%}.para-body .table-wrap{overflow-x:auto}.para-toc{padding:1rem 1.25rem;border:1px solid var(--border);border-radius:12px}.para-toc a{display:block;padding:.4rem 0}.para-body h2{scroll-margin-top:80px}</style><link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/capture-next.css?v=4e62584640">
+<link rel="stylesheet" href="/assets/css/capture-third.css?v=ce878a94dc">
+<noscript><style>
+    @media(max-width:1199px){
+      .capture-brand .global-nav{position:relative}
+      .capture-brand .global-nav__inner{height:auto;flex-wrap:wrap;padding-top:12px!important;padding-bottom:12px!important}
+      .capture-brand .global-nav__links:not(.open){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));order:3;flex-basis:100%;gap:4px}
+      .capture-brand .global-nav__hamburger{display:none!important}
+      .capture-brand .nav-cta-mobile{display:block;grid-column:1/-1}
+      .capture-brand .nav-cta-mobile a{justify-content:center;color:#07070b!important;background:#fff!important}
+    }
+  </style></noscript>
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/zh/obsidian/second-brain/#faq","inLanguage":"zh-Hans","mainEntity":[{"@type":"Question","name":"需要插件吗？","acceptedAnswer":{"@type":"Answer","text":"在这篇报道的文件夹、检查项目、内部链接、移动的例子中，没有添加社区插件。 不处理自动分类和与外部服务的同步。"}},{"@type":"Question","name":"有必要把现有的备忘录全部转移到PARA吗？","acceptedAnswer":{"@type":"Answer","text":"在这个步骤中，可以从一个练习用项目开始。 转移现有笔记时，请准备备份，少量确认移动和链接的移动后再进行。"}},{"@type":"Question","name":"不知道该放在Projects和Resources哪个。","acceptedAnswer":{"@type":"Answer","text":"现在进行的发表稿子是Projects，其他发表也使用的一般资料是Resources，这样可以分开。 如果从原稿方面链接到资料，就可以不把相同的正文复制到两边进行参考。"}},{"@type":"Question","name":"制作图表的话，第二脑就能完成吗？","acceptedAnswer":{"@type":"Answer","text":"仅凭链接的显示，不知道资料是否在必要的场合使用。 首先从工作笔记进入资料，试试能不能把一个要点放回原稿上。 从这次的操作确认来看，没有判断记忆力和生产力的提高。如果想要缩小显示的笔记范围，请参考文件夹、标签搜索和本地图表的实例。"}}]}</script>
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+<body class="capture-editorial capture-brand capture-full capture-next capture-third site-designed" data-design-family="refined">
+<a class="ce-skip" href="#main-content">跳到正文</a>
+<nav aria-label="全球导航" class="global-nav" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><!-- site-chrome:quick --><div class="site-quick-links"><a href="/zh/guides/">使用指南</a><a href="/zh/use-cases/">使用场景</a><a href="/zh/vs/">对比</a></div><!-- /site-chrome:quick --><ul class="global-nav__links" id="navLinks"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/about/">关于开发者</a></li></ul><a class="global-nav__cta" data-cta-cluster="obsidian" data-cta-placement="nav" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a><button type="button" class="global-nav__hamburger" aria-controls="navLinks" aria-expanded="false" aria-label="菜单"><span>菜单</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8h16"/><path d="M4 16h16"/></svg></button><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/second-brain/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/second-brain/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/second-brain/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/second-brain/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/second-brain/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/second-brain/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/second-brain/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/second-brain/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/second-brain/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content" id="main-content"><article class="container" style="max-width:880px"><header class="lp-hero ce-hero ce-hero--with-routes"><div class="ce-hero-copy"><div class="lp-hero__label">Obsidian · PARA实施指南</div><h1 class="lp-hero__title">用Obsidian制作第二脑<br/>4文件夹和链接开始的PARA</h1><p class="lp-hero__sub">连接正在进行的工作和以后使用的资料。 以发表笔记为例，从制作到移动到Archive的实画面介绍。</p><p class="article-meta">作者: <a href="/zh/about/">AI ATAKA</a> ・ 公开・确认: <time datetime="2026-09-15">2026年9月15日</time></p><a class="ce-read-link" href="#concept">阅读正文 <span aria-hidden="true">↓</span></a></div><nav aria-label="从想读的内容中选择" class="ce-routes"><a class="ce-route" href="#folders"><span>01</span><b>制作4文件夹</b></a><a class="ce-route" href="#project"><span>02</span><b>写发表用笔记</b></a><a class="ce-route" href="#archive"><span>03</span><b>转移到档案</b></a></nav><figure aria-hidden="true" class="ce-stage cn-concept"><p class="ce-stage-label">PARA / 四个地方</p><div class="cn-concept-list"><div class="cn-concept-row"><span>01</span><strong>项目</strong></div><div class="cn-concept-row"><span>02</span><strong>区域</strong></div><div class="cn-concept-row"><span>03</span><strong>资源</strong></div><div class="cn-concept-row"><span>04</span><strong>存档</strong></div></div><figcaption class="ce-stage-foot">PARA的4个放置处（概念图）</figcaption></figure></header><div class="ce-article"><details class="ce-index"><summary>本页目录</summary><nav aria-label="目录"><a href="#concept">第二脑・CODE・PARA的作用</a><a href="#folders">1。 在保管库中制作4的文件夹</a><a href="#project">2。 在发表用笔记本上写下目标和下一个工作</a><a href="#links">3。 标准和资料通过链接连接</a><a href="#distill">4。 在使用场景中找出要点</a><a href="#archive">5。 转移到Archive，重新打开链接</a><a href="#review">开始运用的话，回头看什么？</a><a href="#faq">常见问题</a><a href="#sources">参考资料和确认范围</a><a href="#capture-section-10">下载手动模板</a></nav></details><details class="ce-legacy-index"><summary>实践的步骤</summary><nav aria-label="这篇报道的目录" class="para-toc"><a href="#folders">制作4文件夹</a><a href="#project">写发表用笔记</a><a href="#links">链接到资料</a><a href="#archive">转移到Archive</a><a href="#starter">使用手动模板</a></nav></details><p>虽然备忘录增加了，但是找不到下次工作中使用的资料。 那样的时候，试着在Obsidian的保管库里做一个放置“正在进行的事情”和“稍后参考的事情”的地方吧。</p>
+<p>在这篇文章中，以准备发表为例，准备4个文件夹、工作用笔记、相关资料的链接。 一开始做的只有一小组。 没有必要一次性重新分类已有的笔记。</p>
+<p>操作例子在2026年9月15日、Mac版Obsidian 1.13.7的验证用保管库中确认。 画面的预定和文章是虚构的样本。 实际操作文件夹、检查项目、内部链接、移动到Archive。</p>
+<section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="01" id="concept">第二脑・CODE・PARA的作用</h2></div><div class="ce-chapter__body">
+<p>第二脑是把以后使用的信息留在自己外面，通过工作和学习来提取的想法。 Tiago Forte的CODE表示Capture（收集）、Organize（整理）、Distill（提取要点）、Express（形成）的流程。 <a href="https://fortelabs.com/blog/basboverview/">Forte Labs的解说</a></p>
+<p>PARA是将信息的放置位置分为4种的方法。 Projects是有目标的正在进行的活动，Areas是持续照顾的责任领域，Resources是感兴趣的资料，Archives是放置目前未使用的项目的地方。 <a href="https://fortelabs.com/blog/para/">PARA的原作者的说明</a></p>
+<p>在这里用Obsidian的文件夹和笔记本来尝试这种想法。 不是整个CODE自动化的设置。 如果想从思路和备忘录的入口重新审视的话，也请参考<a href="/zh/methods/second-brain/">第二脑的制作方法</a>。</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="folders">1。 在保管库中制作4的文件夹</h2></div><div class="ce-chapter__body">
+<p>尝试制作时，准备练习用的保管库不会影响原来的笔记本。 第一次使用时可以从<a href="/zh/obsidian/getting-started/">Obsidian的开始方法</a>开始。</p>
+<p>在文件一览表中创建新的文件夹，并命名下一个。 配合这次的实际画面，对应于Archives的文件夹名使用单数形式的<code>Archive</code>。</p>
+<div aria-labelledby="folders" class="table-wrap ce-table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>文件夹</th>
+<th>这次放进去的东西</th>
+<th>迷茫时的判断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目</td>
+<td>发表的准备笔记</td>
+<td>有可以判断完成的目标吗</td>
+</tr>
+<tr>
+<td>区域</td>
+<td>写文章时要保持的标准</td>
+<td>特定的发表结束后也会继续吗</td>
+</tr>
+<tr>
+<td>资源</td>
+<td>发表前要读的清单</td>
+<td>在必要场合参考的资料吗</td>
+</tr>
+<tr>
+<td>存档</td>
+<td>现在不着手的笔记</td>
+<td>虽然留在手边，但是想从正在进行的列表中去掉吗</td>
+</tr>
+</tbody>
+</table></div>
+<p>例如“写文章”是持续的活动，但“完成10月1日的发表稿件”是有界限的。 前者的标准放在Areas上，后者的工作放在Projects上，这样更容易选择下一个打开的笔记。 这是分类的一例，如果用途不同，可以更换放置位置。</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="project">2。 在发表用笔记本上写下目标和下一个工作</h2></div><div class="ce-chapter__body">
+<p>在<code>Projects</code>里面制作名为<code>Conference talk</code>的笔记本。 为了和实际画面对应，名字是英文的，在自己的保管库里用日语也可以。</p>
+<pre aria-label="Markdown的描述例子" role="region" tabindex="0"><code class="language-markdown"># Conference talk
+
+Target date: 2026-10-01
+
+- [ ] Draft outline
+- [ ] Rehearse
+
+Related area: [[Areas/Writing]]
+Reference: [[Resources/Presentation checklist]]
+</code></pre>
+<p><code>Draft outline</code>是制作构成方案的工作，<code>Rehearse</code>是发表的练习。 换成自己的例子时，比起像“准备”这样的宽泛的措辞，下次试着用能动手的大小来写。</p>
+<p><img alt="在Projects内的发表笔记中显示2个未完成任务和相关笔记的链接的Obsidian的实画面" decoding="async" height="768" loading="lazy" src="/assets/img/obsidian-second-brain/project-open.png" width="984"/></p>
+<p><em>验证用保管库的实画面。 日期是样品的目标日期，不是实际的发表预定。 </em></p>
+<p>检查栏可以通过读取视图等进行点击。 这次，检查了构成方案栏，Markdown变成了<code>- [x] Draft outline</code>，重新打开笔记本也保留了状态。 练习栏没有打勾。 不仅要分开文件夹，还要在打开笔记本时看到下一个工作。</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 id="links">3。 标准和资料通过链接连接</h2></div><div class="ce-chapter__body">
+<p>接下来制作<code>Areas/Writing</code>和<code>Resources/Presentation checklist</code>。 前者是写文章时的标准，后者是发表前要确认的内容。 以下是手动使用的填写示例。</p>
+<pre aria-label="Markdown的描述例子" role="region" tabindex="0"><code class="language-markdown"># Writing
+
+Ongoing standard: keep examples reproducible and sources attributable.
+
+Current project: [[Projects/Conference talk]]
+</code></pre>
+<p>这个标准的意思是“能够重现例子，并能够从出处”。 即使发表有变化，也作为使用标准。</p>
+<p>从发表用笔记本的<code>[[Areas/Writing]]</code>开始，可以移动到这个标准。 代替每次复制资料的正文，放上必要时打开的链接。 在这次的验证中，也确认了从发表笔记移动到Writing，打开返回的链接。</p>
+<p>Obsidian可以以<code>[[ノート名]]</code>的形式制作内部链接。 如果有多个同名笔记，请选择包含文件夹的候选，确认是否打开了预期的笔记。 <a href="https://obsidian.md/help/links">内部链接的官方说明</a>。 在笔记本之间连接相关想法的具体例子，请参考<a href="/zh/obsidian/zettelkasten/">Obsidian开始Zettelkasten的步骤</a>。</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 id="distill">4。 在使用场景中找出要点</h2></div><div class="ce-chapter__body">
+<p>放好资料后，在实际工作中尝试使用一次。 如果是发表的话，打开检查清单，把“这次的构成方案要改正的点”简短地写在发表用的笔记上。</p><p>用日语查询操作和构成例子时，<a href="/zh/obsidian/community/">日语原稿3件的更新履历和整理了提问对象的未确认范围的信息来源指南</a>也请参考。</p>
+<p>例如，可以考虑如下的填写。</p>
+<pre aria-label="Markdown的描述例子" role="region" tabindex="0"><code class="language-markdown">## 今回使う要点
+- 冒頭で、聞き手に持ち帰ってほしい問いを一つ示す。
+- 操作例には、その結果を確認できる画面を添える。
+
+## 次の作業
+- [ ] 導入の段落を3文で書く。
+</code></pre>
+<p>这是为正文制作的提案，不是实际画面上显示的操作结果。 收集完资料后，选择要点，用于自己的稿件的流程示例。 意识到CODE的Distill和Express时，首先可以从“从资料中选择一个，用于现在制作的东西”的小工作开始。</p>
+</div></section><section class="lp-section ce-chapter ce-chapter--wide"><div class="ce-chapter__head"><h2 id="archive">5。 转移到Archive，重新打开链接</h2></div><div class="ce-chapter__body">
+<p>已经完成的工作或暂时没有着手的工作，可以从正在进行的一览表中除名。 在Obsidian中打开目标笔记的菜单，从移动命令中选择<code>Archive</code>。 操作名称和显示位置可能因语言和版本而异。 <a href="https://obsidian.md/help/manage-notes">笔记管理的官方说明</a></p>
+<p>这次移动确认要更新“2文件中的2链接”，所以选择了那次更新。 一直自动更新的设置没有改变。</p>
+<p><img alt="Writing笔记中留下了发表笔记的链接，2文件的2链接更新显示的实画面" decoding="async" height="768" loading="lazy" src="/assets/img/obsidian-second-brain/archive-links-updated.png" width="984"/></p>
+<p><em>移动后的真实画面。 从更新的链接重新打开Archive内的发表笔记，也确认了检查状态。 </em></p>
+<p>移动后确认下一个3点。</p>
+<ol>
+<li>发表笔记在Archive，从Projects的原处移动。</li>
+<li>从Writing和资料方面，打开移动的发表笔记。</li>
+<li>笔记本的正文和检查状态仍然存在。</li>
+</ol>
+<p>画面例子只是尝试了移动动作，并没有完成发表。 因为即使还有检查栏也可以移动，所以“移动了”和“工作结束了”要自己分开判断。</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="07" id="review">开始运用的话，回头看什么？</h2></div><div class="ce-chapter__body">
+<p>首先在一个项目中使用，开始工作时请打开Projects。 如果不知道下一步行动的话，在笔记的末尾加一个。 如果资料的链接太多的话，只把这次使用的东西放在正文附近。</p>
+<p>在周末等自己决定的时机，也可以重新审视已经完成的东西、保留的东西、下次使用的资料的方法。 这是运用的提案，不是根据确定的重新审查频率来衡量效果的结果。</p>
+<p>如果想先留下每天的记录的话，也可以使用<a href="/zh/obsidian/journaling/">Obsidian的记事</a>的手动模板。 外出时留下的笔记和在桌子上整理的笔记本想分开时，请参考<a href="/zh/methods/second-brain/">从笔记入口到Obsidian的思路</a>。</p>
+</div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="08" id="faq">常见问题</h2></div><div class="ce-chapter__body">
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">需要插件吗？</summary><div class="faq-answer">
+<p>在这篇报道的文件夹、检查项目、内部链接、移动的例子中，没有添加社区插件。 不处理自动分类和与外部服务的同步。</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">有必要把现有的备忘录全部转移到PARA吗？</summary><div class="faq-answer">
+<p>在这个步骤中，可以从一个练习用项目开始。 转移现有笔记时，请准备备份，少量确认移动和链接的移动后再进行。</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">不知道该放在Projects和Resources哪个。</summary><div class="faq-answer">
+<p>现在进行的发表稿子是Projects，其他发表也使用的一般资料是Resources，这样可以分开。 如果从原稿方面链接到资料，就可以不把相同的正文复制到两边进行参考。</p>
+</div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">制作图表的话，第二脑就能完成吗？</summary><div class="faq-answer">
+<p>仅凭链接的显示，不知道资料是否在必要的场合使用。 首先从工作笔记进入资料，试试能不能把一个要点放回原稿上。 从这次的操作确认来看，没有判断记忆力和生产力的提高。</p><p>如果想要缩小显示的笔记范围，请参考<a href="/zh/obsidian/graph-view/">文件夹、标签搜索和本地图表的实例</a>。</p>
+</div></details></div></div></section><section class="lp-section ce-chapter"><div class="ce-chapter__head"><h2 data-ce-number="09" id="sources">参考资料和确认范围</h2></div><div class="ce-chapter__body">
+<ul>
+<li><a href="https://fortelabs.com/blog/basboverview/">Forte Labs — 构建第二个大脑</a></li>
+<li><a href="https://fortelabs.com/blog/para/">Forte Labs — PARA</a></li>
+<li><a href="https://obsidian.md/help/links">Obsidian — 内部链接</a></li>
+<li><a href="https://obsidian.md/help/manage-notes">Obsidian — 管理备注</a></li>
+</ul>
+<p>资料确认日期：2026年9月15日。 实际操作的范围是Mac版Obsidian 1.13.7的验证用保管库。 CODE的长期运用、插件、自动配送、多个终端的同步、对生产力的效果不包括在这次的验证中。</p></div></section><section class="ce-chapter" id="starter"><div class="ce-chapter__head"><h2 data-ce-number="10" id="capture-section-10">下载手动模板</h2></div><div class="ce-chapter__body"><p><a download="" href="/assets/templates/obsidian-para-starter.zip">下载PARA练习用Markdown（ZIP）</a></p><p>展开ZIP的话，会有Projects・Areas・Resources・Archive的指南文件。 请将文件夹复制到新的练习用保管库，或者将每个Markdown的正文粘贴到对应的笔记本上使用。 与现有笔记本同名时，请不要覆盖，请在其他保管库中尝试。</p><p>日期和正文是固定的样本。 即使下载了，也不会自动更改日期，也不会被导入保管库。 与实画面分开制作的手动模板，在读者的终端导入和同步尚未验证。</p></div></section><p style="font-size:.9rem;color:var(--text-secondary)">本网站由YURIKA, K.K.运营，介绍独立应用程序“SimpleMemo”。 不是Obsidian官方的报道。</p><aside class="next-step"><a data-next-step="explore" href="/zh/obsidian/">查看从iPhone到Obsidian留下备忘录的设置</a></aside></div></article></main><footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav aria-label="页脚导航" class="footer__nav"><div class="footer__col"><p class="footer__col-title">产品</p><a class="footer__link" href="/zh/download/">下载</a><a class="footer__link" href="/zh/">首页</a><a class="footer__link" href="/zh/obsidian/">Obsidian 集成</a></div><div class="footer__col"><p class="footer__col-title">比较与迁移</p><a class="footer__link" href="/zh/vs/">对比</a><a class="footer__link" href="/zh/obsidian/compare/">Obsidian比较</a></div><div class="footer__col"><p class="footer__col-title">支持</p><a class="footer__link" href="/zh/about/">关于开发者</a><a class="footer__link" href="/zh/faq">常见问题</a><a class="footer__link" href="/zh/privacy">隐私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

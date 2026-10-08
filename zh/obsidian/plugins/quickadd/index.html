@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/plugins/quickadd/">
+  <title>QuickAdd的使用方法 — Obsidian的Inbox追加的设置和实例 | SimpleMemo</title>
+  <meta name="description" content="用Obsidian的QuickAdd在笔记本上添加备忘录的方法。 设置Capture的保存地址、格式、末尾补充，刊登2次输入的实画面和Markdown。 解说保存地址不同时的确认，从iPhone开始与入口的区分使用，Linux版Obsidian 1.13.7和QuickAdd 2.29.0验证的范围。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="QuickAdd的使用方法 — 在Obsidian的Inbox中追加的设置和实例">
+  <meta property="og:description" content="用Obsidian的QuickAdd在笔记本上添加备忘录的方法。 设置Capture的保存地址、格式、末尾补充，刊登2次输入的实画面和Markdown。 解说保存地址不同时的确认，从iPhone开始与入口的区分使用，Linux版Obsidian 1.13.7和QuickAdd 2.29.0验证的范围。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/zh/obsidian/plugins/quickadd/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-quickadd.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="QuickAdd的使用方法 — 在Obsidian的Inbox中追加的设置和实例">
+  <meta name="twitter:description" content="用Obsidian的QuickAdd在笔记本上添加备忘录的方法。 设置Capture的保存地址、格式、末尾补充，刊登2次输入的实画面和Markdown。 解说保存地址不同时的确认，从iPhone开始与入口的区分使用，Linux版Obsidian 1.13.7和QuickAdd 2.29.0验证的范围。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-plugins-quickadd.png">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/zh/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="zh-Hant" href="https://simplememofast.com/zh-Hant/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="ko" href="https://simplememofast.com/ko/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="es" href="https://simplememofast.com/es/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="pt-BR" href="https://simplememofast.com/pt-BR/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="id" href="https://simplememofast.com/id/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="ar" href="https://simplememofast.com/ar/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="tr" href="https://simplememofast.com/tr/obsidian/plugins/quickadd/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/plugins/quickadd/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=aa4747a0f6">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2?v=a4c50a515e" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.capture-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.capture-note{color:var(--text-secondary);font-size:.9rem}</style>
+<style>.lp-section code,.tip-box code,.faq-answer{overflow-wrap:anywhere}.capture-code{max-width:100%;min-width:0;font-size:.9rem}.capture-toc a{min-height:44px;display:inline-flex;align-items:center}.capture-results{display:grid;gap:1rem}.capture-results>div{min-width:0}.source-list a{overflow-wrap:anywhere}@media(min-width:701px){.capture-results{grid-template-columns:1fr 1fr}}</style>
+<style>
+.capture-code{white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem}.capture-toc a{padding:.4rem .2rem;min-height:44px}.article-meta{font-size:.9rem;line-height:1.8;color:var(--text-secondary)}.shot a{display:block}.shot figcaption a{display:inline}.lp-section code,.tip-box code{overflow-wrap:anywhere}.settings-table tbody th{width:32%}.role-map{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}.role-route{min-width:0;padding:1.25rem;border:1px solid var(--border);border-radius:12px;background:var(--surface)}.role-route h3{font-size:1.1rem;line-height:1.6;margin:0 0 1rem}.role-route ol{list-style:none!important;margin:0;padding:0!important}.role-route li{margin:0;padding:.75rem 1rem;line-height:1.75;background:rgba(100,180,255,.06);border-radius:8px}.role-route li+li{margin-top:1.35rem;position:relative}.role-route li+li:before{content:"↓";position:absolute;top:-1.5rem;left:calc(50% - .4rem);color:var(--accent-bright)}.role-caption{font-size:.875rem;color:var(--text-secondary);line-height:1.8}.capture-checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.capture-checks>div{min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px}.capture-checks h3{font-size:1rem;margin:0 0 .5rem}.capture-checks p{margin:.5rem 0}.source-list a{overflow-wrap:anywhere}.quickadd-crumb{font-size:.875rem;line-height:1.8;margin-bottom:1rem}.quickadd-crumb a{color:var(--accent-bright)}
+@media(max-width:700px){.role-map,.capture-checks{grid-template-columns:1fr}.role-route{padding:1rem}.settings-table tbody th{width:auto}.global-nav__inner{padding:0 1rem}.global-nav__logo{min-width:0;font-size:.82rem}.global-nav__logo img{flex-shrink:0}.lp-hero{padding-top:2.25rem}.lp-section{padding:2rem 0}.capture-toc{gap:.4rem .9rem}.shot{margin:1.25rem 0}.role-caption{text-align:left}}
+</style>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "@id": "https://simplememofast.com/zh/obsidian/plugins/quickadd/#article",
+  "inLanguage": "zh-Hans",
+  "headline": "QuickAdd的使用方法 — 在Obsidian的Inbox中追加的设置和实例",
+  "description": "用Obsidian的QuickAdd在笔记本上添加备忘录的方法。 设置Capture的保存地址、格式、末尾补充，刊登2次输入的实画面和Markdown。 解说保存地址不同时的确认，从iPhone开始与入口的区分使用，Linux版Obsidian 1.13.7和QuickAdd 2.29.0验证的范围。",
+  "url": "https://simplememofast.com/zh/obsidian/plugins/quickadd/",
+  "datePublished": "2026-09-30",
+  "dateModified": "2026-09-30",
+  "author": {
+    "@type": "Person",
+    "name": "SimpleMemo Developer",
+    "url": "https://simplememofast.com/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "SimpleMemo",
+    "url": "https://simplememofast.com/"
+  },
+  "image": "https://simplememofast.com/assets/img/og/obsidian-plugins-quickadd.png",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://simplememofast.com/zh/obsidian/plugins/quickadd/"
+  }
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "主页",
+      "item": "https://simplememofast.com/zh/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Obsidian",
+      "item": "https://simplememofast.com/zh/obsidian/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "插件入门",
+      "item": "https://simplememofast.com/zh/obsidian/plugins/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "快速添加",
+      "item": "https://simplememofast.com/zh/obsidian/plugins/quickadd/"
+    }
+  ]
+}</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": "https://simplememofast.com/zh/obsidian/plugins/quickadd/#faq",
+  "inLanguage": "zh-Hans",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "QuickAdd的Capture和Template有什么不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Capture是在确定的笔记中添加文章的选项。 Template是从模板中制作新笔记的选择。 在这篇报道中确认实际操作的，只有在现有的Inbox.md末尾追加的Capture。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "不是打开的笔记本，而是在Inbox上追加记？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "关闭Capture to active file，Capture to指定Inbox.md，Write position指定Bottom of file。 在这篇报道的例子中，先制作了Inbox.md，Create file if it doesn't exist关闭了。 输入后打开保存目的地的笔记进行确认。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "QuickAdd可以从Obsidian的外面调用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "官方资料中有obsidian://quickadd的URI、Apple Shortcuts和启动器、桌面的Obsidian CLI调用选项的方法。 并不是说不能从外面叫。 在这篇文章中尝试的是从Obsidian内的命令调色板执行，外部启动尚未验证。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "iPhone也可以和这个设置一样使用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "QuickAdd 2.29.0的官方manifest不是桌面专用的设置，但这次的实际操作只有Linux版Obsidian 1.13.7。 iPhone和Android的设置画面、执行、终端间同步、SimpleMemo的输入没有确认。 请在自己的终端上确认保存地址和实际的补充。"
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/capture-editorial.css?v=c5d88c68f2">
+<link rel="stylesheet" href="/assets/css/capture-content.css?v=308eef75be">
+<link rel="stylesheet" href="/assets/css/site-design.css?v=84e8e2a31b">
+<!-- site-chrome:bootstrap --><script>document.documentElement.classList.add('site-chrome-js');</script><!-- /site-chrome:bootstrap -->
+<link rel="stylesheet" href="/assets/css/site-chrome.css?v=1b96511de3">
+<script src="/js/site-chrome.js?v=d3fa3a5bbd" defer onerror="document.documentElement.classList.remove('site-chrome-js')"></script>
+</head>
+
+<body class="site-designed capture-editorial capture-full site-reading" data-design-family="reading">
+<nav class="global-nav" aria-label="全球导航" data-site-header=""><div class="global-nav__inner"><a class="global-nav__logo site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="36" height="36" alt="" loading="eager"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><ul class="global-nav__links"><li><a href="/zh/guides/">使用指南</a></li><li><a href="/zh/use-cases/">使用场景</a></li><li><a href="/zh/vs/">对比</a></li><li><a href="/zh/blog/">博客</a></li><li><a href="/zh/about/">关于开发者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=web_obsidian_v1&amp;mt=8">下载</a><details class="site-languages"><summary aria-label="简体中文 · 选择语言"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg><span>简中</span><svg class="site-language-chevron" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m4 6 4 4 4-4"/></svg></summary><div class="site-language-panel" lang="zh-Hans" dir="ltr"><p class="site-language-title">选择语言</p><div class="site-language-grid"><a href="/obsidian/plugins/quickadd/" hreflang="ja" data-site-locale="ja"><span lang="ja" dir="ltr">日本語</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/en/obsidian/plugins/quickadd/" hreflang="en" data-site-locale="en"><span lang="en" dir="ltr">English</span><span class="site-language-check" aria-hidden="true"></span></a><span class="site-language-current" data-site-locale="zh-Hans" aria-current="page"><span lang="zh-Hans" dir="ltr">简体中文</span><span class="site-language-check" aria-hidden="true">✓</span></span><a href="/zh-Hant/obsidian/plugins/quickadd/" hreflang="zh-Hant" data-site-locale="zh-Hant"><span lang="zh-Hant" dir="ltr">繁體中文</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ko/obsidian/plugins/quickadd/" hreflang="ko" data-site-locale="ko"><span lang="ko" dir="ltr">한국어</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/es/obsidian/plugins/quickadd/" hreflang="es" data-site-locale="es"><span lang="es" dir="ltr">Español</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/pt-BR/obsidian/plugins/quickadd/" hreflang="pt-BR" data-site-locale="pt-BR"><span lang="pt-BR" dir="ltr">Português</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/id/obsidian/plugins/quickadd/" hreflang="id" data-site-locale="id"><span lang="id" dir="ltr">Bahasa Indonesia</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/ar/obsidian/plugins/quickadd/" hreflang="ar" data-site-locale="ar"><span lang="ar" dir="rtl">العربية</span><span class="site-language-check" aria-hidden="true"></span></a><a href="/tr/obsidian/plugins/quickadd/" hreflang="tr" data-site-locale="tr"><span lang="tr" dir="ltr">Türkçe</span><span class="site-language-check" aria-hidden="true"></span></a></div></div></details></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero sd-hero"><div class="sd-hero-copy"><div class="lp-hero__label">Obsidian · 对决定的笔记的补充</div><h1 class="lp-hero__title">QuickAdd的使用方法<br>Inbox追加的设置和实例</h1><p class="lp-hero__sub">在写笔记的途中，还想留下另外的笔记。 如果是QuickAdd的Capture，可以将输入的文章和补充地址分开。 这里将保存地址固定在Inbox上，用实画面和原文介绍2次的输入，直到留在同一个笔记的末尾。</p><p class="article-meta">作者: <a href="/zh/about/">SimpleMemo Developer</a> ・ 公开・验证: <time datetime="2026-09-30">2026年9月30日</time></p></div><nav class="sd-hero-index" aria-label="本页内容"><p>本页内容</p><a href="#reading-01"><span aria-hidden="true">01</span><span>QuickAdd，如何在固定的笔记本上添加备忘录？ </span><span aria-hidden="true">↗</span></a><a href="#reading-02"><span aria-hidden="true">02</span><span>准备QuickAdd，选择Capture</span><span aria-hidden="true">↗</span></a><a href="#reading-03"><span aria-hidden="true">03</span><span>设置Capture的保存位置、格式、补充位置</span><span aria-hidden="true">↗</span></a></nav></header>
+<p class="quickadd-crumb"><a href="/zh/obsidian/plugins/">Obsidian的插件入门</a> → QuickAdd</p>
+<section class="lp-section ce-chapter sd-chapter" id="answer" data-answer-block="quickadd-inbox-capture" style="padding-top:1rem"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-01" data-ce-number="01">在QuickAdd中，如何在固定的笔记上添加备忘录？</h2></div><div class="ce-chapter__body"><p><strong>Capture这个选项，在Capture to上指定保存地址，在Capture format上指定1次的格式，在Write position上指定Bottom of file。 </strong>这次的例子在现有的<code>Inbox.md</code>上以<code>- {{VALUE}}</code>的形式补充，在打开工作中的其他笔记的情况下输入了。</p><p>如果直接写在普通笔记本上的方法足够的话，就不需要插件了。 如果每次想对齐补记地址和行的形式，请尝试这个设置。</p></div></section>
+<aside class="tip-box"><strong>确认的环境：</strong>Linux版Obsidian 1.13.7和QuickAdd 2.29.0，只放了验证用的架空备忘录的单独保管库。 操作了实际的命令调色板和输入画面。 iPhone的操作、外部启动、同步、SimpleMemo的输入、速度不计入本次确认。<a href="#evidence">详细范围和出处</a>在报道的末尾。</aside>
+<nav class="capture-toc" aria-label="这篇报道的目录"><a href="#prepare">准备</a><a href="#settings">Capture的设置</a><a href="#run">输入和结果</a><a href="#trouble">遇到困难的时候</a><a href="#roles">选择入口</a><a href="#faq">常见问题</a><a href="#evidence">验证和出处</a></nav>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="prepare"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-02" data-ce-number="02">准备QuickAdd，选择Capture</h2></div><div class="ce-chapter__body"><p>官方README的导入步骤是，在Obsidian的<strong>Settings → Community plugins</strong>中搜索QuickAdd，安装并激活的流程。 在这次的验证中，将官方2.29.0的分发文件放入单独的保管库中，激活了插件。 不是尝试从正常列表中安装的所有操作的记录。</p><p>如果对启用后的启动时间感到在意的话，请参考<a href="/zh/obsidian/troubleshooting/slow-startup/">在同一Linux保管库中0个、Templater、Templater+QuickAdd各3次比较的结果和分割步骤</a>。</p><p>QuickAdd 2.29.0的官方manifest指定的Obsidian的最小版本是<strong>1.13.0</strong>。 先确认一下正在使用的版本。 一开始不结合日期的自动指定和脚本，在同一个保管库中制作<code>Inbox.md</code>的1张，这样更容易确认保存地址。</p><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table"><thead><tr><th scope="col">选择</th><th scope="col">官方资料中的作用</th><th scope="col">这次的处理</th></tr></thead><tbody><tr><th scope="row">捕捉</th><td data-label="角色">在笔记本上添加文章</td><td data-label="这次">通过实际操作确认对现有Inbox的末尾追加</td></tr><tr><th scope="row">模板</th><td data-label="角色">从模板制作新的笔记</td><td data-label="这次">执行未验证</td></tr><tr><th scope="row">宏</th><td data-label="角色">汇总多个处理</td><td data-label="这次">执行未验证</td></tr><tr><th scope="row">多</th><td data-label="角色">在菜单中汇总选项</td><td data-label="这次">执行未验证</td></tr></tbody></table></div><p>固定Inbox的补充，不需要Templater和附加的宏。 考虑每个日期的记录位置时，可以在另一个<a href="/zh/obsidian/daily-note/">每日笔记指南</a>中确认保存位置和日期的处理。 这个页面没有尝试分配到日期笔记。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="settings"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-03" data-ce-number="03">设置Capture的保存地址、格式、补充位置</h2></div><div class="ce-chapter__body"><ol><li><strong>Settings → QuickAdd → New choice → Capture</strong>，将选项命名为<code>Inbox capture</code>。</li><li><strong>Capture to active file关闭</strong>，在<strong>Capture to</strong>中输入<code>Inbox.md</code>。 这是从打开的保管库的相对路径。</li><li><strong>Write position</strong>中选择<code>Bottom of file</code>。 这是在现有正文后面添加的设置。</li><li><strong>Capture format打开</strong>，指定<code>- {{VALUE}}</code>。 在<code>{{VALUE}}</code>中，输入画面中写的文章。</li><li>根据下面的表格确认输入和显示的设置，用<strong>Done</strong>关闭设置画面。</li></ol><div class="sd-table" tabindex="0" role="region" aria-label="可以横向滚动的表格"><table class="rt-table settings-table"><thead><tr><th scope="col">设定项目</th><th scope="col">这次的数值</th><th scope="col">这个例子的理由</th></tr></thead><tbody><tr><th scope="row">捕获到活动文件</th><td data-label="值">关闭</td><td data-label="理由">避免写在当前工作笔记中</td></tr><tr><th scope="row">捕获到</th><td data-label="值"><code>Inbox.md</code></td><td data-label="理由">选择保管库内的固定文件</td></tr><tr><th scope="row">如果文件不存在，请创建</th><td data-label="值">关闭</td><td data-label="理由">使用先做的Inbox。 不尝试新建</td></tr><tr><th scope="row">写入位置</th><td data-label="值">文件底部</td><td data-label="理由">保留现有的行并添加到末尾</td></tr><tr><th scope="row">捕捉格式</th><td data-label="值">ON：<code>- {{VALUE}}</code></td><td data-label="理由">1次输入项目符号</td></tr><tr><th scope="row">任务</th><td data-label="值">关闭</td><td data-label="理由">这个例子是不加勾栏的备忘录</td></tr><tr><th scope="row">打开</th><td data-label="值">关闭</td><td data-label="理由">输入后也显示工作中的笔记</td></tr><tr><th scope="row">使用编辑器选择作为默认值</th><td data-label="值">忽略选择</td><td data-label="理由">不使用选择中的正文，在输入画面上写文章</td></tr><tr><th scope="row">链接到捕获的文件/将链接复制到剪贴板</th><td data-label="值">禁用/关闭</td><td data-label="理由">不在其他笔记本或剪贴板上添加链接</td></tr></tbody></table></div><p>这次的Capture只使用简短的格式，没有使用宏、AI功能、脚本、Templater的后处理。 在添加高级示例之前，首先确认这个1的保存地址和输入。</p><p>QuickAdd的AI助手这次未验证，考虑其他AI插件时，请参考<a href="/zh/obsidian/ai-plugins/">主要AI插件的发送地址、语境、索引、密钥保存在固定来源读取表</a>，请将资料说明和实际通信的未确认部分分开确认。</p><figure class="shot"><a href="/assets/img/obsidian-quickadd/capture-settings.png" aria-label="以原尺寸打开QuickAdd的保存地址和末尾补充的设置画面"><img src="/assets/img/obsidian-quickadd/capture-settings.png" alt="QuickAdd的Capture设置。 Inbox.md、创建文件关闭、写入位置文件底部、链接到捕获的文件显示禁用" width="1024" height="800" loading="lazy"></a><figcaption>这次的实际设定。 指定保存地址为<code>Inbox.md</code>，追加位置指定为<code>Bottom of file</code>。 选择图像的话，可以原尺寸阅读。</figcaption></figure></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="run"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-04" data-ce-number="04">QuickAdd:从Run输入，确认Inbox的原文</h2></div><div class="ce-chapter__body"><p>打开另一个工作笔记，在命令调色板中选择<strong>QuickAdd: Run</strong>。 这次的Linux环境使用了<kbd>Ctrl</kbd>+<kbd>P</kbd>。 从列表中选择<code>Inbox capture</code>，<strong>Text to capture</strong>的输入画面会打开，显示<code>Inbox capture → Inbox.md</code>和保存地址。</p><figure class="shot"><a href="/assets/img/obsidian-quickadd/capture-prompt.png" aria-label="以原尺寸打开QuickAdd的实际输入画面"><img src="/assets/img/obsidian-quickadd/capture-prompt.png" alt="打开Working笔记，在QuickAdd的Text to capture画面中输入C14 capture one。 保存地址是Inbox.md" width="1024" height="800" loading="lazy"></a><figcaption>打开工作中的<code>Working.md</code>，将1的第1次虚构备忘录输入到实际输入画面中。</figcaption></figure><ol><li><code>C14 capture one</code>，然后按<strong>Ok</strong>。</li><li>再次选择<strong>QuickAdd: Run → Inbox capture</strong>，输入<code>C14 capture two</code>，然后按<strong>Ok</strong>。</li><li>这次2次都显示着<code>Working.md</code>，其保存内容也没有变化。 为了阅读结果，稍后打开<code>Inbox.md</code>。</li></ol><p>2次输入后保存的Markdown的<strong>原文</strong>。 英文各行是不包含个人信息的验证用备忘录，<code>original seed</code>是输入前就有的行。</p><pre class="capture-code" tabindex="0"><code data-evidence="two-captures"># Inbox
+
+- original seed
+
+- C14 capture one
+- C14 capture two</code></pre><p>比较保存文件时，可以获取<a href="/assets/downloads/obsidian-quickadd/inbox-before.md" download>输入前的Inbox</a>和<a href="/assets/downloads/obsidian-quickadd/inbox-after-one.md" download>1次后</a>、<a href="/assets/downloads/obsidian-quickadd/inbox-after-two.md" download>2次后</a>。 都是验证时的原文，不是导入自己的保管库的自动设置。</p><figure class="shot"><a href="/assets/img/obsidian-quickadd/inbox-result.png" aria-label="2次追加的Inbox的真实画面以原尺寸打开"><img src="/assets/img/obsidian-quickadd/inbox-result.png" alt="Obsidian的Inbox笔记original seed之后，C14 capture one和C14 capture two按照输入顺序显示的实画面" width="1024" height="800" loading="lazy"></a><figcaption>保留原行，2次的输入按顺序追加。 不仅确认了图像，还确认了保存文件的原文。</figcaption></figure><p>这次，在相同的输入画面上写<code>C14 cancelled input</code>并按<strong>Cancel</strong>，Inbox的保存内容没有变化，那篇文章也没有添加。 这是这个设置下的1次的确认结果。</p><p>经常使用的话，在官方资料的<strong>Add to command palette</strong>，或者选择的闪电图标中，可以将这个Capture注册到单独的命令中。 之后，是Settings → Hotkeys分配的流程。 这次的确认是<strong>QuickAdd:通过Run</strong>，没有尝试分配个别热键。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="trouble"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-05" data-ce-number="05">进入不同的笔记、进入开头、无法输入时</h2></div><div class="ce-chapter__body"><div class="capture-checks"><div><h3>保存地址不同</h3><p>确认现在打开的保管库和<code>Capture to</code>的路径。 进入工作中的笔记时，要查看<code>Capture to active file</code>是否打开。</p></div><div><h3>进入了选择画面</h3><p>在官方说明中，如果保存地址为空白或<code>/</code>，就会进入笔记本选择画面。 在这个例子中，不仅指定了文件夹名，还指定了<code>Inbox.md</code>这个文件名。</p></div><div><h3>被添加到开头</h3><p>确认<code>Write position</code>不是<code>Top of file</code>而是<code>Bottom of file</code>。 想留在末尾的备忘录和想插入标题下方的备忘录是不同的设置。</p></div><div><h3>选择的文章进入了</h3><p>确认<code>Use editor selection as default value</code>的设置。 在这个例子中，使用<code>Ignore selection</code>，从实际输入画面传递文章。</p></div><div><h3>找不到Inbox</h3><p>这个步骤关闭了<code>Create file if it doesn’t exist</code>。 指定并执行不存在的<code>MissingInbox.md</code>，在这次的环境下显示<code>Target file missing</code>，在输入画面之前停止。 文件也没有制作出来。 将保存地址恢复到现有的<code>Inbox.md</code>后使用。 这次没有尝试打开自动制作时的成功。</p></div><div><h3>找不到个别命令</h3><p>确认插件是否有效，首先从<code>QuickAdd: Run</code>中选择。 个别命令是激活<code>Add to command palette</code>并注册的另一个操作。</p></div></div><p>如果使用其他保管库或日期笔记的设置，不一定只替换这个例子中的<code>Inbox.md</code>就可以了。 更改保存地址后，在虚构的1行中确认实际文件后再使用。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter ce-chapter--wide" id="roles"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-06" data-ce-number="06">QuickAdd和SimpleMemo，从哪个入口留下？</h2></div><div class="ce-chapter__body"><p>首先，从平时留下笔记的场景中选择入口。 如果在写笔记的途中想在固定的Inbox上添加的话，这次尝试的QuickAdd的Capture就足够了。 如果想将iPhone的输入作为其他入口使用的话，可以确认SimpleMemo的<a href="/zh/obsidian/">连接和保存地址的设置</a>。</p><figure><div class="role-map"><div class="role-route"><h3>写笔记的途中</h3><ol><li>Obsidian正在工作</li><li>输入QuickAdd的Capture</li><li>这个保管库的<br><strong>Inbox.md追记</strong></li></ol></div><div class="role-route"><h3>iPhone想到的时候</h3><ol><li>以SimpleMemo为入口</li><li>设置关联、保存地址</li><li>在<br><strong>邮件/保管库中确认设定的收货地址</strong></li></ol></div></div><figcaption class="role-caption"><strong>这次验证的区分使用的例子：</strong>只有左边的固定Inbox补充，在这篇报道中确认了实际操作。 右边是进入现有合作指南的指南，不是这次尝试SimpleMemo的配送和iPhone操作的结果。 并不是说只要发邮件就可以进入保管库。</figcaption></figure><p><strong>QuickAdd不能从Obsidian外面使用，没有必要区分。 </strong>官方也有从<code>obsidian://quickadd</code>的URI、Apple Shortcuts和启动器、桌面的Obsidian CLI调用的方法。 这篇报道的图显示了这次尝试的输入路径和检查设置的入口。 URI和CLI的动作请在<a href="https://quickadd.obsidian.guide/docs/Advanced/TriggerQuickAddFromOutsideObsidian/" target="_blank" rel="noopener">官方的外部启动指南</a>中确认。</p><p>如果想比较入口，包括正在看的报道和发送选择文本的用途，请到<a href="/zh/vs/obsidian-share-sheet/">与官方共享表、快捷键、QuickAdd的比较</a>。 也有不添加特定应用程序就足够的情况。 这篇报道没有测量入口之间的速度和使用舒适度的优劣。</p></div></section>
+<section class="lp-section ce-chapter sd-chapter" id="faq"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-07" data-ce-number="07">常见问题</h2></div><div class="ce-chapter__body">
+<details class="faq-item"><summary class="faq-summary">QuickAdd的Capture和Template有什么不同？</summary><div class="faq-answer">Capture是在确定的笔记中添加文章的选项。 Template是从模板中制作新笔记的选择。 在这篇报道中确认实际操作的，只有在现有的Inbox.md末尾追加的Capture。</div></details>
+<details class="faq-item"><summary class="faq-summary">不是打开的笔记本，而是在Inbox上追加记？</summary><div class="faq-answer">关闭Capture to active file，Capture to指定Inbox.md，Write position指定Bottom of file。 在这篇报道的例子中，先制作了Inbox.md，Create file if it doesn't exist关闭了。 输入后打开保存目的地的笔记进行确认。</div></details>
+<details class="faq-item"><summary class="faq-summary">QuickAdd可以从Obsidian的外面调用吗？</summary><div class="faq-answer">官方资料中有obsidian://quickadd的URI、Apple Shortcuts和启动器、桌面的Obsidian CLI调用选项的方法。 并不是说不能从外面叫。 在这篇文章中尝试的是从Obsidian内的命令调色板执行，外部启动尚未验证。</div></details>
+<details class="faq-item"><summary class="faq-summary">iPhone也可以和这个设置一样使用吗？</summary><div class="faq-answer">QuickAdd 2.29.0的官方manifest不是桌面专用的设置，但这次的实际操作只有Linux版Obsidian 1.13.7。 iPhone和Android的设置画面、执行、终端间同步、SimpleMemo的输入没有确认。 请在自己的终端上确认保存地址和实际的补充。</div></details>
+</div></section><section class="lp-section ce-chapter sd-chapter" id="evidence"><div class="ce-chapter__head"><h2 class="lp-section__title" id="reading-08" data-ce-number="08">验证环境和确认的范围</h2></div><div class="ce-chapter__body"><ul><li><strong>实际操作：</strong>2026年9月30日20:06~20:10 JST（11:06~11:10 UTC）、Linux版Obsidian 1.13.7、QuickAdd 2.29.0、只有虚构备忘录的单独保管库。 通过Ctrl+P打开QuickAdd: Run，操作了选项和输入画面。</li><li><strong>保存结果：</strong>在现有的Inbox.md中，从实际prompt输入的2行依次追加。 Working.md作为显示中的笔记保留，也确认了保存内容没有变化。 分别确认了Cancel时的非变更和不存在保存地址时的停止。</li><li><strong>设置：</strong>固定路径、Bottom of file、Open OFF、Ignore selection、Create file OFF。 这个结果并不能证明创建新文件、日期变量、指定标题、属性和写入Canvas。</li><li><strong>官方原件：</strong>确认了2.29.0的分发文件和manifest、同一版本的README和Capture的官方资料。 官方release的公开日期是2026年9月29日JST。</li><li><strong>未验证：</strong>iPhone・Android・Mac的实际操作，URI/CLI的外部启动，Obsidian关闭的状态，同步，SimpleMemo配合，速度，语音・Siri・Apple Watch，长期使用和大量输入。</li></ul><p>这个验证是Linux的桌面操作，不是iOS Simulator或iPhone实机的确认。 仅限于刊登图像和保存Markdown所示的步骤，作为实际操作的结果进行介绍。</p><p><a href="https://github.com/simplememofast/simplememo/blob/main/docs/obsidian/evidence/quickadd-20260930.md" target="_blank" rel="noopener">验证记录・原件和确认范围</a></p><h3>官方资料</h3><ul class="source-list"><li><a href="https://github.com/chhoumann/quickadd/blob/2.29.0/README.md" target="_blank" rel="noopener">QuickAdd 2.29.0的README</a> — 导入、4种类的选择、执行方法</li><li><a href="https://github.com/chhoumann/quickadd/blob/2.29.0/docs/src/content/docs/docs/Choices/CaptureChoice.md" target="_blank" rel="noopener">同一版本的Capture官方说明</a> — 保存地址、格式、位置、选择文本、Open</li><li><a href="https://github.com/chhoumann/quickadd/blob/2.29.0/docs/src/content/docs/docs/Advanced/TriggerQuickAddFromOutsideObsidian.md" target="_blank" rel="noopener">同一版本的外部启动说明</a> — URI、Shortcuts、启动器、CLI</li><li><a href="https://github.com/chhoumann/quickadd/blob/2.29.0/manifest.json" target="_blank" rel="noopener">官方manifest</a> — 插件版和最小Obsidian版</li><li><a href="https://quickadd.obsidian.guide/docs/Choices/CaptureChoice/" target="_blank" rel="noopener">QuickAdd的当前Capture指南</a> — 今后的版本可能会改变设置名称和行为</li></ul><div class="internal-links"><a href="/zh/obsidian/plugins/">Obsidian的插件入门</a><a href="/zh/obsidian/daily-note/">每日笔记的保存地址和补充</a><a href="/zh/vs/obsidian-share-sheet/">比较从iPhone留下的入口</a></div><p class="capture-note">本网站由YURIKA, K.K.运营，介绍独立应用程序“SimpleMemo”。 不是Obsidian官方或QuickAdd开发者的报道。</p></div></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/zh/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">接下来阅读</span><strong>确认Obsidian连接和保存位置的设置</strong></a></aside>
+</article></main>
+<footer class="footer" data-site-footer=""><!-- site-chrome:intro --><div class="site-footer-intro" lang="zh-Hans" dir="ltr"><a class="site-brand" href="/zh/"><img src="/assets/img/app-icon-56.png" width="48" height="48" alt="" loading="lazy"><span><small>Obsidian 集成</small><strong>Simple Memo</strong></span></a><div><p class="site-footer-title">记下一点想法，迈出下一步。</p><p class="site-footer-description">从 iPhone 向 Obsidian 和电子邮件发送笔记。</p></div></div><!-- /site-chrome:intro --><div class="container"><nav class="footer__nav" aria-label="页脚导航"><div class="footer__col"><p class="footer__col-title">产品</p><a href="/zh/download/" class="footer__link">下载</a><a href="/zh/" class="footer__link">首页</a><a href="/zh/obsidian/" class="footer__link">Obsidian 集成</a></div><div class="footer__col"><p class="footer__col-title">比较与迁移</p><a href="/zh/vs/" class="footer__link">对比</a><a href="/zh/obsidian/compare/" class="footer__link">Obsidian比较</a></div><div class="footer__col"><p class="footer__col-title">支持</p><a href="/zh/about/" class="footer__link">关于开发者</a><a href="/zh/faq" class="footer__link">常见问题</a><a href="/zh/privacy" class="footer__link">隐私</a></div></nav><p class="footer__copyright">© 2026 Simple Memo - for Obsidian / 运营：YURIKA, K.K.</p></div></footer>
+<script>
+  (function() {
+    if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+      });
+    });
+  })();
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>

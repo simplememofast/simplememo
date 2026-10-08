@@ -12,6 +12,18 @@ const map = { cpps: [row] };
 const html = '<img src="/assets/img/qr-obsidian-ja.svg">';
 const definitions = [{ slug: 'obsidian', en: false }];
 
+test('generated translations retain the source QR route without remapping editorial English', () => {
+  const { generatedSources, sourceRouteOf } = require('./lib/localized-sources.js');
+  const routes = generatedSources({pages: [{source: 'obsidian/index.html',
+    existing: {ja: 'obsidian/index.html', en: 'en/obsidian/index.html'},
+    pages: {ja: 'obsidian/index.html', en: 'en/obsidian/index.html', ar: 'ar/obsidian/index.html'}}]});
+  assert.equal(routes.get('/ar/obsidian/'), '/obsidian/');
+  assert.equal(routes.has('/en/obsidian/'), false);
+  assert.equal(sourceRouteOf('/ar/obsidian/'), '/obsidian/');
+  assert.equal(cppForQr('/ar/obsidian/', map), ppid);
+  assert.equal(sourceRouteOf('/en/siri/'), '/en/siri/');
+});
+
 test('Obsidian QR keeps its campaign and storefront while selecting the visible CPP', () => {
   const [target] = buildTargets([{ pagePath: '/obsidian/', html }], map, definitions);
   assert.equal(target.url, `https://apps.apple.com/jp/app/id6758438948?pt=128498560&ct=obsidian-jp__qr&mt=8&ppid=${ppid}`);
