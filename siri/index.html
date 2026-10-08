@@ -143,10 +143,10 @@
        行末に取り残される（旧 .flow-row の崩れの原因）。表示指定は必ず
        [data-lang].active より強い詳細度で書くこと。
        矢印は擬似要素にしてあるので、単独で行送りされることはない。 */
-    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
+    .flow-card{container-type:inline-size;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
     .flow-card .flow-steps,
     .flow-card .flow-steps[data-lang].active{display:grid;grid-template-columns:1fr;gap:2rem;list-style:none;margin:0 auto;padding:0;max-width:30rem}
-    .flow-step{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
+    .flow-step{position:relative;min-inline-size:0;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
     .flow-step--siri{background:rgba(122,120,255,.14);border-color:rgba(139,124,255,.34)}
     .flow-step__who{font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#4fdcf0}
     .flow-step--siri .flow-step__who{color:#b0a5ff}
@@ -162,9 +162,9 @@
     /* 縦つなぎ: 線 + 三角の矢じり */
     .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
     .flow-step + .flow-step::after{content:'';position:absolute;left:50%;top:-.6rem;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(34,211,238,.85);border-bottom:0}
-    @media(min-width:900px){
+    @container(min-width:46rem){
       .flow-card .flow-steps,
-      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,1fr);gap:1.75rem;max-width:none;align-items:stretch}
+      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.75rem;max-width:none;align-items:stretch}
       /* 横つなぎ: 同じ擬似要素を回転させて使う */
       .flow-step + .flow-step::before{left:auto;right:calc(100% + .45rem);top:50%;width:.9rem;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.8))}
       .flow-step + .flow-step::after{left:auto;right:calc(100% + .1rem);top:50%;transform:translateY(-50%);border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid rgba(34,211,238,.85);border-right:0}

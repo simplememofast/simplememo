@@ -142,10 +142,10 @@
        行末に取り残される（旧 .flow-row の崩れの原因）。表示指定は必ず
        [data-lang].active より強い詳細度で書くこと。
        矢印は擬似要素にしてあるので、単独で行送りされることはない。 */
-    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
+    .flow-card{container-type:inline-size;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem 1.25rem;margin:1.5rem 0}
     .flow-card .flow-steps,
     .flow-card .flow-steps[data-lang].active{display:grid;grid-template-columns:1fr;gap:2rem;list-style:none;margin:0 auto;padding:0;max-width:30rem}
-    .flow-step{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
+    .flow-step{position:relative;min-inline-size:0;overflow-wrap:anywhere;display:flex;flex-direction:column;gap:.25rem;padding:.9rem 1.1rem;border-radius:12px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.26)}
     .flow-step--siri{background:rgba(122,120,255,.14);border-color:rgba(139,124,255,.34)}
     .flow-step__who{font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#4fdcf0}
     .flow-step--siri .flow-step__who{color:#b0a5ff}
@@ -161,9 +161,9 @@
     /* 縦つなぎ: 線 + 三角の矢じり */
     .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
     .flow-step + .flow-step::after{content:'';position:absolute;left:50%;top:-.6rem;transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid rgba(34,211,238,.85);border-bottom:0}
-    @media(min-width:900px){
+    @container(min-width:46rem){
       .flow-card .flow-steps,
-      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,1fr);gap:1.75rem;max-width:none;align-items:stretch}
+      .flow-card .flow-steps[data-lang].active{grid-template-columns:repeat(4,minmax(0,1fr));gap:1.75rem;max-width:none;align-items:stretch}
       /* 横つなぎ: 同じ擬似要素を回転させて使う */
       .flow-step + .flow-step::before{left:auto;right:calc(100% + .45rem);top:50%;width:.9rem;height:2px;transform:translateY(-50%);background:linear-gradient(90deg,rgba(34,211,238,.18),rgba(34,211,238,.8))}
       .flow-step + .flow-step::after{left:auto;right:calc(100% + .1rem);top:50%;transform:translateY(-50%);border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:6px solid rgba(34,211,238,.85);border-right:0}
@@ -324,10 +324,11 @@
     .guide-body p a,.guide-body li a{color:#6ab4ff;text-underline-offset:.2em}
     .guide-body h3{margin-top:1.5rem;margin-bottom:.5rem}
 
-    .quick-route{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin:1.25rem 0 1.5rem;max-width:32rem}
-    .quick-route a{position:relative;display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:64px;border:1px solid #5182ae;border-radius:12px;background:#14253a;color:#eaf2ff;text-decoration:none;font-size:1.125rem;font-weight:700}
-    .quick-route a+a::before{content:'→';position:absolute;left:-1.15rem;color:#a8d3ff}
+    .quick-route{display:grid;grid-template-columns:minmax(0,1fr);gap:.75rem;margin:1.25rem 0 1.5rem;max-width:32rem}
+    .quick-route a{position:relative;display:flex;align-items:center;justify-content:flex-start;gap:.75rem;min-inline-size:0;padding:.5rem 1rem;overflow-wrap:anywhere;text-align:center;min-height:64px;border:1px solid #5182ae;border-radius:12px;background:#14253a;color:#eaf2ff;text-decoration:none;font-size:1.125rem;font-weight:700}
+    .quick-route a+a::before{content:none;position:absolute;left:-1.15rem;color:#a8d3ff}
     .quick-route span{font-size:.875rem;color:#a8d3ff}
+    @media(min-width:600px){.quick-route{grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}.quick-route a{flex-direction:column;align-items:center;justify-content:center;padding:.5rem .25rem;gap:.25rem}.quick-route a+a::before{content:'→'}}
     .capture-step{scroll-margin-top:76px}
     /* Beginner guide: semantic HTML diagram, with decorative line icons. */
     .guide-body{max-width:920px;font-size:1.125rem}
