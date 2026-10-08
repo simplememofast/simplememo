@@ -1,0 +1,56 @@
+/* Homepage film: quiet typography, native playback and readable evidence. */
+.capture-home.capture-full main>.home-film {
+  width:calc(100% - 56px);max-width:1200px;margin:96px auto!important;
+  padding:0;border:0;border-radius:0;background:transparent;scroll-margin-block-start:120px;
+}
+.home-film__heading {display:flex;align-items:flex-end;justify-content:space-between;gap:32px;margin-block-end:28px;}
+.home-film__eyebrow {display:block;margin-block-end:18px;color:#b7a6cd;font-size:12px;font-weight:600;letter-spacing:.16em;}
+.home-film__heading h2 {margin:0;color:#f5f1fa;font-size:clamp(26px,3.6vw,46px);font-weight:700;line-height:1.45;letter-spacing:-.035em;}
+.home-film__meta {flex-shrink:0;margin:0 0 6px;color:#b5afc2;font-size:13px;line-height:1.8;}
+.home-film__stage {position:relative;isolation:isolate;overflow:hidden;border:1px solid #44354f;border-radius:22px;background:#09090f;}
+.home-film__stage video {display:block;width:100%;height:auto;aspect-ratio:8/5;border-radius:0!important;background:#09090f;}
+.home-film__stage:has(video:focus-visible) {outline:3px solid #e5cdff;outline-offset:5px;}
+.home-film__stage video:focus-visible {outline:3px solid #e5cdff;outline-offset:-5px;}
+.home-film__play {position:absolute;inset-inline-start:50%;inset-block-start:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:80px;height:80px;padding:0;border:1px solid #eadbff99;border-radius:50%;background:#eee7fa;color:#201629;box-shadow:0 8px 36px #0005;cursor:pointer;transition:background .2s,box-shadow .2s;}
+.home-film__play[hidden] {display:none;}
+.home-film__play:hover {background:#fff;box-shadow:0 8px 48px #d3baff30;}
+.home-film__play-icon {display:grid;place-items:center;}
+.home-film__play svg {width:24px;height:24px;fill:currentColor;margin-inline-start:3px;}
+.home-film__play-label {position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.home-film :is(button,summary,a):focus-visible {outline:3px solid #e5cdff;outline-offset:5px;}
+.capture-home main .home-film__play:focus-visible {border-radius:50%;}
+.capture-home.capture-full main>.home-film figcaption {padding:20px 0 0;font-size:14px!important;line-height:1.85!important;color:#b9b2c6;}
+.home-film__description {max-width:760px;margin:0;}
+.home-film__status {padding:12px 16px;border-inline-start:2px solid #d3baff;background:#21192a;color:#eee4f7;}
+.home-film__facts {margin-block-start:28px;border-block:1px solid #ffffff24;}
+.home-film__facts summary {display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:76px;padding:18px 4px;color:#e9e3f0;cursor:pointer;list-style:none;}
+.home-film__facts summary::-webkit-details-marker {display:none;}
+.home-film__facts summary::after {content:'+';flex-shrink:0;font-size:24px;font-weight:400;color:#cfb5f2;}
+.home-film__facts[open] summary::after {content:'−';}
+.home-film__facts summary strong {font-size:22px;font-weight:600;color:#dbc1ff;margin-inline-start:12px;white-space:nowrap;}
+.home-film__evidence {padding:0 4px 26px;}
+.home-film__evidence p {max-width:900px;margin:0 0 20px;color:#bab2c6;}
+.home-film__evidence a {color:#dfc6ff;text-underline-offset:4px;}
+.home-film__table {width:100%;max-width:900px;border-collapse:collapse;font-size:15px;line-height:1.65;}
+.home-film__table :is(th,td) {padding:12px 8px;border-block-end:1px solid #ffffff14;text-align:start;}
+.home-film__table thead {color:#aaa0b9;font-size:12px;}
+.home-film__table tbody th {font-weight:400;color:#dad4e3;}
+.home-film__table :is(th,td):last-child {width:80px;text-align:end;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.home-film__table tr:first-child :is(th,td) {color:#e0c6ff;}
+.home-film__evidence .home-film__source {margin:20px 0 0;font-size:13px;}
+@media(max-width:640px) {
+  .capture-home.capture-full main>.home-film {width:calc(100% - 40px);margin:64px auto!important;padding:0;}
+  .home-film__heading {display:block;margin-block-end:20px;}
+  .home-film__eyebrow {font-size:11px;margin-block-end:12px;}
+  .home-film__meta {margin:14px 0 0;font-size:12px;}
+  .home-film__stage {border-radius:12px;}
+  .home-film__play {width:48px;height:48px;}
+  .home-film__play svg {width:17px;height:17px;}
+  .home-film__facts {margin-block-start:20px;}
+  .home-film__facts summary {gap:12px;font-size:13px;}
+  .home-film__facts summary strong {font-size:19px;margin-inline-start:8px;}
+  .home-film__table {font-size:13px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .home-film__play {transition:none;}
+}

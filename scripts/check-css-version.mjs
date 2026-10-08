@@ -46,6 +46,10 @@ const ASSETS = [
   'assets/css/capture-seventh.css',
   'assets/css/home-hero.css',
   'assets/css/home-banners.css',
+  'assets/css/home-film.css',
+  'js/home-film.js',
+  'assets/video/capture-home.mp4',
+  'assets/video/capture-home-poster.jpg',
   'assets/css/editorial-resources.css',
   'js/obsidian-inbox-tool.js',
   'js/meeting-template-tools.js',
@@ -200,6 +204,7 @@ if (stale.size) {
 // Inline homepage styles must follow the same source-of-truth and cache checks.
 execFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py'), '--selftest'], { stdio: 'inherit' });
 execFileSync('python3', [path.join(ROOT, 'scripts/perf/verify_home.py')], { stdio: 'inherit' });
+execFileSync('python3', [path.join(ROOT, 'scripts/check_home_film.py'), '--selftest'], { stdio: 'inherit' });
 
 console.log('OK: every page requests the current version of '
   + targets.map((t) => `${path.basename(t.asset)}?v=${t.hash}`).join(', '));
