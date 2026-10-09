@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 from check_home_film import measurement_errors, measurement_snapshot, shown
 
 ROOT = Path(__file__).resolve().parents[1]
-W, H, FPS, DURATION = 1280, 800, 30, 22
+W, H, FPS, DURATION = 1280, 800, 30, 18
 SCALE = 2  # Draw vector-like typography at Retina resolution, not an upscaled bitmap.
 BG, INK, MUTED, ACCENT = '#09090f', '#f5f1fa', '#aaa3ba', '#d3baff'
 FONTS = {}
@@ -116,7 +116,7 @@ def note(draw, box, ink=1, lift=0):
 
 
 def opening(t, poster=False):
-    im=page(0,min(t/5,1));d=FilmDraw(im)
+    im=page(0,min(t/4,1));d=FilmDraw(im)
     text(d,(68,143),'思いついた、その瞬間に。',24,MUTED)
     lines=('ひらく。','書く。','送る。')
     for i,line in enumerate(lines):
@@ -135,7 +135,7 @@ def opening(t, poster=False):
 
 
 def writing(t):
-    im=page(1,min(t/5,1));d=FilmDraw(im)
+    im=page(1,min(t/4,1));d=FilmDraw(im)
     text(d,(68,170),'02 / CAPTURE',19,ACCENT)
     text(d,(60,260),'話しても。',84,INK,True)
     text(d,(60,369),'打っても。',84,INK,True)
@@ -151,7 +151,7 @@ def writing(t):
 
 
 def sending(t):
-    im=page(2,min(t/5,1));d=FilmDraw(im)
+    im=page(2,min(t/4,1));d=FilmDraw(im)
     text(d,(68,154),'03 / SEND',19,ACCENT)
     text(d,(60,217),'いつもの場所へ。',78,INK,True)
     text(d,(68,323),'自分宛メールに。Obsidianのノートに。',25,MUTED)
@@ -183,7 +183,7 @@ def sending(t):
 
 
 def measured(t,ready):
-    im=page(3,min(t/7,1));d=FilmDraw(im)
+    im=page(3,min(t/6,1));d=FilmDraw(im)
     text(d,(68,161),'入力できるまで。',45,INK,True)
     text(d,(60,240),shown(ready),210,ACCENT,True)
     text(d,(470,397),'秒',38,ACCENT)
@@ -200,10 +200,10 @@ def measured(t,ready):
 
 
 def frame(t,ready):
-    if t<5:return opening(t)
-    if t<10:return writing(t-5)
-    if t<15:return sending(t-10)
-    return measured(t-15,ready)
+    if t<4:return opening(t)
+    if t<8:return writing(t-4)
+    if t<12:return sending(t-8)
+    return measured(t-12,ready)
 
 
 def main():
@@ -218,7 +218,7 @@ def main():
     ready=ledger['apps']['Simple Memo - for Obsidian']['ready']
     if args.stills:
         args.stills.mkdir(parents=True,exist_ok=True)
-        for t in (2,7,12,18):frame(t,ready).save(args.stills/f'frame-{t:02}.png')
+        for t in (2,6,10,15):frame(t,ready).save(args.stills/f'frame-{t:02}.png')
         return
     out=ROOT/'assets/video'
     target=out/'capture-home.mp4'
@@ -232,7 +232,7 @@ def main():
             t=n/FPS
             current=frame(t,ready)
             # Brief restrained dissolves between chapters; hold most of each shot.
-            for boundary in (5,10,15):
+            for boundary in (4,8,12):
                 if boundary<=t<boundary+.45:
                     previous=frame(boundary-.001,ready)
                     current=Image.blend(previous,current,ramp(t,boundary,.45))
