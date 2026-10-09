@@ -1,15 +1,15 @@
 {
-  "as_of_jst": "2026-10-08",
+  "as_of_jst": "2026-10-09",
   "routine_snapshot_sha256": "6cb24923a477f976d3e0d16e6acd8dcebe4b241f8b730f16207eba313f56fc05",
   "viewport_measurement": {
-    "main_sha": "868bfcd5760fe4d91cb1168203f5385e4c1a4673",
-    "head_sha": "9b9dca319132a50f5cc41b8874a1b0458ab0924f",
-    "run_id": 37716470722,
+    "main_sha": "b5bdb7ee76b42b71421b1efaf9574a03333e7065",
+    "head_sha": "125bbdcc5fdf4d098c8c902f5f06c3a7f6302dcc",
+    "run_id": 37783024880,
     "attempt": 1,
-    "started_at": "2026-10-08T02:09:19Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/37716470722/attempts/1",
-    "job_id": 113114069537,
-    "state": "overflow",
+    "started_at": "2026-10-08T13:16:12Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/37783024880/attempts/1",
+    "job_id": 113330631061,
+    "state": "healthy",
     "report": {
       "version": 1,
       "static_problems": 0,
@@ -22,23 +22,23 @@
           "complete": true
         },
         "blink_sweep": {
-          "expected": 1844,
-          "measured": 1844,
+          "expected": 10136,
+          "measured": 10136,
           "failures": 0,
-          "problems": 1,
+          "problems": 0,
           "complete": true
         },
         "webkit": {
-          "expected": 500,
-          "measured": 500,
+          "expected": 2573,
+          "measured": 2573,
           "failures": 0,
-          "problems": 1,
+          "problems": 0,
           "complete": true
         }
       }
     }
   },
-  "open_total": 8,
+  "open_total": 7,
   "deferred": [],
   "pending_pr": [
     {
@@ -56,7 +56,7 @@
       "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
     }
   ],
-  "oldest_open_days": 3,
+  "oldest_open_days": 4,
   "acknowledged": 8,
   "closed_today": [
     {
@@ -70,9 +70,19 @@
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 5回着手し usage_limit の再発なし"
     },
     {
+      "id": "act-routine-snapshot-stale",
+      "title": "副系の写しが 2.3日前（上限 3日）— 期限まであと 0.7日",
+      "evidence": "scripts/check-routine-runs.mjs --snapshot-fresh が exit 0"
+    },
+    {
       "id": "act-selfheal-ap-20260905-actions",
       "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
       "evidence": "ap-20260928-actions-codex-01a0e541-4411-7443-8004-6f4e0a6d5562 より後に actions は 5回着手し usage_limit の再発なし"
+    },
+    {
+      "id": "act-viewport-measurement",
+      "title": "描画検査の未測定・横はみ出しを解消する",
+      "evidence": "最新main b5bdb7ee76b42b71421b1efaf9574a03333e7065 の全範囲実測・新規横はみ出し0: https://github.com/simplememofast/simplememo/actions/runs/37783024880/attempts/1"
     },
     {
       "id": "act-selfheal-ap-20260908-ccr-0920-codex-01a07e63-4255-7be2-8623-3ab271db643b",
@@ -104,7 +114,7 @@
     {
       "id": "act-health-2008",
       "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "age_days": 2,
+      "age_days": 3,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "#2008 がまだ open",
       "not_before_jst": null
@@ -113,7 +123,7 @@
       "id": "act-selfheal-escalated-no_artifact",
       "title": "no_artifact が再発（修理カウント5／設定上限3）",
       "detail": "対象 ap-20261006-actions（2026-10-06 / actions）。self_repair.stop_after_failed_repairs に達したため、修理をやめて人間に上げる。同時に該当経路の封じ込め（--contain）を実行する。",
-      "age_days": 2,
+      "age_days": 3,
       "why": "修理の上限に達した故障は人が原因を見るまで自動で触らない（policy.ai_may_resume:false）",
       "evidence": "ap-20261006-actions は未修理のまま（repair_of で名指しされていない）",
       "not_before_jst": null
@@ -123,7 +133,7 @@
     {
       "id": "act-health-1991",
       "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "age_days": 3,
+      "age_days": 4,
       "auto": null,
       "evidence": "#1991 がまだ open"
     },
@@ -131,39 +141,31 @@
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
       "detail": "37249907984（2026-10-05 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
-      "age_days": 3,
+      "age_days": 4,
       "auto": "reconcile-runs",
       "evidence": "台帳に無い run が 1件: 37249907984"
     },
     {
       "id": "act-shipping-outage",
-      "title": "どの経路も 3日連続で出荷していない（2026-10-06〜2026-10-08）",
-      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-10-06 / 2026-10-07 / 2026-10-08）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
-      "age_days": 1,
+      "title": "どの経路も 4日連続で出荷していない（2026-10-06〜2026-10-09）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "age_days": 2,
       "auto": null,
       "evidence": "2026-10-05 以降どの経路も出荷していない"
     },
     {
       "id": "act-status-stale",
-      "title": "data/autopilot-status.json が 3日前（2026-10-05）のまま",
+      "title": "data/autopilot-status.json が 4日前（2026-10-05）のまま",
       "detail": "日報の唯一のデータ源。当日分でないと「上流が止まった」と報告される（Runbook §5-2）。",
-      "age_days": 1,
+      "age_days": 2,
       "auto": null,
       "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1"
     },
     {
-      "id": "act-viewport-measurement",
-      "title": "描画検査の未測定・横はみ出しを解消する",
-      "detail": "最新mainの描画検査: overflow (overflow)。https://github.com/simplememofast/simplememo/actions/runs/37716470722/attempts/1。Blink深い面・全面とWebKitの全対象を実測し、新しい横はみ出しゼロを確認する。CI全体の成功だけで閉じない。",
-      "age_days": 1,
-      "auto": null,
-      "evidence": "描画の全範囲実測は未確認 (overflow)"
-    },
-    {
       "id": "act-route-silent-actions",
-      "title": "actions が 3日ぶん出荷していない（2026-10-06〜2026-10-08・最後の出荷 2026-10-04）",
-      "detail": "この経路の行は立っているが、2026-10-04 より後に出荷が1件も無い（2026-10-06 / 2026-10-07 / 2026-10-08）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
-      "age_days": 0,
+      "title": "actions が 4日ぶん出荷していない（2026-10-06〜2026-10-09・最後の出荷 2026-10-04）",
+      "detail": "この経路の行は立っているが、2026-10-04 より後に出荷が1件も無い（2026-10-06 / 2026-10-07 / 2026-10-08 / 2026-10-09）。\n\n**失敗ではないので、失敗を見る監視には出ない。** cron-health は event=schedule かつ conclusion=failure だけを集計し、autopilot-health は status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、ここが黙っていること自体はどちらにも現れない。\n\n**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、両方が最近出せていることでしか裏が取れない。片方が出していない日数は、そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。",
+      "age_days": 1,
       "auto": null,
       "evidence": "2026-10-04 以降 actions の出荷は台帳に無い"
     }
@@ -172,8 +174,8 @@
     {
       "handler": "reconcile-runs",
       "ok": true,
-      "changed": 0,
-      "log": "37249907984: 成功回はPR特定が要るため自動追記しない"
+      "changed": 1,
+      "log": "37249907984: 成功回はPR特定が要るため自動追記しない\n37874099540 -> ap-20261009-actions: appended ap-20261009-actions (skipped_gate)"
     }
   ]
 }
