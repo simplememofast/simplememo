@@ -61,7 +61,8 @@ def validate(files):
     need(meta['sha256']==digest(files['assets/video/capture-home.mp4']),'Video differs from its export record')
     need(meta['poster_sha256']==digest(files['assets/video/capture-home-poster.jpg']),'Poster differs from its export record')
     need(meta['bytes']==len(files['assets/video/capture-home.mp4']),'Video byte size differs')
-    need(meta['duration_s']==22 and meta['fps']==30 and (meta['width'],meta['height'])==(2560,1600),'Film format changed; review visible metadata')
+    need(meta['duration_s']==18 and meta['fps']==30 and (meta['width'],meta['height'])==(2560,1600),'Film format changed; review visible metadata')
+    need('図解動画 · 18秒 · 音声なし' in film and '18秒の図解動画を再生' in film,'Visible film duration is stale')
     need(f'<strong>{ready}秒</strong>' in film,'Visible timing differs from ledger')
     need('iPhone 16e' in film and 'ウォーム起動' in film and
          ledger['measuredOn']['device']=='iPhone 16e (A18)' and
@@ -82,7 +83,7 @@ def validate(files):
     if video:
         need(video.get('contentUrl')=='https://simplememofast.com'+video_url and
              video.get('thumbnailUrl')==['https://simplememofast.com'+poster_url], 'VideoObject asset URLs are stale')
-        need(video.get('duration')=='PT22S' and f'入力開始まで{ready}秒' in video.get('description',''), 'VideoObject timing is stale')
+        need(video.get('duration')=='PT18S' and f'入力開始まで{ready}秒' in video.get('description',''), 'VideoObject timing is stale')
     return errors
 
 
@@ -98,7 +99,8 @@ def main():
             copy[name]=copy[name].replace(old,new,1);mutants.append(copy)
         change('index.html',b'<strong>0.4',b'<strong>9.4')
         change('index.html','2.8秒'.encode(),'9.8秒'.encode())
-        change('index.html',b'PT22S',b'PT20S')
+        change('index.html',b'PT18S',b'PT20S')
+        change('index.html','図解動画 · 18秒'.encode(),'図解動画 · 22秒'.encode())
         change('index.html',b'capture-home.mp4?v=',b'capture-home.mp4?v=stale')
         change('assets/video/capture-home.mp4',files['assets/video/capture-home.mp4'][:8],b'BROKEN!!')
         change('scripts/build_home_film.py',b'FPS, DURATION',b'FPS,  DURATION')
