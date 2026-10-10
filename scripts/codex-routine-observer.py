@@ -330,7 +330,9 @@ def native_observer_origin(observed_at, invoke=None, parent_pid=None, home=None)
 
 def validate_detection_receipt(receipt, row, observed):
     keys(receipt, 'version kind observed_at parent_pid launcher_sha256 thread_id turn_id transcript_sha256 sha256')
-    first = row['transcript']['turns'][0]
+    turns = row['transcript'].get('turns', [])
+    require(row['transcript']['state'] == 'observed' and turns, 'Invalid automatic detection receipt')
+    first = turns[0]
     require(receipt['version'] == 1 and receipt['kind'] == 'launchd_interval'
             and type(receipt['parent_pid']) is int and receipt['parent_pid'] > 1
             and receipt['thread_id'] == row['thread_id'] and receipt['turn_id'] == first['turn_id']
@@ -359,6 +361,9 @@ def validate_runtime_failure(receipt, row):
 def observe(codex_dir, previous=None, now=None, resources=None):
     observed_at = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
     origin = native_observer_origin(observed_at)
+    if previous is not None:
+        validate(previous, now=previous['observed_at'])
+        require(timestamp(previous['observed_at']) <= timestamp(observed_at), 'Codex observation is stale or future')
     prior_runs = {r['thread_id']: r for r in (previous or {}).get('runs', [])}
     scheduler = readonly(codex_dir / 'sqlite/codex-dev.db')
     state = readonly(codex_dir / 'state_5.sqlite')
@@ -392,6 +397,14 @@ def observe(codex_dir, previous=None, now=None, resources=None):
             if receipt is not None:
                 record['gate_receipt'] = receipt
             prior = prior_runs.get(tid, {})
+            if record['transcript']['state'] == 'unavailable':
+                if prior.get('last_verified'):
+                    record['last_verified'] = prior['last_verified']
+                elif prior.get('transcript', {}).get('state') == 'observed':
+                    record['last_verified'] = {'observed_at': previous['observed_at'], 'run': prior}
+                normalized.append(record)
+                continue
+            prior = prior.get('last_verified', {}).get('run', prior)
             if prior.get('detection_receipt'):
                 record['detection_receipt'] = prior['detection_receipt']
             else:
@@ -410,7 +423,7 @@ def observe(codex_dir, previous=None, now=None, resources=None):
     for automation in automations:
         for key in ('next_run_at', 'last_run_at'):
             automation[key] = None if automation[key] is None else iso(automation[key])
-    result = {'schema_version': 4, 'observed_at': observed_at, 'registered': list(REGISTERED),
+    result = {'schema_version': 5, 'observed_at': observed_at, 'registered': list(REGISTERED),
               'source': 'local_codex_scheduler_and_session_store', 'scheduler_query_complete': True,
               # launchd's service name does not necessarily reach descendants.
               # Its absence cannot establish that a person started this read.
@@ -426,6 +439,10 @@ def observe(codex_dir, previous=None, now=None, resources=None):
             newer = current[old['thread_id']]
             require(newer['automation_id'] == old['automation_id'] and newer['created_at'] == old['created_at'],
                     'Scheduled run identity changed')
+            # Current missing bytes never become a new execution. Compare the
+            # sealed old metadata while keeping the current source unavailable.
+            old = old.get('last_verified', {}).get('run', old)
+            newer = newer.get('last_verified', {}).get('run', newer)
             prior_turns = old['transcript']['turns']
             if old.get('runtime_failure'):
                 # New follow-up bytes may change the transcript hash, never
@@ -451,7 +468,7 @@ def keys(value, expected):
 
 def validate(doc, now=None):
     keys(doc, 'schema_version observed_at registered source scheduler_query_complete collection_context automations runs')
-    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3, 4)
+    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3, 4, 5)
             and doc['registered'] == list(REGISTERED), 'Observation scope changed')
     require(doc['source'] == 'local_codex_scheduler_and_session_store' and doc['scheduler_query_complete'] is True,
             'Scheduler inventory is incomplete')
@@ -473,63 +490,81 @@ def validate(doc, now=None):
             timestamp(a['next_run_at'])
     seen = set()
     for run in doc['runs']:
-        keys(run, 'thread_id automation_id scheduler_status created_at updated_at business_outcome transcript'
-             + (' gate_receipt' if doc['schema_version'] >= 3 and 'gate_receipt' in run else '')
-             + (' detection_receipt' if doc['schema_version'] >= 3 and 'detection_receipt' in run else '')
-             + (' runtime_failure' if doc['schema_version'] >= 4 and 'runtime_failure' in run else ''))
-        if 'runtime_failure' in run:
-            validate_runtime_failure(run['runtime_failure'], run)
-        if 'detection_receipt' in run:
-            validate_detection_receipt(run['detection_receipt'], run, observed)
-        if 'gate_receipt' in run:
-            receipt = run['gate_receipt']
-            keys(receipt, 'version thread_id turn_id observed_at admitted code input_sha256 script_sha256 sha256')
-            require(receipt['version'] == 1 and receipt['thread_id'] == run['thread_id']
-                    and type(receipt['admitted']) is bool and HASH.fullmatch(receipt['input_sha256'])
-                    and HASH.fullmatch(receipt['script_sha256'])
-                    and receipt['sha256'] == receipt_digest({k: v for k, v in receipt.items() if k != 'sha256'}), 'Invalid gate receipt')
-            require(isinstance(receipt['code'], str) and re.fullmatch('[a-z][a-z0-9_]{0,79}', receipt['code']), 'Invalid gate code')
-            first = run['transcript']['turns'][0]
-            require(receipt['turn_id'] == first['turn_id'] and timestamp(first['started_at']) <= timestamp(receipt['observed_at']) <= observed
-                    and (first['finished_at'] is None or timestamp(receipt['observed_at']) <= timestamp(first['finished_at'])),
-                    'Gate receipt is outside the original turn')
-        tid = run['thread_id']
-        require(isinstance(tid, str) and UUID.fullmatch(tid) and tid not in seen, 'Duplicate or invalid scheduled run')
-        seen.add(tid)
-        require(run['automation_id'] in REGISTERED, 'Unregistered automation data')
-        # UI review state is not an original turn outcome or publication proof.
-        require(run['scheduler_status'] in ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'NEEDS_REVIEW', 'PENDING_REVIEW',
-                                            'ACCEPTED', 'ARCHIVED', 'FAILED', 'ERROR'),
-                'Unknown scheduler UI status')
-        require(run['business_outcome'] == 'not_inferred', 'Scheduler status is not publication success')
-        require(timestamp(run['created_at']) <= timestamp(run['updated_at']) <= observed, 'Invalid run timestamps')
-        t = run['transcript']
-        if t['state'] == 'unavailable':
-            keys(t, 'state reason sha256 bytes turns')
-            require(t['reason'] in ('thread_missing', 'path_outside_session_store', 'unreadable_or_incomplete_transcript')
-                    and t['sha256'] is None and t['bytes'] is None and t['turns'] == [], 'Unavailable source fabricated')
-            continue
-        keys(t, 'state sha256 bytes turns')
-        require(t['state'] == 'observed' and HASH.fullmatch(t['sha256']) and type(t['bytes']) is int
-                and t['bytes'] > 0, 'Missing transcript fingerprint')
-        prior_end = timestamp(run['created_at'])
-        turn_ids = set()
-        for i, turn in enumerate(t['turns']):
-            keys(turn, 'turn_id started_at finished_at state tool_calls tool_outputs unanswered_calls unattributed_outputs')
-            require(UUID.fullmatch(turn['turn_id']) and turn['turn_id'] not in turn_ids, 'Duplicate or invalid turn')
-            turn_ids.add(turn['turn_id'])
-            start = timestamp(turn['started_at'])
-            require(prior_end <= start <= observed, 'Invalid turn order')
-            require(turn['state'] in ('completed', 'failed', 'aborted', 'in_progress'), 'Unknown turn termination')
-            if turn['state'] == 'in_progress':
-                require(turn['finished_at'] is None and i == len(t['turns']) - 1, 'Open turn is not last')
-            else:
-                prior_end = timestamp(turn['finished_at'])
-                require(start <= prior_end <= observed, 'Invalid turn termination time')
-            for count in ('tool_calls', 'tool_outputs', 'unanswered_calls', 'unattributed_outputs'):
-                require(type(turn[count]) is int and turn[count] >= 0, 'Invalid tool count')
-            require(turn['tool_calls'] == turn['tool_outputs'] + turn['unanswered_calls'], 'Tool results do not match calls')
+        validate_run(run, doc['schema_version'], observed, seen)
     return doc
+
+
+def validate_run(run, version, observed, seen):
+    keys(run, 'thread_id automation_id scheduler_status created_at updated_at business_outcome transcript'
+         + (' gate_receipt' if version >= 3 and 'gate_receipt' in run else '')
+         + (' detection_receipt' if version >= 3 and 'detection_receipt' in run else '')
+         + (' runtime_failure' if version >= 4 and 'runtime_failure' in run else '')
+         + (' last_verified' if version >= 5 and 'last_verified' in run else ''))
+    if 'last_verified' in run:
+        last = run['last_verified']
+        keys(last, 'observed_at run')
+        require(run['transcript']['state'] == 'unavailable'
+                and not any(k in run for k in ('gate_receipt', 'detection_receipt', 'runtime_failure'))
+                and timestamp(last['observed_at']) <= observed
+                and last['run'].get('transcript', {}).get('state') == 'observed'
+                and 'last_verified' not in last['run']
+                and all(run[k] == last['run'].get(k) for k in ('thread_id', 'automation_id', 'created_at')),
+                'Invalid historical observation')
+        validate_run(last['run'], 4, timestamp(last['observed_at']), set())
+    if 'runtime_failure' in run:
+        validate_runtime_failure(run['runtime_failure'], run)
+    if 'detection_receipt' in run:
+        validate_detection_receipt(run['detection_receipt'], run, observed)
+    if 'gate_receipt' in run:
+        receipt = run['gate_receipt']
+        keys(receipt, 'version thread_id turn_id observed_at admitted code input_sha256 script_sha256 sha256')
+        require(receipt['version'] == 1 and receipt['thread_id'] == run['thread_id']
+                and type(receipt['admitted']) is bool and HASH.fullmatch(receipt['input_sha256'])
+                and HASH.fullmatch(receipt['script_sha256'])
+                and receipt['sha256'] == receipt_digest({k: v for k, v in receipt.items() if k != 'sha256'}), 'Invalid gate receipt')
+        require(isinstance(receipt['code'], str) and re.fullmatch('[a-z][a-z0-9_]{0,79}', receipt['code']), 'Invalid gate code')
+        turns = run['transcript'].get('turns', [])
+        require(run['transcript']['state'] == 'observed' and turns, 'Invalid gate receipt')
+        first = turns[0]
+        require(receipt['turn_id'] == first['turn_id'] and timestamp(first['started_at']) <= timestamp(receipt['observed_at']) <= observed
+                and (first['finished_at'] is None or timestamp(receipt['observed_at']) <= timestamp(first['finished_at'])),
+                'Gate receipt is outside the original turn')
+    tid = run['thread_id']
+    require(isinstance(tid, str) and UUID.fullmatch(tid) and tid not in seen, 'Duplicate or invalid scheduled run')
+    seen.add(tid)
+    require(run['automation_id'] in REGISTERED, 'Unregistered automation data')
+    # UI review state is not an original turn outcome or publication proof.
+    require(run['scheduler_status'] in ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'NEEDS_REVIEW', 'PENDING_REVIEW',
+                                        'ACCEPTED', 'ARCHIVED', 'FAILED', 'ERROR'),
+            'Unknown scheduler UI status')
+    require(run['business_outcome'] == 'not_inferred', 'Scheduler status is not publication success')
+    require(timestamp(run['created_at']) <= timestamp(run['updated_at']) <= observed, 'Invalid run timestamps')
+    t = run['transcript']
+    if t['state'] == 'unavailable':
+        keys(t, 'state reason sha256 bytes turns')
+        require(t['reason'] in ('thread_missing', 'path_outside_session_store', 'unreadable_or_incomplete_transcript')
+                and t['sha256'] is None and t['bytes'] is None and t['turns'] == [], 'Unavailable source fabricated')
+        return
+    keys(t, 'state sha256 bytes turns')
+    require(t['state'] == 'observed' and HASH.fullmatch(t['sha256']) and type(t['bytes']) is int
+            and t['bytes'] > 0, 'Missing transcript fingerprint')
+    prior_end = timestamp(run['created_at'])
+    turn_ids = set()
+    for i, turn in enumerate(t['turns']):
+        keys(turn, 'turn_id started_at finished_at state tool_calls tool_outputs unanswered_calls unattributed_outputs')
+        require(UUID.fullmatch(turn['turn_id']) and turn['turn_id'] not in turn_ids, 'Duplicate or invalid turn')
+        turn_ids.add(turn['turn_id'])
+        start = timestamp(turn['started_at'])
+        require(prior_end <= start <= observed, 'Invalid turn order')
+        require(turn['state'] in ('completed', 'failed', 'aborted', 'in_progress'), 'Unknown turn termination')
+        if turn['state'] == 'in_progress':
+            require(turn['finished_at'] is None and i == len(t['turns']) - 1, 'Open turn is not last')
+        else:
+            prior_end = timestamp(turn['finished_at'])
+            require(start <= prior_end <= observed, 'Invalid turn termination time')
+        for count in ('tool_calls', 'tool_outputs', 'unanswered_calls', 'unattributed_outputs'):
+            require(type(turn[count]) is int and turn[count] >= 0, 'Invalid tool count')
+        require(turn['tool_calls'] == turn['tool_outputs'] + turn['unanswered_calls'], 'Tool results do not match calls')
 
 
 def apply(ledger, codex_dir):
@@ -549,10 +584,13 @@ def apply(ledger, codex_dir):
 
 
 def summary(doc):
-    initial = [r['transcript']['turns'][0] for r in doc['runs'] if r['transcript']['turns']]
+    verified = [r.get('last_verified', {}).get('run', r) for r in doc['runs']]
+    initial = [r['transcript']['turns'][0] for r in verified if r['transcript']['turns']]
+    historical = [r['last_verified']['run']['transcript']['turns'] for r in doc['runs'] if 'last_verified' in r]
     return {'observed_at': doc['observed_at'], 'registered': len(doc['automations']), 'runs': len(doc['runs']),
             'collection_context': doc['collection_context'] if doc['schema_version'] >= 2 else 'legacy_unverified',
             'initial_failed': sum(t['state'] in ('failed', 'aborted') for t in initial),
+            'historical_initial_failed': sum(bool(t) and t[0]['state'] in ('failed', 'aborted') for t in historical),
             'unavailable_transcripts': sum(r['transcript']['state'] != 'observed' for r in doc['runs']),
             'publication_success': 'not_inferred'}
 
@@ -836,6 +874,16 @@ class Tests(unittest.TestCase):
                 receipt = first['runs'][0]['detection_receipt']
                 self.assertEqual(receipt['thread_id'], self.tid)
                 self.assertEqual(observe(root, first, now=self.now)['runs'][0]['detection_receipt'], receipt)
+                log.unlink()
+                missing = observe(root, first, now=self.now)
+                self.assertNotIn('detection_receipt', missing['runs'][0])
+                self.assertEqual(missing['runs'][0]['last_verified']['run']['detection_receipt'], receipt)
+                invalid = json.loads(json.dumps(missing))
+                invalid['runs'][0]['detection_receipt'] = receipt
+                with self.assertRaises(ValueError): validate(invalid, now=self.now)
+                invalid['runs'][0].pop('last_verified')
+                with self.assertRaisesRegex(ValueError, 'Invalid automatic detection receipt'):
+                    validate(invalid, now=self.now)
                 receipt['parent_pid'] += 1
                 with self.assertRaisesRegex(ValueError, 'Invalid automatic detection receipt'):
                     validate(first, now=self.now)
@@ -999,7 +1047,7 @@ class Tests(unittest.TestCase):
             validate(old, now=self.now)
             self.assertEqual(summary(old)['collection_context'], 'legacy_unverified')
             new = observe(root, old, now=self.now)
-            self.assertEqual(new['schema_version'], 4)
+            self.assertEqual(new['schema_version'], 5)
             self.assertEqual(new['runs'], old['runs'])
             self.assertEqual(summary(new)['initial_failed'], 1)
 
@@ -1011,8 +1059,28 @@ class Tests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Closed turn changed'):
                 observe(root, doc, now=self.now)
             log.unlink()
-            with self.assertRaisesRegex(ValueError, 'transcript disappeared'):
-                observe(root, doc, now=self.now)
+            missing = observe(root, doc, now=self.now)
+            self.assertEqual(missing['runs'][0]['transcript']['state'], 'unavailable')
+            self.assertEqual(missing['runs'][0]['last_verified'],
+                             {'observed_at': doc['observed_at'], 'run': doc['runs'][0]})
+            self.assertEqual(summary(missing)['initial_failed'], 1)
+            self.assertEqual(summary(missing)['historical_initial_failed'], 1)
+            later = observe(root, missing, now='2026-09-09T06:00:00.000Z')
+            self.assertEqual(later['runs'][0]['last_verified'], missing['runs'][0]['last_verified'])
+            log.write_bytes(self.raw(failed=False))
+            with self.assertRaisesRegex(ValueError, 'Closed turn changed'):
+                observe(root, missing, now=self.now)
+            log.write_bytes(self.raw())
+            restored = observe(root, missing, now=self.now)
+            self.assertEqual(restored['runs'], doc['runs'])
+            for change in ('identity', 'private', 'nested', 'future', 'current'):
+                bad = json.loads(json.dumps(missing)); last = bad['runs'][0]['last_verified']
+                if change == 'identity': last['run']['automation_id'] = 'obsidian' if bad['runs'][0]['automation_id'] == 'obsidian-2' else 'obsidian-2'
+                if change == 'private': last['run']['prompt'] = 'private'
+                if change == 'nested': last['run']['last_verified'] = {}
+                if change == 'future': last['observed_at'] = '2099-01-01T00:00:00.000Z'
+                if change == 'current': bad['runs'][0]['transcript'] = doc['runs'][0]['transcript']
+                with self.assertRaises(ValueError): validate(bad, now=self.now)
             c = sqlite3.connect(root / 'sqlite/codex-dev.db')
             c.execute('DELETE FROM automation_runs'); c.commit(); c.close()
             with self.assertRaisesRegex(ValueError, 'scheduled run disappeared'):

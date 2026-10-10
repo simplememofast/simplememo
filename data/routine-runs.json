@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-10-06T07:44:56.773Z",
+  "observed_at": "2026-10-10T12:26:17.218Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -142,18 +142,34 @@
   "open_findings": [
     {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
-      "what": "completion_unverified",
+      "what": "observation_unavailable",
       "found_at": "2026-09-05",
-      "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
+      "why": "全件一覧に存在せず、個別GETも404。現在の実行結果は不明。登録と最後の実測、既存の異常履歴を保持し、未解消として追跡する。停止・削除・復旧成功とは判定しない。",
       "observation": {
-        "observed_at": "2026-10-06T07:44:56.773Z",
-        "enabled": false,
+        "observed_at": "2026-10-10T12:26:17.218Z",
+        "enabled": null,
         "last_run_status": null,
         "last_run_fired_at": null,
         "last_run_finished_at": null,
         "last_run_session_id": null,
-        "next_run_at": "2026-09-06T12:40:53.239185213Z"
-      }
+        "next_run_at": null
+      },
+      "state_history": [
+        {
+          "what": "completion_unverified",
+          "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
+          "observation": {
+            "observed_at": "2026-10-06T07:44:56.773Z",
+            "enabled": false,
+            "last_run_status": null,
+            "last_run_fired_at": null,
+            "last_run_finished_at": null,
+            "last_run_session_id": null,
+            "next_run_at": "2026-09-06T12:40:53.239185213Z"
+          },
+          "changed_at": "2026-10-10T12:26:17.218Z"
+        }
+      ]
     }
   ],
   "intentional_stops": [
@@ -563,7 +579,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_018EyeYcJiVLFQeAHArMpGtM",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:55.628Z"
+        "observed_at": "2026-10-10T12:26:15.875Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -629,7 +645,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01GphcHzTuH1A1JUGq8dYkWa",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:55.881Z"
+        "observed_at": "2026-10-10T12:26:16.112Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -666,17 +682,41 @@
     {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
       "name": "伏字が実際の日次取り込みで効いたか確認",
-      "cron_expression": "",
-      "run_once_at": "2026-09-05T12:40:00Z",
-      "enabled": false,
-      "ended_reason": "run_once_fired",
-      "bound_session": true,
-      "next_run_at": "2026-09-06T12:40:53.239185213Z",
-      "last_fired_at": "2026-09-05T12:40:53.619116Z",
+      "enabled": null,
+      "cron_expression": null,
+      "run_once_at": null,
+      "next_run_at": null,
+      "last_fired_at": null,
       "last_run_status": null,
       "last_run_fired_at": null,
       "last_run_finished_at": null,
-      "last_run_session_id": null
+      "last_run_session_id": null,
+      "observation_state": "unavailable",
+      "source_observation": {
+        "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
+        "method": "GET",
+        "endpoint": "/v1/code/triggers/trig_01N1SWZdPwKTot2SbT71UV2U",
+        "http_status": 404,
+        "observed_at": "2026-10-10T12:26:16.337Z"
+      },
+      "last_verified": {
+        "observed_at": "2026-10-06T07:44:56.773Z",
+        "routine": {
+          "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
+          "name": "伏字が実際の日次取り込みで効いたか確認",
+          "cron_expression": "",
+          "run_once_at": "2026-09-05T12:40:00Z",
+          "enabled": false,
+          "ended_reason": "run_once_fired",
+          "bound_session": true,
+          "next_run_at": "2026-09-06T12:40:53.239185213Z",
+          "last_fired_at": "2026-09-05T12:40:53.619116Z",
+          "last_run_status": null,
+          "last_run_fired_at": null,
+          "last_run_finished_at": null,
+          "last_run_session_id": null
+        }
+      }
     },
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
@@ -738,7 +778,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01RcUDUaFDf86KffssLRsQdw",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:56.106Z"
+        "observed_at": "2026-10-10T12:26:16.557Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -776,7 +816,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01TixKQ5Sovfjfn8rRVQCrYf",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:56.321Z"
+        "observed_at": "2026-10-10T12:26:16.777Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -828,7 +868,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01VuJravpvATQPBuAigHCZJi",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:56.540Z"
+        "observed_at": "2026-10-10T12:26:17.009Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -866,7 +906,7 @@
         "method": "GET",
         "endpoint": "/v1/code/triggers/trig_01XUeM9mCTkoqdWhUMac6jD1",
         "http_status": 404,
-        "observed_at": "2026-10-06T07:44:56.773Z"
+        "observed_at": "2026-10-10T12:26:17.218Z"
       },
       "last_verified": {
         "observed_at": "2026-09-19T05:14:50.520Z",
@@ -893,15 +933,15 @@
     "method": "GET",
     "endpoint": "/v1/code/triggers",
     "include_last_run": true,
-    "pages": 2,
+    "pages": 1,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 119,
-    "unregistered_current_count": 13,
-    "ended_records": 97,
-    "unavailable_registered_count": 6,
+    "total_records": 81,
+    "unregistered_current_count": 11,
+    "ended_records": 61,
+    "unavailable_registered_count": 7,
     "ended_since_previous": [],
-    "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。既存の意図的停止が一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。削除・成功・現在の停止を断定しない。稼働中タスクの欠落は受理しない。予定や停止の判断は変更しない。"
+    "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。登録タスクが一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。意図的停止以外は未解消として追跡する。削除・成功・現在の停止を断定せず、予定や停止の判断を変更しない。"
   },
   "closed_findings": [
     {
@@ -1006,8 +1046,8 @@
     }
   ],
   "codex_observation": {
-    "schema_version": 4,
-    "observed_at": "2026-10-06T07:44:48.693Z",
+    "schema_version": 5,
+    "observed_at": "2026-10-10T12:26:09.301Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -1040,31 +1080,49 @@
         "updated_at": "2026-09-08T01:39:47.110Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "57fc38043d2e276d7578c44058235bd2c8ca61c53f1d47a4e69aa697d13dbc0a",
-          "bytes": 2067110,
-          "turns": [
-            {
-              "turn_id": "01a07dad-869f-7761-8d3b-aa4eee6ea517",
-              "started_at": "2026-09-07T21:01:59.399Z",
-              "finished_at": "2026-09-07T21:10:18.494Z",
-              "state": "completed",
-              "tool_calls": 23,
-              "tool_outputs": 23,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
-            },
-            {
-              "turn_id": "01a07ea9-f1d9-7952-9344-a23dd5116bb1",
-              "started_at": "2026-09-08T01:37:41.894Z",
-              "finished_at": "2026-09-08T01:38:27.281Z",
-              "state": "completed",
-              "tool_calls": 4,
-              "tool_outputs": 4,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a07dad-83f0-72b2-82db-92ff1a4a89bc",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-07T21:01:58.625Z",
+            "updated_at": "2026-09-08T01:39:47.110Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "57fc38043d2e276d7578c44058235bd2c8ca61c53f1d47a4e69aa697d13dbc0a",
+              "bytes": 2067110,
+              "turns": [
+                {
+                  "turn_id": "01a07dad-869f-7761-8d3b-aa4eee6ea517",
+                  "started_at": "2026-09-07T21:01:59.399Z",
+                  "finished_at": "2026-09-07T21:10:18.494Z",
+                  "state": "completed",
+                  "tool_calls": 23,
+                  "tool_outputs": 23,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                },
+                {
+                  "turn_id": "01a07ea9-f1d9-7952-9344-a23dd5116bb1",
+                  "started_at": "2026-09-08T01:37:41.894Z",
+                  "finished_at": "2026-09-08T01:38:27.281Z",
+                  "state": "completed",
+                  "tool_calls": 4,
+                  "tool_outputs": 4,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1075,41 +1133,59 @@
         "updated_at": "2026-09-08T01:39:33.991Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "af56b67601dccc50699d1007dc539a8266f2108611f0d90873d5279e4351299e",
-          "bytes": 1169097,
-          "turns": [
-            {
-              "turn_id": "01a07e63-44d2-7bb3-a0dc-4cdbf010e08e",
-              "started_at": "2026-09-08T00:20:30.111Z",
-              "finished_at": "2026-09-08T00:20:32.370Z",
-              "state": "failed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
-            },
-            {
-              "turn_id": "01a07ea7-cf32-7381-959d-e78756be4caf",
-              "started_at": "2026-09-08T01:35:21.932Z",
-              "finished_at": "2026-09-08T01:38:35.454Z",
-              "state": "completed",
-              "tool_calls": 14,
-              "tool_outputs": 14,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "runtime_failure": {
-          "version": 1,
-          "thread_id": "01a07e63-4255-7be2-8623-3ab271db643b",
-          "turn_id": "01a07e63-44d2-7bb3-a0dc-4cdbf010e08e",
-          "finished_at": "2026-09-08T00:20:32.370Z",
-          "code": "usage_limit_exceeded",
-          "failure_class": "usage_limit",
-          "transcript_sha256": "af56b67601dccc50699d1007dc539a8266f2108611f0d90873d5279e4351299e",
-          "sha256": "2a79daea114fcf1f2c46d6aa730d5a55a6adcf968f584d42bca6d0d7124d2938"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a07e63-4255-7be2-8623-3ab271db643b",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-08T00:20:29.386Z",
+            "updated_at": "2026-09-08T01:39:33.991Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "af56b67601dccc50699d1007dc539a8266f2108611f0d90873d5279e4351299e",
+              "bytes": 1169097,
+              "turns": [
+                {
+                  "turn_id": "01a07e63-44d2-7bb3-a0dc-4cdbf010e08e",
+                  "started_at": "2026-09-08T00:20:30.111Z",
+                  "finished_at": "2026-09-08T00:20:32.370Z",
+                  "state": "failed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                },
+                {
+                  "turn_id": "01a07ea7-cf32-7381-959d-e78756be4caf",
+                  "started_at": "2026-09-08T01:35:21.932Z",
+                  "finished_at": "2026-09-08T01:38:35.454Z",
+                  "state": "completed",
+                  "tool_calls": 14,
+                  "tool_outputs": 14,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "runtime_failure": {
+              "version": 1,
+              "thread_id": "01a07e63-4255-7be2-8623-3ab271db643b",
+              "turn_id": "01a07e63-44d2-7bb3-a0dc-4cdbf010e08e",
+              "finished_at": "2026-09-08T00:20:32.370Z",
+              "code": "usage_limit_exceeded",
+              "failure_class": "usage_limit",
+              "transcript_sha256": "af56b67601dccc50699d1007dc539a8266f2108611f0d90873d5279e4351299e",
+              "sha256": "2a79daea114fcf1f2c46d6aa730d5a55a6adcf968f584d42bca6d0d7124d2938"
+            }
+          }
         }
       },
       {
@@ -1120,31 +1196,49 @@
         "updated_at": "2026-09-11T10:42:22.368Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "3d4e34fc3d1ef515b365993a8022ffd475b6fb206829c98f9d74343e7b5db619",
-          "bytes": 1302000,
-          "turns": [
-            {
-              "turn_id": "01a07f09-71a7-7b40-beac-d71dd186f78e",
-              "started_at": "2026-09-08T03:22:00.559Z",
-              "finished_at": "2026-09-08T03:25:00.955Z",
-              "state": "completed",
-              "tool_calls": 9,
-              "tool_outputs": 9,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 2
-            },
-            {
-              "turn_id": "01a07f0c-891a-7b11-95ee-b0c615d642c8",
-              "started_at": "2026-09-08T03:25:23.110Z",
-              "finished_at": "2026-09-08T03:25:56.965Z",
-              "state": "completed",
-              "tool_calls": 2,
-              "tool_outputs": 2,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a07f09-6f2b-7b32-b9d8-552211e66097",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-08T03:21:59.834Z",
+            "updated_at": "2026-09-11T10:42:22.368Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "3d4e34fc3d1ef515b365993a8022ffd475b6fb206829c98f9d74343e7b5db619",
+              "bytes": 1302000,
+              "turns": [
+                {
+                  "turn_id": "01a07f09-71a7-7b40-beac-d71dd186f78e",
+                  "started_at": "2026-09-08T03:22:00.559Z",
+                  "finished_at": "2026-09-08T03:25:00.955Z",
+                  "state": "completed",
+                  "tool_calls": 9,
+                  "tool_outputs": 9,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 2
+                },
+                {
+                  "turn_id": "01a07f0c-891a-7b11-95ee-b0c615d642c8",
+                  "started_at": "2026-09-08T03:25:23.110Z",
+                  "finished_at": "2026-09-08T03:25:56.965Z",
+                  "state": "completed",
+                  "tool_calls": 2,
+                  "tool_outputs": 2,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1155,21 +1249,39 @@
         "updated_at": "2026-09-09T09:38:17.460Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "57cbc5e3a1cdaa21547132f3adc748f50feabd4b719cfb25a9c36884af38487b",
-          "bytes": 1748314,
-          "turns": [
-            {
-              "turn_id": "01a082d3-f2d3-7ad1-a55e-05e9a14a1815",
-              "started_at": "2026-09-08T21:02:03.549Z",
-              "finished_at": "2026-09-08T21:07:27.493Z",
-              "state": "completed",
-              "tool_calls": 21,
-              "tool_outputs": 21,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a082d3-f05b-79a3-a19b-043b2bdf2d5c",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-08T21:02:02.826Z",
+            "updated_at": "2026-09-09T09:38:17.460Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "57cbc5e3a1cdaa21547132f3adc748f50feabd4b719cfb25a9c36884af38487b",
+              "bytes": 1748314,
+              "turns": [
+                {
+                  "turn_id": "01a082d3-f2d3-7ad1-a55e-05e9a14a1815",
+                  "started_at": "2026-09-08T21:02:03.549Z",
+                  "finished_at": "2026-09-08T21:07:27.493Z",
+                  "state": "completed",
+                  "tool_calls": 21,
+                  "tool_outputs": 21,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1180,21 +1292,39 @@
         "updated_at": "2026-09-09T09:38:13.870Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "7ac386b09da7b751c410574d84f82f895289b446dbc0751fd77f03014c39420c",
-          "bytes": 1297984,
-          "turns": [
-            {
-              "turn_id": "01a08389-b117-7b22-8a39-1f39a79bb805",
-              "started_at": "2026-09-09T00:20:34.284Z",
-              "finished_at": "2026-09-09T00:23:55.770Z",
-              "state": "completed",
-              "tool_calls": 12,
-              "tool_outputs": 12,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a08389-ae4d-78b1-bf79-138617fc1f99",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-09T00:20:33.459Z",
+            "updated_at": "2026-09-09T09:38:13.870Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "7ac386b09da7b751c410574d84f82f895289b446dbc0751fd77f03014c39420c",
+              "bytes": 1297984,
+              "turns": [
+                {
+                  "turn_id": "01a08389-b117-7b22-8a39-1f39a79bb805",
+                  "started_at": "2026-09-09T00:20:34.284Z",
+                  "finished_at": "2026-09-09T00:23:55.770Z",
+                  "state": "completed",
+                  "tool_calls": 12,
+                  "tool_outputs": 12,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1205,21 +1335,39 @@
         "updated_at": "2026-09-09T09:38:08.799Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "12c57a5cca7a32f0733e6a2f867a9f39c67afe13376bc8069121408a185cadcf",
-          "bytes": 1301704,
-          "turns": [
-            {
-              "turn_id": "01a0842e-e567-7173-8356-5655dc9142b9",
-              "started_at": "2026-09-09T03:21:01.106Z",
-              "finished_at": "2026-09-09T03:24:24.411Z",
-              "state": "completed",
-              "tool_calls": 17,
-              "tool_outputs": 17,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0842e-e2e4-7e32-9a4f-6232383ca324",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-09T03:21:00.374Z",
+            "updated_at": "2026-09-09T09:38:08.799Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "12c57a5cca7a32f0733e6a2f867a9f39c67afe13376bc8069121408a185cadcf",
+              "bytes": 1301704,
+              "turns": [
+                {
+                  "turn_id": "01a0842e-e567-7173-8356-5655dc9142b9",
+                  "started_at": "2026-09-09T03:21:01.106Z",
+                  "finished_at": "2026-09-09T03:24:24.411Z",
+                  "state": "completed",
+                  "tool_calls": 17,
+                  "tool_outputs": 17,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1230,21 +1378,39 @@
         "updated_at": "2026-09-11T10:42:15.911Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "cdee7783bac657af390c2fda93fe15bacd1414d2efae4b7c2481d5e0adaa5f5a",
-          "bytes": 2219474,
-          "turns": [
-            {
-              "turn_id": "01a087fa-5ffe-7ae3-9962-c3c6e66e70a9",
-              "started_at": "2026-09-09T21:02:07.950Z",
-              "finished_at": "2026-09-09T21:10:33.751Z",
-              "state": "completed",
-              "tool_calls": 30,
-              "tool_outputs": 30,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a087fa-5c5d-7ef0-ac9a-bb6abf67d499",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-09T21:02:06.926Z",
+            "updated_at": "2026-09-11T10:42:15.911Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "cdee7783bac657af390c2fda93fe15bacd1414d2efae4b7c2481d5e0adaa5f5a",
+              "bytes": 2219474,
+              "turns": [
+                {
+                  "turn_id": "01a087fa-5ffe-7ae3-9962-c3c6e66e70a9",
+                  "started_at": "2026-09-09T21:02:07.950Z",
+                  "finished_at": "2026-09-09T21:10:33.751Z",
+                  "state": "completed",
+                  "tool_calls": 30,
+                  "tool_outputs": 30,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1255,21 +1421,39 @@
         "updated_at": "2026-09-11T10:42:14.723Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "d9665400aef492187252b588795e856ec691493f93bc46196ca3710d18b3b2bd",
-          "bytes": 1228683,
-          "turns": [
-            {
-              "turn_id": "01a088af-a6e8-7261-b02c-8406dbb96108",
-              "started_at": "2026-09-10T00:20:08.120Z",
-              "finished_at": "2026-09-10T00:23:17.336Z",
-              "state": "completed",
-              "tool_calls": 10,
-              "tool_outputs": 10,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a088af-a470-7273-a9f4-564325746819",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-10T00:20:07.390Z",
+            "updated_at": "2026-09-11T10:42:14.723Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "d9665400aef492187252b588795e856ec691493f93bc46196ca3710d18b3b2bd",
+              "bytes": 1228683,
+              "turns": [
+                {
+                  "turn_id": "01a088af-a6e8-7261-b02c-8406dbb96108",
+                  "started_at": "2026-09-10T00:20:08.120Z",
+                  "finished_at": "2026-09-10T00:23:17.336Z",
+                  "state": "completed",
+                  "tool_calls": 10,
+                  "tool_outputs": 10,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1280,21 +1464,39 @@
         "updated_at": "2026-09-11T09:48:34.995Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "ce7d92e32d8cf9a50caf2334b3ad327ffa1d4ad3d19169149574ffdd9d76411d",
-          "bytes": 1174053,
-          "turns": [
-            {
-              "turn_id": "01a08955-64e5-7ac1-9d1e-284505604171",
-              "started_at": "2026-09-10T03:21:10.213Z",
-              "finished_at": "2026-09-10T03:24:12.240Z",
-              "state": "completed",
-              "tool_calls": 11,
-              "tool_outputs": 11,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a08955-6252-7d11-9ae7-4aedd8a6bd16",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-10T03:21:09.438Z",
+            "updated_at": "2026-09-11T09:48:34.995Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "ce7d92e32d8cf9a50caf2334b3ad327ffa1d4ad3d19169149574ffdd9d76411d",
+              "bytes": 1174053,
+              "turns": [
+                {
+                  "turn_id": "01a08955-64e5-7ac1-9d1e-284505604171",
+                  "started_at": "2026-09-10T03:21:10.213Z",
+                  "finished_at": "2026-09-10T03:24:12.240Z",
+                  "state": "completed",
+                  "tool_calls": 11,
+                  "tool_outputs": 11,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1305,21 +1507,39 @@
         "updated_at": "2026-09-11T10:42:12.016Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "2e54b3746e3cf848cd489ae1469434b027e7084149f5207e0eee06d0d204d796",
-          "bytes": 1248262,
-          "turns": [
-            {
-              "turn_id": "01a08d1f-e952-78f3-9fe6-f593271ce11b",
-              "started_at": "2026-09-10T21:01:14.156Z",
-              "finished_at": "2026-09-10T21:04:43.422Z",
-              "state": "completed",
-              "tool_calls": 13,
-              "tool_outputs": 13,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a08d1f-e643-7640-b922-3502cdcc0ac0",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-10T21:01:13.127Z",
+            "updated_at": "2026-09-11T10:42:12.016Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "2e54b3746e3cf848cd489ae1469434b027e7084149f5207e0eee06d0d204d796",
+              "bytes": 1248262,
+              "turns": [
+                {
+                  "turn_id": "01a08d1f-e952-78f3-9fe6-f593271ce11b",
+                  "started_at": "2026-09-10T21:01:14.156Z",
+                  "finished_at": "2026-09-10T21:04:43.422Z",
+                  "state": "completed",
+                  "tool_calls": 13,
+                  "tool_outputs": 13,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1330,21 +1550,39 @@
         "updated_at": "2026-09-11T10:42:09.799Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "aea52ea4ad87b68da4b55d4c6cfe7ac8bad71de9a9a102b650d43878bcb7df88",
-          "bytes": 1379628,
-          "turns": [
-            {
-              "turn_id": "01a08dd7-c9b8-7680-ad29-879eeec8abdb",
-              "started_at": "2026-09-11T00:22:04.569Z",
-              "finished_at": "2026-09-11T00:25:56.493Z",
-              "state": "completed",
-              "tool_calls": 14,
-              "tool_outputs": 14,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a08dd7-c726-7b51-ae63-cb5e1f9d8d3e",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-11T00:22:03.799Z",
+            "updated_at": "2026-09-11T10:42:09.799Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "aea52ea4ad87b68da4b55d4c6cfe7ac8bad71de9a9a102b650d43878bcb7df88",
+              "bytes": 1379628,
+              "turns": [
+                {
+                  "turn_id": "01a08dd7-c9b8-7680-ad29-879eeec8abdb",
+                  "started_at": "2026-09-11T00:22:04.569Z",
+                  "finished_at": "2026-09-11T00:25:56.493Z",
+                  "state": "completed",
+                  "tool_calls": 14,
+                  "tool_outputs": 14,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1355,21 +1593,39 @@
         "updated_at": "2026-09-11T10:42:04.255Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "5d0d631ce7d4bce62895952596cc37f98e1ee47e8af72d864e4bcec6597e25fd",
-          "bytes": 1236989,
-          "turns": [
-            {
-              "turn_id": "01a08e7b-ae09-7011-89ce-7d1208135c94",
-              "started_at": "2026-09-11T03:21:05.376Z",
-              "finished_at": "2026-09-11T03:24:05.145Z",
-              "state": "completed",
-              "tool_calls": 11,
-              "tool_outputs": 11,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a08e7b-ab8d-7af1-99d6-82a4ec7b65dd",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-11T03:21:04.638Z",
+            "updated_at": "2026-09-11T10:42:04.255Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "5d0d631ce7d4bce62895952596cc37f98e1ee47e8af72d864e4bcec6597e25fd",
+              "bytes": 1236989,
+              "turns": [
+                {
+                  "turn_id": "01a08e7b-ae09-7011-89ce-7d1208135c94",
+                  "started_at": "2026-09-11T03:21:05.376Z",
+                  "finished_at": "2026-09-11T03:24:05.145Z",
+                  "state": "completed",
+                  "tool_calls": 11,
+                  "tool_outputs": 11,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1380,21 +1636,39 @@
         "updated_at": "2026-09-11T22:00:07.137Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "b9b79697b8c66c3337cd89d5c2874bddbcd4eaed28ec292a3ab68fade023e441",
-          "bytes": 1187967,
-          "turns": [
-            {
-              "turn_id": "01a09246-2745-7370-a5db-63c05c1799e6",
-              "started_at": "2026-09-11T21:01:06.331Z",
-              "finished_at": "2026-09-11T21:04:56.986Z",
-              "state": "completed",
-              "tool_calls": 13,
-              "tool_outputs": 13,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a09246-247e-7400-bed2-1fb7aa54a052",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-11T21:01:05.517Z",
+            "updated_at": "2026-09-11T22:00:07.137Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "b9b79697b8c66c3337cd89d5c2874bddbcd4eaed28ec292a3ab68fade023e441",
+              "bytes": 1187967,
+              "turns": [
+                {
+                  "turn_id": "01a09246-2745-7370-a5db-63c05c1799e6",
+                  "started_at": "2026-09-11T21:01:06.331Z",
+                  "finished_at": "2026-09-11T21:04:56.986Z",
+                  "state": "completed",
+                  "tool_calls": 13,
+                  "tool_outputs": 13,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1405,21 +1679,39 @@
         "updated_at": "2026-09-12T01:10:35.116Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "abfce89b4c1df493a22d33570bb4a64241c3bfc3838fd59ce29673fc5abbe739",
-          "bytes": 1260082,
-          "turns": [
-            {
-              "turn_id": "01a092fe-2cb4-7152-9b45-da99373deefc",
-              "started_at": "2026-09-12T00:22:06.348Z",
-              "finished_at": "2026-09-12T00:24:49.493Z",
-              "state": "completed",
-              "tool_calls": 13,
-              "tool_outputs": 13,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a092fe-2a4e-7c11-996c-4189040c09d8",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-12T00:22:05.631Z",
+            "updated_at": "2026-09-12T01:10:35.116Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "abfce89b4c1df493a22d33570bb4a64241c3bfc3838fd59ce29673fc5abbe739",
+              "bytes": 1260082,
+              "turns": [
+                {
+                  "turn_id": "01a092fe-2cb4-7152-9b45-da99373deefc",
+                  "started_at": "2026-09-12T00:22:06.348Z",
+                  "finished_at": "2026-09-12T00:24:49.493Z",
+                  "state": "completed",
+                  "tool_calls": 13,
+                  "tool_outputs": 13,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1430,21 +1722,39 @@
         "updated_at": "2026-09-12T07:55:59.418Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "f7406329f9e7f43ae8e5edf5d7446fdd487d995a789867b58b521cfcee585fe9",
-          "bytes": 1336699,
-          "turns": [
-            {
-              "turn_id": "01a093a1-99d6-7c31-98c7-fe0ab13bdca6",
-              "started_at": "2026-09-12T03:20:36.774Z",
-              "finished_at": "2026-09-12T03:23:42.200Z",
-              "state": "completed",
-              "tool_calls": 13,
-              "tool_outputs": 13,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a093a1-9764-7d52-945b-1cb09e18e5a5",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-12T03:20:35.925Z",
+            "updated_at": "2026-09-12T07:55:59.418Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "f7406329f9e7f43ae8e5edf5d7446fdd487d995a789867b58b521cfcee585fe9",
+              "bytes": 1336699,
+              "turns": [
+                {
+                  "turn_id": "01a093a1-99d6-7c31-98c7-fe0ab13bdca6",
+                  "started_at": "2026-09-12T03:20:36.774Z",
+                  "finished_at": "2026-09-12T03:23:42.200Z",
+                  "state": "completed",
+                  "tool_calls": 13,
+                  "tool_outputs": 13,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1455,21 +1765,39 @@
         "updated_at": "2026-09-12T22:54:33.317Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "807f3cc0edd9e0fd06d3b07ee65bef0ee6638e08a0e35fd13d6714b4492300fe",
-          "bytes": 1179299,
-          "turns": [
-            {
-              "turn_id": "01a0976c-1baa-70c3-8fe3-6bfe479b7a86",
-              "started_at": "2026-09-12T21:00:39.840Z",
-              "finished_at": "2026-09-12T21:03:57.533Z",
-              "state": "completed",
-              "tool_calls": 12,
-              "tool_outputs": 12,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0976c-1652-79e3-a68f-dcdb7529e636",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-12T21:00:38.299Z",
+            "updated_at": "2026-09-12T22:54:33.317Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "807f3cc0edd9e0fd06d3b07ee65bef0ee6638e08a0e35fd13d6714b4492300fe",
+              "bytes": 1179299,
+              "turns": [
+                {
+                  "turn_id": "01a0976c-1baa-70c3-8fe3-6bfe479b7a86",
+                  "started_at": "2026-09-12T21:00:39.840Z",
+                  "finished_at": "2026-09-12T21:03:57.533Z",
+                  "state": "completed",
+                  "tool_calls": 12,
+                  "tool_outputs": 12,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1480,51 +1808,69 @@
         "updated_at": "2026-09-13T01:22:45.536Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "c6bb5c51e23ee6ccd21be2a5c0beac7307d201925b3cb7dcd66ad604bdc1f625",
-          "bytes": 1428686,
-          "turns": [
-            {
-              "turn_id": "01a09822-c1e4-7192-a4f6-2e4423f96da9",
-              "started_at": "2026-09-13T00:20:10.038Z",
-              "finished_at": "2026-09-13T00:23:04.494Z",
-              "state": "completed",
-              "tool_calls": 11,
-              "tool_outputs": 11,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
-            },
-            {
-              "turn_id": "01a0984a-a10a-7831-9e5b-91222c4f388e",
-              "started_at": "2026-09-13T01:03:42.879Z",
-              "finished_at": "2026-09-13T01:03:53.486Z",
-              "state": "completed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0984b-9c6b-7b32-b36b-132770eb0e2b",
-              "started_at": "2026-09-13T01:04:47.226Z",
-              "finished_at": "2026-09-13T01:04:59.432Z",
-              "state": "completed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0984c-62dc-7502-8946-6c018d153558",
-              "started_at": "2026-09-13T01:05:38.048Z",
-              "finished_at": "2026-09-13T01:06:21.257Z",
-              "state": "completed",
-              "tool_calls": 5,
-              "tool_outputs": 5,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a09822-be15-7690-95bf-87e1eb10b262",
+            "automation_id": "obsidian-2",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-13T00:20:08.821Z",
+            "updated_at": "2026-09-13T01:22:45.536Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "c6bb5c51e23ee6ccd21be2a5c0beac7307d201925b3cb7dcd66ad604bdc1f625",
+              "bytes": 1428686,
+              "turns": [
+                {
+                  "turn_id": "01a09822-c1e4-7192-a4f6-2e4423f96da9",
+                  "started_at": "2026-09-13T00:20:10.038Z",
+                  "finished_at": "2026-09-13T00:23:04.494Z",
+                  "state": "completed",
+                  "tool_calls": 11,
+                  "tool_outputs": 11,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                },
+                {
+                  "turn_id": "01a0984a-a10a-7831-9e5b-91222c4f388e",
+                  "started_at": "2026-09-13T01:03:42.879Z",
+                  "finished_at": "2026-09-13T01:03:53.486Z",
+                  "state": "completed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0984b-9c6b-7b32-b36b-132770eb0e2b",
+                  "started_at": "2026-09-13T01:04:47.226Z",
+                  "finished_at": "2026-09-13T01:04:59.432Z",
+                  "state": "completed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0984c-62dc-7502-8946-6c018d153558",
+                  "started_at": "2026-09-13T01:05:38.048Z",
+                  "finished_at": "2026-09-13T01:06:21.257Z",
+                  "state": "completed",
+                  "tool_calls": 5,
+                  "tool_outputs": 5,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
             }
-          ]
+          }
         }
       },
       {
@@ -1535,43 +1881,61 @@
         "updated_at": "2026-09-13T23:34:33.749Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
-          "bytes": 7700971,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-13T21:01:34.028Z",
+            "updated_at": "2026-09-13T23:34:33.749Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
+              "bytes": 7700971,
+              "turns": [
+                {
+                  "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
+                  "started_at": "2026-09-13T21:01:35.516Z",
+                  "finished_at": "2026-09-13T21:46:14.723Z",
+                  "state": "completed",
+                  "tool_calls": 123,
+                  "tool_outputs": 123,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 3
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
               "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
-              "started_at": "2026-09-13T21:01:35.516Z",
-              "finished_at": "2026-09-13T21:46:14.723Z",
-              "state": "completed",
-              "tool_calls": 123,
-              "tool_outputs": 123,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 3
+              "observed_at": "2026-09-13T21:04:33.982Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "e68aadc1d83503612a6f57e40ab573df0a04c62bac9dd963f1520ccd81244bfa",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "5d028dace376556f08180c3965d4a199eae4a60fa3d12f4eec2456a823c7df74"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-13T22:34:36.126Z",
+              "parent_pid": 68602,
+              "launcher_sha256": "e86c364721d94a07e37abe9079faec8966c6c365e46485b1428b25820a13026c",
+              "version": 1,
+              "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
+              "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
+              "transcript_sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
+              "sha256": "b23cff9926dbb5a7b3e5bdd1959f7e284b5a059559121e01e552841d6770bc40"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
-          "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
-          "observed_at": "2026-09-13T21:04:33.982Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "e68aadc1d83503612a6f57e40ab573df0a04c62bac9dd963f1520ccd81244bfa",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "5d028dace376556f08180c3965d4a199eae4a60fa3d12f4eec2456a823c7df74"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-13T22:34:36.126Z",
-          "parent_pid": 68602,
-          "launcher_sha256": "e86c364721d94a07e37abe9079faec8966c6c365e46485b1428b25820a13026c",
-          "version": 1,
-          "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
-          "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
-          "transcript_sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
-          "sha256": "b23cff9926dbb5a7b3e5bdd1959f7e284b5a059559121e01e552841d6770bc40"
+          }
         }
       },
       {
@@ -1582,113 +1946,131 @@
         "updated_at": "2026-09-15T02:45:52.814Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "051c92891cf952513388e4f027c8b0c91bebb5364ebd6b7e66abc799f1b1d191",
-          "bytes": 9847745,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0a1b9-4982-70f3-b2d6-eed77be68e26",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-14T21:01:09.852Z",
+            "updated_at": "2026-09-15T02:45:52.814Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "051c92891cf952513388e4f027c8b0c91bebb5364ebd6b7e66abc799f1b1d191",
+              "bytes": 9847745,
+              "turns": [
+                {
+                  "turn_id": "01a0a1b9-4c71-7171-b3c5-f1d8d60d805a",
+                  "started_at": "2026-09-14T21:01:10.787Z",
+                  "finished_at": "2026-09-14T21:36:55.823Z",
+                  "state": "completed",
+                  "tool_calls": 114,
+                  "tool_outputs": 114,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                },
+                {
+                  "turn_id": "01a0a200-2b29-75a3-a43a-cd7aabc442d3",
+                  "started_at": "2026-09-14T22:18:35.203Z",
+                  "finished_at": "2026-09-14T22:23:08.502Z",
+                  "state": "completed",
+                  "tool_calls": 13,
+                  "tool_outputs": 13,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a208-5a96-7972-aa3c-9f817ee667d7",
+                  "started_at": "2026-09-14T22:27:31.621Z",
+                  "finished_at": "2026-09-14T22:46:19.608Z",
+                  "state": "completed",
+                  "tool_calls": 61,
+                  "tool_outputs": 61,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a24b-7b1f-71b0-8d9b-f0486bdf4e4e",
+                  "started_at": "2026-09-14T23:40:50.857Z",
+                  "finished_at": "2026-09-14T23:41:25.318Z",
+                  "state": "completed",
+                  "tool_calls": 2,
+                  "tool_outputs": 2,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a24c-abd6-7580-985c-730c488a6b54",
+                  "started_at": "2026-09-14T23:42:08.870Z",
+                  "finished_at": "2026-09-14T23:45:13.867Z",
+                  "state": "completed",
+                  "tool_calls": 6,
+                  "tool_outputs": 6,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a24f-c5c3-73a1-8837-3c84a28a0b70",
+                  "started_at": "2026-09-14T23:45:32.112Z",
+                  "finished_at": "2026-09-14T23:45:40.101Z",
+                  "state": "completed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a24f-fc11-7403-92e8-2b0a3179c04c",
+                  "started_at": "2026-09-14T23:45:46.013Z",
+                  "finished_at": "2026-09-15T00:45:38.860Z",
+                  "state": "completed",
+                  "tool_calls": 149,
+                  "tool_outputs": 149,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0a2f4-a7e2-70e0-beb6-bb224dff9634",
+                  "started_at": "2026-09-15T02:45:37.912Z",
+                  "finished_at": "2026-09-15T02:45:46.678Z",
+                  "state": "completed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0a1b9-4982-70f3-b2d6-eed77be68e26",
               "turn_id": "01a0a1b9-4c71-7171-b3c5-f1d8d60d805a",
-              "started_at": "2026-09-14T21:01:10.787Z",
-              "finished_at": "2026-09-14T21:36:55.823Z",
-              "state": "completed",
-              "tool_calls": 114,
-              "tool_outputs": 114,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+              "observed_at": "2026-09-14T21:03:37.683Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "7e2fdc0f258d4c0bd2507b96324fb1706b387a2f57aa25e37bf60fc40c91b560",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "e853083a6b24030a2557cb2eae0144bbcc7c7af0cd8f96bd1c9b08f92c976989"
             },
-            {
-              "turn_id": "01a0a200-2b29-75a3-a43a-cd7aabc442d3",
-              "started_at": "2026-09-14T22:18:35.203Z",
-              "finished_at": "2026-09-14T22:23:08.502Z",
-              "state": "completed",
-              "tool_calls": 13,
-              "tool_outputs": 13,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a208-5a96-7972-aa3c-9f817ee667d7",
-              "started_at": "2026-09-14T22:27:31.621Z",
-              "finished_at": "2026-09-14T22:46:19.608Z",
-              "state": "completed",
-              "tool_calls": 61,
-              "tool_outputs": 61,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a24b-7b1f-71b0-8d9b-f0486bdf4e4e",
-              "started_at": "2026-09-14T23:40:50.857Z",
-              "finished_at": "2026-09-14T23:41:25.318Z",
-              "state": "completed",
-              "tool_calls": 2,
-              "tool_outputs": 2,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a24c-abd6-7580-985c-730c488a6b54",
-              "started_at": "2026-09-14T23:42:08.870Z",
-              "finished_at": "2026-09-14T23:45:13.867Z",
-              "state": "completed",
-              "tool_calls": 6,
-              "tool_outputs": 6,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a24f-c5c3-73a1-8837-3c84a28a0b70",
-              "started_at": "2026-09-14T23:45:32.112Z",
-              "finished_at": "2026-09-14T23:45:40.101Z",
-              "state": "completed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a24f-fc11-7403-92e8-2b0a3179c04c",
-              "started_at": "2026-09-14T23:45:46.013Z",
-              "finished_at": "2026-09-15T00:45:38.860Z",
-              "state": "completed",
-              "tool_calls": 149,
-              "tool_outputs": 149,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0a2f4-a7e2-70e0-beb6-bb224dff9634",
-              "started_at": "2026-09-15T02:45:37.912Z",
-              "finished_at": "2026-09-15T02:45:46.678Z",
-              "state": "completed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-14T22:40:44.600Z",
+              "parent_pid": 23056,
+              "launcher_sha256": "e86c364721d94a07e37abe9079faec8966c6c365e46485b1428b25820a13026c",
+              "version": 1,
+              "thread_id": "01a0a1b9-4982-70f3-b2d6-eed77be68e26",
+              "turn_id": "01a0a1b9-4c71-7171-b3c5-f1d8d60d805a",
+              "transcript_sha256": "e44a0def11475e811e1360fc66b9c2e8c2c30d334cdeff63d3bef4c1528bc38b",
+              "sha256": "751146db2e528f0044f3a9e705af1e0a7f504d35e0af8ba7cff5a4057c22cde7"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0a1b9-4982-70f3-b2d6-eed77be68e26",
-          "turn_id": "01a0a1b9-4c71-7171-b3c5-f1d8d60d805a",
-          "observed_at": "2026-09-14T21:03:37.683Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "7e2fdc0f258d4c0bd2507b96324fb1706b387a2f57aa25e37bf60fc40c91b560",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "e853083a6b24030a2557cb2eae0144bbcc7c7af0cd8f96bd1c9b08f92c976989"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-14T22:40:44.600Z",
-          "parent_pid": 23056,
-          "launcher_sha256": "e86c364721d94a07e37abe9079faec8966c6c365e46485b1428b25820a13026c",
-          "version": 1,
-          "thread_id": "01a0a1b9-4982-70f3-b2d6-eed77be68e26",
-          "turn_id": "01a0a1b9-4c71-7171-b3c5-f1d8d60d805a",
-          "transcript_sha256": "e44a0def11475e811e1360fc66b9c2e8c2c30d334cdeff63d3bef4c1528bc38b",
-          "sha256": "751146db2e528f0044f3a9e705af1e0a7f504d35e0af8ba7cff5a4057c22cde7"
+          }
         }
       },
       {
@@ -1699,42 +2081,60 @@
         "updated_at": "2026-09-19T12:14:20.612Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
-          "bytes": 132994,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-15T21:01:49.539Z",
+            "updated_at": "2026-09-19T12:14:20.612Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
+              "bytes": 132994,
+              "turns": [
+                {
+                  "turn_id": "01a0a6e0-4347-7fa1-86d8-c2d630e94bf6",
+                  "started_at": "2026-09-15T21:01:50.352Z",
+                  "finished_at": "2026-09-15T21:01:56.057Z",
+                  "state": "failed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
+            },
+            "runtime_failure": {
+              "version": 1,
+              "thread_id": "01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
               "turn_id": "01a0a6e0-4347-7fa1-86d8-c2d630e94bf6",
-              "started_at": "2026-09-15T21:01:50.352Z",
               "finished_at": "2026-09-15T21:01:56.057Z",
-              "state": "failed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+              "code": "usage_limit_exceeded",
+              "failure_class": "usage_limit",
+              "transcript_sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
+              "sha256": "474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-17T14:34:10.102Z",
+              "parent_pid": 29986,
+              "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
+              "version": 1,
+              "thread_id": "01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
+              "turn_id": "01a0a6e0-4347-7fa1-86d8-c2d630e94bf6",
+              "transcript_sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
+              "sha256": "e8bbf11e3eb77ffd28baf58ac3259e0c81f1d8b6c33173a529cd18a748eac1aa"
             }
-          ]
-        },
-        "runtime_failure": {
-          "version": 1,
-          "thread_id": "01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
-          "turn_id": "01a0a6e0-4347-7fa1-86d8-c2d630e94bf6",
-          "finished_at": "2026-09-15T21:01:56.057Z",
-          "code": "usage_limit_exceeded",
-          "failure_class": "usage_limit",
-          "transcript_sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
-          "sha256": "474cdfbf4eb846127ea9aaeb9cc987a1dd305afd42c179797a1f1e1318f988ed"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-17T14:34:10.102Z",
-          "parent_pid": 29986,
-          "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
-          "version": 1,
-          "thread_id": "01a0a6e0-4080-7ec0-953e-cff70fbeaa09",
-          "turn_id": "01a0a6e0-4347-7fa1-86d8-c2d630e94bf6",
-          "transcript_sha256": "9b9e48811d5a346bd2f1f1c9a17772b31efd7a685b56db609d0f90b55778aaf0",
-          "sha256": "e8bbf11e3eb77ffd28baf58ac3259e0c81f1d8b6c33173a529cd18a748eac1aa"
+          }
         }
       },
       {
@@ -1760,42 +2160,60 @@
         "updated_at": "2026-09-19T10:24:06.716Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "f6dea123efe6f3e491e2887262127597abc0971a15f50b5385c43a5028453525",
-          "bytes": 134038,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0b12d-3339-76f1-9627-c1add8c8dad1",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-17T21:02:04.558Z",
+            "updated_at": "2026-09-19T10:24:06.716Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "f6dea123efe6f3e491e2887262127597abc0971a15f50b5385c43a5028453525",
+              "bytes": 134038,
+              "turns": [
+                {
+                  "turn_id": "01a0b12d-3693-7930-80d4-e5dba3e33048",
+                  "started_at": "2026-09-17T21:02:05.547Z",
+                  "finished_at": "2026-09-17T21:02:08.951Z",
+                  "state": "failed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
+            },
+            "runtime_failure": {
+              "version": 1,
+              "thread_id": "01a0b12d-3339-76f1-9627-c1add8c8dad1",
               "turn_id": "01a0b12d-3693-7930-80d4-e5dba3e33048",
-              "started_at": "2026-09-17T21:02:05.547Z",
               "finished_at": "2026-09-17T21:02:08.951Z",
-              "state": "failed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+              "code": "usage_limit_exceeded",
+              "failure_class": "usage_limit",
+              "transcript_sha256": "f6dea123efe6f3e491e2887262127597abc0971a15f50b5385c43a5028453525",
+              "sha256": "ee7c2e14da95418ba8076f3c5228fab32a5a013c0919b657a336e4acb828cbcc"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-17T21:35:41.289Z",
+              "parent_pid": 59733,
+              "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
+              "version": 1,
+              "thread_id": "01a0b12d-3339-76f1-9627-c1add8c8dad1",
+              "turn_id": "01a0b12d-3693-7930-80d4-e5dba3e33048",
+              "transcript_sha256": "c66f86a34f21e40bb749f82a6b537a29b609cfddcb821f24d4154631db6a0f9e",
+              "sha256": "f1645dcab873c2b55d6cd0053b9067d016fa21cee6d219b8cdd0d3d55ba82054"
             }
-          ]
-        },
-        "runtime_failure": {
-          "version": 1,
-          "thread_id": "01a0b12d-3339-76f1-9627-c1add8c8dad1",
-          "turn_id": "01a0b12d-3693-7930-80d4-e5dba3e33048",
-          "finished_at": "2026-09-17T21:02:08.951Z",
-          "code": "usage_limit_exceeded",
-          "failure_class": "usage_limit",
-          "transcript_sha256": "f6dea123efe6f3e491e2887262127597abc0971a15f50b5385c43a5028453525",
-          "sha256": "ee7c2e14da95418ba8076f3c5228fab32a5a013c0919b657a336e4acb828cbcc"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-17T21:35:41.289Z",
-          "parent_pid": 59733,
-          "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
-          "version": 1,
-          "thread_id": "01a0b12d-3339-76f1-9627-c1add8c8dad1",
-          "turn_id": "01a0b12d-3693-7930-80d4-e5dba3e33048",
-          "transcript_sha256": "c66f86a34f21e40bb749f82a6b537a29b609cfddcb821f24d4154631db6a0f9e",
-          "sha256": "f1645dcab873c2b55d6cd0053b9067d016fa21cee6d219b8cdd0d3d55ba82054"
+          }
         }
       },
       {
@@ -1806,42 +2224,60 @@
         "updated_at": "2026-09-19T10:24:03.623Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "b4dfd52e3f0c37200ce67b85d4946f7518f9cc783aad36bcb9a0072d6ef75359",
-          "bytes": 134117,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0b653-5750-7182-b69e-639d261ab1ac",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-18T21:01:50.271Z",
+            "updated_at": "2026-09-19T10:24:03.623Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "b4dfd52e3f0c37200ce67b85d4946f7518f9cc783aad36bcb9a0072d6ef75359",
+              "bytes": 134117,
+              "turns": [
+                {
+                  "turn_id": "01a0b653-5a26-7eb3-b906-f316e4d8c8dd",
+                  "started_at": "2026-09-18T21:01:51.174Z",
+                  "finished_at": "2026-09-18T21:01:54.581Z",
+                  "state": "failed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
+            },
+            "runtime_failure": {
+              "version": 1,
+              "thread_id": "01a0b653-5750-7182-b69e-639d261ab1ac",
               "turn_id": "01a0b653-5a26-7eb3-b906-f316e4d8c8dd",
-              "started_at": "2026-09-18T21:01:51.174Z",
               "finished_at": "2026-09-18T21:01:54.581Z",
-              "state": "failed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+              "code": "usage_limit_exceeded",
+              "failure_class": "usage_limit",
+              "transcript_sha256": "b4dfd52e3f0c37200ce67b85d4946f7518f9cc783aad36bcb9a0072d6ef75359",
+              "sha256": "202260f45b8e6a255b07d02363801fd2c65361c38089c06a409ffe33c1ccf6a2"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-18T21:12:48.997Z",
+              "parent_pid": 86855,
+              "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
+              "version": 1,
+              "thread_id": "01a0b653-5750-7182-b69e-639d261ab1ac",
+              "turn_id": "01a0b653-5a26-7eb3-b906-f316e4d8c8dd",
+              "transcript_sha256": "7b0896709fd96d7f16658c7d976de54e8e53fe8d9bec98ed595aa02ebe703b91",
+              "sha256": "089352fa4f603d7a8a7923ae08ff28c455488df1d748910ee76013d3753b7cce"
             }
-          ]
-        },
-        "runtime_failure": {
-          "version": 1,
-          "thread_id": "01a0b653-5750-7182-b69e-639d261ab1ac",
-          "turn_id": "01a0b653-5a26-7eb3-b906-f316e4d8c8dd",
-          "finished_at": "2026-09-18T21:01:54.581Z",
-          "code": "usage_limit_exceeded",
-          "failure_class": "usage_limit",
-          "transcript_sha256": "b4dfd52e3f0c37200ce67b85d4946f7518f9cc783aad36bcb9a0072d6ef75359",
-          "sha256": "202260f45b8e6a255b07d02363801fd2c65361c38089c06a409ffe33c1ccf6a2"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-18T21:12:48.997Z",
-          "parent_pid": 86855,
-          "launcher_sha256": "3d825f55d1fa1b661a03f62eec0f0df264d587d0583bc9f745aa9510ce0d9a79",
-          "version": 1,
-          "thread_id": "01a0b653-5750-7182-b69e-639d261ab1ac",
-          "turn_id": "01a0b653-5a26-7eb3-b906-f316e4d8c8dd",
-          "transcript_sha256": "7b0896709fd96d7f16658c7d976de54e8e53fe8d9bec98ed595aa02ebe703b91",
-          "sha256": "089352fa4f603d7a8a7923ae08ff28c455488df1d748910ee76013d3753b7cce"
+          }
         }
       },
       {
@@ -1852,52 +2288,70 @@
         "updated_at": "2026-09-20T00:28:23.075Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "945535a42c225acb13627489221a394439de6b7f150ec3b11c777bea3add2793",
-          "bytes": 5455320,
-          "turns": [
-            {
-              "turn_id": "01a0bb78-4c36-7301-a85b-fc58ae405d14",
-              "started_at": "2026-09-19T21:00:18.436Z",
-              "finished_at": "2026-09-19T21:31:41.784Z",
-              "state": "completed",
-              "tool_calls": 84,
-              "tool_outputs": 84,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0bc15-f017-7b02-a071-940506aaa0ee",
-              "started_at": "2026-09-19T23:52:29.487Z",
-              "finished_at": "2026-09-19T23:52:42.217Z",
-              "state": "completed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0bc27-7ec7-7660-9ceb-a7198fa035f3",
-              "started_at": "2026-09-20T00:11:40.112Z",
-              "finished_at": "2026-09-20T00:22:45.377Z",
-              "state": "completed",
-              "tool_calls": 22,
-              "tool_outputs": 22,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0bb78-4965-7242-bedf-29a93d1b0bf9",
-          "turn_id": "01a0bb78-4c36-7301-a85b-fc58ae405d14",
-          "observed_at": "2026-09-19T21:03:10.786Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "a07e0ef760adba06751d633e3c372b4ba5d19e457c95d5daf14842fa9af68ae2",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "e207f6ff6c7a99ccec33e6cf553a66e54dc0566f804d7ee0fa7d6ca1b9630ed3"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0bb78-4965-7242-bedf-29a93d1b0bf9",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-19T21:00:17.617Z",
+            "updated_at": "2026-09-20T00:28:23.075Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "945535a42c225acb13627489221a394439de6b7f150ec3b11c777bea3add2793",
+              "bytes": 5455320,
+              "turns": [
+                {
+                  "turn_id": "01a0bb78-4c36-7301-a85b-fc58ae405d14",
+                  "started_at": "2026-09-19T21:00:18.436Z",
+                  "finished_at": "2026-09-19T21:31:41.784Z",
+                  "state": "completed",
+                  "tool_calls": 84,
+                  "tool_outputs": 84,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0bc15-f017-7b02-a071-940506aaa0ee",
+                  "started_at": "2026-09-19T23:52:29.487Z",
+                  "finished_at": "2026-09-19T23:52:42.217Z",
+                  "state": "completed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0bc27-7ec7-7660-9ceb-a7198fa035f3",
+                  "started_at": "2026-09-20T00:11:40.112Z",
+                  "finished_at": "2026-09-20T00:22:45.377Z",
+                  "state": "completed",
+                  "tool_calls": 22,
+                  "tool_outputs": 22,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0bb78-4965-7242-bedf-29a93d1b0bf9",
+              "turn_id": "01a0bb78-4c36-7301-a85b-fc58ae405d14",
+              "observed_at": "2026-09-19T21:03:10.786Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "a07e0ef760adba06751d633e3c372b4ba5d19e457c95d5daf14842fa9af68ae2",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "e207f6ff6c7a99ccec33e6cf553a66e54dc0566f804d7ee0fa7d6ca1b9630ed3"
+            }
+          }
         }
       },
       {
@@ -1908,32 +2362,50 @@
         "updated_at": "2026-09-24T08:30:51.618Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "574615ec1084d879c37f31ee8cb8bb8762ec86aa3c8c816ffcb8c04b74bf5b3e",
-          "bytes": 1956242,
-          "turns": [
-            {
-              "turn_id": "01a0c09f-469e-7e93-a2b5-89c0ee8a5fc6",
-              "started_at": "2026-09-20T21:00:59.063Z",
-              "finished_at": "2026-09-20T21:05:11.678Z",
-              "state": "completed",
-              "tool_calls": 20,
-              "tool_outputs": 20,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0c09f-441c-7241-b87b-10cd6f5d014b",
-          "turn_id": "01a0c09f-469e-7e93-a2b5-89c0ee8a5fc6",
-          "observed_at": "2026-09-20T21:03:49.504Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "f24227b6c67c6d7f1a94dbb3b666fba8b1fc67e7567e3826118cb6f4c6426762",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "09077f0a1752c95ec87f9563f1f512d6206688dbb96f9e8c3cdde552eb0cd149"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0c09f-441c-7241-b87b-10cd6f5d014b",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-20T21:00:58.249Z",
+            "updated_at": "2026-09-24T08:30:51.618Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "574615ec1084d879c37f31ee8cb8bb8762ec86aa3c8c816ffcb8c04b74bf5b3e",
+              "bytes": 1956242,
+              "turns": [
+                {
+                  "turn_id": "01a0c09f-469e-7e93-a2b5-89c0ee8a5fc6",
+                  "started_at": "2026-09-20T21:00:59.063Z",
+                  "finished_at": "2026-09-20T21:05:11.678Z",
+                  "state": "completed",
+                  "tool_calls": 20,
+                  "tool_outputs": 20,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0c09f-441c-7241-b87b-10cd6f5d014b",
+              "turn_id": "01a0c09f-469e-7e93-a2b5-89c0ee8a5fc6",
+              "observed_at": "2026-09-20T21:03:49.504Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "f24227b6c67c6d7f1a94dbb3b666fba8b1fc67e7567e3826118cb6f4c6426762",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "09077f0a1752c95ec87f9563f1f512d6206688dbb96f9e8c3cdde552eb0cd149"
+            }
+          }
         }
       },
       {
@@ -1944,32 +2416,50 @@
         "updated_at": "2026-09-24T08:30:34.957Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "f6230f4df4a34caee39505aa8f98827369c72567c0330213121298384a9684f2",
-          "bytes": 1820916,
-          "turns": [
-            {
-              "turn_id": "01a0c5c5-3562-7cc0-912f-b94ed0291a6a",
-              "started_at": "2026-09-21T21:00:31.020Z",
-              "finished_at": "2026-09-21T21:03:59.609Z",
-              "state": "completed",
-              "tool_calls": 17,
-              "tool_outputs": 17,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0c5c5-32d5-7601-93da-85ce4c6df386",
-          "turn_id": "01a0c5c5-3562-7cc0-912f-b94ed0291a6a",
-          "observed_at": "2026-09-21T21:02:54.260Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "f4aea80dd61943a74fd21a2f28c430d4d8e5ce795c354f14d9252b8280bd43d1",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "d1b06e800205c0b0c68e344a70fefc9b078f5add95e05923d9a32e287602f906"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0c5c5-32d5-7601-93da-85ce4c6df386",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-21T21:00:30.274Z",
+            "updated_at": "2026-09-24T08:30:34.957Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "f6230f4df4a34caee39505aa8f98827369c72567c0330213121298384a9684f2",
+              "bytes": 1820916,
+              "turns": [
+                {
+                  "turn_id": "01a0c5c5-3562-7cc0-912f-b94ed0291a6a",
+                  "started_at": "2026-09-21T21:00:31.020Z",
+                  "finished_at": "2026-09-21T21:03:59.609Z",
+                  "state": "completed",
+                  "tool_calls": 17,
+                  "tool_outputs": 17,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0c5c5-32d5-7601-93da-85ce4c6df386",
+              "turn_id": "01a0c5c5-3562-7cc0-912f-b94ed0291a6a",
+              "observed_at": "2026-09-21T21:02:54.260Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "f4aea80dd61943a74fd21a2f28c430d4d8e5ce795c354f14d9252b8280bd43d1",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "d1b06e800205c0b0c68e344a70fefc9b078f5add95e05923d9a32e287602f906"
+            }
+          }
         }
       },
       {
@@ -1980,43 +2470,61 @@
         "updated_at": "2026-09-24T08:30:26.450Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "75c16a3073d548b0c254794a7293f00b1c91a163110b3afc794d0620c4c06b67",
-          "bytes": 1782909,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-22T21:00:33.512Z",
+            "updated_at": "2026-09-24T08:30:26.450Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "75c16a3073d548b0c254794a7293f00b1c91a163110b3afc794d0620c4c06b67",
+              "bytes": 1782909,
+              "turns": [
+                {
+                  "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
+                  "started_at": "2026-09-22T21:00:34.278Z",
+                  "finished_at": "2026-09-22T21:04:31.587Z",
+                  "state": "completed",
+                  "tool_calls": 18,
+                  "tool_outputs": 18,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
               "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
-              "started_at": "2026-09-22T21:00:34.278Z",
-              "finished_at": "2026-09-22T21:04:31.587Z",
-              "state": "completed",
-              "tool_calls": 18,
-              "tool_outputs": 18,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-22T21:03:30.248Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "701c957ba93459fe5bfd866cad4890a6d0e14a4de8f662906181e9407b578be6",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "7c5683f6ce11d492c85ab333399b3689ea46e998694a348842223be44852809b"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-22T21:49:11.338Z",
+              "parent_pid": 25725,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
+              "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
+              "transcript_sha256": "be8179e3268e0877a8d9343fd3aeceeab128332c518463375ef1cfe70c510ea0",
+              "sha256": "d78de7f7cd4707aaeb8596cb0b665ac968e0e7a7dce251525d83eca3cd53ba58"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
-          "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
-          "observed_at": "2026-09-22T21:03:30.248Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "701c957ba93459fe5bfd866cad4890a6d0e14a4de8f662906181e9407b578be6",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "7c5683f6ce11d492c85ab333399b3689ea46e998694a348842223be44852809b"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-22T21:49:11.338Z",
-          "parent_pid": 25725,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0caeb-9b7d-7902-aad2-3b15e256a803",
-          "turn_id": "01a0caeb-9e1c-7843-932a-ef0069b5ef64",
-          "transcript_sha256": "be8179e3268e0877a8d9343fd3aeceeab128332c518463375ef1cfe70c510ea0",
-          "sha256": "d78de7f7cd4707aaeb8596cb0b665ac968e0e7a7dce251525d83eca3cd53ba58"
+          }
         }
       },
       {
@@ -2027,43 +2535,61 @@
         "updated_at": "2026-09-24T08:29:50.063Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "c6edaa001c725dcd185b02a3500b7449188c57c9576b8889aefc8c8c8629fb9f",
-          "bytes": 2062084,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0d012-0042-7a10-ab0b-c04051a9254e",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-23T21:00:35.757Z",
+            "updated_at": "2026-09-24T08:29:50.063Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "c6edaa001c725dcd185b02a3500b7449188c57c9576b8889aefc8c8c8629fb9f",
+              "bytes": 2062084,
+              "turns": [
+                {
+                  "turn_id": "01a0d012-02d1-7800-b885-ffbbbf28b4c1",
+                  "started_at": "2026-09-23T21:00:36.510Z",
+                  "finished_at": "2026-09-23T21:04:20.660Z",
+                  "state": "completed",
+                  "tool_calls": 18,
+                  "tool_outputs": 18,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0d012-0042-7a10-ab0b-c04051a9254e",
               "turn_id": "01a0d012-02d1-7800-b885-ffbbbf28b4c1",
-              "started_at": "2026-09-23T21:00:36.510Z",
-              "finished_at": "2026-09-23T21:04:20.660Z",
-              "state": "completed",
-              "tool_calls": 18,
-              "tool_outputs": 18,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-23T21:03:20.894Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "695d525075a0e2277517691cc814f55b8731b725302edace42e13ca371d9e70a",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "8702cd98fdef074fa9f3b6956ee186e3ca4a2cd61cd6a6e04c31600a83a5fbe9"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-23T21:59:41.108Z",
+              "parent_pid": 46868,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0d012-0042-7a10-ab0b-c04051a9254e",
+              "turn_id": "01a0d012-02d1-7800-b885-ffbbbf28b4c1",
+              "transcript_sha256": "5df8aaf07bd226cef3927e77ca6e940d25d728593d399e6c695cdfd37bf92708",
+              "sha256": "429d66aabcce11a67a56718769fac0cfd6d3d41613f76257b1f6ce1da2eccfc1"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0d012-0042-7a10-ab0b-c04051a9254e",
-          "turn_id": "01a0d012-02d1-7800-b885-ffbbbf28b4c1",
-          "observed_at": "2026-09-23T21:03:20.894Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "695d525075a0e2277517691cc814f55b8731b725302edace42e13ca371d9e70a",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "8702cd98fdef074fa9f3b6956ee186e3ca4a2cd61cd6a6e04c31600a83a5fbe9"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-23T21:59:41.108Z",
-          "parent_pid": 46868,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0d012-0042-7a10-ab0b-c04051a9254e",
-          "turn_id": "01a0d012-02d1-7800-b885-ffbbbf28b4c1",
-          "transcript_sha256": "5df8aaf07bd226cef3927e77ca6e940d25d728593d399e6c695cdfd37bf92708",
-          "sha256": "429d66aabcce11a67a56718769fac0cfd6d3d41613f76257b1f6ce1da2eccfc1"
+          }
         }
       },
       {
@@ -2074,53 +2600,71 @@
         "updated_at": "2026-09-25T09:44:31.750Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "8f2156b7820b239f927038bed4c7ea64d078e36f443bfeb50ce23b86e1c9079b",
-          "bytes": 2267801,
-          "turns": [
-            {
-              "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
-              "started_at": "2026-09-24T21:01:39.921Z",
-              "finished_at": "2026-09-24T21:05:16.876Z",
-              "state": "completed",
-              "tool_calls": 17,
-              "tool_outputs": 17,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-24T21:01:38.871Z",
+            "updated_at": "2026-09-25T09:44:31.750Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "8f2156b7820b239f927038bed4c7ea64d078e36f443bfeb50ce23b86e1c9079b",
+              "bytes": 2267801,
+              "turns": [
+                {
+                  "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
+                  "started_at": "2026-09-24T21:01:39.921Z",
+                  "finished_at": "2026-09-24T21:05:16.876Z",
+                  "state": "completed",
+                  "tool_calls": 17,
+                  "tool_outputs": 17,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0d7bc-3bc8-7c91-aef5-520361e2c1bc",
+                  "started_at": "2026-09-25T08:43:52.678Z",
+                  "finished_at": "2026-09-25T08:45:43.875Z",
+                  "state": "completed",
+                  "tool_calls": 6,
+                  "tool_outputs": 6,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 1
+                }
+              ]
             },
-            {
-              "turn_id": "01a0d7bc-3bc8-7c91-aef5-520361e2c1bc",
-              "started_at": "2026-09-25T08:43:52.678Z",
-              "finished_at": "2026-09-25T08:45:43.875Z",
-              "state": "completed",
-              "tool_calls": 6,
-              "tool_outputs": 6,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 1
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
+              "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
+              "observed_at": "2026-09-24T21:04:26.013Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "e527cddf83dff649b9f35b5975b674aa8c6219f2c93634f182befb509c7b7881",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "243e87cea24b0fa721b73ff56b7545268dc36781acce90e56451d2209cf295b0"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-24T21:07:18.774Z",
+              "parent_pid": 15548,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
+              "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
+              "transcript_sha256": "c1cccf930aad35697d5cc682c203f0c7f02eb4a885378a6f9b0de3e0d66e847a",
+              "sha256": "f53c3ce151c0e9710fdfe4cde547ac73fa9a09fd3bc373422211506498bf7b56"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
-          "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
-          "observed_at": "2026-09-24T21:04:26.013Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "e527cddf83dff649b9f35b5975b674aa8c6219f2c93634f182befb509c7b7881",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "243e87cea24b0fa721b73ff56b7545268dc36781acce90e56451d2209cf295b0"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-24T21:07:18.774Z",
-          "parent_pid": 15548,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0d539-52d7-76a1-8e8e-15c4fb67ec5e",
-          "turn_id": "01a0d539-55e1-7cb0-97ac-f897f55223cf",
-          "transcript_sha256": "c1cccf930aad35697d5cc682c203f0c7f02eb4a885378a6f9b0de3e0d66e847a",
-          "sha256": "f53c3ce151c0e9710fdfe4cde547ac73fa9a09fd3bc373422211506498bf7b56"
+          }
         }
       },
       {
@@ -2131,43 +2675,61 @@
         "updated_at": "2026-09-25T23:36:29.904Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "0c902e63c9978c3d4b855784ec4447dcfa10239db3d2cb4dfd9fcb3b656933d4",
-          "bytes": 2064973,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0da5e-cd92-7223-89b4-1f2d8797624a",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-25T21:00:41.197Z",
+            "updated_at": "2026-09-25T23:36:29.904Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "0c902e63c9978c3d4b855784ec4447dcfa10239db3d2cb4dfd9fcb3b656933d4",
+              "bytes": 2064973,
+              "turns": [
+                {
+                  "turn_id": "01a0da5e-d168-7aa2-88ca-c74a4e859908",
+                  "started_at": "2026-09-25T21:00:42.304Z",
+                  "finished_at": "2026-09-25T21:04:24.636Z",
+                  "state": "completed",
+                  "tool_calls": 17,
+                  "tool_outputs": 17,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0da5e-cd92-7223-89b4-1f2d8797624a",
               "turn_id": "01a0da5e-d168-7aa2-88ca-c74a4e859908",
-              "started_at": "2026-09-25T21:00:42.304Z",
-              "finished_at": "2026-09-25T21:04:24.636Z",
-              "state": "completed",
-              "tool_calls": 17,
-              "tool_outputs": 17,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-25T21:03:13.528Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "8a7459269506537c90d6f2f34b10adf596888b40081def50ff7dfbe5619b8996",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "f60532e0bd93028f0a6a4d28d99f1cd18e93c58ede84738668892e8fe413539f"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-25T21:13:58.494Z",
+              "parent_pid": 75466,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0da5e-cd92-7223-89b4-1f2d8797624a",
+              "turn_id": "01a0da5e-d168-7aa2-88ca-c74a4e859908",
+              "transcript_sha256": "76154715cd40c51291176b4a3c707855fff033ab2fa3555b10aafc5537726c54",
+              "sha256": "fb4b44c469f68fd99a40e4630f16cca21153933a0fb619ee83955e01cfa3a617"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0da5e-cd92-7223-89b4-1f2d8797624a",
-          "turn_id": "01a0da5e-d168-7aa2-88ca-c74a4e859908",
-          "observed_at": "2026-09-25T21:03:13.528Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "8a7459269506537c90d6f2f34b10adf596888b40081def50ff7dfbe5619b8996",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "f60532e0bd93028f0a6a4d28d99f1cd18e93c58ede84738668892e8fe413539f"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-25T21:13:58.494Z",
-          "parent_pid": 75466,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0da5e-cd92-7223-89b4-1f2d8797624a",
-          "turn_id": "01a0da5e-d168-7aa2-88ca-c74a4e859908",
-          "transcript_sha256": "76154715cd40c51291176b4a3c707855fff033ab2fa3555b10aafc5537726c54",
-          "sha256": "fb4b44c469f68fd99a40e4630f16cca21153933a0fb619ee83955e01cfa3a617"
+          }
         }
       },
       {
@@ -2178,43 +2740,61 @@
         "updated_at": "2026-09-27T00:19:25.973Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "cef56bbe1e9040a6af3832e4e967e933bfad26adec315c1ec1a8421751c08265",
-          "bytes": 1927176,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0df85-ffe3-7333-9195-c126e6186b68",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-26T21:01:36.070Z",
+            "updated_at": "2026-09-27T00:19:25.973Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "cef56bbe1e9040a6af3832e4e967e933bfad26adec315c1ec1a8421751c08265",
+              "bytes": 1927176,
+              "turns": [
+                {
+                  "turn_id": "01a0df86-027c-72b2-bd5d-e0e28ab495e7",
+                  "started_at": "2026-09-26T21:01:36.833Z",
+                  "finished_at": "2026-09-26T21:05:07.808Z",
+                  "state": "completed",
+                  "tool_calls": 15,
+                  "tool_outputs": 15,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0df85-ffe3-7333-9195-c126e6186b68",
               "turn_id": "01a0df86-027c-72b2-bd5d-e0e28ab495e7",
-              "started_at": "2026-09-26T21:01:36.833Z",
-              "finished_at": "2026-09-26T21:05:07.808Z",
-              "state": "completed",
-              "tool_calls": 15,
-              "tool_outputs": 15,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-26T21:04:06.768Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "86d63d2388bce1f0fc91b77087a3fe8b8533dec2139da0149d60e605a0be5fae",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "a43618f5bf7d0952bf9726b486be969a4eb63c1c1d31439d88822aee95d60212"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-26T21:20:58.074Z",
+              "parent_pid": 23631,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0df85-ffe3-7333-9195-c126e6186b68",
+              "turn_id": "01a0df86-027c-72b2-bd5d-e0e28ab495e7",
+              "transcript_sha256": "952eb87bd7add3c78f166a4cec2fbb05dafb4845f24ac9c74f71703c7695df5a",
+              "sha256": "d1893a32208efe6385bb0455a564f52d19fab6592815c0ee932278b93e340541"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0df85-ffe3-7333-9195-c126e6186b68",
-          "turn_id": "01a0df86-027c-72b2-bd5d-e0e28ab495e7",
-          "observed_at": "2026-09-26T21:04:06.768Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "86d63d2388bce1f0fc91b77087a3fe8b8533dec2139da0149d60e605a0be5fae",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "a43618f5bf7d0952bf9726b486be969a4eb63c1c1d31439d88822aee95d60212"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-26T21:20:58.074Z",
-          "parent_pid": 23631,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0df85-ffe3-7333-9195-c126e6186b68",
-          "turn_id": "01a0df86-027c-72b2-bd5d-e0e28ab495e7",
-          "transcript_sha256": "952eb87bd7add3c78f166a4cec2fbb05dafb4845f24ac9c74f71703c7695df5a",
-          "sha256": "d1893a32208efe6385bb0455a564f52d19fab6592815c0ee932278b93e340541"
+          }
         }
       },
       {
@@ -2225,42 +2805,60 @@
         "updated_at": "2026-09-27T23:58:25.857Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
-          "bytes": 135017,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0e541-4411-7443-8004-6f4e0a6d5562",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-27T23:44:14.821Z",
+            "updated_at": "2026-09-27T23:58:25.857Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
+              "bytes": 135017,
+              "turns": [
+                {
+                  "turn_id": "01a0e541-4a0f-78b1-ab88-affbfe190e53",
+                  "started_at": "2026-09-27T23:44:16.519Z",
+                  "finished_at": "2026-09-27T23:44:19.017Z",
+                  "state": "failed",
+                  "tool_calls": 0,
+                  "tool_outputs": 0,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "runtime_failure": {
+              "version": 1,
+              "thread_id": "01a0e541-4411-7443-8004-6f4e0a6d5562",
               "turn_id": "01a0e541-4a0f-78b1-ab88-affbfe190e53",
-              "started_at": "2026-09-27T23:44:16.519Z",
               "finished_at": "2026-09-27T23:44:19.017Z",
-              "state": "failed",
-              "tool_calls": 0,
-              "tool_outputs": 0,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "code": "usage_limit_exceeded",
+              "failure_class": "usage_limit",
+              "transcript_sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
+              "sha256": "44d68c91e166ec77408c4e6222c5a284fa49a087307bdb844609c498d288ef7a"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-28T00:47:09.445Z",
+              "parent_pid": 19929,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0e541-4411-7443-8004-6f4e0a6d5562",
+              "turn_id": "01a0e541-4a0f-78b1-ab88-affbfe190e53",
+              "transcript_sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
+              "sha256": "da5b13f510faa146fab1cb04a610c031d90747b5157cd07911fcd53892ca27c9"
             }
-          ]
-        },
-        "runtime_failure": {
-          "version": 1,
-          "thread_id": "01a0e541-4411-7443-8004-6f4e0a6d5562",
-          "turn_id": "01a0e541-4a0f-78b1-ab88-affbfe190e53",
-          "finished_at": "2026-09-27T23:44:19.017Z",
-          "code": "usage_limit_exceeded",
-          "failure_class": "usage_limit",
-          "transcript_sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
-          "sha256": "44d68c91e166ec77408c4e6222c5a284fa49a087307bdb844609c498d288ef7a"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-28T00:47:09.445Z",
-          "parent_pid": 19929,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0e541-4411-7443-8004-6f4e0a6d5562",
-          "turn_id": "01a0e541-4a0f-78b1-ab88-affbfe190e53",
-          "transcript_sha256": "384733b403ad5b01b49fa39eab63067ad2612360b6c4df376b59c745420268ba",
-          "sha256": "da5b13f510faa146fab1cb04a610c031d90747b5157cd07911fcd53892ca27c9"
+          }
         }
       },
       {
@@ -2271,43 +2869,61 @@
         "updated_at": "2026-09-28T23:41:12.223Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "ffeee789fd72b536c85e8a1ebac7df2386110fe58267fb0390e0b313676ce294",
-          "bytes": 2340849,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0e9d1-a939-7013-a5c7-d905763f9cb9",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-28T21:00:26.777Z",
+            "updated_at": "2026-09-28T23:41:12.223Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "ffeee789fd72b536c85e8a1ebac7df2386110fe58267fb0390e0b313676ce294",
+              "bytes": 2340849,
+              "turns": [
+                {
+                  "turn_id": "01a0e9d1-abd2-7841-9d03-a64d06b2c4b1",
+                  "started_at": "2026-09-28T21:00:27.543Z",
+                  "finished_at": "2026-09-28T21:04:29.808Z",
+                  "state": "completed",
+                  "tool_calls": 18,
+                  "tool_outputs": 18,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0e9d1-a939-7013-a5c7-d905763f9cb9",
               "turn_id": "01a0e9d1-abd2-7841-9d03-a64d06b2c4b1",
-              "started_at": "2026-09-28T21:00:27.543Z",
-              "finished_at": "2026-09-28T21:04:29.808Z",
-              "state": "completed",
-              "tool_calls": 18,
-              "tool_outputs": 18,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-28T21:03:14.797Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "6102a4905f76fc762071d8674ab1a42bd1a6302d219bf45b8aeab2c1e1a75d72",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "87407b900c026a54af684fcbf82174de2025863a3c14eecf1bdfa7a2a6475163"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-28T21:52:43.000Z",
+              "parent_pid": 44580,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0e9d1-a939-7013-a5c7-d905763f9cb9",
+              "turn_id": "01a0e9d1-abd2-7841-9d03-a64d06b2c4b1",
+              "transcript_sha256": "564d52fa01c010fd98ed175ce4ad28f4ff193ca21363a868cf17169e1b3af150",
+              "sha256": "cd1668df6580d55f7b72ef520954bea4d68dd9e9f86beb91e9a377e6b981316e"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0e9d1-a939-7013-a5c7-d905763f9cb9",
-          "turn_id": "01a0e9d1-abd2-7841-9d03-a64d06b2c4b1",
-          "observed_at": "2026-09-28T21:03:14.797Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "6102a4905f76fc762071d8674ab1a42bd1a6302d219bf45b8aeab2c1e1a75d72",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "87407b900c026a54af684fcbf82174de2025863a3c14eecf1bdfa7a2a6475163"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-28T21:52:43.000Z",
-          "parent_pid": 44580,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0e9d1-a939-7013-a5c7-d905763f9cb9",
-          "turn_id": "01a0e9d1-abd2-7841-9d03-a64d06b2c4b1",
-          "transcript_sha256": "564d52fa01c010fd98ed175ce4ad28f4ff193ca21363a868cf17169e1b3af150",
-          "sha256": "cd1668df6580d55f7b72ef520954bea4d68dd9e9f86beb91e9a377e6b981316e"
+          }
         }
       },
       {
@@ -2318,63 +2934,81 @@
         "updated_at": "2026-09-30T00:47:52.385Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "08f261b07444e688cc2bed0c3ffa80304fb82afa0b58d4a6499b8a634d776a23",
-          "bytes": 8464521,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0eef8-e991-74d0-863e-5ac8a7698966",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-29T21:01:25.238Z",
+            "updated_at": "2026-09-30T00:47:52.385Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "08f261b07444e688cc2bed0c3ffa80304fb82afa0b58d4a6499b8a634d776a23",
+              "bytes": 8464521,
+              "turns": [
+                {
+                  "turn_id": "01a0eef8-ec0b-7bd2-a745-acbcada1c87f",
+                  "started_at": "2026-09-29T21:01:25.973Z",
+                  "finished_at": "2026-09-29T21:04:31.014Z",
+                  "state": "completed",
+                  "tool_calls": 16,
+                  "tool_outputs": 16,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0ef7f-d7f9-7f43-bdaa-4438f227fe7c",
+                  "started_at": "2026-09-29T23:28:48.142Z",
+                  "finished_at": "2026-09-29T23:30:15.680Z",
+                  "state": "completed",
+                  "tool_calls": 7,
+                  "tool_outputs": 7,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0ef95-ce59-7041-b8ac-fa55936a24da",
+                  "started_at": "2026-09-29T23:52:47.463Z",
+                  "finished_at": "2026-09-30T00:41:36.369Z",
+                  "state": "completed",
+                  "tool_calls": 128,
+                  "tool_outputs": 128,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0eef8-e991-74d0-863e-5ac8a7698966",
               "turn_id": "01a0eef8-ec0b-7bd2-a745-acbcada1c87f",
-              "started_at": "2026-09-29T21:01:25.973Z",
-              "finished_at": "2026-09-29T21:04:31.014Z",
-              "state": "completed",
-              "tool_calls": 16,
-              "tool_outputs": 16,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-29T21:03:34.048Z",
+              "admitted": false,
+              "code": "agent_stopped",
+              "input_sha256": "71dee7d4e983736539e204d0d981eeff016905faa954535430bfdb7b38e15630",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "be4e07dc13ce91714d32c1d8370936f9ac3adf777bc531d35a3cbec7d9198f20"
             },
-            {
-              "turn_id": "01a0ef7f-d7f9-7f43-bdaa-4438f227fe7c",
-              "started_at": "2026-09-29T23:28:48.142Z",
-              "finished_at": "2026-09-29T23:30:15.680Z",
-              "state": "completed",
-              "tool_calls": 7,
-              "tool_outputs": 7,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0ef95-ce59-7041-b8ac-fa55936a24da",
-              "started_at": "2026-09-29T23:52:47.463Z",
-              "finished_at": "2026-09-30T00:41:36.369Z",
-              "state": "completed",
-              "tool_calls": 128,
-              "tool_outputs": 128,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-29T21:58:57.571Z",
+              "parent_pid": 38417,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0eef8-e991-74d0-863e-5ac8a7698966",
+              "turn_id": "01a0eef8-ec0b-7bd2-a745-acbcada1c87f",
+              "transcript_sha256": "677bf2581f0521f845105901310d592c373de988b2f54544371050086d982e5b",
+              "sha256": "4fcf64c77c9dc5cebe1bc8847505a6c0c73065659934866b4e4e0397635c9015"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0eef8-e991-74d0-863e-5ac8a7698966",
-          "turn_id": "01a0eef8-ec0b-7bd2-a745-acbcada1c87f",
-          "observed_at": "2026-09-29T21:03:34.048Z",
-          "admitted": false,
-          "code": "agent_stopped",
-          "input_sha256": "71dee7d4e983736539e204d0d981eeff016905faa954535430bfdb7b38e15630",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "be4e07dc13ce91714d32c1d8370936f9ac3adf777bc531d35a3cbec7d9198f20"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-29T21:58:57.571Z",
-          "parent_pid": 38417,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0eef8-e991-74d0-863e-5ac8a7698966",
-          "turn_id": "01a0eef8-ec0b-7bd2-a745-acbcada1c87f",
-          "transcript_sha256": "677bf2581f0521f845105901310d592c373de988b2f54544371050086d982e5b",
-          "sha256": "4fcf64c77c9dc5cebe1bc8847505a6c0c73065659934866b4e4e0397635c9015"
+          }
         }
       },
       {
@@ -2385,63 +3019,81 @@
         "updated_at": "2026-10-01T00:49:06.907Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "2f1c36da7d192e1bfbfd2371ae19e9c6ed720b20096c7a02e5abd42f78f32d27",
-          "bytes": 13233871,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0f41e-d80a-7a70-b927-485e8385da0e",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-09-30T21:00:57.192Z",
+            "updated_at": "2026-10-01T00:49:06.907Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "2f1c36da7d192e1bfbfd2371ae19e9c6ed720b20096c7a02e5abd42f78f32d27",
+              "bytes": 13233871,
+              "turns": [
+                {
+                  "turn_id": "01a0f41e-db36-74d2-bc48-c6f63573f988",
+                  "started_at": "2026-09-30T21:00:58.126Z",
+                  "finished_at": "2026-09-30T21:37:29.020Z",
+                  "state": "completed",
+                  "tool_calls": 127,
+                  "tool_outputs": 127,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0f4a4-14fb-7ef0-a8fc-9c9bdecc44f4",
+                  "started_at": "2026-09-30T23:26:29.125Z",
+                  "finished_at": "2026-09-30T23:26:50.114Z",
+                  "state": "completed",
+                  "tool_calls": 1,
+                  "tool_outputs": 1,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                },
+                {
+                  "turn_id": "01a0f4c5-5a53-7e13-bcee-a959e92dd488",
+                  "started_at": "2026-10-01T00:02:49.642Z",
+                  "finished_at": "2026-10-01T00:43:57.507Z",
+                  "state": "completed",
+                  "tool_calls": 110,
+                  "tool_outputs": 110,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0f41e-d80a-7a70-b927-485e8385da0e",
               "turn_id": "01a0f41e-db36-74d2-bc48-c6f63573f988",
-              "started_at": "2026-09-30T21:00:58.126Z",
-              "finished_at": "2026-09-30T21:37:29.020Z",
-              "state": "completed",
-              "tool_calls": 127,
-              "tool_outputs": 127,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-09-30T21:03:48.999Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "baf0288952f492ffa1ec8bbefad662f9982e2660af99ad2cb7b0144d465c6c9a",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "6c2a02436e9db0a067a08f224ccc8f4664ebd914e46b864bb2919c2b5c9270b5"
             },
-            {
-              "turn_id": "01a0f4a4-14fb-7ef0-a8fc-9c9bdecc44f4",
-              "started_at": "2026-09-30T23:26:29.125Z",
-              "finished_at": "2026-09-30T23:26:50.114Z",
-              "state": "completed",
-              "tool_calls": 1,
-              "tool_outputs": 1,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            },
-            {
-              "turn_id": "01a0f4c5-5a53-7e13-bcee-a959e92dd488",
-              "started_at": "2026-10-01T00:02:49.642Z",
-              "finished_at": "2026-10-01T00:43:57.507Z",
-              "state": "completed",
-              "tool_calls": 110,
-              "tool_outputs": 110,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-09-30T22:07:40.094Z",
+              "parent_pid": 19839,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0f41e-d80a-7a70-b927-485e8385da0e",
+              "turn_id": "01a0f41e-db36-74d2-bc48-c6f63573f988",
+              "transcript_sha256": "15d40ad0f419addcd076b8e9b0b9ece5a0c755f855bf9692cd3d18c411282399",
+              "sha256": "c8baf088f27564566c6998d5899a75c08cc1ed7c3cf50860e9ef54c03e105eb6"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0f41e-d80a-7a70-b927-485e8385da0e",
-          "turn_id": "01a0f41e-db36-74d2-bc48-c6f63573f988",
-          "observed_at": "2026-09-30T21:03:48.999Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "baf0288952f492ffa1ec8bbefad662f9982e2660af99ad2cb7b0144d465c6c9a",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "6c2a02436e9db0a067a08f224ccc8f4664ebd914e46b864bb2919c2b5c9270b5"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-09-30T22:07:40.094Z",
-          "parent_pid": 19839,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0f41e-d80a-7a70-b927-485e8385da0e",
-          "turn_id": "01a0f41e-db36-74d2-bc48-c6f63573f988",
-          "transcript_sha256": "15d40ad0f419addcd076b8e9b0b9ece5a0c755f855bf9692cd3d18c411282399",
-          "sha256": "c8baf088f27564566c6998d5899a75c08cc1ed7c3cf50860e9ef54c03e105eb6"
+          }
         }
       },
       {
@@ -2452,43 +3104,61 @@
         "updated_at": "2026-10-01T23:48:56.176Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "f7d5635ccb9590ca843b4ed900c5d4ac8d018ed5da3725603ca06379f4d6361b",
-          "bytes": 5563627,
-          "turns": [
-            {
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
+        },
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0f946-1d12-7883-aa89-0718772a5b85",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-10-01T21:01:56.851Z",
+            "updated_at": "2026-10-01T23:48:56.176Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "f7d5635ccb9590ca843b4ed900c5d4ac8d018ed5da3725603ca06379f4d6361b",
+              "bytes": 5563627,
+              "turns": [
+                {
+                  "turn_id": "01a0f946-20ba-7f61-8aea-43fc03b02709",
+                  "started_at": "2026-10-01T21:01:57.884Z",
+                  "finished_at": "2026-10-01T21:38:56.253Z",
+                  "state": "completed",
+                  "tool_calls": 117,
+                  "tool_outputs": 117,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0f946-1d12-7883-aa89-0718772a5b85",
               "turn_id": "01a0f946-20ba-7f61-8aea-43fc03b02709",
-              "started_at": "2026-10-01T21:01:57.884Z",
-              "finished_at": "2026-10-01T21:38:56.253Z",
-              "state": "completed",
-              "tool_calls": 117,
-              "tool_outputs": 117,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
+              "observed_at": "2026-10-01T21:04:28.748Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "1e4cf44b9ed80b94e566639791256433993c4a2831e535ab2012c63a64da6e90",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "c99842a20188fde7a8b5fb87bf7c730d9e6451c46f88be9ad2a1e261b00c3e63"
+            },
+            "detection_receipt": {
+              "kind": "launchd_interval",
+              "observed_at": "2026-10-01T22:13:39.133Z",
+              "parent_pid": 8658,
+              "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
+              "version": 1,
+              "thread_id": "01a0f946-1d12-7883-aa89-0718772a5b85",
+              "turn_id": "01a0f946-20ba-7f61-8aea-43fc03b02709",
+              "transcript_sha256": "f7d5635ccb9590ca843b4ed900c5d4ac8d018ed5da3725603ca06379f4d6361b",
+              "sha256": "1c666a1471f74a4806b587d0dbd5bd45a203c957286d1b409445b10f662de28b"
             }
-          ]
-        },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0f946-1d12-7883-aa89-0718772a5b85",
-          "turn_id": "01a0f946-20ba-7f61-8aea-43fc03b02709",
-          "observed_at": "2026-10-01T21:04:28.748Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "1e4cf44b9ed80b94e566639791256433993c4a2831e535ab2012c63a64da6e90",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "c99842a20188fde7a8b5fb87bf7c730d9e6451c46f88be9ad2a1e261b00c3e63"
-        },
-        "detection_receipt": {
-          "kind": "launchd_interval",
-          "observed_at": "2026-10-01T22:13:39.133Z",
-          "parent_pid": 8658,
-          "launcher_sha256": "e7189a88ded5cd3471072b0093fec59b3721969d98a2195ac5cc6f3a98df531b",
-          "version": 1,
-          "thread_id": "01a0f946-1d12-7883-aa89-0718772a5b85",
-          "turn_id": "01a0f946-20ba-7f61-8aea-43fc03b02709",
-          "transcript_sha256": "f7d5635ccb9590ca843b4ed900c5d4ac8d018ed5da3725603ca06379f4d6361b",
-          "sha256": "1c666a1471f74a4806b587d0dbd5bd45a203c957286d1b409445b10f662de28b"
+          }
         }
       },
       {
@@ -2499,32 +3169,50 @@
         "updated_at": "2026-10-02T23:45:04.811Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "359cf68e1015fa4c9de3cbcdd06f9e5076dbe7f67b8198302d357c0b63368849",
-          "bytes": 4910807,
-          "turns": [
-            {
-              "turn_id": "01a0fe6a-e227-7240-91d0-a21c81b4827b",
-              "started_at": "2026-10-02T21:00:12.789Z",
-              "finished_at": "2026-10-02T21:42:05.913Z",
-              "state": "completed",
-              "tool_calls": 95,
-              "tool_outputs": 95,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a0fe6a-df2f-7403-a65a-d60d3297e89d",
-          "turn_id": "01a0fe6a-e227-7240-91d0-a21c81b4827b",
-          "observed_at": "2026-10-02T21:03:19.099Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "83cc7ca196c8cd43023d1a98c2452ff671ec71a9d7e038142e938f446f4ce9e0",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "6cb53b7e33e56517b7b815605fc93291c6c778e6ffb7b1bd4a21fcb8d66161ae"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a0fe6a-df2f-7403-a65a-d60d3297e89d",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-10-02T21:00:11.926Z",
+            "updated_at": "2026-10-02T23:45:04.811Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "359cf68e1015fa4c9de3cbcdd06f9e5076dbe7f67b8198302d357c0b63368849",
+              "bytes": 4910807,
+              "turns": [
+                {
+                  "turn_id": "01a0fe6a-e227-7240-91d0-a21c81b4827b",
+                  "started_at": "2026-10-02T21:00:12.789Z",
+                  "finished_at": "2026-10-02T21:42:05.913Z",
+                  "state": "completed",
+                  "tool_calls": 95,
+                  "tool_outputs": 95,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a0fe6a-df2f-7403-a65a-d60d3297e89d",
+              "turn_id": "01a0fe6a-e227-7240-91d0-a21c81b4827b",
+              "observed_at": "2026-10-02T21:03:19.099Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "83cc7ca196c8cd43023d1a98c2452ff671ec71a9d7e038142e938f446f4ce9e0",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "6cb53b7e33e56517b7b815605fc93291c6c778e6ffb7b1bd4a21fcb8d66161ae"
+            }
+          }
         }
       },
       {
@@ -2535,32 +3223,50 @@
         "updated_at": "2026-10-04T00:03:15.977Z",
         "business_outcome": "not_inferred",
         "transcript": {
-          "state": "observed",
-          "sha256": "8b0c64d1c0eee0ef7da276b4580778dcb6d3b5bec5af88c7f5c0e929c75ec823",
-          "bytes": 6015986,
-          "turns": [
-            {
-              "turn_id": "01a10392-c61b-74a3-a218-eff1224a22bd",
-              "started_at": "2026-10-03T21:01:53.147Z",
-              "finished_at": "2026-10-03T21:46:24.657Z",
-              "state": "completed",
-              "tool_calls": 110,
-              "tool_outputs": 110,
-              "unanswered_calls": 0,
-              "unattributed_outputs": 0
-            }
-          ]
+          "state": "unavailable",
+          "reason": "unreadable_or_incomplete_transcript",
+          "sha256": null,
+          "bytes": null,
+          "turns": []
         },
-        "gate_receipt": {
-          "version": 1,
-          "thread_id": "01a10392-c32e-78e3-a7ca-fb2d158f0351",
-          "turn_id": "01a10392-c61b-74a3-a218-eff1224a22bd",
-          "observed_at": "2026-10-03T21:05:21.918Z",
-          "admitted": true,
-          "code": "run",
-          "input_sha256": "bb1cffcf8217b8dfcc6af816a96eb9c3faca2397eb3087612abc7454c49ceeeb",
-          "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
-          "sha256": "ba68bd84b93da060c6eee0f7b92bb4b4b84e5533e2eca87bc44ce45fbea6049f"
+        "last_verified": {
+          "observed_at": "2026-10-06T07:44:48.693Z",
+          "run": {
+            "thread_id": "01a10392-c32e-78e3-a7ca-fb2d158f0351",
+            "automation_id": "obsidian",
+            "scheduler_status": "ARCHIVED",
+            "created_at": "2026-10-03T21:01:52.259Z",
+            "updated_at": "2026-10-04T00:03:15.977Z",
+            "business_outcome": "not_inferred",
+            "transcript": {
+              "state": "observed",
+              "sha256": "8b0c64d1c0eee0ef7da276b4580778dcb6d3b5bec5af88c7f5c0e929c75ec823",
+              "bytes": 6015986,
+              "turns": [
+                {
+                  "turn_id": "01a10392-c61b-74a3-a218-eff1224a22bd",
+                  "started_at": "2026-10-03T21:01:53.147Z",
+                  "finished_at": "2026-10-03T21:46:24.657Z",
+                  "state": "completed",
+                  "tool_calls": 110,
+                  "tool_outputs": 110,
+                  "unanswered_calls": 0,
+                  "unattributed_outputs": 0
+                }
+              ]
+            },
+            "gate_receipt": {
+              "version": 1,
+              "thread_id": "01a10392-c32e-78e3-a7ca-fb2d158f0351",
+              "turn_id": "01a10392-c61b-74a3-a218-eff1224a22bd",
+              "observed_at": "2026-10-03T21:05:21.918Z",
+              "admitted": true,
+              "code": "run",
+              "input_sha256": "bb1cffcf8217b8dfcc6af816a96eb9c3faca2397eb3087612abc7454c49ceeeb",
+              "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
+              "sha256": "ba68bd84b93da060c6eee0f7b92bb4b4b84e5533e2eca87bc44ce45fbea6049f"
+            }
+          }
         }
       }
     ]

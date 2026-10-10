@@ -150,8 +150,8 @@ function epRatifiedOrWindow(params, ctx) {
 export const CLOSE_CHECKS = {
   codex_ledger_covers_runs(_params, ctx) {
     const intake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
-    return { closed: intake.valid && intake.rows.length + intake.triage.length === 0,
-      evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件、原因分類 ${intake.triage.length} 件` };
+    return { closed: intake.valid && intake.rows.length + intake.triage.length + intake.unavailable.length === 0,
+      evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件、原因分類 ${intake.triage.length} 件、未記帳または未分類で参照不可 ${intake.unavailable.length} 件` };
   },
 
   viewport_measured: viewportMeasured,
@@ -3359,6 +3359,19 @@ async function selftest() {
     t('Codex initial failure derives an authorized ledger action', action?.auto === 'reconcile-codex-runs'
       && classify(action, matrix).owner === 'ai');
     t('Codex intake remains open before appending', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
+    const unavailableCtx = structuredClone(ctx);
+    unavailableCtx.routineDoc.codex_observation.schema_version = 5;
+    const missingRun = unavailableCtx.routineDoc.codex_observation.runs[0];
+    missingRun.last_verified = { observed_at: routineDoc.codex_observation.observed_at, run: structuredClone(missingRun) };
+    missingRun.transcript = { state: 'unavailable', reason: 'unreadable_or_incomplete_transcript', sha256: null, bytes: null, turns: [] };
+    t('Missing unrecorded source cannot close Codex ledger synchronization',
+      !CLOSE_CHECKS.codex_ledger_covers_runs({}, unavailableCtx).closed);
+    unavailableCtx.runsDoc.runs.push({ external_ref: `codex:${tid}`, run_id: 'example', needs_triage: true });
+    t('Missing source cannot close pending Codex classification',
+      !CLOSE_CHECKS.codex_ledger_covers_runs({}, unavailableCtx).closed);
+    unavailableCtx.runsDoc.runs[0].needs_triage = false;
+    t('Already recorded Codex outcomes remain covered without reimporting history',
+      CLOSE_CHECKS.codex_ledger_covers_runs({}, unavailableCtx).closed);
     const appended = []; let statusSyncs = 0;
     await HANDLERS['reconcile-codex-runs'](ctx, action, { append: args => appended.push(args), syncStatus: () => { statusSyncs++; } });
     t('Codex ledger intake synchronizes and declares the public totals', statusSyncs === 1

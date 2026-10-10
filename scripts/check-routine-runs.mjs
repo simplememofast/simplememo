@@ -149,16 +149,20 @@ export function validate(doc, { now = Date.now() } = {}) {
       const emptyCurrent = ['enabled', 'cron_expression', 'run_once_at', 'next_run_at',
         'last_fired_at', 'last_run_status', 'last_run_fired_at', 'last_run_finished_at', 'last_run_session_id']
         .every(k => r[k] === null);
-      if (!intentionalIds.has(r.id) || openIds.has(r.id) || !emptyCurrent
+      const accounted = intentionalIds.has(r.id)
+        ? !openIds.has(r.id) && last?.routine?.enabled === false
+          && diagnose(last.routine, { now: oldAt }) === 'stopped'
+        : open.some(f => f.id === r.id && f.what === 'observation_unavailable');
+      if (!accounted || !emptyCurrent
         || p?.id !== r.id || p.method !== 'GET' || p.http_status !== 404
         || p.endpoint !== '/v1/code/triggers/' + r.id
         || !Number.isFinite(readAt) || readAt > ref || ref - readAt > 60000
         || !Number.isFinite(oldAt) || oldAt > readAt
-        || last?.routine?.id !== r.id || last.routine.enabled !== false
-        || diagnose(last.routine, { now: oldAt }) !== 'stopped') {
-        problems.push(`${r.id}: 参照不可の現在証跡・元の意図的停止・履歴が不整合`);
+        || last?.routine?.id !== r.id || typeof last.routine.enabled !== 'boolean'
+        || last.routine.observation_state) {
+        problems.push(`${r.id}: 参照不可の現在証跡・未解消の記録または意図的停止・履歴が不整合`);
       } else {
-        warnings.push(`${r.id}: 個別GETは404。現在の有効状態・削除・実行結果は不明。意図的停止の判断と最後の実測履歴を保持し、復旧成功には数えない`);
+        warnings.push(`${r.id}: 個別GETは404。現在の有効状態・削除・実行結果は不明。未解消の記録または意図的停止の判断と最後の実測履歴を保持し、復旧成功には数えない`);
       }
     }
     const what = diagnose(r, { now, observedAt: ref });
@@ -401,6 +405,13 @@ function selftest() {
       const p = V(broken(real, (d) => {
         const f = d.open_findings[0];
         const r = d.routines.find((x) => x.id === f.id);
+        // This fixture represents a new healthy source read, not null current
+        // fields left over from an unavailable observation.
+        if (r.observation_state === 'unavailable') {
+          const verified = structuredClone(r.last_verified.routine);
+          for (const key of Object.keys(r)) delete r[key];
+          Object.assign(r, verified);
+        }
         // [2026-08-31] **固定日付を置くと、写しの観測時刻を追い越されて overdue のまま残る。**
         // overdue の基準を壁時計から observed_at へ移した（同日の別の直し）ので、
         // **写しより後**に置かないと「健全になった」形にならない。実際にここで踏んだ。

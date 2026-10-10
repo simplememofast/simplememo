@@ -65,22 +65,24 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-10-05",
-      "days": 56
+      "to": "2026-10-10",
+      "days": 61
     },
-    "completion_rate": 0.6563,
-    "change_failure_rate": 0.3438,
-    "human_intervention_rate": 0.3281,
+    "completion_rate": 0.6462,
+    "change_failure_rate": 0.3538,
+    "human_intervention_rate": null,
     "intervention_observation": {
       "attempted": {
         "scope": "recorded_intervention_fields; not complete human-activity or native-origin proof",
-        "total_runs": 64,
+        "total_runs": 65,
         "recorded_zero_runs": 43,
         "recorded_positive_runs": 21,
-        "unknown_runs": 0,
-        "unknown_by_reason": {},
+        "unknown_runs": 1,
+        "unknown_by_reason": {
+          "not_observed": 1
+        },
         "recorded_event_count": 21,
-        "complete_recorded_fields": true,
+        "complete_recorded_fields": false,
         "actual_zero_touch_proven": null
       },
       "shipped": {
@@ -98,42 +100,42 @@
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
-        "rate": 0,
-        "unknown_runs": 0,
+        "rate": null,
+        "unknown_runs": 1,
         "count_scope": "recorded positive events"
       },
       "infra": {
         "runs": 4,
-        "rate": 0.0625,
-        "unknown_runs": 0,
+        "rate": null,
+        "unknown_runs": 1,
         "count_scope": "recorded positive events"
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.015625,
-        "unknown_runs": 0,
+        "rate": null,
+        "unknown_runs": 1,
         "count_scope": "recorded positive events"
       },
       "bootstrap": {
         "runs": 2,
-        "rate": 0.03125,
-        "unknown_runs": 0,
+        "rate": null,
+        "unknown_runs": 1,
         "count_scope": "recorded positive events"
       },
       "request": {
         "runs": 14,
-        "rate": 0.21875,
-        "unknown_runs": 0,
+        "rate": null,
+        "unknown_runs": 1,
         "count_scope": "recorded positive events"
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.6607,
+    "shipping_day_rate": 0.6066,
     "totals": {
-      "runs": 110,
-      "attempted": 64,
+      "runs": 115,
+      "attempted": 65,
       "shipped": 42,
-      "failed": 22,
+      "failed": 23,
       "no_run": 2
     },
     "by_route": {
@@ -143,8 +145,8 @@
         "shipped": 28
       },
       "primary": {
-        "runs": 74,
-        "attempted": 32,
+        "runs": 79,
+        "attempted": 33,
         "shipped": 14
       }
     },
@@ -155,21 +157,21 @@
     ],
     "streaks": {
       "current": {
-        "days": 49,
+        "days": 54,
         "from": "2026-08-18"
       },
       "longest": {
-        "days": 49,
+        "days": 54,
         "from": "2026-08-18",
-        "to": "2026-10-05"
+        "to": "2026-10-10"
       },
-      "active_days": 54,
-      "last_day": "2026-10-05"
+      "active_days": 59,
+      "last_day": "2026-10-10"
     },
     "shipping_streaks": {
       "current": {
-        "days": 5,
-        "from": "2026-10-01"
+        "days": 0,
+        "from": null
       },
       "longest": {
         "days": 8,
@@ -177,7 +179,7 @@
         "to": "2026-09-08"
       },
       "active_days": 37,
-      "last_day": "2026-10-05"
+      "last_day": "2026-10-10"
     },
     "hands_off_streaks": {
       "current": {
@@ -190,7 +192,7 @@
         "to": null
       },
       "active_days": null,
-      "last_day": "2026-10-05",
+      "last_day": "2026-10-10",
       "measurement_state": "unknown",
       "unknown_days": [
         "2026-10-02",
@@ -208,14 +210,14 @@
           "to": "2026-09-05"
         },
         "active_days": 19,
-        "last_day": "2026-10-05"
+        "last_day": "2026-10-10"
       },
       "scope": "recorded fields only; unknown days cannot establish zero intervention"
     },
     "publishing_streaks": {
       "current": {
-        "days": 4,
-        "from": "2026-10-02"
+        "days": 0,
+        "from": null
       },
       "longest": {
         "days": 5,
@@ -223,20 +225,20 @@
         "to": "2026-08-23"
       },
       "active_days": 22,
-      "last_day": "2026-10-05"
+      "last_day": "2026-10-10"
     },
     "last_publishing": {
       "date_jst": "2026-10-05",
       "lane": "D",
       "artifact": "/"
     },
-    "intervention_count": 21,
+    "intervention_count": null,
     "recorded_intervention_count": 21,
     "timings": {
       "time_to_detect_hours": {
-        "median": 0.604491388888889,
+        "median": 0.5589827777777778,
         "max": 122.66181,
-        "n": 24
+        "n": 29
       },
       "time_to_repair_hours": {
         "median": 6.683333333333334,
@@ -406,6 +408,26 @@
         },
         {
           "run_id": "ap-20261004-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261006-actions",
+          "failure_class": "no_artifact"
+        },
+        {
+          "run_id": "ap-20261007-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261008-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261009-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20261010-actions",
           "failure_class": null
         }
       ]

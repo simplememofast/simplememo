@@ -831,6 +831,18 @@
       "expr": "byDate",
       "disposition": "別に検出",
       "note": "クリック欠測・不正値と合計オーバーフローは、比較より前の clicksOf が組別に明示fatalへ入れ、合計をNULLで保持する。byDate/byQuery がNULLなら大小比較をしないので、未知を0として比較しない。この比較guardを外しても先行fatalは消えず、欠測を0へ補うこともない。全3組の不正値・0・小数・オーバーフローを実ファイルの自己テスト36検体で検査する（通常CIの実行結果は別証拠）。"
+    },
+    {
+      "file": "scripts/check-routine-runs.mjs",
+      "expr": "r.id",
+      "disposition": "別に検出",
+      "note": "参照不可の登録IDと observation_unavailable の未解消行を同時に照合する。該当行がない場合は accounted=false となり、その直後の不整合判定と後段の未追跡異常検査が失敗する。routine-observer の自己テストで未解消行を削除した変異が失敗することを確認。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "last.routine.observation_state",
+      "disposition": "前提",
+      "note": "最後の実測に参照不可の写しを入れ子で保存しないための否定条件。直前のID照合・enabledのboolean検査と観測時刻の検査をすべて満たすことをassertで要求する。観測状態がない通常の実測だけを履歴として保持し、現在の参照不可には別途個別GETの404証跡を必須とする。繰り返し観測でも元の履歴時刻を更新しない自己テストあり。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
