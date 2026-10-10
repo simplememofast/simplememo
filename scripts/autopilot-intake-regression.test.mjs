@@ -27,7 +27,7 @@ const intake = (runs, id = thread) => codexRunIntake(observation(id), { runs }, 
 test('different owner tasks may share a session without becoming scheduled runs', () => {
   const rows = [manual('task-a'), manual('task-b')];
   const before = structuredClone(rows);
-  assert.deepEqual(intake(rows), { valid: true, rows: [], triage: [], unresolved: [] });
+  assert.deepEqual(intake(rows), { valid: true, rows: [], triage: [], unresolved: [], unavailable: [] });
   assert.deepEqual(rows, before, 'retain all manual outcomes and intervention evidence');
 });
 test('manual session grouping does not hide a distinct failed scheduled run', () => {

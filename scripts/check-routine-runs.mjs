@@ -405,6 +405,13 @@ function selftest() {
       const p = V(broken(real, (d) => {
         const f = d.open_findings[0];
         const r = d.routines.find((x) => x.id === f.id);
+        // This fixture represents a new healthy source read, not null current
+        // fields left over from an unavailable observation.
+        if (r.observation_state === 'unavailable') {
+          const verified = structuredClone(r.last_verified.routine);
+          for (const key of Object.keys(r)) delete r[key];
+          Object.assign(r, verified);
+        }
         // [2026-08-31] **固定日付を置くと、写しの観測時刻を追い越されて overdue のまま残る。**
         // overdue の基準を壁時計から observed_at へ移した（同日の別の直し）ので、
         // **写しより後**に置かないと「健全になった」形にならない。実際にここで踏んだ。
