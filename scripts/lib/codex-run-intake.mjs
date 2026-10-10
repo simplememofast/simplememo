@@ -35,9 +35,9 @@ function nativeDetection(entry, first, observed) {
 
 export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automatic = false } = {}) {
   const doc = routineDoc?.codex_observation;
-  const empty = { valid: false, rows: [], triage: [], unresolved: [] };
+  const empty = { valid: false, rows: [], triage: [], unresolved: [], unavailable: [] };
   const observed = instant(doc?.observed_at);
-  if (![2, 3, 4].includes(doc?.schema_version) || doc.source !== 'local_codex_scheduler_and_session_store'
+  if (![2, 3, 4, 5].includes(doc?.schema_version) || doc.source !== 'local_codex_scheduler_and_session_store'
     || doc.scheduler_query_complete !== true || !Number.isFinite(observed) || observed > now
     || now - observed > 3 * 86400000 || !Array.isArray(doc.runs)) return empty;
   empty.valid = true;
@@ -71,6 +71,7 @@ export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automati
     const existing = known.get(ref);
     if (existing && existing.needs_triage !== true) continue;
     const t = entry.transcript, first = t?.turns?.[0];
+    if (t?.state === 'unavailable') { empty.unavailable.push(ref); continue; }
     if (t?.state !== 'observed' || !/^[a-f0-9]{64}$/.test(t.sha256 ?? '') || !first) continue;
     if (first.state === 'in_progress') continue;
     const start = instant(first.started_at), end = instant(first.finished_at);
@@ -167,6 +168,18 @@ export async function codexIntakeSelftest() {
   for (const change of [{ external_ref: 'codex:invalid' }, { route: 'outside' }, { detected_note: 'unverified' }, { needs_triage: false }]) {
     assert.equal(observedPendingTriage({ ...failed, ...change }), false);
   }
+  const unavailable = doc(); unavailable.codex_observation.schema_version = 5;
+  const unavailableRun = unavailable.codex_observation.runs[0];
+  unavailableRun.last_verified = { observed_at: unavailable.codex_observation.observed_at, run: structuredClone(entry) };
+  unavailableRun.transcript = { state: 'unavailable', reason: 'unreadable_or_incomplete_transcript', sha256: null, bytes: null, turns: [] };
+  const retainedFailures = { runs: [structuredClone(failed)] };
+  assert.equal(intake(unavailable).valid, true);
+  assert.deepEqual(intake(unavailable).unavailable, [`codex:${tid}`]);
+  assert.deepEqual(intake(unavailable, retainedFailures).unavailable, [`codex:${tid}`], 'Missing sources cannot finish pending triage');
+  assert.equal(intake(unavailable, { runs: [{ ...failed, needs_triage: false }] }).unavailable.length, 0);
+  assert.equal(intake(unavailable).rows.length, 0, 'Historical evidence is not a newly observed execution');
+  assert.equal(intake(unavailable, retainedFailures).rows.length, 0);
+  assert.deepEqual(retainedFailures.runs, [failed], 'Unavailable sources do not erase previously recorded failures');
   const aborted = doc(); aborted.codex_observation.runs[0].transcript.turns[0].state = 'aborted';
   assert.equal(observedPendingTriage(intake(aborted).rows[0]), true);
   assert.equal(intake(doc(), { runs: [failed] }).rows.length, 0, 'external id makes reconciliation idempotent');

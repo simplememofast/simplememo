@@ -46,7 +46,11 @@ export async function collect({ token, fetchImpl = fetch, now = timestamp, maxPa
       assert(ID.test(row?.id) && !ids.has(row.id), 'Invalid or duplicate routine identity');
       assert(typeof row.enabled === 'boolean' && typeof row.name === 'string', 'Unknown routine state');
       assert(typeof row.ended_reason === 'string', 'Unknown routine lifecycle');
-      if (row.ended_reason) {
+      if (row.ended_reason === 'auto_disabled_session_gone') {
+        // The source session can disappear before a scheduled run fires.
+        // This proves disabling, never execution or successful completion.
+        assert(row.enabled === false, 'Session-gone routine must be disabled');
+      } else if (row.ended_reason) {
         assert(row.ended_reason === 'run_once_fired' && row.enabled === false && !row.cron_expression
           && time(row.run_once_at) && time(row.last_fired_at)
           && Date.parse(row.last_fired_at) >= Date.parse(row.run_once_at), 'Unverified ended routine');
@@ -87,8 +91,8 @@ export async function collect({ token, fetchImpl = fetch, now = timestamp, maxPa
 }
 
 // A missing record is not deletion or successful retirement. Individually read
-// only already registered IDs; a fresh 404 may explain an existing intentional
-// stop's unavailable state, but never an active routine's disappearance.
+// only already registered IDs. A fresh 404 records missing visibility; active
+// routines stay registered with an open finding, never an inferred stop.
 export async function observeUnavailable(previous, observation, { token, fetchImpl = fetch, now = timestamp } = {}) {
   assert(observation.complete === true, 'Complete inventory required before individual reads');
   const current = new Set(observation.records.map(r => r.id));
@@ -128,12 +132,11 @@ export function reconcileObservation(previous, observation) {
         && Date.parse(proof.observed_at) >= Date.parse(observation.inventory_observed_at)
         && Date.parse(proof.observed_at) <= Date.parse(observation.observed_at),
       'Registered routine missing without current individual read evidence');
-      assert(previous.intentional_stops.some(r => r.id === id), 'Active registered routine missing; operator decision required');
       const last = prior.observation_state === 'unavailable' ? prior.last_verified
         : { observed_at: previous.observed_at, routine: prior };
-      assert(last?.routine?.id === id && last.routine.enabled === false
-        && diagnose(last.routine, { now: Date.parse(last.observed_at) }) === 'stopped',
-      'Missing routine requires a previously verified intentional stop');
+      assert(last?.routine?.id === id && typeof last.routine.enabled === 'boolean'
+        && !last.routine.observation_state && time(last.observed_at),
+      'Missing routine requires a previously verified observation');
       routines.push({ id, name: last.routine.name, enabled: null, cron_expression: null,
         run_once_at: null, next_run_at: null, last_fired_at: null, last_run_status: null,
         last_run_fired_at: null, last_run_finished_at: null, last_run_session_id: null,
@@ -169,6 +172,8 @@ export function reconcileObservation(previous, observation) {
           ?? row.next_run_at ?? null } : {}),
         why: prior?.what === what ? prior.why : what === 'completion_unverified'
           ? '単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。'
+          : what === 'observation_unavailable'
+          ? '全件一覧に存在せず、個別GETも404。現在の実行結果は不明。登録と最後の実測、既存の異常履歴を保持し、未解消として追跡する。停止・削除・復旧成功とは判定しない。'
           : what === 'pending'
           ? '実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。'
           : `実APIの観測で ${what}。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。`,
@@ -181,7 +186,8 @@ export function reconcileObservation(previous, observation) {
       assert(row.last_run_status === 'SUCCEEDED', 'A finding needs a successful run before closure');
       // 終了した単発予約のAPIはlast_runを省略することがある。省略前の実行IDを
       // 履歴から引き継ぎ、別の古い成功で未確認の実行を閉じない。
-      const priorRun = [previous.routines.find(r => r.id === row.id),
+      const priorRow = previous.routines.find(r => r.id === row.id);
+      const priorRun = [priorRow, priorRow?.last_verified?.routine,
         ...(prior.state_history ?? []).map(f => f.observation).reverse()].find(r => r?.last_run_fired_at);
       if (priorRun?.last_run_fired_at) {
         // A pending run can finish without changing its fire time. Failed or
@@ -202,7 +208,7 @@ export function reconcileObservation(previous, observation) {
     }
   }
   // 予約の終了だけでは台帳から除かない。成功を照合できた単発だけを退役する。
-  const completedIds = new Set(ended.filter(r => r.last_run_status === 'SUCCEEDED').map(r => r.id));
+  const completedIds = new Set(ended.filter(r => r.ended_reason === 'run_once_fired' && r.last_run_status === 'SUCCEEDED').map(r => r.id));
   const next = { ...previous, observed_at: observation.observed_at,
     routines: routines.filter(r => !completedIds.has(r.id)),
     open_findings: open, closed_findings: closed,
@@ -217,7 +223,7 @@ export function reconcileObservation(previous, observation) {
       ended_since_previous: ended.filter(r => completedIds.has(r.id) || !previous.routines.find(p => p.id === r.id)?.ended_reason)
         .map(({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id }) =>
           ({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id })),
-      note: '全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。既存の意図的停止が一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。削除・成功・現在の停止を断定しない。稼働中タスクの欠落は受理しない。予定や停止の判断は変更しない。' } };
+      note: '全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録。登録タスクが一覧になく個別GETも404の場合、現状は参照不可と明示し、最後の実測を履歴に保持する。意図的停止以外は未解消として追跡する。削除・成功・現在の停止を断定せず、予定や停止の判断を変更しない。' } };
   const checked = validate(next, { now });
   assert.equal(checked.problems.length, 0, 'Observed routine ledger is inconsistent');
   return next;
@@ -308,6 +314,15 @@ async function selftest() {
   assert.equal(failedAgain.open_findings[0].state_history.length, 2);
   const oneShotRow = { ...row, id: 'trig_once', enabled: false, cron_expression: '',
     run_once_at: row.last_fired_at, ended_reason: 'run_once_fired', last_run: undefined };
+  const goneRow = { ...oneShotRow, ended_reason: 'auto_disabled_session_gone', last_fired_at: undefined };
+  const gone = await collect({ token: 'x', now: () => '2026-09-06T03:05:00Z',
+    fetchImpl: async () => fake([goneRow]) });
+  assert.equal(diagnose(gone.records[0], { now: Date.parse(gone.observed_at) }), 'stopped');
+  assert.equal(gone.records[0].last_run_status, null);
+  await assert.rejects(() => collect({ token: 'x', fetchImpl: async () => fake([{ ...goneRow, enabled: true }]) }),
+    /must be disabled/);
+  await assert.rejects(() => collect({ token: 'x', fetchImpl: async () => fake([{ ...goneRow, ended_reason: 'unknown_reason' }]) }),
+    /Unverified ended routine/);
   const endedUnknown = await collect({ token: 'x', now: () => '2026-09-06T03:05:00Z',
     fetchImpl: async () => fake([oneShotRow]) });
   const oneShotPrior = { ...prior, routines: [{ ...endedUnknown.records[0], enabled: true,
@@ -368,7 +383,23 @@ async function selftest() {
   const repeatedUnavailable = reconcileObservation(unavailable, evidence);
   assert.deepEqual(repeatedUnavailable.routines[0].last_verified, unavailable.routines[0].last_verified, 'Do not refresh historical observation time');
   assert.throws(() => reconcileObservation(stoppedPrior, absent), /missing/);
-  assert.throws(() => reconcileObservation(prior, evidence), /Active registered/);
+  const missingActive = reconcileObservation(prior, evidence);
+  assert.equal(missingActive.open_findings[0].what, 'observation_unavailable');
+  assert.equal(missingActive.open_budget, 1);
+  assert.deepEqual(missingActive.intentional_stops, prior.intentional_stops);
+  assert.equal(missingActive.closed_findings.length, 0);
+  assert.deepEqual(missingActive.routines[0].last_verified.routine, prior.routines[0]);
+  assert.deepEqual(reconcileObservation(missingActive, evidence).routines[0].last_verified,
+    missingActive.routines[0].last_verified);
+  assert.throws(() => reconcileObservation(missingActive, observed), /newer successful/,
+    'A reappearing old success cannot resolve missing visibility');
+  const missingFailed = reconcileObservation(second, evidence);
+  assert.equal(missingFailed.open_findings[0].state_history.at(-1).what, second.open_findings[0].what);
+  assert.equal(missingFailed.open_findings[0].found_at, second.open_findings[0].found_at);
+  assert.equal(missingFailed.closed_findings.length, second.closed_findings.length);
+  const noFinding = structuredClone(missingActive); noFinding.open_findings = []; noFinding.open_budget = 0;
+  assert(validate(noFinding, { now: Date.parse(observed.observed_at) }).problems.length > 0);
+
   assert.throws(() => reconcileObservation(unavailable, observed), /Intentional/);
   const returned = structuredClone(observed); returned.records[0].enabled = false;
   const readAgain = reconcileObservation(unavailable, returned);
