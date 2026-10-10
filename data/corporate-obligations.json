@@ -275,7 +275,7 @@
         "$personal_data": "**§3.3.3(C) が、利用者へのデータ侵害通知を契約上の義務にしている。**原文: You agree to notify Your users, in accordance with applicable law, in the event of a data breach in which user data collected from Your Application is compromised (e.g., You will send an email notifying Your users if there has been an unintentional disclosure or misuse of their user data).\n\n**その経路が無い。**⑧「障害案内の一斉配信」は `nobody` で、2026-08-27 の実測が経路を2つとも閉じている —— (a) **メール**: 宛先になりうる名簿は reminder_optin_invites だけで、同意文言が『メモが途切れた日に、そっと1通』とリマインダーに限定されており、**障害案内を送ると同意を超える。**(b) **アプリ内**: /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**\n\nつまり**契約で約束した動作を、事故が起きた日に実行できない。**⑦（この行）と⑧（配信経路）と⑬（危機対応）が同じ穴を指している。**条項検査がこれを出したのは、この台帳を作った目的そのもの。**\n\nなお §3.3.3 のその他の義務（プライバシーポリシーの掲示・収集前の同意・目的外利用の禁止・Face Data / HealthKit の制限）は、現在の作りでは抵触しそうな箇所が見当たらない —— 収集しているものが少ないため。**ただしこれは本文と現況を突き合わせた結果であって、監査ではない。**",
         "fingerprint": "e6b0a134ff04",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22",
+        "fetched_at": "2026-10-10",
         "analysis_sources": [
           "https://developer.apple.com/support/terms/apple-developer-program-license-agreement/"
         ]
@@ -299,7 +299,7 @@
         "$ip": "**権利は残るが、渡すライセンスが広く、しかも契約終了後も存続する。**\n\nCustomer Content（data / content / code / video / images）の right・title・interest は顧客に残る（§2.5.1）。**そこは ok。**問題はその次の一文。\n\nCloudflare が取るのは **non-exclusive / fully sublicensable / worldwide / royalty-free** で、**collect / use / copy / store / transmit / modify / create derivative works** ができる。**改変・二次的著作物・第三者への再許諾が明示的に入っている。**\n§2.5.3 はさらに具体化していて、スクリプトの追加・ファイアウォールルールの追加・**代替コンテンツの表示**を例示する。\n\n**歯止めは目的制限ひとつ** —— 'to the extent necessary to provide the Services'。\n\n**そしてここが効く。§16 が §2.5.1 を契約終了後も存続させる。**§2.5.1 にはライセンスも入っているので、条項ごと残る。**ところが終了後に何がなお『Services を提供するために necessary』なのかは、本文に書かれていない。**（リサーチャーが探した上で「本文では具体化されていない」と報告。）\n\n**目的制限が効くのは目的が在るあいだだけで、その目的が消えたあとも条項は残る。**これは Apple の『線が両方向にはっきり引かれている』とは違う形。\n\n**統計・改善は別建てで、そちらは Cloudflare のもの。**Network Data —— サーバ・ネットワーク・トラフィックから Cloudflare が生成・導出した models / observations / reports / analyses / statistics / databases —— は Cloudflare が権利を保持し、Services の開発・改善に使える。**こちらのトラフィックから作られた導出物は、こちらのものではない。**\n\n**Feedback（§9）も広い** —— non-exclusive / royalty-free / worldwide / transferable / **irrevocable / sublicensable / perpetual**。§9 も §16 の存続対象。\n\n**キャッシュを名指しした条項は無い**（`cache` の語が本文に無い）。ただし §2.5.1 がcopy / store / transmit を明示的に許諾しているので、CDN の複製はその中に収まる。\n\n**Cloudflare の商標をこちらが使うことは §2.2.1(d) が制限**（framing・meta tags・hidden text での利用を書面同意なしに禁止）。§2.7 は提携の虚偽示唆を禁止。**逆向きの許諾は無い。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "fingerprint": "d58e255a2450",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22"
+        "fetched_at": "2026-10-10"
       },
       {
         "id": "resend",
@@ -317,7 +317,7 @@
         "$governing_law": "**カリフォルニア州法**（Terms of Service §23、Last update: August 27th, 2026）。抵触法原則は除外。\n\n**Cloudflare や Firebase より条項としては緩い。**専属管轄裁判所の指定・強制仲裁・class action waiver が**どれも見つからなかった**（リサーチャーが項目別に「確認できなかった」と明示）。§21 に arbitration の語はあるが、費用の文脈であって仲裁合意ではない。\n\n**それでも risk に置く理由は、条項の厳しさではなく相手の重さ。**ベンダー台帳の Resend は critical / **fallback 無し** / **personal**（生のメールアドレスと本文が通る唯一の相手）。そこにカリフォルニア州法が乗り、**どこで争うかは書かれていない。**\n\n**管轄が書いていないことは、こちらに有利とは限らない。**指定が無ければ一般原則に落ち、相手の所在地で争うことになりうる。**空白は中立ではない。**",
         "$ip": "**メール本文のライセンスが、目的に明示的に縛られている。**\n\nMessage Content（text / graphics / images / videos）と Your Data の権利は顧客に残り（§9）、Resend が取るのは **'for purposes of providing the Service'** の利用権。例示は processing / transmitting / **delivering your messages** ——**配信に必要なことだけ。**\n\n**Cloudflare との違いがここ。**Message Content 条項に **modify / create derivative works / sublicense の明示が無い。**統計・製品改善・マーケティングへの利用も §9 には無い。第三者開示も顧客の承認なしには行わず、例外は Service 提供に必要な場合と法令要求のみ。\n\n**したがって `ok`。**Apple と同じく、この欄が問う『渡したものの権利がどちらに残るか』に曖昧さが無い。\n\n**ただし2つ、知っておくべきものがある。どちらも本文の権利ではなく周辺。**\n\n**(1) Feedback（§18）は Cloudflare より強い。**バグ報告・改善提案・ideas・complaints について、ユーザーは **IP権を保持・取得・主張しないことに同意**し、移転できない場合は **exclusive**（Cloudflare は non-exclusive）/ transferable / irrevocable / sublicensable / perpetual な利用権を与える。copy / modify / derivative works / publish / distribute / **commercialize** まで明示。\n\n**(2) §27 が自社ロゴのマーケティング利用を既定で許している。**Resend は顧客企業のロゴを自社サイト・marketing materials・case studies・promotional content で使える（非独占・無償・transferable ではない）。**契約期間中、書面で終了されない限り有効** ——つまり**いま現在この許諾は生きている。**\n**外したければ書面で終了できる。**オーナーの判断。\n\n**存続は明示されていない。**§22 は「性質上存続すべき規定」と一般的に書くだけで、§9 のライセンスを条番号で挙げていない。**Cloudflare の §16 のような明示が無い。**\nリサーチャーは「一般的な survival 文言だけから §9 が存続するかは特定できない」と報告した。**在ることと、在ると書いてあることは違う。**\n\n**テンプレートと送信履歴を名指しした条項は無い。**`Your Data` の「any other data you provide to or transmit through the Service」に含まれうるが、**規約が明示しているわけではない。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "fingerprint": "55e2506d70df",
-        "fetched_at": "2026-09-22"
+        "fetched_at": "2026-10-10"
       },
       {
         "id": "anthropic",
@@ -339,7 +339,7 @@
         "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが外部ディープリサーチに調査を依頼した。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**Privacy Center の運用説明（「APIは通常30日」「ZDRは申請制」）を契約本文ではないので除外した。**(3) AIがそれを読んで4観点を下書きした（`ai_draft`）。(4) オーナーが判定を確認して承認したので `human` に上げた（2026-08-29）。\n\n**Apple より1段深い伝聞。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間はこの鎖の中に居ない。**\n\n**`ip: ok` は判断が分かれる箇所として提示した上での承認。**`$ip` に risk へ倒す3つの読み（当事者間の配分にすぎない／survival に §B が無い／**Consumer Terms の非EEA版が未取得**）を並べた上で、オーナーは ok を選んだ。\n\n**この `human` は Commercial Terms 側にしか及ばない。**`claude_code_oauth_token` 経路（Consumer Terms・critical: true）は**誰もまだ読めていない** —— `$two_contracts` 参照。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Commercial Terms は「Effective June 17, 2025」で、前回の記録と同じ版。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
         "fingerprint": "f7f1718a8330",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22",
+        "fetched_at": "2026-10-10",
         "analysis_sources": [
           "https://www.anthropic.com/legal/consumer-terms"
         ]
@@ -363,7 +363,7 @@
         "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**この4マスは新しい調査ではなく、既読の GCP Terms から埋めた。**Search Console を分離したことで、BigQuery が GCP Terms だけで完結するようになった。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**前回の読みの版（Google Cloud Terms 2026-06-01 版、`/legal/archive/terms/index-20260601`）と現行の 2026-09-02 版の本文を文ごとに突き合わせた。変わったのは課金（不正や利用上限の回避が疑われる場合の請求頻度とクレジット購入、Flexible／Annual プランでの月単位の請求）、支払遅延などによる停止、重大な違反での解除、「Delayed Authorization Form of Payment」の定義だけで、**§5.1・§5.2・§12・§14.12 は同一。**Regional Terms（APAC の仲裁から日本を除外）は 2025-11-25 版のまま。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
         "fingerprint": "de8000039069",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22"
+        "fetched_at": "2026-10-10"
       },
       {
         "id": "search_console",
@@ -390,28 +390,25 @@
         "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Google Terms of Service は「Effective July 30, 2026」で、前回の読み（2026-08-29）より前の日付。**ただし前回の記録に版が無いので、同じ版だとは確定できていない**（オーナーはこの点を承知で判断した）。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
         "fingerprint": "bce060d41c8f",
         "fingerprint_scope": "anchors:3a592696",
-        "fetched_at": "2026-09-24"
+        "fetched_at": "2026-10-10"
       },
       {
         "id": "firebase",
-        "liability_cap": "risk",
-        "ip": "ok",
-        "personal_data": "risk",
-        "governing_law": "risk",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
         "source": "https://firebase.google.com/terms",
         "body_scope": "main",
-        "reviewed_at": "2026-09-24",
-        "reviewed_by": "human",
+        "reviewed_at": null,
         "$liability_cap": "**実体規定は Firebase の規約に無い。**Firebase Terms のサービス別表がApp Check と Authentication の Terms of Service 欄に**Google Cloud Platform Terms of Service** を指しており、責任制限は GCP Terms §12。\n\n**上限は責任原因の直前12か月に当該 Services について支払った Fees**（§12.2）。「固定額と12か月分の低いほう」ではない。\n\n**無料提供分は別枠で USD 5,000。**したがって**「無料利用 → 支払額0 → 上限も0」という構造ではない。**上限額を確かめずに0と決めつけていたら、この欄は間違って重く書かれていた。\n\n**§12.1 の除外:** 間接・結果的・特別・付随・懲罰的損害に加えて、lost revenues / profits / savings / goodwill。\n**§12.3 の無制限（上限が効かない）:** 詐欺・虚偽表示、§13 の補償義務、相手方の知財侵害、支払義務、法令上制限できない責任。\n\n**無制限リストに無いもの**（リサーチャーが探した上で「見つからなかった」と報告）: **重過失・故意・人身損害。**§12.1 の除外列挙にも data loss / business interruption は独立項目として無い。**無いことを確かめた記録として残す。**\n\n**この欄が効くのは、代替が無いから。**ベンダー台帳は firebase を critical / fallback **無し** と記録し、App Check のキルスイッチについて「**代替ではなく回避策。**外している間は検証が効かない」と明記している。USD 5,000 は、代替の無いものが止まったときに回復できる額ではない。",
         "$governing_law": "**カリフォルニア州法・Santa Clara County 専属管轄**（GCP Terms §14.12(c)、米国政府機関以外の All Other Entities に適用される区分）。\n\n**日本は APAC の仲裁置換から明示的に除外されている。**Regional Terms の APAC 仲裁条項は対象を「all regions excluding Australia, **Japan**, India, New Zealand, Singapore」としており、**日本は基礎規約のまま＝米国の裁判所**に行く。強制仲裁・class action waiver・仲裁 opt-out はいずれも日本向けには確認できなかった。\n\n**これは調べないと出てこない形。**「APACだから仲裁だろう」と一般論で埋めていたら逆になっていた。",
         "$personal_data": "**Cloud Data Processing Addendum が対象契約に組み込まれる**（GCP Terms §5.2 が接続）。役割は Google が processor、こちらが controller または processor。渡しているのは pseudonymous（ベンダー台帳）。\n\n**Cloudflare と同じ理由で risk。**分かったのは役割構造だけで、DPA本文（サブプロセッサ・越境移転・削除）は読んでいない。",
-        "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。**行の reviewed_by は既に human だが、この観点はまだ人が見ていない。**\n\n**`draft_clauses` が無いと、行の human に紛れて確認済みとして数えられる** ——実際このコミットの途中で一度そうなり、件数が 24/40 と出た（正しくは人19・下書き5）。**同じ行の中で、確認済みと未確認が同じ字面になる。**それを止めるための欄。\n\n読んだのは GCP Terms §5.1 / §5.2 / §5.3 / §8.7 / §14.14 / §14.19。**Firebase Terms がここを指している。**",
         "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが外部ディープリサーチに調査を依頼した。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで結果を返した（著作権上、長文転載は避け、識別できる短い引用＋日本語の記述）。(3) オーナーがその結果を貼り、AIが読んで判定を下書きした（`ai_draft`）。(4) オーナーが判定を確認し「これでいい」と応答したので `human` に上げた（2026-08-28）。\n\n**Apple のときより1段深い。**あちらは「オーナーが本文を貼る → AIが読む → オーナーが承認」で、**間に第三者の読解が入っていない。**こちらは 規約本文 → 第三者の読解 → AIの下書き → オーナー承認。\n\n**責任の所在は人にあるので `human` で正しいが、原文を読んだ人間はこの鎖の中に居ない。**次に誰かがこの `risk` を根拠に何かを決めるなら、そこを知った上で決めること。\n\n**[2026-08-29] `ip` が入って4観点そろった。**同じ外部ディープリサーチ経由。\n\n**[2026-08-29] `ip` の下書きをオーナーが確認して承認した。**外部ディープリサーチ → AIの下書き → オーナー承認。**原文を読んだ人間はこの鎖の中に居ない。**\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Firebase Terms の 2026-05-01 版（Web アーカイブ 2026-08-25）と現行の 2026-09-02 版のサービス表を突き合わせた。変わったのは Gemini in Firebase・Firebase Studio・Firebase AI Logic の行と注の番号だけで、**App Check と Authentication は引き続き Google Cloud Platform Terms of Service の欄**（＝ google_cloud と同じ §5・§12・§14.12。こちらも 6/1 版から変わっていない）。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
-        "risk_note": "**Apple と同じ構造。金額では回復しない相手に、代替が無い。**\n\n上限は12か月の支払額、無料提供分は USD 5,000（≒75万円）。lost profits / revenues / savings / goodwill は種類として除外。**重過失・故意・人身損害は無制限リストに入っていない**（探した上で「見つからなかった」）。\n\n**ベンダー台帳は firebase を critical / fallback 無し と記録し、**App Check のキルスイッチについて「**代替ではなく回避策。**外している間は検証が効かない」と明記している。つまり止まったときの選択肢は「検証を切って動かす」で、**それは機能の代替ではなく、守りを下げること。**\n\n**USD 5,000 が意味するのは、代替の無いものの停止を金銭では戻せないということ。**下げる手立てがあるとすれば契約側ではなく運用側で、そこは一部ある（キルスイッチ）が、**外している間の穴は埋まっていない。**\n\n紛争は カリフォルニア州法・Santa Clara County 専属管轄。**日本は APAC の仲裁置換から明示的に除外されている**ので、米国の裁判所に行く。",
         "$ip": "**4社でいちばんきれい。ライセンスを渡していない。**\n\nGCP Terms §5.1 —— Customer Data と Customer Applications の**全 IP 権が Customer に残る。**（`Customer Application` は GCP を使って作成・ホストする software program、`Customer Data` は提供したデータとそこから導出したデータ。）\n\n**そして Google に与える IP ライセンス条項が、本文に見つからない。**modify も derivative work も sublicense も無い。**渡していないので、範囲を心配する必要が無い。**\n\n§5.2 はむしろ逆向き —— Google は Customer Data を **Cloud Data Processing Addendum に従ってのみ**access / use / process し、**それ以外の目的では処理しない。**\n\n**『改善のため利用できる』という一般的な権利も無い。**リサーチャーが `improv...` で本文を探して**見つからなかった**と報告している。**Cloudflare の Network Data に当たるものが、ここには無い。**\n\n**Feedback も表現が弱い。**Google と Affiliates が 'without restriction and without obligation to Customer' で使えるだけで、**過去版にあった『all right, title, and interest を Google に assign』という文言ではない**（リサーチャーが現行条文で確認）。Resend の exclusive・Cloudflare の perpetual/irrevocable と比べて、いちばん軽い。\n\n§14.14 が Section 5 全体を存続させる —— **権利帰属も §5.2 の保護も残る。**§8.7 は終了時に Services へのアクセスと Customer Data へのアクセスが終わると定める。\n\n**処理の具体的な許容範囲は §5.2 が Cloud DPA へ委ねているので、IP条項単独ではそこまで。**DPA 本文は別途（personal_data の欄が扱う範囲）。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
-        "fingerprint": "683aed5b3b3a",
+        "fingerprint": "dd3de87afc9a",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22",
+        "fetched_at": "2026-10-10",
         "analysis_sources": [
           "https://cloud.google.com/terms",
           "https://cloud.google.com/terms/service-terms",
@@ -426,6 +423,14 @@
             "basis_sha256": "16984a9d427e2801ce6e367ccee354c17e725e859344c817e5c039b799becda6",
             "note": "Authentication / App Checkの共通4条項を参照。固有条件・DPA本文の読み合わせと未確認事項は根拠文書に保持。契約適用・承認は未確認。"
           }
+        ],
+        "reset_reason": "本文が改定された（683aed5b3b3a → dd3de87afc9a・2026-10-10） — **前の判定は前の本文に対するもの。**読み直すまで unreviewed",
+        "reset_at": "2026-10-10",
+        "reset_clauses": [
+          "liability_cap",
+          "ip",
+          "personal_data",
+          "governing_law"
         ]
       },
       {
@@ -454,7 +459,7 @@
         "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。\n\n**読めた:** AppsFlyer Master Services Agreement §9 / §12 / §15 / §16(d) / §21.9 / §21.10、AppsFlyer Data Processing Addendum §2.1 / §3.1–3.2 / §10 / Schedule 1。\n\n**未確認: Order Form 上の contracting entity。**New York 型か UK 型かはそこでしか決まらない。オーナー側の確認事項。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**`governing_law` の `human` は「New York 型か UK 型か未確定」を含んだままの承認。**Order Form を見ないと決まらない。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Terms of Use は「Last updated November 23, 2025」と表示される。この別文書の観測に基づき、オーナーは以前の4観点の判定を維持すると判断した。ただし、その時点で判定根拠である MSA の表示日には July 16 / December 16, 2024 の不一致があり、公開現行版とアカウント採用版は未確認だった。後からエージェントが公式公開 MSA の表示改定日 December 16, 2024 と本文指紋を確認したが、その新観測に対する追加の本人判断は記録されていない。アカウント採用版、Order Form の契約主体、DPA の現行適用版も未確認。原文を人が通読していない点は前回と同じ。",
         "fingerprint": "63ecaea35a53",
-        "fetched_at": "2026-09-24",
+        "fetched_at": "2026-10-10",
         "source_history": [
           {
             "url": "https://www.appsflyer.com/legal/services-agreement/",
@@ -501,7 +506,7 @@
         "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**この `human` は Standard ToS 前提にしか及ばない。**Organization が GCA へ upgrade 済みなら4観点すべて読み直しになる。**確かめられるのはオーナーだけ**（draft_note 参照）。\n\n**[2026-09-24] 改定で戻されたあとの読み直し。**Terms of Service は「Effective date: April 27, 2026」で、前回の記録（2026-04-27）と同じ。**オーナーがこの確認を見て、前回の4判定のまま付け直すと判断した（2026-09-24）。**確かめる作業（版と本文の突き合わせ）は Claude。原文を人が通読していない点は前回と同じ。",
         "fingerprint": "8017e8b47403",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22"
+        "fetched_at": "2026-10-10"
       },
       {
         "id": "prtimes",
@@ -522,7 +527,7 @@
         "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。",
         "fingerprint": "88086a1230ff",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22",
+        "fetched_at": "2026-10-10",
         "source_history": [
           {
             "url": "https://prtimes.jp/main/html/terms",
@@ -553,7 +558,7 @@
         "$personal_data": "**この調査で、こちらの台帳の誤りが1つ証明された。**\n\nベンダー台帳は registrar へ渡している個人情報を **`none`（無し）**と記録していた。**§5-3 が「氏名、住所、電子メールアドレス等」を『登録情報』として明示している。**`none` は規約本文と矛盾する。**同じコミットで `personal` へ直した。**\n\n**なぜ間違えたか。**「ユーザーの個人情報を渡していない」は正しい。**渡しているのは会社（オーナー本人）の個人情報。**台帳の他の行がユーザーデータの話をしていたので、**同じ欄に別の種類の事実が入る場所だと気づいていなかった。**\n\n**Whois 情報代理公開は制度としては在る（§27）**が、条文は「代理公開**できる**」で、**新規登録時に既定で有効になるとは書いていない。**リサーチャーは「既定 ON か申込が必要かを定める文言」を探して**見つからなかった**と報告した。**つまり、いま自分の氏名・住所が Whois に出ているかどうかは、規約からは分からない。****管理画面で確かめるしかない**（会員専用ページから変更できると §27 にある）。\n\n**代理公開を切ると移管できるようになるが、個人情報が出る。**§27-2 が「代理公開中はレジストラ移管ができない」と定めているので、**この2つは同じスイッチの裏表。**（$ip 参照。）\n\n**そのほか本文にあること:**\n  §30-1 … 本人以外に開示せず、サービス提供に必要な範囲を超えて利用しない。詳細は**別文書のプライバシーポリシー**（GMOペパボ／未読）\n  §30-2 … カード不正利用検知・本人認証のため **GMOペイメントゲートウェイへ提供**\n  §5-3  … **提携レジストラも**登録情報の正確性確認を行える\n  §29   … 登録・管理・更新を**上位レジストラおよびレジストリで遂行**する\n  §5-4  … 登録情報が不正確・虚偽・確認できない場合、**停止・契約取消しができる**\n\n**探した上で無かったもの:** 電話番号を登録情報として明示列挙する規定（§5-1 の SMS/自動音声認証には出てくるが、列挙には無い）／代理公開しない場合に Whois で公開される項目の一覧／**RDAP という語**／**Verisign の名称と、そこへ移転する具体的フィールド。**\n\n**§29 が「レジストリで遂行する」と書きながら、何を送るかは書いていない。**こちらの `check-domain-expiry` は RDAP を毎週引いているので、**機械はレジストリ側を見ているのに、そこへ何を渡しているかは台帳が持っていない。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "fingerprint": "39b4c7a5bd23",
         "fingerprint_scope": "main",
-        "fetched_at": "2026-09-22"
+        "fetched_at": "2026-10-10"
       }
     ],
     "ai_assessments": [
