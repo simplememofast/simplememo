@@ -1,9 +1,13 @@
-# Obsidian Web→アプリ計測：最初の1配置
+# Obsidian Web→アプリ計測：ハブ9言語の冒頭CTA
 
 2026-09-07作成、2026-10-11に現行main・公開アプリ・管理画面設定と再照合。
-変更対象は `/obsidian/` 冒頭のApp Storeバッジ1個。公開条件を満たすまではPRをdraftに保つ。
+変更対象は日本語 `/obsidian/` と生成翻訳8ページの冒頭App Storeボタン、計9個。
+翻訳元のリンク・計測属性を引き継ぐ既存ルールを維持する。公開条件を満たすまではPRをdraftに保つ。
 この候補の作成、保存済みリンク、CI成功は、本番開始や実インストール帰属の証明ではない。
-この1配置の検証だけで、公式サイト全体の計測改善を完了とはしない。
+対象URLは `/obsidian/`、`/ar/obsidian/`、`/es/obsidian/`、`/id/obsidian/`、
+`/ko/obsidian/`、`/pt-BR/obsidian/`、`/tr/obsidian/`、`/zh/obsidian/`、`/zh-Hant/obsidian/`。
+独立した英語編集ページ `/en/obsidian/` はこの候補の対象外。
+この9配置の検証だけで、公式サイト全体の計測改善を完了とはしない。
 
 ## 保存済み設定と変更範囲
 
@@ -25,7 +29,9 @@ iOS未インストール時はApp Storeへ、既存利用者も同じストア�
 QAの確認にはQA媒体を使い、pilotの実績に算入しない。
 
 ボタンの文言・画像・位置は維持。ほかのAppleリンク、QR、Smart App Bannerはこの候補では変更しない。
-HTML内のhrefを1個だけ切り替え、Smart Scriptや非同期URL置換を追加しない。
+各ページのheroのhrefと計測属性だけを切り替え、Smart Scriptや非同期URL置換を追加しない。
+9ページは同じpilot URLを使い、AppsFlyerの当該campaignの数値には合算される。
+GA4でpage_pathを分けても、それをAppsFlyerのページ別・言語別インストール数とは扱わない。
 OneLink障害時の自動fallbackはない。既存の直接Appleリンクは引き続き利用できる。
 サイトマップは現行mainを保持し、古い候補の日付へ巻き戻さない。
 
@@ -79,7 +85,7 @@ variant=`onelink_v1` の受信を確認する。固定集計表を個別イベ�
 
 このheroは現在 `web_obsidian_v1` を使う。古い候補の `jp__hero` を現行値や復旧先として扱わない。
 OneLink経由では従来のApple pt/ct系列との連続性を仮定しない。`web_obsidian_v1` の減少は
-導線切替の影響を含み、このct全体をhero1個の対照群や需要減少の証明に使わない。
+導線切替の影響を含み、このct全体を9個のheroの対照群や需要減少の証明に使わない。
 QR・navも無作為な対照群ではない。
 
 `owned_web` は自社サイト経由の分類であり、SEOの証明ではない。GA4とAppsFlyer/D1を個人単位で
@@ -90,7 +96,7 @@ A24・R7・D35は実開始後の獲得条件と成熟期間を揃えて読む。
 
 ## 不具合時の戻し方
 
-heroのhrefを次へ戻し、`data-app-route` / `data-app-traffic` を外してvariantを `v1` に戻す。
+日本語元ページと生成翻訳8ページのheroのhrefを次へ戻し、`data-app-route` / `data-app-traffic` を外してvariantを `v1` に戻す。
 
 ```text
 https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&pt=128498560&ct=web_obsidian_v1&mt=8
