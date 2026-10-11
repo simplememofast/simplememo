@@ -180,6 +180,17 @@ Failure reporting retains every original failure-state row and its source-specif
 
 ### Prospective CTA measurement
 
+Website acquisition reporting keeps AppsFlyer's overall report quality separate
+from the exact owned-link period ratio. A verified receipt with all dates and
+valid pilot Installs/Clicks can expose that ratio even when other known metric
+columns (sessions, revenue, cost, impressions or purchases) are missing. The
+overall source remains PARTIAL and lists those missing columns. Missing dates,
+Installs/Clicks, pilot cells, failed/unverified receipts, unknown partial states,
+row limits and integrity failures still block the ratio. It remains an
+AppsFlyer report-period installs/clicks observation, not a matched visitor-cohort
+CVR; never divide these installs by GA4 sessions or reinterpret QA/Organic as
+official-site acquisition.
+
 The fixed funnel query also reports a supplemental `ga4-landing-diagnostics-v1`
 partition for missing landings: no timestamped page view in the existing scan,
 views only before session start, only at/after the 24-hour boundary, or on both
