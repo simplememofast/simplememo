@@ -243,7 +243,10 @@ export function connectionView({ stateRoot, now = new Date(), readThread } = {})
     try {
       const result = verifyAppsFlyer(af.evidence); af.quality = result.quality; af.population = result.population;
       af.site_acquisition = summarizeAppsFlyerAcquisition(fs.readFileSync(path.join(af.evidence,'report.csv'),'utf8'));
-      if (result.quality.missing_dates.length || result.quality.missing_metric_columns.length) af.status = 'PARTIAL';
+      // Quality gaps can downgrade a verified retrieval, never rehabilitate a
+      // failed receipt just because an older readable CSV is still retained.
+      if (af.status === 'CONNECTED'
+        && (result.quality.missing_dates.length || result.quality.missing_metric_columns.length)) af.status = 'PARTIAL';
     } catch {af.status='BLOCKED';af.reason='retained_aggregate_integrity_failed';}
   }
   const ga = connection('ga4-funnel');
