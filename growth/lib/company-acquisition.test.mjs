@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,ownedLinkPeriodRate} from './company-acquisition.mjs';
+import crypto from 'node:crypto';
+import {summarizeAscAcquisition,summarizeAscPeriods,summarizeAppsFlyerAcquisition,siteAcquisition,acquisitionMaterial,acquisitionReport,ownedLinkPeriodRate} from './company-acquisition.mjs';
 import {collectAsc,connectionView,currentSiteAcquisition} from './company-data.mjs';
 
 const date='2026-10-03';
@@ -124,7 +125,7 @@ test('OneLink and Store sessions use the SQL union and never double count',()=>{
   assert.equal(siteAcquisition(connection).ga4.observed_any_app_route_click_session_rate,null);
 });
 test('only a complete exact-pilot report produces a labeled within-provider period ratio',()=>{
-  const connection={status:'CONNECTED',quality:{missing_dates:[],missing_metric_columns:[]},
+  const connection={status:'CONNECTED',collection:{status:'verified'},quality:{missing_dates:[],missing_metric_columns:[]},
     site_acquisition:summarizeAppsFlyerAcquisition(header+'2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n'+
       '2026-10-01,None,seo_aio_qa,obsidian_bridge_qa_20260907,90,100\n')};
   const r=ownedLinkPeriodRate(connection);
@@ -138,4 +139,61 @@ test('only a complete exact-pilot report produces a labeled within-provider peri
   connection.site_acquisition.by_category.owned_web_pilot.clicks=1;
   assert.equal(ownedLinkPeriodRate(connection).value,3); // lagged installs are not clamped into a fake CVR
   assert.equal(siteAcquisition({appsflyer:connection}).website_install_cvr.value,null);
+});
+
+test('verified pilot counts survive optional metric gaps without upgrading the whole report',t=>{
+  const stateRoot=fs.mkdtempSync(path.join(os.tmpdir(),'acquisition-columns-'));
+  t.after(()=>fs.rmSync(stateRoot,{recursive:true,force:true}));
+  const dir=path.join(stateRoot,'data/collection-receipts'),output=path.join(stateRoot,'data/report');
+  fs.mkdirSync(dir,{recursive:true,mode:0o700});fs.mkdirSync(output,{recursive:true,mode:0o700});
+  const receiptFile=path.join(dir,'appsflyer-2026-10-01.json');
+  const receipt={source:'appsflyer',window:{start:'2026-10-01',end:'2026-10-01'},status:'verified',output};
+  const csv=header+'2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n'+
+    '2026-10-01,None,seo_aio_qa,obsidian_bridge_qa_20260907,90,100\n';
+  const missing=['Sessions','Loyal Users','Total Revenue','Total Cost','Impressions','af_purchase (Event counter)'];
+  const result={ok:true,http_status:200,quality:{sha256:crypto.createHash('sha256').update(csv).digest('hex'),
+    row_cap_hit:false,missing_dates:[],missing_metric_columns:missing}};
+  fs.writeFileSync(receiptFile,JSON.stringify(receipt));
+  fs.writeFileSync(path.join(output,'report.csv'),csv);
+  const writeResult=()=>fs.writeFileSync(path.join(output,'result.json'),JSON.stringify(result));writeResult();
+  const observe=()=>siteAcquisition(connectionView({stateRoot}));
+  const s=observe(),rate=s.appsflyer.owned_link_period_rate;
+  assert.equal(s.appsflyer.connection_state,'PARTIAL');
+  assert.deepEqual(s.appsflyer.missing_metric_columns,missing);
+  assert.equal(rate.value,.3);assert.equal(rate.state,'observed_period_ratio');
+  assert.deepEqual(rate.missing_optional_metric_columns,missing);
+  assert.deepEqual(rate.missing_required_metric_columns,[]);
+  assert.equal(s.website_install_cvr.value,null);
+  assert.match(acquisitionReport(s).join('\n'),/30\.00%/);
+  assert.match(acquisitionReport(s).join('\n'),/af_purchase \(Event counter\)/);
+  result.quality.missing_dates=['2026-10-01'];writeResult();
+  assert.equal(observe().appsflyer.owned_link_period_rate.value,null);
+  result.quality.missing_dates=[];writeResult();
+  fs.writeFileSync(receiptFile,JSON.stringify({...receipt,status:'failed',failure:'permission_or_credential'}));
+  const failed=observe().appsflyer;
+  assert.equal(failed.connection_state,'BLOCKED');assert.equal(failed.owned_link_period_rate.value,null);
+  assert.equal(failed.owned_link_period_rate.installs,null);
+  fs.writeFileSync(receiptFile,JSON.stringify(receipt));
+  fs.appendFileSync(path.join(output,'report.csv'),'tampered');
+  assert.equal(observe().appsflyer.connection_state,'BLOCKED');
+});
+
+test('pilot ratios reject required metric gaps, unknown partial states and failed receipts',()=>{
+  const connection={status:'PARTIAL',collection:{status:'verified'},
+    quality:{missing_dates:[],missing_metric_columns:['af_purchase (Event counter)']},
+    site_acquisition:summarizeAppsFlyerAcquisition(header+'2026-10-01,None,owned_web,obsidian_bridge_pilot_v1,3,10\n')};
+  assert.equal(ownedLinkPeriodRate(connection).value,.3);
+  for(const status of ['BLOCKED','FAILED','unknown'])
+    assert.equal(ownedLinkPeriodRate({...connection,status}).value,null);
+  for(const collection of [undefined,{status:'failed'},{status:'reading'}])
+    assert.equal(ownedLinkPeriodRate({...connection,collection}).value,null);
+  for(const missing_metric_columns of [[],['Installs'],['Clicks'],['Sessions','Clicks'],['unexpected_metric'],[null]])
+    assert.equal(ownedLinkPeriodRate({...connection,quality:{missing_dates:[],missing_metric_columns}}).value,null);
+  assert.equal(ownedLinkPeriodRate({...connection,quality:{...connection.quality,row_cap_hit:true}}).value,null);
+  connection.site_acquisition.by_category.owned_web_pilot.clicks=null;
+  assert.equal(ownedLinkPeriodRate(connection).value,null);
+  connection.site_acquisition.by_category.owned_web_pilot={installs:0,clicks:10};
+  assert.equal(ownedLinkPeriodRate(connection).value,0);
+  delete connection.site_acquisition.by_category.owned_web_pilot;
+  assert.equal(ownedLinkPeriodRate(connection).value,null);
 });

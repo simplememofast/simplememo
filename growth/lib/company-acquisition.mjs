@@ -2,6 +2,10 @@
 import { parseDelimited } from './csv.mjs';
 
 const TOKENS = ['web_obsidian_v1', 'web_other_v1'];
+// These columns describe other measures in the existing aggregate reader. Their
+// absence keeps that report partial, but does not invalidate Installs / Clicks.
+const OPTIONAL_PERIOD_METRICS = new Set(['Sessions', 'Loyal Users', 'Total Revenue',
+  'Total Cost', 'Impressions', 'af_purchase (Event counter)']);
 const validCount = n => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0;
 const sum = (rows, key) => {
   if (!rows.length || rows.some(r => !validCount(r[key]))) return null;
@@ -121,15 +125,24 @@ export function ownedLinkPeriodRate(connection) {
   const group = connection?.site_acquisition?.by_category?.owned_web_pilot;
   const installs = group?.installs ?? null, clicks = group?.clicks ?? null;
   const quality = connection?.quality;
-  const complete = connection?.status === 'CONNECTED'
+  const missing = quality?.missing_metric_columns;
+  const missingRequired = Array.isArray(missing) ? missing.filter(k => ['Installs','Clicks'].includes(k)) : null;
+  const missingOptional = Array.isArray(missing) ? missing.filter(k => OPTIONAL_PERIOD_METRICS.has(k)) : null;
+  const optionalOnly = Array.isArray(missing) && missing.every(k => OPTIONAL_PERIOD_METRICS.has(k));
+  const admitted = connection?.collection?.status === 'verified' && !connection?.reason
+    && (connection?.status === 'CONNECTED'
+      || (connection?.status === 'PARTIAL' && optionalOnly && missing.length > 0));
+  const complete = admitted && !quality?.row_cap_hit
     && Array.isArray(quality?.missing_dates) && quality.missing_dates.length === 0
-    && Array.isArray(quality?.missing_metric_columns) && quality.missing_metric_columns.length === 0;
+    && optionalOnly;
   const countsValid = validCount(installs) && validCount(clicks);
   return { value: complete && countsValid && clicks > 0 ? installs / clicks : null,
     state: !complete ? 'incomplete_report' : !countsValid ? 'not_observed'
       : clicks === 0 ? 'no_click_denominator' : 'observed_period_ratio',
     installs: connection?.status === 'BLOCKED' ? null : installs,
     clicks: connection?.status === 'BLOCKED' ? null : clicks,
+    missing_required_metric_columns: missingRequired,
+    missing_optional_metric_columns: missingOptional,
     media_source: 'owned_web', campaign: 'obsidian_bridge_pilot_v1',
     matched_cohort: false,
     scope: 'AppsFlyer report-period attributed installs / reported link clicks, limited to the reserved pilot. Attribution delay can produce a ratio above 100%. Not all website visits, not all installations, and not a visitor-cohort CVR.' };
@@ -190,7 +203,7 @@ export function acquisitionReport(a) {
     lines.push(`- ${key} (${r.window?.min ?? '?'}..${r.window?.max ?? '?'} UTC): own-site first downloads ${number(r.own_site_first_time_downloads?.observed_count)}; ${r.own_site_first_time_downloads?.state ?? r.state}.`);
     for (const [token,m] of Object.entries(r.campaign_first_time_downloads ?? {})) lines.push(`  ${token}: ${number(m.observed_count)} (${m.state}).`);
   }
-  lines.push(`AppsFlyer (${a.appsflyer?.window?.start ?? a.appsflyer?.window?.from ?? "?"}..${a.appsflyer?.window?.end ?? a.appsflyer?.window?.to ?? "?"} JST): ${a.appsflyer?.connection_state}; ${a.appsflyer?.own_site_state ?? a.appsflyer?.state}; observed own-site pilot installs ${number(a.appsflyer?.own_site_installs)}. Missing dates: ${(a.appsflyer?.missing_dates??[]).join(', ') || 'see source quality'}. Organic and QA are separate.`,
+  lines.push(`AppsFlyer (${a.appsflyer?.window?.start ?? a.appsflyer?.window?.from ?? "?"}..${a.appsflyer?.window?.end ?? a.appsflyer?.window?.to ?? "?"} JST): ${a.appsflyer?.connection_state}; ${a.appsflyer?.own_site_state ?? a.appsflyer?.state}; observed own-site pilot installs ${number(a.appsflyer?.own_site_installs)}. Missing dates: ${(a.appsflyer?.missing_dates??[]).join(', ') || 'see source quality'}. Missing metric columns: ${(a.appsflyer?.missing_metric_columns??[]).join(', ') || 'see source quality'}. Organic and QA are separate.`,
     `AppsFlyer pilot (${a.appsflyer?.window?.start ?? a.appsflyer?.window?.from ?? "?"}..${a.appsflyer?.window?.end ?? a.appsflyer?.window?.to ?? "?"} JST) report-period installs / link clicks: ${number(linkRate?.installs)} / ${number(linkRate?.clicks)}; ${Number.isFinite(linkRate?.value) ? (linkRate.value*100).toFixed(2)+'%' : 'unknown'} (${linkRate?.state ?? 'unavailable'}). This is not a matched visitor-cohort CVR.`,
     'Website visit-to-install CVR: unavailable. Missing Apple cells are not zero; do not combine report populations or divide Apple/AppsFlyer downloads by GA4 sessions.');
   return lines;
